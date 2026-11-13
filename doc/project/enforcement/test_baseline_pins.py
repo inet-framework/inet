@@ -294,6 +294,34 @@ class RebaseTest(PinTestCase):
         self.assertEqual(self.git(self.inet, "diff", "--name-only", old[1], new[1]).stdout.split(), ["inet.opp"])
         self.assertEqual(self.git(self.inet, "diff", "--name-only", new[0], new[1]).stdout.split(), ["src/a.c"])
 
+    def rebuild_statistics(self, *names):
+        """Makes the branch "new" of the statistics clone: the commits of the names on the first pin."""
+        self.git(self.stat, "checkout", "-q", "-b", "new", self.pins["statistical"])
+        commits = [self.baseline_commit(self.stat, name) for name in names]
+        self.git(self.stat, "checkout", "-q", "master")
+        return commits
+
+    def test_a_pin_move_over_two_baseline_commits_keeps_two_commits_after_the_rebuild(self):
+        doc = self.baseline_commit(self.stat, "doc")
+        result_commit = self.baseline_commit(self.stat, "result")
+        self.move("move over two", dict(self.pins, statistical=result_commit))
+        self.commit(self.inet, "no move", {"src/a.c": "int a = 1;\n"})
+        new_doc, new_result = self.rebuild_statistics("doc2", "result2")
+        result = self.rebase("master", "--baseline", "statistical=new")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([self.pins_of(commit)["statistical"] for commit in self.series()], [new_result, new_result])
+        self.assertNotEqual(new_doc, new_result)
+
+    def test_two_pin_moves_over_two_and_one_commits_take_two_and_one_new_commits(self):
+        doc, result_commit = self.baseline_commit(self.stat, "doc"), self.baseline_commit(self.stat, "result")
+        last = self.baseline_commit(self.stat, "last")
+        self.move("first move, two commits", dict(self.pins, statistical=result_commit))
+        self.move("second move, one commit", dict(self.pins, statistical=last))
+        new = self.rebuild_statistics("doc2", "result2", "last2")
+        result = self.rebase("master", "--baseline", "statistical=new")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([self.pins_of(commit)["statistical"] for commit in self.series()], [new[1], new[2]])
+
     def test_both_kinds_moving_in_one_commit_get_their_own_baseline_commits(self):
         b, m2 = self.baseline_commit(self.stat, "b"), self.baseline_commit(self.media, "m2")
         self.move("move both", {"statistical": b, "chart": m2})
@@ -366,6 +394,20 @@ class RebaseErrorTest(PinTestCase):
         result = self.rebase()
         self.assert_refused(result, old_head)
         self.assertIn("1 time(s)", result.stderr)
+
+    def test_two_moves_over_three_commits_and_a_branch_of_four_commits(self):
+        c, d = self.baseline_commit(self.stat, "c"), self.baseline_commit(self.stat, "d")
+        self.move("first, two commits", dict(self.pins, statistical=c))
+        self.move("second, one commit", dict(self.pins, statistical=d))
+        self.git(self.stat, "checkout", "-q", "-b", "new", self.pins["statistical"])
+        for name in ("b2", "c2", "d2", "e2"):
+            self.baseline_commit(self.stat, name)
+        self.git(self.stat, "checkout", "-q", "master")
+        old_head = self.head(self.inet)
+        result = self.rebase("master", "--baseline", "statistical=new")
+        self.assert_refused(result, old_head)
+        self.assertIn("the series moves the statistical pin 2 time(s) over 3 baseline commit(s), and the baseline "
+                      "branch has 4 commit(s) above the pin of the new base", result.stderr)
 
     def test_two_moves_and_one_baseline_commit(self):
         c = self.baseline_commit(self.stat, "c")

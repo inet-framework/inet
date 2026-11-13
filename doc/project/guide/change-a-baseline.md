@@ -156,6 +156,10 @@ doc/project/enforcement/check-baselines.sh origin/master..HEAD \
 
 Push the baseline branch to the baseline repository. A contributor with no push right opens a pull request from a fork of the baseline repository. Name the branch or the pull request in the description of the INET pull request ([PR-REQ-STORY](../rule/pull-request.md#pr-req-story)). The maintainer approves the values in the baseline repository; that approval is apart from the approval of the source change.
 
+### A commit that changes no result
+
+The `media` repository also holds documentation media: network images, screenshots and videos. Only the images that a chart of an analysis file exports are results; `python3 doc/project/enforcement/baseline_summary.py media` lists the results of a staged change and leaves the other files out. A commit that changes no result needs no record and no attribution. Commit it to the branch of the `media` repository, and move the pin to it in the INET commit that needs the files. A pin can move over more than one commit, but only one of them can change results.
+
 ### After a baseline commit or the base changes
 
 A baseline commit gets a new hash when its message or its values change, and when its branch is rebased. A rebase is necessary after another change lands and moves the pin of `master`. The pins of your series then name commits that are gone. First rebase the baseline branch, then let the tool make the series again with the new pins:
@@ -165,7 +169,7 @@ git -C statistics rebase --onto <pin of origin/master> <old pin>
 python3 doc/project/enforcement/baseline_pins.py rebase origin/master
 ```
 
-The tool keeps the messages, the authors and the changes of the commits. It gives the n-th pin move of the series the n-th commit of the baseline branch. It pushes nothing.
+The tool keeps the messages, the authors and the changes of the commits. It gives the pin moves of the series the commits of the baseline branch in order; a pin move takes as many commits as it took before. It pushes nothing.
 
 ### When the change lands
 

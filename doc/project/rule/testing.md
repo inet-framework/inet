@@ -168,7 +168,7 @@ The statistical and chart baselines are in other repositories. There, the propos
 
 Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is one explanation for 31 rows and it is complete. What is not complete is a count.
 
-**In a baseline repository, the commit message holds the record.** One baseline commit holds the files that one INET commit moves, and its message has four parts:
+**In a baseline repository, the commit message holds the record.** One baseline commit holds the result files that one INET commit moves, and its message has four parts:
 
 1. **The analysis.** For each group of moved results: what moves, in which direction, by how much, and why the INET change causes that move. For a chart, say how the picture changes.
 2. **The summary.** The `Moved results:` block that [baseline_summary.py](../enforcement/baseline_summary.py) computes. The block gives the tests, the rows, the groups of tests whose moved rows have the same names, and the names with the range of their relative change. The gate computes the block again, so the block in a message is always true. Each group of the block needs its explanation in the analysis.
@@ -197,13 +197,15 @@ A baseline in another repository cannot be in the INET commit. The pin of [TR-BA
 
 The statistical and chart baselines are in the `statistics` and `media` repositories. `inet.opp` names one commit of each in the `ref` field of its `baseline` entry. That commit is the baseline that this INET commit passes with. CI checks out the pins. It never reads a baseline that moves, such as the head of a branch.
 
-A pin moves in the commit that causes the move, and it moves to one new baseline commit: the direct child of the pin before it. Thus the baseline commit of an INET commit is exactly the step from the pin of its parent to its own pin. The link survives a rebase, a bisect knows the baseline of each commit, and the branches of the two repositories do not have to move at the same moment.
+A pin moves in the commit that causes the move, and it moves only forward: the new pin descends from the pin before it, with no merge between. The step holds at most one commit that changes results. That commit is the baseline commit of the INET commit, and it has the record of [TR-BASELINE-PROVENANCE](#tr-baseline-provenance). Thus the link is exact for each commit, it survives a rebase, a bisect knows the baseline of each commit, and the branches of the two repositories do not have to move at the same moment.
+
+**Not each file of a baseline repository is a result.** In `statistics`, the results are the `.sca` files. In `media`, the results are the images that a chart of an analysis file in the INET tree exports; the other files are documentation media, such as network images and videos. A commit that changes no result needs no record, and a pin can move over it. The `media` pin of an INET commit thus also names the documentation media that the commit goes with.
 
 The pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there. After the INET change lands, `master` of the baseline repository moves to the pin by a fast-forward.
 
 Two series that move the same pin conflict in `inet.opp`. The second one rebases its baseline branch onto the new pin and writes the new hashes into its commits. The conflict is correct: the baseline of the second series must stand on the baseline of the first one.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the direct child, and the presence of the commit in the baseline repository; T2 — the statistical and chart tests run against the pins.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the step forward with at most one commit that changes results, and the presence of the commit in the baseline repository; T2 — the statistical and chart tests run against the pins.*
 
 ### TR-BASELINE-PARENT
 

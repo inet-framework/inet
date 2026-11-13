@@ -72,12 +72,6 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.stdout.count("VIOLATION:"), 1, result.stdout)
         self.assertIn("has no Change: line", result.stdout)
 
-    def commit_opp(self, subject, trailer, ref):
-        self.write("inet.opp", 'SimulationProject(name="inet", test_parameters={"statistical": {"baseline": '
-                   '{"repository": "inet-framework/statistics", "ref": "%s", "folder": "statistics"}}})\n' % (ref * 40))
-        self.git("add", ".")
-        self.git("commit", "-q", "-m", f"{subject}\n\nThe file changes.\n\nChange: {trailer}")
-
     def test_the_chart_obligation_is_a_known_value(self):
         self.write("src/inet/a/A.cc", "int a = 1;\n")
         self.git("add", ".")
@@ -86,23 +80,16 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("VIOLATION:", result.stdout)
 
-    def test_a_pin_move_below_the_behavior_level_fails(self):
-        self.commit_opp("build: add: the first pin", "build | behavior.add | -", "a")
-        self.commit_opp("build: refactor: the project file", "build | refactor | -", "b")
-        result = self.check()
-        self.assertEqual(result.returncode, 1, result.stdout)
-        self.assertIn("claims 'refactor' and moves the pin of a baseline: statistical", result.stdout)
-
-    def test_a_pin_move_at_the_behavior_level_is_quiet(self):
-        self.commit_opp("build: add: the first pin", "build | behavior.add | -", "a")
-        self.commit_opp("build: change: one result", "build | behavior.change | statistical", "b")
-        result = self.check()
-        self.assertEqual(result.returncode, 0, result.stdout)
-        self.assertNotIn("VIOLATION:", result.stdout)
-
-    def test_the_first_pin_below_the_behavior_level_is_quiet(self):
-        # a pin that a commit adds is its first recording; it moves no recorded expectation
-        self.commit_opp("build: refactor: the project file", "build | refactor | -", "a")
+    def test_a_pin_move_below_the_behavior_level_is_no_violation_in_this_gate(self):
+        # the baseline gate (check-baselines.sh) has the pin check CR-OBL-INERT
+        self.write("inet.opp", 'SimulationProject(name="inet", test_parameters={"statistical": {"baseline": '
+                   '{"repository": "inet-framework/statistics", "ref": "%s", "folder": "statistics"}}})\n' % ("a" * 40))
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "build: add: the first pin\n\nThe file changes.\n\nChange: build | behavior.add | -")
+        self.write("inet.opp", 'SimulationProject(name="inet", test_parameters={"statistical": {"baseline": '
+                   '{"repository": "inet-framework/statistics", "ref": "%s", "folder": "statistics"}}})\n' % ("b" * 40))
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "build: refactor: the project file\n\nThe file changes.\n\nChange: build | refactor | -")
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("VIOLATION:", result.stdout)

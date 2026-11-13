@@ -5,16 +5,21 @@ TR-BASELINE-ATTRIBUTION and TR-BASELINE-PARENT (doc/project/rule/testing.md), an
 PR-SPLIT-BASELINE for a baseline in another repository.
 
   TR-BASELINE-PIN          each commit pins the commit of each baseline repository with a full hash;
-                           a pin moves only to a direct child of the pin before it; the pinned
-                           commit is in the baseline repository
-  TR-BASELINE-PROVENANCE   the baseline commit has its record: the computed "Moved results:" block,
-                           an analysis, and the trailers INET-Subject (or INET-Commit) and
-                           Attribution; it changes only results and one reduction file
+                           a pin moves only forward, over at most one commit that changes results;
+                           the pinned commit is in the baseline repository
+  TR-BASELINE-PROVENANCE   the baseline commit, which is the commit that changes results, has its
+                           record: the computed "Moved results:" block, an analysis, and the
+                           trailers INET-Subject (or INET-Commit) and Attribution
   TR-BASELINE-PARENT       each changed result file differs in a value
   TR-BASELINE-ATTRIBUTION  the form of the attribution holds: the size of the cause commit or of
                            the reduction, a reduction that applies, files that only come or only go
   PR-SPLIT-BASELINE        the pin moves in the commit that causes the move
   CR-OBL-BASELINE          the Change: trailer of the cause commit names the baseline that moves
+  CR-OBL-INERT             a commit below the behavior level moves no pin over a result
+
+A result is a .sca file of the statistics repository, or an image of the media repository that a
+chart of an analysis file of the INET tree exports. A commit of a baseline repository that changes
+no result, such as documentation media, needs no record, and a pin can move over it.
 
 The gate reads git objects only. It never runs content of the series, so the pull-request
 workflow can run it on untrusted content. Whether an analysis is true, and whether a reduction
@@ -116,8 +121,16 @@ class BaselineRepository:
     def is_ancestor(self, ancestor, commit):
         return git("merge-base", "--is-ancestor", ancestor, commit, cwd=self.folder, check=False).returncode == 0
 
-    def count(self, old, new):
-        return int(git("rev-list", "--count", f"{old}..{new}", cwd=self.folder).stdout)
+    def chain(self, old, new):
+        """The commits above the old pin up to the new pin, the oldest first."""
+        return git("rev-list", "--reverse", f"{old}..{new}", cwd=self.folder).stdout.split()
+
+    def has_merge(self, old, new):
+        return bool(git("rev-list", "--merges", f"{old}..{new}", cwd=self.folder).stdout.strip())
+
+    def changed_paths(self, commit):
+        return [path for path in git("diff-tree", "-r", "--no-commit-id", "--no-renames", "--name-only", "-z", commit,
+                                     cwd=self.folder).stdout.split("\0") if path]
 
     def message(self, commit):
         return git("log", "-1", "--format=%B", commit, cwd=self.folder).stdout
@@ -190,10 +203,15 @@ def patch_applies(text, tree):
         return subprocess.run(["git", "apply", "--cached", "--check", patch], env=env, capture_output=True).returncode == 0
 
 
+def change_fields(commit):
+    """The fields of the Change: trailer of a commit; an empty list when the commit has no trailer."""
+    value = git("log", "-1", "--format=%(trailers:key=Change,valueonly)", commit).stdout.strip()
+    return [field.strip() for field in value.split("|")] if value else []
+
+
 def obligations_of(commit):
     """The obligations field of the Change: trailer of a commit, or None when the commit has no trailer."""
-    value = git("log", "-1", "--format=%(trailers:key=Change,valueonly)", commit).stdout.strip()
-    fields = [field.strip() for field in value.split("|")]
+    fields = change_fields(commit)
     return fields[2].split() if len(fields) >= 3 else None
 
 
@@ -246,14 +264,14 @@ def check_pins(report, commits, base, baselines):
     return moves
 
 
-def check_record(report, repository, kind, commit, parent, old, new):
+def check_record(report, repository, kind, commit, parent, old, new, is_result):
     """TR-BASELINE-PROVENANCE, TR-BASELINE-PARENT and the form of TR-BASELINE-ATTRIBUTION for one
     baseline commit. Returns (form, text of the reduction, object name of the reduction, cause): the
     cause is the value of INET-Commit, or None when INET-Subject names the cause."""
     where = f"{short(commit)} -> {kind} {short(new)}"
     files = baseline_summary.changed_files(repository.folder, old, new)
-    results = [(status, path) for status, path in files if baseline_summary.is_result(path)]
-    reductions = [(status, path) for status, path in files if not baseline_summary.is_result(path)]
+    results = [(status, path) for status, path in files if is_result(path)]
+    reductions = [(status, path) for status, path in files if path.startswith(baseline_summary.ATTRIBUTION_FOLDER)]
     trailers = repository.trailers(new)
     message = repository.message(new)
 
@@ -286,11 +304,11 @@ def check_record(report, repository, kind, commit, parent, old, new):
             reduction_text = baseline_summary.read_file(repository.folder, new, reduction_path)
     for status, path in reductions:
         if path != reduction_path or status != "A":
-            report.flag(f"{where} changes {path}; a baseline commit changes results, and it adds only the reduction that its Attribution names")
+            report.flag(f"{where} changes {path}; a baseline commit adds only the reduction that its Attribution names to the folder {baseline_summary.ATTRIBUTION_FOLDER}")
 
     # the summary and the analysis
     repository.fetch_contents(old, new)
-    moved = baseline_summary.analyze(repository.folder, old, new)
+    moved = baseline_summary.analyze(repository.folder, old, new, is_result)
     expected = baseline_summary.block(moved)
     found = baseline_summary.find_block(message)
     if found is None:
@@ -307,8 +325,6 @@ def check_record(report, repository, kind, commit, parent, old, new):
         report.flag(f"{where} has no analysis: {words} words of prose; say why the change causes each group of the moved results")
 
     # only results that move
-    if not results:
-        report.flag(f"{where} changes no result")
     for status, path, changed, added, removed in moved["tests"]:
         if status == "M" and not changed and not added and not removed:
             report.flag(f"{where} changes {path} and no value in it; a baseline changes only for a test that moves (TR-BASELINE-PARENT)")
@@ -321,7 +337,7 @@ def check_record(report, repository, kind, commit, parent, old, new):
 
 
 def check_attribution(report, base, commit, parent, kind, new, form, reduction_text, cause):
-    """TR-BASELINE-ATTRIBUTION, PR-SPLIT-BASELINE and CR-OBL-BASELINE against the cause commit."""
+    """TR-BASELINE-ATTRIBUTION, PR-SPLIT-BASELINE, CR-OBL-BASELINE and CR-OBL-INERT against the cause commit."""
     where = f"{short(commit)} -> {kind} {short(new)}"
     lines = source_lines(commit)
     if form == "commit":
@@ -350,7 +366,10 @@ def check_attribution(report, base, commit, parent, kind, new, form, reduction_t
             report.flag(f"{where} names its cause with INET-Commit, and {short(commit)} changes {lines} source lines; a commit that changes source is the cause of its own pin move")
     obligations = obligations_of(commit)
     if obligations is not None and "?" not in obligations and kind not in obligations:
-        report.flag(f"{short(commit)} moves the pin of the {kind} baseline, and its Change: trailer does not name '{kind}' (CR-OBL-BASELINE)")
+        report.flag(f"{short(commit)} moves the pin of the {kind} baseline over a result, and its Change: trailer does not name '{kind}' (CR-OBL-BASELINE)")
+    fields = change_fields(commit)
+    if len(fields) >= 2 and "behavior" not in fields[1]:
+        report.flag(f"{short(commit)} claims '{fields[1]}' and moves the pin of the {kind} baseline over a result (CR-OBL-INERT)")
 
 
 def main(argv=None):
@@ -385,7 +404,7 @@ def main(argv=None):
     with tempfile.TemporaryDirectory() as cache_folder:
         repositories = {}
         try:
-            report.section("TR-BASELINE-PIN: a pin moves to a direct child, in the baseline repository")
+            report.section("TR-BASELINE-PIN: a pin moves forward, over at most one commit with results, in the baseline repository")
             print(f"  {len(moves)} pin move(s)")
             usable = []
             for kind in sorted({move[2] for move in moves}):
@@ -405,21 +424,31 @@ def main(argv=None):
                         report.flag(f"{short(commit)} pins {kind} {short(new)}, which is not in the baseline repository; push the baseline branch, or open a pull request in the baseline repository")
                     elif old in missing:
                         report.flag(f"{short(commit)} moves the {kind} pin from {short(old)}, which is not in the baseline repository")
-                    elif repository.parents(new) != [old]:
-                        if repository.is_ancestor(old, new) and len(repository.parents(new)) == 1:
-                            report.flag(f"{short(commit)} moves the {kind} pin over {repository.count(old, new)} baseline commits; one cause commit has one baseline commit")
-                        elif len(repository.parents(new)) > 1:
-                            report.flag(f"{short(commit)} pins the merge commit {kind} {short(new)}; a pin moves to a direct child")
-                        else:
-                            report.flag(f"{short(commit)} pins {kind} {short(new)}, which does not stand on the pin of the parent, {short(old)}; rebase the baseline branch and write the new pins")
+                    elif not repository.is_ancestor(old, new):
+                        report.flag(f"{short(commit)} pins {kind} {short(new)}, which does not stand on the pin of the parent, {short(old)}; rebase the baseline branch and write the new pins")
+                    elif repository.has_merge(old, new):
+                        report.flag(f"{short(commit)} moves the {kind} pin over a merge commit; the history of a baseline is a line")
                     else:
-                        usable.append((commit, parent, kind, old, new))
+                        images = ()
+                        if kind == "chart":
+                            images = baseline_summary.chart_images_at(commit, entry) | baseline_summary.chart_images_at(parent, entry)
+                        is_result = baseline_summary.result_filter(kind, images)
+                        chain = repository.chain(old, new)
+                        with_results = [c for c in chain if any(is_result(path) for path in repository.changed_paths(c))]
+                        if len(with_results) > 1:
+                            report.flag(f"{short(commit)} moves the {kind} pin over {len(with_results)} baseline commits that change results; one cause commit has one baseline commit")
+                        elif with_results:
+                            usable.append((commit, parent, kind, repository.parents(with_results[0])[0], with_results[0], is_result))
+                            if len(chain) > 1:
+                                print(f"  {short(commit)} moves the {kind} pin over {len(chain)} commits; {short(with_results[0])} changes results and has the record")
+                        else:
+                            print(f"  {short(commit)} moves the {kind} pin over {len(chain)} commit(s) that change no result; they need no record")
             report.end_section()
 
             report.section("TR-BASELINE-PROVENANCE and TR-BASELINE-PARENT: the record of each baseline commit")
             records = []
-            for commit, parent, kind, old, new in usable:
-                records.append((commit, parent, kind, new, *check_record(report, repositories[kind], kind, commit, parent, old, new)))
+            for commit, parent, kind, old, new, is_result in usable:
+                records.append((commit, parent, kind, new, *check_record(report, repositories[kind], kind, commit, parent, old, new, is_result)))
             report.end_section()
 
             report.section("TR-BASELINE-ATTRIBUTION: a small change that causes the move")
@@ -436,7 +465,7 @@ def main(argv=None):
             if usable:
                 print()
                 print("== the baseline commits (the record, for the reviewer) ==")
-                for commit, parent, kind, old, new in usable:
+                for commit, parent, kind, old, new, _ in usable:
                     print(f"  {short(commit)} {subject_of(commit)}")
                     print(f"    {kind} {short(old)} -> {short(new)}")
                     print("\n".join("      " + line for line in repositories[kind].message(new).rstrip().splitlines()))

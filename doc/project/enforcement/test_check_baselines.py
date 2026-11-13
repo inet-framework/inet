@@ -6,6 +6,7 @@ Each gate test builds three temporary git repositories: the baseline repositorie
 """
 
 from pathlib import Path
+import os
 import subprocess
 import sys
 import tempfile
@@ -23,6 +24,14 @@ CHANGE = "Change: src | behavior.change | "
 SCA_A = "examples/a/omnetpp.ini-General-#0.sca"
 SCA_B = "examples/b/omnetpp.ini-General-#0.sca"
 PNG_A = "showcases/a/doc/chart.png"
+PNG_A2 = "showcases/a/doc/chart2.png"
+PNG_DOC = "showcases/b/doc/chart.png"
+ANF = "showcases/a/A.anf"
+ANF_TEXT = ('<?xml version="1.0"?>\n<analysis>\n<property name="image_export_filename" value="chart"/>\n'
+            '<property name="image_export_filename" value="chart2"/>\n</analysis>\n')
+ANF_TEXT_WITHOUT_CHART = ANF_TEXT.replace('<property name="image_export_filename" value="chart"/>\n', "")
+MEDIA_LINK = "../../../media/showcases/a/doc"
+ENTRY = {"folder": "media", "read_folder": "doc/media"}
 PATCH = "attribution/x.patch"
 
 # the cause commit appends the line "int v1;" to src/inet/a/A.cc
@@ -52,6 +61,8 @@ def opp_text(pins, omit=(), statistical_repository="inet-framework/statistics"):
                                      ("chart", "inet-framework/media", "media")):
         if kind not in omit:
             baseline = {"repository": repository, "folder": folder}
+            if kind == "chart":
+                baseline["read_folder"] = "doc/media"
             if kind in pins:
                 baseline["ref"] = pins[kind]
             parameters[kind] = {"baseline": baseline}
@@ -74,7 +85,7 @@ class GateTestCase(unittest.TestCase):
         self.write(self.stat, SCA_A, sca())
         self.write(self.stat, SCA_B, sca())
         self.write(self.media, PNG_A, b"\x89PNG old")
-        self.write(self.media, "showcases/b/doc/chart.png", b"\x89PNG other")
+        self.write(self.media, PNG_DOC, b"\x89PNG other")
         self.pins = {}
         for kind, repository in (("statistical", self.stat), ("chart", self.media)):
             self.git(repository, "add", "-A")
@@ -83,6 +94,10 @@ class GateTestCase(unittest.TestCase):
         self.first = dict(self.pins)
         self.write(self.inet, "src/inet/a/A.cc", "int a = 0;\n")
         self.write(self.inet, "inet.opp", opp_text(self.pins))
+        # the chart of the analysis file exports to the folder doc/media, a link into the media folder
+        self.write(self.inet, ANF, ANF_TEXT)
+        (self.inet / "showcases/a/doc").mkdir(parents=True)
+        os.symlink(MEDIA_LINK, self.inet / "showcases/a/doc/media")
         self.git(self.inet, "add", "-A")
         self.git(self.inet, "commit", "-qm", "fixture")
         self.git(self.inet, "checkout", "-qb", "topic")
@@ -106,6 +121,20 @@ class GateTestCase(unittest.TestCase):
         else:
             path.write_text(content, encoding="utf-8")
 
+    def result_filter(self, repository):
+        """The filter of the results of a baseline repository, as the gate computes it for the parent commit."""
+        if repository == self.stat:
+            return baseline_summary.result_filter("statistical")
+        return baseline_summary.result_filter("chart", baseline_summary.chart_images_at("HEAD", ENTRY, cwd=self.inet))
+
+    def plain(self, repository, changes, subject="Change files that are no result"):
+        """Makes a baseline commit with no record. Returns the hash."""
+        for path, content in changes.items():
+            self.write(repository, path, content)
+        self.git(repository, "add", "-A")
+        self.git(repository, "commit", "-q", "-m", subject)
+        return self.head(repository)
+
     def record(self, repository, changes, inet_subject=SUBJECT, attribution="commit", analysis=ANALYSIS,
                block=None, subject="Move the results"):
         """Makes a baseline commit with its record. A change of None removes the file. inet_subject and
@@ -117,7 +146,7 @@ class GateTestCase(unittest.TestCase):
             else:
                 self.write(repository, path, content)
         self.git(repository, "add", "-A")
-        lines = baseline_summary.block(baseline_summary.analyze(str(repository)))
+        lines = baseline_summary.block(baseline_summary.analyze(str(repository), is_result=self.result_filter(repository)))
         if block == "none":
             lines = None
         elif block is not None:
@@ -131,9 +160,11 @@ class GateTestCase(unittest.TestCase):
         self.git(repository, "commit", "-q", "-m", "\n\n".join(part for part in parts if part))
         return self.head(repository)
 
-    def inet_commit(self, subject=SUBJECT, source=0, trailer=CHANGE + "-", pins=None, opp=None):
-        """Makes an INET commit. It appends the given number of lines to A.cc, and writes inet.opp."""
+    def inet_commit(self, subject=SUBJECT, source=0, trailer=CHANGE + "-", pins=None, opp=None, files=None):
+        """Makes an INET commit. It appends the given number of lines to A.cc, writes inet.opp and the files."""
         self.pins.update(pins or {})
+        for path, content in (files or {}).items():
+            self.write(self.inet, path, content)
         self.write(self.inet, "inet.opp", opp if opp is not None else opp_text(self.pins))
         if source:
             path = self.inet / "src/inet/a/A.cc"
@@ -145,7 +176,7 @@ class GateTestCase(unittest.TestCase):
         self.git(self.inet, "commit", "-q", "--allow-empty", "-m", message)
 
     def move(self, stat=None, media=None, subject=SUBJECT, source=1, trailer=None, stat_record=None,
-             media_record=None):
+             media_record=None, files=None):
         """One INET commit that moves the pin of each baseline with changes: the baseline commit with
         its record, then the INET commit."""
         pins = {}
@@ -155,7 +186,7 @@ class GateTestCase(unittest.TestCase):
                 pins[kind] = self.record(repository, changes, **{"inet_subject": subject, **(options or {})})
         if trailer is None:
             trailer = CHANGE + " ".join(sorted(pins))
-        self.inet_commit(subject, source, trailer, pins)
+        self.inet_commit(subject, source, trailer, pins, files=files)
 
     def gate(self, *args, series="master..topic", repositories=True):
         extra = []
@@ -249,7 +280,8 @@ class PinViolationTest(GateTestCase):
         self.record(self.stat, {SCA_A: sca(sent="11")})
         pin = self.record(self.stat, {SCA_A: sca(sent="12")})
         self.inet_commit(source=1, trailer=CHANGE + "statistical", pins={"statistical": pin})
-        self.assert_fails("moves the statistical pin over 2 baseline commits; one cause commit has one baseline commit")
+        self.assert_fails("moves the statistical pin over 2 baseline commits that change results; "
+                          "one cause commit has one baseline commit")
 
     def test_a_pin_that_moves_to_a_commit_that_does_not_descend_from_the_old_pin_fails(self):
         self.git(self.stat, "checkout", "-q", "--orphan", "other")
@@ -317,7 +349,7 @@ class RecordViolationTest(GateTestCase):
 
     def test_a_baseline_commit_that_changes_an_unnamed_file_under_attribution_fails(self):
         self.move(stat={SCA_A: sca(sent="11"), "attribution/other.patch": FORWARD_PATCH})
-        self.assert_fails("changes attribution/other.patch; a baseline commit changes results")
+        self.assert_fails("changes attribution/other.patch; a baseline commit adds only the reduction")
 
 
 class AttributionViolationTest(GateTestCase):
@@ -355,7 +387,7 @@ class AttributionViolationTest(GateTestCase):
         self.assert_passes()
 
     def test_two_baseline_commits_with_different_attributions_fail(self):
-        self.move(stat={SCA_A: sca(sent="11")}, media={"showcases/c/doc/chart.png": b"\x89PNG added"},
+        self.move(stat={SCA_A: sca(sent="11")}, media={PNG_A2: b"\x89PNG added"},
                   media_record={"attribution": "first-record"})
         result = self.assert_fails("moves 2 pins, and their baseline commits do not have the same attribution")
         self.assertEqual(result.stdout.count("VIOLATION"), 1, result.stdout)
@@ -422,6 +454,93 @@ class UrlTest(GateTestCase):
         self.assertIn("rows of the changed tests: 1 changed, 0 added, 0 removed", result.stdout)
 
 
+class ResultRuleTest(GateTestCase):
+    """Not each file of a baseline repository is a result; a commit with no result needs no record."""
+
+    DOC_TRAILER = "Change: doc | behavior.change | -"
+
+    def test_a_media_commit_that_changes_only_a_documentation_image_needs_no_record(self):
+        doc = self.plain(self.media, {PNG_DOC: b"\x89PNG new documentation"})
+        self.inet_commit("doc: change: an image", 0, self.DOC_TRAILER, {"chart": doc})
+        result = self.assert_passes()
+        self.assertIn("1 commit(s) that change no result", result.stdout)
+
+    def test_a_statistics_commit_that_only_adds_a_readme_needs_no_record(self):
+        readme = self.plain(self.stat, {"README.md": "About the results.\n"})
+        self.inet_commit("doc: change: a readme", 0, self.DOC_TRAILER, {"statistical": readme})
+        result = self.assert_passes()
+        self.assertIn("change no result", result.stdout)
+
+    def test_a_pin_move_over_a_documentation_commit_and_then_a_result_commit_passes(self):
+        self.plain(self.media, {PNG_DOC: b"\x89PNG new documentation"})
+        self.move(media={PNG_A: b"\x89PNG new"})
+        result = self.assert_passes()
+        self.assertIn("moves the chart pin over 2 commits;", result.stdout)
+        self.assertIn("changes results and has the record", result.stdout)
+
+    def test_a_pin_move_over_a_result_commit_and_then_a_documentation_commit_passes(self):
+        self.record(self.media, {PNG_A: b"\x89PNG new"})
+        doc = self.plain(self.media, {PNG_DOC: b"\x89PNG new documentation"})
+        self.inet_commit(SUBJECT, 1, CHANGE + "chart", {"chart": doc})
+        result = self.assert_passes()
+        self.assertIn("moves the chart pin over 2 commits;", result.stdout)
+
+    def test_a_pin_move_over_two_commits_that_both_change_results_fails(self):
+        self.record(self.media, {PNG_A: b"\x89PNG new"})
+        pin = self.record(self.media, {PNG_A: b"\x89PNG newer"})
+        self.inet_commit(SUBJECT, 1, CHANGE + "chart", {"chart": pin})
+        self.assert_fails("moves the chart pin over 2 baseline commits that change results; "
+                          "one cause commit has one baseline commit")
+
+    def test_a_result_commit_that_also_changes_a_documentation_image_lists_only_the_chart(self):
+        self.move(media={PNG_A: b"\x89PNG new", PNG_DOC: b"\x89PNG new documentation"})
+        result = self.assert_passes()
+        self.assertIn(f"  - {PNG_A}: changed", result.stdout)
+        self.assertNotIn(f"  - {PNG_DOC}", result.stdout)
+
+    def test_a_block_that_lists_a_documentation_image_fails(self):
+        def with_documentation(lines):
+            lines = [line.replace("charts: 1 changed", "charts: 2 changed") for line in lines]
+            return lines + [f"  - {PNG_DOC}: changed"]
+        self.move(media={PNG_A: b"\x89PNG new", PNG_DOC: b"\x89PNG new documentation"},
+                  media_record={"block": with_documentation})
+        self.assert_fails("has a 'Moved results:' block that is not the computed block")
+
+    def test_a_behavior_free_change_that_moves_the_statistical_pin_over_a_result_fails(self):
+        self.move(stat={SCA_A: sca(sent="11")}, trailer="Change: src | refactor | statistical")
+        self.assert_fails("claims 'refactor' and moves the pin of the statistical baseline over a result (CR-OBL-INERT)")
+
+    def test_a_comment_change_that_moves_the_chart_pin_over_a_documentation_commit_is_no_violation(self):
+        doc = self.plain(self.media, {PNG_DOC: b"\x89PNG new documentation"})
+        self.inet_commit("doc: comment: an image", 0, "Change: doc | comment | -", {"chart": doc})
+        result = self.assert_passes()
+        self.assertNotIn("CR-OBL-INERT", result.stdout)
+
+    def test_an_image_that_only_the_parent_of_the_cause_commit_names_is_a_result_when_it_goes(self):
+        # the cause commit removes the chart property from the .anf file, and the media commit removes the image
+        self.move(media={PNG_A: None}, media_record={"attribution": "removal"}, files={ANF: ANF_TEXT_WITHOUT_CHART})
+        self.assert_passes()
+
+    def test_the_removal_of_an_image_that_only_the_parent_names_needs_the_record(self):
+        self.move(media={PNG_A: None}, media_record={"attribution": "removal", "block": "none"},
+                  files={ANF: ANF_TEXT_WITHOUT_CHART})
+        self.assert_fails("has no 'Moved results:' block")
+
+    def test_a_pin_that_moves_over_a_merge_commit_of_the_baseline_repository_fails(self):
+        self.git(self.media, "checkout", "-q", "-b", "side")
+        self.plain(self.media, {"side.txt": "side\n"})
+        self.git(self.media, "checkout", "-q", "master")
+        self.plain(self.media, {"main.txt": "main\n"})
+        self.git(self.media, "merge", "-q", "--no-ff", "-m", "merge side", "side")
+        self.inet_commit(SUBJECT, 1, CHANGE + "chart", {"chart": self.head(self.media)})
+        self.assert_fails("moves the chart pin over a merge commit")
+
+    def test_chart_images_at_reads_the_git_objects_like_the_work_tree(self):
+        images = baseline_summary.chart_images_at("HEAD", ENTRY, cwd=self.inet)
+        self.assertEqual(images, {PNG_A, PNG_A2})
+        self.assertEqual(baseline_summary.chart_images_in_work_tree(ENTRY, cwd=self.inet), images)
+
+
 class BaselineSummaryTest(unittest.TestCase):
     def test_read_scalars_reads_a_quoted_name_and_the_run_attributes(self):
         rows = baseline_summary.read_scalars(sca())
@@ -471,6 +590,60 @@ class BaselineSummaryTest(unittest.TestCase):
 
     def test_block_of_no_change_says_that_no_result_moves(self):
         self.assertEqual(baseline_summary.block({"tests": [], "charts": []}), ["Moved results:", "  no result moves"])
+
+    def test_chart_images_names_the_images_of_the_charts_of_each_analysis_file(self):
+        texts = {
+            "showcases/a/A.anf": ANF_TEXT,
+            "showcases/b/B.anf": '<property name="image_export_filename" value="x"/>\n',
+            "showcases/c/C.anf": "<analysis/>\n",
+            "showcases/d/D.anf": '<property name="image_export_filename" value="outside"/>\n',
+            "showcases/e/E.anf": '<property name="image_export_filename" value="nolink"/>\n',
+        }
+        links = {
+            "showcases/a/doc/media": "../../../media/showcases/a/doc",
+            "showcases/b/doc/media": "../../../media/showcases/b/doc",
+            "showcases/c/doc/media": "../../../media/showcases/c/doc",
+            "showcases/d/doc/media": "../../../other/showcases/d/doc",
+        }
+        images = baseline_summary.chart_images(texts, links.get, ENTRY)
+        self.assertEqual(images, {PNG_A, PNG_A2, "showcases/b/doc/x.png"})
+
+    def test_result_filter_of_statistical_accepts_only_sca_files(self):
+        is_result = baseline_summary.result_filter("statistical")
+        self.assertTrue(is_result(SCA_A))
+        self.assertFalse(is_result("README.md"))
+        self.assertFalse(is_result(PNG_A))
+
+    def test_result_filter_of_chart_accepts_only_the_given_images(self):
+        is_result = baseline_summary.result_filter("chart", {PNG_A})
+        self.assertTrue(is_result(PNG_A))
+        self.assertFalse(is_result(PNG_DOC))
+
+    def test_result_filter_of_another_kind_accepts_each_file_outside_the_attribution_folder(self):
+        is_result = baseline_summary.result_filter("other")
+        self.assertTrue(is_result("x/y.txt"))
+        self.assertFalse(is_result(PATCH))
+
+    def test_analyze_leaves_out_a_file_that_is_not_a_result(self):
+        with tempfile.TemporaryDirectory() as folder:
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=folder, check=True, capture_output=True, text=True).stdout.strip()
+            git("init", "-q", "-b", "master")
+            for name, value in (("user.email", "test@example.invalid"), ("user.name", "Test"), ("commit.gpgsign", "false")):
+                git("config", name, value)
+            Path(folder, "a.png").write_bytes(b"old")
+            Path(folder, "b.png").write_bytes(b"old")
+            git("add", "-A")
+            git("commit", "-qm", "first")
+            old = git("rev-parse", "HEAD")
+            Path(folder, "a.png").write_bytes(b"new")
+            Path(folder, "b.png").write_bytes(b"new")
+            git("commit", "-qam", "second")
+            new = git("rev-parse", "HEAD")
+            everything = baseline_summary.analyze(folder, old, new)
+            only_a = baseline_summary.analyze(folder, old, new, is_result=lambda path: path == "a.png")
+        self.assertEqual(everything["charts"], [("M", "a.png"), ("M", "b.png")])
+        self.assertEqual(only_a, {"tests": [], "charts": [("M", "a.png")]})
 
 
 if __name__ == "__main__":

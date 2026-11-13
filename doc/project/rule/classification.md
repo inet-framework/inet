@@ -210,13 +210,13 @@ The values, in full:
 
 **The last row of the first table is the one cell that no tool can fill.** Whether a behavior change moves a covered scenario depends on the trajectory of that scenario, and only a run answers it. Everything above that row is derivable.
 
-*Enforced at T3 for every value except `fingerprint`, `statistical` and `chart`, because a run decides whether a scenario moves. For `statistical` and `chart`, T3 checks one half: a commit that moves a pin names that baseline ([check-baselines.sh](../enforcement/check-baselines.sh)).*
+*Enforced at T3 for every value except `fingerprint`, `statistical` and `chart`, because a run decides whether a scenario moves. For `statistical` and `chart`, T3 checks one half: a commit that moves a pin over a result names that baseline ([check-baselines.sh](../enforcement/check-baselines.sh)).*
 
 ### CR-OBL-INERT
 
 **A commit below the behavior level moves no recorded expectation.**
 
-This is the check that the whole classification exists for. A commit at level 0 to 4 claims that the model produces the same results. A fingerprint or statistical baseline in the same series falsifies the claim, and so does a pin of a baseline repository that moves ([TR-BASELINE-PIN](testing.md#tr-baseline-pin)). One of the two is then wrong: the classification, or the split under [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline).
+This is the check that the whole classification exists for. A commit at level 0 to 4 claims that the model produces the same results. A fingerprint or statistical baseline in the same series falsifies the claim, and so does a pin that moves over a baseline commit with results ([TR-BASELINE-PIN](testing.md#tr-baseline-pin)). One of the two is then wrong: the classification, or the split under [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline).
 
 **The check is cheap and it fires about once in a thousand commits.** Master's last 300 hold 9 commits that claim inertness in their subject, and none of the 9 touches a baseline. Widen the window to 3000 and the contradiction appears: of the 71 subjects that carry the word `refactor`, two carry a fingerprint baseline as well.
 
@@ -229,7 +229,7 @@ Both are honest commits that chose the wrong word. The second one repairs a dete
 
 The contrary case exists and is legitimate: **12 of the 300 move a baseline and change no source**, for example `tests: synchronize stale JSON fingerprints with CSV baselines`. Those are `tests` at level 5, and the obligation field is where the reason belongs.
 
-*Enforced at T3 — a gate compares the claimed depth with the presence of a baseline or of a pin move in the diff.*
+*Enforced at T3 — a gate compares the claimed depth with the presence of a baseline in the diff; [check-baselines.sh](../enforcement/check-baselines.sh) compares it with a pin that moves over a result.*
 
 ### CR-OBL-BASELINE
 
@@ -243,7 +243,7 @@ Three answers are acceptable, and silence is not one of them:
 2. **They move**, with a baseline commit and the reason under [TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance).
 3. **`?`** — the author has not run them yet. This is honest and a reviewer can act on it.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): a commit that moves a pin names that baseline in its trailer; T4 — the reviewer asks in the other cases; T2 when the statistical and chart tests run on pull requests, not yet configured.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): a commit that moves a pin over a result names that baseline in its trailer; T4 — the reviewer asks in the other cases; T2 when the statistical and chart tests run on pull requests, not yet configured.*
 
 ## The group (CR-GROUP)
 

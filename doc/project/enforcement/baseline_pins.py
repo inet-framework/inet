@@ -11,8 +11,9 @@ It also writes new pins into a series, after a baseline branch changed. A baseli
 hash when its branch is rebased onto the baseline of another pull request that landed, and when its
 message or its values change. Then the pins of the series name commits that are gone. The rebase
 command makes the commits of the series again on the new base, with the same messages, authors and
-changes, and gives the n-th pin move of each test kind the n-th commit of the baseline branch above
-the pin of the new base. It writes git objects only; the files of the work tree change at the end,
+changes. It gives the pin moves of each test kind the commits of the baseline branch above the pin
+of the new base, in order: a pin move takes as many commits as it took before, which is one commit
+when the old commits are not in the clone. It writes git objects only; the files of the work tree change at the end,
 when the branch moves, and only if no local change is lost.
 
 Usage, from the repository root:
@@ -111,6 +112,13 @@ def baseline_chain(folder, old, tip):
     return git("rev-list", "--reverse", "--first-parent", f"{old}..{tip}", cwd=folder).stdout.split()
 
 
+def span(folder, old, new):
+    """The number of baseline commits that a pin move went over; 1 when the clone does not have the two commits."""
+    if git("merge-base", "--is-ancestor", old, new, cwd=folder, check=False).returncode != 0:
+        return 1
+    return max(1, int(git("rev-list", "--count", f"{old}..{new}", cwd=folder).stdout))
+
+
 def substitute(text, old_pins, new_pins):
     """The text of an inet.opp with each pin of old_pins replaced by the pin of the same kind in new_pins."""
     for kind, old in old_pins.items():
@@ -156,7 +164,7 @@ def rebase(upstream, tips, folders):
         raise RebaseError(f"no commit is in {upstream}..HEAD")
     base_entries = read_baselines(new_base)
     # the baseline commits that the pin moves of each kind get, in order
-    chains = {}
+    chains, clones = {}, {}
     for kind, entry in base_entries.items():
         if is_full_hash(entry.get("ref")):
             folder = folders.get(kind) or entry.get("folder") or "."
@@ -165,11 +173,15 @@ def rebase(upstream, tips, folders):
                     raise RebaseError(f"the {kind} baseline has no clone in {folder}; give one with --baseline-repository {kind}=PATH")
                 continue
             tip = git("rev-parse", "--verify", f"{tips.get(kind, 'HEAD')}^{{commit}}", cwd=folder).stdout.strip()
-            chains[kind] = baseline_chain(folder, entry["ref"], tip)
-    moves = {kind: [commit for commit in commits if any(k == kind and old and new for k, old, new in moved_pins(commit))] for kind in chains}
+            chains[kind], clones[kind] = baseline_chain(folder, entry["ref"], tip), folder
+    # the new pin of each pin move: a move takes as many commits of the baseline branch as it took before
+    new_pins = {}
     for kind, chain in chains.items():
-        if len(moves[kind]) != len(chain):
-            raise RebaseError(f"the series moves the {kind} pin {len(moves[kind])} time(s), and the baseline branch has {len(chain)} commit(s) above the pin of the new base; one commit that moves a pin has one baseline commit")
+        moves = [(commit, old, new) for commit in commits for k, old, new in moved_pins(commit) if k == kind and old and new]
+        spans = [span(clones[kind], old, new) for _, old, new in moves]
+        if sum(spans) != len(chain):
+            raise RebaseError(f"the series moves the {kind} pin {len(moves)} time(s) over {sum(spans)} baseline commit(s), and the baseline branch has {len(chain)} commit(s) above the pin of the new base")
+        new_pins[kind] = {commit: chain[sum(spans[:index + 1]) - 1] for index, (commit, _, _) in enumerate(moves)}
     head, current = new_base, read_pins(new_base)
     result = []
     with tempfile.TemporaryDirectory() as folder:
@@ -194,8 +206,8 @@ def rebase(upstream, tips, folders):
             tree = merged.stdout.split()[0]
             changed = []
             for kind in chains:
-                if commit in moves[kind]:
-                    new_pin = chains[kind][moves[kind].index(commit)]
+                if commit in new_pins[kind]:
+                    new_pin = new_pins[kind][commit]
                     changed.append((kind, commit_pins.get(kind), new_pin))
                     text = git("show", f"{tree}:{OPP_FILE}").stdout
                     tree = tree_with_opp(tree, substitute(text, {kind: current[kind]}, {kind: new_pin}), index)

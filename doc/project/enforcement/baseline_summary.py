@@ -9,16 +9,25 @@ commit. check-baselines.sh computes it again and compares, so the
 summary in a message is always true.
 
 A stored result file (.sca) is compared as the statistical test compares it: by its scalar rows and
-its run attributes, with numbers as numbers. A different text for the same number is no change. Any
-other file is a chart and is compared by its content.
+its run attributes, with numbers as numbers. A different text for the same number is no change. A
+chart is compared by its content.
+
+Not each file of a baseline repository is a result. In the statistics repository, the results are
+the .sca files. In the media repository, the results are the images that a chart of an analysis file
+(.anf) of the INET tree exports; the other files are documentation media. A file that is not a result
+is not in the block, and it needs no record.
 
 Usage, from the INET repository root:
   baseline_summary.py FOLDER               the staged changes of the baseline checkout in FOLDER
   baseline_summary.py FOLDER OLD NEW       the change between two commits of that repository
 
+FOLDER is the folder of a baseline entry of inet.opp, for example statistics or media.
+
 Exit status 0 = done, 2 = invalid usage.
 """
 import math
+import os
+import re
 import shlex
 import subprocess
 import sys
@@ -31,6 +40,7 @@ GROUP_LIMIT = 10
 GROUP_NAME_LIMIT = 12
 FOLDER_LIMIT = 10
 CHART_LIMIT = 30
+CHART_PROPERTY = re.compile(r'<property name="image_export_filename" value="([^"]+)"/>')
 
 
 def git(folder, *args, check=True, text=True):
@@ -106,12 +116,82 @@ def is_result(path):
     return not path.startswith(ATTRIBUTION_FOLDER)
 
 
+def chart_images(analysis_files, read_link, entry):
+    """The paths, in the media repository, of the images that the charts of analysis files export.
+
+    The chart test writes the image of a chart to <folder of the .anf file>/<read folder>/<name>.png,
+    and the read folder (doc/media) is a link into the clone of the media repository. analysis_files
+    is {path of an .anf file: its text}. read_link gives the target of a link, or None. entry is the
+    baseline entry of the chart tests in inet.opp."""
+    media_folder = (entry.get("folder") or ".").rstrip("/") + "/"
+    read_folder = entry.get("read_folder") or entry.get("folder") or "."
+    images = set()
+    for path, text in analysis_files.items():
+        names = CHART_PROPERTY.findall(text)
+        if not names:
+            continue
+        link = os.path.normpath(os.path.join(os.path.dirname(path), read_folder))
+        target = read_link(link)
+        if target is None:
+            continue
+        resolved = os.path.normpath(os.path.join(os.path.dirname(link), target)) + "/"
+        if resolved.startswith(media_folder):
+            images.update(resolved[len(media_folder):] + name + ".png" for name in names)
+    return images
+
+
+def chart_images_at(commit, entry, cwd=None):
+    """The chart images of the analysis files of an INET commit. It reads git objects only."""
+    out = subprocess.run(["git", "grep", "-h", "--full-name", "--heading", "-e", "image_export_filename", commit, "--", "*.anf"],
+                         cwd=cwd, capture_output=True, text=True).stdout
+    analysis_files, path = {}, None
+    for line in out.splitlines():
+        if line.startswith(commit + ":") and "<property" not in line:
+            path = line[len(commit) + 1:]
+            analysis_files[path] = ""
+        elif path is not None:
+            analysis_files[path] += line + "\n"
+
+    def read_link(link):
+        entry_line = subprocess.run(["git", "ls-tree", commit, link], cwd=cwd, capture_output=True, text=True).stdout
+        if not entry_line.startswith("120000 "):
+            return None
+        return subprocess.run(["git", "cat-file", "-p", entry_line.split()[2]], cwd=cwd, capture_output=True, text=True).stdout
+    return chart_images(analysis_files, read_link, entry)
+
+
+def chart_images_in_work_tree(entry, cwd=None):
+    """The chart images of the analysis files of the INET work tree, with the files that are not committed."""
+    root = cwd or "."
+    paths = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "*.anf"], cwd=cwd, capture_output=True, text=True).stdout.split("\n")
+    analysis_files = {}
+    for path in paths:
+        if path and os.path.exists(os.path.join(root, path)):
+            with open(os.path.join(root, path), encoding="utf-8", errors="replace") as f:
+                analysis_files[path] = f.read()
+
+    def read_link(link):
+        full = os.path.join(root, link)
+        return os.readlink(full) if os.path.islink(full) else None
+    return chart_images(analysis_files, read_link, entry)
+
+
+def result_filter(kind, images=()):
+    """The function that says if a file of a baseline repository is a result of a test kind."""
+    if kind == "statistical":
+        return is_test
+    if kind == "chart":
+        return lambda path: path in images
+    return is_result
+
+
 def is_test(path):
     return path.endswith(".sca")
 
 
-def analyze(folder, old=None, new=None):
+def analyze(folder, old=None, new=None, is_result=is_result):
     """The moved results between two commits of a baseline repository, or of its staged changes.
+    is_result says which files are results; the other files are not in the answer.
     Returns {"tests": [...], "charts": [...]}: a test is (status, path, changed, added, removed),
     a chart is (status, path)."""
     old_revision, new_revision = (old, new) if old else ("HEAD", "")
@@ -222,13 +302,31 @@ def find_block(message):
     return None
 
 
+def result_filter_of_folder(folder):
+    """The result filter for the baseline checkout in a folder of the INET work tree. Outside an
+    INET work tree, and for a folder that inet.opp does not name, each file is a result."""
+    from baseline_pins import OPP_FILE, PinError, parse_baselines
+    if not os.path.exists(OPP_FILE):
+        return is_result
+    try:
+        with open(OPP_FILE, encoding="utf-8") as f:
+            baselines = parse_baselines(f.read())
+    except PinError:
+        return is_result
+    for kind, entry in baselines.items():
+        if os.path.normpath(entry.get("folder") or ".") == os.path.normpath(folder):
+            images = chart_images_in_work_tree(entry) | chart_images_at("HEAD", entry) if kind == "chart" else ()
+            return result_filter(kind, images)
+    return is_result
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if len(argv) not in (1, 3):
         print(__doc__, file=sys.stderr)
         return 2
     try:
-        print("\n".join(block(analyze(*argv))))
+        print("\n".join(block(analyze(*argv, is_result=result_filter_of_folder(argv[0])))))
     except RuntimeError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
