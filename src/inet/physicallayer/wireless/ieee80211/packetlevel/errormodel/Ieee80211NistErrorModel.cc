@@ -288,7 +288,7 @@ double Ieee80211NistErrorModel::getDataSuccessRate(const IIeee80211Mode *mode, u
     if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength + ofdmMode->getHeaderMode()->getServiceFieldLength().get<b>(),
+                                                        bitLength,
                                                         snr);
     else if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(htMode->getDataMode()->getModulation()->getSubcarrierModulation(),

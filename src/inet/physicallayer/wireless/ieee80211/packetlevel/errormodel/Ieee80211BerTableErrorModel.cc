@@ -65,6 +65,21 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISnir *snir, IR
     return berTableFile->getPer(bitrate.get<bps>(), getScalarSnir(snir), dataLength.get());
 }
 
+double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const
+{
+    Enter_Method("computeBitErrorRate");
+    checkRegionPart(part);
+    // the table gives the error rate of the data, as the whole-part rate uses it
+    if (part == IRadioSignal::SIGNAL_PART_HEADER)
+        return 0;
+    auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
+    bps bitrate = transmission->getMode()->getDataMode()->getNetBitrate();
+    B dataLength = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket())->getLengthField();
+    // each bit of the PSDU has its share of the table value of the PSDU; the table can give a value above 1
+    double packetErrorRate = std::min(1.0, berTableFile->getPer(bitrate.get<bps>(), getScalarSnir(snir, startTime, endTime), dataLength.get()));
+    return -std::expm1(std::log1p(-packetErrorRate) / b(dataLength).get<b>());
+}
+
 double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computeBitErrorRate");

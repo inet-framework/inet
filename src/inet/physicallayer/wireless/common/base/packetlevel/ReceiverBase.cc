@@ -86,10 +86,7 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    bool isReceptionSuccessful = true;
-    for (auto decision : *decisions)
-        isReceptionSuccessful &= decision->isReceptionSuccessful();
-    auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
+    auto packet = computeReceivedPacket(snir, decisions);
     auto signalPower = computeSignalPower(listening, snir, interference);
     if (!std::isnan(signalPower.get())) {
         auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
@@ -128,6 +125,14 @@ W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *sni
         delete signalPlusNoise;
         return signalPower;
     }
+}
+
+Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
+{
+    bool isReceptionSuccessful = true;
+    for (auto decision : *decisions)
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    return computeReceivedPacket(snir, isReceptionSuccessful);
 }
 
 Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const

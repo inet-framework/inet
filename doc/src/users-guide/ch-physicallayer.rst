@@ -186,6 +186,27 @@ or samples depending on the lowest simulated physical domain where the
 real decoding starts. The error model is optional (if omitted, all
 receptions are considered successful).
 
+A flat receiver with an error model decides the header and the data of a
+reception separately. A part fails if its SNIR is not above the SNIR threshold
+of the receiver, or else if one random draw against its error rate fails. Both
+use the SNIR of the time of that part, so interference that starts during the
+data does not change the decision of the header. The preamble needs only the
+SNIR threshold, and the data needs a successful header. At a constant SNIR, the
+probability of a successful reception is the same as with one decision of the
+whole signal.
+
+The ``corruptionMode`` parameter of the error model selects the regions of these
+decisions and how the received packet shows the errors. In the ``packet`` mode,
+the default, each part is one region, and a failed region gives a packet with a
+bit error. In the ``chunk`` mode, each chunk of a part is one region, and the
+received packet has an incorrect copy of each failed chunk of the data. Only a
+failed header then gives a packet-level bit error, so interference that covers
+the end of a frame marks only the late chunks incorrect, and a MAC can keep the
+MPDUs before it in an aggregate. The ``byte`` and ``bit`` modes have the regions
+of the chunk mode, and a failed chunk becomes a raw chunk with flipped bytes or
+bits, marked incorrect. The flipped units follow the bit error rate of the
+chunk, and at least one unit is flipped.
+
 The following list provides some examples:
 
 -  :ned:`StochasticErrorModel`: simplistic error model with constant
