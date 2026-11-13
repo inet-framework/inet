@@ -8,7 +8,11 @@ on:
     branches:
       - master
   workflow_dispatch:
-    # nothing
+    inputs:
+      pull-request:
+        description: "A pull request number: test its merge with master and post a commit status on its head. Empty: test the selected branch"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -22,18 +26,49 @@ jobs:
       pull-requests: read
     outputs:
       relevant: ${{ steps.paths.outputs.relevant }}
+      ref: ${{ steps.paths.outputs.ref }}
+      head: ${{ steps.paths.outputs.head }}
+      conflict: ${{ steps.paths.outputs.conflict }}
     steps:
       - name: Select the paths of the pull request
         id: paths
         env:
           GH_TOKEN: ${{ github.token }}
-          NUMBER: ${{ github.event.pull_request.number }}
+          NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
         run: |
-          # a push and a run by hand test the branch; a pull request runs the tests only when it
-          # changes a path that can change a statistical result, and else the check passes
+          # a push, and a run by hand with no pull request, test the branch; a pull request runs the
+          # tests only when it changes a path that can change a statistical result, and else the check passes
           if [ -z "$NUMBER" ]; then
             echo "relevant=true" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+          if ! [[ "$NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "error: '$NUMBER' is not a pull request number" >&2
+            exit 2
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            # GitHub computes the merge of a pull request in the background: mergeable is null until it is known
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" > "$RUNNER_TEMP/pull.json"
+              [ "$(jq -r .mergeable "$RUNNER_TEMP/pull.json")" != null ] && break
+              sleep 6
+            done
+            if [ "$(jq -r '.state + " " + .base.ref' "$RUNNER_TEMP/pull.json")" != "open master" ]; then
+              echo "error: #$NUMBER is not an open pull request to master" >&2
+              exit 2
+            fi
+            echo "head=$(jq -r .head.sha "$RUNNER_TEMP/pull.json")" >> "$GITHUB_OUTPUT"
+            echo "ref=refs/pull/$NUMBER/merge" >> "$GITHUB_OUTPUT"
+            if [ "$(jq -r .mergeable "$RUNNER_TEMP/pull.json")" = null ]; then
+              echo "error: GitHub did not compute the merge of #$NUMBER in 60 s; run the workflow again" >&2
+              exit 1
+            fi
+            if [ "$(jq -r .mergeable "$RUNNER_TEMP/pull.json")" = false ]; then
+              echo "conflict=true" >> "$GITHUB_OUTPUT"
+              echo "relevant=false" >> "$GITHUB_OUTPUT"
+              echo "#$NUMBER has a conflict with master, so no merge exists to test." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
           fi
           paths='^(src|examples|showcases|tutorials|tests/networks|tests/validation|python|_scripts|bin)/'
           paths+='|^(inet\.opp|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
@@ -64,6 +99,8 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: inet
+          # empty for a push and a pull request; the merge ref of the pull request for a run by hand
+          ref: ${{ needs.changes.outputs.ref }}
           persist-credentials: false
       - run: mkdir -p /home/runner/work/ccache
       - uses: actions/cache/restore@v5
@@ -146,3 +183,42 @@ jobs:
           name: statistical-candidates
           path: ${{ github.workspace }}/candidates
           if-no-files-found: ignore
+
+  status:
+    name: Commit status of the pull request
+    needs: [changes, statistical-tests]
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.pull-request != ''
+    runs-on: ubuntu-latest
+    # this job runs no content of the pull request; it only posts the result of the jobs above
+    permissions:
+      statuses: write
+    steps:
+      - name: Post the result on the head of the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD: ${{ needs.changes.outputs.head }}
+          CHANGES: ${{ needs.changes.result }}
+          TESTS: ${{ needs.statistical-tests.result }}
+          RELEVANT: ${{ needs.changes.outputs.relevant }}
+          CONFLICT: ${{ needs.changes.outputs.conflict }}
+        run: |
+          if [ -z "$HEAD" ]; then
+            echo "error: no head commit, the job changes ended with: $CHANGES" >&2
+            exit 1
+          fi
+          if [ "$CHANGES" != success ]; then
+            state=error; text="the selection of the pull request failed: see the job changes"
+          elif [ "$CONFLICT" = true ]; then
+            state=error; text="no merge with master: the pull request has a conflict"
+          elif [ "$RELEVANT" != true ]; then
+            state=success; text="no path can change a statistical result"
+          elif [ "$TESTS" = success ]; then
+            state=success; text="the statistical tests pass"
+          elif [ "$TESTS" = failure ]; then
+            state=failure; text="the statistical tests fail; the run has the candidate baseline files"
+          else
+            state=error; text="the statistical tests did not end: $TESTS"
+          fi
+          gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$HEAD" -f state="$state" -f context="Test: statistical (sweep)" \
+            -f description="$text" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          echo "$state: $text" >> "$GITHUB_STEP_SUMMARY"

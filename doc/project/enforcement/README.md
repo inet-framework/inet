@@ -62,6 +62,15 @@ The pull-request [enforcement-tests workflow](../../../.github/workflows/enforce
 
 A pull request without activity gets no event. To audit the pull requests that exist, start the pull-request workflow by hand, with a list of numbers or with `open` for every open pull request to `master`: `gh workflow run check-pull-request.yml -f pull-requests=open`. That run posts a commit status on each head, with a link to the run, and the run page holds every report. Do it again after a gate changes on `master`, because an existing pull request keeps its old result until its next push.
 
+The statistical and chart tests run on each pull request in the same way, but only after a push. To test the pull requests that exist, start each test workflow by hand with the number of one pull request: the run tests the merge of the pull request with `master` and posts the commit status `Test: statistical (sweep)` or `Test: chart (sweep)` on its head. A loop over the open pull requests is the sweep:
+
+```bash
+for n in $(gh pr list --repo inet-framework/inet --base master --state open --limit 1000 --json number --jq '.[].number'); do
+  gh workflow run statistical-tests.yml --repo inet-framework/inet -f pull-request=$n
+  gh workflow run chart-tests.yml --repo inet-framework/inet -f pull-request=$n
+done
+```
+
 ## How to run them
 
 ```bash
