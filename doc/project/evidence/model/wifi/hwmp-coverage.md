@@ -1,6 +1,6 @@
 # HWMP mesh — implementation and verification ledger
 
-> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [Mesh features](../../protocol/wifi/features.md), [Mesh checks](../../protocol/wifi/checks.md), [Implementation plan](../../../../../plan/pending/ieee80211-hwmp.md)
+> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [Mesh features](../../protocol/wifi/features.md), [Mesh checks](../../protocol/wifi/checks.md), [Implementation plan](../../../../../plan/done/ieee80211-hwmp.md)
 
 This ledger separates selected behavior, implementation work and executed evidence. Implementation was requested on 2026-11-10 against source `91219b0fa7d2794ee67ac8a3dd45c3a09cfc45b0`. The C1 evidence documents define the selected profile; they do not establish runtime support. All planned behavior checks below are `NOT_RUN` until their named tests exist, select nonzero cases and execute against the matching library. No fingerprint or expected-result update is authorized.
 
@@ -57,7 +57,7 @@ The T0 shared PHY timing prerequisite adds `tests/unit/Ieee80211HtVhtTiming_1.te
 
 ## Model decisions
 
-These are selected modeling policies, not requirements attributed to IEEE. The [plan](../../../../../plan/pending/ieee80211-hwmp.md) defines ownership and the complete implementation contract. Defaults are implemented in NED with units; this ledger records their rationale and evidence limits.
+These are selected modeling policies, not requirements attributed to IEEE. The [plan](../../../../../plan/done/ieee80211-hwmp.md) defines ownership and the complete implementation contract. Defaults are implemented in NED with units; this ledger records their rationale and evidence limits.
 
 | Decision | Selected policy | Reason and boundary |
 | --- | --- | --- |
