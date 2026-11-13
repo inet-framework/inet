@@ -47,7 +47,7 @@ class CheckPullRequestTest(unittest.TestCase):
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
         for gate in ("check-commits.sh", "check-classification.sh", "check-includes.sh", "check-ned-params.sh",
-                     "check-whatsnew.sh"):
+                     "check-whatsnew.sh", "check-baselines.sh"):
             self.assertRegex(result.stdout, rf"{gate} +pass")
         self.assertIn("check-pr-description.sh    not run", result.stdout)
 

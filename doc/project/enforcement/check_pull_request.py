@@ -22,7 +22,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 GUIDE = "doc/project/guide/review-a-pull-request.md"
-RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md", "doc/project/rule/release.md"]
+RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md", "doc/project/rule/release.md",
+         "doc/project/rule/testing.md"]
 
 
 def git(*args, cwd=None):
@@ -44,6 +45,7 @@ def gates(commit_range, description):
         ("check-includes.sh", "PR-SERIES-BUILDS: every #include resolves", [commit_range]),
         ("check-ned-params.sh", "PR-SERIES-BUILDS: every par() is declared", [commit_range]),
         ("check-whatsnew.sh", "RR-WHATSNEW-FILE, RR-MIGRATE-FILE", [commit_range]),
+        ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION", [commit_range]),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))
