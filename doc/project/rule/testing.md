@@ -201,11 +201,11 @@ A pin moves in the commit that causes the move, and it moves only forward: the n
 
 **Not each file of a baseline repository is a result.** In `statistics`, the results are the `.sca` files. In `media`, the results are the images that a chart of an analysis file in the INET tree exports; the other files are documentation media, such as network images and videos. A commit that changes no result needs no record, and a pin can move over it. The `media` pin of an INET commit thus also names the documentation media that the commit goes with.
 
-The pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there. After the INET change lands, `master` of the baseline repository moves to the pin by a fast-forward.
+The pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there. After the INET change lands, `master` of the baseline repository moves to the pin by a fast-forward. Thus `master` of a baseline repository is always the pin of INET `master`.
 
 Two series that move the same pin conflict in `inet.opp`. The second one rebases its baseline branch onto the new pin and writes the new hashes into its commits. The conflict is correct: the baseline of the second series must stand on the baseline of the first one.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the step forward with at most one commit that changes results, and the presence of the commit in the baseline repository; T2 — the statistical and chart tests run against the pins.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the step forward with at most one commit that changes results, and the presence of the commit in the baseline repository; [baseline_masters.py](../enforcement/baseline_masters.py), after each push to `master`: each baseline master is at its pin; T2 — the statistical and chart tests run against the pins.*
 
 ### TR-BASELINE-PARENT
 

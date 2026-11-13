@@ -184,11 +184,15 @@ The tool keeps the messages, the authors and the changes of the commits. It give
 
 ### When the change lands
 
-The maintainer moves `master` of each baseline repository to the pin of INET `master`, by a fast-forward:
+Land the INET pull request only. Do not merge the pull request of the baseline repository with the button of GitHub: a merge commit or a rebase makes a new commit that no INET commit pins.
+
+After each push to INET `master`, the workflow `check-baseline-masters.yml` moves `master` of each baseline repository to its pin by a fast-forward. GitHub then shows the pull request of the baseline repository as merged, because its head is on `master`. When the workflow has no deploy key, it fails and its log gives the command for a maintainer:
 
 ```bash
-git -C statistics push origin <pin>:master
+git push git@github.com:inet-framework/statistics.git <pin>:refs/heads/master
 ```
+
+The push is not a fast-forward when `master` of the baseline repository holds a commit that the pin does not hold, for example a commit that a person pushed by hand. The workflow then fails and changes nothing. Pin that commit in an INET commit, or move `master` back by hand.
 
 ## At release time
 

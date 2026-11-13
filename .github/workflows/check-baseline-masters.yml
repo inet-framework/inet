@@ -1,0 +1,39 @@
+name: "Check: baseline masters"
+
+# The master branch of each baseline repository (statistics, media) is the commit that inet.opp of
+# INET master pins (TR-BASELINE-PIN in doc/project/rule/testing.md). After each push to master, this
+# workflow moves a baseline master that is behind its pin by a fast-forward, with the deploy key of
+# that repository in the secret STATISTICS_DEPLOY_KEY or MEDIA_DEPLOY_KEY. The push is never forced.
+# Without the key, or when a master is ahead of its pin or on another line, the job fails and its log
+# says what to do. A run by hand on another branch only checks.
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    # nothing
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baseline-masters
+  cancel-in-progress: false
+
+jobs:
+  baseline-masters:
+    name: Baseline masters at the pins
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Move each baseline master to its pin
+        env:
+          STATISTICS_DEPLOY_KEY: ${{ secrets.STATISTICS_DEPLOY_KEY }}
+          MEDIA_DEPLOY_KEY: ${{ secrets.MEDIA_DEPLOY_KEY }}
+          PUSH: ${{ github.ref == 'refs/heads/master' && '--push' || '' }}
+        run: |
+          # shellcheck disable=SC2086 # PUSH is empty or one option
+          python3 doc/project/enforcement/baseline_masters.py HEAD $PUSH
