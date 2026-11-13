@@ -222,9 +222,9 @@ Each entry is one future commit. INET work is on the branch `topic/baseline-upda
 | C4 | INET | doc: change: procedure for a statistical or chart baseline | C3 | The guides of section 6. `check-links.sh` passes. |
 | C5 | INET | C5a: doc: add: gate for the baseline pins and records. C5b: doc: change: the classification gate knows the chart obligation and a pin that moves. C5c: doc: change: the pull-request audit runs the baseline gate | C2; C5b and C5c after C3 | `check-baselines.sh`, `check_baselines.py`, `baseline_summary.py`, `baseline_pins.py`, `test_check_baselines.py`; the `chart` obligation and the pin in `check-classification.sh`; the gate in `check_pull_request.py`. Unit tests with small repositories: one case that passes and one that fails for each of B1 to B5. |
 | C6 | INET | doc: add: write the new baseline pins of a series after a rebase | C5a | `baseline_pins.py rebase`, with unit tests on small repositories. |
-| C7 | INET | ci: add: statistical and chart tests on pull requests | C2, green `master` | `pull_request` trigger, the path job, the candidate artifact, the job summary. Check on the pilot pull request. |
-| C8 | INET | ci: add: check of the attribution of a baseline change | O2, C7 | New workflow for V2. Check on the pilot: a correct reduction passes, and a changed reduction fails. |
-| C9 | INET | ci: add: sweep of the baseline tests over the open pull requests | C7 | Start it for three pull request numbers, then for `open`. |
+| C7 | INET | build: add: the statistical and chart tests on pull requests | C2, green `master` | A job selects the paths of the pull request from the GitHub API; `_scripts/github/baseline-candidates.py` makes the candidates after a failure; unit tests with a fake update command; a run of the script in the copy of the CI job. |
+| C8 | INET | build: add: the attribution run on pull requests | O2, C7 | `check-baseline-attribution.yml`; the run scripts pass `bash -n`. |
+| C9 | INET | build: add: test one open pull request by hand and post its status | C7 | An input `pull-request` of the two test workflows and a status job; the loop over the open pull requests is in the enforcement README. |
 | C10 | INET | build: add: move each baseline master to its pin after a push | C2 | `check-baseline-masters.yml` runs `baseline_masters.py` after each push to `master`; unit tests with local bare repositories. D9 stays open: the deploy keys. Until they exist, the job fails after a push that moves a pin and gives the command. |
 | S1, S2, C10a | statistics, media, INET | doc: describe the repository and how INET pins it (in each baseline repository); build: change: pin the baseline commits that add the README files | C4, D12 | `check-baselines.sh` with local clones: the pins move over commits that change no result, with no record. |
 | C11 | INET | plan: record the results, then move the plan to `plan/done` | all | Two commits (`PR-SPLIT-MOVE`). |
@@ -262,8 +262,10 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] S1: `statistics` `f76ce96`, S2: `media` `6e835bc`, on the local branches `topic/baseline-updates-in-pull-requests`, 2026-11-13.
 - [x] C10a: INET `7087b297d6`, 2026-11-13.
 - [x] C10: INET `67731d2e46`, 2026-11-13.
-- [ ] C7 to C9, on the stacked branch `topic/baseline-tests-on-pull-requests`.
-- [ ] C11.
+- [x] Fix: INET `55f297abc5`, the chart images when git cannot read the work tree, 2026-11-13.
+- [x] C7: INET `ff1d003a01`, C8: `5487bdb77f`, C9: `e8f3b14038`, on the stacked branch `topic/baseline-tests-on-pull-requests`, 2026-11-13.
+- [ ] Landing, in the order of the section below.
+- [ ] C11, after the landing.
 
 ## Results of the implementation
 
@@ -325,6 +327,25 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 - **Do not merge a baseline pull request with the GitHub button.** A merge commit or a rebase makes a commit that no INET commit pins. The job moves `master` to the pin, and GitHub then shows the pull request as merged. The guide says so.
 - **Against GitHub**, `baseline_masters.py` passes INET `878a1f28a7` (both masters at their pins) and fails this branch, because the README commits are not pushed. For the same reason, `check-baselines.sh` without local clones fails this branch: the gate does what it must.
 - **The catch-up lands as one pin move** (decision D5 of that plan). If that pin is not a descendant of the baseline masters, this job fails, and the masters move by hand.
+
+### The fifth group of steps, 2026-11-13
+
+- **The candidates reproduce the reviewed baseline (D10).** In the copy of the CI job, the cause commit of the pilot ran against its old pins, as a pull request that moves results and no pin. The 141 statistical tests and 6 charts failed, and `baseline-candidates.py` made the candidates. The 141 files have the values of the reviewed baseline commit, and the block is equal to the block of its record; they differ only in the run name, the date and the process number. The 6 images have the same pixels; they differ only in the kernel version in the `Creator` text of the PNG file. The chart test compares pixels, so this difference has no effect.
+- **The script copies only result files.** A unit test found that it copied a `.diff` work file when the baseline repository does not ignore it.
+- **A container cannot read the INET worktree with git.** The summary tool then found no chart image and called each changed image documentation media. The fix `55f297abc5` walks the folders when git fails.
+- **A pull request with no path that can change a result** skips the tests, and the skipped job counts as passed. The path list is in the two workflows.
+- **The selection job and the status job of C9** ran here against the GitHub API, read-only, with the push of the status replaced by an echo: #1452 is a pull request to test, #1286 and #1203 have a conflict, a merge that GitHub did not compute in 60 s is an error, and the six result combinations give the right status.
+- **Not verified:** no run of the three workflows on GitHub, because they run only after the push. The attribution run builds two or three commits on a GitHub runner, which has about 14 GB of free disk; the chart workflow removes the build folders to free disk, and the attribution run cannot. The first run shows if the disk is sufficient.
+
+### Landing order
+
+1. opp_repl: `9f11f80` and `155ac50` to `main`, `github_ci` and `opp_ci`, which stay at one commit. The INET workflows install `opp_repl@github_ci`, so this comes first.
+2. opp_ci: `09bb0b0` to `main`, then a restart of the service.
+3. `statistics` and `media`: push the branches `topic/baseline-updates-in-pull-requests` with the README commits.
+4. INET: the branch `topic/baseline-updates-in-pull-requests`. Its last commit pins the README commits, so `check-baselines.sh` passes only after step 3.
+5. After the INET push, `check-baseline-masters.yml` moves the two baseline masters to the README commits. Without the deploy keys (D9), a maintainer runs the two commands of its log.
+6. After the catch-up makes `master` green: the stacked branch `topic/baseline-tests-on-pull-requests`, then the sweep of C9, then the required checks (D11).
+7. C11: record the landing, and move the plan to `plan/done`.
 
 ## Decisions
 
