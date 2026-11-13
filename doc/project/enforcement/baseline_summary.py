@@ -123,9 +123,15 @@ def chart_images(analysis_files, read_link, entry):
     and the read folder (doc/media) is a link into the clone of the media repository. analysis_files
     is {path of an .anf file: its text}. read_link gives the target of a link, or None. entry is the
     baseline entry of the chart tests in inet.opp."""
+    return set(chart_image_folders(analysis_files, read_link, entry))
+
+
+def chart_image_folders(analysis_files, read_link, entry):
+    """{path of a chart image in the media repository: folder of its analysis file in the INET tree}.
+    The chart test selects its charts by that folder."""
     media_folder = (entry.get("folder") or ".").rstrip("/") + "/"
     read_folder = entry.get("read_folder") or entry.get("folder") or "."
-    images = set()
+    images = {}
     for path, text in analysis_files.items():
         names = CHART_PROPERTY.findall(text)
         if not names:
@@ -136,12 +142,17 @@ def chart_images(analysis_files, read_link, entry):
             continue
         resolved = os.path.normpath(os.path.join(os.path.dirname(link), target)) + "/"
         if resolved.startswith(media_folder):
-            images.update(resolved[len(media_folder):] + name + ".png" for name in names)
+            images.update({resolved[len(media_folder):] + name + ".png": os.path.dirname(path) for name in names})
     return images
 
 
 def chart_images_at(commit, entry, cwd=None):
     """The chart images of the analysis files of an INET commit. It reads git objects only."""
+    return set(chart_image_folders_at(commit, entry, cwd))
+
+
+def chart_image_folders_at(commit, entry, cwd=None):
+    """{chart image: folder of its analysis file} for an INET commit. It reads git objects only."""
     out = subprocess.run(["git", "grep", "-h", "--full-name", "--heading", "-e", "image_export_filename", commit, "--", "*.anf"],
                          cwd=cwd, capture_output=True, text=True).stdout
     analysis_files, path = {}, None
@@ -157,7 +168,7 @@ def chart_images_at(commit, entry, cwd=None):
         if not entry_line.startswith("120000 "):
             return None
         return subprocess.run(["git", "cat-file", "-p", entry_line.split()[2]], cwd=cwd, capture_output=True, text=True).stdout
-    return chart_images(analysis_files, read_link, entry)
+    return chart_image_folders(analysis_files, read_link, entry)
 
 
 def chart_images_in_work_tree(entry, cwd=None):
