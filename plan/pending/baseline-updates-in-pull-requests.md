@@ -1,6 +1,6 @@
 # Baseline updates in pull requests
 
-**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`. On 2026-11-13 the user asked to land the first branch and to delay the deploy keys; the first branch is on `master`. The same day the user asked to land the stacked branch too, before `master` is green (D7 revised).
+**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`. On 2026-11-13 the user asked to land the first branch and to delay the deploy keys; the first branch is on `master`. The same day the user asked to land the stacked branch too, before `master` is green (D7 revised). Later that day an admin set up the deploy keys (D9), and a fix of the candidate step is on `master`.
 
 ## Goal
 
@@ -225,7 +225,7 @@ Each entry is one future commit. INET work is on the branch `topic/baseline-upda
 | C7 | INET | build: add: the statistical and chart tests on pull requests | C2, green `master` | A job selects the paths of the pull request from the GitHub API; `_scripts/github/baseline-candidates.py` makes the candidates after a failure; unit tests with a fake update command; a run of the script in the copy of the CI job. |
 | C8 | INET | build: add: the attribution run on pull requests | O2, C7 | `check-baseline-attribution.yml`; the run scripts pass `bash -n`. |
 | C9 | INET | build: add: test one open pull request by hand and post its status | C7 | An input `pull-request` of the two test workflows and a status job; the loop over the open pull requests is in the enforcement README. |
-| C10 | INET | build: add: move each baseline master to its pin after a push | C2 | `check-baseline-masters.yml` runs `baseline_masters.py` after each push to `master`; unit tests with local bare repositories. D9 stays open: the deploy keys. Until they exist, the job fails after a push that moves a pin and gives the command. |
+| C10 | INET | build: add: move each baseline master to its pin after a push | C2 | `check-baseline-masters.yml` runs `baseline_masters.py` after each push to `master`; unit tests with local bare repositories. The deploy keys came later (D9). |
 | S1, S2, C10a | statistics, media, INET | doc: describe the repository and how INET pins it (in each baseline repository); build: change: pin the baseline commits that add the README files | C4, D12 | `check-baselines.sh` with local clones: the pins move over commits that change no result, with no record. |
 | C11 | INET | plan: record the results, then move the plan to `plan/done` | all | Two commits (`PR-SPLIT-MOVE`). |
 
@@ -266,6 +266,8 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] C7: INET `ff1d003a01`, C8: `5487bdb77f`, C9: `e8f3b14038`, on the stacked branch `topic/baseline-tests-on-pull-requests`, 2026-11-13.
 - [x] Landing steps 1 to 5, 2026-11-13: opp_repl `155ac50` on `main`, `github_ci` and `opp_ci`; opp_ci `09bb0b0` on `main`, worker restarted; `statistics` `f76ce96` and `media` `6e835bc` on `master`; INET `master` at `55f297abc5`.
 - [x] Landing step 6, first part: the stacked branch on `master`, 2026-11-13 (D7 revised).
+- [x] Fix: INET `ee2a6114ce`, no false warning after the update of the candidates, 2026-11-13.
+- [x] D9: the environment and the deploy keys, INET `7ea261d72f` (Rudolf Hornig), 2026-11-13.
 - [ ] Landing step 6, rest: the sweep of C9, when `master` is green; then the required checks (D11).
 - [ ] Landing step 7 (C11).
 - [ ] C11, after the landing.
@@ -346,7 +348,7 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 2. opp_ci: `09bb0b0` to `main`, then a restart of the service.
 3. `statistics` and `media`: push the branches `topic/baseline-updates-in-pull-requests` with the README commits.
 4. INET: the branch `topic/baseline-updates-in-pull-requests`. Its last commit pins the README commits, so `check-baselines.sh` passes only after step 3.
-5. After the INET push, `check-baseline-masters.yml` moves the two baseline masters to the README commits. Without the deploy keys (D9), a maintainer runs the two commands of its log.
+5. After the INET push, `check-baseline-masters.yml` moves the two baseline masters to their pins. For this first landing the masters moved by hand; since D9, the job does it with the deploy keys.
 6. After the catch-up makes `master` green: the stacked branch `topic/baseline-tests-on-pull-requests`, then the sweep of C9, then the required checks (D11).
 7. C11: record the landing, and move the plan to `plan/done`.
 
@@ -357,6 +359,14 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 - **The baseline masters moved by hand**, because the user delayed the deploy keys (D9). The README commits went to the two masters by a fast-forward before the INET push. Thus INET `master` pinned commits that were already on the masters.
 - **GitHub, INET `55f297abc5`:** `Check: baseline masters` passes: both masters are at their pins. The statistical run checks out `statistics` at `f76ce96` and the chart run checks out `media` at `6e835bc`, as their logs show. Both give the summary of the run of `7adc565ce9`: 81 unexpected statistical results (72 FAIL, 9 ERROR) and 19 failed charts, and the lists of these tests are equal. The new pins change no result.
 - **The session of the catch-up** got a message with these facts: its landing (D5 of that plan) must set the two pins, and its chain must descend from the README commits for a fast-forward of the masters.
+
+### The first CI runs with candidates, and the deploy keys, 2026-11-13
+
+- **The candidates on GitHub are complete.** The push `ec15b8012d` gave the same 81 statistical and 19 chart failures as the runs before it. The new step uploaded 81 statistical files and 19 chart images, one for each failed test.
+- **A false warning.** The step said that the candidates can be incomplete, because the update command of opp_repl ends with the status 1 when it changes a file. The fix `ee2a6114ce` accepts that status, and warns when a statistical test that needs a candidate gives no file.
+- **The compiler differs.** The GitHub runner compiles with clang 18.1.3 on Ubuntu 24.04.5, and the local copies of the CI job use clang 16. The file `environment.txt` of each artifact records the versions. Whether the two compilers give different values was not checked.
+- **The deploy keys.** The environment `baseline-masters` accepts only `master`. It holds the secrets `STATISTICS_DEPLOY_KEY` and `MEDIA_DEPLOY_KEY`, and the repository holds no baseline key. `statistics` has the deploy key with write access; the key of `media` is not visible to the login of this work, which is not an admin there. The job ran green in the environment on `master` for `7ea261d72f` and `ee2a6114ce`.
+- **Not tested yet: a push with a key.** Both masters were at their pins, so the job pushed nothing. The next change that moves a pin uses the keys for the first time.
 
 ## Decisions
 
@@ -370,7 +380,7 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 | D6 | Baseline commits for one cause commit | At most one in each baseline repository. | settled, user 2026-11-12 |
 | D7 | Start of V1 and V2 on pull requests | After the catch-up makes `master` green. The pins and the gate of B1 to B5 start before. Rejected for now: a comparison with the last run of `master`, so that only new failures count. That method hides a move of a test that is already red. Revised by the user on 2026-11-13: the tests on pull requests land before `master` is green, because no pull request merges until `master` is green. Until then, a pull request that changes a path that can change a result shows the failures of `master` in the two checks, and its candidates hold the files of those tests too; the author leaves them out (TR-BASELINE-PARENT). | settled, user 2026-11-12; revised by the user 2026-11-13 |
 | D8 | Open pull requests of other authors | No exception for the date. The sweep posts a commit status. A comment on each red pull request, with a link to the guide, needs the approval of the user before it is sent. | open |
-| D9 | The move of the baseline masters | A job on each push to INET `master`, with a deploy key for each baseline repository. The user must make the keys. Alternative: the maintainer pushes by hand, and the job only checks. | open |
+| D9 | The move of the baseline masters | A job on each push to INET `master`, with a deploy key for each baseline repository. The user must make the keys. Alternative: the maintainer pushes by hand, and the job only checks. Done on 2026-11-13: the user did not get admin rights and asked an admin, Rudolf Hornig, for the setup. He made the environment `baseline-masters`, which only `master` can use, the two deploy keys with write access, their private keys as secrets of the environment, and the commit `7ea261d72f` that puts the job into the environment. | settled, user 2026-11-13 |
 | D10 | The source of the candidates | The artifact of the CI run, or the local copy of the CI job. Values from a developer machine are not permitted. | settled, user 2026-11-12 |
 | D12 | A commit of a baseline repository that moves no test result | Facts: `media` holds 1,074 files, and the chart test has 229 charts. The other files are documentation media: network images and 179 videos. By their subjects, 7 of the last 14 commits on `media` `master` change documentation media or a repository setting. `statistics` gets a README in step S1. The gate of C5 reads each file of `media` as a chart, and a pin moves only to a direct child with a record. Thus a documentation image needs a record and an attribution today. Proposal: a pin can move over commits that change no result file; at most one commit of the step changes result files, and only that commit needs the record. A result file is a `.sca` file, or an image that a chart of an analysis file in the INET tree exports; the gate reads the chart names from the `.anf` files of the cause commit. Then the `media` pin also names the documentation media that an INET commit goes with. Alternative: keep the gate as it is, and give each `media` commit a record; a new image has the form `first-record`. | settled, user 2026-11-13 |
 | D11 | Required checks on GitHub | After the sweep: the two tests, the attribution check and `Check: pull request` become required for a merge. The user sets this in the repository. | open |
