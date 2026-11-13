@@ -1,6 +1,6 @@
 # Baseline updates in pull requests
 
-**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`. On 2026-11-13 the user asked to land the first branch and to delay the deploy keys; the first branch is on `master`, and the stacked branch waits for a green `master`.
+**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`. On 2026-11-13 the user asked to land the first branch and to delay the deploy keys; the first branch is on `master`. The same day the user asked to land the stacked branch too, before `master` is green (D7 revised).
 
 ## Goal
 
@@ -265,7 +265,9 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] Fix: INET `55f297abc5`, the chart images when git cannot read the work tree, 2026-11-13.
 - [x] C7: INET `ff1d003a01`, C8: `5487bdb77f`, C9: `e8f3b14038`, on the stacked branch `topic/baseline-tests-on-pull-requests`, 2026-11-13.
 - [x] Landing steps 1 to 5, 2026-11-13: opp_repl `155ac50` on `main`, `github_ci` and `opp_ci`; opp_ci `09bb0b0` on `main`, worker restarted; `statistics` `f76ce96` and `media` `6e835bc` on `master`; INET `master` at `55f297abc5`.
-- [ ] Landing steps 6 and 7.
+- [x] Landing step 6, first part: the stacked branch on `master`, 2026-11-13 (D7 revised).
+- [ ] Landing step 6, rest: the sweep of C9, when `master` is green; then the required checks (D11).
+- [ ] Landing step 7 (C11).
 - [ ] C11, after the landing.
 
 ## Results of the implementation
@@ -366,7 +368,7 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 | D4 | The forms of the attribution | The six values of section 3. No value for "the change does not reduce". A maintainer who accepts such a case merges with a red check. | settled, user 2026-11-12 |
 | D5 | The size limits | Two limits of changed source lines, for the cause commit of the `commit` form and for a reduction. Above 100 lines the check fails (user). Above 30 lines the gate gives a note, and a note never changes the exit status. The user asked for a note limit, and agreed to the value 30 of this plan. Of the 70 commits of F13, 50 are at or below 30 lines (71 %), 11 are from 31 to 100 (16 %), and 9 are above 100 (13 %). | settled, user 2026-11-12 |
 | D6 | Baseline commits for one cause commit | At most one in each baseline repository. | settled, user 2026-11-12 |
-| D7 | Start of V1 and V2 on pull requests | After the catch-up makes `master` green. The pins and the gate of B1 to B5 start before. Rejected for now: a comparison with the last run of `master`, so that only new failures count. That method hides a move of a test that is already red. | settled, user 2026-11-12 |
+| D7 | Start of V1 and V2 on pull requests | After the catch-up makes `master` green. The pins and the gate of B1 to B5 start before. Rejected for now: a comparison with the last run of `master`, so that only new failures count. That method hides a move of a test that is already red. Revised by the user on 2026-11-13: the tests on pull requests land before `master` is green, because no pull request merges until `master` is green. Until then, a pull request that changes a path that can change a result shows the failures of `master` in the two checks, and its candidates hold the files of those tests too; the author leaves them out (TR-BASELINE-PARENT). | settled, user 2026-11-12; revised by the user 2026-11-13 |
 | D8 | Open pull requests of other authors | No exception for the date. The sweep posts a commit status. A comment on each red pull request, with a link to the guide, needs the approval of the user before it is sent. | open |
 | D9 | The move of the baseline masters | A job on each push to INET `master`, with a deploy key for each baseline repository. The user must make the keys. Alternative: the maintainer pushes by hand, and the job only checks. | open |
 | D10 | The source of the candidates | The artifact of the CI run, or the local copy of the CI job. Values from a developer machine are not permitted. | settled, user 2026-11-12 |
