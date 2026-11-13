@@ -122,9 +122,10 @@ def main(argv=None):
             return 0
         option, value = test_filter(args.kind, tests)
         print(f"{len(tests)} {args.kind} test(s) need a candidate; the update runs for them.", flush=True)
+        # the update of opp_repl ends with the status 1 when it changes a file, because it expects no change
         status = subprocess.run(f"{args.update} {option} {shlex.quote(value)}", shell=True).returncode
-        if status != 0:
-            print(f"warning: the update command stopped with the exit status {status}; the candidates can be incomplete")
+        if status not in (0, 1):
+            print(f"warning: the update command stopped with the exit status {status}")
         # the work files of the chart test and of the update are not candidates
         for path in git(folder, "ls-files", "--others", "--exclude-standard", "-z").split("\0"):
             if path and WORK_FILES.search(path):
@@ -153,6 +154,9 @@ def main(argv=None):
         print(f"error: {error}", file=sys.stderr)
         return 2
     print(f"{len(changes) - len(removed)} candidate file(s) and {len(removed)} removed file(s) are in {args.output_folder}.")
+    if args.kind == "statistical" and len(changes) < len(tests):
+        # each selected statistical test changes or adds its one result file
+        print(f"warning: {len(tests)} test(s) need a candidate, and the update gave {len(changes)} file(s)")
     print(block, end="")
     return 0
 

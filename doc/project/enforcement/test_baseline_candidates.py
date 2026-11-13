@@ -112,6 +112,18 @@ class ScriptTest(unittest.TestCase):
         self.assertEqual((self.output / "removed.txt").read_text(), "")
         self.assertIn("statistical baseline checkout:", (self.output / "environment.txt").read_text())
 
+    def test_the_exit_status_1_of_an_update_gives_no_warning(self):
+        self.update.write_text(self.update.read_text() + "sys.exit(1)\n")
+        out = self.run_script([result("examples/a for 10s")])
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertNotIn("warning", out.stdout)
+
+    def test_a_test_with_no_candidate_file_gives_a_warning(self):
+        # the fake update writes only the tests that its filter selects; "examples/c" has no stored file
+        out = self.run_script([result("examples/a for 10s"), result("examples/c for 10s")])
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("warning: 2 test(s) need a candidate, and the update gave 1 file(s)", out.stdout)
+
     def test_no_failed_test_makes_no_candidate(self):
         out = self.run_script([result("examples/a for 10s", "PASS", expected=True)])
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
