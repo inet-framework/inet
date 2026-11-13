@@ -30,6 +30,9 @@ Every test rule in document order.
 | [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes only after explicit approval, never as a side effect |
 | [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause and its reason |
 | [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update travels with the change that causes it |
+| [TR-BASELINE-PIN](#tr-baseline-pin) | Each commit pins the commit of each baseline repository |
+| [TR-BASELINE-PARENT](#tr-baseline-parent) | A baseline changes only for a test that passes on the parent commit and that the change moves |
+| [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution) | A baseline change in another repository is attributed to a small change, and a run proves the attribution |
 
 **Determinism**
 
@@ -147,9 +150,11 @@ An analytical result, a measurement, a reference implementation, or a figure fro
 
 **A recorded expectation changes only after its exact scope and reason receive explicit approval, never as a side effect of another change.**
 
-A fingerprint in `tests/fingerprint/store.json`, a statistical baseline, an expected output: each is a claim that *these values are correct*. Regenerating one to make CI green is the single fastest way to lose every regression guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the specific baselines or configurations that would move, the behavior that caused the movement, and why the new values would be right; the human responsible for accepting the change approves that proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded expectations.
+A fingerprint in `tests/fingerprint/store.json`, a statistical baseline, a chart baseline, an expected output: each is a claim that *these values are correct*. Regenerating one to make CI green is the single fastest way to lose every regression guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the specific baselines or configurations that would move, the behavior that caused the movement, and why the new values would be right; the human responsible for accepting the change approves that proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded expectations.
 
 The defence continues in the commit message: the commit that moves the values states which behavior moved and why the new values are right ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
+
+The statistical and chart baselines are in other repositories. There, the proposal is a branch or a pull request of the baseline repository. Its commits are candidates until the maintainer approves them in that place, apart from the approval of the source change. Candidate values come from the CI environment: the artifact of a CI run, or the local copy of the CI job. Values from a developer machine can differ in the last digit, and such a baseline fails in CI.
 
 *Enforced at T5 for explicit approval; T4 for review of the message against the moved values; T3 for a baseline-only commit that gives no reason.*
 
@@ -163,7 +168,16 @@ The defence continues in the commit message: the commit that moves the values st
 
 Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is one explanation for 31 rows and it is complete. What is not complete is a count.
 
-*Enforced at T4 — agent review of the message against the diff, row group by row group.*
+**In a baseline repository, the commit message holds the record.** One baseline commit holds the files that one INET commit moves, and its message has four parts:
+
+1. **The analysis.** For each group of moved results: what moves, in which direction, by how much, and why the INET change causes that move. For a chart, say how the picture changes.
+2. **The summary.** The `Moved results:` block that [baseline_summary.py](../enforcement/baseline_summary.py) computes. The block gives the tests, the rows, the groups of tests whose moved rows have the same names, and the names with the range of their relative change. The gate computes the block again, so the block in a message is always true. Each group of the block needs its explanation in the analysis.
+3. **`INET-Subject:`** the exact subject of the INET commit that moves the pin. A hash cannot be the link, because the hash changes when the change lands with a rebase. A re-record whose cause is on the target branch already uses `INET-Commit:` with the hash.
+4. **`Attribution:`** one of the forms of [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution).
+
+The INET commit keeps its own task: its message says which behavior changes and why the new behavior is correct. `git blame` on a baseline file then shows the commit that explains its values.
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh) for the parts of the record and for the computed summary of a baseline commit in another repository; T4 — agent review of the message against the diff, row group by row group.*
 
 ### TR-BASELINE-COMMIT
 
@@ -173,7 +187,54 @@ The rule is [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline); it is repeat
 
 A re-record that no single commit causes — a compiler, tool or solver version change, or drift from outside the branch — keeps a commit of its own, because there is no commit beside it to hold the reason.
 
-*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the values; T4 for the reason itself.*
+A baseline in another repository cannot be in the INET commit. The pin of [TR-BASELINE-PIN](#tr-baseline-pin) takes its place: the commit that changes the behavior changes the pin.
+
+*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the values, and a pin that moves in a commit with no source change; T4 for the reason itself.*
+
+### TR-BASELINE-PIN
+
+**Each commit pins the commit of each baseline repository, with a full commit hash.**
+
+The statistical and chart baselines are in the `statistics` and `media` repositories. `inet.opp` names one commit of each in the `ref` field of its `baseline` entry. That commit is the baseline that this INET commit passes with. CI checks out the pins. It never reads a baseline that moves, such as the head of a branch.
+
+A pin moves in the commit that causes the move, and it moves to one new baseline commit: the direct child of the pin before it. Thus the baseline commit of an INET commit is exactly the step from the pin of its parent to its own pin. The link survives a rebase, a bisect knows the baseline of each commit, and the branches of the two repositories do not have to move at the same moment.
+
+The pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there. After the INET change lands, `master` of the baseline repository moves to the pin by a fast-forward.
+
+Two series that move the same pin conflict in `inet.opp`. The second one rebases its baseline branch onto the new pin and writes the new hashes into its commits. The conflict is correct: the baseline of the second series must stand on the baseline of the first one.
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the direct child, and the presence of the commit in the baseline repository; T2 — the statistical and chart tests run against the pins.*
+
+### TR-BASELINE-PARENT
+
+**A baseline changes only for a test that passes on the parent commit and that the change moves.**
+
+A test that fails on the parent has an earlier difference. An update of its baseline hides that difference under the reason of the new change. Such a test keeps its baseline until its own repair, and the record of the new change names it as out of scope.
+
+Regenerate only what moves. A blanket regeneration takes in drift that has no relation to the change. A baseline file whose values do not change is not a part of a baseline commit. A result file with another text for the same numbers is such a file.
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): each changed result file of a baseline commit in another repository differs in a value; T2 — a run of the moved tests at the parent commit, not yet configured; T4 for an in-tree baseline.*
+
+### TR-BASELINE-ATTRIBUTION
+
+**A baseline change in another repository is attributed to a small change, and a run proves the attribution.**
+
+A reviewer accepts new baseline values because the reviewer can read a small change and see that it is correct. A summary and an analysis are not sufficient when the cause is a large commit: the reader cannot see which part of the commit moves the results. The `Attribution:` trailer of the baseline commit names one form:
+
+| Form | Claim | Proof |
+| --- | --- | --- |
+| `commit` | The INET commit that moves the pin is the small change. | The moved tests pass at its parent with the old pins, and at the commit with the new pins. |
+| `forward <file>` | The patch applies to the parent of the INET commit, and the parent with the patch gives the new results. | The moved tests pass at the parent with the patch, against the new pins. |
+| `reverse <file>` | The patch applies to the INET commit, and the commit with the patch gives the old results. | The moved tests pass at the commit with the patch, against the old pins. |
+| `first-record` | The INET commit adds the test. No earlier values exist. | The baseline commit only adds files. |
+| `removal` | The INET commit removes the test. | The baseline commit only removes files. |
+| `environment` | No source change is the cause: a new version of OMNeT++, of a tool, of a compiler or of a library. | The INET commit changes no source, and its message names the version change. |
+
+Prefer `commit`. [PR-SPLIT-PREPARE](pull-request.md#pr-split-prepare) gives that form: the series first prepares with no change of results, and a last, small commit turns the behavior on. Write a reduction only when that commit cannot be small. A reduction is an experiment. It does not have to be code that can land. It is a file in the folder `attribution/` of the baseline commit. When one INET commit moves two pins, the two baseline commits have the same attribution and the same file.
+
+**Small has a number.** The limit counts the changed lines of the files that can change a result: the model source, the simulations and the Python of the project, without documents and images. It applies to the INET commit of the `commit` form and to a reduction. Above 100 lines the gate fails. Above 30 lines the gate gives a note, and the reviewer asks if a smaller change shows the same move. The numbers come from `master`: of the 70 commits between 2026-09-22 and 2026-11-11 that move a fingerprint baseline together with a source change, 71 % change 30 lines or fewer, and 87 % change 100 lines or fewer.
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, and files that only come or only go; T2 — a run of the moved tests that proves the form, not yet configured; T5 — whether the small change is easy to understand.*
 
 ## Determinism
 

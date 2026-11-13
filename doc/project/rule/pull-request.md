@@ -187,6 +187,8 @@ What the earlier form of this rule protected — that a baseline never moves unn
 
 A value that is recorded for the first time is not a baseline update. A new fingerprint row for a new example is the test of that example, and it belongs to the commit that adds the example.
 
+**A baseline in another repository travels by its pin.** The statistical and chart baselines are in the `statistics` and `media` repositories, so their values cannot be in the INET commit. The commit that moves them changes the pin in `inet.opp` to the baseline commit that holds the new values ([TR-BASELINE-PIN](testing.md#tr-baseline-pin)). The commit is then true on its own as before: its tests pass against its own pins. The message of the baseline commit holds the record of the moved results ([TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance)), with the attribution to a small change ([TR-BASELINE-ATTRIBUTION](testing.md#tr-baseline-attribution)). A commit that changes only a pin is a baseline-only commit, and it stands alone only when no source commit causes the move.
+
 ### PR-SPLIT-DRIVEBY
 
 **No unrelated fixes**
@@ -429,7 +431,7 @@ A description has three parts, in this order:
 
 1. **A summary that answers the [reviewer's questions](#the-reviewers-questions)** for the whole pull request: the problem, how we know that it is real and worth solving, what changes, and how. Then the risk: what can break, and for whom. A few short paragraphs: a reviewer reads them in about five minutes and then knows what to expect from the commits. The summary describes the change at the level of components and contracts; it does not repeat the commit messages.
 2. **The commits, in the order to read them**, one line each. Say which commits only prepare and which commit moves behavior ([PR-SPLIT-PREPARE](#pr-split-prepare)). The architectural surface ([PR-REQ-ARCH](#pr-req-arch)) follows the commits.
-3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every baseline update (*Contributor workflow*, step 6), and what remains unverified.
+3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every baseline update (*Contributor workflow*, step 6), and what remains unverified. For a baseline in another repository, name its pull request or its branch in that repository.
 
 A reviewer who stops after the summary must still be able to answer the reviewer's questions. Long material — a table for each test, a log excerpt, the complete account of moved baselines — goes to the end of the description, or into the plan.
 
@@ -536,7 +538,7 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 |---|---|---|
 | PR-SPLIT-WHITESPACE | T3 | per-commit check: a file whose diff is empty under `git diff -w` but not otherwise, in a commit that also has real changes |
 | PR-SPLIT-MOVE | T3 | per-commit check: a delete/add pair with high similarity plus a content change |
-| PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body (T3) + agent review that the commit which moves the values explains the movement (T4) |
+| PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body; for a baseline in another repository, a pin that moves in a commit with no source change and no environment cause (T3) + agent review that the commit which moves the values explains the movement (T4) |
 | PR-SPLIT-MECHANICAL | T3+T4 | diff-size and hunk-uniformity heuristic (T3) + agent review |
 | PR-SPLIT-SIZE | T3+T4 | note: more than 400 changed source lines (T3) + agent review of the reason in the body (T4) |
 | PR-SERIES-BUILDS | T2 | CI builds and tests every commit of the branch, not only the head |
