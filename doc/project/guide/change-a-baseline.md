@@ -96,7 +96,7 @@ The reviewer accepts the new values through a small change ([TR-BASELINE-ATTRIBU
 2. **A forward reduction.** Write a patch for the parent of the cause commit that gives the new results. Check it: apply the patch to the parent, build, and run the moved tests against the new baseline.
 3. **A reverse reduction.** Write a patch for the cause commit that gives the old results. Check it: apply the patch to the cause commit, build, and run the moved tests against the old baseline.
 
-A reduction is an experiment, not code that lands. Its limit is 100 changed lines, and the gate gives a note above 30. Put the file into the folder `attribution/` of the baseline commit.
+A reduction is an experiment, not code that lands. Its limit is 100 changed lines, and the gate gives a note above 30. Put the file into the folder `attribution/` of the baseline commit. The attribution run below does the checks of each form.
 
 ### Commit the values with their record
 
@@ -151,6 +151,17 @@ Write the hash of the baseline commit into the `ref` of its entry in `inet.opp`,
 doc/project/enforcement/check-baselines.sh origin/master..HEAD \
     --baseline-repository statistical=statistics --baseline-repository chart=media
 ```
+
+The gate does not run a test. Prove the attribution with a run ([TR-BASELINE-ATTRIBUTION](../rule/testing.md#tr-baseline-attribution)):
+
+```bash
+doc/project/enforcement/check-baseline-attribution.sh plan origin/master..HEAD \
+    --baseline-repository statistical=statistics --baseline-repository chart=media
+doc/project/enforcement/check-baseline-attribution.sh run origin/master..HEAD \
+    --baseline-repository statistical=statistics --baseline-repository chart=media
+```
+
+The tool runs the moved tests at the parent with the old pins, and at the cause commit with the new pins. For a reduction, it also runs them with the patch. A run that selects other tests than the moved tests fails. `run` checks out and builds each commit in the work tree, so use a checkout for this purpose only, such as the local copy of the CI job; its options `--build`, `--checkout`, `--statistical` and `--chart` take the commands of that copy. Put the result lines of the tool into the description of the pull request.
 
 ### Push and link
 

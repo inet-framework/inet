@@ -215,7 +215,7 @@ A test that fails on the parent has an earlier difference. An update of its base
 
 Regenerate only what moves. A blanket regeneration takes in drift that has no relation to the change. A baseline file whose values do not change is not a part of a baseline commit. A result file with another text for the same numbers is such a file.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): each changed result file of a baseline commit in another repository differs in a value; T2 — a run of the moved tests at the parent commit, not yet configured; T4 for an in-tree baseline.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): each changed result file of a baseline commit in another repository differs in a value; T2 — [check-baseline-attribution.sh](../enforcement/check-baseline-attribution.sh) runs the moved tests at the parent commit, by hand and not yet in CI; T4 for an in-tree baseline.*
 
 ### TR-BASELINE-ATTRIBUTION
 
@@ -236,7 +236,7 @@ Prefer `commit`. [PR-SPLIT-PREPARE](pull-request.md#pr-split-prepare) gives that
 
 **Small has a number.** The limit counts the changed lines of the files that can change a result: the model source, the simulations and the Python of the project, without documents and images. It applies to the INET commit of the `commit` form and to a reduction. Above 100 lines the gate fails. Above 30 lines the gate gives a note, and the reviewer asks if a smaller change shows the same move. The numbers come from `master`: of the 70 commits between 2026-09-22 and 2026-11-11 that move a fingerprint baseline together with a source change, 71 % change 30 lines or fewer, and 87 % change 100 lines or fewer.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, and files that only come or only go; T2 — a run of the moved tests that proves the form, not yet configured; T5 — whether the small change is easy to understand.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, and files that only come or only go; T2 — [check-baseline-attribution.sh](../enforcement/check-baseline-attribution.sh) runs the moved tests that prove the form, by hand and not yet in CI; T5 — whether the small change is easy to understand.*
 
 ## Determinism
 
