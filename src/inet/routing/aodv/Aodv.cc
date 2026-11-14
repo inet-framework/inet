@@ -130,6 +130,7 @@ void Aodv::initialize(int stage)
         rrepAckTimer = new cMessage("RrepAckTimer");
         blacklistTimer = new cMessage("BlackListTimer");
         recoveryTimer = new cMessage("RecoveryTimer");
+        interfaceChangeTimer = new cMessage("InterfaceChangeTimer");
         if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
             neighborTimer = new cMessage("NeighborTimer");
@@ -162,6 +163,13 @@ void Aodv::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
+        host->subscribe(interfaceCreatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
+        host->subscribe(interfaceStateChangedSignal, this);
+        host->subscribe(interfaceConfigChangedSignal, this);
+        host->subscribe(interfaceIpv4ConfigChangedSignal, this);
+        host->subscribe(interfaceIpv6ConfigChangedSignal, this);
+        host->subscribe(routeDeletedSignal, this);
     }
 }
 
@@ -193,6 +201,8 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             handleNeighborTimer();
         else if (msg == recoveryTimer)
             handleRecoveryTimer();
+        else if (msg == interfaceChangeTimer)
+            reconcileInterfaces();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
             delayedSends.erase(msg);
             if (auto error = dynamic_cast<RerrSend *>(msg))
@@ -384,15 +394,20 @@ IRoute *Aodv::selectDataRoute(const L3Address& destination)
     if (defaultGatewayRoute)
         updateGatewayRoute();
     int blockedPrefix = -1;
+    for (const auto& entry : removedRouteHistory) {
+        auto data = check_and_cast<AodvRouteData *>(entry.second->getProtocolData());
+        if (data->hasValidDestNum() && destination.matches(entry.first.first, entry.first.second))
+            blockedPrefix = std::max(blockedPrefix, entry.first.second);
+    }
     // Both supported IP tables enumerate routes in their native lookup order.
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         auto route = routingTable->getRoute(i);
         if (!destination.matches(route->getDestinationAsGeneric(), route->getPrefixLength()))
             continue;
         auto iface = route->getInterface();
-        if (!iface || !iface->isUp())
-            continue;
         if (route->getSource() != this) {
+            if (!iface || !iface->isUp())
+                continue;
             // A connected MANET subnet describes address scope, not reachability.
             auto type = route->getSourceType();
             if (isSelectedInterface(iface) && (type == IRoute::IFACENETMASK ||
@@ -407,7 +422,7 @@ IRoute *Aodv::selectDataRoute(const L3Address& destination)
                 blockedPrefix = std::max(blockedPrefix, route->getPrefixLength());
             continue;
         }
-        if (route->getPrefixLength() < blockedPrefix || route->getNextHopAsGeneric().isUnspecified())
+        if (!iface || !iface->isUp() || route->getPrefixLength() < blockedPrefix || route->getNextHopAsGeneric().isUnspecified())
             continue;
         return route;
     }
@@ -1021,7 +1036,8 @@ IRoute *Aodv::findExactRoute(const L3Address& destination, int prefixLength) con
                 route->getPrefixLength() == prefixLength)
             return route;
     }
-    return nullptr;
+    auto removed = removedRouteHistory.find({destination, prefixLength});
+    return removed == removedRouteHistory.end() ? nullptr : removed->second.get();
 }
 
 IRoute *Aodv::findRetainedRoute(const L3Address& destination, bool knownOnly) const
@@ -1035,6 +1051,13 @@ IRoute *Aodv::findRetainedRoute(const L3Address& destination, bool knownOnly) co
         auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
         if ((!knownOnly || data->hasValidDestNum()) &&
                 (!selected || route->getPrefixLength() > selected->getPrefixLength()))
+            selected = route;
+    }
+    for (const auto& entry : removedRouteHistory) {
+        auto route = entry.second.get();
+        auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+        if (destination.matches(entry.first.first, entry.first.second) && (!knownOnly || data->hasValidDestNum()) &&
+                (!selected || entry.first.second > selected->getPrefixLength()))
             selected = route;
     }
     return selected;
@@ -1057,7 +1080,8 @@ Aodv::RouteKey Aodv::routeKey(const IRoute *route) const
 
 bool Aodv::repairAllowed(Packet *packet, IRoute *route, unsigned int& ttl)
 {
-    if (!useLocalRepair || recovering || !route || route->getSource() != this || route == defaultGatewayRoute ||
+    if (!useLocalRepair || recovering || !route || !isSelectedInterface(route->getInterface()) ||
+            !isUsableInterface(route->getInterface()) || route->getSource() != this || route == defaultGatewayRoute ||
             route->getPrefixLength() == 0 || maxRepairTTL == 0 || route->getMetric() <= 0 ||
             unsigned(route->getMetric()) > maxRepairTTL || classifyDatagram(packet) != DatagramKind::DATA)
         return false;
@@ -1229,6 +1253,12 @@ void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned 
     routingData->setDestSeqNum(destSeqNum);
     routingData->setIsActive(isActive);
     routingData->setHasValidDestNum(hasValidDestNum);
+    auto removed = removedRouteHistory.find(routeKey(route));
+    if (removed != removedRouteHistory.end() && removed->second.get() == route) {
+        removed->second.release();
+        removedRouteHistory.erase(removed);
+        routingTable->addRoute(route);
+    }
 
     EV_DETAIL << "Route updated: " << route << endl;
 
@@ -1422,6 +1452,36 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
 void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (operationalState != OPERATING)
+        return;
+    if (signalID == routeDeletedSignal) {
+        auto route = dynamic_cast<IRoute *>(object);
+        if (route && route->getSource() == this && !removingOwnedRoute)
+            rememberRemovedRoute(route);
+        return;
+    }
+    if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal ||
+            signalID == interfaceStateChangedSignal || signalID == interfaceConfigChangedSignal ||
+            signalID == interfaceIpv4ConfigChangedSignal || signalID == interfaceIpv6ConfigChangedSignal) {
+        auto changed = dynamic_cast<NetworkInterfaceChangeDetails *>(object);
+#ifdef INET_WITH_IPv6
+        if (signalID == interfaceIpv6ConfigChangedSignal && changed &&
+                changed->getFieldId() != Ipv6InterfaceData::F_IP_ADDRESS)
+            return; // multicast membership changes do not change the selected identity
+#endif
+        auto candidate = changed ? changed->getNetworkInterface() : dynamic_cast<NetworkInterface *>(object);
+        if (!candidate || candidate == interface || std::find(configuredInterfaceNames.begin(), configuredInterfaceNames.end(),
+                candidate->getInterfaceName()) == configuredInterfaceNames.end())
+            return;
+        auto previous = selectedAddresses.find(candidate->getInterfaceId());
+        bool invalidated = signalID == interfaceDeletedSignal || !isUsableInterface(candidate) ||
+            (previous != selectedAddresses.end() && previous->second != candidate->getNetworkAddress());
+        if (invalidated)
+            forgetInterface(candidate->getInterfaceId());
+        if (!interfaceChangeTimer->isScheduled())
+            scheduleAt(simTime(), interfaceChangeTimer);
+        return;
+    }
     if (signalID != linkBrokenSignal || operationalState != OPERATING)
         return;
     auto packet = dynamic_cast<Packet *>(object);
@@ -1604,6 +1664,183 @@ void Aodv::sendRouteError(RerrSend *message)
     }
 }
 
+bool Aodv::isUsableInterface(const NetworkInterface *candidate) const
+{
+    if (!candidate || candidate->isLoopback() || !candidate->isUp())
+        return false;
+    auto address = candidate->getNetworkAddress();
+    if (address.isUnspecified() || address.isBroadcast() || address.isMulticast() ||
+            (addressType && address.getAddressType() != addressType))
+        return false;
+#ifdef INET_WITH_IPv6
+    if (address.getType() == L3Address::IPv6 && (address.toIpv6().isLinkLocal() ||
+            candidate->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(address.toIpv6())))
+        return false;
+#endif
+    return true;
+}
+
+void Aodv::rememberRemovedRoute(IRoute *route)
+{
+    if (route == defaultGatewayRoute) {
+        defaultGatewayRoute = nullptr;
+        return;
+    }
+    auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+    bool lost = data->isActive() && data->getLifeTime() > simTime();
+    auto sequence = data->getDestSeqNum() + (lost && data->hasValidDestNum() ? 1 : 0);
+    auto retained = std::unique_ptr<IRoute>(routingTable->createRoute());
+    retained->setDestination(route->getDestinationAsGeneric());
+    retained->setPrefixLength(route->getPrefixLength());
+    retained->setMetric(route->getMetric());
+    retained->setNextHop(route->getNextHopAsGeneric());
+    retained->setSourceType(IRoute::AODV);
+    retained->setSource(this);
+    retained->setInterface(nullptr);
+    auto history = new AodvRouteData();
+    history->setIsActive(false);
+    history->setHasValidDestNum(data->hasValidDestNum());
+    history->setDestSeqNum(sequence);
+    history->setLifeTime(data->isActive() ? simTime() + deletePeriod : data->getLifeTime());
+    retained->setProtocolData(history);
+    auto iface = route->getInterface();
+    if (lost && iface) {
+        Link link(route->getNextHopAsGeneric(), iface->getInterfaceId());
+        auto& pending = pendingInterfaceLosses[link];
+        UnreachableNode node;
+        node.addr = route->getDestinationAsGeneric();
+        node.seqNum = data->hasValidDestNum() ? sequence : 0;
+        pending.destinations.push_back(node);
+        for (const auto& precursor : data->getPrecursorList())
+            if (precursor != link)
+                pending.precursors.insert(precursor);
+    }
+    removedRouteHistory[routeKey(route)] = std::move(retained);
+    if (!interfaceChangeTimer->isScheduled())
+        scheduleAt(simTime(), interfaceChangeTimer);
+}
+
+void Aodv::forgetInterface(int interfaceId)
+{
+    for (auto it = delayedSends.begin(); it != delayedSends.end();) {
+        auto message = *it;
+        bool discard = false;
+        if (auto error = dynamic_cast<RerrSend *>(message)) {
+            for (auto recipient = error->recipients.begin(); recipient != error->recipients.end();)
+                if (recipient->second == interfaceId)
+                    recipient = error->recipients.erase(recipient);
+                else
+                    ++recipient;
+            discard = error->recipients.empty();
+        }
+        else {
+            auto packet = check_and_cast<PacketHolderMessage *>(message)->getOwnedPacket();
+            auto output = packet->findTag<InterfaceReq>();
+            discard = output && output->getInterfaceId() == interfaceId;
+        }
+        if (discard) {
+            it = delayedSends.erase(it);
+            cancelAndDelete(message);
+        }
+        else
+            ++it;
+    }
+    for (int i = 0; i < routingTable->getNumRoutes(); ++i) {
+        auto route = routingTable->getRoute(i);
+        if (route->getSource() == this && route->getInterface() && route->getInterface()->getInterfaceId() == interfaceId) {
+            expireRouteIfDue(route);
+            auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+            if (data->isActive()) {
+                Link link(route->getNextHopAsGeneric(), interfaceId);
+                auto& pending = pendingInterfaceLosses[link];
+                if (data->hasValidDestNum())
+                    data->setDestSeqNum(data->getDestSeqNum() + 1);
+                data->setIsActive(false);
+                data->setLifeTime(simTime() + deletePeriod);
+                UnreachableNode node;
+                node.addr = route->getDestinationAsGeneric();
+                node.seqNum = data->hasValidDestNum() ? data->getDestSeqNum() : 0;
+                pending.destinations.push_back(node);
+                for (const auto& precursor : data->getPrecursorList())
+                    if (precursor != link)
+                        pending.precursors.insert(precursor);
+            }
+            data->setIsRepariable(false);
+            repairableDeadlines.erase(routeKey(route));
+            route->setInterface(nullptr);
+        }
+    }
+    selectedAddresses.erase(interfaceId);
+    selectedInterfaces.erase(std::remove_if(selectedInterfaces.begin(), selectedInterfaces.end(),
+        [interfaceId](NetworkInterface *entry) { return entry->getInterfaceId() == interfaceId; }), selectedInterfaces.end());
+    if (interface && interface->getInterfaceId() == interfaceId)
+        interface = nullptr;
+    auto eraseLinks = [interfaceId](auto& entries) {
+        for (auto it = entries.begin(); it != entries.end();)
+            if (it->first.second == interfaceId)
+                it = entries.erase(it);
+            else
+                ++it;
+    };
+    eraseLinks(pendingAcks);
+    eraseLinks(blacklist);
+    eraseLinks(neighborDeadlines);
+    eraseLinks(neighborIntervals);
+    eraseLinks(neighborBindings);
+    for (auto it = inverseBindings.begin(); it != inverseBindings.end();)
+        if (it->first.first == interfaceId)
+            it = inverseBindings.erase(it);
+        else
+            ++it;
+    for (auto it = unusableBindings.begin(); it != unusableBindings.end();)
+        if (it->first == interfaceId)
+            it = unusableBindings.erase(it);
+        else
+            ++it;
+    disabledHelloObservation.erase(interfaceId);
+    attributionWarnings.erase(interfaceId);
+    lastBroadcastTimes.erase(interfaceId);
+    if (rrepAckTimer)
+        scheduleLinkTimer(rrepAckTimer, pendingAcks);
+    if (blacklistTimer)
+        scheduleLinkTimer(blacklistTimer, blacklist);
+    if (neighborTimer)
+        scheduleLinkTimer(neighborTimer, neighborDeadlines);
+}
+
+void Aodv::reconcileInterfaces()
+{
+    auto losses = std::move(pendingInterfaceLosses);
+    pendingInterfaceLosses.clear();
+    auto primary = interfaceTable->findInterfaceByName(primaryInterfaceName.c_str());
+    interface = isUsableInterface(primary) ? primary : nullptr;
+    selectedInterfaces.clear();
+    selectedAddresses.clear();
+    std::set<L3Address> addresses;
+    if (usingIpv6)
+        socket.leaveMulticastGroup(addressType->getBroadcastAddress());
+    if (interface) {
+        selectedInterfaces.push_back(interface);
+        selectedAddresses[interface->getInterfaceId()] = interface->getNetworkAddress();
+        addresses.insert(interface->getNetworkAddress());
+        if (usingIpv6)
+            socket.joinMulticastGroup(addressType->getBroadcastAddress(), interface->getInterfaceId());
+    }
+    for (const auto& name : configuredInterfaceNames) {
+        auto candidate = interfaceTable->findInterfaceByName(name.c_str());
+        if (candidate == interface || !isUsableInterface(candidate) || !addresses.insert(candidate->getNetworkAddress()).second)
+            continue;
+        selectedInterfaces.push_back(candidate);
+        selectedAddresses[candidate->getInterfaceId()] = candidate->getNetworkAddress();
+        if (usingIpv6)
+            socket.joinMulticastGroup(addressType->getBroadcastAddress(), candidate->getInterfaceId());
+    }
+    for (const auto& entry : losses)
+        queueRouteError(entry.second.destinations, entry.second.precursors, false, *jitterPar);
+    releaseEligiblePackets();
+    scheduleExpungeRoutes();
+}
+
 void Aodv::configureInterfaces()
 {
     interface = interfaceTable->findInterfaceByName(par("interface"));
@@ -1612,6 +1849,7 @@ void Aodv::configureInterfaces()
     auto names = cStringTokenizer(par("interfaces")).asVector();
     bool explicitSelection = !names.empty();
     selectedInterfaces.clear();
+    selectedAddresses.clear();
     std::set<std::string> selectedNames;
     if (!explicitSelection)
         selectedInterfaces.push_back(interface);
@@ -1653,11 +1891,23 @@ void Aodv::configureInterfaces()
         if (!addresses.insert(address).second)
             throw cRuntimeError("AODV selected interfaces must have distinct addresses");
     }
+    primaryInterfaceName = par("interface").stdstringValue();
+    configuredInterfaceNames.clear();
+    selectedAddresses.clear();
+    for (auto selected : selectedInterfaces) {
+        configuredInterfaceNames.push_back(selected->getInterfaceName());
+        selectedAddresses[selected->getInterfaceId()] = selected->getNetworkAddress();
+    }
 }
 
 bool Aodv::isSelectedInterface(const NetworkInterface *candidate) const
 {
-    return candidate && std::find(selectedInterfaces.begin(), selectedInterfaces.end(), candidate) != selectedInterfaces.end();
+    if (!candidate)
+        return false;
+    auto selected = selectedAddresses.find(candidate->getInterfaceId());
+    // configureInterfaces validates selection before it fills the address snapshot.
+    return std::find(selectedInterfaces.begin(), selectedInterfaces.end(), candidate) != selectedInterfaces.end() &&
+        (selected == selectedAddresses.end() || selected->second == candidate->getNetworkAddress());
 }
 
 bool Aodv::isLocalAodvAddress(const L3Address& address) const
@@ -1753,6 +2003,10 @@ void Aodv::clearState(bool disposeQueued)
     lastBroadcastTimes.clear();
     if (recoveryTimer)
         cancelEvent(recoveryTimer);
+    if (interfaceChangeTimer)
+        cancelEvent(interfaceChangeTimer);
+    pendingInterfaceLosses.clear();
+    removedRouteHistory.clear();
     for (auto message : delayedSends)
         cancelAndDelete(message);
     delayedSends.clear();
@@ -1792,6 +2046,7 @@ void Aodv::clearState(bool disposeQueued)
     if (rrepAckTimer)
         cancelEvent(rrepAckTimer);
     defaultGatewayRoute = nullptr;
+    removingOwnedRoute = true;
     if (disposeQueued)
         for (int i = 0; i < routingTable->getNumRoutes();) {
             auto route = routingTable->getRoute(i);
@@ -1800,6 +2055,7 @@ void Aodv::clearState(bool disposeQueued)
             else
                 i++;
         }
+    removingOwnedRoute = false;
 }
 
 void Aodv::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive, NetworkInterface *output)
@@ -1981,12 +2237,30 @@ void Aodv::expungeRoutes()
                         EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive and we are not expecting any RREP to this destination, so we delete this route" << endl;
                         if (route == defaultGatewayRoute)
                             defaultGatewayRoute = nullptr;
+                        removingOwnedRoute = true;
                         routingTable->deleteRoute(route);
+                        removingOwnedRoute = false;
                         i--;
                     }
                 }
             }
         }
+    }
+    for (auto it = removedRouteHistory.begin(); it != removedRouteHistory.end();) {
+        auto data = check_and_cast<AodvRouteData *>(it->second->getProtocolData());
+        if (data->getLifeTime() <= simTime()) {
+            bool retained = false;
+            for (const auto& search : searches)
+                retained |= search.second.retainedKey == it->first;
+            if (retained || hasOngoingRouteDiscovery(it->first.first) || queueOwners.count(it->first.first)) {
+                data->setLifeTime(simTime() + 2 * netTraversalTime);
+                ++it;
+            }
+            else
+                it = removedRouteHistory.erase(it);
+        }
+        else
+            ++it;
     }
     scheduleExpungeRoutes();
 }
@@ -1996,6 +2270,9 @@ void Aodv::scheduleExpungeRoutes()
     simtime_t nextExpungeTime = SimTime::getMaxTime();
     for (const auto& entry : repairableDeadlines)
         nextExpungeTime = std::min(nextExpungeTime, entry.second);
+    for (const auto& entry : removedRouteHistory)
+        nextExpungeTime = std::min(nextExpungeTime,
+            check_and_cast<AodvRouteData *>(entry.second->getProtocolData())->getLifeTime());
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
 
@@ -2013,10 +2290,10 @@ void Aodv::scheduleExpungeRoutes()
     }
     else {
         if (!expungeTimer->isScheduled())
-            scheduleAt(nextExpungeTime, expungeTimer);
+            scheduleAt(std::max(nextExpungeTime, simTime()), expungeTimer);
         else {
             if (expungeTimer->getArrivalTime() != nextExpungeTime) {
-                rescheduleAt(nextExpungeTime, expungeTimer);
+                rescheduleAt(std::max(nextExpungeTime, simTime()), expungeTimer);
             }
         }
     }
@@ -2168,7 +2445,8 @@ void Aodv::sendPreparedControl(Packet *packet)
     auto control = packet->peekAtFront<AodvControlPacket>();
     auto type = control->getPacketType();
     auto output = interfaceTable->findInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
-    if (!canSendControl(type) || !isSelectedInterface(output) || !output->isUp()) {
+    if (!canSendControl(type) || !isSelectedInterface(output) || !output->isUp() ||
+            packet->getTag<L3AddressReq>()->getSrcAddress() != output->getNetworkAddress()) {
         delete packet;
         return;
     }
@@ -2468,6 +2746,7 @@ Aodv::~Aodv()
     delete blacklistTimer;
     delete neighborTimer;
     delete recoveryTimer;
+    delete interfaceChangeTimer;
 }
 
 } // namespace aodv

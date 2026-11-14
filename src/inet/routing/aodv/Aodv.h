@@ -11,6 +11,7 @@
 #include <map>
 #include <deque>
 #include <vector>
+#include <memory>
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -75,6 +76,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     UdpSocket socket;
     NetworkInterface *interface = nullptr;
     std::vector<NetworkInterface *> selectedInterfaces;
+    std::vector<std::string> configuredInterfaceNames;
+    std::map<int, L3Address> selectedAddresses;
+    std::string primaryInterfaceName;
     bool usingIpv6 = false;
     long numSent = 0;
     long numReceived = 0;
@@ -136,10 +140,17 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     std::map<RouteKey, Search> searches;
     std::deque<RouteKey> readySearches;
     std::map<RouteKey, simtime_t> repairableDeadlines;
+    std::map<RouteKey, std::unique_ptr<IRoute>> removedRouteHistory;
+    bool removingOwnedRoute = false;
     simtime_t rateEpoch;
     int64_t rateWindow = 0;
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
     using Link = AodvRouteData::Precursor;
+    struct InterfaceLoss {
+        std::vector<UnreachableNode> destinations;
+        std::set<Link> precursors;
+    };
+    std::map<Link, InterfaceLoss> pendingInterfaceLosses;
     class RerrSend : public cMessage {
       public:
         Ptr<Rerr> header;
@@ -171,6 +182,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *blacklistTimer = nullptr; // timer to clean the blacklist out
     cMessage *neighborTimer = nullptr;
     cMessage *recoveryTimer = nullptr;
+    cMessage *interfaceChangeTimer = nullptr;
 
     // lifecycle
     bool hasStarted = false;
@@ -222,6 +234,10 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void sendPreparedControl(Packet *packet);
     bool canSendControl(AodvControlPacketType type) const;
     void configureInterfaces();
+    void reconcileInterfaces();
+    void forgetInterface(int interfaceId);
+    void rememberRemovedRoute(IRoute *route);
+    bool isUsableInterface(const NetworkInterface *candidate) const;
     bool isSelectedInterface(const NetworkInterface *candidate) const;
     bool isLocalAodvAddress(const L3Address& address) const;
     bool resolvePreviousHop(const Packet *packet, Link& link) const;
