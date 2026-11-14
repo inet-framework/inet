@@ -493,7 +493,7 @@ round-tripped constructively where they have a wire form):
 * **INET-internal simulation MACs** — AckingMac, ShortcutMac, B-MAC, X-MAC, CSMA-CA (no
   real-wire equivalent);
 * **payload placeholders** — ApplicationPacket, EtherAppReq/Resp, VoipStreamPacket,
-  EchoPacket, DsdvHello;
+  EchoPacket;
 * **pseudo / abstract / dispatch bases** — TransportPseudoHeader, the `*Base` dispatch
   headers, the TPID tag sub-headers.
 

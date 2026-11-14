@@ -1,0 +1,3 @@
+Optional DSDV MAC failure feedback
+
+DSDV can now use MAC delivery-failure hints to withdraw routes through a failed next hop before the neighbor timeout. Enable useMacFailureFeedback and use ordinary local ARP; unresolved hints leave timeout processing active. The Dsdv NED declaration defines its configuration. This option does not change MAC retry rules.

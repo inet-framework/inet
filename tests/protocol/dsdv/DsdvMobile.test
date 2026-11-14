@@ -1,0 +1,34 @@
+%description:
+Run the production mobile example through DsdvRouter's UDP attachment. Require
+data replies before departure, no replies during the partition and replies
+after return. Result vectors provide independent delivery times; no route is
+injected, no global ARP is used and no baseline is changed by this check.
+
+%testprog: python3 run.py
+
+%file: run.py
+import csv
+import os
+from pathlib import Path
+import subprocess
+
+root = Path(os.environ["INET_ROOT"])
+command = ["inet", "--debug", "-u", "Cmdenv", "-f", str(root / "examples/dsdv/omnetpp.ini"),
+           "-n", str(root / "src") + ";" + str(root / "examples"), "-c", "Mobile", "-r", "0",
+           "--output-vector-file=mobile.vec", "--output-scalar-file=mobile.sca"]
+with open("simulation.log", "w") as output:
+    subprocess.run(command, stdout=output, stderr=subprocess.STDOUT, check=True)
+subprocess.run(["opp_scavetool", "export", "-F", "CSV-R", "-f",
+                'type =~ vector AND module =~ "*.host[0].app[0]" AND name =~ "pingRxSeq:vector"',
+                "-o", "replies.csv", "mobile.vec"], check=True)
+with open("replies.csv", newline="") as source:
+    rows = [row for row in csv.DictReader(source) if row["type"] == "vector"]
+assert len(rows) == 1, rows
+times = [float(value) for value in rows[0]["vectime"].split()]
+assert any(4 <= value < 8 for value in times), times
+assert not any(12 <= value <= 22 for value in times), times
+assert any(26 <= value < 32 for value in times), times
+print("DSDV mobile PASS: initial forwarding, partition loss, rejoin recovery")
+
+%contains: stdout
+DSDV mobile PASS: initial forwarding, partition loss, rejoin recovery

@@ -1,0 +1,483 @@
+%description:
+PB94 section 3: a configured base station advertises external access over two
+wireless hops. Real Ping traffic crosses its wired uplink and the explicit
+return route. Capability loss preserves host reachability, stale/mixed-profile
+input cannot restore a default, foreign defaults survive, and interface,
+wireless and DSDV-controller lifecycle recovery restore forwarding.
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.dsdv.DsdvRouter;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+import inet.mobility.static.StationaryMobility;
+
+simple BaseStationObserver { parameters: @class(BaseStationObserver); @display("i=block/control"); }
+simple ControlledMobility extends StationaryMobility { parameters: @class(ControlledMobility); @display("i=block/cogwheel"); }
+simple ReplayApp like IApp
+{
+    parameters:
+        @class(ReplayApp);
+        @display("i=block/app");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+network DsdvBaseStationNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        observer: BaseStationObserver;
+        mobile: DsdvRouter;
+        relay: DsdvRouter;
+        base: DsdvRouter { parameters: numEthInterfaces = 1; }
+        replay: AdhocHost;
+        wired: Router { parameters: numEthInterfaces = 2; }
+        external: StandardHost { parameters: numEthInterfaces = 1; }
+    connections:
+        base.ethg[0] <--> { delay = 1us; datarate = 100Mbps; } <--> wired.ethg[0];
+        wired.ethg[1] <--> { delay = 1us; datarate = 100Mbps; } <--> external.ethg[0];
+}
+
+%file: Observer.cc
+#include <algorithm>
+#include <vector>
+#include "inet/common/SimpleModule.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/mobility/static/StationaryMobility.h"
+#include "inet/routing/dsdv/DsdvHeader_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+
+using namespace inet;
+using namespace inet::dsdv;
+
+namespace DsdvBaseStation {
+
+class ControlledMobility : public StationaryMobility
+{
+  public:
+    void moveTo(const Coord& position)
+    {
+        Enter_Method("moveTo");
+        lastPosition = position;
+        checkPosition();
+        emitMobilityStateChangedSignal();
+    }
+};
+
+class ReplayApp : public SimpleModule, public UdpSocket::ICallback
+{
+  protected:
+    UdpSocket socket;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            socket.setOutputGate(gate("socketOut"));
+            socket.setCallback(this);
+        }
+        else if (stage == INITSTAGE_APPLICATION_LAYER) {
+            socket.bind(26999);
+            socket.setBroadcast(true);
+            socket.setTimeToLive(1);
+        }
+    }
+    void handleMessage(cMessage *message) override
+    {
+        if (socket.belongsToSocket(message))
+            socket.processMessage(message);
+        else
+            delete message;
+    }
+    void socketDataArrived(UdpSocket *, Packet *packet) override { delete packet; }
+    void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
+    void socketClosed(UdpSocket *) override {}
+  public:
+    void replay(uint64_t sequence, int version = 2, bool wrongOrigin = false)
+    {
+        Enter_Method("replay");
+        auto header = makeShared<DsdvHeader>();
+        header->setVersion(version);
+        header->setKind(2);
+        header->setSender(Ipv4Address("10.10.0.9"));
+        header->setEntriesArraySize(1);
+        DsdvEntry entry;
+        entry.destination = Ipv4Address(wrongOrigin ? "10.10.0.44" : "10.10.0.3");
+        entry.sequence = sequence;
+        entry.metric = 1;
+        entry.defaultCapability = version == 2;
+        header->setEntries(0, entry);
+        header->setChunkLength(B(version == 2 ? 33 : 32));
+        auto packet = new Packet("replayed capability", header);
+        auto interfaces = check_and_cast<IInterfaceTable *>(getParentModule()->getSubmodule("interfaceTable"));
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+        packet->addTag<L3AddressReq>()->setSrcAddress(Ipv4Address("10.10.0.9"));
+        socket.sendTo(packet, Ipv4Address::ALLONES_ADDRESS, 26999);
+    }
+};
+
+class BaseStationObserver : public SimpleModule, public cListener, public LifecycleController
+{
+    using cListener::finish;
+  protected:
+    cMessage *timer = nullptr;
+    int phase = 0;
+    int baseDumps = 0;
+    int replies = 0;
+    int repliesBeforeRadioLoss = 0;
+    int rejected = 0;
+    int rejectedBeforeReplay = 0;
+    uint64_t baseSequence = 0;
+    uint64_t beforeLossSequence = 0;
+    uint64_t beforeStopSequence = 0;
+    bool started = false;
+    bool unavailableControlSeen = false;
+    bool falseAtMobile = false;
+    bool trueAfterLoss = false;
+    bool relayTraversed = false;
+    bool wiredTraversed = false;
+    int restartReplies = 0;
+    simtime_t restartTime = -1;
+    simtime_t epoch;
+    std::vector<double> offsets = {0, .05, .1, .15, .2, .3, .4, .45, .5, .55, .7, .8, .9, 1, 1.2, 1.7, 1.8, 3.1, 3.2, 3.3, 3.4, 4.8};
+
+    cModule *host(const char *name) const { return getParentModule()->getSubmodule(name); }
+    cModule *controller(const char *name) const { return host(name)->getSubmodule("dsdv"); }
+    IRoutingTable *routes(const char *name) const
+    {
+        return check_and_cast<IRoutingTable *>(host(name)->getSubmodule("ipv4")->getSubmodule("routingTable"));
+    }
+    NetworkInterface *interface(const char *name, const char *interfaceName) const
+    {
+        auto table = check_and_cast<IInterfaceTable *>(host(name)->getSubmodule("interfaceTable"));
+        return table->findInterfaceByName(interfaceName);
+    }
+    void assertDefault(const char *name, bool present)
+    {
+        auto route = routes(name)->getDefaultRoute();
+        if ((route != nullptr) != present)
+            std::cout << "Base default mismatch: phase=" << phase << " time=" << simTime() << " epoch=" << epoch << " host=" << name << " expected=" << present << " actual=" << (route != nullptr) << "\n";
+        ASSERT((route != nullptr) == present);
+        if (present) {
+            ASSERT(route->getSource() == controller(name));
+            ASSERT(route->getPrefixLength() == 0);
+            bool mobile = strcmp(name, "mobile") == 0;
+            ASSERT(route->getNextHopAsGeneric() == Ipv4Address(mobile ? "10.10.0.2" : "10.10.0.3"));
+            ASSERT(route->getMetric() == (mobile ? 2 : 1));
+        }
+    }
+    void assertBaseHostRoute()
+    {
+        auto route = routes("mobile")->findBestMatchingRoute(Ipv4Address("10.10.0.3"));
+        ASSERT(route && route->getPrefixLength() == 32 && route->getSource() == controller("mobile"));
+    }
+    void addDefault(const char *name, const char *interfaceName, const char *gateway)
+    {
+        auto table = routes(name);
+        auto route = table->createRoute();
+        route->setDestination(Ipv4Address::UNSPECIFIED_ADDRESS);
+        route->setPrefixLength(0);
+        route->setNextHop(Ipv4Address(gateway));
+        route->setInterface(interface(name, interfaceName));
+        route->setSource(this);
+        route->setSourceType(IRoute::MANUAL);
+        route->setMetric(1);
+        table->addRoute(route);
+    }
+    void operation(bool start)
+    {
+        LifecycleOperation::StringMap parameters;
+        LifecycleOperation *operation = start ? static_cast<LifecycleOperation *>(new ModuleStartOperation()) : new ModuleStopOperation();
+        operation->initialize(controller("base"), parameters);
+        initiateOperation(operation);
+    }
+    void inspect()
+    {
+        switch (phase) {
+            case -1:
+                ASSERT(replies == 0);
+                assertDefault("mobile", false);
+                assertDefault("relay", false);
+                assertBaseHostRoute();
+                unavailableControlSeen = true;
+                addDefault("base", "eth0", "10.20.0.2");
+                epoch = simTime() + SimTime(.5);
+                break;
+            case 0: {
+                ASSERT(replies > 0);
+                ASSERT(relayTraversed && wiredTraversed);
+                falseAtMobile = false;
+                trueAfterLoss = false;
+                assertDefault("mobile", true);
+                assertDefault("relay", true);
+                assertBaseHostRoute();
+                auto internal = routes("mobile")->findBestMatchingRoute(Ipv4Address("10.10.0.99"));
+                ASSERT(internal && internal->getPrefixLength() == 24);
+                beforeLossSequence = baseSequence;
+                auto external = routes("base")->getDefaultRoute();
+                ASSERT(external && external->getSource() != controller("base"));
+                routes("base")->deleteRoute(external);
+                break;
+            }
+            case 1:
+                ASSERT(falseAtMobile);
+                assertDefault("mobile", false);
+                assertDefault("relay", false);
+                assertBaseHostRoute();
+                break;
+            case 2: {
+                rejectedBeforeReplay = rejected;
+                auto replay = check_and_cast<ReplayApp *>(host("replay")->getSubmodule("app", 0));
+                replay->replay(beforeLossSequence);
+                replay->replay(beforeLossSequence + 100, 1);
+                replay->replay(2, 2, true);
+                break;
+            }
+            case 3: {
+                ASSERT(rejected == rejectedBeforeReplay + 2);
+                assertDefault("mobile", false);
+                auto wrong = routes("mobile")->findBestMatchingRoute(Ipv4Address("10.10.0.44"));
+                ASSERT(wrong && wrong->getPrefixLength() == 24);
+                break;
+            }
+            case 4:
+                addDefault("base", "eth0", "10.20.0.2");
+                break;
+            case 5:
+                ASSERT(trueAfterLoss && baseSequence > beforeLossSequence);
+                assertDefault("mobile", true);
+                assertDefault("relay", true);
+                break;
+            case 6:
+                addDefault("mobile", "wlan0", "10.10.0.2");
+                break;
+            case 7:
+                ASSERT(routes("mobile")->getDefaultRoute()->getSource() == this);
+                break;
+            case 8:
+                routes("mobile")->deleteRoute(routes("mobile")->getDefaultRoute());
+                break;
+            case 9:
+                assertDefault("mobile", true);
+                break;
+            case 10:
+                interface("base", "eth0")->setState(NetworkInterface::DOWN);
+                break;
+            case 11:
+                assertDefault("mobile", false);
+                assertBaseHostRoute();
+                break;
+            case 12:
+                interface("base", "eth0")->setState(NetworkInterface::UP);
+                interface("base", "eth0")->setCarrier(true);
+                addDefault("base", "eth0", "10.20.0.2");
+                break;
+            case 13:
+                assertDefault("mobile", true);
+                repliesBeforeRadioLoss = replies;
+                break;
+            case 14: {
+                auto mobility = check_and_cast<ControlledMobility *>(host("relay")->getSubmodule("mobility"));
+                mobility->moveTo(Coord(200, 500, 0));
+                break;
+            }
+            case 15:
+                assertDefault("mobile", false);
+                break;
+            case 16: {
+                auto mobility = check_and_cast<ControlledMobility *>(host("relay")->getSubmodule("mobility"));
+                mobility->moveTo(Coord(200, 100, 0));
+                break;
+            }
+            case 17:
+                assertDefault("mobile", true);
+                ASSERT(replies > repliesBeforeRadioLoss);
+                break;
+            case 18:
+                beforeStopSequence = baseSequence;
+                operation(false);
+                break;
+            case 19:
+                for (int i = 0; i < routes("base")->getNumRoutes(); i++)
+                    ASSERT(routes("base")->getRoute(i)->getSource() != controller("base"));
+                ASSERT(routes("base")->getDefaultRoute() && routes("base")->getDefaultRoute()->getSource() == this);
+                break;
+            case 20:
+                operation(true);
+                restartTime = simTime();
+                break;
+            case 21:
+                assertDefault("mobile", true);
+                assertBaseHostRoute();
+                ASSERT(baseSequence > beforeStopSequence);
+                ASSERT(restartReplies > 0);
+                std::cout << "DSDV base station PASS: external forwarding, capability loss, replay rejection, foreign routes, link and controller recovery\n";
+                break;
+        }
+        if (++phase < int(offsets.size()))
+            scheduleAt(epoch + SimTime(offsets[phase]), timer);
+    }
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            timer = new cMessage("inspect");
+            getParentModule()->subscribe("fullDumpSent", this);
+            getParentModule()->subscribe("pingRxSeq", this);
+            getParentModule()->subscribe("updateRejected", this);
+            getParentModule()->subscribe("packetSentToUpper", this);
+            getParentModule()->subscribe("packetReceivedFromLower", this);
+        }
+    }
+    void handleMessage(cMessage *message) override
+    {
+        ASSERT(message == timer);
+        inspect();
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, intval_t, cObject *) override
+    {
+        if (signal == registerSignal("fullDumpSent") && source == controller("base") && !started) {
+            if (++baseDumps == 4) {
+                started = true;
+                phase = -1;
+                epoch = simTime() + SimTime(.1);
+                scheduleAt(epoch, timer);
+            }
+        }
+        else if (signal == registerSignal("pingRxSeq") && source == host("mobile")->getSubmodule("app", 0)) {
+            replies++;
+            if (restartTime >= SIMTIME_ZERO && simTime() > restartTime + SimTime(.1))
+                restartReplies++;
+        }
+        else if (signal == registerSignal("updateRejected") && source == controller("mobile"))
+            rejected++;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *) override
+    {
+        auto packet = dynamic_cast<Packet *>(value);
+        if (!packet)
+            return;
+        if (signal == registerSignal("packetReceivedFromLower")) {
+            auto protocol = packet->findTag<PacketProtocolTag>();
+            if (!protocol || protocol->getProtocol() != &Protocol::ipv4)
+                return;
+            auto header = packet->peekAtFront<Ipv4Header>();
+            if (header->getProtocolId() != IP_PROT_ICMP || header->getDestAddress() != Ipv4Address("10.30.0.2"))
+                return;
+            if (source == host("relay")->getSubmodule("ipv4")->getSubmodule("ip"))
+                relayTraversed = true;
+            if (source == host("wired")->getSubmodule("ipv4")->getSubmodule("ip"))
+                wiredTraversed = true;
+            return;
+        }
+        if (signal != registerSignal("packetSentToUpper"))
+            return;
+        auto port = packet->findTag<L4PortInd>();
+        if (!port || port->getDestPort() != 26999)
+            return;
+        if (source != host("mobile")->getSubmodule("udp") && source != host("relay")->getSubmodule("udp"))
+            return;
+        auto header = packet->peekAtFront<DsdvHeader>();
+        if (header->getSender() == Ipv4Address("10.10.0.9"))
+            return;
+        ASSERT(header->getVersion() == 2);
+        if (header->getSender() == Ipv4Address("10.10.0.3"))
+            baseSequence = std::max(baseSequence, header->getSelfSequence());
+        for (size_t i = 0; i < header->getEntriesArraySize(); i++) {
+            const auto& entry = header->getEntries(i);
+            if (entry.destination != Ipv4Address("10.10.0.3") || !started || simTime() < epoch)
+                continue;
+            if (source == host("mobile")->getSubmodule("udp") && header->getSender() == Ipv4Address("10.10.0.2") &&
+                    entry.sequence > beforeLossSequence && header->getKind() == 2) {
+                if (!entry.defaultCapability && simTime() < epoch + SimTime(.05))
+                    falseAtMobile = true;
+                if (entry.defaultCapability && simTime() > epoch + SimTime(.2))
+                    trueAfterLoss = true;
+            }
+        }
+    }
+    void finish() override { ASSERT(started && unavailableControlSeen && phase == int(offsets.size())); }
+  public:
+    ~BaseStationObserver() override { cancelAndDelete(timer); }
+};
+
+Define_Module(ReplayApp);
+Define_Module(ControlledMobility);
+Define_Module(BaseStationObserver);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvBaseStationNetwork
+sim-time-limit = 10.5s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.optimizeRoutes = false
+*.configurator.config = xml("<config><interface hosts='mobile' names='wlan0' address='10.10.0.1' netmask='255.255.255.0'/><interface hosts='relay' names='wlan0' address='10.10.0.2' netmask='255.255.255.0'/><interface hosts='base' names='wlan0' address='10.10.0.3' netmask='255.255.255.0'/><interface hosts='replay' names='wlan0' address='10.10.0.9' netmask='255.255.255.0'/><interface hosts='base' names='eth0' address='10.20.0.1' netmask='255.255.255.0'/><interface hosts='wired' names='eth0' address='10.20.0.2' netmask='255.255.255.0'/><interface hosts='wired' names='eth1' address='10.30.0.1' netmask='255.255.255.0'/><interface hosts='external' names='eth0' address='10.30.0.2' netmask='255.255.255.0'/><route hosts='wired' destination='10.10.0.0' netmask='255.255.255.0' gateway='10.20.0.1' interface='eth0'/><route hosts='external' destination='*' netmask='0.0.0.0' gateway='10.30.0.1' interface='eth0'/></config>")
+*.base.hasStatus = true
+*.base.dsdv.externalInterface = "eth0"
+**.dsdv.baseStationAddress = "10.10.0.3"
+**.dsdv.useMacFailureFeedback = true
+**.dsdv.fullDumpInterval = 1s
+**.dsdv.periodicJitter = 0s
+**.dsdv.neighborTimeout = 5s
+**.dsdv.routeTimeout = 7s
+**.dsdv.settlingCap = 50ms
+**.dsdv.payloadBudget = 128B
+*.mobile.numApps = 1
+*.mobile.app[0].typename = "PingApp"
+*.mobile.app[0].destAddr = "10.30.0.2"
+*.mobile.app[0].startTime = 1.5s
+*.mobile.app[0].sendInterval = 200ms
+*.replay.numApps = 1
+*.replay.app[0].typename = "ReplayApp"
+**.ipv4.arp.proxyArpInterfaces = ""
+*.mobile.mobility.typename = "StationaryMobility"
+*.relay.mobility.typename = "ControlledMobility"
+*.base.mobility.typename = "StationaryMobility"
+*.replay.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+*.replay.mobility.initialX = 0m
+*.mobile.mobility.initialX = 100m
+*.relay.mobility.initialX = 200m
+*.base.mobility.initialX = 300m
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+**.eth[*].typename = "EthernetInterface"
+**.eth[*].bitrate = 100Mbps
+
+%contains: stdout
+DSDV base station PASS: external forwarding, capability loss, replay rejection, foreign routes, link and controller recovery

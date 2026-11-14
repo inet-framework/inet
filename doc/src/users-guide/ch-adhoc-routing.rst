@@ -69,11 +69,39 @@ DSDV (Destination-Sequenced Distance-Vector Routing) is a table-driven
 routing scheme for ad hoc mobile networks based on the Bellman-Ford
 algorithm.
 
-The :ned:`Dsdv` module type implements DSDV. It is currently a partial
-implementation.
+The :ned:`Dsdv` module implements the IPv4 host-routing profile of
+Perkins and Bhagwat (SIGCOMM 1994), with hop counts on one bidirectional ad hoc
+interface. Forwarding changes take effect immediately; finite route
+advertisements may wait for settling. Periodic full dumps repair lost updates.
+New settling deadlines are at least ``minSettlingDelay`` and
+at most ``settlingCap`` into the future. Later updates retain the existing
+deadline. The minimum must be positive and no greater than the cap;
+urgent advertisements bypass this delay.
+The model uses its own versioned UDP format and retains withdrawn destination
+sequence floors for the remainder of the run.
 
-:ned:`DsdvRouter` is a :ned:`ManetRouter` with the routing module type
-set to :ned:`Dsdv`.
+Incremental updates send required route changes first, then rotate through
+sequence-only changes in the remaining space. Destinations with newer sequence
+numbers therefore get a turn across successive updates instead of repeatedly
+favoring the lowest addresses. This uses existing send opportunities and does
+not create additional broadcasts just to send sequence-only changes.
+
+Set ``useMacFailureFeedback = true`` to let MAC delivery-failure hints withdraw routes through the failed neighbor before its silence timeout. It uses the failed frame's receiver and a local ARP-cache lookup through the configured ``arpModule``; missing or unusable metadata leaves ordinary timeout processing active. Parameter declarations and defaults are in :ned:`Dsdv`. A failed receiver does not invalidate a route that has already switched to a different next hop. A MAC failure can also result from transient interference, so feedback is a routing hint rather than proof of physical disconnection.
+
+Set ``adaptiveFullDump = true`` to adjust periodic full-dump timing. Quiet periods try a longer interval, substantial route changes try a shorter one, and the encoded dump size is considered against the configured payload bitrate target. See :ned:`Dsdv` for parameter declarations and defaults. The interval bounds and budget must be finite and positive, with minimum <= initial <= maximum. The overhead target is best effort and excludes triggered traffic, UDP/IP headers and radio airtime. Urgent updates do not wait for a periodic dump. With adaptation disabled, the fixed interval and existing jitter behavior remain in use.
+
+Set ``neighborTimeout`` and ``routeTimeout`` from the longest expected update gaps of the sending peers, including their jitter, delivery allowance and settling where relevant. A receiver's own sending interval does not determine how long it must wait to hear its neighbors. Peers may therefore use different full-dump intervals and timeout values; the module does not negotiate intervals or infer a domain-wide timeout guarantee.
+
+For access to an external network, configure the same ``baseStationAddress`` on every participant and set ``externalInterface`` on the station with that ad hoc IPv4 identity. The base station advertises external service only while its uplink and non-DSDV external default route are usable. Mobile nodes install a DSDV-owned default through their selected next hop toward the station. An existing foreign default is preserved instead. Keep connected ad hoc subnet routes, use separate wired prefixes, and provide wired return routes to the mobile subnet. This profile supports one configured base station, with no gateway election, NAT or remote-health probing. The declarations and defaults are in :ned:`Dsdv`.
+
+All participants in a base-station domain use the version-2 wire profile; mixing host-only version 1 with version 2 rejects control updates rather than negotiating an upgrade. Losing external service withdraws the default capability while leaving the station's host route finite wherever its wireless path remains usable. See the development migration guide's DSDV base-station profile for a configuration example.
+
+:ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
+through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
+ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding
+and avoid configurator-supplied multihop routes when studying routing behavior.
+The example under ``examples/dsdv`` demonstrates a deterministic mobile line.
+IPv6, arbitrary prefix advertisements and multiple active ad hoc interfaces are outside the supported profile. Ordinary routers use one active non-loopback interface; a configured base station may add its named external interface. Restarting the same module preserves sequence floors; destroying and recreating it requires persistent state outside this model.
 
 .. _ug:sec:adhocrouting:dymo:
 
