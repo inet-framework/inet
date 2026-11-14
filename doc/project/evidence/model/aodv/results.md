@@ -1,6 +1,10 @@
 # AODV correction execution record
 
-## Submission validation
+> **Kind:** report · **Status:** snapshot 2026-11-09 · **Seal:** none · **Owns:** — · **Stands on:** [coverage.md](coverage.md)
+
+This record describes the 2026-11-09 correction submission and its stage-specific parent comparisons. Its counts and build results apply to those revisions. The C1–C10 remaining-feature implementation and its current execution outcomes are recorded separately in [remaining-features-results.md](remaining-features-results.md); no result below validates that later source tree.
+
+## Historical submission validation, 2026-11-09
 
 Final integrated source passes **231/231 protocol cases**, **97/97 module
 cases** (93 `Aodv*` plus all four unchanged `AODV*` integration controls), and

@@ -21,5 +21,4 @@ sequenceDiagram
 This is a passing preparation control, with the same expectation on its parent and this commit.
 It demonstrates the fixture's control receive/send path and public state observations. It does
 not establish stale-reply rejection, queued data release, loss attribution, repair or lifecycle
-correctness. Execution evidence belongs in the model results record. Mermaid rendering remains
-unverified until a renderer is available.
+correctness. Execution evidence belongs in the model results record. Mermaid rendering passed in the series-wide [implementation record](../../../doc/project/evidence/model/aodv/remaining-features-results.md).

@@ -24,6 +24,8 @@ advice. Verified [erratum 7762](https://www.rfc-editor.org/errata/eid7762) corre
 | [RFC3561-REBOOT](#rfc3561-reboot) | §6.13 | After sequence loss, defer route advertisements and forwarding for DELETE_PERIOD, extended by transit data. |
 | [RFC3561-INTERFACE](#rfc3561-interface) | §6.14 | Learn the incoming interface and broadcast discovery across configured interfaces while retaining one originator identity. |
 | [RFC3561-SUBNET](#rfc3561-subnet) | §§7–8 | Nonzero reply prefixes describe subnet routes. Sequence and precursor information belongs to that subnet. Member ICMP errors do not invalidate the aggregate. |
+| [RFC3561-EXTENSION](#rfc3561-extension) | §9 | RREQ/RREP extensions follow the base message as Type, Length and data; types 128–255 cannot be skipped. |
+| [RFC3561-HELLO-INTERVAL](#rfc3561-hello-interval) | §9.1 | Optional Type 1, Length 4 on a one-hop Hello advertises its transmission interval in milliseconds. |
 | [RFC3561-PARAMETER](#rfc3561-parameter) | §10 | Traversal, retention, retry and advertisement parameters must support the protocol's timing relationships. |
 
 Model interpretations and implementation restrictions belong to
@@ -118,6 +120,18 @@ Source: §6.14.
 Nonzero reply prefixes describe subnet routes. Sequence and precursor information belongs to that subnet. Member ICMP errors do not invalidate the aggregate.
 
 Source: §§7–8.
+
+## RFC3561-EXTENSION
+
+RREQ/RREP extensions follow the base message as Type, Length and data. Length counts only data bytes; Type is in 1–255. Types 128–255 cannot be skipped.
+
+Source: [RFC 3561 §9](https://www.rfc-editor.org/rfc/rfc3561.html#section-9).
+
+## RFC3561-HELLO-INTERVAL
+
+The optional Hello Interval extension uses Type 1 and Length 4. It carries the transmission interval in milliseconds on a TTL-one RREP, allowing the neighbor to choose its Hello waiting interval.
+
+Source: [RFC 3561 §9.1](https://www.rfc-editor.org/rfc/rfc3561.html#section-9.1).
 
 ## RFC3561-PARAMETER
 

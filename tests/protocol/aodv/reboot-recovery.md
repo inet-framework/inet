@@ -46,10 +46,10 @@ sequenceDiagram
     A->>IP: Reinject first detached packet
     IP->>IP: Finish reinjection and remove its queue entry
     IP->>L: Test callback after completed reinjection
-    L->>IP: Crash/start; dispose remaining queued packets
+    L->>IP: Crash/start and dispose remaining queued packets
     L->>A: Clear state and change operational generation
     IP-->>A: Return from reinjection
-    A->>A: Generation changed; stop touching old borrowed pointers
+    A->>A: Generation changed, stop touching old borrowed pointers
 ```
 
 The test adapter invokes the callback only after the real IP reinjection completes. This respects

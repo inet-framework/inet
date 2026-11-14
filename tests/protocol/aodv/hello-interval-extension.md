@@ -47,23 +47,35 @@ The tests do not establish RFC-wide conformance, an independent IPv6 wire format
 
 ## Executed verification
 
-The recorded debug working-tree verification ran on 2026-11-14 with a fresh matching INET debug library and protocol support library, after the native-expiry API and subnet introspection changes. The protocol pass also follows the production NED lifecycle-parameter declaration fix and tests the actual asynchronous completion contract. Protocol/module fixtures use General, run 0 and seed 0; the unit cases use no random draws.
+The recorded debug working-tree verification ran on 2026-11-14 with a fresh matching INET debug library and protocol support library, after the native-expiry API change and the move to the AODV-owned subnet protocol identity. The protocol pass also follows the production NED lifecycle-parameter declaration fix and tests the actual asynchronous completion contract. Protocol/module fixtures use General, run 0 and seed 0; the unit cases use no random draws.
 
 | Selection | Outcome | Exit status | Retained raw output |
 | --- | --- | --- | --- |
-| Nine extension cases plus existing HelloLossSilent and HelloLossOutgoing controls | 11 PASS | 0 | `/tmp/aodv-hello-debug8-protocol-run.log` |
-| Four interval-validation cases plus changed AdvertisementLifetimeInvalid_3 control | 5 PASS | 0 | `/tmp/aodv-hello-debug8-module-run.log` |
-| AodvExtensions helper unit plus RouteExpiry and AodvSubnetIntrospection integration units | 3 PASS | 0 | `/tmp/aodv-hello-debug8-unit-run.log` |
+| Nine extension cases plus existing HelloLossSilent and HelloLossOutgoing controls | 11 PASS | 0 | `/tmp/aodv-hello-owned-protocol-run.log` |
+| Four interval-validation cases plus changed AdvertisementLifetimeInvalid_3 control | 5 PASS | 0 | `/tmp/aodv-hello-owned-module-run.log` |
+| Subnet coordination startup guard family, including the 128/255 acceptance control | 10 PASS | 0 | `/tmp/aodv-hello-owned-module-run.log` |
+| AodvExtensions helper unit plus RouteExpiry and AodvSubnetIntrospection integration units | 3 PASS | 0 | `/tmp/aodv-hello-owned-unit-run.log` |
 
 Underlying runner commands from `/home/miguel/workspace/inet-aodv` were:
 
 ```sh
-opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/aodv$' -f 'Rfc3561(HelloIntervalExtension[A-Za-z0-9_]+|HelloLoss(Silent|Outgoing))\.test$' --log-file /tmp/aodv-hello-debug8-protocol-driver.log --result-file /tmp/aodv-hello-debug8-protocol-result.json
-opp_run_module_tests --load . -p inet -m debug --no-build --no-concurrent -f '(AodvHelloIntervalValidation[A-Za-z0-9_]+|AodvAdvertisementLifetimeInvalid_3)\.test$' --log-file /tmp/aodv-hello-debug8-module-driver.log --result-file /tmp/aodv-hello-debug8-module-result.json
-opp_run_unit_tests --load . -p inet -m debug --no-build --no-concurrent -f '(AodvExtensions|RouteExpiry|AodvSubnetIntrospection)\.test$' --log-file /tmp/aodv-hello-debug8-unit-driver.log --result-file /tmp/aodv-hello-debug8-unit-result.json
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/aodv$' -f 'Rfc3561(HelloIntervalExtension[A-Za-z0-9_]+|HelloLoss(Silent|Outgoing))\.test$' --log-file /tmp/aodv-hello-owned-protocol-driver.log --result-file /tmp/aodv-hello-owned-protocol-result.json
+opp_run_module_tests --load . -p inet -m debug --no-build --no-concurrent -f '(AodvHelloIntervalValidation[A-Za-z0-9_]+|AodvAdvertisementLifetimeInvalid_3|AodvSubnetCoordinationValidation[A-Za-z0-9_]+)\.test --log-file /tmp/aodv-hello-owned-module-driver.log --result-file /tmp/aodv-hello-owned-module-result.json
+opp_run_unit_tests --load . -p inet -m debug --no-build --no-concurrent -f '(AodvExtensions|RouteExpiry|AodvSubnetIntrospection)\.test$' --log-file /tmp/aodv-hello-owned-unit-driver.log --result-file /tmp/aodv-hello-owned-unit-result.json
 ```
 
-Each runner command executed inside `flock /tmp/inet-aodv-test-runner.lock`; the shell retained that lock while copying generated work before another category could clear it. Local diagnostic snapshots are `/tmp/aodv-hello-debug8-protocol-work.NvtHUV/work`, `/tmp/aodv-hello-debug8-module-work.L52ryE/work` and `/tmp/aodv-hello-debug8-unit-work.R6Syg9/work`. These are local execution artifacts, not repository test inputs. The library SHA-256 is `94959d33c3a6a4b7457ce1dde67c073b8ca5c806e155b1df1c5e300837a58d04`, recorded in `/tmp/aodv-hello-debug8-library.sha256`. Earlier unlocked attempts that lost shared work directories are setup failures and are excluded from the final result counts.
+Each runner command executed inside `flock /tmp/inet-aodv-test-runner.lock`; the shell retained that lock while copying generated work before another category could clear it. Local diagnostic snapshots are `/tmp/aodv-hello-owned-protocol-work.P6PMnz/work`, `/tmp/aodv-hello-owned-module-work.nm6Eu5/work` and `/tmp/aodv-hello-owned-unit-work.8D7N0l/work`. These are local execution artifacts, not repository test inputs. The library SHA-256 is `bcb9f5d13fa867ddca91b87c45121fe280c38c2a6042d8fc4b830e7d777e1011`, recorded in `/tmp/aodv-hello-owned-library.sha256`. Earlier unlocked attempts that lost shared work directories are setup failures and are excluded from the final result counts.
+
+`RouteExpiry.test` checks the virtual `IRoute::getNativeExpiryTime()` contract for IPv4, IPv6 and NextHop routes: zero means no native deadline, while a finite IPv6 deadline is exposed unchanged and can be reset. `AodvSubnetIntrospection.test` checks global registry lookup of `aodv::aodvSubnetProtocol`, exact independent IPv4/IPv6 announcement wire vectors, decoding raw bytes through the registered dissector, and the registered printer's source, type and prefix/eligibility/sequence fields. These checks cover both eligible/known-sequence and unavailable/unknown-sequence states. They do not establish production outgoing protocol-tag assignment or subnet election behavior; those require the separate subnet fixtures.
+
+No fingerprint expectations changed. Exact parent executions and release-mode behavior checks remain unverified. Mermaid rendering passed in the series-wide [implementation record](../../../doc/project/evidence/model/aodv/remaining-features-results.md).
+
+Static authoring checks passed on 2026-11-14: `clang++ -std=c++17 -fsyntax-only -Isrc -I"$OMNETPP_ROOT/include"` accepted the shared peer header and extracted module/unit C++ bodies against the regenerated message headers. `opp_nedtool validate` accepted every extracted NED fixture. These checks do not load `libINET_dbg` or execute a simulation, and therefore do not establish runtime correctness.
+ --log-file /tmp/aodv-hello-owned-module-driver.log --result-file /tmp/aodv-hello-owned-module-result.json
+opp_run_unit_tests --load . -p inet -m debug --no-build --no-concurrent -f '(AodvExtensions|RouteExpiry|AodvSubnetIntrospection)\.test$' --log-file /tmp/aodv-hello-owned-unit-driver.log --result-file /tmp/aodv-hello-owned-unit-result.json
+```
+
+Each runner command executed inside `flock /tmp/inet-aodv-test-runner.lock`; the shell retained that lock while copying generated work before another category could clear it. Local diagnostic snapshots are `/tmp/aodv-hello-owned-protocol-work.P6PMnz/work`, `/tmp/aodv-hello-owned-module-work.nm6Eu5/work` and `/tmp/aodv-hello-owned-unit-work.8D7N0l/work`. These are local execution artifacts, not repository test inputs. The library SHA-256 is `bcb9f5d13fa867ddca91b87c45121fe280c38c2a6042d8fc4b830e7d777e1011`, recorded in `/tmp/aodv-hello-owned-library.sha256`. Earlier unlocked attempts that lost shared work directories are setup failures and are excluded from the final result counts.
 
 `RouteExpiry.test` checks the virtual `IRoute::getNativeExpiryTime()` contract for IPv4, IPv6 and NextHop routes: zero means no native deadline, while a finite IPv6 deadline is exposed unchanged and can be reset. `AodvSubnetIntrospection.test` checks exact independent IPv4/IPv6 announcement wire vectors, decoding raw bytes through the registered dissector, and the registered printer's source, type and prefix/eligibility/sequence fields. These checks cover both eligible/known-sequence and unavailable/unknown-sequence states. They do not establish production outgoing protocol-tag assignment or subnet election behavior; those require the separate subnet fixtures.
 

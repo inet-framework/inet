@@ -1,7 +1,7 @@
 # AODV route freshness
 
 This change implements row 2 of
-[the RFC 3561 correction plan](../../../plan/pending/aodv-rfc3561-corrections.md).
+[the RFC 3561 correction plan](../../../plan/done/aodv-rfc3561-corrections.md).
 Its owner is `Aodv`: incoming UDP control reaches `processPacket()`, then the message-specific
 handler updates `AodvRouteData` on an owned routing-table record. No packet wire layout changes.
 
@@ -60,5 +60,4 @@ these production paths and is not a parent runtime reproduction.
 The tests establish the listed host-route transitions and one-datagram discovery completion.
 They do not establish multi-destination queue ownership,
 subnet precedence, multiple interfaces, independent ACK validation, Hello-loss attribution, reboot
-recovery or local repair. Those remain assigned to the later plan rows. Mermaid rendering is
-unverified until a renderer is available.
+recovery or local repair. Those remain assigned to the later plan rows. Mermaid rendering passed in the series-wide [implementation record](../../../doc/project/evidence/model/aodv/remaining-features-results.md).

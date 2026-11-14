@@ -57,7 +57,7 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
-Received IPv4 RREPs with a nonzero prefix install a normalized subnet route;
+Received IPv4 and IPv6 RREPs with a nonzero prefix install a normalized subnet route;
 zero retains host-route semantics. Other eligible members can use the subnet.
 Sequence numbers belong to exact prefixes, so a known inactive host record
 blocks a covering subnet for that host until fresh host information arrives or
@@ -65,12 +65,11 @@ ordinary retention ends. Continuing demand can keep that host record indefinitel
 An inactive unknown placeholder does not impose that block. Active manual routes
 retain their forwarding precedence.
 
-This subnet profile interprets a known RREQ sequence floor as host knowledge.
+The default subnet profile interprets a known RREQ sequence floor as host knowledge.
 Retained aggregate history instead requests an authoritative answer with U and D
 set, retaining its sequence locally. A cached aggregate answers only U=1,D=0
-and retains its nonzero prefix. Peers using aggregate counters as RREQ floors,
-authoritative subnet-router election/advertisement and live transitions between
-independent subnet counters are outside this profile. RERR identity requires a
+and retains its nonzero prefix. Authoritative subnet export requires the opt-in
+profile described below. RERR identity requires a
 stable unambiguous prefix per peer/interface/wire address; ambiguous entries are
 skipped conservatively, including inactive candidates. A quoted ICMP Host
 Unreachable for one member does not invalidate the aggregate.
@@ -91,11 +90,13 @@ attached queues and notifies precursors without incrementing again. Independent
 host recovery can release one aggregate member while its prefix repair and
 notification deadline remain alive.
 
-Legacy single-interface IPv6 uses the shared discovery and host-repair state
+IPv6 uses the shared discovery and host-repair state
 with its existing custom control encoding. IPv6 neighbor discovery passes
 independently of AODV data discovery. Disable IPv6 ``sendRedirects`` for a MANET
 whose next hop is not directly reachable by the original source. Explicit
-interface selection and received subnet routes are the IPv4 profiles above.
+interface selection and received subnet routes support both address families.
+IPv6 identities must be non-link-local and non-tentative; this control encoding
+is an INET IPv6 adaptation, rather than an interoperable standardized IPv6 AODV format.
 
 Discovery uses increasing ring TTLs through the configured threshold, then
 network-wide requests with exponential reply waits. ``rreqRetries`` counts
@@ -112,9 +113,11 @@ may share one gateway discovery, whose success or failure completes all its
 dependent queues. A queued packet with a caller-selected interface or next hop
 incompatible with the discovered path is dropped individually.
 
-Discovery exhaustion disposes of queued packets through IP. It does not generate
-an application Destination Unreachable indication. Applications retain their
-own timeout/error handling. Ordinary transit data without a route follows the
+Final originating-discovery exhaustion asks IP to report each queued packet
+through native Destination Unreachable handling. Native suppression rules still
+apply, and an application must support its transport's error indication to
+observe the error. Stop, crash and failed transit repair retain silent queue
+disposal. Ordinary transit data without a route follows the
 route-error/drop path instead of starting an originating discovery.
 
 Route selection uses 32-bit serial sequence ordering. An older control message
@@ -136,7 +139,11 @@ to invalidate. Bindings remain usable after route expiry, and are cleared on
 stop/crash. Custom interfaces must preserve the same immediate-peer contract.
 
 With Hello messages enabled, a positive attributable Hello arms a separate
-neighbor-loss deadline. Incoming IP traffic refreshes the learned immediate
+neighbor-loss deadline. Hellos carry the RFC 3561 Hello Interval extension,
+rounded upward to whole milliseconds. Each neighbor's advertised interval
+determines its deadline; a legacy Hello uses the receiver's local interval.
+Unknown optional extensions are preserved, while malformed or unsupported
+mandatory extensions are discarded before affecting liveness. Incoming IP traffic refreshes the learned immediate
 sender identified by interface and source MAC, regardless of the original IP
 source. Outgoing traffic extends route leases without postponing neighbor loss.
 Data alone does not arm a new deadline. Missing sender metadata, rebinding or
@@ -156,11 +163,11 @@ without an unnecessary request. Stop/crash removes this instance's routes and
 cancels pending work before a later restart.
 
 ``interface`` remains the primary address and legacy link selection. The optional
-``interfaces`` parameter selects multiple IPv4 links with a whitespace-separated
+``interfaces`` parameter selects multiple same-family links with a whitespace-separated
 list of exact names, for example ``"wlan0 wlan1"``. The list must include the
 primary; an empty value selects only that primary interface. Selected interfaces
 must be up, nonloopback and addressed at actual startup, with distinct local
-IPv4 addresses. Each selected local address answers requests using the shared
+addresses. Each selected local address answers requests using the shared
 node sequence. Discovery copies use each link's IP source while preserving the
 primary originator identity and one logical request/rate charge.
 
@@ -171,11 +178,42 @@ unselected interface is ignored; legitimate data can still traverse an external
 gateway interface. Every selected IPv4 subnet contributes to internal address
 scope, and a gateway's default adapter follows its learned outgoing interface.
 
-Selection changes apply at the next start. Stop, reconfigure and start is the
-supported way to change interfaces or addresses. For AckingWirelessInterface
+The configured interface names apply at the next start. While running, AODV
+tracks disappearance, reappearance and address changes of those names. Losing a
+secondary link invalidates its paths while preserving retained freshness and
+unaffected links. Losing the primary identity suspends protocol output; its
+return begins the same recovery hold used by restart. Native manual routes keep
+their precedence. For AckingWirelessInterface
 profiles that must receive immediately after restart, set the radio's
 ``initialRadioMode`` to ``receiver`` or ``transceiver``; its default ``off`` can
 otherwise wait for a local transmission to activate reception.
+
+To export an attached subnet, set ``subnetExtensionType`` consistently to a
+scenario-local value in ``128..255`` on participating peers and configure, for
+example, ``advertisedSubnets = xml("<subnets><subnet prefix='192.0.2.0/24'
+interface='eth0'/></subnets>")``. The default extension value, zero, disables
+this profile; no extension number is claimed as an IANA assignment. An attached
+export must be contained in the interface's connected IPv4 prefix or its own
+advertised on-link IPv6 prefix. Host prefixes and default routes are not exports.
+``externalSubnets`` uses the same XML form for a network reached through an
+independent native route covering the whole prefix on the named interface.
+These exports cannot be combined with the legacy ``gatewayAddress`` adapter.
+
+An authority replies on demand with the requested member address and aggregate
+prefix. Prefix-qualified request extensions carry retained aggregate freshness
+without comparing it with an independent host counter. Members use native
+forwarding and address resolution; an unreachable member produces the native
+ICMP error without invalidating the aggregate. Mixed peers that cannot process
+the mandatory profile extension cannot provide its recovery guarantees.
+
+Multiple authorities can supply a common ``candidates`` address list and a
+``coordinationInterface`` attribute on each export. They exchange announcements
+on ``subnetCoordinationPort`` and select the lowest eligible address after a
+qualification interval. This model assumes trusted, finite candidates on a
+common connected network, reliable delivery within ``subnetAnnouncementDelay``
+and fail-stop failures. It does not guarantee a single authority across arbitrary
+partitions. ``subnetAnnouncementInterval`` controls the announcement period;
+the coordination port must differ from ``udpPort``.
 
 RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
 sequence updates. This model follows the freshness rule of section 6.1: the

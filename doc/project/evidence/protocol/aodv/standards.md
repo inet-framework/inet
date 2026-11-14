@@ -8,12 +8,11 @@ The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org
 
 ## Target level
 
-The 2026-11-09 correction effort adds a [selected RFC 3561 catalog](../../standard/rfc3561/catalog.md),
-[feature map](features.md) and [check descriptions](checks.md). These artifacts select a bounded
-repair surface. They do not supersede the historical survey or establish an achieved conformance
-level. Current execution evidence remains owned by the model records.
+The current [selected RFC 3561 catalog](../../standard/rfc3561/catalog.md), [feature map](features.md) and [check descriptions](checks.md) cover a bounded verification surface. Its extension scope includes [§9 framing and mandatory-type handling](../../standard/rfc3561/catalog.md#rfc3561-extension) and the [§9.1 Hello Interval extension](../../standard/rfc3561/catalog.md#rfc3561-hello-interval). These selected requirements do not establish an achieved conformance level. Implementation choices and execution evidence remain owned by the [model records](../../model/aodv/coverage.md#current-feature-coverage-2026-11-14); model-specific subnet cooperation is not an additional standard extension assignment.
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
+The following depth targets record the 2026-09-23 survey rather than the scope of the current selected catalog.
+
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). That survey mapped the family, pinned the in-scope set that a level 2 pass would need, and recorded the claims of the model. It wrote no catalog, feature map or test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -54,7 +53,7 @@ This is not a conflict between the two documents; RFC 5148 fills a gap RFC 3561 
 
 ## In-scope set
 
-The set that a level 2 pass tests against:
+Historical scope recorded on 2026-09-23 for a future level 2 pass. The catalog availability and exclusions in these tables describe that survey date. Current selected extension requirements are linked under [Target level](#target-level); in particular, the historical background-only classification of §9 does not exclude its framing and Hello Interval requirements from the current selected catalog.
 
 | Document | Version | Catalog file |
 | --- | --- | --- |

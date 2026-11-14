@@ -23,7 +23,7 @@ sequenceDiagram
     P->>U: Multicast RREQ for DUT
     U->>A: Deliver request with ingress metadata
     A->>P: Unicast destination RREP
-    Note over U,A: Stop/crash clears socket state; start joins again
+    Note over U,A: Stop/crash clears socket state and start joins again
 ```
 
 ## Case assertions

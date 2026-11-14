@@ -1,7 +1,7 @@
 # AODV reverse-route and advertisement lifetimes
 
 This change implements the lifetime concern in row 3 of
-[the correction plan](../../../plan/pending/aodv-rfc3561-corrections.md).
+[the correction plan](../../../plan/done/aodv-rfc3561-corrections.md).
 `Aodv::handleRREQ()` owns reverse-route refresh. Reply creators own conversion from an absolute
 route expiry to a relative, representable wire duration. The expiry scheduler observes the
 resulting deadlines. Route sequence knowledge stays in the existing owned route record.
@@ -84,5 +84,4 @@ the radio medium's simultaneous-transmission guard are excluded from those outco
 
 These tests establish control-field durations, reverse expiration and recipient expiry. They do
 not independently verify serialized bytes, a complete intermediate forwarding chain, link-loss
-sequence actions, discovery scheduling, reboot or local repair. Mermaid rendering remains
-unverified until a renderer is available.
+sequence actions, discovery scheduling, reboot or local repair. Mermaid rendering passed in the series-wide [implementation record](../../../doc/project/evidence/model/aodv/remaining-features-results.md).

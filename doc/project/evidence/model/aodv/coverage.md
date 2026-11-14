@@ -2,7 +2,25 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/aodv/standards.md), [conformance.md](conformance.md)
 
-The single place that holds the changing state of the AODV workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
+This ledger maps selected AODV features to their model evidence. Protocol requirements belong in the standard and protocol maps; implementation choices belong in [conformance.md](conformance.md), and completed executions belong in the dated results records. The current source profile does not itself raise the achieved conformance level.
+
+## Current feature coverage, 2026-11-14
+
+C1–C10 are implemented in the source profile described in [conformance.md](conformance.md#current-implementation-profile-2026-11-14). The table maps the added verification surface without asserting a final integrated pass. The reviewer documents own fixture-level scope and observations. [remaining-features-results.md](remaining-features-results.md) owns the final source-matched builds, execution counts and unresolved outcomes; the 2026-11-09 records below remain historical.
+
+| Feature or integration path | Direct reviewer evidence | Limit |
+| --- | --- | --- |
+| AODV-F-EXTENSION, AODV-F-HELLO-INTERVAL | [Hello interval](../../../../../tests/protocol/aodv/hello-interval-extension.md): extension bytes, heterogeneous neighbors, fallback, malformed input, forwarding, rounding and lifecycle. | Standard Type 1 plus model validation policy; parser units supplement UDP/IP checks. |
+| AODV-F-DISCOVERY, native terminal reporting | [Discovery notifications](../../../../../tests/protocol/aodv/discovery-failure-notification.md), [IPv4 queue failures](../../../../../tests/protocol/ipv4/queued-datagram-failure.md), [IPv6 queue failures](../../../../../tests/protocol/ipv6/queued-datagram-failure.md). | Native ICMP suppression and transport delivery, queue identity/lifecycle and silent repair/output-constraint paths remain distinct assertions. |
+| AODV-F-INTERFACE, selected IPv6 links | [IPv6 interfaces](../../../../../tests/protocol/aodv/ipv6-interfaces.md): fan-out, ingress output, ACK/error/Hello isolation, rate budget and membership. | Same-family selected identities in an IPv6-enabled build; AODV still has an IPv4 build dependency. |
+| AODV-F-SUBNET, received IPv6 aggregates | [IPv6 subnet routes](../../../../../tests/protocol/aodv/ipv6-subnet-routes.md): prefix learning, counters, blockers, cached/relayed replies, repair, errors and member ICMP. | Native INET IPv6 control encoding; host-only RREQ floors when the subnet profile is disabled. |
+| AODV-F-INTERFACE, AODV-F-RECOVERY, live changes | [Secondary interfaces](../../../../../tests/protocol/aodv/interface-changes.md), [primary identity](../../../../../tests/protocol/aodv/primary-identity-changes.md), [UDP membership removal](../../../../../tests/protocol/udp/multicast-interface-removal.md). | Native notification order, detached inactive history, prepared output and lifecycle; no live address-family switch. |
+| AODV-F-SUBNET, attached authority | [Subnet authority](../../../../../tests/protocol/aodv/subnet-authority.md): native member delivery, independent counters, retained-floor recovery, relay promotion, withdrawal and restart. | Opt-in INET mandatory extension, no IANA allocation. Actual repeated-failure recovery and separately seeded retained-history relay checks prove different paths. |
+| AODV-F-SUBNET, member address-resolution failure | [ARP exhaustion](../../../../../tests/protocol/ipv4/arp-failure-unreachable.md) and [authority member checks](../../../../../tests/protocol/aodv/subnet-authority.md). | Forwarded IPv4 ARP failures report native ICMP after retries; local failure remains silent. IPv6 member checks use native ND. A member error preserves aggregate state. |
+| AODV-F-SUBNET, candidate cooperation | [Subnet election](../../../../../tests/protocol/aodv/subnet-election.md): selection, qualification, takeover, return, withdrawal and lifecycle. | INET cooperation under finite trusted/fail-stop candidates and bounded reliable delivery. Partition safety is not claimed. |
+| AODV-F-SUBNET, external network | [Infrastructure gateway](../../../../../tests/protocol/aodv/infrastructure-gateway.md): covering-route eligibility, dormancy/restoration, native discovery and actual external return traffic. | Public native routes configure the external network; no claim about other routing protocols producing them. Legacy configured-gateway mode is a separate control. |
+
+## Historical survey context
 
 Historical level 1 survey — no build or run in that survey:
 
@@ -17,7 +35,7 @@ exhaustive criteria for a higher achieved level.
 
 ## Achieved level
 
-**Level 1, reached.** Target: level 1, from [`standards.md`](../../protocol/aodv/standards.md#target-level).
+**Level 1, reached.** Target: level 1, from [`standards.md`](../../protocol/aodv/standards.md#target-level). The assessment below records the historical workflow, not a fresh exhaustive classification of the 2026-11-14 implementation. Selected later evidence does not satisfy the higher levels' complete catalogs and exit criteria by itself.
 
 The exit criterion of level 1 has three parts, and all three hold:
 
@@ -54,7 +72,7 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | 10, partial | 2026-11-09 | selected corrections | AODV-F-RECOVERY, lifecycle ownership | 24 protocol and five module parent runtime failures become passes, with four protocol/two module controls. Final combined scope: 140 protocol and 60 module passes; native removal order preserves existing expectations. |
 
-## Selected feature evidence
+## Historical selected feature evidence, 2026-11-09
 
 | Feature | Evidence | Limit |
 | --- | --- | --- |
