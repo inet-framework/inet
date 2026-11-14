@@ -60,4 +60,3 @@ cmdenv-express-mode = true
 AODV rreqRetries/search durations exceed
 %not-contains: test.out
 undisposed object:
-

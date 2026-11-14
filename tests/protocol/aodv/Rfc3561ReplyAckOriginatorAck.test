@@ -70,4 +70,3 @@ cmdenv-express-mode = true
 
 %contains: stdout
 AODV OriginatorAck: PASS
-

@@ -73,4 +73,3 @@ cmdenv-express-mode = true
 
 %contains: stdout
 AODV AckFirstAtDeadline: PASS
-

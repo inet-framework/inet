@@ -93,5 +93,3 @@ cmdenv-express-mode = true
 
 %contains: stdout
 AODV TransitAdmission: PASS
-
-

@@ -73,5 +73,3 @@ cmdenv-express-mode = true
 
 %contains: stdout
 AODV FailedReplyAck: PASS
-
-
