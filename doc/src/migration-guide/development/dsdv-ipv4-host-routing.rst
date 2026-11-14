@@ -10,8 +10,10 @@ Enable UDP. The C++ class is ``inet::dsdv::Dsdv``.
 Replace old DSDV timing/configuration overrides with the parameters documented
 in ``Dsdv.ned``: ``interface``, ``controlPort``, ``fullDumpInterval``,
 ``periodicJitter``, ``neighborTimeout``, ``routeTimeout``, ``settlingCap``,
-``minSettlingDelay`` and ``payloadBudget``. This is a new model wire format, not compatible with
-``DsdvHello``. The old wire classes remain available for legacy tooling only.
+``minSettlingDelay`` and ``payloadBudget``. The old Hello-based implementation,
+including ``DsdvHello`` and ``DsdvHelloSerializer``, has been removed. The new
+model uses ``DsdvHeader`` and ``DsdvHeaderSerializer`` with an incompatible wire
+format. Update custom code and tooling that depended on the removed classes.
 Previous simulation trajectories and recorded DSDV fingerprints do not apply.
 
 New deferred advertisement deadlines have a 10 ms minimum by default, even
