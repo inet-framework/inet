@@ -104,6 +104,18 @@ class RrepAck extends AodvControlPacket
     uint8_t reserved = 0;
 }
 
+// INET-only coordination endpoint. This is not an AODV message type on UDP 654.
+class AodvSubnetAnnouncement extends FieldsChunk
+{
+    unsigned int addressFamily; // 4 or 6
+    bool eligible;
+    unsigned int prefixLength;
+    bool sequenceValid;
+    uint32_t sequenceNumber;
+    L3Address candidateAddress;
+    L3Address prefix;
+}
+
 //
 // Represents an internal timer for a Route Reply packet in Aodv module
 //
