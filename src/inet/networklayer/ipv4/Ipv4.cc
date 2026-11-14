@@ -1198,14 +1198,19 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
-        for (int i = 0; i < packetQueue.getLength(); i++) {
-            auto packet = packetQueue.get(i);
+        std::vector<Packet *> failed;
+        while (!packetQueue.isEmpty())
+            failed.push_back(check_and_cast<Packet *>(packetQueue.pop()));
+        pendingPackets.erase(it);
+        for (auto packet : failed) {
             PacketDropDetails details;
             details.setReason(ADDRESS_RESOLUTION_FAILED);
             emit(packetDroppedSignal, packet, &details);
+            if (packet->findTag<InterfaceInd>())
+                sendIcmpError(packet, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_HOST_UNREACHABLE);
+            else
+                delete packet;
         }
-        packetQueue.clear();
-        pendingPackets.erase(it);
     }
 }
 
