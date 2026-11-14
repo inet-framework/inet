@@ -46,6 +46,9 @@ simple Aodv extends SimpleModule like IApp
         string gatewayAddress = default(""); // The address of the external gateway (external traffic routed here by default)
         int subnetExtensionType = default(0); // 0 disables the INET subnet-floor profile; otherwise use the same scenario-local type in 128..255 on all peers
         xml advertisedSubnets = default(xml("<subnets/>")); // Attached aggregate prefixes: subnet elements with prefix and interface attributes
+        int subnetCoordinationPort = default(655); // Separate UDP endpoint for configured candidate announcements, different from udpPort
+        double subnetAnnouncementInterval @unit(s) = default(1s); // Candidate announcement period H
+        double subnetAnnouncementDelay @unit(s) = default(10ms); // Assumed maximum announcement delivery delay D on a reliable common coordination network
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // It MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.
         volatile double periodicJitter @unit(s) = default(uniform(0s, maxPeriodicJitter)); // Jitter for externally triggered message generation and message forwarding

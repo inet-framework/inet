@@ -74,6 +74,10 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
+    UdpSocket subnetSocket;
+    bool subnetSocketBound = false;
+    std::set<int> subnetMulticastInterfaces;
+    std::set<int> pendingSocketCloses;
     NetworkInterface *interface = nullptr;
     std::vector<NetworkInterface *> selectedInterfaces;
     std::vector<std::string> configuredInterfaceNames;
@@ -126,15 +130,27 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
     enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
     using RouteKey = std::pair<L3Address, int>;
+    struct SubnetCandidate {
+        bool eligible = false;
+        simtime_t expires;
+    };
     struct SubnetExport {
         std::string interfaceName;
+        std::string coordinationInterfaceName;
+        L3Address coordinationAddress;
         bool reachable = false;
         bool sequenceValid = false;
         uint32_t sequence = 0;
+        simtime_t qualifiedAt;
+        std::set<L3Address> candidates;
+        std::map<L3Address, SubnetCandidate> observations;
         std::set<AodvRouteData::Precursor> precursors;
     };
     std::map<RouteKey, SubnetExport> subnetExports;
     unsigned int subnetExtensionType = 0;
+    unsigned int subnetCoordinationPort = 0;
+    simtime_t subnetAnnouncementInterval;
+    simtime_t subnetAnnouncementDelay;
     struct Search {
         enum class Purpose { ORIGINATING, LOCAL_REPAIR };
         Purpose purpose = Purpose::ORIGINATING;
@@ -194,6 +210,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *neighborTimer = nullptr;
     cMessage *recoveryTimer = nullptr;
     cMessage *interfaceChangeTimer = nullptr;
+    cMessage *subnetTimer = nullptr;
 
     // lifecycle
     bool hasStarted = false;
@@ -245,14 +262,16 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void sendPreparedControl(Packet *packet, SubnetExport *authority = nullptr);
     bool canSendControl(AodvControlPacketType type) const;
     void configureInterfaces();
+    void reconcileInterfaces();
     void configureSubnetExports();
     void reconcileSubnetExports();
     bool isSubnetReachable(const RouteKey& key, const SubnetExport& subnet) const;
     bool isSubnetAuthority(const RouteKey& key, const SubnetExport& subnet) const;
     bool answerSubnetRequest(const Ptr<Rreq>& request, IRoute *reverse);
     void promoteSubnetFloor(const Ptr<Rreq>& request);
+    void sendSubnetAnnouncements();
+    void processSubnetAnnouncement(Packet *packet);
     void resetSubnetState(bool loseSequences);
-    void reconcileInterfaces();
     void forgetInterface(int interfaceId);
     void rememberRemovedRoute(IRoute *route);
     bool isUsableInterface(const NetworkInterface *candidate) const;

@@ -1,0 +1,102 @@
+%description:
+Native AODV startup rejects DelayZero in configured subnet coordination.
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ethernet.Eth100M;
+import inet.routing.aodv.Aodv;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+
+simple AuthorityAodv extends Aodv
+{
+    parameters:
+        @lifecycleSupport;
+}
+module AuthorityRouter extends AdhocHost
+{
+    submodules:
+        aodv: AuthorityAodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
+}
+network AuthorityNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AuthorityRouter;
+        dut2: AuthorityRouter;
+        peer: AdhocHost;
+        member: StandardHost;
+        member2: StandardHost;
+        lan: EthernetSwitch;
+    connections:
+        dut.ethg++ <--> Eth100M <--> lan.ethg++;
+        dut2.ethg++ <--> Eth100M <--> lan.ethg++;
+        member.ethg++ <--> Eth100M <--> lan.ethg++;
+        member2.ethg++ <--> Eth100M <--> lan.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AuthorityNetwork
+ned-path = .;../../../../src;../../../protocol/lib
+sim-time-limit = 0.02s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='dut2' names='wlan0' address='10.0.0.4' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='dut' names='eth0' address='192.0.2.1' netmask='255.255.255.0'/><interface hosts='dut2' names='eth0' address='192.0.2.2' netmask='255.255.255.0'/><interface hosts='member' names='eth0' address='192.0.2.99' netmask='255.255.255.0'/><interface hosts='member2' names='eth0' address='192.0.2.100' netmask='255.255.255.0'/></config>")
+*.dut*.numEthInterfaces = 1
+*.dut*.numApps = 0
+*.dut*.forwarding = true
+*.dut*.aodv.jitter = 0s
+*.dut*.aodv.periodicJitter = 0s
+*.dut*.aodv.useHelloMessages = false
+*.dut*.aodv.subnetExtensionType = 253
+*.dut*.aodv.subnetAnnouncementInterval = 0.05s
+*.dut*.aodv.subnetAnnouncementDelay = 0s
+*.dut*.aodv.netDiameter = 2
+*.dut*.aodv.ttlStart = 1
+*.dut*.aodv.ttlThreshold = 2
+*.dut*.aodv.rreqRetries = 0
+*.dut*.aodv.nodeTraversalTime = 0.01s
+*.dut*.aodv.activeRouteTimeout = 0.2s
+*.dut*.aodv.deletePeriod = 0.4s
+*.dut.aodv.advertisedSubnets = xml("<subnets><subnet prefix='192.0.2.0/24' interface='eth0' candidates='192.0.2.1 192.0.2.2'/></subnets>")
+*.dut2.aodv.advertisedSubnets = xml("<subnets></subnets>")
+*.peer.numApps = 0
+*.member*.numApps = 0
+**.arp.typename = "Arp"
+**.arp.retryTimeout = 0.03s
+**.arp.retryCount = 2
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%exitcode: 1
+
+%contains: stderr
+AODV subnet announcement durations must be positive and have a representable sum

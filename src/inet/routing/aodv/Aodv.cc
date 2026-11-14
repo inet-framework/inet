@@ -7,6 +7,7 @@
 
 #include "inet/routing/aodv/Aodv.h"
 #include "inet/routing/aodv/AodvExtensions.h"
+#include "inet/routing/aodv/AodvSubnetProtocol.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -95,6 +96,15 @@ void Aodv::initialize(int stage)
         if (extensionType != 0 && (extensionType < 128 || extensionType > 255))
             throw cRuntimeError("AODV subnetExtensionType must be zero or in 128..255");
         subnetExtensionType = extensionType;
+        auto coordinationPort = par("subnetCoordinationPort").intValue();
+        if (coordinationPort <= 0 || coordinationPort > 65535)
+            throw cRuntimeError("AODV subnetCoordinationPort must be in 1..65535");
+        subnetCoordinationPort = coordinationPort;
+        subnetAnnouncementInterval = par("subnetAnnouncementInterval");
+        subnetAnnouncementDelay = par("subnetAnnouncementDelay");
+        if (subnetAnnouncementInterval <= SIMTIME_ZERO || subnetAnnouncementDelay <= SIMTIME_ZERO ||
+                subnetAnnouncementInterval >= SimTime::getMaxTime() - subnetAnnouncementDelay - SimTime::fromRaw(1))
+            throw cRuntimeError("AODV subnet announcement durations must be positive and have a representable sum");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
         useLocalRepair = par("useLocalRepair");
@@ -135,6 +145,7 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         recoveryTimer = new cMessage("RecoveryTimer");
         interfaceChangeTimer = new cMessage("InterfaceChangeTimer");
+        subnetTimer = new cMessage("SubnetAnnouncementTimer");
         if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
             neighborTimer = new cMessage("NeighborTimer");
@@ -207,6 +218,11 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             handleRecoveryTimer();
         else if (msg == interfaceChangeTimer)
             reconcileInterfaces();
+        else if (msg == subnetTimer) {
+            reconcileSubnetExports();
+            sendSubnetAnnouncements();
+            scheduleAfter(subnetAnnouncementInterval, subnetTimer);
+        }
         else if (msg->getKind() == KIND_DELAYEDSEND) {
             delayedSends.erase(msg);
             if (auto error = dynamic_cast<RerrSend *>(msg))
@@ -222,6 +238,8 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
     }
     else if (socket.belongsToSocket(msg))
         socket.processMessage(msg);
+    else if (subnetSocket.belongsToSocket(msg))
+        subnetSocket.processMessage(msg);
     else
         delete msg; // an indication from the socket of a previous operational interval
 }
@@ -353,6 +371,8 @@ Aodv::DatagramKind Aodv::classifyDatagram(const Packet *packet) const
 {
     if (auto transport = packet->findTag<TransportProtocolInd>()) {
         auto udp = dynamicPtrCast<const UdpHeader>(transport->getTransportProtocolHeader());
+        if (udp && subnetSocketBound && udp->getDestPort() == subnetCoordinationPort)
+            return DatagramKind::CONTROL;
         if (udp && (udp->getSrcPort() != aodvUDPPort || udp->getDestPort() != aodvUDPPort))
             return DatagramKind::DATA;
     }
@@ -381,6 +401,8 @@ Aodv::DatagramKind Aodv::classifyDatagram(const Packet *packet) const
         if (!datagram)
             return DatagramKind::DATA;
         auto udp = datagram->peek<UdpHeader>(Chunk::ForwardIterator(B(0)), B(8));
+        if (subnetSocketBound && udp->getDestPort() == subnetCoordinationPort)
+            return DatagramKind::CONTROL;
         if (udp->getDestPort() != aodvUDPPort || udp->getSrcPort() != aodvUDPPort)
             return DatagramKind::DATA;
         reservedControlPort = true;
@@ -496,7 +518,6 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
     if (destination.isBroadcast() || destination.isMulticast() || routingTable->isLocalAddress(destination) ||
             classifyDatagram(datagram) != DatagramKind::DATA)
         return ACCEPT;
-
     // An explicitly attached/exported network uses its independent native route.
     // A lost export cannot use an AODV-learned route recursively to reach itself.
     auto exported = subnetExports.end();
@@ -1349,8 +1370,12 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     }
 }
 
-void Aodv::socketDataArrived(UdpSocket *socket, Packet *packet)
+void Aodv::socketDataArrived(UdpSocket *arrivingSocket, Packet *packet)
 {
+    if (arrivingSocket == &subnetSocket) {
+        processSubnetAnnouncement(packet);
+        return;
+    }
     numReceived++;
     processPacket(packet);
 }
@@ -1361,9 +1386,10 @@ void Aodv::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void Aodv::socketClosed(UdpSocket *socket)
+void Aodv::socketClosed(UdpSocket *closedSocket)
 {
-    if (operationalState == State::STOPPING_OPERATION)
+    pendingSocketCloses.erase(closedSocket->getSocketId());
+    if (operationalState == State::STOPPING_OPERATION && pendingSocketCloses.empty())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
@@ -1522,7 +1548,8 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obje
         auto candidate = changed ? changed->getNetworkInterface() : dynamic_cast<NetworkInterface *>(object);
         if (candidate && !subnetExports.empty())
             for (const auto& entry : subnetExports)
-                if (entry.second.interfaceName == candidate->getInterfaceName()) {
+                if (entry.second.interfaceName == candidate->getInterfaceName() ||
+                        entry.second.coordinationInterfaceName == candidate->getInterfaceName()) {
                     if (!interfaceChangeTimer->isScheduled())
                         scheduleAt(simTime(), interfaceChangeTimer);
                     break;
@@ -1740,6 +1767,12 @@ bool Aodv::isUsableInterface(const NetworkInterface *candidate) const
     return true;
 }
 
+bool Aodv::isPrimaryAvailable() const
+{
+    return interface && !primaryResetPending && isSelectedInterface(interface) &&
+        isUsableInterface(interface) && interface->getNetworkAddress() == selfAddress;
+}
+
 void Aodv::rememberRemovedRoute(IRoute *route)
 {
     if (route == defaultGatewayRoute) {
@@ -1868,12 +1901,6 @@ void Aodv::forgetInterface(int interfaceId)
         scheduleLinkTimer(neighborTimer, neighborDeadlines);
 }
 
-bool Aodv::isPrimaryAvailable() const
-{
-    return interface && !primaryResetPending && isSelectedInterface(interface) &&
-        isUsableInterface(interface) && interface->getNetworkAddress() == selfAddress;
-}
-
 void Aodv::reconcileInterfaces()
 {
     bool reset = primaryResetPending;
@@ -1922,6 +1949,8 @@ void Aodv::reconcileInterfaces()
         releaseEligiblePackets();
     }
     reconcileSubnetExports();
+    if (subnetSocketBound && !subnetTimer->isScheduled())
+        scheduleAfter(subnetAnnouncementInterval, subnetTimer);
     scheduleExpungeRoutes();
 }
 
@@ -1964,11 +1993,33 @@ void Aodv::configureSubnetExports()
                 subnet.sequence = previous->second.sequence;
                 subnet.sequenceValid = previous->second.sequenceValid;
             }
+            const char *candidates = element->getAttribute("candidates");
+            if (candidates && *candidates) {
+                const char *coordinationInterface = element->getAttribute("coordinationInterface");
+                subnet.coordinationInterfaceName = coordinationInterface && *coordinationInterface ? coordinationInterface : interfaceName;
+                auto coordination = interfaceTable->findInterfaceByName(subnet.coordinationInterfaceName.c_str());
+                if (!coordination || coordination->isLoopback() || coordination->getNetworkAddress().getAddressType() != addressType)
+                    throw cRuntimeError("AODV subnet requires a same-family coordination interface");
+                for (const auto& name : cStringTokenizer(candidates).asVector()) {
+                    L3Address candidate;
+                    if (!candidate.tryParse(name.c_str()) || candidate.getAddressType() != addressType ||
+                            candidate.isUnspecified() || candidate.isBroadcast() || candidate.isMulticast() ||
+                            !subnet.candidates.insert(candidate).second)
+                        throw cRuntimeError("AODV subnet candidates require distinct same-family unicast addresses");
+                }
+                if (!subnet.candidates.count(coordination->getNetworkAddress()))
+                    throw cRuntimeError("AODV subnet candidate list must include this coordination interface address");
+            }
             configured.emplace(key, std::move(subnet));
         }
     }
     if (!configured.empty() && (!subnetExtensionType || hasExternalGateway))
         throw cRuntimeError("AODV subnet exports require subnetExtensionType and cannot be combined with gatewayAddress");
+    bool coordinating = false;
+    for (const auto& entry : configured)
+        coordinating |= !entry.second.candidates.empty();
+    if (coordinating && subnetCoordinationPort == aodvUDPPort)
+        throw cRuntimeError("AODV subnet coordination port must differ from udpPort");
     subnetExports = std::move(configured);
 }
 
@@ -1999,14 +2050,36 @@ bool Aodv::isSubnetAuthority(const RouteKey& key, const SubnetExport& subnet) co
 {
     if (!isPrimaryAvailable() || recovering || !subnet.reachable || !isSubnetReachable(key, subnet))
         return false;
+    if (subnet.candidates.empty())
+        return true;
+    auto coordination = interfaceTable->findInterfaceByName(subnet.coordinationInterfaceName.c_str());
+    if (!isUsableInterface(coordination) || !subnet.candidates.count(coordination->getNetworkAddress()) || simTime() < subnet.qualifiedAt)
+        return false;
+    auto self = coordination->getNetworkAddress();
+    for (const auto& candidate : subnet.observations)
+        if (candidate.first < self && candidate.second.eligible && candidate.second.expires >= simTime())
+            return false;
     return true;
 }
 
 void Aodv::reconcileSubnetExports()
 {
+    bool announce = false;
+    std::set<int> multicastInterfaces;
     for (auto& entry : subnetExports) {
         auto& subnet = entry.second;
-        bool reachable = isSubnetReachable(entry.first, subnet);
+        auto coordination = subnet.candidates.empty() ? nullptr : interfaceTable->findInterfaceByName(subnet.coordinationInterfaceName.c_str());
+        bool reachable = isSubnetReachable(entry.first, subnet) &&
+            (subnet.candidates.empty() || (isUsableInterface(coordination) && subnet.candidates.count(coordination->getNetworkAddress())));
+        if (coordination && isUsableInterface(coordination)) {
+            multicastInterfaces.insert(coordination->getInterfaceId());
+            if (subnet.coordinationAddress != coordination->getNetworkAddress()) {
+                subnet.observations.clear();
+                subnet.qualifiedAt = simTime() + subnetAnnouncementInterval + subnetAnnouncementDelay + SimTime::fromRaw(1);
+                subnet.coordinationAddress = coordination->getNetworkAddress();
+                announce = true;
+            }
+        }
         if (subnet.reachable != reachable) {
             if (subnet.reachable) {
                 if (subnet.sequenceValid)
@@ -2018,8 +2091,24 @@ void Aodv::reconcileSubnetExports()
                 subnet.precursors.clear();
             }
             subnet.reachable = reachable;
+            if (reachable && !subnet.candidates.empty())
+                subnet.qualifiedAt = simTime() + subnetAnnouncementInterval + subnetAnnouncementDelay + SimTime::fromRaw(1);
+            announce = true;
         }
+        for (auto candidate = subnet.observations.begin(); candidate != subnet.observations.end();)
+            if (candidate->second.expires < simTime())
+                candidate = subnet.observations.erase(candidate);
+            else
+                ++candidate;
     }
+    if (usingIpv6 && subnetSocketBound && multicastInterfaces != subnetMulticastInterfaces) {
+        subnetSocket.leaveMulticastGroup(addressType->getBroadcastAddress());
+        for (int id : multicastInterfaces)
+            subnetSocket.joinMulticastGroup(addressType->getBroadcastAddress(), id);
+        subnetMulticastInterfaces = multicastInterfaces;
+    }
+    if (announce && subnetSocketBound)
+        sendSubnetAnnouncements();
     scheduleExpungeRoutes();
 }
 
@@ -2087,13 +2176,84 @@ bool Aodv::answerSubnetRequest(const Ptr<Rreq>& request, IRoute *reverse)
 
 void Aodv::resetSubnetState(bool loseSequences)
 {
+    if (subnetTimer)
+        cancelEvent(subnetTimer);
     for (auto& entry : subnetExports) {
         entry.second.reachable = false;
+        entry.second.observations.clear();
         entry.second.precursors.clear();
         if (loseSequences) {
             entry.second.sequenceValid = false;
             entry.second.sequence = 0;
         }
+    }
+}
+
+void Aodv::sendSubnetAnnouncements()
+{
+    if (!subnetSocketBound || (operationalState != OPERATING && operationalState != STARTING_OPERATION))
+        return;
+    for (const auto& entry : subnetExports) {
+        const auto& subnet = entry.second;
+        if (subnet.candidates.empty())
+            continue;
+        auto coordination = interfaceTable->findInterfaceByName(subnet.coordinationInterfaceName.c_str());
+        if (!isUsableInterface(coordination) || !subnet.candidates.count(coordination->getNetworkAddress()))
+            continue;
+        auto message = makeShared<AodvSubnetAnnouncement>();
+        message->setAddressFamily(usingIpv6 ? 6 : 4);
+        message->setChunkLength(usingIpv6 ? B(40) : B(16));
+        message->setEligible(subnet.reachable);
+        message->setPrefixLength(entry.first.second);
+        message->setSequenceValid(subnet.sequenceValid);
+        message->setSequenceNumber(subnet.sequence);
+        message->setCandidateAddress(coordination->getNetworkAddress());
+        message->setPrefix(entry.first.first);
+        auto packet = new Packet("aodv-subnet-candidate", message);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&aodvSubnetProtocol);
+        packet->addTag<InterfaceReq>()->setInterfaceId(coordination->getInterfaceId());
+        packet->addTag<HopLimitReq>()->setHopLimit(1);
+        packet->addTag<L3AddressReq>()->setSrcAddress(coordination->getNetworkAddress());
+        subnetSocket.sendTo(packet, addressType->getBroadcastAddress(), subnetCoordinationPort);
+    }
+}
+
+void Aodv::processSubnetAnnouncement(Packet *packet)
+{
+    std::unique_ptr<Packet> owner(packet);
+    if (operationalState != OPERATING)
+        return;
+    try {
+        auto message = packet->peekAtFront<AodvSubnetAnnouncement>();
+        if (!message->isCorrect() || message->getAddressFamily() != (usingIpv6 ? 6 : 4) ||
+                packet->getDataLength() != (usingIpv6 ? B(40) : B(16)) ||
+                message->getPrefixLength() == 0 || message->getPrefixLength() >= addressType->getMaxPrefixLength() ||
+                message->getPrefix().getAddressType() != addressType ||
+                message->getPrefix() != message->getPrefix().getPrefix(message->getPrefixLength()))
+            return;
+        auto source = packet->findTag<L3AddressInd>();
+        auto ingress = packet->findTag<InterfaceInd>();
+        auto ports = packet->findTag<L4PortInd>();
+        if (!source || !ingress || !ports || ports->getSrcPort() != subnetCoordinationPort ||
+                source->getSrcAddress() != message->getCandidateAddress())
+            return;
+        auto entry = subnetExports.find({message->getPrefix(), int(message->getPrefixLength())});
+        if (entry == subnetExports.end() || entry->second.candidates.empty() || !entry->second.candidates.count(source->getSrcAddress()))
+            return;
+        auto& subnet = entry->second;
+        auto coordination = interfaceTable->findInterfaceByName(subnet.coordinationInterfaceName.c_str());
+        if (!isUsableInterface(coordination) || coordination->getInterfaceId() != ingress->getInterfaceId())
+            return;
+        if (subnetAnnouncementInterval + subnetAnnouncementDelay > SimTime::getMaxTime() - simTime())
+            return;
+        subnet.observations[source->getSrcAddress()] = {message->getEligible(), simTime() + subnetAnnouncementInterval + subnetAnnouncementDelay};
+        if (message->getSequenceValid() && (!subnet.sequenceValid || AodvSequence::isNewer(message->getSequenceNumber(), subnet.sequence))) {
+            subnet.sequence = message->getSequenceNumber();
+            subnet.sequenceValid = true;
+        }
+    }
+    catch (const cRuntimeError&) {
+        EV_WARN << "Discarding malformed AODV subnet announcement" << endl;
     }
 }
 
@@ -2216,8 +2376,13 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     operationalGeneration++;
     recovering = hasStarted;
     recoveryDeadline = recovering ? simTime() + deletePeriod : simTime();
-    if (hasStarted)
+    if (hasStarted) {
         socket = UdpSocket(); // stale indications retain the old socket ID
+        subnetSocket = UdpSocket();
+    }
+    pendingSocketCloses.clear();
+    subnetSocketBound = false;
+    subnetMulticastInterfaces.clear();
     hasStarted = true;
     if (recovering)
         scheduleAt(recoveryDeadline, recoveryTimer);
@@ -2232,8 +2397,18 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
         for (auto selected : selectedInterfaces) {
             socket.joinMulticastGroup(addressType->getBroadcastAddress(), selected->getInterfaceId());
         }
-
+    for (const auto& entry : subnetExports)
+        if (!entry.second.candidates.empty()) {
+            subnetSocket.setOutputGate(gate("socketOut"));
+            subnetSocket.setCallback(this);
+            subnetSocket.bind(L3Address(), subnetCoordinationPort);
+            subnetSocket.setBroadcast(true);
+            subnetSocketBound = true;
+            break;
+        }
     reconcileSubnetExports();
+    if (subnetSocketBound)
+        scheduleAfter(subnetAnnouncementInterval, subnetTimer);
 
     // RFC 5148:
     // Jitter SHOULD be applied by reducing this delay by a random amount, so that
@@ -2247,13 +2422,29 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
 
 void Aodv::handleStopOperation(LifecycleOperation *operation)
 {
+    pendingSocketCloses.clear();
+    if (socket.isOpen())
+        pendingSocketCloses.insert(socket.getSocketId());
+    if (subnetSocketBound && subnetSocket.isOpen())
+        pendingSocketCloses.insert(subnetSocket.getSocketId());
+    if (!pendingSocketCloses.empty())
+        delayActiveOperationFinish(par("stopOperationTimeout"));
     socket.close();
+    if (subnetSocketBound)
+        subnetSocket.close();
+    subnetSocketBound = false;
+    subnetMulticastInterfaces.clear();
     clearState();
 }
 
 void Aodv::handleCrashOperation(LifecycleOperation *operation)
 {
     socket.destroy();
+    if (subnetSocketBound)
+        subnetSocket.destroy();
+    subnetSocketBound = false;
+    subnetMulticastInterfaces.clear();
+    pendingSocketCloses.clear();
     resetSubnetState(true);
     clearState();
 }
@@ -3022,6 +3213,7 @@ Aodv::~Aodv()
     delete neighborTimer;
     delete recoveryTimer;
     delete interfaceChangeTimer;
+    delete subnetTimer;
 }
 
 } // namespace aodv
