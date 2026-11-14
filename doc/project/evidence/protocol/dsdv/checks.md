@@ -79,6 +79,12 @@ The same unit scenario then prepares a full dump, suspends the table at 4 s and 
 
 If B itself expires, invalidate each selected route through B once. A complete refresh delivered at the expiry timestamp must win over the pending expiry callback. The module scenario tests that event ordering.
 
+### Link-layer detection of a failed next hop
+
+Begin with finite routes D = (2,2) and E = (4,3) through neighbor B, plus F = (6,2) through C. Report B's link failure before any silence timeout. D and E must immediately become withdrawals (3,infinity) and (5,infinity), and their advertisements must bypass settling. F must remain finite through C. Repeating the same failure must not advance already-invalid sequence numbers again.
+
+In a separate case, first replace D's route with a newer route through C and then report B's failure. D must retain its selected route through C; only destinations whose current successor is B are affected. These checks establish the route response after a link failure is reported. They do not prove that every lower-layer failure accurately identifies a physical disconnection.
+
 ### Single-host module topology
 
 Both module tests contain one stationary AdhocHost at 10.0.0.1, an IPv4 configurator and a unit-disk radio medium. The host's application slot contains a DSDV-derived probe. DsdvLifecycle additionally contains a scenario manager.

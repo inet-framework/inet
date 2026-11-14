@@ -106,7 +106,15 @@ class DsdvKernelProbe : public Dsdv
                 ASSERT(active && socket.isOpen());
                 beforeStop=table.getSelf().current.sequence;
                 break;
-            case 10: assertNoTimers(); break;
+            case 10: {
+                assertNoTimers();
+                Packet failed("inactive failure hint");
+                auto before=table.getSelf().current.sequence;
+                Dsdv::receiveSignal(routingInterface,linkBrokenSignal,&failed,nullptr);
+                ASSERT(table.getSelf().current.sequence==before);
+                assertNoTimers();
+                break;
+            }
             case 11:
                 ASSERT(active && table.getSelf().current.sequence==beforeStop+2);
                 ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
@@ -155,6 +163,7 @@ record-vector-results = false
 *.host.hasStatus = true
 *.host.numApps = 1
 *.host.app[0].typename = "DsdvKernelProbe"
+*.host.app[0].useMacFailureFeedback = true
 *.host.app[0].fullDumpInterval = 100s
 *.host.app[0].periodicJitter = 0s
 *.host.app[0].neighborTimeout = 1s

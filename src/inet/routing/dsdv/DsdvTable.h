@@ -72,6 +72,7 @@ class INET_API DsdvTable
     void advanceSelf();
     void receive(const DsdvHeader& header, simtime_t now);
     bool invalidate(Ipv4Address destination, simtime_t now);
+    std::vector<Ipv4Address> invalidateNeighbor(Ipv4Address neighbor, simtime_t now);
     std::vector<Ipv4Address> expire(simtime_t now);
     simtime_t nextExpiry() const;
     simtime_t nextAdvertisement(simtime_t now) const;

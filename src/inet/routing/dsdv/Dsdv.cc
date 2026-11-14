@@ -9,7 +9,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/dsdv/DsdvProtocol.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -21,6 +23,10 @@ Define_Module(Dsdv);
 
 Dsdv::~Dsdv()
 {
+    if (useMacFailureFeedback) {
+        if (auto host = findContainingNode(this))
+            host->unsubscribe(linkBrokenSignal, this);
+    }
     cancelAndDelete(periodicTimer);
     cancelAndDelete(advertisementTimer);
     cancelAndDelete(expiryTimer);
@@ -32,6 +38,9 @@ void Dsdv::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
+        useMacFailureFeedback = par("useMacFailureFeedback");
+        if (useMacFailureFeedback)
+            arp.reference(this, "arpModule", true);
         controlPort = par("controlPort");
         period = par("fullDumpInterval");
         jitter = par("periodicJitter");
@@ -89,6 +98,8 @@ void Dsdv::initialize(int stage)
         getContainingNode(this)->subscribe(interfaceStateChangedSignal, this);
         getContainingNode(this)->subscribe(interfaceConfigChangedSignal, this);
         getContainingNode(this)->subscribe(interfaceIpv4ConfigChangedSignal, this);
+        if (useMacFailureFeedback)
+            getContainingNode(this)->subscribe(linkBrokenSignal, this);
         if (isUp() && interfaceUsable())
             start();
     }
@@ -328,9 +339,44 @@ void Dsdv::socketClosed(UdpSocket *)
 {
 }
 
-void Dsdv::receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *)
+void Dsdv::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *)
 {
     Enter_Method_Silent();
+    if (signal == linkBrokenSignal) {
+        if (!useMacFailureFeedback || !active)
+            return;
+        auto module = dynamic_cast<cModule *>(source);
+        while (module && module != routingInterface)
+            module = module->getParentModule();
+        auto packet = dynamic_cast<Packet *>(value);
+        if (!module || !packet)
+            return;
+        auto mac = packet->findTag<MacAddressReq>();
+        auto header = findNetworkProtocolHeader(packet);
+        if (!mac || mac->getDestAddress().isUnspecified() || mac->getDestAddress().isMulticast() ||
+                findNetworkProtocol(packet) != &Protocol::ipv4 || !header ||
+                header->getDestinationAddress().getType() != L3Address::IPv4 ||
+                !DsdvTable::isHost(header->getDestinationAddress().toIpv4()))
+            return;
+        auto neighbor = arp->getL3AddressFor(mac->getDestAddress());
+        if (neighbor.getType() != L3Address::IPv4 || !DsdvTable::isHost(neighbor.toIpv4()))
+            return;
+        bool known = table.getNeighbors().count(neighbor.toIpv4());
+        // Perkins/Bhagwat 1994 §3: link-layer failure can disclose loss early.
+        auto invalidated = table.invalidateNeighbor(neighbor.toIpv4(), simTime());
+        if (!known && invalidated.empty())
+            return;
+        for (const auto& destination : invalidated) {
+            EV_INFO << "MAC failure withdrew DSDV route to " << destination << endl;
+            emit(registerSignal("invalidationReason"), "macFailure");
+        }
+        synchronizeRoutes();
+        scheduleTimers();
+        return;
+    }
+    if (signal != interfaceStateChangedSignal && signal != interfaceConfigChangedSignal &&
+            signal != interfaceIpv4ConfigChangedSignal)
+        return;
     auto change = check_and_cast<NetworkInterfaceChangeDetails *>(value);
     if (!isUp())
         return;

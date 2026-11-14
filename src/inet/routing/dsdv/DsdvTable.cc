@@ -227,6 +227,19 @@ bool DsdvTable::invalidate(Ipv4Address destination, simtime_t now)
     return true;
 }
 
+std::vector<Ipv4Address> DsdvTable::invalidateNeighbor(Ipv4Address neighbor, simtime_t now)
+{
+    neighbors.erase(neighbor);
+    std::vector<Ipv4Address> invalidated;
+    for (auto& item : routeEntries) {
+        if (item.first != self && isFinite(item.second.current) && item.second.successor == neighbor) {
+            invalidate(item.first, now);
+            invalidated.push_back(item.first);
+        }
+    }
+    return invalidated;
+}
+
 std::vector<Ipv4Address> DsdvTable::expire(simtime_t now)
 {
     std::set<Ipv4Address> lost;
@@ -239,14 +252,19 @@ std::vector<Ipv4Address> DsdvTable::expire(simtime_t now)
             ++it;
     }
     std::vector<Ipv4Address> invalidated;
+    for (const auto& neighbor : lost) {
+        auto routes = invalidateNeighbor(neighbor, now);
+        invalidated.insert(invalidated.end(), routes.begin(), routes.end());
+    }
     for (auto& item : routeEntries) {
         const auto& record = item.second;
         if (item.first != self && isFinite(record.current) &&
-                (lost.count(record.successor) || record.refreshed + routeTimeout <= now)) {
+                record.refreshed + routeTimeout <= now) {
             invalidate(item.first, now);
             invalidated.push_back(item.first);
         }
     }
+    std::sort(invalidated.begin(), invalidated.end());
     return invalidated;
 }
 

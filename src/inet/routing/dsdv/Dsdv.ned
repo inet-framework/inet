@@ -14,7 +14,9 @@ simple Dsdv like IApp
         @lifecycleSupport;
         string interfaceTableModule = default(absPath("^.interfaceTable"));
         string routingTableModule = default(absPath("^.ipv4.routingTable"));
+        string arpModule = default(absPath("^.ipv4.arp")); // Used only with MAC failure feedback
         string interface = default("wlan0"); // Exactly one active non-loopback interface is supported
+        bool useMacFailureFeedback = default(false); // Use unicast MAC delivery failures as neighbor-loss hints
         int controlPort = default(26999); // Unprivileged UDP port, 1024..65535
         double fullDumpInterval @unit(s) = default(5s); // Positive periodic interval
         double periodicJitter @unit(s) = default(500ms); // Uniform [0,J], nonnegative

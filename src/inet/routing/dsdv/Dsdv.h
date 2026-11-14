@@ -4,6 +4,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dsdv/DsdvTable.h"
@@ -17,6 +18,7 @@ class INET_API Dsdv : public RoutingProtocolBase, public UdpSocket::ICallback, p
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<IRoutingTable> routingTable;
+    ModuleRefByPar<IArp> arp;
     NetworkInterface *routingInterface = nullptr;
     UdpSocket socket;
     DsdvTable table;
@@ -25,6 +27,7 @@ class INET_API Dsdv : public RoutingProtocolBase, public UdpSocket::ICallback, p
     cMessage *expiryTimer = nullptr;
     bool active = false;
     bool startupDump = false;
+    bool useMacFailureFeedback = false;
     int controlPort = -1;
     size_t capacity = 0;
     simtime_t period;

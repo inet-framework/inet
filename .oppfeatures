@@ -281,7 +281,7 @@
         name = "DSDV tests"
         description = "Independent DSDV state, kernel and forwarding fixtures."
         initiallyEnabled = "true"
-        requires = "DsdvExamples"
+        requires = "DsdvExamples Ieee80211"
         recommended = ""
         labels = "routing"
         nedPackages = ""

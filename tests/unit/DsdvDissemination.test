@@ -167,6 +167,22 @@ for (size_t capacity : {4U, 20U}) {
     ASSERT(destinations == std::vector<Ipv4Address>({Ipv4Address("10.0.0.5"), Ipv4Address("10.0.0.9"),
             Ipv4Address("10.0.0.4"), Ipv4Address("10.0.0.6")}));
 }
+// A failed next hop invalidates its current dependents, not a switched route.
+DsdvTable failure; failure.configure(Ipv4Address("10.0.0.1"),1,10,12); failure.start(0);
+failure.receive(h(2,{e(4,10,1),e(5,10,1)}),0);
+failure.receive(h(3,{e(5,12,2),e(6,10,1)}),.1);
+auto failed = failure.invalidateNeighbor(Ipv4Address("10.0.0.2"),.2);
+ASSERT(failed == std::vector<Ipv4Address>({Ipv4Address("10.0.0.4")}));
+ASSERT(failure.getNeighbors().count(Ipv4Address("10.0.0.2")) == 0);
+ASSERT(failure.getRouteEntries().at(failed[0]).current.sequence == 11);
+ASSERT(!DsdvTable::isFinite(failure.getRouteEntries().at(failed[0]).current));
+ASSERT(failure.getRouteEntries().at(Ipv4Address("10.0.0.5")).successor == Ipv4Address("10.0.0.3"));
+ASSERT(failure.getRouteEntries().at(Ipv4Address("10.0.0.5")).current.sequence == 12);
+ASSERT(failure.invalidateNeighbor(Ipv4Address("10.0.0.2"),.3).empty());
+ASSERT(failure.getRouteEntries().at(failed[0]).current.sequence == 11);
+ASSERT(failure.invalidateNeighbor(Ipv4Address("10.0.0.99"),.3).empty());
+auto remaining = failure.expire(10.1);
+ASSERT(remaining == std::vector<Ipv4Address>({Ipv4Address("10.0.0.5"),Ipv4Address("10.0.0.6")}));
 EV << "DSDV dissemination PASS\n";
 
 %contains: stdout

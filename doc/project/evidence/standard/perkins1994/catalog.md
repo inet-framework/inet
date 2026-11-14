@@ -10,6 +10,7 @@ not PDF page numbers. [Accessible source](https://www.cse.iitb.ac.in/~mythili/te
 | --- | --- | --- |
 | PB94-SELECT | §3; §4 Damping Fluctuations | Prefer newer destination sequences, then lower hop counts; add the receiving hop once. |
 | PB94-LOSS | §3 | Destinations originate even sequences; failed successors produce odd-sequence infinity, disclosed immediately. |
+| PB94-LINK-FEEDBACK | §3 | A broken link may be detected by the link layer or inferred from missing neighbor broadcasts; routes using the failed next hop are invalidated immediately. |
 | PB94-CORRECT | §3 | A finite route newer than an incoming withdrawal triggers a corrective advertisement. |
 | PB94-DUMPS | §3; §4 Tables 1–4 | Periodic full dumps and single-packet incrementals disseminate routes; full dumps may span packets. |
 | PB94-PRIORITY | §4 Table 4 | Metric changes take priority over sequence-only changes in incrementals. |

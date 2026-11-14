@@ -86,6 +86,8 @@ numbers therefore get a turn across successive updates instead of repeatedly
 favoring the lowest addresses. This uses existing send opportunities and does
 not create additional broadcasts just to send sequence-only changes.
 
+Set ``useMacFailureFeedback = true`` to let MAC delivery-failure hints withdraw routes through the failed neighbor before its silence timeout. It uses the failed frame's receiver and a local ARP-cache lookup through the configured ``arpModule``; missing or unusable metadata leaves ordinary timeout processing active. Parameter declarations and defaults are in :ned:`Dsdv`. A failed receiver does not invalidate a route that has already switched to a different next hop. A MAC failure can also result from transient interference, so feedback is a routing hint rather than proof of physical disconnection.
+
 :ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
 through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
 ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding
