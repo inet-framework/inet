@@ -1,0 +1,3 @@
+AODV bounds request timing and retry parameters
+
+AODV destination reply lifetime now defaults to at least twice the path-discovery interval. The default blacklist duration covers expanding rings, a retained-hop first ring, exponential network-wide retries and bounded jitter. Zero additional retries still permit one network-wide request.

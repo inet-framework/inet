@@ -1,0 +1,111 @@
+%description:
+RFC 3561 section 6.11: attributed actual failed MAC attempt, with Hello disabled.
+
+%file: Peer.cc
+#include "../../../protocol/aodv/AodvFailurePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.queueing.queue.PacketQueue;
+simple AodvTagStrippingQueue extends PacketQueue
+{
+    parameters:
+        @class(::AodvTagStrippingQueue);
+}
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvFailurePeer like IApp
+{
+    parameters:
+        string scenario = default("RateLimit");
+        @class(::AodvFailurePeer);
+        double startTime @unit(s) = default(1.2s);
+        int incompatibleIndex = default(-1);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvDataSource like IApp
+{
+    parameters:
+        int localPort = default(12345);
+        @class(::AodvDataSource);
+        string destinations = default("10.0.0.99 10.0.0.98");
+        double emitTime @unit(s) = default(0.16s);
+        int incompatibleIndex = default(-1);
+        bool constrainNextHop = default(false);
+        string nextHop = default("");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 2.2s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.peer.app[0].scenario = "MissingOutput"
+*.dut.aodv.rreqRatelimit = 1
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
+*.dut.numApps = 2
+*.dut.app[1].typename = "AodvDataSource"
+*.dut.app[1].destinations = "10.0.0.99"
+*.dut.app[1].emitTime = 0.3s
+*.dut.app[1].localPort = 12346
+*.dut.app[0].destinations = "10.0.0.99"
+*.peer.app[0].startTime = 0.1s
+*.dut.wlan[0].mac.ackTimeout = 0.1s
+*.dut.wlan[0].queue.typename = "AodvTagStrippingQueue"
+*.peer.numWlanInterfaces = 2
+*.peer.forwarding = false
+*.dut.app[0].typename = "AodvDataSource"
+*.peer.numApps = 2
+*.peer.app[1].typename = "UdpSink"
+*.peer.app[1].localPort = 12345
+*.peer.app[0].typename = "AodvFailurePeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV MissingOutput: PASS
+
+
+

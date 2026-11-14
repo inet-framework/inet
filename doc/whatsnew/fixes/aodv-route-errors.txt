@@ -1,0 +1,3 @@
+AODV preserves error and precursor identity
+
+AODV now preserves N-flagged notifications, sends route errors to affected precursors, applies transit-failure counter and retention changes before rate limiting, and admits all copies of one logical error together after jitter.

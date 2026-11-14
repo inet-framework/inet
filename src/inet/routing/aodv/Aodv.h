@@ -9,14 +9,18 @@
 #define __INET_AODV_H
 
 #include <map>
+#include <deque>
+#include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/aodv/AodvControlPackets_m.h"
 #include "inet/routing/aodv/AodvRouteData.h"
+#include "inet/routing/aodv/AodvSequence.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
@@ -69,7 +73,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
-    NetworkInterface *interface;
+    NetworkInterface *interface = nullptr;
+    std::vector<NetworkInterface *> selectedInterfaces;
     bool usingIpv6 = false;
     long numSent = 0;
     long numReceived = 0;
@@ -79,6 +84,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int aodvUDPPort = 0;
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
+    bool useLocalRepair = false;
     bool destinationOnlyFlag = false;
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
@@ -91,6 +97,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int ttlIncrement = 0;
     unsigned int ttlThreshold = 0;
     unsigned int localAddTTL = 0;
+    unsigned int maxRepairTTL = 0;
     unsigned int allowedHelloLoss = 0;
     simtime_t nodeTraversalTime;
     cPar *jitterPar = nullptr;
@@ -109,15 +116,50 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     // state
     unsigned int rreqId = 0; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
-    unsigned int sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
-    std::map<L3Address, WaitForRrep *> waitForRREPTimers; // timeout for Route Replies
+    uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
+    enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
+    using RouteKey = std::pair<L3Address, int>;
+    struct Search {
+        enum class Purpose { ORIGINATING, LOCAL_REPAIR };
+        Purpose purpose = Purpose::ORIGINATING;
+        SearchPhase phase = SearchPhase::SEND_DELAY;
+        cMessage *timer = nullptr;
+        unsigned int ttl = 0;
+        unsigned int networkAttempts = 0;
+        RouteKey retainedKey;
+        L3Address wireTarget;
+        unsigned int oldHopCount = 0;
+        simtime_t deadline;
+        std::set<AodvRouteData::Precursor> precursors;
+    };
+    std::map<RouteKey, Search> searches;
+    std::deque<RouteKey> readySearches;
+    std::map<RouteKey, simtime_t> repairableDeadlines;
+    simtime_t rateEpoch;
+    int64_t rateWindow = 0;
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
-    L3Address failedNextHop; // next hop to the destination who failed to send us RREP-ACK
-    std::map<L3Address, simtime_t> blacklist; // we don't accept RREQs from blacklisted nodes
+    using Link = AodvRouteData::Precursor;
+    class RerrSend : public cMessage {
+      public:
+        Ptr<Rerr> header;
+        std::set<Link> recipients;
+        RerrSend(const Ptr<Rerr>& header, const std::set<Link>& recipients) :
+            cMessage("aodv-error-jitter", 100), header(header), recipients(recipients) {}
+    };
+    std::set<cMessage *> delayedSends;
+    using MacLink = std::pair<int, MacAddress>;
+    std::map<Link, simtime_t> pendingAcks;
+    std::map<Link, simtime_t> blacklist;
+    std::map<Link, simtime_t> neighborDeadlines;
+    std::set<int> disabledHelloObservation;
+    std::map<Link, MacAddress> neighborBindings;
+    std::map<MacLink, Link> inverseBindings;
+    std::set<MacLink> unusableBindings;
+    std::set<int> attributionWarnings;
     unsigned int rerrCount = 0; // num of originated RERR in the last second
     unsigned int rreqCount = 0; // num of originated RREQ in the last second
-    simtime_t lastBroadcastTime; // the last time when any control packet was broadcasted
-    std::map<L3Address, unsigned int> addressToRreqRetries; // number of re-discovery attempts per address
+    std::map<int, simtime_t> lastBroadcastTimes;
+
 
     // self messages
     cMessage *helloMsgTimer = nullptr; // timer to send hello messages (only if the feature is enabled)
@@ -125,12 +167,18 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *counterTimer = nullptr; // timer to set rrerCount = rreqCount = 0 in each second
     cMessage *rrepAckTimer = nullptr; // timer to wait for RREP-ACKs (RREP-ACK timeout)
     cMessage *blacklistTimer = nullptr; // timer to clean the blacklist out
+    cMessage *neighborTimer = nullptr;
+    cMessage *recoveryTimer = nullptr;
 
     // lifecycle
-    simtime_t rebootTime; // the last time when the node rebooted
+    bool hasStarted = false;
+    bool recovering = false;
+    simtime_t recoveryDeadline;
+    uint64_t operationalGeneration = 0;
 
     // internal
-    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets; // queue for the datagrams we have no route for
+    std::map<L3Address, std::deque<Packet *>> delayedPackets; // borrowed from IP
+    std::map<L3Address, RouteKey> queueOwners; // actual destination -> exact search prefix
     IRoute *defaultGatewayRoute = nullptr;  // Pointer to default gateway route (0.0.0.0/0)
 
   protected:
@@ -140,67 +188,109 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Route Discovery */
     void startRouteDiscovery(const L3Address& target, unsigned int timeToLive = 0);
-    void completeRouteDiscovery(const L3Address& target);
     bool hasOngoingRouteDiscovery(const L3Address& destAddr);
-    void cancelRouteDiscovery(const L3Address& destAddr);
+    void cancelRouteDiscovery(const RouteKey& key);
 
+  private:
+    IRoute *findExactRoute(const L3Address& destination, int prefixLength = -1) const;
+    IRoute *findRetainedRoute(const L3Address& destination, bool knownOnly = false) const;
+    void updateSearchAuthorities();
+    RouteKey routeKey(const IRoute *route) const;
+    bool repairAllowed(Packet *packet, IRoute *route, unsigned int& ttl);
+    void startRepair(IRoute *route, const L3Address& target, unsigned int ttl);
+    bool queueForRepair(Packet *packet, bool local);
+    void finishRepair(const RouteKey& key, bool success);
+    void expireRouteIfDue(IRoute *route);
+    void refreshNeighbor(const L3Address& sender, NetworkInterface *ingress);
+    IRoute *selectDataRoute(const L3Address& destination);
+    bool prepareDataPacket(Packet *packet, IRoute *route);
+    enum class DatagramKind { DATA, CONTROL, REPLY };
+    DatagramKind classifyDatagram(const Packet *packet) const;
+    void learnBinding(const Link& link, const MacAddress& mac);
+    bool resolveFailedLink(const Packet *packet, Link& link);
+    void diagnoseAttribution(int interfaceId);
+    void scheduleLinkTimer(cMessage *timer, const std::map<Link, simtime_t>& deadlines);
+    void failLinkValidation(const Link& link, bool replyFailed);
+    void observeIncoming(const Packet *packet);
+    void disableHelloObservation(int interfaceId);
+    void handleNeighborTimer();
+    void handleRecoveryTimer();
+    void extendRecovery();
+    bool isLocalGatewayDestination(const L3Address& destination) const;
+    void sendPreparedControl(Packet *packet);
+    bool canSendControl(AodvControlPacketType type) const;
+    void configureInterfaces();
+    bool isSelectedInterface(const NetworkInterface *candidate) const;
+    bool isLocalAodvAddress(const L3Address& address) const;
+    bool resolvePreviousHop(const Packet *packet, Link& link) const;
+    void refreshSourceRoute(Packet *packet);
+    void queueRouteError(const std::vector<UnreachableNode>& nodes, const std::set<Link>& recipients, bool noDelete, simtime_t delay);
+    void sendRouteError(RerrSend *message);
+    void releaseEligiblePackets();
+    void scheduleSearch(const RouteKey& key);
+    void handleSearchTimer(cMessage *timer);
+    void drainReadySearches();
+    void refreshRateWindow();
+    void eraseSearch(const RouteKey& key);
+    static simtime_t quantizeAdvertisementLifetime(simtime_t duration);
+    simtime_t samplePeriodicJitter();
+
+  protected:
     /* Routing Table management */
-    void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
-    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
+    void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface = nullptr);
+    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface = nullptr, int prefixLength = -1);
     bool updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime);
     void scheduleExpungeRoutes();
     void expungeRoutes();
 
     /* Control packet creators */
     const Ptr<RrepAck> createRREPACK();
-    const Ptr<Rrep> createHelloMessage();
+    const Ptr<Rrep> createHelloMessage(NetworkInterface *output = nullptr);
     const Ptr<Rreq> createRREQ(const L3Address& destAddr);
-    const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr, NetworkInterface *ingress);
     const Ptr<Rrep> createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *originatorRoute);
     const Ptr<Rerr> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
-    void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr);
-    void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const Ptr<Rrep>& helloMessage);
-    void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
+    void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, NetworkInterface *ingress);
+    void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive, NetworkInterface *ingress);
+    void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr, NetworkInterface *ingress);
+    void handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *ingress);
+    void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr, NetworkInterface *ingress);
 
     /* Control Packet sender methods */
-    void sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned int timeToLive);
-    void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr);
+    void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr, NetworkInterface *output);
     void sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
     void sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
 
     /* Control Packet forwarders */
-    void forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive, NetworkInterface *output);
     void forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
 
     /* Self message handlers */
     void handleRREPACKTimer();
     void handleBlackListTimer();
     void sendHelloMessagesIfNeeded();
-    void handleWaitForRREP(WaitForRrep *rrepTimer);
 
     /* General functions to handle route errors */
-    void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
-    void handleLinkBreakSendRERR(const L3Address& unreachableAddr);
+    void sendRERRWhenNoRouteToForward(Packet *packet);
+    void handleLinkBreakSendRERR(const Link& link, IRoute *repairRoute = nullptr);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
-    Result ensureRouteForDatagram(Packet *datagram);
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    Result ensureRouteForDatagram(Packet *datagram, bool local);
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, false); }
     virtual Result datagramForwardHook(Packet *datagram) override;
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramLocalInHook(Packet *datagram) override;
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, true); }
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output = nullptr);
     void processPacket(Packet *pk);
-    void clearState();
+    void clearState(bool disposeQueued = true);
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
     bool isExternalAddress(const L3Address& destAddr) const;
     void createDefaultGatewayRoute();

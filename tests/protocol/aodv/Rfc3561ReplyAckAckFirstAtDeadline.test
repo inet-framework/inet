@@ -1,0 +1,76 @@
+%description:
+RFC 3561 section 6.8: exact ACK/timeout ties through real Ethernet/IP/UDP delivery.
+Calibration measures serialization latency. Completed UDP delivery delay selects event order.
+
+%file: Peer.cc
+#include "../../AodvAckDeadlinePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.routing.aodv.Aodv;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+simple AodvAckDeadlinePeer like IApp
+{
+    parameters:
+        string scenario = default("Deadline");
+        double startTime @unit(s) = default(0.01s);
+        bool ackFirst = default(true);
+        @class(::AodvAckDeadlinePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+module AodvDeadlineRouter extends AdhocHost
+{
+    parameters:
+        double applicationDelay @unit(s) = default(100ms);
+    submodules:
+        aodv: Aodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- { delay = parent.applicationDelay; } <-- at.out++;
+}
+network AodvTest
+{
+    parameters:
+        double linkDelay @unit(s) = default(20ms);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        dut: AodvDeadlineRouter;
+        peer: AdhocHost;
+    connections:
+        dut.ethg[0] <--> Eth100M { delay = parent.linkDelay; } <--> peer.ethg[0];
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' names='eth0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='eth0' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+*.dut.aodv.interface = "eth0"
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.nextHopWait = 0.05s
+*.dut.aodv.blacklistTimeout = 1s
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvAckDeadlinePeer"
+**.numWlanInterfaces = 0
+**.numEthInterfaces = 1
+**.eth[*].typename = "EthernetInterface"
+**.eth[*].duplexMode = true
+**.arp.typename = "GlobalArp"
+
+%contains: stdout
+AODV AckFirstAtDeadline: PASS
+

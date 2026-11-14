@@ -1,0 +1,73 @@
+%description:
+RFC 3561 section 6.8: independent ACK obligations and one-hop receipt acknowledgment.
+
+%file: Peer.cc
+#include "../../AodvLinkPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvLinkPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        @class(::AodvLinkPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 0.5s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.nextHopWait = 0.05s
+*.dut.aodv.blacklistTimeout = 1s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.peer.app[0].scenario = "OriginatorAck"
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvLinkPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[0].typename = "AckingWirelessInterface"
+**.wlan[0].radio.typename = "GenericUnitDiskRadio"
+**.wlan[0].bitrate = 1Mbps
+**.wlan[0].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[0].radio.transmitter.headerLength = 4b
+**.wlan[0].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV OriginatorAck: PASS
+
