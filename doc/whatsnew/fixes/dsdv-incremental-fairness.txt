@@ -1,0 +1,3 @@
+Fair selection of DSDV sequence-only updates
+
+DSDV now rotates sequence-only route changes through spare incremental-update space, so repeated updates do not always favor the lowest destination addresses. Required route changes retain priority, and rotation creates no extra broadcasts. This can change DSDV packet contents and simulation fingerprints.

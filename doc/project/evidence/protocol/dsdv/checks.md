@@ -128,6 +128,12 @@ Required metric changes take space before optional sequence-only changes, and de
 
 A stale withdrawal also makes a settling correction urgent. The unit test supplies finite sequence 20 followed by withdrawal 19 and requires sequence 20 in the immediate advertisement. Several changes arriving before one urgent callback must coalesce to the latest selected record.
 
+### Fair sequence-only selection
+
+Establish a full-dump baseline, then provide newer sequence numbers with unchanged metrics for three destinations A, B and C. Arrange successive incremental send opportunities with room for one of those entries after the required metric changes. The selected sequence-only destination must rotate so that all three get a turn, instead of repeatedly selecting the lowest address. For a stable candidate set of N destinations and at least one available slot on every opportunity between full dumps, every candidate must be offered within N opportunities.
+
+Metric changes and corrective advertisements retain priority. An incremental with no spare slot cannot advance the optional selection. Check selection across the end of the candidate ordering and after a candidate disappears; no destination may occur twice in one packet. A full dump establishes a fresh baseline and begins a new selection cycle. Excess sequence-only changes must neither force a full dump nor create a broadcast just to drain them. These observations concern fair selection, not guaranteed delivery under packet loss or a deadline when no incremental opportunities occur.
+
 ### Settling and fixed deadlines
 
 Settling delays ordinary advertisements while forwarding can change immediately. Once established, an advertisement deadline must not move later as additional information arrives. A full dump during the wait must preserve the preceding advertised route.

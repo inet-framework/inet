@@ -125,6 +125,7 @@ void DsdvTable::suspend(simtime_t now)
     mustSend.clear();
     baseline.clear();
     neighbors.clear();
+    optionalCursor = Ipv4Address();
 }
 
 void DsdvTable::advanceSelf()
@@ -307,10 +308,16 @@ DsdvTable::Advertisement DsdvTable::prepare(bool full, size_t capacity, simtime_
     }
     else {
         entries = required;
-        for (const auto& entry : optional) {
-            if (entries.size() == capacity)
-                break;
+        // Perkins/Bhagwat 1994 §4: give sequence-only changes their turns
+        // when slots are scarce; otherwise retain destination order.
+        auto first = optional.size() <= capacity - entries.size() ? optional.begin() :
+                std::upper_bound(optional.begin(), optional.end(), optionalCursor,
+                [](Ipv4Address cursor, const DsdvEntry& entry) { return cursor < entry.destination; });
+        size_t start = first - optional.begin();
+        for (size_t i = 0; i < optional.size() && entries.size() < capacity; i++) {
+            const auto& entry = optional[(start + i) % optional.size()];
             entries.push_back(entry);
+            optionalCursor = entry.destination;
         }
     }
     for (size_t offset = 0; offset < entries.size(); offset += capacity) {
@@ -321,8 +328,10 @@ DsdvTable::Advertisement DsdvTable::prepare(bool full, size_t capacity, simtime_
     // only by submitting every returned datagram in this same callback.
     for (const auto& entry : entries)
         mustSend.erase(entry.destination);
-    if (result.full)
+    if (result.full) {
         baseline = view;
+        optionalCursor = Ipv4Address();
+    }
     return result;
 }
 

@@ -13,6 +13,7 @@ not PDF page numbers. [Accessible source](https://www.cse.iitb.ac.in/~mythili/te
 | PB94-CORRECT | §3 | A finite route newer than an incoming withdrawal triggers a corrective advertisement. |
 | PB94-DUMPS | §3; §4 Tables 1–4 | Periodic full dumps and single-packet incrementals disseminate routes; full dumps may span packets. |
 | PB94-PRIORITY | §4 Table 4 | Metric changes take priority over sequence-only changes in incrementals. |
+| PB94-FAIR | §4 Table 4 discussion | When sequence-only changes exceed the remaining incremental space, select them fairly over successive incremental updates. |
 | PB94-SETTLE | §3; §4 Damping Fluctuations | Forwarding and advertised views differ during settling; history estimates the wait for a better metric. |
 
 The damping paragraph also describes replacing a route with a worse metric at the

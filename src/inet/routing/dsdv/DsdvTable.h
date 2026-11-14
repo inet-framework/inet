@@ -52,6 +52,7 @@ class INET_API DsdvTable
     std::map<Ipv4Address, simtime_t> neighbors;
     std::map<Ipv4Address, DsdvEntry> baseline;
     std::set<Ipv4Address> mustSend;
+    Ipv4Address optionalCursor;
 
     void makeUrgent(RouteEntry& record);
     void install(const DsdvEntry& entry, Ipv4Address sender, simtime_t now);

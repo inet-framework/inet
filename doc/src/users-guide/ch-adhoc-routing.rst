@@ -80,6 +80,12 @@ urgent advertisements bypass this delay.
 The model uses its own versioned UDP format and retains withdrawn destination
 sequence floors for the remainder of the run.
 
+Incremental updates send required route changes first, then rotate through
+sequence-only changes in the remaining space. Destinations with newer sequence
+numbers therefore get a turn across successive updates instead of repeatedly
+favoring the lowest addresses. This uses existing send opportunities and does
+not create additional broadcasts just to send sequence-only changes.
+
 :ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
 through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
 ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding

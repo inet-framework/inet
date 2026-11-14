@@ -130,6 +130,43 @@ ASSERT(age.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.metric == UINT3
 age.receive(h(2,{e(4,4,1)}),101);
 ASSERT(age.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.metric == 2);
 ASSERT(age.expire(106).size() == 1);
+// Fair turns use spare slots without changing the full-dump baseline.
+DsdvTable fair; fair.configure(Ipv4Address("10.0.0.1"),1,10,12); fair.start(0);
+fair.receive(h(2,{e(4,2,1),e(5,2,1),e(6,2,1),e(8,2,1)}),0);
+fair.prepare(true,2,0);
+fair.receive(h(2,{e(4,4,1),e(5,4,1),e(6,4,1)}),.1);
+ASSERT(fair.nextAdvertisement(.1) == SimTime::getMaxTime());
+fair.receive(h(2,{e(8,4,2)}),.2);
+for (int i = 0; i < 4; i++) {
+    simtime_t now = SimTime(.5 + .1 * i);
+    fair.receive(h(2,{e(8,3,UINT32_MAX)}),now);
+    auto packet = fair.prepare(false,2,now);
+    ASSERT(!packet.full && packet.datagrams.size() == 1 && packet.datagrams[0].size() == 2);
+    ASSERT(packet.datagrams[0][0].destination == Ipv4Address("10.0.0.8"));
+    ASSERT(packet.datagrams[0][1].destination == Ipv4Address(0x0a000004U + i % 3));
+}
+// A packet filled with required entries does not consume an optional turn.
+fair.prepare(false,1,.81);
+ASSERT(fair.prepare(false,2,.82).datagrams[0][1].destination == Ipv4Address("10.0.0.5"));
+// A full dump resets the turn and establishes a new baseline.
+fair.prepare(true,2,.9);
+fair.receive(h(2,{e(4,6,1),e(5,6,1),e(6,6,1),e(9,2,1)}),1);
+auto reset = fair.prepare(false,2,1);
+ASSERT(reset.datagrams[0][1].destination == Ipv4Address("10.0.0.4"));
+fair.receive(h(2,{e(5,7,UINT32_MAX)}),1.1);
+// Removing a candidate does not invalidate the address cursor.
+auto removed = fair.prepare(false,3,1.1);
+ASSERT(removed.datagrams[0][2].destination == Ipv4Address("10.0.0.6"));
+// When all optional entries fit, retain sorted order despite a prior scarce turn.
+ASSERT(fair.prepare(false,3,1.15).datagrams[0][2].destination == Ipv4Address("10.0.0.4"));
+for (size_t capacity : {4U, 20U}) {
+    auto ample = fair.prepare(false,capacity,1.2);
+    ASSERT(!ample.full && ample.datagrams.size() == 1 && ample.datagrams[0].size() == 4);
+    std::vector<Ipv4Address> destinations;
+    for (const auto& entry : ample.datagrams[0]) destinations.push_back(entry.destination);
+    ASSERT(destinations == std::vector<Ipv4Address>({Ipv4Address("10.0.0.5"), Ipv4Address("10.0.0.9"),
+            Ipv4Address("10.0.0.4"), Ipv4Address("10.0.0.6")}));
+}
 EV << "DSDV dissemination PASS\n";
 
 %contains: stdout
