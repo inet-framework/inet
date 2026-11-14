@@ -112,6 +112,12 @@ class INET_API IRoute
     /** Cost to reach the destination */
     virtual int getMetric() const = 0;
 
+    /** Native absolute expiry, or zero when the provider has no expiry.
+     * A nonzero expiry remains valid through that simulation time. Protocol
+     * metadata may impose an additional, independent route lifetime.
+     */
+    virtual simtime_t getNativeExpiryTime() const = 0;
+
     virtual cObject *getProtocolData() const = 0;
     virtual void setProtocolData(cObject *protocolData) = 0;
 

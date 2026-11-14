@@ -91,6 +91,8 @@ class INET_API Ipv4Route : public cObject, public IRoute
     /** "Cost" to reach the destination */
     int getMetric() const override { return metric; }
 
+    simtime_t getNativeExpiryTime() const override { return SIMTIME_ZERO; }
+
     void setSource(cObject *_source) override { if (source != _source) { source = _source; changed(F_SOURCE); } }
     cObject *getSource() const override { return source; }
 
