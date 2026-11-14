@@ -50,7 +50,7 @@ class DsdvSchedulingProbe : public Dsdv
     int packets=0, fullDumps=0, accepted=0, rejected=0;
     int beforePackets=0, beforeDumps=0;
     int remoteWithdrawals=0;
-    std::vector<simtime_t> times={.1,.11,.2,.3,.31,.35,.4,.450001,.48,.5,.500001,.55,.56,.560001,.6,.7,.71,.9,.900001,1,1.2,1.3,1.31,1.4,1.41};
+    std::vector<simtime_t> times={.1,.11,.2,.3,.31,.35,.4,.450001,.48,.5,.500001,.55,.56,.560001,.6,.7,.71,.9,.900001,1,1.2,1.3,1.31,1.4,1.41,1.5,1.51,1.6,1.61,1.7,1.71,1.8};
     Ipv4Address destination=Ipv4Address("10.0.0.4");
     DsdvEntry entry(int node,uint64_t sequence,uint32_t metric) {
         DsdvEntry value; value.destination=Ipv4Address(0x0a000000U+node);
@@ -177,6 +177,24 @@ class DsdvSchedulingProbe : public Dsdv
                 ASSERT(!startupDump);
                 std::cout << "DSDV MAC feedback module PASS: hint filtering, failed receiver, repeat safety, restart\n";
                 break;
+            case 25: forcePeriodic(); break;
+            case 26: ASSERT(currentPeriod==SimTime(200)); break;
+            case 27:
+                inject({entry(10,2,1),entry(11,2,1)});
+                forcePeriodic();
+                break;
+            case 28: ASSERT(currentPeriod==SimTime(100)); break;
+            case 29: forcePeriodic(); break;
+            case 30:
+                ASSERT(currentPeriod==SimTime(200));
+                suspend(false);
+                start();
+                ASSERT(currentPeriod==period && table.consumeSignificantChanges()==0);
+                break;
+            case 31:
+                ASSERT(active && !startupDump);
+                std::cout << "DSDV adaptive scheduling module PASS: quiet growth, churn reduction, restart reset\n";
+                break;
         }
         if (++step<int(times.size())) scheduleAt(times[step],probeTimer);
     }
@@ -221,6 +239,7 @@ record-vector-results = false
 *.host.numApps = 1
 *.host.app[0].typename = "DsdvSchedulingProbe"
 *.host.app[0].fullDumpInterval = 100s
+*.host.app[0].adaptiveFullDump = true
 *.host.app[0].periodicJitter = 0s
 *.host.app[0].neighborTimeout = 10s
 *.host.app[0].routeTimeout = 12s
@@ -255,3 +274,5 @@ record-vector-results = false
 DSDV scheduling PASS: forwarding, full-view damping, deadlines, correction, overflow, atomic rejection
 %contains: stdout
 DSDV MAC feedback module PASS: hint filtering, failed receiver, repeat safety, restart
+%contains: stdout
+DSDV adaptive scheduling module PASS: quiet growth, churn reduction, restart reset

@@ -183,6 +183,26 @@ ASSERT(failure.getRouteEntries().at(failed[0]).current.sequence == 11);
 ASSERT(failure.invalidateNeighbor(Ipv4Address("10.0.0.99"),.3).empty());
 auto remaining = failure.expire(10.1);
 ASSERT(remaining == std::vector<Ipv4Address>({Ipv4Address("10.0.0.5"),Ipv4Address("10.0.0.6")}));
+// Adaptation counts selected transitions once, not sequence refresh or correction.
+DsdvTable history; history.configure(Ipv4Address("10.0.0.1"),1,10,12); history.start(0);
+history.configureChangeHistory(2);
+history.receive(h(2,{e(4,2,1)}),0);
+ASSERT(history.consumeSignificantChanges() == 1);
+history.receive(h(2,{e(4,4,1)}),.1);
+history.receive(h(2,{e(4,3,UINT32_MAX)}),.2);
+ASSERT(history.consumeSignificantChanges() == 0);
+history.receive(h(2,{e(4,6,2)}),.3);
+history.receive(h(3,{e(4,8,2),e(5,2,1)}),.4);
+ASSERT(history.consumeSignificantChanges() == 2); // Saturated at one packet's capacity.
+history.receive(h(3,{e(9,1,UINT32_MAX)}),.5);
+ASSERT(history.consumeSignificantChanges() == 0); // Unknown unreachable is not new reachability.
+history.invalidateNeighbor(Ipv4Address("10.0.0.3"),.6);
+history.invalidateNeighbor(Ipv4Address("10.0.0.3"),.7);
+ASSERT(history.consumeSignificantChanges() == 2);
+ASSERT(history.consumeSignificantChanges() == 0);
+history.configureChangeHistory(0);
+history.receive(h(2,{e(4,10,1)}),.8);
+ASSERT(history.consumeSignificantChanges() == 0);
 EV << "DSDV dissemination PASS\n";
 
 %contains: stdout

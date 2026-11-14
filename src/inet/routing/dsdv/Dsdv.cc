@@ -2,6 +2,7 @@
 #include "inet/routing/dsdv/Dsdv.h"
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 
 #include "inet/common/ModuleAccess.h"
@@ -44,6 +45,15 @@ void Dsdv::initialize(int stage)
         controlPort = par("controlPort");
         period = par("fullDumpInterval");
         jitter = par("periodicJitter");
+        adaptiveFullDump = par("adaptiveFullDump");
+        if (adaptiveFullDump) {
+            minPeriod = par("minFullDumpInterval");
+            maxPeriod = par("maxFullDumpInterval");
+            fullDumpBitrateBudget = par("fullDumpBitrateBudget");
+            if (minPeriod <= SIMTIME_ZERO || minPeriod > period || maxPeriod < period ||
+                    !std::isfinite(fullDumpBitrateBudget) || fullDumpBitrateBudget <= 0)
+                throw cRuntimeError("DSDV adaptive intervals require 0 < minimum <= initial <= maximum and a positive finite bitrate budget");
+        }
         if (controlPort < 1024 || controlPort > UINT16_MAX || period <= SIMTIME_ZERO || jitter < SIMTIME_ZERO ||
                 par("neighborTimeout").doubleValue() <= 0 || par("routeTimeout").doubleValue() <= 0 ||
                 par("settlingCap").doubleValue() <= 0 || par("minSettlingDelay").doubleValue() <= 0 ||
@@ -77,6 +87,7 @@ void Dsdv::initialize(int stage)
         WATCH_EXPR("nextPeriodicDump", periodicTimer->isScheduled() ? periodicTimer->getArrivalTime() : SimTime::getMaxTime());
         WATCH_EXPR("nextAdvertisement", advertisementTimer->isScheduled() ? advertisementTimer->getArrivalTime() : SimTime::getMaxTime());
         WATCH_EXPR("nextExpiry", expiryTimer->isScheduled() ? expiryTimer->getArrivalTime() : SimTime::getMaxTime());
+        WATCH(currentPeriod);
         auto group = ProtocolGroup::getUdpProtocolGroup();
         auto existing = group->findProtocol(controlPort);
         if (existing && existing != &dsdvProtocol)
@@ -124,6 +135,8 @@ void Dsdv::start()
         throw cRuntimeError("DSDV payload budget/MTU cannot hold one entry plus IPv4/UDP overhead");
     capacity = std::min((budget - DsdvTable::HEADER_BYTES) / DsdvTable::ENTRY_BYTES, int(UINT16_MAX));
     table.start(simTime());
+    table.configureChangeHistory(adaptiveFullDump ? capacity : 0);
+    currentPeriod = period;
     socket.bind(controlPort);
     socket.setBroadcast(true);
     socket.setTimeToLive(1);
@@ -211,8 +224,20 @@ void Dsdv::handleMessageWhenUp(cMessage *message)
     }
     else if (message == periodicTimer) {
         table.advanceSelf();
-        sendAdvertisement(true);
-        scheduleAt(simTime() + period + SimTime(uniform(0, jitter.dbl())), periodicTimer);
+        size_t bytes = sendAdvertisement(true);
+        if (adaptiveFullDump) {
+            size_t changes = table.consumeSignificantChanges();
+            // PB94 §§3–4 motivate adaptation; this bounded policy is a model choice.
+            simtime_t proposal = currentPeriod;
+            if (changes == 0)
+                proposal = currentPeriod > maxPeriod / 2 ? maxPeriod : currentPeriod * 2;
+            else if (changes >= capacity)
+                proposal = std::max(minPeriod, currentPeriod / 2);
+            double budgetDelay = std::min(maxPeriod.dbl(), 8.0 * bytes / fullDumpBitrateBudget);
+            currentPeriod = std::min(maxPeriod, std::max(minPeriod, std::max(proposal, SimTime(budgetDelay))));
+            emit(registerSignal("fullDumpIntervalSelected"), currentPeriod);
+        }
+        scheduleAt(simTime() + currentPeriod + SimTime(uniform(0, jitter.dbl())), periodicTimer);
     }
     else if (message == advertisementTimer) {
         bool full = startupDump;
@@ -226,8 +251,9 @@ void Dsdv::handleMessageWhenUp(cMessage *message)
     scheduleTimers();
 }
 
-void Dsdv::sendAdvertisement(bool full)
+size_t Dsdv::sendAdvertisement(bool full)
 {
+    size_t bytes = 0;
     auto advertisement = table.prepare(full, capacity, simTime());
     for (auto delay : advertisement.settlingDelays)
         emit(registerSignal("settlingDelay"), delay);
@@ -238,6 +264,7 @@ void Dsdv::sendAdvertisement(bool full)
         header->setSelfSequence(table.getSelf().current.sequence);
         header->setEntriesArraySize(entries.size());
         header->setChunkLength(B(DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES * entries.size()));
+        bytes += header->getChunkLength().get<B>();
         for (size_t i = 0; i < entries.size(); i++)
             header->setEntries(i, entries[i]);
         auto packet = new Packet("DSDV", header);
@@ -251,6 +278,7 @@ void Dsdv::sendAdvertisement(bool full)
     }
     if (!advertisement.datagrams.empty())
         emit(registerSignal(advertisement.full ? "fullDumpSent" : "incrementalSent"), 1L);
+    return bytes;
 }
 
 void Dsdv::synchronizeRoutes(const char *withdrawalReason)

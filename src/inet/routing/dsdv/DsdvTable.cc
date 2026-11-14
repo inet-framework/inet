@@ -143,6 +143,8 @@ void DsdvTable::install(const DsdvEntry& entry, Ipv4Address sender, simtime_t no
     bool finite = isFinite(entry);
     bool newer = !known || entry.sequence > record.current.sequence;
     bool pathChanged = !known || record.current.metric != entry.metric || record.successor != sender;
+    if ((finite && (!wasFinite || pathChanged)) || (wasFinite && !finite))
+        recordChange();
     bool urgent = mustSend.count(entry.destination) || !finite || !wasFinite ||
             (pathChanged && now - record.changed >= cap);
     if (!known)
@@ -217,6 +219,7 @@ bool DsdvTable::invalidate(Ipv4Address destination, simtime_t now)
     auto& record = routeEntries.at(destination);
     if (destination == self || !isFinite(record.current))
         return false;
+    recordChange();
     // Perkins/Bhagwat 1994 §3: failed-successor withdrawals have odd sequences.
     record.current.sequence = advance(record.current.sequence, 1);
     record.current.metric = INFINITY_METRIC;

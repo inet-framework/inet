@@ -28,16 +28,21 @@ class INET_API Dsdv : public RoutingProtocolBase, public UdpSocket::ICallback, p
     bool active = false;
     bool startupDump = false;
     bool useMacFailureFeedback = false;
+    bool adaptiveFullDump = false;
     int controlPort = -1;
     size_t capacity = 0;
     simtime_t period;
     simtime_t jitter;
+    simtime_t minPeriod;
+    simtime_t maxPeriod;
+    simtime_t currentPeriod;
+    double fullDumpBitrateBudget = 0;
 
     void start();
     void suspend(bool crash);
     bool interfaceUsable() const;
     void scheduleTimers();
-    void sendAdvertisement(bool full);
+    size_t sendAdvertisement(bool full);
     void synchronizeRoutes(const char *withdrawalReason = nullptr);
     void removeOwnedRoutes();
     void scheduleTimer(cMessage *timer, simtime_t when);

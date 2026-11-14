@@ -53,9 +53,12 @@ class INET_API DsdvTable
     std::map<Ipv4Address, DsdvEntry> baseline;
     std::set<Ipv4Address> mustSend;
     Ipv4Address optionalCursor;
+    size_t significantChanges = 0;
+    size_t changeLimit = 0;
 
     void makeUrgent(RouteEntry& record);
     void install(const DsdvEntry& entry, Ipv4Address sender, simtime_t now);
+    void recordChange() { if (significantChanges < changeLimit) significantChanges++; }
 
   public:
     static bool isHost(Ipv4Address address);
@@ -70,6 +73,8 @@ class INET_API DsdvTable
     void start(simtime_t now);
     void suspend(simtime_t now);
     void advanceSelf();
+    void configureChangeHistory(size_t limit) { changeLimit = limit; significantChanges = 0; }
+    size_t consumeSignificantChanges() { size_t result = significantChanges; significantChanges = 0; return result; }
     void receive(const DsdvHeader& header, simtime_t now);
     bool invalidate(Ipv4Address destination, simtime_t now);
     std::vector<Ipv4Address> invalidateNeighbor(Ipv4Address neighbor, simtime_t now);

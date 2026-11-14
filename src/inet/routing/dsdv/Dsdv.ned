@@ -20,6 +20,10 @@ simple Dsdv like IApp
         int controlPort = default(26999); // Unprivileged UDP port, 1024..65535
         double fullDumpInterval @unit(s) = default(5s); // Positive periodic interval
         double periodicJitter @unit(s) = default(500ms); // Uniform [0,J], nonnegative
+        bool adaptiveFullDump = default(false); // Adapt periodic intervals to selected-route changes and payload overhead
+        double minFullDumpInterval @unit(s) = default(fullDumpInterval); // Positive lower bound, at most the initial interval
+        double maxFullDumpInterval @unit(s) = default(2 * fullDumpInterval); // Upper bound, at least the initial interval
+        double fullDumpBitrateBudget @unit(bps) = default(11200bps); // Positive periodic DSDV payload target, not total channel load
         double neighborTimeout @unit(s) = default(20s); // Positive sender liveness timeout
         double routeTimeout @unit(s) = default(25s); // Positive per-destination freshness timeout
         double settlingCap @unit(s) = default(1s); // Positive maximum finite-change delay
@@ -36,6 +40,7 @@ simple Dsdv like IApp
         @signal[fullDumpSent](type=long);
         @signal[incrementalSent](type=long);
         @signal[settlingDelay](type=simtime_t);
+        @signal[fullDumpIntervalSelected](type=simtime_t);
         @statistic[updateAccepted](record=count);
         @statistic[updateRejected](record=count);
         @statistic[routeInstalled](record=count);
@@ -45,6 +50,7 @@ simple Dsdv like IApp
         @statistic[fullDumpSent](record=count);
         @statistic[incrementalSent](record=count);
         @statistic[settlingDelay](record=vector);
+        @statistic[fullDumpIntervalSelected](record=vector; unit=s);
     gates:
         input socketIn;
         output socketOut;

@@ -88,6 +88,10 @@ not create additional broadcasts just to send sequence-only changes.
 
 Set ``useMacFailureFeedback = true`` to let MAC delivery-failure hints withdraw routes through the failed neighbor before its silence timeout. It uses the failed frame's receiver and a local ARP-cache lookup through the configured ``arpModule``; missing or unusable metadata leaves ordinary timeout processing active. Parameter declarations and defaults are in :ned:`Dsdv`. A failed receiver does not invalidate a route that has already switched to a different next hop. A MAC failure can also result from transient interference, so feedback is a routing hint rather than proof of physical disconnection.
 
+Set ``adaptiveFullDump = true`` to adjust periodic full-dump timing. Quiet periods try a longer interval, substantial route changes try a shorter one, and the encoded dump size is considered against the configured payload bitrate target. See :ned:`Dsdv` for parameter declarations and defaults. The interval bounds and budget must be finite and positive, with minimum <= initial <= maximum. The overhead target is best effort and excludes triggered traffic, UDP/IP headers and radio airtime. Urgent updates do not wait for a periodic dump. With adaptation disabled, the fixed interval and existing jitter behavior remain in use.
+
+Set ``neighborTimeout`` and ``routeTimeout`` from the longest expected update gaps of the sending peers, including their jitter, delivery allowance and settling where relevant. A receiver's own sending interval does not determine how long it must wait to hear its neighbors. Peers may therefore use different full-dump intervals and timeout values; the module does not negotiate intervals or infer a domain-wide timeout guarantee.
+
 :ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
 through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
 ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding

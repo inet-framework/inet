@@ -187,6 +187,12 @@ These observations distinguish a stale withdrawal requiring correction from a ne
 
 ## Payload, periodic updates and encoding
 
+### Adaptive full-dump frequency
+
+Compare a quiet topology with one undergoing significant route changes. Observe whether full-dump timing can become less frequent while routes remain quiet and respond to increasing incremental-update demand. In a separate scenario, increase the information needed for a full dump and observe the policy's response to routing overhead. Urgent unreachable-route advertisements must remain independent of periodic full-dump timing.
+
+These checks select the paper's qualitative adaptation suggestions. The paper supplies no exact interval formula, overhead budget or convergence improvement to assert; those choices and their numerical oracles belong to the model profile. A longer interval alone does not establish lower total traffic, because triggered updates and topology changes can dominate the result.
+
 ### Capacity and overflow
 
 Let K be the number of entries that fit in one DSDV datagram. The profile uses a 16-byte fixed header and 16 bytes per entry. A 48-byte DSDV payload budget therefore fits two entries. Interface MTU accounting must additionally reserve IPv4 and UDP headers.
