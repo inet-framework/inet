@@ -957,7 +957,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
         }
 
         // RFC 3561 section 6.7. An aliased previous hop must not preempt reply selection.
-        int prefix = !usingIpv6 && rrep->getPrefixSize() ? rrep->getPrefixSize() : addressType->getMaxPrefixLength();
+        int prefix = rrep->getPrefixSize() ? rrep->getPrefixSize() : addressType->getMaxPrefixLength();
         if (prefix <= 0 || prefix > addressType->getMaxPrefixLength())
             return;
         auto normalized = rrep->getDestAddr().getPrefix(prefix);
