@@ -42,7 +42,7 @@ simple Aodv extends SimpleModule like IApp
         double stopOperationTimeout @unit(s) = default(2s); // Maximum wait for UDP socket closure during graceful stop
         double stopOperationExtraTime @unit(s) = default(-1s); // Extra wait after socket closure; negative completes immediately
         string interface @mutable = default("wlan0"); // Primary interface, applied at start
-        string interfaces @mutable = default(""); // Whitespace-separated exact IPv4 interface names including interface; empty selects only interface; applied at start
+        string interfaces @mutable = default(""); // Whitespace-separated exact same-family IP interface names including interface; empty selects only interface; applied at start
         string gatewayAddress = default(""); // The address of the external gateway (external traffic routed here by default)
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // It MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.

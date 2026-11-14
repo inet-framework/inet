@@ -1630,8 +1630,8 @@ void Aodv::configureInterfaces()
     auto primary = interface->getNetworkAddress();
     if (primary.isUnspecified() || primary.isBroadcast() || primary.isMulticast())
         throw cRuntimeError("AODV selected interface requires a usable unicast address");
-    if (explicitSelection && primary.getType() != L3Address::IPv4)
-        throw cRuntimeError("AODV explicit interfaces selection supports IPv4 only");
+    if (explicitSelection && primary.getType() != L3Address::IPv4 && primary.getType() != L3Address::IPv6)
+        throw cRuntimeError("AODV explicit interfaces selection requires IPv4 or IPv6");
     std::set<L3Address> addresses;
     for (auto selected : selectedInterfaces) {
         if (selected->isLoopback())
@@ -1643,8 +1643,15 @@ void Aodv::configureInterfaces()
             throw cRuntimeError("AODV selected interface requires a usable unicast address");
         if (address.getType() != primary.getType())
             throw cRuntimeError("AODV selected interfaces must use one address family");
+        if (address.getType() == L3Address::IPv6 && address.toIpv6().isLinkLocal())
+            throw cRuntimeError("AODV selected IPv6 interfaces require non-link-local identities");
+#ifdef INET_WITH_IPv6
+        if (address.getType() == L3Address::IPv6 &&
+                selected->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(address.toIpv6()))
+            throw cRuntimeError("AODV selected IPv6 interfaces require non-tentative identities");
+#endif
         if (!addresses.insert(address).second)
-            throw cRuntimeError("AODV selected interfaces must have distinct IPv4 addresses");
+            throw cRuntimeError("AODV selected interfaces must have distinct addresses");
     }
 }
 
@@ -1713,7 +1720,9 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     socket.bind(L3Address(), aodvUDPPort);
     socket.setBroadcast(true);
     if (usingIpv6)
-        socket.joinMulticastGroup(addressType->getBroadcastAddress(), interface->getInterfaceId());
+        for (auto selected : selectedInterfaces) {
+            socket.joinMulticastGroup(addressType->getBroadcastAddress(), selected->getInterfaceId());
+        }
 
     // RFC 5148:
     // Jitter SHOULD be applied by reducing this delay by a random amount, so that
