@@ -84,6 +84,41 @@ auto duplicate = update("10.0.0.2", {entry("10.0.0.4", 2, 1),entry("10.0.0.4", 2
 ASSERT(!DsdvTable::isValidHeader(*duplicate));
 for (const char *address : {"0.0.0.0", "127.0.0.1", "224.0.0.1", "255.255.255.255"})
     ASSERT(!DsdvTable::isHost(Ipv4Address(address)));
+// Independent v2 oracle: the v1 fields stay in order, then one flags byte.
+auto capability = entry("10.0.0.4",0x0102030405060708ULL,2);
+capability.defaultCapability = true;
+auto second = update("10.0.0.2",{capability});
+second->setVersion(2); second->setSelfSequence(0x0807060504030200ULL); second->setChunkLength(B(33));
+Packet output2("wire v2",second);
+auto expected2 = expected; expected2[0]=2; expected2.push_back(1);
+ASSERT(output2.peekAllAsBytes()->getBytes() == expected2);
+Packet input2("read v2",makeShared<BytesChunk>(expected2));
+auto decoded2 = input2.peekAtFront<DsdvHeader>(B(33));
+ASSERT(DsdvTable::isValidHeader(*decoded2) && decoded2->getEntries(0).defaultCapability);
+ASSERT(DsdvTable::equal(decoded2->getEntries(0),capability));
+for (uint8_t flag : {uint8_t(2),uint8_t(3),uint8_t(255)}) {
+    auto bad=expected2; bad[32]=flag;
+    Packet packet("reserved flags",makeShared<BytesChunk>(bad));
+    ASSERT(!packet.peekAtFront<DsdvHeader>(B(33),Chunk::PF_ALLOW_INCORRECT)->isCorrect());
+}
+for (size_t size : {size_t(32),size_t(34)}) {
+    auto bad=expected2; bad.resize(size);
+    Packet packet("v2 length",makeShared<BytesChunk>(bad));
+    ASSERT(!packet.peekAtFront<DsdvHeader>(B(size),Chunk::PF_ALLOW_INCORRECT)->isCorrect());
+}
+auto impossible=expected2;
+impossible[27]=9;
+for (int i=28;i<32;i++) impossible[i]=255;
+Packet invalidCapability("infinite capability",makeShared<BytesChunk>(impossible));
+ASSERT(!invalidCapability.peekAtFront<DsdvHeader>(B(33),Chunk::PF_ALLOW_INCORRECT)->isCorrect());
+bool rejectedCapability=false;
+try {
+    Packet legacy("legacy capability",update("10.0.0.2",{capability}));
+    legacy.peekAllAsBytes();
+}
+catch (cRuntimeError&) { rejectedCapability=true; }
+ASSERT(rejectedCapability);
+ASSERT(DsdvTable::getEntryBytes(1)==16 && DsdvTable::getEntryBytes(2)==17 && DsdvTable::getEntryBytes(99)==0);
 EV << "DSDV foundation PASS\n";
 
 %contains: stdout

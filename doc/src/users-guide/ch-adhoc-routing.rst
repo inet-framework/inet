@@ -92,14 +92,16 @@ Set ``adaptiveFullDump = true`` to adjust periodic full-dump timing. Quiet perio
 
 Set ``neighborTimeout`` and ``routeTimeout`` from the longest expected update gaps of the sending peers, including their jitter, delivery allowance and settling where relevant. A receiver's own sending interval does not determine how long it must wait to hear its neighbors. Peers may therefore use different full-dump intervals and timeout values; the module does not negotiate intervals or infer a domain-wide timeout guarantee.
 
+For access to an external network, configure the same ``baseStationAddress`` on every participant and set ``externalInterface`` on the station with that ad hoc IPv4 identity. The base station advertises external service only while its uplink and non-DSDV external default route are usable. Mobile nodes install a DSDV-owned default through their selected next hop toward the station. An existing foreign default is preserved instead. Keep connected ad hoc subnet routes, use separate wired prefixes, and provide wired return routes to the mobile subnet. This profile supports one configured base station, with no gateway election, NAT or remote-health probing. The declarations and defaults are in :ned:`Dsdv`.
+
+All participants in a base-station domain use the version-2 wire profile; mixing host-only version 1 with version 2 rejects control updates rather than negotiating an upgrade. Losing external service withdraws the default capability while leaving the station's host route finite wherever its wireless path remains usable. See the development migration guide's DSDV base-station profile for a configuration example.
+
 :ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
 through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
 ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding
 and avoid configurator-supplied multihop routes when studying routing behavior.
 The example under ``examples/dsdv`` demonstrates a deterministic mobile line.
-IPv6, prefix/default advertisements and multiple active interfaces are outside
-the supported profile. Restarting the same module preserves sequence floors;
-destroying and recreating it requires persistent state outside this model.
+IPv6, arbitrary prefix advertisements and multiple active ad hoc interfaces are outside the supported profile. Ordinary routers use one active non-loopback interface; a configured base station may add its named external interface. Restarting the same module preserves sequence floors; destroying and recreating it requires persistent state outside this model.
 
 .. _ug:sec:adhocrouting:dymo:
 

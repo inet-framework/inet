@@ -11,9 +11,13 @@ void DsdvHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr
 {
     const auto& header = staticPtrCast<const DsdvHeader>(chunk);
     // Wire encoding permits INT_MAX; reception rejects it before adding a hop.
-    if (header->getEntriesArraySize() > UINT16_MAX || header->getChunkLength() !=
-            B(DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES * header->getEntriesArraySize()))
+    int entryBytes = DsdvTable::getEntryBytes(header->getVersion());
+    if (entryBytes == 0 || header->getEntriesArraySize() > UINT16_MAX || header->getChunkLength() !=
+            B(DsdvTable::HEADER_BYTES + entryBytes * header->getEntriesArraySize()))
         throw cRuntimeError("DSDV header count/length mismatch");
+    for (size_t i = 0; i < header->getEntriesArraySize(); i++)
+        if (header->getVersion() == 1 && header->getEntries(i).defaultCapability)
+            throw cRuntimeError("DSDV version 1 cannot encode default capability");
     stream.writeUint8(header->getVersion());
     stream.writeUint8(header->getKind());
     stream.writeUint16Be(header->getEntriesArraySize());
@@ -24,6 +28,8 @@ void DsdvHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr
         stream.writeIpv4Address(entry.destination);
         stream.writeUint64Be(entry.sequence);
         stream.writeUint32Be(entry.metric);
+        if (header->getVersion() == 2)
+            stream.writeUint8(entry.defaultCapability ? 1 : 0);
     }
 }
 
@@ -41,7 +47,8 @@ const Ptr<Chunk> DsdvHeaderSerializer::deserializeFields(MemoryInputStream& stre
     size_t count = stream.readUint16Be();
     header->setSender(stream.readIpv4Address());
     header->setSelfSequence(stream.readUint64Be());
-    if (length != B(DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES * count)) {
+    int entryBytes = DsdvTable::getEntryBytes(header->getVersion());
+    if (entryBytes == 0 || length != B(DsdvTable::HEADER_BYTES + entryBytes * count)) {
         header->markIncorrect();
         stream.readByteRepeatedly(0, stream.getRemainingLength().get<B>());
         return header;
@@ -52,6 +59,12 @@ const Ptr<Chunk> DsdvHeaderSerializer::deserializeFields(MemoryInputStream& stre
         entry.destination = stream.readIpv4Address();
         entry.sequence = stream.readUint64Be();
         entry.metric = stream.readUint32Be();
+        if (header->getVersion() == 2) {
+            uint8_t flags = stream.readUint8();
+            entry.defaultCapability = flags & 1;
+            if (flags & ~uint8_t(1))
+                header->markIncorrect();
+        }
         header->setEntries(i, entry);
     }
     header->setChunkLength(length);

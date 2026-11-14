@@ -2,10 +2,7 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [catalog](../../standard/perkins1994/catalog.md)
 
-The governing source is Perkins/Bhagwat, SIGCOMM 1994, §§3–4. The initial
-profile covers IPv4 host destinations and hop counts on one bidirectional ad hoc
-interface. Layer-2 operation, default routes, external networks, IPv6, asymmetric
-links, security and interoperable external encodings are outside its claim.
+The governing source is Perkins/Bhagwat, SIGCOMM 1994, §§3–4. The host-only profile covers IPv4 host destinations and hop counts on one bidirectional ad hoc interface using the version-1 encoding below. The optional [base-station model profile](../../model/dsdv/profile.md#base-station-default-reachability) adds configured default reachability and an external uplink with version 2. Layer-2 operation, arbitrary prefix propagation, IPv6, asymmetric links, security and interoperable external encodings remain outside the model's claim.
 
 The conflicting damping paragraph is resolved as recorded in the source catalog.
 64-bit checked sequences, retained withdrawal floors, separate destination and

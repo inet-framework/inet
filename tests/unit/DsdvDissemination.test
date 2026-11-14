@@ -203,6 +203,37 @@ ASSERT(history.consumeSignificantChanges() == 0);
 history.configureChangeHistory(0);
 history.receive(h(2,{e(4,10,1)}),.8);
 ASSERT(history.consumeSignificantChanges() == 0);
+// Capability is immutable at a sequence and urgent when a newer tuple changes it.
+auto gatewayHeader = [&](int sender,uint64_t sequence,uint32_t metric,bool available) {
+    auto header=h(sender,{e(4,sequence,metric)});
+    header.setVersion(2); header.setChunkLength(B(33));
+    auto value=header.getEntries(0); value.defaultCapability=available; header.setEntries(0,value);
+    return header;
+};
+DsdvTable gateway; gateway.configure(Ipv4Address("10.0.0.1"),1,10,12); gateway.start(0);
+gateway.configureChangeHistory(10);
+gateway.receive(gatewayHeader(2,10,1,true),0);
+gateway.prepare(true,2,0); gateway.consumeSignificantChanges();
+auto beforeRefresh=gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).refreshed;
+gateway.receive(gatewayHeader(2,10,1,false),.1);
+ASSERT(gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.defaultCapability);
+ASSERT(gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).refreshed==beforeRefresh);
+ASSERT(gateway.consumeSignificantChanges()==0);
+gateway.receive(gatewayHeader(3,12,3,false),.2);
+ASSERT(gateway.nextAdvertisement(.2)==SimTime(.2));
+ASSERT(gateway.consumeSignificantChanges()==1); // Both path and capability changed.
+auto lostCapability=gateway.prepare(false,2,.2);
+ASSERT(!advertised(lostCapability,4).defaultCapability && advertised(lostCapability,4).sequence==12);
+gateway.receive(gatewayHeader(2,10,1,true),.3);
+ASSERT(!gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.defaultCapability);
+gateway.receive(gatewayHeader(2,14,1,true),.4);
+ASSERT(gateway.nextAdvertisement(.4)==SimTime(.4));
+ASSERT(advertised(gateway.prepare(false,2,.4),4).defaultCapability);
+gateway.invalidateNeighbor(Ipv4Address("10.0.0.2"),.5);
+ASSERT(!gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.defaultCapability);
+ASSERT(gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.sequence==15);
+gateway.receive(gatewayHeader(2,14,1,true),.6);
+ASSERT(!DsdvTable::isFinite(gateway.getRouteEntries().at(Ipv4Address("10.0.0.4")).current));
 EV << "DSDV dissemination PASS\n";
 
 %contains: stdout

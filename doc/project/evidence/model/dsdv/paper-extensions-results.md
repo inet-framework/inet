@@ -9,7 +9,7 @@ The extension branch starts at `dc594f8b2e0b2cd6c7ef23f484af356143202e00`. The u
 | C1 incremental fairness | debug PASS | dissemination unit and fairness protocol PASS | Source comparison only, runtime NOT_RUN |
 | C2 MAC feedback | debug PASS | dissemination unit, lifecycle/scheduling modules and MAC protocol PASS | Source comparison only, runtime NOT_RUN |
 | C3 adaptive full dumps | debug PASS | dissemination unit, scheduling/invalid-config modules and adaptive protocol PASS | Source comparison only, runtime NOT_RUN |
-| C4 base-station routes | NOT_RUN | NOT_RUN | New profile cannot run unchanged on the parent |
+| C4 base-station routes | debug/release PASS | wire/graph/dissemination units, six lifecycle/gateway modules and gateway protocol PASS | New profile cannot run unchanged on the parent |
 
 ## C1: Incremental fairness
 
@@ -65,3 +65,19 @@ doc/project/enforcement/check-architecture.sh src/inet/routing/dsdv
 All commands exited 0, executing one unit, three module and one protocol case. Two module cases deliberately fail initialization and pass only when the specific invalid-configuration diagnostic/exit code matches. The protocol case checks quiet growth, churn reduction, byte-cost floors, interval clamps, urgent withdrawal, a triggered fragmented dump without periodic postponement, and heterogeneous peer intervals. The quiet receiver's first periodic spacing is exactly 2 s; its assertion observes packets before requiring the new interval statistic. The reciprocal heterogeneous pair remains reachable with no expiry through its observation window. General/run/seed 0 is used; no performance improvement is inferred.
 
 Logs: `/tmp/dsdv-extensions-c3-build.log`, `/tmp/dsdv-extensions-c3-unit.log`, `/tmp/dsdv-extensions-c3-module.log`, `/tmp/dsdv-extensions-c3-architecture.log`, `/tmp/dsdv-c3-protocol-agent.log`. Raw protocol output is `tests/protocol/dsdv/work/DsdvAdaptiveDumps/test.out`. Exact-parent execution and release compilation remain pending at this feature checkpoint.
+
+## C4: Base-station default routes
+
+The implementation contract was traced through table freshness, UDP validation, IPv4 default replacement/iteration and lifecycle callbacks before editing. Version 2 adds one flags byte per entry while retaining the fixed header and version-1 bytes. One configured base station advertises sequenced capability; the adapter derives its default route without importing external prefixes. Reconciliation uses one conditional deferred event and preserves foreign routes. The test descriptor adds Ethernet without changing core DSDV's dependencies.
+
+On 2026-11-14, fresh debug compilation and three selected unit cases passed: `DsdvFoundation`, `DsdvDissemination`, `DsdvGraph`. The lifecycle/scheduling controls passed, as did the four new gateway modules: `DsdvGatewayReconciliation`, `DsdvGatewayInvalidPayload`, `DsdvGatewayOrigin`, `DsdvUnexpectedInterface`. Invalid payload and unexpected-interface cases pass by requiring the specific initialization rejection. The origin module checks wired/ad hoc default replacement, unchanged-availability notifications without sequence/send churn, 50-byte version-2 fairness and overflow through adapter output. Reconciliation also checks rejection leaves neighbor clocks and expiry unchanged.
+
+The focused protocol command exited 0 with one General/run/seed 0 case:
+
+```sh
+opp_run_protocol_tests --load . -p inet -m debug --no-build -w '(^|/)dsdv$' -f 'DsdvBaseStation\.test$'
+```
+
+It observes no-uplink startup, real mobile/relay/base/wired-router/external-host forwarding, intermediate traversal, urgent capability loss, retained host routes, stale/mixed-version/wrong-origin input, foreign defaults, wired/wireless recovery and DSDV-controller restart. It does not establish whole Ethernet-node reboot behavior or external Internet health. The C3 parent cannot execute the new profile unchanged, so no measured parent forwarding failure is claimed.
+
+Logs: `/tmp/dsdv-extensions-c4-build-final.log`, `/tmp/dsdv-extensions-c4-unit.log`, `/tmp/dsdv-extensions-c4-module.log`, `/tmp/dsdv-extensions-c4-gateway-module.log`, `/tmp/dsdv-extensions-c4-reconciliation-final.log`, `/tmp/dsdv-extensions-c4-review-module.log`, `/tmp/dsdv-c4-protocol-agent.log`. The first gateway-module attempt reached setup errors (interface module-name matching and mobility coordinates); corrected focused reruns pass. Final release compilation also exited 0, log `/tmp/dsdv-extensions-final-release-build.log`. No source semantics changed after these checks; final integrated verification follows in the validation record.

@@ -363,6 +363,12 @@ After 55 further self-sequence advances and updated neighbor input at 8 s, all l
 
 Sender identity and self sequence live in this profile's datagram header. The check therefore does not depend on the paper example's sender-first entry convention.
 
+## Base-station coverage extension
+
+Place mobile station A outside the base station G's direct radio range, with relay R providing the wireless path A–R–G. Connect G to an external network. Once the default route associated with G has propagated, A must be able to forward packets for an external destination through R and G; verify a return path as well. Preserve the ordinary destination routes for mobile stations so traffic within the ad hoc network still follows the more-specific learned path.
+
+Break the wireless path to G. The unreachable next hop and its dependent routes must be withdrawn, and the external path must become unavailable. Restore the wireless path and supply newer reachable information; external forwarding must recover. These checks establish the paper's multihop coverage extension and ordinary path-loss behavior. They do not prescribe how a base station detects failure beyond its wired interface, how several base stations are elected, or an interoperable encoding for a default advertisement.
+
 ## Interpreting the coverage
 
 Unit checks establish controlled table decisions and encoding. Module checks add kernel ordering, route installation, rejection and lifecycle behavior. Protocol checks add real control exchange and application delivery. No single layer establishes all of these properties.

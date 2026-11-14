@@ -15,6 +15,7 @@ std::ostream& operator<<(std::ostream& stream, const DsdvTable::RouteEntry& reco
            << " firstAcceptance=" << record.firstAcceptance << " lastImprovement=" << record.lastImprovement
            << " estimate=" << record.estimate << " deadline=" << record.deadline
            << " hasSample=" << record.hasSample << " hasAdvertised=" << record.hasAdvertised;
+    stream << " defaultCapability=" << record.current.defaultCapability;
     if (record.hasAdvertised)
         stream << " advertisedSequence=" << record.advertised.sequence << " advertisedMetric=" << record.advertised.metric;
     return stream;
@@ -29,20 +30,20 @@ bool DsdvTable::isHost(Ipv4Address address)
 
 bool DsdvTable::isValidEntry(const DsdvEntry& entry)
 {
-    return isHost(entry.destination) && (isFinite(entry) ?
+    return isHost(entry.destination) && (!entry.defaultCapability || isFinite(entry)) && (isFinite(entry) ?
             entry.sequence % 2 == 0 && entry.metric <= INT_MAX : entry.sequence % 2 == 1);
 }
 
 bool DsdvTable::isValidHeader(const DsdvHeader& header)
 {
-    if (!header.isCorrect() || header.getVersion() != 1 || (header.getKind() != 1 && header.getKind() != 2) ||
+    if (!header.isCorrect() || getEntryBytes(header.getVersion()) == 0 || (header.getKind() != 1 && header.getKind() != 2) ||
             !isHost(header.getSender()) || header.getSelfSequence() % 2 || header.getEntriesArraySize() > UINT16_MAX ||
-            header.getChunkLength() != B(HEADER_BYTES + ENTRY_BYTES * header.getEntriesArraySize()))
+            header.getChunkLength() != B(HEADER_BYTES + getEntryBytes(header.getVersion()) * header.getEntriesArraySize()))
         return false;
     std::set<Ipv4Address> seen;
     for (size_t i = 0; i < header.getEntriesArraySize(); i++) {
         const auto& entry = header.getEntries(i);
-        if (!isValidEntry(entry) || !seen.insert(entry.destination).second ||
+        if (!isValidEntry(entry) || (header.getVersion() == 1 && entry.defaultCapability) || !seen.insert(entry.destination).second ||
                 (isFinite(entry) && entry.metric == INT_MAX))
             return false;
         if (entry.destination == header.getSender() &&
@@ -63,7 +64,8 @@ uint64_t DsdvTable::advance(uint64_t sequence, uint64_t increment)
 
 bool DsdvTable::equal(const DsdvEntry& a, const DsdvEntry& b)
 {
-    return a.destination == b.destination && a.sequence == b.sequence && a.metric == b.metric;
+    return a.destination == b.destination && a.sequence == b.sequence && a.metric == b.metric &&
+            a.defaultCapability == b.defaultCapability;
 }
 
 void DsdvTable::configure(Ipv4Address address, simtime_t settlingCap, simtime_t neighborAge, simtime_t routeAge,
@@ -134,6 +136,18 @@ void DsdvTable::advanceSelf()
     entry.sequence = advance(entry.sequence, 2);
 }
 
+void DsdvTable::setDefaultCapability(bool available, bool advanceSequence)
+{
+    auto& record = routeEntries.at(self);
+    if (record.current.defaultCapability == available)
+        return;
+    if (advanceSequence)
+        advanceSelf();
+    record.current.defaultCapability = available;
+    recordChange();
+    makeUrgent(record);
+}
+
 void DsdvTable::install(const DsdvEntry& entry, Ipv4Address sender, simtime_t now)
 {
     auto it = routeEntries.find(entry.destination);
@@ -143,9 +157,10 @@ void DsdvTable::install(const DsdvEntry& entry, Ipv4Address sender, simtime_t no
     bool finite = isFinite(entry);
     bool newer = !known || entry.sequence > record.current.sequence;
     bool pathChanged = !known || record.current.metric != entry.metric || record.successor != sender;
-    if ((finite && (!wasFinite || pathChanged)) || (wasFinite && !finite))
+    bool capabilityChanged = known && record.current.defaultCapability != entry.defaultCapability;
+    if ((finite && (!wasFinite || pathChanged || capabilityChanged)) || (wasFinite && !finite))
         recordChange();
-    bool urgent = mustSend.count(entry.destination) || !finite || !wasFinite ||
+    bool urgent = mustSend.count(entry.destination) || !finite || !wasFinite || capabilityChanged ||
             (pathChanged && now - record.changed >= cap);
     if (!known)
         record.estimate = cap / 2;
@@ -201,6 +216,9 @@ void DsdvTable::receive(const DsdvHeader& header, simtime_t now)
             continue;
         }
         auto& record = it->second;
+        // A destination cannot change its capability without a newer sequence.
+        if (entry.sequence == record.current.sequence && entry.defaultCapability != record.current.defaultCapability)
+            continue;
         // Perkins/Bhagwat 1994 §3, §4: sequence freshness, then lower metric.
         if (entry.sequence > record.current.sequence ||
                 (entry.sequence == record.current.sequence && entry.metric < record.current.metric))
@@ -223,6 +241,7 @@ bool DsdvTable::invalidate(Ipv4Address destination, simtime_t now)
     // Perkins/Bhagwat 1994 §3: failed-successor withdrawals have odd sequences.
     record.current.sequence = advance(record.current.sequence, 1);
     record.current.metric = INFINITY_METRIC;
+    record.current.defaultCapability = false;
     record.successor = Ipv4Address();
     record.changed = now;
     record.hasSample = false;
@@ -316,7 +335,8 @@ DsdvTable::Advertisement DsdvTable::prepare(bool full, size_t capacity, simtime_
     std::vector<DsdvEntry> optional;
     for (const auto& item : view) {
         auto old = baseline.find(item.first);
-        if (mustSend.count(item.first) || old == baseline.end() || old->second.metric != item.second.metric)
+        if (mustSend.count(item.first) || old == baseline.end() || old->second.metric != item.second.metric ||
+                old->second.defaultCapability != item.second.defaultCapability)
             required.push_back(item.second);
         else if (!equal(old->second, item.second))
             optional.push_back(item.second);

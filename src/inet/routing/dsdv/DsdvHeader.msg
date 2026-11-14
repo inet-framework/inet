@@ -11,9 +11,10 @@ struct DsdvEntry
     Ipv4Address destination;
     uint64_t sequence = 0;
     uint32_t metric = 0;
+    bool defaultCapability = false; // Version 2 flag bit 0, finite base-station routes only
 }
 
-// Model wire profile v1: 16B fixed header and 16B per entry, network order.
+// Model wire profile: 16B header, 16B v1 entry or 17B v2 entry, network order.
 // Kind 1 = full dump fragment; kind 2 = independently processable incremental.
 class DsdvHeader extends FieldsChunk
 {

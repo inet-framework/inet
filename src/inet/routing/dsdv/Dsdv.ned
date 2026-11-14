@@ -4,7 +4,7 @@ package inet.routing.dsdv;
 import inet.applications.contract.IApp;
 
 // Perkins/Bhagwat (SIGCOMM 1994), network-layer host-routing profile.
-// One bidirectional ad hoc IPv4 interface; finite-run sequence numbers.
+// One bidirectional ad hoc IPv4 interface; an optional base station has a wired uplink.
 // This versioned UDP model profile is not an external interoperability format.
 simple Dsdv like IApp
 {
@@ -15,8 +15,10 @@ simple Dsdv like IApp
         string interfaceTableModule = default(absPath("^.interfaceTable"));
         string routingTableModule = default(absPath("^.ipv4.routingTable"));
         string arpModule = default(absPath("^.ipv4.arp")); // Used only with MAC failure feedback
-        string interface = default("wlan0"); // Exactly one active non-loopback interface is supported
+        string interface = default("wlan0"); // Ad hoc interface; only a configured base station may add externalInterface
         bool useMacFailureFeedback = default(false); // Use unicast MAC delivery failures as neighbor-loss hints
+        string baseStationAddress = default(""); // Empty selects host-only v1; otherwise every participant uses v2 and this fixed IPv4 origin
+        string externalInterface = default(""); // Optional extra uplink on the matching base station only
         int controlPort = default(26999); // Unprivileged UDP port, 1024..65535
         double fullDumpInterval @unit(s) = default(5s); // Positive periodic interval
         double periodicJitter @unit(s) = default(500ms); // Uniform [0,J], nonnegative

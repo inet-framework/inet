@@ -17,6 +17,7 @@ not PDF page numbers. [Accessible source](https://www.cse.iitb.ac.in/~mythili/te
 | PB94-PRIORITY | §4 Table 4 | Metric changes take priority over sequence-only changes in incrementals. |
 | PB94-FAIR | §4 Table 4 discussion | When sequence-only changes exceed the remaining incremental space, select them fairly over successive incremental updates. |
 | PB94-SETTLE | §3; §4 Damping Fluctuations | Forwarding and advertised views differ during settling; history estimates the wait for a better metric. |
+| PB94-BASE-STATION | §3 Extending Base Station Coverage | A participating base station is shown as a default route in mobile advertisements, allowing stations beyond its direct radio range to reach the wired network through other mobile stations. |
 
 The damping paragraph also describes replacing a route with a worse metric at the
 same sequence. This conflicts with the repeated selection rule. This model follows

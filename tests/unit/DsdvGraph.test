@@ -110,6 +110,43 @@ runGraph({{0,1},{1,0}},true);
 runGraph({{0,1,0,0},{1,0,1,0},{0,1,0,1},{0,0,1,0}},true);
 runGraph({{0,1,1,0},{1,0,0,1},{1,0,0,1},{0,1,1,0}},true);
 runGraph({{0,1,1},{1,0,1},{1,1,0}},true);
+// A sequenced origin capability propagates over a line under fragment replay.
+std::vector<DsdvTable> gateways(3);
+for (int i=0;i<3;i++) { gateways[i].configure(address(i),.1,2,3); gateways[i].start(0); }
+gateways[0].setDefaultCapability(true,false);
+std::vector<DsdvHeader> capableTraffic;
+auto gatewayRounds = [&](double time,bool save) {
+    for (int round=0;round<5;round++) {
+        for (int sender=0;sender<3;sender++) {
+            gateways[sender].advanceSelf();
+            auto sent=gateways[sender].prepare(true,1,time);
+            for (auto fragment=sent.datagrams.rbegin();fragment!=sent.datagrams.rend();++fragment) {
+                auto header=message(gateways[sender],*fragment);
+                header.setVersion(2); header.setChunkLength(B(16+17*fragment->size()));
+                if (save) capableTraffic.push_back(header);
+                for (int receiver=0;receiver<3;receiver++) if (abs(sender-receiver)==1) {
+                    gateways[receiver].receive(header,time); checkNoCycles(gateways);
+                    gateways[receiver].receive(header,time); checkNoCycles(gateways);
+                }
+            }
+        }
+    }
+};
+gatewayRounds(.1,true);
+ASSERT(gateways[2].getRouteEntries().at(address(0)).current.defaultCapability);
+auto previous=gateways[0].getSelf().current.sequence;
+gateways[0].setDefaultCapability(false);
+ASSERT(gateways[0].getSelf().current.sequence==previous+2);
+gatewayRounds(.2,false);
+for (int receiver=1;receiver<3;receiver++)
+    ASSERT(!gateways[receiver].getRouteEntries().at(address(0)).current.defaultCapability);
+for (const auto& header:capableTraffic) {
+    int sender=header.getSender().getInt()-address(0).getInt();
+    for (int receiver=0;receiver<3;receiver++) if (abs(sender-receiver)==1)
+        gateways[receiver].receive(header,.3);
+}
+ASSERT(!gateways[2].getRouteEntries().at(address(0)).current.defaultCapability);
+checkNoCycles(gateways);
 EV << "DSDV graph PASS\n";
 
 %contains: stdout

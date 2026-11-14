@@ -20,7 +20,7 @@ class INET_API DsdvTable
   public:
     static constexpr uint32_t INFINITY_METRIC = UINT32_MAX;
     static constexpr int HEADER_BYTES = 16;
-    static constexpr int ENTRY_BYTES = 16;
+    static int getEntryBytes(uint8_t version) { return version == 1 ? 16 : version == 2 ? 17 : 0; }
 
     struct RouteEntry {
         DsdvEntry current;
@@ -73,6 +73,7 @@ class INET_API DsdvTable
     void start(simtime_t now);
     void suspend(simtime_t now);
     void advanceSelf();
+    void setDefaultCapability(bool available, bool advanceSequence = true);
     void configureChangeHistory(size_t limit) { changeLimit = limit; significantChanges = 0; }
     size_t consumeSignificantChanges() { size_t result = significantChanges; significantChanges = 0; return result; }
     void receive(const DsdvHeader& header, simtime_t now);

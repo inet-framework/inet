@@ -1,0 +1,223 @@
+%description:
+The v2 mobile profile installs a default through the configured origin, preserves
+foreign defaults during replacement, and defers reconciliation until route-table
+notifications finish. Atomic profile rejection and interface restart retain
+sequence floors and prevent stale capability replay.
+
+%file: test.ned
+import inet.routing.dsdv.Dsdv;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple GatewayProbe extends Dsdv { parameters: @class(GatewayProbe); }
+network DsdvGatewayReconciliationNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host: AdhocHost;
+}
+
+%file: Probe.cc
+#include "inet/routing/dsdv/Dsdv.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+using namespace inet;
+using namespace inet::dsdv;
+namespace DsdvGatewayReconciliation {
+class GatewayProbe : public Dsdv
+{
+    cMessage *probeTimer=nullptr;
+    int step=0;
+    int reconciliations=0;
+    int beforeReconciliation=0;
+    uint64_t beforeRestart=0;
+    Ipv4Address gateway=Ipv4Address("10.0.0.2");
+    std::vector<simtime_t> times={.1,.2,.3,.31,.4,.41,.5,.51,.6,.61,.7,.8,.9,1,1.1,1.2};
+    void inject(uint64_t sequence,bool available,int version=2,int destination=2) {
+        auto header=makeShared<DsdvHeader>();
+        header->setVersion(version); header->setSender(gateway); header->setSelfSequence(sequence);
+        header->setEntriesArraySize(1); header->setChunkLength(B(version==1?32:33));
+        DsdvEntry entry; entry.destination=Ipv4Address(0x0a000000U+destination);
+        entry.sequence=sequence; entry.metric=destination==2?0:1; entry.defaultCapability=available;
+        header->setEntries(0,entry);
+        auto packet=new Packet("controlled capability",header);
+        packet->addTag<InterfaceInd>()->setInterfaceId(routingInterface->getInterfaceId());
+        packet->addTag<L3AddressInd>()->setSrcAddress(gateway);
+        packet->addTag<L4PortInd>()->setSrcPort(controlPort);
+        socketDataArrived(&socket,packet);
+    }
+    void addForeignDefault(int nextHop) {
+        auto route=routingTable->createRoute();
+        route->setDestination(Ipv4Address()); route->setPrefixLength(0);
+        route->setInterface(routingInterface); route->setNextHop(Ipv4Address(0x0a000000U+nextHop));
+        route->setSourceType(IRoute::MANUAL); route->setMetric(1);
+        routingTable->addRoute(route);
+    }
+    void assertOwnedDefault() {
+        auto route=routingTable->getDefaultRoute();
+        ASSERT(route && route->getSource()==this && route->getPrefixLength()==0);
+        ASSERT(route->getNextHopAsGeneric()==gateway && route->getMetric()==1);
+    }
+    void probe() {
+        switch (step) {
+            case 0:
+                ASSERT(capacity==1 && getWireVersion()==2);
+                inject(10,true); assertOwnedDefault();
+                ASSERT(routingTable->findBestMatchingRoute(gateway)->getPrefixLength()==32);
+                break;
+            case 1: {
+                auto refreshed=table.getRouteEntries().at(gateway).refreshed;
+                auto neighborTime=table.getNeighbors().at(gateway);
+                auto expiry=expiryTimer->getArrivalTime();
+                inject(12,false,1); // Structurally valid, wrong receiving-domain version.
+                inject(12,true,2,4); // Structurally valid, wrong capability origin.
+                ASSERT(table.getRouteEntries().at(gateway).current.sequence==10);
+                ASSERT(table.getRouteEntries().at(gateway).refreshed==refreshed);
+                ASSERT(table.getNeighbors().at(gateway)==neighborTime && expiryTimer->getArrivalTime()==expiry);
+                ASSERT(table.getRouteEntries().count(Ipv4Address("10.0.0.4"))==0);
+                auto header=makeShared<DsdvHeader>(); header->setVersion(2); header->setSender(gateway);
+                header->setSelfSequence(12); header->setChunkLength(B(16));
+                auto packet=new Packet("liveness only",header);
+                packet->addTag<InterfaceInd>()->setInterfaceId(routingInterface->getInterfaceId());
+                packet->addTag<L3AddressInd>()->setSrcAddress(gateway);
+                packet->addTag<L4PortInd>()->setSrcPort(controlPort);
+                socketDataArrived(&socket,packet);
+                ASSERT(table.getNeighbors().at(gateway)==simTime());
+                ASSERT(table.getRouteEntries().at(gateway).refreshed==refreshed);
+                assertOwnedDefault();
+                break;
+            }
+            case 2:
+                beforeReconciliation=reconciliations;
+                addForeignDefault(9);
+                ASSERT(reconciliationTimer->isScheduled());
+                ASSERT(routingTable->getDefaultRoute()->getSource()!=this);
+                break;
+            case 3:
+                ASSERT(reconciliations==beforeReconciliation+1);
+                ASSERT(routingTable->getDefaultRoute()->getNextHopAsGeneric()==Ipv4Address("10.0.0.9"));
+                break;
+            case 4:
+                beforeReconciliation=reconciliations;
+                addForeignDefault(8);
+                ASSERT(reconciliationTimer->isScheduled());
+                ASSERT(routingTable->getDefaultRoute()->getSource()!=this);
+                break;
+            case 5:
+                ASSERT(reconciliations==beforeReconciliation+1);
+                ASSERT(routingTable->getDefaultRoute()->getNextHopAsGeneric()==Ipv4Address("10.0.0.8"));
+                break;
+            case 6:
+                beforeReconciliation=reconciliations;
+                routingTable->deleteRoute(routingTable->getDefaultRoute());
+                ASSERT(routingTable->getDefaultRoute()==nullptr && reconciliationTimer->isScheduled());
+                break;
+            case 7:
+                ASSERT(reconciliations==beforeReconciliation+1);
+                assertOwnedDefault();
+                break;
+            case 8:
+                beforeReconciliation=reconciliations;
+                routingInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.255.128"));
+                ASSERT(reconciliationTimer->isScheduled());
+                break;
+            case 9:
+                ASSERT(reconciliations==beforeReconciliation+1);
+                assertOwnedDefault();
+                break;
+            case 10:
+                inject(12,false);
+                ASSERT(routingTable->getDefaultRoute()==nullptr);
+                ASSERT(DsdvTable::isFinite(table.getRouteEntries().at(gateway).current));
+                ASSERT(advertisementTimer->getArrivalTime()==simTime());
+                break;
+            case 11:
+                inject(10,true);
+                ASSERT(routingTable->getDefaultRoute()==nullptr);
+                break;
+            case 12:
+                inject(14,true); assertOwnedDefault();
+                beforeRestart=table.getSelf().current.sequence;
+                break;
+            case 13:
+                routingInterface->setState(NetworkInterface::DOWN);
+                ASSERT(!active && !reconciliationTimer->isScheduled());
+                ASSERT(routingTable->getDefaultRoute()==nullptr);
+                ASSERT(table.getRouteEntries().at(gateway).current.sequence==15);
+                ASSERT(!table.getRouteEntries().at(gateway).current.defaultCapability);
+                break;
+            case 14:
+                routingInterface->setState(NetworkInterface::UP); routingInterface->setCarrier(true);
+                ASSERT(active && table.getSelf().current.sequence==beforeRestart+2);
+                inject(14,true); ASSERT(routingTable->getDefaultRoute()==nullptr);
+                inject(16,true); assertOwnedDefault();
+                break;
+            case 15:
+                ASSERT(active && !startupDump);
+                assertOwnedDefault();
+                std::cout << "DSDV gateway module PASS: v2 capacity, atomic profile checks, foreign default replacement, deferred batch, capability and restart\n";
+                break;
+        }
+        if (++step<int(times.size())) scheduleAt(times[step],probeTimer);
+    }
+  protected:
+    void initialize(int stage) override {
+        Dsdv::initialize(stage);
+        if (stage==INITSTAGE_LAST) { probeTimer=new cMessage("probeTimer"); scheduleAt(times[0],probeTimer); }
+    }
+    void handleMessageWhenUp(cMessage *message) override {
+        if (message==probeTimer) probe();
+        else {
+            if (message==reconciliationTimer) reconciliations++;
+            Dsdv::handleMessageWhenUp(message);
+        }
+    }
+    void finish() override { ASSERT(step==int(times.size())); }
+  public:
+    ~GatewayProbe() override { cancelAndDelete(probeTimer); }
+};
+Define_Module(GatewayProbe);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvGatewayReconciliationNetwork
+sim-time-limit = 2s
+seed-set = 0
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.numApps = 1
+*.host.app[0].typename = "GatewayProbe"
+*.host.app[0].baseStationAddress = "10.0.0.2"
+*.host.app[0].fullDumpInterval = 100s
+*.host.app[0].periodicJitter = 0s
+*.host.app[0].payloadBudget = 33B
+*.host.ipv4.routingTable.netmaskRoutes = "wlan*"
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.host.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV gateway module PASS: v2 capacity, atomic profile checks, foreign default replacement, deferred batch, capability and restart

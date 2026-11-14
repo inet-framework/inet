@@ -28,9 +28,17 @@ Dsdv::~Dsdv()
         if (auto host = findContainingNode(this))
             host->unsubscribe(linkBrokenSignal, this);
     }
+    if (reconciliationTimer) {
+        if (auto component = dynamic_cast<cComponent *>(routingTable.getNullable())) {
+            component->unsubscribe(routeAddedSignal, this);
+            component->unsubscribe(routeDeletedSignal, this);
+            component->unsubscribe(routeChangedSignal, this);
+        }
+    }
     cancelAndDelete(periodicTimer);
     cancelAndDelete(advertisementTimer);
     cancelAndDelete(expiryTimer);
+    cancelAndDelete(reconciliationTimer);
 }
 
 void Dsdv::initialize(int stage)
@@ -39,6 +47,13 @@ void Dsdv::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
         routingTable.reference(this, "routingTableModule", true);
+        if (strlen(par("baseStationAddress").stringValue())) {
+            baseStationAddress = Ipv4Address(par("baseStationAddress").stringValue());
+            if (!DsdvTable::isHost(baseStationAddress))
+                throw cRuntimeError("DSDV baseStationAddress must be a unicast IPv4 host address");
+            reconciliationTimer = new cMessage("reconciliationTimer");
+            reconciliationTimer->setSchedulingPriority(5);
+        }
         useMacFailureFeedback = par("useMacFailureFeedback");
         if (useMacFailureFeedback)
             arp.reference(this, "arpModule", true);
@@ -101,16 +116,27 @@ void Dsdv::initialize(int stage)
         routingInterface = interfaceTable->findInterfaceByName(par("interface"));
         if (!routingInterface || routingInterface->isLoopback() || !routingInterface->isBroadcast())
             throw cRuntimeError("DSDV requires one configured broadcast-capable ad hoc interface");
+        if (strlen(par("externalInterface").stringValue())) {
+            externalInterface = interfaceTable->findInterfaceByName(par("externalInterface"));
+            if (!isBaseStation() || !externalInterface || externalInterface == routingInterface || externalInterface->isLoopback())
+                throw cRuntimeError("DSDV externalInterface must name a separate interface on the configured base station");
+        }
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             auto interface = interfaceTable->getInterface(i);
-            if (interface != routingInterface && !interface->isLoopback() && interface->isUp())
-                throw cRuntimeError("DSDV supports only one active non-loopback interface");
+            if (interface != routingInterface && interface != externalInterface && !interface->isLoopback() && interface->isUp())
+                throw cRuntimeError("DSDV permits only its ad hoc interface and the configured base-station uplink");
         }
         getContainingNode(this)->subscribe(interfaceStateChangedSignal, this);
         getContainingNode(this)->subscribe(interfaceConfigChangedSignal, this);
         getContainingNode(this)->subscribe(interfaceIpv4ConfigChangedSignal, this);
         if (useMacFailureFeedback)
             getContainingNode(this)->subscribe(linkBrokenSignal, this);
+        if (reconciliationTimer) {
+            auto component = check_and_cast<cComponent *>(routingTable.get());
+            component->subscribe(routeAddedSignal, this);
+            component->subscribe(routeDeletedSignal, this);
+            component->subscribe(routeChangedSignal, this);
+        }
         if (isUp() && interfaceUsable())
             start();
     }
@@ -124,6 +150,39 @@ bool Dsdv::interfaceUsable() const
     return data && DsdvTable::isHost(data->getIPAddress());
 }
 
+bool Dsdv::isBaseStation() const
+{
+    auto data = routingInterface ? routingInterface->findProtocolData<Ipv4InterfaceData>() : nullptr;
+    return !baseStationAddress.isUnspecified() && data && data->getIPAddress() == baseStationAddress;
+}
+
+bool Dsdv::hasExternalAccess() const
+{
+    if (!isBaseStation() || !externalInterface || !externalInterface->isUp() || !externalInterface->hasCarrier() ||
+            !routingTable->isForwardingEnabled())
+        return false;
+    auto data = externalInterface->findProtocolData<Ipv4InterfaceData>();
+    auto route = routingTable->getDefaultRoute();
+    return data && DsdvTable::isHost(data->getIPAddress()) && route &&
+            dynamic_cast<Dsdv *>(route->getSource()) == nullptr && route->getInterface() == externalInterface;
+}
+
+bool Dsdv::isValidProfile(const DsdvHeader& header) const
+{
+    if (header.getVersion() != getWireVersion())
+        return false;
+    for (size_t i = 0; i < header.getEntriesArraySize(); i++)
+        if (header.getEntries(i).defaultCapability && header.getEntries(i).destination != baseStationAddress)
+            return false;
+    return true;
+}
+
+void Dsdv::scheduleReconciliation()
+{
+    if (active && reconciliationTimer && !reconciliationTimer->isScheduled())
+        scheduleAt(simTime(), reconciliationTimer);
+}
+
 void Dsdv::start()
 {
     if (active || !interfaceUsable())
@@ -131,10 +190,13 @@ void Dsdv::start()
     auto address = routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
     table.configure(address, par("settlingCap"), par("neighborTimeout"), par("routeTimeout"), par("minSettlingDelay"));
     int budget = std::min(par("payloadBudget").intValue(), int64_t(routingInterface->getMtu() - 28));
-    if (budget < DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES)
+    int entryBytes = DsdvTable::getEntryBytes(getWireVersion());
+    if (budget < DsdvTable::HEADER_BYTES + entryBytes)
         throw cRuntimeError("DSDV payload budget/MTU cannot hold one entry plus IPv4/UDP overhead");
-    capacity = std::min((budget - DsdvTable::HEADER_BYTES) / DsdvTable::ENTRY_BYTES, int(UINT16_MAX));
+    capacity = std::min((budget - DsdvTable::HEADER_BYTES) / entryBytes, int(UINT16_MAX));
     table.start(simTime());
+    if (isBaseStation())
+        table.setDefaultCapability(hasExternalAccess(), false);
     table.configureChangeHistory(adaptiveFullDump ? capacity : 0);
     currentPeriod = period;
     socket.bind(controlPort);
@@ -164,6 +226,8 @@ void Dsdv::suspend(bool crash)
     cancelEvent(periodicTimer);
     cancelEvent(advertisementTimer);
     cancelEvent(expiryTimer);
+    if (reconciliationTimer)
+        cancelEvent(reconciliationTimer);
     if (active) {
         active = false;
         table.suspend(simTime());
@@ -215,7 +279,12 @@ void Dsdv::handleMessageWhenUp(cMessage *message)
     }
     if (!active)
         throw cRuntimeError("DSDV timer survived suspension");
-    if (message == expiryTimer) {
+    if (message == reconciliationTimer) {
+        if (isBaseStation())
+            table.setDefaultCapability(hasExternalAccess());
+        synchronizeRoutes();
+    }
+    else if (message == expiryTimer) {
         for (const auto& destination : table.expire(simTime())) {
             EV_INFO << "Expired DSDV route to " << destination << endl;
             emit(registerSignal("invalidationReason"), "expiry");
@@ -259,11 +328,12 @@ size_t Dsdv::sendAdvertisement(bool full)
         emit(registerSignal("settlingDelay"), delay);
     for (const auto& entries : advertisement.datagrams) {
         auto header = makeShared<DsdvHeader>();
+        header->setVersion(getWireVersion());
         header->setKind(advertisement.full ? 1 : 2);
         header->setSender(table.getSelf().current.destination);
         header->setSelfSequence(table.getSelf().current.sequence);
         header->setEntriesArraySize(entries.size());
-        header->setChunkLength(B(DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES * entries.size()));
+        header->setChunkLength(B(DsdvTable::HEADER_BYTES + DsdvTable::getEntryBytes(getWireVersion()) * entries.size()));
         bytes += header->getChunkLength().get<B>();
         for (size_t i = 0; i < entries.size(); i++)
             header->setEntries(i, entries[i]);
@@ -287,6 +357,8 @@ void Dsdv::synchronizeRoutes(const char *withdrawalReason)
     for (int i = routingTable->getNumRoutes() - 1; i >= 0; i--) {
         auto route = routingTable->getRoute(i);
         if (route->getSource() != this)
+            continue;
+        if (route->getPrefixLength() == 0)
             continue;
         auto it = table.getRouteEntries().find(route->getDestinationAsGeneric().toIpv4());
         if (it == table.getRouteEntries().end() || !DsdvTable::isFinite(it->second.current)) {
@@ -327,6 +399,48 @@ void Dsdv::synchronizeRoutes(const char *withdrawalReason)
         if (changed)
             emit(registerSignal("routeInstalled"), 1L);
     }
+    synchronizeDefaultRoute(withdrawalReason);
+}
+
+void Dsdv::synchronizeDefaultRoute(const char *withdrawalReason)
+{
+    if (!reconciliationTimer)
+        return;
+    auto route = routingTable->getDefaultRoute();
+    bool owned = route && route->getSource() == this;
+    auto it = table.getRouteEntries().find(baseStationAddress);
+    bool available = !isBaseStation() && it != table.getRouteEntries().end() &&
+            DsdvTable::isFinite(it->second.current) && it->second.current.defaultCapability;
+    if (!available) {
+        if (owned) {
+            routingTable->deleteRoute(route);
+            emit(registerSignal("routeWithdrawn"), 1L);
+            if (withdrawalReason)
+                emit(registerSignal("invalidationReason"), withdrawalReason);
+        }
+        return;
+    }
+    if (route && !owned)
+        return;
+    const auto& record = it->second;
+    bool changed = !owned || route->getNextHopAsGeneric() != record.successor || route->getMetric() != int(record.current.metric);
+    if (!owned) {
+        route = routingTable->createRoute();
+        route->setDestination(Ipv4Address());
+        route->setPrefixLength(0);
+        route->setSource(this);
+        route->setSourceType(IRoute::MANET);
+        route->setInterface(routingInterface);
+        route->setNextHop(record.successor);
+        route->setMetric(record.current.metric);
+        routingTable->addRoute(route);
+    }
+    else if (changed) {
+        route->setNextHop(record.successor);
+        route->setMetric(record.current.metric);
+    }
+    if (changed)
+        emit(registerSignal("routeInstalled"), 1L);
 }
 
 void Dsdv::socketDataArrived(UdpSocket *, Packet *packet)
@@ -347,7 +461,7 @@ void Dsdv::socketDataArrived(UdpSocket *, Packet *packet)
     }
     if (!active || !incoming || incoming->getInterfaceId() != routingInterface->getInterfaceId() ||
             !address || !port || port->getSrcPort() != controlPort || !header ||
-            !DsdvTable::isValidHeader(*header) || address->getSrcAddress() != header->getSender() ||
+            !DsdvTable::isValidHeader(*header) || !isValidProfile(*header) || address->getSrcAddress() != header->getSender() ||
             header->getSender() == table.getSelf().current.destination) {
         emit(registerSignal("updateRejected"), 1L);
         return;
@@ -370,6 +484,14 @@ void Dsdv::socketClosed(UdpSocket *)
 void Dsdv::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *)
 {
     Enter_Method_Silent();
+    if (signal == routeAddedSignal || signal == routeDeletedSignal || signal == routeChangedSignal) {
+        if (reconciliationTimer && active && source == dynamic_cast<cComponent *>(routingTable.getNullable())) {
+            auto route = dynamic_cast<IRoute *>(value);
+            if (route && route->getSource() != this)
+                scheduleReconciliation();
+        }
+        return;
+    }
     if (signal == linkBrokenSignal) {
         if (!useMacFailureFeedback || !active)
             return;
@@ -410,8 +532,12 @@ void Dsdv::receiveSignal(cComponent *source, simsignal_t signal, cObject *value,
         return;
     if (change->getNetworkInterface() != routingInterface) {
         auto interface = change->getNetworkInterface();
+        if (interface == externalInterface) {
+            scheduleReconciliation();
+            return;
+        }
         if (!interface->isLoopback() && interface->isUp())
-            throw cRuntimeError("DSDV supports only one active non-loopback interface");
+            throw cRuntimeError("DSDV permits only its ad hoc interface and the configured base-station uplink");
         return;
     }
     if (interfaceUsable()) {

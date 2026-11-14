@@ -20,11 +20,14 @@ class INET_API Dsdv : public RoutingProtocolBase, public UdpSocket::ICallback, p
     ModuleRefByPar<IRoutingTable> routingTable;
     ModuleRefByPar<IArp> arp;
     NetworkInterface *routingInterface = nullptr;
+    NetworkInterface *externalInterface = nullptr;
+    Ipv4Address baseStationAddress;
     UdpSocket socket;
     DsdvTable table;
     cMessage *periodicTimer = nullptr;
     cMessage *advertisementTimer = nullptr;
     cMessage *expiryTimer = nullptr;
+    cMessage *reconciliationTimer = nullptr;
     bool active = false;
     bool startupDump = false;
     bool useMacFailureFeedback = false;
@@ -41,9 +44,15 @@ class INET_API Dsdv : public RoutingProtocolBase, public UdpSocket::ICallback, p
     void start();
     void suspend(bool crash);
     bool interfaceUsable() const;
+    bool isBaseStation() const;
+    bool hasExternalAccess() const;
+    uint8_t getWireVersion() const { return baseStationAddress.isUnspecified() ? 1 : 2; }
+    bool isValidProfile(const DsdvHeader& header) const;
+    void scheduleReconciliation();
     void scheduleTimers();
     size_t sendAdvertisement(bool full);
     void synchronizeRoutes(const char *withdrawalReason = nullptr);
+    void synchronizeDefaultRoute(const char *withdrawalReason);
     void removeOwnedRoutes();
     void scheduleTimer(cMessage *timer, simtime_t when);
 

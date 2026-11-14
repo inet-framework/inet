@@ -1,0 +1,41 @@
+%description:
+The v2 entry needs17 bytes plus the16-byte header. A32-byte payload budget must
+fail at startup instead of silently constructing an oversized datagram.
+
+%file: test.ned
+import inet.node.dsdv.DsdvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+network DsdvGatewayInvalidNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host: DsdvRouter;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvGatewayInvalidNetwork
+sim-time-limit = 1ms
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.dsdv.baseStationAddress = "10.0.0.2"
+*.host.dsdv.payloadBudget = 32B
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+
+%exitcode: 1
+%postrun-command: rg '<!>' test.out test.err > gateway-error.out || true
+%contains: gateway-error.out
+DSDV payload budget/MTU cannot hold one entry plus IPv4/UDP overhead

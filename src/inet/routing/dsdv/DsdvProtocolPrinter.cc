@@ -12,6 +12,9 @@ void DsdvProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *,
     context.infoColumn << "DSDV v" << int(header->getVersion()) << " " << header->getSender()
                        << " seq=" << header->getSelfSequence() << " kind=" << int(header->getKind())
                        << " entries=" << header->getEntriesArraySize();
+    for (size_t i = 0; i < header->getEntriesArraySize(); i++)
+        if (header->getEntries(i).defaultCapability)
+            context.infoColumn << " default-via=" << header->getEntries(i).destination;
 }
 } // namespace dsdv
 } // namespace inet

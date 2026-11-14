@@ -1,0 +1,3 @@
+DSDV base-station default routes
+
+DSDV can now extend access to an external network through one configured base station and multihop wireless relays. The base station advertises external service availability, and mobile nodes derive a default route toward it. Uplink loss withdraws that capability while preserving usable wireless host routes. Enable the same base-station profile throughout a domain and configure wired return routes; this uses wire version 2, while host-only domains retain version 1.
