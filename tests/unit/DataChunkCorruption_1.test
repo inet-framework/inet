@@ -1,0 +1,83 @@
+%description:
+Check unconditional DATA corruption without a MAC format or a PHY header.
+All-correct and all-incorrect probabilities consume no random numbers.
+Incorrect chunks remain local to the result. Existing errors remain incorrect.
+The result preserves bytes, length, and errors through packet duplication and extraction.
+Invalid probabilities fail without a retry loop.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+class DataChunkModel : public ErrorModelBase
+{
+  public:
+    mutable int calls = 0;
+    double probability = 1;
+    double ber = 0;
+    bool useBer = false;
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return NaN; }
+    double computeBitErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return ber; }
+    double computeSymbolErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return NaN; }
+    double computeChunkSuccessRate(const ISnir *snir, b length) const override {
+        calls++;
+        return useBer ? ErrorModelBase::computeChunkSuccessRate(snir, length) : probability;
+    }
+};
+
+%activity:
+DataChunkModel model;
+Packet transmitted("data");
+transmitted.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4}));
+transmitted.insertAtBack(makeShared<ByteCountChunk>(B(5)));
+auto original = transmitted.peekAll();
+auto correct = model.computeReceivedData(nullptr, original);
+ASSERT(model.calls == 2 && correct->isCorrect());
+ASSERT(correct->getChunkLength() == B(9));
+model.probability = 0;
+model.calls = 0;
+auto incorrect = model.computeReceivedData(nullptr, original);
+ASSERT(model.calls == 2 && incorrect->isIncorrect() && original->isCorrect());
+Packet received("data", incorrect);
+ASSERT(received.hasBitError() && !received.cPacket::hasBitError());
+ASSERT(received.peekAtFront(B(4), Chunk::PF_ALLOW_ALL)->isIncorrect());
+ASSERT(received.peekDataAt(B(4), B(5), Chunk::PF_ALLOW_ALL)->isIncorrect());
+ASSERT(received.peekAtFront<BytesChunk>(B(4), Chunk::PF_ALLOW_INCORRECT)->getBytes() == std::vector<uint8_t>({1, 2, 3, 4}));
+auto copy = received.dup();
+ASSERT(copy->peekData(Chunk::PF_ALLOW_ALL)->isIncorrect());
+delete copy;
+model.probability = 1;
+ASSERT(model.computeReceivedData(nullptr, incorrect)->isIncorrect());
+Packet raw("raw", makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4, 5, 6, 7, 8, 9}));
+model.probability = 0;
+auto rawData = model.computeReceivedData(nullptr, raw.peekDataAt(B(4), B(5)));
+ASSERT(raw.peekData()->isCorrect());
+ASSERT(rawData->getChunkLength() == B(5) && rawData->isIncorrect());
+model.useBer = true;
+for (double ber : {0.0, 1.0}) {
+    model.ber = ber;
+    ASSERT(model.computeReceivedData(nullptr, original)->isCorrect() == (ber == 0));
+}
+for (double probability : {-1.0, 2.0, NaN}) {
+    model.useBer = false;
+    model.probability = probability;
+    bool refused = false;
+    try { model.computeReceivedData(nullptr, original); }
+    catch (const cRuntimeError&) { refused = true; }
+    ASSERT(refused);
+}
+model.useBer = true;
+model.ber = NaN;
+bool refused = false;
+try { model.computeReceivedData(nullptr, original); }
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+EV << "DATA chunk corruption checks passed\n";
+
+%contains: stdout
+DATA chunk corruption checks passed
