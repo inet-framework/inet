@@ -39,6 +39,8 @@ simple Aodv extends SimpleModule like IApp
         bool useLocalRepair = default(false); // Bounded transit-only local repair, RFC 3561 section 6.12
         bool destinationOnlyFlag = default(false); // See RFC 3561: 5.1
         int udpPort = default(654);
+        double stopOperationTimeout @unit(s) = default(2s); // Maximum wait for UDP socket closure during graceful stop
+        double stopOperationExtraTime @unit(s) = default(-1s); // Extra wait after socket closure; negative completes immediately
         string interface @mutable = default("wlan0"); // Primary interface, applied at start
         string interfaces @mutable = default(""); // Whitespace-separated exact IPv4 interface names including interface; empty selects only interface; applied at start
         string gatewayAddress = default(""); // The address of the external gateway (external traffic routed here by default)
