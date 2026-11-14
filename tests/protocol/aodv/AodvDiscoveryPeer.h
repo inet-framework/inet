@@ -23,11 +23,11 @@ class AodvDiscoveryPeer : public AodvPeer
             getParentModule()->getParentModule()->subscribe(packetSentToLowerSignal, this);
         }
     }
-    void assertComplete(int packets, int requests) {
+    void assertComplete(int packets, int requests, int errors = 0) {
         ASSERT(int(dataNames.size()) == packets);
         ASSERT(int(requestedTargets.size()) == requests);
         ASSERT(AodvDataCounters::created == AodvDataCounters::destroyed);
-        ASSERT(AodvDataCounters::errors == 0);
+        ASSERT(AodvDataCounters::errors == errors);
     }
     void handleMessage(cMessage *message) override {
         if (message != timer) {
@@ -74,9 +74,9 @@ class AodvDiscoveryPeer : public AodvPeer
         else if (scenario == "GatewayQueues" || scenario == "DeferredReply")
             assertComplete(2, 1);
         else if (scenario == "DiscoveryExhaustion")
-            assertComplete(0, 2);
+            assertComplete(0, 2, 2);
         else if (scenario == "GatewayFailure")
-            assertComplete(0, 1);
+            assertComplete(0, 1, 2);
         else if (scenario == "ReplyDuringJitter" || scenario == "IndependentRoute")
             assertComplete(1, 0);
         else if (scenario == "NeighborCompletion") {

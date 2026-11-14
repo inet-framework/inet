@@ -62,11 +62,7 @@ from compilation or setup failures in the execution record.
 
 ## Limits and disposal policy
 
-Dropping a queued datagram through the existing INetfilter interface deletes the packet without
-an application Destination Unreachable indication. This retains the current IP disposal contract
-and leaves RFC 3561 section 6.3's recommended application indication unmet. No synthetic socket
-callback is introduced. The tests require destruction, no reinjection and no invented application
-error. They do not prove application timeout behavior.
+Terminal originating-discovery exhaustion uses IP's queued-datagram failure operation. IPv4 reports Host Unreachable and IPv6 reports No Route through their native ICMP-to-UDP indication paths, then consumes the queued packet. `DiscoveryExhaustion` and `GatewayFailure` require exactly two eligible application indications while preserving their existing destruction and request-count assertions. Gateway errors quote each packet's original member destination, not the shared gateway search key. Stop/crash, incompatible output constraints and local-repair failure retain their separate silent disposal policies. See [discovery-failure-notification.md](discovery-failure-notification.md) for the direct error checks and current execution status.
 
 These are deterministic IPv4, direct-link fixtures. They do not establish IPv6 compatibility,
 subnet repair, reboot holds, Wi-Fi failure attribution or multi-interface discovery. Interface

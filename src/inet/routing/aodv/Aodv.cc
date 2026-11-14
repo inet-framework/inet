@@ -2052,12 +2052,20 @@ void Aodv::cancelRouteDiscovery(const RouteKey& target)
             ++it;
     }
     auto search = searches.find(target);
+    bool originatingFailure = search != searches.end() && search->second.purpose == Search::Purpose::ORIGINATING;
     if (search != searches.end() && search->second.purpose == Search::Purpose::LOCAL_REPAIR)
         finishRepair(target, false);
     else
         eraseSearch(target);
-    for (auto packet : dropped)
-        networkProtocol->dropQueuedDatagram(packet);
+    auto generation = operationalGeneration;
+    for (auto packet : dropped) {
+        if (generation != operationalGeneration || operationalState != OPERATING)
+            return;
+        if (originatingFailure)
+            networkProtocol->failQueuedDatagram(packet);
+        else
+            networkProtocol->dropQueuedDatagram(packet);
+    }
 }
 
 bool Aodv::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime)
