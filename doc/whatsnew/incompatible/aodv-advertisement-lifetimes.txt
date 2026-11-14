@@ -1,0 +1,3 @@
+AODV validates configured advertisement lifetimes
+
+AODV rejects destination and Hello advertisement durations that truncate to zero milliseconds or exceed the uint32 millisecond field. The defaults satisfy these bounds. Custom configurations must keep myRouteTimeout and allowedHelloLoss * helloInterval within the positive wire range. Disable Hello transmission with useHelloMessages=false while retaining valid duration parameters.

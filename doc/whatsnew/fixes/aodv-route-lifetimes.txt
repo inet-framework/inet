@@ -1,0 +1,3 @@
+AODV reverse-route refresh and gratuitous reply lifetimes
+
+AODV refreshes reverse-route expiry independently of path replacement and preserves a later existing deadline. Gratuitous replies advertise the remaining duration rather than the absolute simulation time. Cached routes whose remaining duration cannot encode a positive uint32 millisecond value no longer produce unusable replies, allowing request forwarding to continue when its TTL permits.

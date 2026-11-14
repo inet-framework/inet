@@ -8,6 +8,11 @@ The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org
 
 ## Target level
 
+The 2026-11-09 correction effort adds a [selected RFC 3561 catalog](../../standard/rfc3561/catalog.md),
+[feature map](features.md) and [check descriptions](checks.md). These artifacts select a bounded
+repair surface. They do not supersede the historical survey or establish an achieved conformance
+level. Current execution evidence remains owned by the model records.
+
 **Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
