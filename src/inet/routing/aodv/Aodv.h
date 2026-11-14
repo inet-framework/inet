@@ -126,6 +126,15 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
     enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
     using RouteKey = std::pair<L3Address, int>;
+    struct SubnetExport {
+        std::string interfaceName;
+        bool reachable = false;
+        bool sequenceValid = false;
+        uint32_t sequence = 0;
+        std::set<AodvRouteData::Precursor> precursors;
+    };
+    std::map<RouteKey, SubnetExport> subnetExports;
+    unsigned int subnetExtensionType = 0;
     struct Search {
         enum class Purpose { ORIGINATING, LOCAL_REPAIR };
         Purpose purpose = Purpose::ORIGINATING;
@@ -233,9 +242,16 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void handleRecoveryTimer();
     void extendRecovery();
     bool isLocalGatewayDestination(const L3Address& destination) const;
-    void sendPreparedControl(Packet *packet);
+    void sendPreparedControl(Packet *packet, SubnetExport *authority = nullptr);
     bool canSendControl(AodvControlPacketType type) const;
     void configureInterfaces();
+    void configureSubnetExports();
+    void reconcileSubnetExports();
+    bool isSubnetReachable(const RouteKey& key, const SubnetExport& subnet) const;
+    bool isSubnetAuthority(const RouteKey& key, const SubnetExport& subnet) const;
+    bool answerSubnetRequest(const Ptr<Rreq>& request, IRoute *reverse);
+    void promoteSubnetFloor(const Ptr<Rreq>& request);
+    void resetSubnetState(bool loseSequences);
     void reconcileInterfaces();
     void forgetInterface(int interfaceId);
     void rememberRemovedRoute(IRoute *route);
@@ -309,7 +325,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output = nullptr);
+    void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output = nullptr, SubnetExport *authority = nullptr);
     void processPacket(Packet *pk);
     void clearState(bool disposeQueued = true);
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);

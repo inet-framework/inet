@@ -91,6 +91,10 @@ void Aodv::initialize(int stage)
             throw cRuntimeError("AODV rreqRetries/search durations exceed representable simulation time");
 
         aodvUDPPort = par("udpPort");
+        auto extensionType = par("subnetExtensionType").intValue();
+        if (extensionType != 0 && (extensionType < 128 || extensionType > 255))
+            throw cRuntimeError("AODV subnetExtensionType must be zero or in 128..255");
+        subnetExtensionType = extensionType;
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
         useLocalRepair = par("useLocalRepair");
@@ -259,8 +263,12 @@ void Aodv::processPacket(Packet *packet)
         bool valid = control->isCorrect();
         if (auto reply = dynamicPtrCast<const Rrep>(control))
             valid = valid && readAodvExtensions(*reply, interval);
-        else if (auto request = dynamicPtrCast<const Rreq>(control))
-            valid = valid && readAodvExtensions(*request, interval);
+        else if (auto request = dynamicPtrCast<const Rreq>(control)) {
+            int prefixLength;
+            uint32_t floor;
+            valid = valid && readAodvExtensions(*request, interval, subnetExtensionType) &&
+                readAodvSubnetFloor(*request, subnetExtensionType, prefixLength, floor);
+        }
         if (interval && (SimTime(interval, SIMTIME_MS).raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
                 SimTime(interval, SIMTIME_MS) * allowedHelloLoss > SimTime::getMaxTime() - simTime()))
             valid = false;
@@ -489,6 +497,31 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
             classifyDatagram(datagram) != DatagramKind::DATA)
         return ACCEPT;
 
+    // An explicitly attached/exported network uses its independent native route.
+    // A lost export cannot use an AODV-learned route recursively to reach itself.
+    auto exported = subnetExports.end();
+    for (auto entry = subnetExports.begin(); entry != subnetExports.end(); ++entry)
+        if (destination.matches(entry->first.first, entry->first.second) &&
+                (exported == subnetExports.end() || entry->first.second > exported->first.second))
+            exported = entry;
+    if (exported != subnetExports.end()) {
+        auto route = selectDataRoute(destination);
+        if (!route || route->getSource() == this)
+            for (int i = 0; i < routingTable->getNumRoutes(); ++i) {
+                auto candidate = routingTable->getRoute(i);
+                if (candidate->getSource() != this && candidate->getInterface() && candidate->getInterface()->isUp() &&
+                        candidate->getInterface()->getInterfaceName() == exported->second.interfaceName &&
+                        destination.matches(candidate->getDestinationAsGeneric(), candidate->getPrefixLength())) {
+                    route = candidate;
+                    break;
+                }
+            }
+        if (isSubnetReachable(exported->first, exported->second) && route && route->getSource() != this && prepareDataPacket(datagram, route))
+            return ACCEPT;
+        if (!local)
+            sendRERRWhenNoRouteToForward(datagram);
+        return DROP;
+    }
     if (!isPrimaryAvailable()) {
         auto route = selectDataRoute(destination);
         return route && route->getSource() != this && prepareDataPacket(datagram, route) ? ACCEPT : DROP;
@@ -845,6 +878,7 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
 
     RreqIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
+    promoteSubnetFloor(rreqPacket);
     return rreqPacket;
 }
 
@@ -1274,7 +1308,7 @@ void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned 
     scheduleExpungeRoutes();
 }
 
-void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output)
+void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output, SubnetExport *authority)
 {
     ASSERT(timeToLive != 0);
     auto type = aodvPacket->getPacketType();
@@ -1305,8 +1339,9 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
 
     numSent++;
     if (delay == 0)
-        sendPreparedControl(packet);
+        sendPreparedControl(packet, authority);
     else {
+        ASSERT(authority == nullptr);
         auto *timer = new PacketHolderMessage("aodv-send-jitter", KIND_DELAYEDSEND);
         timer->setOwnedPacket(packet);
         delayedSends.insert(timer);
@@ -1387,6 +1422,9 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
                 sendRREP(reply, rreq->getOriginatorAddr(), 255);
             return;
         }
+        promoteSubnetFloor(rreq);
+        if (answerSubnetRequest(rreq, reverse))
+            return;
         bool aggregate = destination && destination->getPrefixLength() < addressType->getMaxPrefixLength();
         bool known = destinationData && destinationData->hasValidDestNum();
         bool fresh = known && (!aggregate || rreq->getUnknownSeqNumFlag()) && (rreq->getUnknownSeqNumFlag() ||
@@ -1408,7 +1446,10 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         if (timeToLive > 0 && !recovering) {
             // RFC 3561 section 6.5. Unknown placeholders are not serial operands.
             auto hostData = hostDestination ? check_and_cast<AodvRouteData *>(hostDestination->getProtocolData()) : nullptr;
-            if (hostData && hostData->hasValidDestNum()) {
+            int floorPrefix;
+            uint32_t floorSequence;
+            readAodvSubnetFloor(*rreq, subnetExtensionType, floorPrefix, floorSequence);
+            if (floorPrefix < 0 && hostData && hostData->hasValidDestNum()) {
                 if (rreq->getUnknownSeqNumFlag() ||
                         AodvSequence::isNewer(hostData->getDestSeqNum(), rreq->getDestSeqNum()))
                     rreq->setDestSeqNum(hostData->getDestSeqNum());
@@ -1479,6 +1520,13 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obje
             return; // multicast membership changes do not change the selected identity
 #endif
         auto candidate = changed ? changed->getNetworkInterface() : dynamic_cast<NetworkInterface *>(object);
+        if (candidate && !subnetExports.empty())
+            for (const auto& entry : subnetExports)
+                if (entry.second.interfaceName == candidate->getInterfaceName()) {
+                    if (!interfaceChangeTimer->isScheduled())
+                        scheduleAt(simTime(), interfaceChangeTimer);
+                    break;
+                }
         if (!candidate || std::find(configuredInterfaceNames.begin(), configuredInterfaceNames.end(),
                 candidate->getInterfaceName()) == configuredInterfaceNames.end())
             return;
@@ -1873,7 +1921,180 @@ void Aodv::reconcileInterfaces()
             queueRouteError(entry.second.destinations, entry.second.precursors, false, *jitterPar);
         releaseEligiblePackets();
     }
+    reconcileSubnetExports();
     scheduleExpungeRoutes();
+}
+
+void Aodv::configureSubnetExports()
+{
+    std::map<RouteKey, SubnetExport> configured;
+    for (const char *parameter : {"advertisedSubnets"}) {
+        auto root = par(parameter).xmlValue();
+        if (!root || strcmp(root->getTagName(), "subnets"))
+            throw cRuntimeError("AODV %s requires a subnets XML root", parameter);
+        for (auto element : root->getChildren()) {
+            if (strcmp(element->getTagName(), "subnet"))
+                throw cRuntimeError("AODV %s contains an unknown XML element", parameter);
+            const char *prefixText = element->getAttribute("prefix");
+            const char *interfaceName = element->getAttribute("interface");
+            if (!prefixText || !interfaceName || !*interfaceName)
+                throw cRuntimeError("AODV subnet requires prefix and interface attributes");
+            std::string text(prefixText);
+            auto slash = text.find('/');
+            L3Address prefix;
+            if (slash == std::string::npos || !prefix.tryParse(text.substr(0, slash).c_str()))
+                throw cRuntimeError("AODV invalid subnet prefix '%s'", prefixText);
+            char *end = nullptr;
+            auto length = strtol(text.c_str() + slash + 1, &end, 10);
+            if (!end || end == text.c_str() + slash + 1 || *end || length <= 0 ||
+                    length >= addressType->getMaxPrefixLength() || prefix.getAddressType() != addressType ||
+                    prefix != prefix.getPrefix(length))
+                throw cRuntimeError("AODV subnet must be a canonical aggregate of the selected address family");
+            auto output = interfaceTable->findInterfaceByName(interfaceName);
+            if (!output || output->isLoopback())
+                throw cRuntimeError("AODV subnet requires a known nonloopback interface '%s'", interfaceName);
+            RouteKey key(prefix, length);
+            if (configured.count(key))
+                throw cRuntimeError("AODV duplicate subnet export '%s'", prefixText);
+            SubnetExport subnet;
+            subnet.interfaceName = interfaceName;
+            if (!isSubnetReachable(key, subnet))
+                throw cRuntimeError("AODV advertised subnet '%s' is not attached to interface '%s'", prefixText, interfaceName);
+            if (auto previous = subnetExports.find(key); previous != subnetExports.end()) {
+                subnet.sequence = previous->second.sequence;
+                subnet.sequenceValid = previous->second.sequenceValid;
+            }
+            configured.emplace(key, std::move(subnet));
+        }
+    }
+    if (!configured.empty() && (!subnetExtensionType || hasExternalGateway))
+        throw cRuntimeError("AODV subnet exports require subnetExtensionType and cannot be combined with gatewayAddress");
+    subnetExports = std::move(configured);
+}
+
+bool Aodv::isSubnetReachable(const RouteKey& key, const SubnetExport& subnet) const
+{
+    auto output = interfaceTable->findInterfaceByName(subnet.interfaceName.c_str());
+    if (!isUsableInterface(output))
+        return false;
+    if (key.first.getType() == L3Address::IPv4) {
+        auto ipv4 = output->findProtocolData<Ipv4InterfaceData>();
+        return ipv4 && !ipv4->getIPAddress().isUnspecified() &&
+            ipv4->getNetmask().getNetmaskLength() <= key.second &&
+            Ipv4Address::maskedAddrAreEqual(key.first.toIpv4(), ipv4->getIPAddress(), ipv4->getNetmask());
+    }
+#ifdef INET_WITH_IPv6
+    if (auto ipv6 = output->findProtocolData<Ipv6InterfaceData>())
+        for (int i = 0; i < ipv6->getNumAdvPrefixes(); ++i) {
+            const auto& prefix = ipv6->getAdvPrefix(i);
+            if (prefix.advOnLinkFlag && prefix.prefixLength <= key.second &&
+                    key.first.toIpv6().matches(prefix.prefix, prefix.prefixLength))
+                return true;
+        }
+#endif
+    return false;
+}
+
+bool Aodv::isSubnetAuthority(const RouteKey& key, const SubnetExport& subnet) const
+{
+    if (!isPrimaryAvailable() || recovering || !subnet.reachable || !isSubnetReachable(key, subnet))
+        return false;
+    return true;
+}
+
+void Aodv::reconcileSubnetExports()
+{
+    for (auto& entry : subnetExports) {
+        auto& subnet = entry.second;
+        bool reachable = isSubnetReachable(entry.first, subnet);
+        if (subnet.reachable != reachable) {
+            if (subnet.reachable) {
+                if (subnet.sequenceValid)
+                    ++subnet.sequence;
+                UnreachableNode node;
+                node.addr = entry.first.first;
+                node.seqNum = subnet.sequenceValid ? subnet.sequence : 0;
+                queueRouteError({node}, subnet.precursors, false, *jitterPar);
+                subnet.precursors.clear();
+            }
+            subnet.reachable = reachable;
+        }
+    }
+    scheduleExpungeRoutes();
+}
+
+void Aodv::promoteSubnetFloor(const Ptr<Rreq>& request)
+{
+    if (!subnetExtensionType || !request->getUnknownSeqNumFlag())
+        return;
+    int length;
+    uint32_t floor;
+    if (!readAodvSubnetFloor(*request, subnetExtensionType, length, floor))
+        return;
+    auto route = length < 0 ? findRetainedRoute(request->getDestAddr(), true) :
+        findExactRoute(request->getDestAddr().getPrefix(length), length);
+    if (!route || route->getPrefixLength() == addressType->getMaxPrefixLength())
+        return;
+    auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+    if (!data->hasValidDestNum())
+        return;
+    if (length < 0 || AodvSequence::isNewer(data->getDestSeqNum(), floor))
+        writeAodvSubnetFloor(request, subnetExtensionType, route->getPrefixLength(), data->getDestSeqNum());
+}
+
+bool Aodv::answerSubnetRequest(const Ptr<Rreq>& request, IRoute *reverse)
+{
+    if (!request->getUnknownSeqNumFlag() || !reverse || !reverse->getInterface() ||
+            !isSelectedInterface(reverse->getInterface()) ||
+            !check_and_cast<AodvRouteData *>(reverse->getProtocolData())->isActive())
+        return false;
+    auto chosen = subnetExports.end();
+    for (auto entry = subnetExports.begin(); entry != subnetExports.end(); ++entry)
+        if (request->getDestAddr().matches(entry->first.first, entry->first.second) &&
+                (chosen == subnetExports.end() || entry->first.second > chosen->first.second))
+            chosen = entry;
+    if (chosen == subnetExports.end())
+        return false;
+    int floorPrefix;
+    uint32_t floor;
+    if (!readAodvSubnetFloor(*request, subnetExtensionType, floorPrefix, floor) || floorPrefix > chosen->first.second)
+        return false;
+    auto& subnet = chosen->second;
+    if (floorPrefix == chosen->first.second) {
+        if (!subnet.sequenceValid || AodvSequence::isNewer(floor, subnet.sequence)) {
+            subnet.sequence = floor;
+            subnet.sequenceValid = true;
+        }
+        else if (floor != subnet.sequence && !AodvSequence::isNewer(subnet.sequence, floor))
+            return false;
+    }
+    if (!isSubnetAuthority(chosen->first, subnet))
+        return false;
+    subnet.sequenceValid = true;
+    auto reply = makeShared<Rrep>();
+    reply->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
+    reply->setChunkLength(usingIpv6 ? B(44) : B(20));
+    reply->setDestAddr(request->getDestAddr());
+    reply->setOriginatorAddr(request->getOriginatorAddr());
+    reply->setPrefixSize(chosen->first.second);
+    reply->setDestSeqNum(subnet.sequence);
+    reply->setHopCount(0);
+    reply->setLifeTime(quantizeAdvertisementLifetime(myRouteTimeout));
+    reply->setAckRequiredFlag(reverse->getMetric() == 1);
+    sendAODVPacket(reply, reverse->getNextHopAsGeneric(), 255, 0, reverse->getInterface(), &subnet);
+    return true;
+}
+
+void Aodv::resetSubnetState(bool loseSequences)
+{
+    for (auto& entry : subnetExports) {
+        entry.second.reachable = false;
+        entry.second.precursors.clear();
+        if (loseSequences) {
+            entry.second.sequenceValid = false;
+            entry.second.sequence = 0;
+        }
+    }
 }
 
 void Aodv::configureInterfaces()
@@ -1990,6 +2211,7 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     configureInterfaces(); // addresses and interface state are required only at actual start
     addressType = getSelfIPAddress().getAddressType();
     usingIpv6 = (getSelfIPAddress().getType() == L3Address::IPv6);
+    configureSubnetExports();
 
     operationalGeneration++;
     recovering = hasStarted;
@@ -2011,6 +2233,8 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
             socket.joinMulticastGroup(addressType->getBroadcastAddress(), selected->getInterfaceId());
         }
 
+    reconcileSubnetExports();
+
     // RFC 5148:
     // Jitter SHOULD be applied by reducing this delay by a random amount, so that
     // the delay between consecutive transmissions of messages of the same type is
@@ -2030,11 +2254,13 @@ void Aodv::handleStopOperation(LifecycleOperation *operation)
 void Aodv::handleCrashOperation(LifecycleOperation *operation)
 {
     socket.destroy();
+    resetSubnetState(true);
     clearState();
 }
 
 void Aodv::clearState(bool disposeQueued)
 {
+    resetSubnetState(false);
     operationalGeneration++;
     recovering = false;
     lastBroadcastTimes.clear();
@@ -2235,6 +2461,7 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
 
 void Aodv::expungeRoutes()
 {
+    reconcileSubnetExports();
     updateSearchAuthorities();
     for (auto it = repairableDeadlines.begin(); it != repairableDeadlines.end();) {
         if (it->second <= simTime()) {
@@ -2479,7 +2706,7 @@ bool Aodv::canSendControl(AodvControlPacketType type) const
         type == RERR || type == RERR_IPv6 || type == RREPACK || type == RREPACK_IPv6);
 }
 
-void Aodv::sendPreparedControl(Packet *packet)
+void Aodv::sendPreparedControl(Packet *packet, SubnetExport *authority)
 {
     auto control = packet->peekAtFront<AodvControlPacket>();
     auto type = control->getPacketType();
@@ -2490,6 +2717,15 @@ void Aodv::sendPreparedControl(Packet *packet)
         return;
     }
     auto destination = packet->getTag<L3AddressReq>()->getDestAddress();
+    if (authority) {
+        auto reply = dynamicPtrCast<const Rrep>(control);
+        RouteKey key(reply->getDestAddr().getPrefix(reply->getPrefixSize()), reply->getPrefixSize());
+        if (!isSubnetAuthority(key, *authority)) {
+            delete packet;
+            return;
+        }
+        authority->precursors.insert({destination, output->getInterfaceId()});
+    }
     if (destination.isBroadcast() || destination.isMulticast())
         lastBroadcastTimes[packet->getTag<InterfaceReq>()->getInterfaceId()] = simTime();
     if (auto reply = dynamicPtrCast<const Rrep>(control)) {

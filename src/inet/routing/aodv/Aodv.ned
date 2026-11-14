@@ -44,6 +44,8 @@ simple Aodv extends SimpleModule like IApp
         string interface @mutable = default("wlan0"); // Primary interface, applied at start
         string interfaces @mutable = default(""); // Whitespace-separated exact same-family IP interface names including interface; empty selects only interface; applied at start
         string gatewayAddress = default(""); // The address of the external gateway (external traffic routed here by default)
+        int subnetExtensionType = default(0); // 0 disables the INET subnet-floor profile; otherwise use the same scenario-local type in 128..255 on all peers
+        xml advertisedSubnets = default(xml("<subnets/>")); // Attached aggregate prefixes: subnet elements with prefix and interface attributes
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // It MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.
         volatile double periodicJitter @unit(s) = default(uniform(0s, maxPeriodicJitter)); // Jitter for externally triggered message generation and message forwarding
