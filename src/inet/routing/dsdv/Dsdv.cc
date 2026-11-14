@@ -1,383 +1,356 @@
-//
-// Copyright (C) 2008
-//
-// DSDV simple example for INET (add-on)
-// Version 2.0
-// Diogo Antio & Pedro Menezes
-// Instituto Superior Tecnico
-// Lisboa - Portugal
-// This version and newer version can be found at http://dsdv.8rf.com
-// This code was written while assisting the course "Redes moveis e sem fios" http://comp.ist.utl.pt/ec-cm
-// Autorization to use and modify this code not needed :P
-// The authors hope it will be useful to help understand how
-// INET and OMNET++ works(more specifically INET 20061020 and omnet++ 3.3).
-// Also we hope it will help in the developing of routing protocols using INET.
-//
-
+// SPDX-License-Identifier: LGPL-3.0-or-later
 #include "inet/routing/dsdv/Dsdv.h"
 
-#include <sstream>
+#include <algorithm>
+#include <memory>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/routing/dsdv/DsdvProtocol.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
+namespace dsdv {
 
 Define_Module(Dsdv);
 
-Dsdv::ForwardEntry::~ForwardEntry()
-{
-    if (this->event != nullptr) delete this->event;
-    if (this->hello != nullptr) delete this->hello;
-}
-
-Dsdv::Dsdv()
-{
-}
-
 Dsdv::~Dsdv()
 {
-    stop();
-    // Dispose of dynamically allocated the objects
-    delete event;
-    delete purgeTimer;
-    delete forwardList;
-//    delete Hello;
+    cancelAndDelete(periodicTimer);
+    cancelAndDelete(advertisementTimer);
+    cancelAndDelete(expiryTimer);
 }
 
 void Dsdv::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-
-    // reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL) {
-        sequencenumber = 0;
-        host = getContainingNode(this);
-        ift.reference(this, "interfaceTableModule", true);
-        rt.reference(this, "routingTableModule", true);
-
-        routeLifetime = par("routeLifetime").doubleValue();
-        helloInterval = par("helloInterval");
-        forwardList = new std::list<ForwardEntry *>();
-        event = new cMessage("event");
-        purgeTimer = new cMessage("purge");
-
-        WATCH(numSent);
-        WATCH(numReceived);
-        WATCH(sequencenumber);
-        WATCH(interfaceId);
-        WATCH(isForwardHello);
-        WATCH_EXPR("numRoutes", rt->getNumRoutes());
+        interfaceTable.reference(this, "interfaceTableModule", true);
+        routingTable.reference(this, "routingTableModule", true);
+        controlPort = par("controlPort");
+        period = par("fullDumpInterval");
+        jitter = par("periodicJitter");
+        if (controlPort < 1024 || controlPort > UINT16_MAX || period <= SIMTIME_ZERO || jitter < SIMTIME_ZERO ||
+                par("neighborTimeout").doubleValue() <= 0 || par("routeTimeout").doubleValue() <= 0 ||
+                par("settlingCap").doubleValue() <= 0 || par("minSettlingDelay").doubleValue() <= 0 ||
+                par("minSettlingDelay").doubleValue() > par("settlingCap").doubleValue())
+            throw cRuntimeError("Invalid DSDV control port or timer parameters");
+        periodicTimer = new cMessage("periodicTimer");
+        advertisementTimer = new cMessage("advertisementTimer");
+        expiryTimer = new cMessage("expiryTimer");
+        // Incoming delivery wins ties; expiry precedes either form of sending.
+        expiryTimer->setSchedulingPriority(10);
+        advertisementTimer->setSchedulingPriority(20);
+        periodicTimer->setSchedulingPriority(30);
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+        WATCH(active);
+        WATCH(startupDump);
+        WATCH(capacity);
+        WATCH_EXPR("selfAddress", active ? table.getSelf().current.destination : Ipv4Address::UNSPECIFIED_ADDRESS);
+        WATCH_EXPR("selfSequence", active ? table.getSelf().current.sequence : uint64_t(0));
+        WATCH_EXPR("numDestinations", table.getRouteEntries().size());
+        WATCH_EXPR("numFiniteRoutes", std::count_if(table.getRouteEntries().begin(), table.getRouteEntries().end(),
+                [this](const auto& item) {
+                    return active && item.first != table.getSelf().current.destination && DsdvTable::isFinite(item.second.current);
+                }));
+        WATCH_EXPR("numNeighbors", table.getNeighbors().size());
+        WATCH_EXPR("numPendingAdvertisements", table.getMustSend().size());
+        WATCH_EXPR("routeEntries", table.getRouteEntries());
+        WATCH_EXPR("neighbors", table.getNeighbors());
+        WATCH_EXPR("fullDumpBaseline", table.getBaseline());
+        WATCH_EXPR("mustSend", table.getMustSend());
+        WATCH_EXPR("nextPeriodicDump", periodicTimer->isScheduled() ? periodicTimer->getArrivalTime() : SimTime::getMaxTime());
+        WATCH_EXPR("nextAdvertisement", advertisementTimer->isScheduled() ? advertisementTimer->getArrivalTime() : SimTime::getMaxTime());
+        WATCH_EXPR("nextExpiry", expiryTimer->isScheduled() ? expiryTimer->getArrivalTime() : SimTime::getMaxTime());
+        auto group = ProtocolGroup::getUdpProtocolGroup();
+        auto existing = group->findProtocol(controlPort);
+        if (existing && existing != &dsdvProtocol)
+            throw cRuntimeError("DSDV control port already belongs to another protocol");
+        if (!existing)
+            group->addProtocol(controlPort, &dsdvProtocol);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
+        if (routingTable->getRouterIdAsGeneric().getType() != L3Address::IPv4)
+            throw cRuntimeError("DSDV supports only an IPv4 routing table");
+        routingInterface = interfaceTable->findInterfaceByName(par("interface"));
+        if (!routingInterface || routingInterface->isLoopback() || !routingInterface->isBroadcast())
+            throw cRuntimeError("DSDV requires one configured broadcast-capable ad hoc interface");
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+            auto interface = interfaceTable->getInterface(i);
+            if (interface != routingInterface && !interface->isLoopback() && interface->isUp())
+                throw cRuntimeError("DSDV supports only one active non-loopback interface");
+        }
+        getContainingNode(this)->subscribe(interfaceStateChangedSignal, this);
+        getContainingNode(this)->subscribe(interfaceConfigChangedSignal, this);
+        getContainingNode(this)->subscribe(interfaceIpv4ConfigChangedSignal, this);
+        if (isUp() && interfaceUsable())
+            start();
     }
+}
+
+bool Dsdv::interfaceUsable() const
+{
+    if (!routingInterface || !routingInterface->isUp() || !routingInterface->hasCarrier())
+        return false;
+    auto data = routingInterface->findProtocolData<Ipv4InterfaceData>();
+    return data && DsdvTable::isHost(data->getIPAddress());
 }
 
 void Dsdv::start()
 {
-    /* Search the 80211 interface */
-    int num_80211 = 0;
-    NetworkInterface *ie;
-    NetworkInterface *i_face;
-    broadcastDelay = &par("broadcastDelay");
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        ie = ift->getInterface(i);
-        if (ie->isWireless()) {
-            i_face = ie;
-            num_80211++;
-            interfaceId = i;
+    if (active || !interfaceUsable())
+        return;
+    auto address = routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+    table.configure(address, par("settlingCap"), par("neighborTimeout"), par("routeTimeout"), par("minSettlingDelay"));
+    int budget = std::min(par("payloadBudget").intValue(), int64_t(routingInterface->getMtu() - 28));
+    if (budget < DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES)
+        throw cRuntimeError("DSDV payload budget/MTU cannot hold one entry plus IPv4/UDP overhead");
+    capacity = std::min((budget - DsdvTable::HEADER_BYTES) / DsdvTable::ENTRY_BYTES, int(UINT16_MAX));
+    table.start(simTime());
+    socket.bind(controlPort);
+    socket.setBroadcast(true);
+    socket.setTimeToLive(1);
+    active = true;
+    startupDump = true;
+    synchronizeRoutes();
+    scheduleAt(simTime(), advertisementTimer);
+    scheduleAt(simTime() + SimTime(uniform(0, period.dbl())), periodicTimer);
+}
+
+void Dsdv::removeOwnedRoutes()
+{
+    // Never retain borrowed route pointers across routing-table cleanup.
+    for (int i = routingTable->getNumRoutes() - 1; i >= 0; i--) {
+        auto route = routingTable->getRoute(i);
+        if (route->getSource() == this) {
+            routingTable->deleteRoute(route);
+            emit(registerSignal("routeWithdrawn"), 1L);
         }
     }
+}
 
-    // One enabled network interface (in total)
-    if (num_80211 == 1)
-        interface80211ptr = i_face;
+void Dsdv::suspend(bool crash)
+{
+    cancelEvent(periodicTimer);
+    cancelEvent(advertisementTimer);
+    cancelEvent(expiryTimer);
+    if (active) {
+        active = false;
+        table.suspend(simTime());
+        if (crash)
+            socket.destroy();
+        else
+            socket.close();
+    }
+    startupDump = false;
+    removeOwnedRoutes();
+}
+
+void Dsdv::handleStartOperation(LifecycleOperation *)
+{
+    start();
+}
+
+void Dsdv::handleStopOperation(LifecycleOperation *)
+{
+    suspend(false);
+}
+
+void Dsdv::handleCrashOperation(LifecycleOperation *)
+{
+    suspend(true);
+}
+
+void Dsdv::scheduleTimer(cMessage *timer, simtime_t when)
+{
+    cancelEvent(timer);
+    if (when != SimTime::getMaxTime())
+        scheduleAt(when, timer);
+}
+
+void Dsdv::scheduleTimers()
+{
+    scheduleTimer(expiryTimer, table.nextExpiry());
+    scheduleTimer(advertisementTimer, startupDump ? simTime() : table.nextAdvertisement(simTime()));
+}
+
+void Dsdv::handleMessageWhenUp(cMessage *message)
+{
+    if (!message->isSelfMessage()) {
+        if (active && socket.belongsToSocket(message))
+            socket.processMessage(message);
+        else
+            delete message;
+        return;
+    }
+    if (!active)
+        throw cRuntimeError("DSDV timer survived suspension");
+    if (message == expiryTimer) {
+        for (const auto& destination : table.expire(simTime())) {
+            EV_INFO << "Expired DSDV route to " << destination << endl;
+            emit(registerSignal("invalidationReason"), "expiry");
+        }
+        synchronizeRoutes();
+    }
+    else if (message == periodicTimer) {
+        table.advanceSelf();
+        sendAdvertisement(true);
+        scheduleAt(simTime() + period + SimTime(uniform(0, jitter.dbl())), periodicTimer);
+    }
+    else if (message == advertisementTimer) {
+        bool full = startupDump;
+        startupDump = false;
+        if (!full)
+            emit(registerSignal("triggeredSend"), 1L);
+        sendAdvertisement(full);
+    }
     else
-        throw cRuntimeError("DSDV has found %i 80211 interfaces", num_80211);
-    if (par("manetPurgeRoutingTables").boolValue()) {
-        Ipv4Route *entry;
-        // clean the route table wlan interface entry
-        for (int i = rt->getNumRoutes() - 1; i >= 0; i--) {
-            entry = rt->getRoute(i);
-            if (entry->getInterface()->isWireless())
-                rt->deleteRoute(entry);
+        throw cRuntimeError("Unknown DSDV timer");
+    scheduleTimers();
+}
+
+void Dsdv::sendAdvertisement(bool full)
+{
+    auto advertisement = table.prepare(full, capacity, simTime());
+    for (auto delay : advertisement.settlingDelays)
+        emit(registerSignal("settlingDelay"), delay);
+    for (const auto& entries : advertisement.datagrams) {
+        auto header = makeShared<DsdvHeader>();
+        header->setKind(advertisement.full ? 1 : 2);
+        header->setSender(table.getSelf().current.destination);
+        header->setSelfSequence(table.getSelf().current.sequence);
+        header->setEntriesArraySize(entries.size());
+        header->setChunkLength(B(DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES * entries.size()));
+        for (size_t i = 0; i < entries.size(); i++)
+            header->setEntries(i, entries[i]);
+        auto packet = new Packet("DSDV", header);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&dsdvProtocol);
+        packet->addTag<InterfaceReq>()->setInterfaceId(routingInterface->getInterfaceId());
+        packet->addTag<L3AddressReq>()->setSrcAddress(header->getSender());
+        packet->addTag<FragmentationReq>()->setDontFragment(true);
+        emit(registerSignal("controlBytes"), long(header->getChunkLength().get<B>()));
+        emit(registerSignal("controlPacketSent"), 1L);
+        socket.sendTo(packet, Ipv4Address::ALLONES_ADDRESS, controlPort);
+    }
+    if (!advertisement.datagrams.empty())
+        emit(registerSignal(advertisement.full ? "fullDumpSent" : "incrementalSent"), 1L);
+}
+
+void Dsdv::synchronizeRoutes(const char *withdrawalReason)
+{
+    auto self = table.getSelf().current.destination;
+    for (int i = routingTable->getNumRoutes() - 1; i >= 0; i--) {
+        auto route = routingTable->getRoute(i);
+        if (route->getSource() != this)
+            continue;
+        auto it = table.getRouteEntries().find(route->getDestinationAsGeneric().toIpv4());
+        if (it == table.getRouteEntries().end() || !DsdvTable::isFinite(it->second.current)) {
+            routingTable->deleteRoute(route);
+            emit(registerSignal("routeWithdrawn"), 1L);
+            if (withdrawalReason)
+                emit(registerSignal("invalidationReason"), withdrawalReason);
         }
     }
-    CHK(interface80211ptr->getProtocolDataForUpdate<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
-
-    // schedules a random periodic event: the hello message broadcast from DSDV module
-
-    // reads from omnetpp.ini
-//    HelloForward = new DsdvHello("HelloForward");
-    // schedules a random periodic event: the hello message broadcast from DSDV module
-    scheduleAfter(uniform(0.0, par("maxVariance").doubleValue()), event);
-}
-
-void Dsdv::stop()
-{
-    cancelEvent(event);
-    cancelEvent(purgeTimer);
-    while (!forwardList->empty()) {
-        ForwardEntry *fh = forwardList->front();
-        if (fh->event)
-            cancelAndDelete(fh->event);
-        if (fh->hello)
-            cancelAndDelete(fh->hello);
-        fh->event = nullptr;
-        fh->hello = nullptr;
-        forwardList->pop_front();
-        delete fh;
-    }
-}
-
-void Dsdv::handleSelfMessage(cMessage *msg)
-{
-    // When DSDV module receives selfmessage (scheduled event)
-    // it means that it's time for Hello message broadcast event
-    // i.e. Brodcast Hello messages to other nodes when selfmessage=event
-    // But if selmessage!=event it means that it is time to forward useful Hello message to othert nodes
-    if (msg == event) {
-        auto hello = makeShared<DsdvHello>();
-
-        purge();
-
-        // count non-loopback interfaces
-//        int numIntf = 0;
-//        NetworkInterface *ie = nullptr;
-        //for (int k=0; k<ift->getNumInterfaces(); k++)
-//         if (!ift->getInterface(k)->isLoopback())
-//         {ie = ift->getInterface(k); numIntf++; }
-
-        // Filling the DsdvHello fields
-//        Ipv4Address source = (ie->ipv4()->getIPAddress());
-        Ipv4Address source = (interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-        hello->setChunkLength(b(128)); /// size of Hello message in bits
-        hello->setSrcAddress(source);
-        sequencenumber += 2;
-        hello->setSequencenumber(sequencenumber);
-        hello->setNextAddress(source);
-        hello->setHopdistance(1);
-
-        /*http://www.cs.ucsb.edu/~ebelding/txt/bc.txt
-        The IPv4 address for "limited broadcast" is 255.255.255.255, and is not supposed to be forwarded.
-        Since the nodes in an ad hoc network are asked to forward the flooded packets, the limited broadcast
-        address is a poor choice.  The other available choice, the "directed broadcast" address, would presume a
-        choice of routing prefix for the ad hoc network and thus is not a reasonable choice.
-        (...)
-        Limited Broadcast - Sent to all NICs on the some network segment as the source NIC. It is represented with
-        the 255.255.255.255 TCP/IP address. This broadcast is not forwarded by routers so will only appear on one
-        network segment.
-        Direct broadcast - Sent to all hosts on a network. Routers may be configured to forward directed broadcasts
-        on large networks. For network 192.168.0.0, the broadcast is 192.168.255.255.
-        */
-        // new control info for DsdvHello
-        auto packet = new Packet("Hello", hello);
-        auto addressReq = packet->addTag<L3AddressReq>();
-        addressReq->setDestAddress(Ipv4Address(255, 255, 255, 255)); // let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-        addressReq->setSrcAddress(source); // let's try the limited broadcast
-        packet->addTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-
-        // broadcast to other nodes the hello message
-        numSent++;
-        send(packet, "ipOut");
-        packet = nullptr;
-        hello = nullptr;
-
-        // schedule new brodcast hello message event
-        scheduleAfter(helloInterval + broadcastDelay->doubleValue(), event);
-        bubble("Sending new hello message");
-    }
-    else if (msg == purgeTimer) {
-        purge();
-        reschedulePurgeTimer();
-    }
-    else {
-        for (auto it = forwardList->begin(); it != forwardList->end(); it++) {
-            if ((*it)->event == msg) {
-                EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
-                numSent++;
-                send((*it)->hello, "ipOut");
-                (*it)->hello = nullptr;
-                delete *it;
-                forwardList->erase(it);
+    for (const auto& item : table.getRouteEntries()) {
+        if (item.first == self || !DsdvTable::isFinite(item.second.current))
+            continue;
+        IRoute *owned = nullptr;
+        for (int i = 0; i < routingTable->getNumRoutes(); i++) {
+            auto route = routingTable->getRoute(i);
+            if (route->getSource() == this && route->getDestinationAsGeneric() == item.first) {
+                owned = route;
                 break;
             }
         }
-        delete msg;
-    }
-}
-
-void Dsdv::handleMessageWhenUp(cMessage *msg)
-{
-    if (msg->isSelfMessage()) {
-        handleSelfMessage(msg);
-    }
-    else if (check_and_cast<Packet *>(msg)->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::manet) {
-        numReceived++;
-        auto packet = new Packet("Hello");
-
-        // When DSDV module receives DsdvHello from other host
-        // it adds/replaces the information in routing table for the one contained in the message
-        // but only if it's useful/up-to-date. If not the DSDV module ignores the message.
-        auto addressReq = packet->addTag<L3AddressReq>();
-        addressReq->setDestAddress(Ipv4Address(255, 255, 255, 255)); // let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-        addressReq->setSrcAddress(interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-        packet->addTag<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-        ForwardEntry *fhp = nullptr;
-        auto recHello = !isForwardHello ? staticPtrCast<DsdvHello>(check_and_cast<Packet *>(msg)->peekData<DsdvHello>()->dupShared()) : nullptr;
-        if (isForwardHello) {
-            fhp = new ForwardEntry();
-            fhp->hello = check_and_cast<Packet *>(msg->dup());
+        bool changed = !owned || owned->getNextHopAsGeneric() != item.second.successor ||
+                owned->getMetric() != int(item.second.current.metric);
+        if (!owned) {
+            owned = routingTable->createRoute();
+            owned->setSource(this);
+            owned->setSourceType(IRoute::MANET);
+            owned->setDestination(item.first);
+            owned->setPrefixLength(32);
+            owned->setInterface(routingInterface);
+            owned->setNextHop(item.second.successor);
+            owned->setMetric(item.second.current.metric);
+            routingTable->addRoute(owned);
         }
-
-        if (msg->arrivedOn("ipIn")) {
-            ASSERT((!isForwardHello && recHello) || (isForwardHello && fhp->hello));
-            bubble("Received hello message");
-            Ipv4Address source = interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
-
-            // reads DSDV hello message fields
-            Ipv4Address src;
-            unsigned int msgsequencenumber;
-            int numHops;
-            Ipv4Address next;
-            if (!isForwardHello) {
-                src = recHello->getSrcAddress();
-                msgsequencenumber = recHello->getSequencenumber();
-                next = recHello->getNextAddress();
-                numHops = recHello->getHopdistance();
-
-                if (src == source) {
-                    EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
-                    delete packet;
-                    delete fhp;
-                    delete msg;
-                    return;
-                }
-            }
-            else {
-                auto fhpHello = fhp->hello->peekData<DsdvHello>();
-                src = fhpHello->getSrcAddress();
-                msgsequencenumber = fhpHello->getSequencenumber();
-                next = fhpHello->getNextAddress();
-                numHops = fhpHello->getHopdistance();
-
-                if (src == source) {
-                    EV_INFO << "Hello msg dropped. This message returned to the original creator.\n";
-                    delete packet;
-                    delete fhp;
-                    delete msg;
-                    return;
-                }
-            }
-
-            Ipv4Route *_entrada_routing = rt->findBestMatchingRoute(src);
-            DsdvIpv4Route *entrada_routing = dynamic_cast<DsdvIpv4Route *>(_entrada_routing);
-
-            // Tests if the DSDV hello message that arrived is useful
-            if (_entrada_routing == nullptr
-                || (_entrada_routing != nullptr && _entrada_routing->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
-                || (entrada_routing != nullptr && (msgsequencenumber > (entrada_routing->getSequencenumber()) || (msgsequencenumber == (entrada_routing->getSequencenumber()) && numHops < (entrada_routing->getMetric())))))
-            {
-
-                // remove old entry
-                if (entrada_routing != nullptr)
-                    rt->deleteRoute(entrada_routing);
-
-                // adds new information to routing table according to information in hello message
-                {
-                    Ipv4Address netmask = Ipv4Address::ALLONES_ADDRESS; // Ipv4Address(par("netmask").stringValue());
-                    DsdvIpv4Route *e = new DsdvIpv4Route();
-                    e->setDestination(src);
-                    e->setNetmask(netmask);
-                    e->setGateway(next);
-                    e->setInterface(interface80211ptr);
-                    e->setSourceType(IRoute::MANET);
-                    e->setMetric(numHops);
-                    e->setSequencenumber(msgsequencenumber);
-                    e->setExpiryTime(simTime() + routeLifetime);
-                    rt->addRoute(e);
-                    reschedulePurgeTimer();
-                }
-                if (!isForwardHello) {
-                    recHello->setNextAddress(source);
-                    numHops++;
-                    recHello->setHopdistance(numHops);
-                    double waitTime = intuniform(1, 50);
-                    waitTime = waitTime / 100;
-                    EV_DETAIL << "waitime for forward before was " << waitTime << " And host is " << source << "\n";
-//                    waitTime= SIMTIME_DBL (simTime())+waitTime;
-                    EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n"; // FIXME unchanged waitTime showed twice!!!
-                    packet->insertAtBack(recHello);
-                    sendDelayed(packet, waitTime, "ipOut");
-                    packet = nullptr;
-                }
-                else {
-                    auto forwardHello = staticPtrCast<DsdvHello>(fhp->hello->peekData<DsdvHello>()->dupShared());
-                    // forward useful message to other nodes
-                    forwardHello->setNextAddress(source);
-                    numHops++;
-                    forwardHello->setHopdistance(numHops);
-//                    send(HelloForward, "ipOut");
-//                    HelloForward=nullptr;
-                    double waitTime = intuniform(1, 50);
-                    waitTime = waitTime / 100;
-                    EV_DETAIL << "waitime for forward before was " << waitTime << " And host is " << source << "\n";
-                    EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n";
-                    fhp->event = new cMessage("event2");
-                    scheduleAfter(waitTime, fhp->event);
-                    forwardList->push_back(fhp);
-                    fhp = nullptr;
-                }
-            }
-            delete packet;
-            delete fhp;
-            delete msg;
+        else if (changed) {
+            owned->setNextHop(item.second.successor);
+            owned->setMetric(item.second.current.metric);
         }
-        else
-            throw cRuntimeError("Message arrived on unknown gate %s", msg->getArrivalGate()->getName());
-    }
-    else
-        throw cRuntimeError("Message not supported %s", msg->getName());
-}
-
-void Dsdv::reschedulePurgeTimer()
-{
-    simtime_t purgeTime = SimTime::getMaxTime();
-    for (int i = 0; i < rt->getNumRoutes(); i++) {
-        auto route = dynamic_cast<DsdvIpv4Route *>(rt->getRoute(i));
-        if (route && !route->isExpired() && route->getExpiryTime() < purgeTime)
-            purgeTime = route->getExpiryTime();
-    }
-    cancelEvent(purgeTimer);
-    if (purgeTime != SimTime::getMaxTime())
-        scheduleAt(purgeTime, purgeTimer);
-}
-
-void Dsdv::purge()
-{
-    for (int i = 0; i < rt->getNumRoutes();) {
-        auto route = dynamic_cast<DsdvIpv4Route *>(rt->getRoute(i));
-        if (route && route->isExpired())
-            rt->deleteRoute(route);
-        else
-            i++;
+        if (changed)
+            emit(registerSignal("routeInstalled"), 1L);
     }
 }
 
-std::string DsdvIpv4Route::str() const
+void Dsdv::socketDataArrived(UdpSocket *, Packet *packet)
 {
-    std::ostringstream out;
-    out << Ipv4Route::str() << " seqNo:" << getSequencenumber() << " expiryTime:" << getExpiryTime();
-    return out.str();
+    std::unique_ptr<Packet> owner(packet);
+    auto incoming = packet->findTag<InterfaceInd>();
+    auto address = packet->findTag<L3AddressInd>();
+    auto port = packet->findTag<L4PortInd>();
+    Ptr<const DsdvHeader> header;
+    if (packet->getDataLength() >= B(DsdvTable::HEADER_BYTES)) {
+        try {
+            header = packet->peekAtFront<DsdvHeader>(packet->getDataLength(),
+                    Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+        }
+        catch (cRuntimeError&) {
+            // Unrepresentable/truncated external bytes are a rejected datagram.
+        }
+    }
+    if (!active || !incoming || incoming->getInterfaceId() != routingInterface->getInterfaceId() ||
+            !address || !port || port->getSrcPort() != controlPort || !header ||
+            !DsdvTable::isValidHeader(*header) || address->getSrcAddress() != header->getSender() ||
+            header->getSender() == table.getSelf().current.destination) {
+        emit(registerSignal("updateRejected"), 1L);
+        return;
+    }
+    table.receive(*header, simTime());
+    emit(registerSignal("updateAccepted"), 1L);
+    synchronizeRoutes("remoteWithdrawal");
+    scheduleTimers();
 }
 
+void Dsdv::socketErrorArrived(UdpSocket *, Indication *indication)
+{
+    delete indication;
+}
+
+void Dsdv::socketClosed(UdpSocket *)
+{
+}
+
+void Dsdv::receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *)
+{
+    Enter_Method_Silent();
+    auto change = check_and_cast<NetworkInterfaceChangeDetails *>(value);
+    if (!isUp())
+        return;
+    if (change->getNetworkInterface() != routingInterface) {
+        auto interface = change->getNetworkInterface();
+        if (!interface->isLoopback() && interface->isUp())
+            throw cRuntimeError("DSDV supports only one active non-loopback interface");
+        return;
+    }
+    if (interfaceUsable()) {
+        if (active && routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress() !=
+                table.getSelf().current.destination)
+            throw cRuntimeError("DSDV does not support changing its IPv4 identity");
+        start();
+    }
+    else if (active) {
+        emit(registerSignal("invalidationReason"), "interfaceDown");
+        suspend(false);
+    }
+}
+
+} // namespace dsdv
 } // namespace inet
-

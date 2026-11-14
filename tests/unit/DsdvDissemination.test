@@ -1,0 +1,136 @@
+%description:
+PB94-DUMPS/PRIORITY/SETTLE/CORRECT: controlled advertised view and submission
+deadlines, full baseline semantics, sequence-only overflow and recovery clocks.
+
+%includes:
+#include "inet/routing/dsdv/DsdvTable.h"
+using namespace inet;
+using namespace inet::dsdv;
+
+%global:
+static DsdvEntry e(int destination, uint64_t sequence, uint32_t metric)
+{
+    DsdvEntry entry; entry.destination = Ipv4Address(0x0a000000U + destination);
+    entry.sequence = sequence; entry.metric = metric; return entry;
+}
+static DsdvHeader h(int sender, std::vector<DsdvEntry> entries)
+{
+    DsdvHeader header; header.setSender(Ipv4Address(0x0a000000U + sender));
+    header.setChunkLength(B(16+16*entries.size())); header.setEntriesArraySize(entries.size());
+    for (size_t i=0; i<entries.size(); i++) header.setEntries(i, entries[i]);
+    return header;
+}
+static DsdvEntry advertised(const DsdvTable::Advertisement& a, int destination)
+{
+    for (const auto& datagram : a.datagrams)
+        for (const auto& entry : datagram)
+            if (entry.destination == Ipv4Address(0x0a000000U + destination)) return entry;
+    throw cRuntimeError("Missing advertised destination");
+}
+
+%activity:
+// Stable sequences can reduce the estimate to zero; deferred changes still wait 10ms.
+DsdvTable minimum; minimum.configure(Ipv4Address("10.0.0.1"),1,10,12); minimum.start(0);
+minimum.receive(h(2,{e(4,2,1)}),0);
+minimum.prepare(true,10,0);
+for (int i = 1; i <= 32; i++)
+    minimum.receive(h(2,{e(4,2 + 2 * i,1)}), SimTime(i, SIMTIME_MS));
+ASSERT(minimum.getRouteEntries().at(Ipv4Address("10.0.0.4")).estimate == SIMTIME_ZERO);
+minimum.prepare(true,10,SimTime(32, SIMTIME_MS));
+minimum.receive(h(3,{e(4,68,3)}), SimTime(40, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(40, SIMTIME_MS)) == SimTime(50, SIMTIME_MS));
+// Neither a full dump nor a later improvement bypasses or slides the deadline.
+ASSERT(advertised(minimum.prepare(true,10,SimTime(41, SIMTIME_MS)),4).sequence == 66);
+minimum.receive(h(2,{e(4,68,1)}), SimTime(42, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(42, SIMTIME_MS)) == SimTime(50, SIMTIME_MS));
+ASSERT(advertised(minimum.prepare(false,10,SimTime(50, SIMTIME_MS)),4).sequence == 68);
+// Urgent withdrawals bypass the minimum.
+minimum.receive(h(2,{e(4,69,UINT32_MAX)}), SimTime(51, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(51, SIMTIME_MS)) == SimTime(51, SIMTIME_MS));
+// An explicitly configured minimum is honored, including minimum == cap.
+DsdvTable custom; custom.configure(Ipv4Address("10.0.0.1"),.02,10,12,.02); custom.start(0);
+custom.receive(h(2,{e(4,2,1)}),0); custom.prepare(true,10,0);
+custom.receive(h(3,{e(4,4,3)}),SimTime(1, SIMTIME_MS));
+ASSERT(custom.nextAdvertisement(SimTime(1, SIMTIME_MS)) == SimTime(21, SIMTIME_MS));
+for (simtime_t invalid : {SIMTIME_ZERO, SimTime(-1, SIMTIME_MS), SimTime(1001, SIMTIME_MS)}) {
+    bool rejected = false;
+    try { DsdvTable bad; bad.configure(Ipv4Address("10.0.0.1"),1,10,12,invalid); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+// Several arrivals before an urgent callback coalesce to the current record.
+DsdvTable coalesced; coalesced.configure(Ipv4Address("10.0.0.1"),1,10,12); coalesced.start(0);
+coalesced.prepare(true,10,0);
+coalesced.receive(h(2,{e(4,10,1)}),.1);
+coalesced.receive(h(3,{e(4,12,3)}),.1);
+ASSERT(advertised(coalesced.prepare(false,10,.1),4).sequence == 12);
+ASSERT(coalesced.nextAdvertisement(.1) == SimTime::getMaxTime());
+DsdvTable t; t.configure(Ipv4Address("10.0.0.1"), 1, 10, 12); t.start(0);
+t.receive(h(2,{e(4,10,1)}),0);
+ASSERT(t.nextAdvertisement(0) == SIMTIME_ZERO);
+t.prepare(true,10,0);
+t.receive(h(3,{e(4,12,3)}),.1);
+ASSERT(t.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.metric == 4);
+ASSERT(t.nextAdvertisement(.1) == SimTime(.35));
+t.receive(h(2,{e(4,12,1)}),.2);
+auto full = t.prepare(true,10,.21);
+ASSERT(advertised(full,4).sequence == 10 && advertised(full,4).metric == 2);
+t.receive(h(2,{e(4,14,1)}),.25);
+ASSERT(t.nextAdvertisement(.25) == SimTime(.35));
+ASSERT(t.getRouteEntries().at(Ipv4Address("10.0.0.4")).estimate == SimTime(.10625));
+auto sent = t.prepare(false,10,.35);
+ASSERT(advertised(sent,4).sequence == 14);
+ASSERT(t.nextAdvertisement(.35) == SimTime::getMaxTime());
+t.prepare(true,10,1.2);
+// Baseline-equal correction must remain a send obligation.
+t.receive(h(2,{e(4,13,UINT32_MAX)}),1.3);
+ASSERT(t.nextAdvertisement(1.3) == SimTime(1.3));
+ASSERT(advertised(t.prepare(false,10,1.3),4).sequence == 14);
+// Sequence-only updates create no callback. They fill spare capacity only.
+t.receive(h(2,{e(4,16,1)}),1.4);
+ASSERT(t.nextAdvertisement(1.4) == SimTime::getMaxTime());
+t.receive(h(2,{e(5,2,1),e(6,2,1),e(7,2,1)}),1.5);
+auto overflow = t.prepare(false,2,1.5);
+ASSERT(overflow.full && overflow.datagrams.size() == 3);
+ASSERT(overflow.datagrams[0].size() == 2 && overflow.datagrams[2].size() == 1);
+t.receive(h(2,{e(5,4,1),e(6,4,1),e(7,4,1)}),1.6);
+t.receive(h(2,{e(8,2,1)}),1.6);
+auto incremental = t.prepare(false,1,1.6);
+ASSERT(!incremental.full && incremental.datagrams.size() == 1);
+ASSERT(incremental.datagrams[0][0].destination == Ipv4Address("10.0.0.8"));
+auto repeated = t.prepare(false,1,1.7);
+ASSERT(advertised(repeated,8).metric == 2); // Incrementals never reset full baseline.
+// A correction promotes a settling route without waiting for its deadline.
+t.receive(h(3,{e(4,18,4)}),1.8);
+ASSERT(t.nextAdvertisement(1.8) == SimTime(1.8)); // Stable path change is urgent.
+t.prepare(true,20,1.8);
+t.receive(h(3,{e(4,20,5)}),1.85);
+ASSERT(t.nextAdvertisement(1.85) > SimTime(1.85));
+t.receive(h(2,{e(4,19,UINT32_MAX)}),1.9);
+ASSERT(advertised(t.prepare(false,20,1.9),4).sequence == 20);
+ASSERT(t.getSelf().current.metric == 0);
+t.receive(h(2,{e(1,19,UINT32_MAX)}),2);
+ASSERT(t.getSelf().current.sequence == 20 && t.getSelf().current.metric == 0);
+// Destination age and neighbor liveness are distinct.
+DsdvTable age; age.configure(Ipv4Address("10.0.0.1"),1,5,3); age.start(0);
+age.receive(h(2,{e(4,2,1),e(5,2,1)}),0);
+age.receive(h(2,{e(5,2,1)}),3);
+auto expired = age.expire(3);
+ASSERT(expired.size() == 1 && expired[0] == Ipv4Address("10.0.0.4"));
+ASSERT(age.getRouteEntries().at(expired[0]).current.sequence == 3);
+ASSERT(age.expire(3).empty());
+// Startup repeats old withdrawals and advances self exactly once.
+age.prepare(true,20,3); age.suspend(4); age.start(100);
+auto startup = age.prepare(true,1,100);
+ASSERT(startup.full && startup.datagrams.size() == 3);
+ASSERT(advertised(startup,4).sequence == 3 && advertised(startup,4).metric == UINT32_MAX);
+ASSERT(age.getSelf().current.sequence == 2);
+age.receive(h(2,{e(4,2,1)}),101);
+ASSERT(age.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.metric == UINT32_MAX);
+age.receive(h(2,{e(4,4,1)}),101);
+ASSERT(age.getRouteEntries().at(Ipv4Address("10.0.0.4")).current.metric == 2);
+ASSERT(age.expire(106).size() == 1);
+EV << "DSDV dissemination PASS\n";
+
+%contains: stdout
+DSDV dissemination PASS

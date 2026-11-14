@@ -1,5 +1,17 @@
 [
  {
+  "working_directory": "examples/dsdv",
+  "ini_file": "omnetpp.ini",
+  "config": "Mobile",
+  "run_number": 0,
+  "sim_time_limit": "32s",
+  "test_result": "PASS",
+  "ingredients": "tplx",
+  "fingerprint": "2bf5-fcd0",
+  "timestamp": 1794247372.1665733,
+  "itervars": ""
+ },
+ {
   "working_directory": "examples/adhoc/hostautoconf",
   "ini_file": "omnetpp.ini",
   "config": "General",
@@ -18643,8 +18655,8 @@
   "sim_time_limit": "22s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "b5fe-a1b2",
-  "timestamp": 1792589940.0,
+  "fingerprint": "ea2a-cd36",
+  "timestamp": 1794247373.309817,
   "itervars": "$repetition==0"
  },
  {
@@ -18667,8 +18679,8 @@
   "sim_time_limit": "22s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "0af5-5bc7",
-  "timestamp": 1792589940.0,
+  "fingerprint": "9cfd-b9e8",
+  "timestamp": 1794247373.3122354,
   "itervars": "$repetition==0"
  },
  {
@@ -18679,8 +18691,8 @@
   "sim_time_limit": "22s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "3e2c-1eee",
-  "timestamp": 1792589940.0,
+  "fingerprint": "ec39-cd04",
+  "timestamp": 1794247373.311081,
   "itervars": "$repetition==0"
  },
  {
@@ -18691,8 +18703,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "2d1b-0515",
-  "timestamp": 1792589940.0,
+  "fingerprint": "fe44-d006",
+  "timestamp": 1794247371.4716792,
   "itervars": "$repetition==0"
  },
  {
@@ -18715,8 +18727,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "bed0-9954",
-  "timestamp": 1792589940.0,
+  "fingerprint": "6975-ddb0",
+  "timestamp": 1794247371.4761908,
   "itervars": "$repetition==0"
  },
  {
@@ -18727,8 +18739,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "1ba1-8398",
-  "timestamp": 1792589940.0,
+  "fingerprint": "052c-d3e9",
+  "timestamp": 1794247371.4739592,
   "itervars": "$repetition==0"
  },
  {
@@ -18739,8 +18751,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "a35f-3c51",
-  "timestamp": 1792589940.0,
+  "fingerprint": "9d2b-c13d",
+  "timestamp": 1794247371.4722347,
   "itervars": "$repetition==0"
  },
  {
@@ -18763,8 +18775,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "92cb-62b4",
-  "timestamp": 1792589940.0,
+  "fingerprint": "a9c7-4579",
+  "timestamp": 1794247371.4767418,
   "itervars": "$repetition==0"
  },
  {
@@ -18775,8 +18787,8 @@
   "sim_time_limit": "10s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "9f80-f16d",
-  "timestamp": 1792589940.0,
+  "fingerprint": "be75-f184",
+  "timestamp": 1794247371.474507,
   "itervars": "$repetition==0"
  },
  {
@@ -43723,8 +43735,8 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "84f0-9aea",
-  "timestamp": 1792589940.0,
+  "fingerprint": "e7a2-1b3d",
+  "timestamp": 1794247373.310422,
   "itervars": "$repetition==0"
  },
  {
@@ -43747,8 +43759,8 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "fefe-9ffb",
-  "timestamp": 1792589940.0,
+  "fingerprint": "3b16-c25e",
+  "timestamp": 1794247373.3127925,
   "itervars": "$repetition==0"
  },
  {
@@ -43759,8 +43771,8 @@
   "sim_time_limit": "100s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "bdad-9a28",
-  "timestamp": 1792589940.0,
+  "fingerprint": "7c88-78ac",
+  "timestamp": 1794247373.3116462,
   "itervars": "$repetition==0"
  },
  {

@@ -121,29 +121,28 @@ turned off in INET's AODV implementation.
 About DSDV
 ~~~~~~~~~~
 
-DSDV is a proactive (or table-driven) MANET routing protocol, so it
-makes sure routing information in the network is always up-to-date. Each
-node maintains a routing table with the best route to each destination.
-The routing table contains routing entries for all possible destinations
-known either directly because it's a neighbor, or indirectly through
-neighbors. A routing entry contains the destination's IP address, last
-known sequence number, hop count required to reach the destination, and
-the next hop. Routing information is frequently updated so all nodes
-have the best routes in the network. Routing information is updated in
-two ways:
+DSDV is a proactive (or table-driven) MANET routing protocol. Each node
+maintains routes learned from its neighbors, identified by destination,
+destination sequence number, hop count and next hop. A newer sequence
+number takes precedence over a shorter path; among routes with the same
+sequence number, the smaller hop count wins.
 
--  Nodes broadcast their entire routing table periodically
-   (infrequently)
--  Nodes broadcast small updates when a change in their routing table
-   occurs
+Nodes broadcast periodic full dumps and triggered incremental updates.
+The forwarding table changes immediately when a better route is accepted,
+while advertising a finite route may wait for settling. Newly reachable
+destinations and withdrawals are advertised without that settling delay.
 
-A node updates a routing table entry if it receives a better route. A
-better route is one that has a higher sequence number, or a lower hop
-count if the sequence number is the same.
+A failed successor or an expired destination makes the route unusable.
+Withdrawals carry an odd sequence number and an infinite metric; a newer
+finite route can restore reachability. The model retains the withdrawn
+destination's sequence floor to prevent delayed old updates from restoring
+a stale route.
 
-In general, DSDV has more overhead than reactive routing protocols
-because route maintenance messages are sent all the time. Since the
-routes are always up to date, DSDV has less delay in sending data.
+Proactive updates can make a route available before an application needs
+it, but they do not guarantee that every stored route is current or that
+every packet is delivered. Mobility, control-packet loss, convergence and
+expiry all affect forwarding. Comparing overhead or delay with another
+routing protocol requires a separate measurement across suitable runs.
 
 About GPSR
 ~~~~~~~~~~
@@ -351,44 +350,62 @@ The example simulation featuring DSDV is defined in the :ned:`Dsdv`
 configuration in :download:`omnetpp.ini <../omnetpp.ini>`. Just like
 the AODV configuration, this one uses the
 ``ManetprotocolsShowcaseB`` network. The mobility settings are
-also the same as in the AODV simulation. The ping app in ``source`` will
-send a ping request every second.
+also the same as in the AODV simulation. The ping app in ``source`` sends
+a ping request every 0.5 seconds.
 
-The DSDV protocol is implemented in the :ned:`Dsdv` module. The routing
-protocol type in all hosts is set to :ned:`Dsdv`:
+The :ned:`Dsdv` module implements the IPv4 host-routing profile of
+Perkins and Bhagwat (SIGCOMM 1994) on one bidirectional ad hoc interface.
+It exchanges one-hop UDP broadcasts and publishes host routes for ordinary
+IPv4 forwarding. Each :ned:`ManetRouter` selects it in the ``routingApp``
+slot, which connects through the UDP dispatcher:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: "Dsdv"
    :end-at: "Dsdv"
 
-Currently, complete routing table broadcasts are not implemented, only
-the broadcasting of changes in the routing table using periodic hello
-messages.
+This configuration uses local :ned:`Arp` to resolve the selected next hop.
+The configurator assigns addresses but supplies no static routes, and
+interface netmask routes are disabled. Consequently, application packets
+depend on the routes learned by DSDV.
 
-Like :ned:`Aodv` (and most routing protocol modules), :ned:`Dsdv` has many
-parameters with default values that yield a working simulation without
-any configuration. In this simulation, similarly to the previous one, we
-set two parameters of the protocol:
+The protocol sends periodic full dumps as well as triggered incrementals.
+The full dump period and the two independent expiry clocks are selected
+for the moving-node scenario:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: helloInterval
-   :end-at: routeLifetime
+   :start-at: routingApp.fullDumpInterval
+   :end-at: routingApp.routeTimeout
 
-The :par:`helloInterval` parameter controls the frequency of the periodic
-updates, or hello messages. Setting this parameter to a higher value
-decreases the protocol overhead, but the network will react more slowly
-to changes in topology. We lower it from the default 5s to 1s
-to make the network more adaptive to rapid changes. When a route is not
-used or updated after a time, it gets deleted. The ``routeLifetime``
-parameter sets after how long the routes are deleted after not being
-used or updated anymore. We lower this from the default 5s to 2s.
+The configured full dump interval is the base period; periodic jitter
+prevents repeated synchronized updates. Neighbor expiry invalidates routes
+through a silent successor. Destination expiry instead tracks accepted
+information about that destination, even if its successor remains live.
+Sending ordinary data does not refresh either clock. Removed forwarding
+routes leave retained sequence floors in the protocol state.
 
-The following video shows the nodes sending hello messages and routes
-being created at the beginning of the simulation. Note that the black
-arrows represent routes, and routes from all nodes to all destinations
-are visualized here.
+Forwarding state and advertised state can differ while a finite change
+settles. Both full dumps and incrementals use the advertised view; a full
+dump does not bypass settling. See :ned:`Dsdv` for the model's timing,
+payload and supported-profile parameters.
+
+DSDV control packets are named ``DSDV``. The green data link visualizer
+selects them separately from the blue ping traffic:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: packetFilter = "DSDV"
+   :end-at: packetFilter = "DSDV"
+
+Historical recordings
+^^^^^^^^^^^^^^^^^^^^^
+
+The following recordings were made with the previous DSDV implementation.
+They illustrate the scene and routing-table arrows, but their hello messages,
+event timings and packet exchanges do not describe the current UDP model.
+Run the current ``Dsdv`` configuration to observe full dumps, incrementals
+and expiry with the new implementation.
 
 .. video:: media/Dsdv1.mp4
    :width: 60%
@@ -396,7 +413,7 @@ are visualized here.
 
    <!--internal video recording, animation speed none, data link visualizers fadeOutMode set to animation time, zoom 1.54-->
 
-The following video shows ``source`` pinging ``destination``:
+The second historical recording shows ``source`` pinging ``destination``:
 
 .. video:: media/DsdvPing1.mp4
    :width: 60%
@@ -486,8 +503,8 @@ in this showcase:
 
 -  `Ad hoc On-Demand Distance Vector (AODV)
    Routing <https://www.rfc-editor.org/info/rfc3561>`__
--  `Destination-Sequenced Distance Vector (DSDV)
-   Protocol <http://www.netlab.tkk.fi/opetus/s38030/k02/Papers/03-Guoyou.pdf>`__
+-  `Highly Dynamic Destination-Sequenced Distance-Vector Routing (DSDV)
+   for Mobile Computers <https://doi.org/10.1145/190314.190336>`__
 -  `GPSR: Greedy Perimeter Stateless Routing for Wireless
    Networks <http://www.icir.org/bkarp/jobs/gpsr-mobicom2000.pdf>`__
 
