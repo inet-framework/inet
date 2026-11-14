@@ -420,7 +420,7 @@ const std::set<std::string> pcapCoverageSkipTypes = {
     "inet::XMacControlFrame", "inet::XMacDataFrameHeader",
     "inet::AckingMacHeader", "inet::ShortcutMacHeader",
     "inet::EtherAppReq", "inet::EtherAppResp", "inet::ApplicationPacket",
-    "inet::VoipStreamPacket", "inet::EchoPacket", "inet::DsdvHello",
+    "inet::VoipStreamPacket", "inet::EchoPacket",
     "inet::ChecksumHeader", "inet::FragmentNumberHeader", "inet::SequenceNumberHeader",
     "inet::TransportPseudoHeader",
 
