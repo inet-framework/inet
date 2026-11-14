@@ -433,7 +433,9 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
     // route packet
     if (destIE != nullptr) {
-        if (!ipv6Header->getDestAddress().isMulticast())
+        if (!ipv6Header->getDestAddress().isMulticast() && !requestedNextHopAddress.isUnspecified())
+            routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
+        else if (!ipv6Header->getDestAddress().isMulticast())
             fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true);
         else
             fragmentPostRouting(packet, destIE, ipv6Header->getDestAddress().mapToMulticastMacAddress(), true);
