@@ -101,6 +101,15 @@ class INET_API INetfilter
     virtual void dropQueuedDatagram(const Packet *daragram) = 0;
 
     /**
+     * Terminates an existing queued obligation with a native destination-unreachable
+     * indication where the network protocol supports one. Detaches the obligation
+     * before reporting the error and consumes the original packet exactly once.
+     * An unknown pointer identity is ignored without dereferencing it. Protocols
+     * without a native error protocol dispose of the packet silently.
+     */
+    virtual void failQueuedDatagram(const Packet *datagram) = 0;
+
+    /**
      * Requests the network layer to restart the processing of the datagram. This
      * function may be used by a reactive routing protocol when it completes the
      * route discovery process.

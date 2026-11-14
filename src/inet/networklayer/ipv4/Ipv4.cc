@@ -1265,6 +1265,20 @@ void Ipv4::dropQueuedDatagram(const Packet *packet)
     }
 }
 
+void Ipv4::failQueuedDatagram(const Packet *packet)
+{
+    Enter_Method("failQueuedDatagram()");
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); ++iter) {
+        if (iter->packet == packet) {
+            auto datagram = iter->packet;
+            queuedDatagramsForHooks.erase(iter);
+            take(datagram);
+            sendIcmpError(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_HOST_UNREACHABLE);
+            return;
+        }
+    }
+}
+
 void Ipv4::reinjectQueuedDatagram(const Packet *packet)
 {
     Enter_Method("reinjectDatagram()");

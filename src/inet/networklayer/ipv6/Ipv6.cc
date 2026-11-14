@@ -1338,6 +1338,20 @@ void Ipv6::dropQueuedDatagram(const Packet *packet)
     }
 }
 
+void Ipv6::failQueuedDatagram(const Packet *packet)
+{
+    Enter_Method("failQueuedDatagram()");
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); ++iter) {
+        if (iter->packet == packet) {
+            auto datagram = iter->packet;
+            queuedDatagramsForHooks.erase(iter);
+            take(datagram);
+            sendIcmpError(datagram, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
+            return;
+        }
+    }
+}
+
 void Ipv6::reinjectQueuedDatagram(const Packet *packet)
 {
     Enter_Method("reinjectDatagram()");
