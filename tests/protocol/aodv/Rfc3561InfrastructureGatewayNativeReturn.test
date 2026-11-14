@@ -1,0 +1,120 @@
+%description:
+Native AODV external-subnet discovery, forward delivery and echo return. Source S -- Ethernet -- MANET relay R -- wireless -- exporter A -- Ethernet -- external router G -- Ethernet -- members.
+The script configures public native external/return routes and sends originating UDP data. All discovery, aggregate installation and MANET forwarding belong to native AODV instances; native UdpEchoApp returns both packets.
+See infrastructure-gateway.md.
+
+%file: Peer.cc
+#include "../../AodvSubnetRecoveryPathPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.routing.aodv.Aodv;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+module RecoveryPathRouter extends AdhocHost
+{
+    submodules:
+        aodv: Aodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
+}
+simple AodvSubnetRecoveryPathPeer like IApp
+{
+    parameters:
+        string scenario;
+        @class(::AodvSubnetRecoveryPathPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network SubnetRecoveryNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        source: RecoveryPathRouter;
+        relay: RecoveryPathRouter;
+        authority: RecoveryPathRouter;
+        member: StandardHost;
+        member2: StandardHost;
+        lan: EthernetSwitch;
+        externalLan: EthernetSwitch;
+        gateway: Router;
+    connections:
+        source.ethg++ <--> Eth100M <--> relay.ethg++;
+        authority.ethg++ <--> Eth100M <--> lan.ethg++;
+        gateway.ethg++ <--> Eth100M <--> lan.ethg++;
+        gateway.ethg++ <--> Eth100M <--> externalLan.ethg++;
+        member.ethg++ <--> Eth100M <--> externalLan.ethg++;
+        member2.ethg++ <--> Eth100M <--> externalLan.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = SubnetRecoveryNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.3s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='source' names='eth0' address='10.1.0.1' netmask='255.255.255.0'/><interface hosts='relay' names='eth0' address='10.1.0.2' netmask='255.255.255.0'/><interface hosts='relay' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='authority' names='wlan0' address='10.0.0.3' netmask='255.255.255.0'/><interface hosts='authority' names='eth0' address='192.0.2.1' netmask='255.255.255.0'/><interface hosts='member' address='198.51.100.99' netmask='255.255.255.0'/><interface hosts='member2' address='198.51.100.100' netmask='255.255.255.0'/><interface hosts='gateway' names='eth0' address='192.0.2.254' netmask='255.255.255.0'/><interface hosts='gateway' names='eth1' address='198.51.100.1' netmask='255.255.255.0'/></config>")
+*.source.numWlanInterfaces = 0
+*.source.numEthInterfaces = 1
+*.relay.numEthInterfaces = 1
+*.authority.numEthInterfaces = 1
+*.source.numApps = 1
+*.source.app[0].typename = "AodvSubnetRecoveryPathPeer"
+*.source.app[0].scenario = "ExternalReturn"
+*.relay.numApps = 0
+*.authority.numApps = 0
+*.member*.numApps = 1
+*.member*.app[0].typename = "UdpEchoApp"
+*.member*.app[0].localPort = 9999
+*.source.aodv.interface = "eth0"
+*.relay.aodv.interface = "eth0"
+*.relay.aodv.interfaces = "eth0 wlan0"
+*.authority.aodv.externalSubnets = xml("<subnets><subnet prefix='198.51.100.0/24' interface='eth0'/></subnets>")
+*.**.aodv.subnetExtensionType = 253
+*.**.aodv.jitter = 0s
+*.**.aodv.periodicJitter = 0s
+*.**.aodv.useHelloMessages = false
+*.**.aodv.useLocalRepair = false
+*.**.aodv.netDiameter = 3
+*.**.aodv.ttlStart = 2
+*.**.aodv.ttlThreshold = 2
+*.**.aodv.rreqRetries = 0
+*.**.aodv.nodeTraversalTime = 0.01s
+*.**.aodv.activeRouteTimeout = 0.2s
+*.**.aodv.deletePeriod = 0.4s
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].mac.useAck = true
+**.wlan[*].mac.ackTimeout = 0.002s
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV Subnet Native Recovery ExternalReturn: PASS

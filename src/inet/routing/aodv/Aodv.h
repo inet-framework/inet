@@ -138,6 +138,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
         std::string interfaceName;
         std::string coordinationInterfaceName;
         L3Address coordinationAddress;
+        bool external = false;
         bool reachable = false;
         bool sequenceValid = false;
         uint32_t sequence = 0;

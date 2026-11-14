@@ -42,6 +42,13 @@ Define_Module(Aodv);
 const int KIND_DELAYEDSEND = 100;
 const int KIND_SEARCH = 101;
 
+static bool isNativeRouteValid(const IRoute *route)
+{
+    auto output = route->getInterface();
+    return output && output->isUp() &&
+        (route->getNativeExpiryTime() == SIMTIME_ZERO || simTime() <= route->getNativeExpiryTime());
+}
+
 void Aodv::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
@@ -185,6 +192,8 @@ void Aodv::initialize(int stage)
         host->subscribe(interfaceIpv4ConfigChangedSignal, this);
         host->subscribe(interfaceIpv6ConfigChangedSignal, this);
         host->subscribe(routeDeletedSignal, this);
+        host->subscribe(routeAddedSignal, this);
+        host->subscribe(routeChangedSignal, this);
     }
 }
 
@@ -440,7 +449,7 @@ IRoute *Aodv::selectDataRoute(const L3Address& destination)
             continue;
         auto iface = route->getInterface();
         if (route->getSource() != this) {
-            if (!iface || !iface->isUp())
+            if (!isNativeRouteValid(route))
                 continue;
             // A connected MANET subnet describes address scope, not reachability.
             auto type = route->getSourceType();
@@ -530,7 +539,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
         if (!route || route->getSource() == this)
             for (int i = 0; i < routingTable->getNumRoutes(); ++i) {
                 auto candidate = routingTable->getRoute(i);
-                if (candidate->getSource() != this && candidate->getInterface() && candidate->getInterface()->isUp() &&
+                if (candidate->getSource() != this && isNativeRouteValid(candidate) &&
                         candidate->getInterface()->getInterfaceName() == exported->second.interfaceName &&
                         destination.matches(candidate->getDestinationAsGeneric(), candidate->getPrefixLength())) {
                     route = candidate;
@@ -1534,6 +1543,14 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obje
         auto route = dynamic_cast<IRoute *>(object);
         if (route && route->getSource() == this && !removingOwnedRoute)
             rememberRemovedRoute(route);
+        else if (!subnetExports.empty() && !interfaceChangeTimer->isScheduled())
+            scheduleAt(simTime(), interfaceChangeTimer);
+        return;
+    }
+    if (signalID == routeAddedSignal || signalID == routeChangedSignal) {
+        auto route = dynamic_cast<IRoute *>(object);
+        if (!subnetExports.empty() && route && route->getSource() != this && !interfaceChangeTimer->isScheduled())
+            scheduleAt(simTime(), interfaceChangeTimer);
         return;
     }
     if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal ||
@@ -1957,7 +1974,7 @@ void Aodv::reconcileInterfaces()
 void Aodv::configureSubnetExports()
 {
     std::map<RouteKey, SubnetExport> configured;
-    for (const char *parameter : {"advertisedSubnets"}) {
+    for (const char *parameter : {"advertisedSubnets", "externalSubnets"}) {
         auto root = par(parameter).xmlValue();
         if (!root || strcmp(root->getTagName(), "subnets"))
             throw cRuntimeError("AODV %s requires a subnets XML root", parameter);
@@ -1987,7 +2004,8 @@ void Aodv::configureSubnetExports()
                 throw cRuntimeError("AODV duplicate subnet export '%s'", prefixText);
             SubnetExport subnet;
             subnet.interfaceName = interfaceName;
-            if (!isSubnetReachable(key, subnet))
+            subnet.external = !strcmp(parameter, "externalSubnets");
+            if (!subnet.external && !isSubnetReachable(key, subnet))
                 throw cRuntimeError("AODV advertised subnet '%s' is not attached to interface '%s'", prefixText, interfaceName);
             if (auto previous = subnetExports.find(key); previous != subnetExports.end()) {
                 subnet.sequence = previous->second.sequence;
@@ -2028,6 +2046,16 @@ bool Aodv::isSubnetReachable(const RouteKey& key, const SubnetExport& subnet) co
     auto output = interfaceTable->findInterfaceByName(subnet.interfaceName.c_str());
     if (!isUsableInterface(output))
         return false;
+    if (subnet.external) {
+        for (int i = 0; i < routingTable->getNumRoutes(); ++i) {
+            auto route = routingTable->getRoute(i);
+            if (route->getSource() != this && isNativeRouteValid(route) && route->getInterface() == output &&
+                    route->getPrefixLength() <= key.second &&
+                    key.first.matches(route->getDestinationAsGeneric(), route->getPrefixLength()))
+                return true;
+        }
+        return false;
+    }
     if (key.first.getType() == L3Address::IPv4) {
         auto ipv4 = output->findProtocolData<Ipv4InterfaceData>();
         return ipv4 && !ipv4->getIPAddress().isUnspecified() &&
@@ -2737,6 +2765,15 @@ void Aodv::scheduleExpungeRoutes()
 
             if (routeData->getLifeTime() < nextExpungeTime)
                 nextExpungeTime = routeData->getLifeTime();
+        }
+        else if (route->getNativeExpiryTime() != SIMTIME_ZERO && route->getNativeExpiryTime() >= simTime() &&
+                route->getNativeExpiryTime() < SimTime::getMaxTime()) {
+            for (const auto& entry : subnetExports)
+                if (entry.second.external && route->getPrefixLength() <= entry.first.second &&
+                        entry.first.first.matches(route->getDestinationAsGeneric(), route->getPrefixLength())) {
+                    nextExpungeTime = std::min(nextExpungeTime, route->getNativeExpiryTime() + SimTime::fromRaw(1));
+                    break;
+                }
         }
     }
     if (nextExpungeTime == SimTime::getMaxTime()) {
