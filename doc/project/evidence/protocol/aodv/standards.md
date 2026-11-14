@@ -28,13 +28,15 @@ What a pass actually reached is not recorded here. It is in [`model/aodv/coverag
 
 | Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [`standards/RFC/rfc3561.txt`](../../../../../../standards/RFC/rfc3561.txt), 2026-09-23 |
-| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [`standards/RFC/rfc5148.txt`](../../../../../../standards/RFC/rfc5148.txt), 2026-09-23 |
+| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [RFC Editor text](https://www.rfc-editor.org/rfc/rfc3561.txt), 2026-09-23 |
+| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [RFC Editor text](https://www.rfc-editor.org/rfc/rfc5148.txt), 2026-09-23 |
 
 Source of the texts:
 
-- `rfc3561.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3561.txt) — <https://www.rfc-editor.org/rfc/rfc3561.txt>, downloaded 2026-09-23.
-- `rfc5148.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5148.txt) — <https://www.rfc-editor.org/rfc/rfc5148.txt>, downloaded 2026-09-23.
+- `standards/RFC/rfc3561.txt` — [RFC 3561 text](https://www.rfc-editor.org/rfc/rfc3561.txt), downloaded 2026-09-23.
+- `standards/RFC/rfc5148.txt` — [RFC 5148 text](https://www.rfc-editor.org/rfc/rfc5148.txt), downloaded 2026-09-23.
+
+The paths above identify the survey's local copies in the separate standards corpus. Links point to the official source texts so they also work without that corpus installed beside the checkout.
 
 Neither document has an `obsoletes`, `obsoleted_by`, `updates` or `updated_by` entry in the register. AODV is the one protocol of this pass whose family carries no later document at all: what RFC 3561 says in 2003 is still the whole of the base text today.
 
