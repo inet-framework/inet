@@ -1,0 +1,114 @@
+%description:
+Public mesh power activation and a real-air peer service period. Both peers
+commit LIGHT_SLEEP through their actual individually acknowledged mode Nulls.
+Buffered native DATA then uses actual rendezvous, trigger, payload and ending
+acknowledgment owners, without an explicit opportunity provider.
+
+%file: MeshPeerServicePeriod.cc
+#include "mesh/MeshServicePeriodSupport.h"
+#include "mesh/MeshServicePeriodTableSupport.h"
+#include "mesh/MeshServiceIntentSupport.h"
+#include "mesh/MeshServiceLifecycleSupport.h"
+#include "mesh/MeshManagementPeriodSupport.h"
+#include "mesh/MeshActiveBatchSupport.h"
+#include "mesh/MeshInitiationGateSupport.h"
+#include "mesh/MeshGroupModeSupport.h"
+#include "mesh/MeshPeerRetirementSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_peer_service_period) {
+    ProtocolTest test("mesh_peer_service_period");
+    int scenario=getSimulation()->getSystemModule()->par("scenario");
+    if (scenario==25 || scenario==26) test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("name == 'table-trigger'").nth(2).mutate([](Packet *packet) { setReceivedNullRetry(packet); })
+        .describe("second equal-SNS5 Null is received with Retry1 and valid recomputed FCS"));
+    if (scenario==37) test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("name == 'mesh-period-ending'").nth(1).mutate([](Packet *packet) { setReceivedNullMoreData(packet); })
+        .describe("the ending Null carries MoreData1 with a recomputed valid FCS"));
+    if (scenario==27) {
+        test.once(on("driver").signal("triggerStarted").assertValue(1).within(0.3));
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).drop());
+    }
+    if (scenario==21) {
+        test.once(on("driver").signal("endingStart").assertValue(1).within(0.3));
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).drop());
+    }
+    test.once(on("driver").signal(scenario==42 ? "batchComplete" : "serviceComplete").assertValue(1).within(scenario==23 ? 5.5 : (scenario>=43 ? 2.5 : 1.6)));
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple EndingResponseTxFixture extends Tx { parameters: @class(::EndingResponseTxFixture); @signal[endingCancelled](type=long); }
+simple ActiveResponseTxFixture extends Tx { parameters: @class(::ActiveResponseTxFixture); @signal[activeResponseHeld](type=long); }
+simple TablePowerObserver extends MeshPowerSave { parameters: @class(::TablePowerObserver); @signal[tableAck](type=object); }
+simple IntentPowerObserver extends MeshPowerSave { parameters: @class(::IntentPowerObserver); }
+module IntentHcfFixture extends Hcf { parameters: @class(::IntentHcfFixture); }
+module IntentMacFixture extends Ieee80211MeshMac { parameters: @class(::IntentMacFixture); }
+module ReplayEndingMac extends Ieee80211MeshMac { parameters: @class(::ReplayEndingMac); }
+module ActiveEndingMac extends Ieee80211MeshMac { parameters: @class(::ActiveEndingMac); }
+simple PeriodManagementFixture extends Ieee80211MgmtMesh { parameters: @class(::PeriodManagementFixture); }
+simple BatchResponseTx extends Tx { parameters: @class(::BatchResponseTx); @signal[batchResponseHeld](type=object); }
+module BatchHoldingMac extends Ieee80211MeshMac { parameters: @class(::BatchHoldingMac); }
+module InitiationHoldMac extends Ieee80211MeshMac { parameters: @class(::InitiationHoldMac); }
+simple InitiationPowerObserver extends MeshPowerSave { parameters: @class(::InitiationPowerObserver); }
+simple GroupModeObserver extends MeshPowerSave { parameters: @class(::GroupModeObserver); }
+simple ServicePeriodDriver like IServicePeriodDriver { parameters: int scenario; @class(::ServicePeriodDriver); @signal[serviceComplete](type=long); }
+simple ServicePeriodTableDriver like IServicePeriodDriver { parameters: int scenario; bool releaseEnding @mutable = scenario!=26 && scenario<38; @class(::ServicePeriodTableDriver); @signal[serviceComplete](type=long); @signal[endingStart](type=long); @signal[triggerStarted](type=long); }
+simple ServiceIntentDriver like IServicePeriodDriver { parameters: int scenario; bool releasePayload @mutable = false; bool releaseTrigger @mutable = false; @class(::ServiceIntentDriver); @signal[serviceComplete](type=long); }
+simple ServiceLifecycleDriver like IServicePeriodDriver { parameters: int scenario; @class(::ServiceLifecycleDriver); @signal[serviceComplete](type=long); }
+simple ManagementPeriodDriver like IServicePeriodDriver { parameters: int scenario; @class(::ManagementPeriodDriver); @signal[serviceComplete](type=long); }
+simple ActiveBatchDriver like IServicePeriodDriver { parameters: int scenario; bool batchStarted @mutable = false; bool releaseFirstEnding @mutable = false; bool releaseNested @mutable = false; @class(::ActiveBatchDriver); @signal[batchComplete](type=long); }
+simple InitiationGateDriver like IServicePeriodDriver { parameters: int scenario; bool releaseEnding @mutable = false; @class(::InitiationGateDriver); @signal[serviceComplete](type=long); }
+simple GroupModeDriver like IServicePeriodDriver { parameters: int scenario; @class(::GroupModeDriver); @signal[serviceComplete](type=long); }
+simple PeerRetirementDriver like IServicePeriodDriver { parameters: int scenario; bool batchStarted @mutable = false; bool releaseFirstEnding @mutable = false; bool releaseNested @mutable = false; @class(::PeerRetirementDriver); @signal[serviceComplete](type=long); }
+moduleinterface IServicePeriodDriver { parameters: int scenario; }
+network Test extends MeshPairNetwork {
+    parameters: int scenario; string driverType=scenario==47 ? "PeerRetirementDriver" : (scenario==46 ? "GroupModeDriver" : (scenario>=43 ? "InitiationGateDriver" : (scenario==42 ? "ActiveBatchDriver" : (scenario==41 ? "ManagementPeriodDriver" : (scenario>=28 && scenario<=36 ? "ServiceLifecycleDriver" : (scenario<4 ? "ServicePeriodDriver" : (scenario<22 || scenario>=25 ? "ServicePeriodTableDriver" : "ServiceIntentDriver")))))));
+    submodules: driver: <driverType> like IServicePeriodDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=${scenario}==23 ? 5500ms : (${scenario}>=43 ? 2500ms : 1600ms)
+*.scenario=${scenario=0..47}
+*.driver.scenario=${scenario}
+*.numStations=${scenario}==42 || ${scenario}==47 ? 3 : 2
+*.radioMedium.typename="Ieee80211ScalarTapRadioMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="${scenario}"=="47" ? "TablePowerObserver" : ("${scenario}"=="46" ? "GroupModeObserver" : ("${scenario}"=="43" || ${scenario}>=44 ? "InitiationPowerObserver" : (${scenario}<4 || (${scenario}>=28 && ${scenario}<=36) || ${scenario}>=41 ? "MeshPowerSave" : (${scenario}>=22 && ${scenario}<=24 ? "IntentPowerObserver" : "TablePowerObserver"))))
+*.station[*].wlan[0].mac.typename="${scenario}"=="47" ? "BatchHoldingMac" : ("${scenario}"=="46" ? "Ieee80211MeshMac" : ("${scenario}"=="43" || ${scenario}>=44 ? "InitiationHoldMac" : (${scenario}==42 ? "BatchHoldingMac" : (${scenario}>=22 && ${scenario}<=24 ? "IntentMacFixture" : (${scenario}>=25 && ${scenario}<=27 ? "ReplayEndingMac" : (${scenario}>=38 && ${scenario}<=40 ? "ActiveEndingMac" : "Ieee80211MeshMac"))))))
+*.station[*].wlan[0].mac.hcf.typename="${scenario}"=="22" || ${scenario}>=23 && ${scenario}<=24 ? "IntentHcfFixture" : "Hcf"
+*.station[*].wlan[0].mac.tx.typename="${scenario}"=="20" ? "EndingResponseTxFixture" : (${scenario}==42 || ${scenario}==47 ? "BatchResponseTx" : (${scenario}>=38 && ${scenario}<=40 ? "ActiveResponseTxFixture" : "Tx"))
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].mgmt.typename="${scenario}"=="41" ? "PeriodManagementFixture" : "Ieee80211MgmtMesh"
+*.station[*].wlan[0].pathSelection.typename="${scenario}"=="0" || (${scenario}>=4 && ${scenario}<22) ? "Hwmp" : "MeshFixturePaths"
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].msduLifetime=${scenario}>=22 ? 6s : 2s
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[2].wlan[0].mgmt.initialTsf=51.2ms
+*.station[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold=65536B
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].aifsn=${scenario}==45 ? 1 : -1
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].cwMin=${scenario}==45 ? 0 : -1
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].cwMax=${scenario}==45 ? 0 : -1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=6Mbps
+*.station[*].wlan[0].radio.switchingTimes="ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="mesh_peer_service_period"
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_peer_service_period: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_peer_service_period: FAIL

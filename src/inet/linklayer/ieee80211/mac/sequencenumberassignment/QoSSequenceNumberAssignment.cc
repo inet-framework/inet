@@ -30,6 +30,13 @@ QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType
 
 void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
+    if (header->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(header)) {
+        // IEEE Std 802.11-2024, Table 10-5 SNS5: any SN, no counter.
+        // The selected native mesh producer uses zero, independently of DATA
+        // and management sequence allocation. Received raw SC is not rewritten.
+        header->setSequenceNumber(SequenceNumberCyclic(0));
+        return;
+    }
     CacheType type = getCacheType(header, false);
     SequenceNumberCyclic seqNum;
     MacAddress address = header->getReceiverAddress();

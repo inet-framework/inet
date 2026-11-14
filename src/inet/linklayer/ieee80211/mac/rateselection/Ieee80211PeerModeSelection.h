@@ -15,6 +15,13 @@
 namespace inet {
 namespace ieee80211 {
 
+INET_API bool isMeshPeerCompatibleMode(const physicallayer::Ieee80211ModeSet *modes,
+        const Ieee80211PeerPhyCapabilities& local, const Ieee80211PeerPhyCapabilities *peer,
+        const physicallayer::IIeee80211Mode *mode, bool shortGiTransmissionEnabled);
+INET_API const physicallayer::IIeee80211Mode *selectMeshPeerCompatibleMode(const physicallayer::Ieee80211ModeSet *modes,
+        const Ieee80211PeerPhyCapabilities& local, const Ieee80211PeerPhyCapabilities *peer,
+        const physicallayer::IIeee80211Mode *requested, bool fixed, const MacAddress& address, bool shortGiTransmissionEnabled);
+
 /** Checks the retained transmit mode without a new rate-control decision. */
 INET_API bool isPeerCompatibleMode(const physicallayer::Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState, const physicallayer::IIeee80211Mode *mode);

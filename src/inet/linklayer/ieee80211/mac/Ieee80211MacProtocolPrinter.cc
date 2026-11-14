@@ -10,6 +10,7 @@
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -70,7 +71,10 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
                 break;
 
             case ST_ACTION:
-                context.typeColumn << "Action"; // TODO
+                if (auto mesh = dynamicPtrCast<const Ieee80211MeshActionFrame>(chunk))
+                    context.typeColumn << "MeshAction " << int(mesh->getCategory()) << "/" << int(mesh->getMeshAction());
+                else
+                    context.typeColumn << "Action";
                 break;
 
             case ST_NOACKACTION:
@@ -121,6 +125,14 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
                 break;
         }
     }
+    else if (auto hwmp = dynamicPtrCast<const Ieee80211HwmpFrame>(chunk))
+        context.infoColumn << "HWMP PREQ=" << hwmp->getPreqsArraySize()
+            << " PREP=" << hwmp->getPrepsArraySize() << " PERR=" << hwmp->getPerrsArraySize()
+            << " RANN=" << hwmp->getRannsArraySize();
+    else if (auto control = dynamicPtrCast<const Ieee80211MeshControl>(chunk))
+        context.infoColumn << "Mesh TTL=" << int(control->getTtl()) << " SN=" << control->getSequenceNumber();
+    else if (auto metric = dynamicPtrCast<const Ieee80211MeshLinkMetricFrame>(chunk))
+        context.infoColumn << "Mesh metric=" << metric->getMetric() << (metric->getRequest() ? " request" : "");
     else
         context.infoColumn << "(IEEE 802.11 Mac) " << chunk;
 }

@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
@@ -22,6 +23,20 @@ namespace ieee80211 {
 using namespace inet::physicallayer;
 
 Define_Module(Dcf);
+
+void Dcf::transmissionCancelled(const Packet *packet)
+{
+    Enter_Method("transmissionCancelled");
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto step = dynamic_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        if (step && step->getFrameToTransmit()->getTreeId() == packet->getTreeId()) {
+            frameSequenceHandler->cancelPendingTransmission();
+            return;
+        }
+    }
+    // A cancelled recipient response does not resolve an originator wait.
+    mac->sendDownPendingRadioConfigMsg();
+}
 
 void Dcf::initialize(int stage)
 {

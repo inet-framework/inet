@@ -32,6 +32,9 @@ simple QosRateSelection extends SimpleModule
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
+        string dataFramePhyFamily @enum("auto","ht","vht") = default("auto");
+        int dataFrameMcs = default(-1); // Physical HT0..31 or VHT0..9; -1 retains bitrate-based selection
+        string dataFrameGuardInterval @enum("auto","long","short") = default("auto");
         double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
 

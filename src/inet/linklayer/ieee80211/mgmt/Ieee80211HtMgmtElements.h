@@ -23,6 +23,8 @@ inline Ieee80211HtCapabilitiesElement makeHtCapabilitiesElement(const Ieee80211H
     element.shortGi20 = capabilities.shortGi20;
     element.shortGi40 = capabilities.shortGi40;
     element.maxAmpduLengthExponent = capabilities.maxAmpduLengthExponent;
+    element.maxAmsduLength7935 = capabilities.maxAmsduLength == 7935;
+    element.minimumMpduStartSpacing = capabilities.minimumMpduStartSpacing;
     for (int i = 0; i < 77; i++)
         element.rxMcsSupported[i] = capabilities.rxMcsSupported[i];
     element.txMcsSetDefined = capabilities.txMcsSetDefined;
@@ -63,6 +65,8 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
     capabilities.shortGi20 = element.shortGi20;
     capabilities.shortGi40 = element.shortGi40;
     capabilities.maxAmpduLengthExponent = element.maxAmpduLengthExponent;
+    capabilities.maxAmsduLength = element.maxAmsduLength7935 ? 7935 : 3839;
+    capabilities.minimumMpduStartSpacing = element.minimumMpduStartSpacing;
     capabilities.txMcsSetDefined = element.txMcsSetDefined;
     capabilities.txRxMcsSetNotEqual = element.txRxMcsSetNotEqual;
     capabilities.txMaxNss = element.txMaxNss;

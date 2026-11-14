@@ -1,0 +1,478 @@
+%description:
+Actual dimensional-radio capture through the opt-in IEEE80211 recorder. HT40
+and VHT80 each send two distinguishable computed-FCS QoS members. Receiver
+decapsulation faults damage only the first FCS, arbitrary first-header bytes,
+or truncate the second member; another case marks the whole PPDU erroneous.
+The recorder must preserve bad member bytes and still record the good second
+member, atomically reject truncated structure, and delegate ordinary frames.
+An independent Python PCAP/radiotap/CRC32 oracle checks every captured byte.
+This isolates radio observation; it does not prove MAC aggregation/admission.
+
+%extraargs: -r 0..11
+%postrun-command: python3 check-capture.py
+
+%file: test.cc
+#include <fstream>
+#include <iostream>
+#include <memory>
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211AmpduObservationTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211AmpduCapture_1 {
+
+static void saveBody(const Packet *packet, const char *side)
+{
+    auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+    auto available = packet->getDataLength() - header->getChunkLength();
+    auto length = std::min(B(available), header->getLengthField());
+    auto bytes = packet->peekDataAt<BytesChunk>(header->getChunkLength(), length)->getBytes();
+    auto pattern = std::string("results/psdu-${runnumber}-") + side + ".bin";
+    auto path = cSimulation::getActiveSimulation()->getEnvir()->getConfig()->substituteVariables(pattern.c_str());
+    std::ofstream stream(path, std::ios::binary);
+    ASSERT(stream.good());
+    stream.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+}
+
+class FaultRadio : public Ieee80211Radio
+{
+  protected:
+    void decapsulate(Packet *packet) const override
+    {
+        int scenario = par("scenario");
+        const auto& vector = packet->getTag<Ieee80211ModeInd>()->getTxVector();
+        ASSERT(!packet->findTag<Ieee80211AmpduObservationTag>());
+        if (vector.ampdu) {
+            auto header = peekIeee80211PhyHeaderAtFront(packet);
+            Ieee80211AmpduLayout layout;
+            ASSERT(findAmpdu(packet, header->getChunkLength(), header->getLengthField(),
+                vector.format == Ieee80211TxVector::VHT, layout));
+            ASSERT(layout.members.size() == 2);
+            auto first = header->getChunkLength() + layout.members[0].offset;
+            if (scenario == 1 || scenario == 2) {
+                auto bytes = packet->peekDataAt<BytesChunk>(first, layout.members[0].length)->getBytes();
+                if (scenario == 1)
+                    bytes.back() ^= 0x80;
+                else {
+                    // Delimiters/length stay valid while FC/header are arbitrary.
+                    bytes[0] = bytes[1] = 0xff;
+                    bytes[4] = bytes[5] = 0xff;
+                }
+                packet->replaceDataAt(makeShared<BytesChunk>(bytes), first, layout.members[0].length);
+            }
+            else if (scenario == 3) {
+                auto end = header->getChunkLength() + layout.members[1].offset + B(5);
+                packet->eraseDataAt(end, packet->getDataLength() - end);
+            }
+            else if (scenario == 5)
+                packet->setBitError(true);
+            saveBody(packet, "rx");
+        }
+        Ieee80211Radio::decapsulate(packet);
+    }
+};
+Define_Module(FaultRadio);
+
+class Probe : public cSimpleModule, public cListener
+{
+    opp_component_ptr<cModule> medium;
+    const IIeee80211Mode *mode = nullptr;
+    int scenario = 0;
+    bool vht = false;
+    int departures = 0;
+    int deliveries = 0;
+
+    Packet *member(int index)
+    {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setChunkLength(B(26));
+        header->setDurationField(SIMTIME_ZERO);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(MacAddress("02:00:00:00:00:03"));
+        header->setSequenceNumber(SequenceNumberCyclic(100 + index));
+        header->setTid(5);
+        header->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(index ? "capture-second" : "capture-first", header);
+        // Experimental SNAP type keeps this radio-only payload opaque; no
+        // truncated synthetic IPv4 packet is presented to the verbose printer.
+        std::vector<uint8_t> payload = {0xaa,0xaa,0x03,0,0,0,0x88,0xb5};
+        payload.insert(payload.end(), index ? 12 : 9, index ? 0x20 : 0x10);
+        packet->insertAtBack(makeShared<BytesChunk>(payload));
+        auto bytes = packet->peekDataAsBytes()->getBytes();
+        auto fcs = makeShared<Ieee80211MacTrailer>();
+        fcs->setFcsMode(FCS_COMPUTED);
+        fcs->setFcs(ethernetFcs(bytes.data(), bytes.size()));
+        packet->insertAtBack(fcs);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        return packet;
+    }
+
+  protected:
+    void initialize() override
+    {
+        scenario = par("scenario");
+        vht = par("vht");
+        auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto candidate = modes->getMode(i);
+            if ((vht ? candidate->getVhtMcsIndex() : candidate->getHtMcsIndex()) == 7
+                    && candidate->getDataMode()->getBandwidth() == MHz(vht ? 80 : 40)
+                    && candidate->getDataMode()->getNumberOfSpatialStreams() == 1
+                    && (vht ? candidate->isVhtShortGuardInterval() : candidate->isHtShortGuardInterval()))
+                mode = candidate;
+        }
+        ASSERT(mode);
+        medium = getParentModule()->getSubmodule("radioMedium");
+        medium->subscribe(IRadioMedium::signalDepartureStartedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send", 0));
+        scheduleAt(SimTime(3, SIMTIME_MS), new cMessage("check", 1));
+    }
+
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override
+    {
+        auto transmission = check_and_cast<const Ieee80211Transmission *>(object);
+        const auto& vector = transmission->getTxVector();
+        ASSERT(vector.mode == mode && vector.bandwidth == MHz(vht ? 80 : 40));
+        ASSERT(vector.ampdu == (scenario != 4));
+        ASSERT(!transmission->getPacket()->findTag<Ieee80211AmpduObservationTag>());
+        if (vector.ampdu)
+            saveBody(transmission->getPacket(), "tx");
+        departures++;
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (auto packet = dynamic_cast<Packet *>(message)) {
+            auto vector = packet->getTag<Ieee80211ModeInd>()->getTxVector();
+            ASSERT(vector.mode == mode && vector.bandwidth == MHz(vht ? 80 : 40));
+            ASSERT(vector.ampdu == (scenario != 4));
+            ASSERT(!packet->findTag<Ieee80211AmpduObservationTag>());
+            ASSERT(packet->hasBitError() == (scenario == 3 || scenario == 5));
+            deliveries++;
+            delete packet;
+            return;
+        }
+        int kind = message->getKind();
+        delete message;
+        if (kind == 1) {
+            ASSERT(departures == 1 && deliveries == 1);
+            std::cout << "actual A-MPDU capture round PASS vht=" << vht << " scenario=" << scenario << std::endl;
+            endSimulation();
+            return;
+        }
+        std::unique_ptr<Packet> first(member(0));
+        std::unique_ptr<Packet> second(member(1));
+        Packet *packet = scenario == 4 ? first.release() : buildAmpdu({first.get(), second.get()}, vht, B(64));
+        Ieee80211TxVector vector(mode);
+        vector.ampdu = scenario != 4;
+        vector.singleMpdu = vht && scenario == 4;
+        packet->addTagIfAbsent<Ieee80211ModeReq>()->setTxVector(vector);
+        send(packet, "out");
+    }
+
+  public:
+    using cListener::finish;
+    ~Probe() override
+    {
+        if (medium)
+            medium->unsubscribe(IRadioMedium::signalDepartureStartedSignal, this);
+    }
+};
+Define_Module(Probe);
+}
+
+%file: test.ned
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.ieee80211.radiotap.Ieee80211PcapRecorder;
+
+module FaultRadio extends Ieee80211DimensionalRadio
+{
+    parameters:
+        int scenario;
+        @class(FaultRadio);
+}
+
+module RadioNode
+{
+    gates:
+        input down;
+        output up;
+    submodules:
+        mobility: StationaryMobility;
+        radio: <default("Ieee80211DimensionalRadio")> like IRadio {
+            parameters:
+                antenna.mobilityModule = absPath("^.mobility");
+        }
+        capture: Ieee80211PcapRecorder;
+    connections allowunconnected:
+        down --> radio.upperLayerIn;
+        radio.upperLayerOut --> up;
+}
+
+simple Probe
+{
+    parameters:
+        bool vht;
+        int scenario;
+        @class(Probe);
+    gates:
+        output out;
+        input in;
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211DimensionalRadioMedium;
+        a: RadioNode;
+        b: RadioNode;
+        probe: Probe;
+    connections allowunconnected:
+        probe.out --> a.down;
+        b.up --> probe.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 4ms
+seed-set = 0
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+*.probe.vht = ${vht=false,true}
+*.probe.scenario = ${scenario=0..5}
+*.b.radio.typename = "FaultRadio"
+*.b.radio.scenario = ${scenario}
+*.a.radio.initialRadioMode = "transmitter"
+*.b.radio.initialRadioMode = "receiver"
+**.radio.opMode = "ac-complete"
+**.radio.bandName = "5 GHz (mapped 20 MHz)"
+**.radio.channelNumber = 0
+**.radio.contiguousChannelAllocation = true
+**.radio.bandwidth = ${vht} ? 80MHz : 40MHz
+**.radio.transmitter.bandwidth = 20MHz
+**.radio.transmitter.bitrate = 6Mbps
+**.radio.transmitter.power = 20mW
+**.radio.fcsMode = "computed"
+**.radio.receiver.sensitivity = -100dBm
+**.radio.receiver.energyDetection = -100dBm
+**.radio.receiver.snirThreshold = 4dB
+*.radioMedium.listeningFilter = false
+*.radioMedium.macAddressFilter = false
+*.radioMedium.radioModeFilter = false
+*.radioMedium.rangeFilter = ""
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+**.capture.moduleNamePatterns = "radio"
+*.a.capture.sendingSignalNames = "transmissionEnded"
+*.a.capture.receivingSignalNames = ""
+*.b.capture.sendingSignalNames = ""
+*.b.capture.receivingSignalNames = "receptionEnded"
+**.capture.helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+**.capture.dumpProtocols = "ieee80211mac"
+**.capture.fileFormat = "pcap"
+**.capture.dumpBadFrames = true
+**.capture.verbose = true
+**.capture.packetFilter = "capture-*"
+**.capture.alwaysFlush = true
+**.capture.cmdenv-log-level = debug
+**.cmdenv-log-level = warn
+*.a.capture.pcapFile = "results/ampdu-${runnumber}-tx.pcap"
+*.b.capture.pcapFile = "results/ampdu-${runnumber}-rx.pcap"
+**.scalar-recording = false
+**.vector-recording = false
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.a.mobility.initialX = 0m
+*.b.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%file: check-capture.py
+import collections
+import hashlib
+import json
+from pathlib import Path
+import re
+import struct
+import sys
+import traceback
+import zlib
+
+# Independent raw-byte oracle: imports no INET serializer/helper implementation.
+# Radiotap field definitions: https://radiotap.org/fields/A-MPDU%20status.html
+FIELDS = {0:(8,8),1:(1,1),2:(1,1),3:(2,4),5:(1,1),6:(1,1),10:(1,1),19:(1,3),20:(4,8),21:(2,12)}
+
+def audit_error(kind,value,trace):
+    Path('capture-audit-error.txt').write_text(''.join(traceback.format_exception(kind,value,trace)))
+    sys.__excepthook__(kind,value,trace)
+sys.excepthook = audit_error
+
+def golden(index):
+    header = struct.pack('<HH',0x0088,0)
+    header += bytes.fromhex('020000000002020000000001020000000003')
+    header += struct.pack('<HH',(100+index)<<4,0x65)
+    body = header + bytes.fromhex('aaaa0300000088b5') + bytes([0x20 if index else 0x10]) * (12 if index else 9)
+    return body + struct.pack('<I',zlib.crc32(body))
+
+def capture(path):
+    data = path.read_bytes()
+    if not data:
+        return [] # PcapWriter creates its global header lazily at first record.
+    assert data[:4] == bytes.fromhex('d4c3b2a1'), path
+    assert struct.unpack_from('<I',data,20)[0] == 127
+    offset = 24
+    result = []
+    while offset < len(data):
+        sec,usec,size,original = struct.unpack_from('<IIII',data,offset)
+        offset += 16
+        assert size == original and offset+size <= len(data)
+        raw = data[offset:offset+size]
+        offset += size
+        version,pad,length,present = struct.unpack_from('<BBHI',raw)
+        assert version == pad == 0 and not present & 0x80000000
+        cursor = 8
+        fields = {}
+        for bit in range(31):
+            if present & (1<<bit):
+                assert bit in FIELDS, bit
+                align,count = FIELDS[bit]
+                cursor = (cursor+align-1)//align*align
+                fields[bit] = raw[cursor:cursor+count]
+                cursor += count
+        assert cursor <= length
+        result.append((fields,raw[length:]))
+    assert offset == len(data)
+    return result
+
+def delimiters(raw, vht):
+    cursor = 0
+    members = []
+    while cursor+4 <= len(raw):
+        word,crc,signature = struct.unpack_from('<HBB',raw,cursor)
+        assert signature == 0x4e and not word & 2
+        length = (word>>4) | ((word&12)<<10)
+        eof = bool(word&1)
+        cursor += 4
+        if length:
+            assert not eof and cursor+length <= len(raw)
+            members.append((raw[cursor:cursor+length],crc))
+            cursor += length
+            if cursor == len(raw):
+                break
+            cursor += (-length)%4
+        else:
+            assert vht or not eof
+    return members
+
+def metadata(fields,vht):
+    assert fields[1][0] & 0x10
+    assert struct.unpack('<HH',fields[3])[0] == 5180
+    if vht:
+        known,flags,width,users,coding,group,aid = struct.unpack('<HBB4sBBH',fields[21])
+        assert known & 0x44 == 0x44 and flags & 4 and width == 4
+        assert users == bytes([0x71,0,0,0]) and 19 not in fields
+        return {'family':'VHT','width_mhz':80,'short_gi':bool(flags&4),'mcs':users[0]>>4,'nss':users[0]&15,'channel_mhz':5180}
+    else:
+        known,flags,mcs = fields[19]
+        assert known & 7 == 7 and flags & 7 == 5 and mcs == 7 and 21 not in fields
+        return {'family':'HT','width_mhz':40,'short_gi':bool(flags&4),'mcs':mcs,'nss':mcs//8+1,'channel_mhz':5180}
+
+settings = {}
+run = None
+log = Path('test.out').read_text()
+for line in log.splitlines():
+    match = re.search(r'Preparing for running configuration General, run #(\d+)',line)
+    if match: run = int(match[1])
+    if line.startswith('Scenario:'):
+        values = dict(re.findall(r'\$(\w+)=([^, ]+)',line))
+        settings[run] = (values['vht']=='true',int(values['scenario']))
+assert len(settings) == 12 and set(settings.values()) == {(v,s) for v in (False,True) for s in range(6)}
+assert log.count('Dumping packet') == 40, 'Actual verbose printer path must execute for every record'
+audit = []
+manifest = []
+observations = []
+for run,(vht,scenario) in sorted(settings.items()):
+    tx = capture(Path(f'results/ampdu-{run}-tx.pcap'))
+    rx = capture(Path(f'results/ampdu-{run}-rx.pcap'))
+    assert len(tx) == (1 if scenario==4 else 2), (run,'tx',len(tx))
+    assert len(rx) == (0 if scenario==3 else 1 if scenario==4 else 2), (run,'rx',len(rx))
+    if scenario==3:
+        original = Path(f'results/psdu-{run}-tx.bin').read_bytes()
+        truncated = Path(f'results/psdu-{run}-rx.bin').read_bytes()
+        assert len(truncated)==73 and truncated==original[:73]
+        assert truncated[4:51]==golden(0), 'A complete good first member must precede the rejected truncation'
+        assert truncated[68:]==golden(1)[:5], 'Only five bytes of the second member remain'
+    for side,records in [('tx',tx),('rx',rx)]:
+        path = Path(f'results/ampdu-{run}-{side}.pcap')
+        manifest.append({'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'records':len(records)})
+        if scenario!=4:
+            body = Path(f'results/psdu-{run}-{side}.bin')
+            manifest.append({'path':str(body),'sha256':hashlib.sha256(body.read_bytes()).hexdigest(),'bytes':body.stat().st_size})
+        expected = [golden(0)] if scenario==4 else [golden(0),golden(1)]
+        if side=='rx' and scenario in (1,2):
+            first = bytearray(expected[0])
+            if scenario==1: first[-1] ^= 0x80
+            else: first[0]=first[1]=first[4]=first[5]=0xff
+            expected[0] = bytes(first)
+        raw_members = None
+        if scenario != 4 and not (side=='rx' and scenario==3):
+            raw_members = delimiters(Path(f'results/psdu-{run}-{side}.bin').read_bytes(),vht)
+            assert [m for m,crc in raw_members] == expected, (run,side,'actual PSDU members')
+        references = []
+        for index,(fields,mac) in enumerate(records):
+            decoded = metadata(fields,vht)
+            assert mac == expected[index], (run,side,index,'member bytes')
+            crc_ok = zlib.crc32(mac[:-4]) == int.from_bytes(mac[-4:],'little')
+            expected_bad = side=='rx' and (scenario==5 or index==0 and scenario in (1,2))
+            assert bool(fields[1][0]&0x40) == expected_bad, (run,side,index,'bad-FCS flag',fields[1][0],expected_bad)
+            assert crc_ok == (not (side=='rx' and index==0 and scenario in (1,2))), (run,side,index,'independent MAC CRC')
+            observation = {'run':run,'side':side,'member_index':index,'mac_hex':mac.hex(),'mac_length':len(mac),
+                'crc32_valid':crc_ok,'bad_fcs':bool(fields[1][0]&0x40),'metadata':decoded,
+                'radiotap_fields_hex':{str(k):v.hex() for k,v in fields.items()}}
+            if scenario==4:
+                assert 20 not in fields
+            else:
+                reference,flags,crc,reserved = struct.unpack('<IHBB',fields[20])
+                references.append(reference)
+                assert flags == (0x00a4 | (8 if index==1 else 0))
+                assert crc == raw_members[index][1] and reserved==0
+                observation['ampdu'] = {'reference':reference,'flags':flags,'delimiter_crc':crc}
+            observations.append(observation)
+        if references: assert len(set(references)) == 1
+    audit.append({'run':run,'vht':vht,'scenario':scenario,'tx_records':len(tx),'rx_records':len(rx),'status':'PASS'})
+Path('capture-audit.json').write_text(json.dumps({'status':'PASS','rounds':audit,'capture_manifest':manifest,
+    'records':observations,'actual_verbose_printer_calls':log.count('Dumping packet'),
+    'radiotap_authority':'https://radiotap.org/fields/A-MPDU%20status.html',
+    'delimiter_crc_scope':'Observed value cross-checked against actual PSDU delimiter; no independent delimiter polynomial claim.'},indent=2)+'\n')
+print('A-MPDU capture audit PASS:12 real-radio rounds, exact member bytes/FCS/radiotap')
+
+%contains: stdout
+actual A-MPDU capture round PASS
+
+%not-contains: stdout
+it doesn't own
+
+%not-contains: stdout
+undisposed object:

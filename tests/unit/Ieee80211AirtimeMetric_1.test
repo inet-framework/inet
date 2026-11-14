@@ -1,0 +1,61 @@
+%description:
+Independent arithmetic fixtures for IEEE802.11-2024 14.10.2/Table14-4.
+Both units, ID1 fixedn1, fractional future aggregation parameter, ceiling,
+saturation and invalid inputs. Fractional n does not claim live aggregation.
+
+%includes:
+#include <cmath>
+#include <limits>
+#include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+auto cost = [](int id, simtime_t overhead, double rate, double error, double n = 1) {
+    return AirtimeLinkMetric::computeMetric(id,overhead,bps(rate),error,n);
+};
+auto overhead = SimTime(100,SIMTIME_US);
+ASSERT(cost(1,overhead,100e6,0) == 18);
+ASSERT(cost(1,overhead,100e6,0,4) == 18);
+ASSERT(cost(2,overhead,100e6,0) == 18192);
+ASSERT(cost(2,overhead,100e6,0,4) == 10692);
+ASSERT(cost(2,overhead,100e6,0,2.5) == 12192);
+ASSERT(cost(2,overhead+SimTime(1,SIMTIME_PS),100e6,0) == 18193);
+ASSERT(cost(2,overhead-SimTime(1,SIMTIME_PS),100e6,0) == 18192);
+ASSERT(cost(1,SIMTIME_ZERO,8192,0) == 97657);
+ASSERT(cost(2,SIMTIME_ZERO,8192,0) == 100000000);
+ASSERT(cost(1,overhead,100e6,0.125) == 21);
+ASSERT(cost(2,overhead,100e6,0.125) == 20791);
+for (int id : {1,2}) {
+    ASSERT(cost(id,overhead,100e6,1) == UINT32_MAX);
+    ASSERT(cost(id,overhead,100e6,1-1e-12) == UINT32_MAX);
+    ASSERT(cost(id,SimTime(1000000),1,0) == UINT32_MAX);
+    for (double invalid : {0.,-1.,std::numeric_limits<double>::infinity(),std::numeric_limits<double>::quiet_NaN()}) {
+        bool rejected = false;
+        try { cost(id,overhead,invalid,0); } catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        rejected = false;
+        try { cost(id,overhead,100e6,0,invalid); } catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+    }
+    bool belowOne = false;
+    try { cost(id,overhead,100e6,0,0.5); } catch (const cRuntimeError&) { belowOne = true; }
+    ASSERT(belowOne);
+    for (double invalid : {-0.001,1.001,std::numeric_limits<double>::infinity(),std::numeric_limits<double>::quiet_NaN()}) {
+        bool rejected = false;
+        try { cost(id,overhead,100e6,invalid); } catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+    }
+}
+for (int id : {0,3}) {
+    bool rejected = false;
+    try { cost(id,overhead,100e6,0); } catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+bool rejected = false;
+try { cost(1,SimTime(-1),100e6,0); } catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+EV << "Both airtime metric units and boundary fixtures passed.\n";
+
+%contains: stdout
+Both airtime metric units and boundary fixtures passed.

@@ -107,6 +107,22 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+    virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
+            const physicallayer::IIeee80211Mode *mode);
+    virtual void frameTransmissionComplete(const Packet *packet);
+    virtual void frameTransmissionComplete(const Packet *packet, simtime_t start) { frameTransmissionComplete(packet); }
+    // Concrete legacy defaults preserve immediate Tx submission outside mesh doze.
+    virtual bool defersTransmissionStart() const { return false; }
+    virtual bool isTransmissionReady() const { return true; }
+    virtual bool isRadioReadyForTransmission(simtime_t start) const { return true; }
+    virtual void requestTransmissionReadiness() {}
+    // Variable management content is finalized before mode/length admission.
+    // The late preparation hook above owns fixed-size timestamp insertion.
+    virtual void prepareFrameContent(Packet *packet, const std::set<int64_t>& deliveryUnit) {}
+    // Called once when a local source forwarding unit is committed, never on preview.
+    virtual void finalizeDataFrame(Packet *packet) {}
+    virtual bool isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const;
+    virtual bool isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>& header) const;
     virtual void resetPeerAssociationContext(const MacAddress& peer) override;
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

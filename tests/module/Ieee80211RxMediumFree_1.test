@@ -1,0 +1,318 @@
+%description:
+Generic Rx medium availability uses the actual receptive radio mode and its
+matching TX state. Real asymmetric receptive-mode switches include synchronous
+mixed publications and an observer inserted before the equal-deadline completion.
+Actual primary energy defers queued DATA; secondary-only energy leaves primary
+contention available. Real DATA transmission, NAV, TXNAV and the contention gate
+remain independent exclusions. No mesh or power-save policy is instantiated.
+
+%extraargs: -r 0..1
+
+%file: test.cc
+#include <iostream>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/noise/NoiseSource.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211RxMediumFree_1 {
+class MediumRx : public Rx {
+  public:
+    bool canContend() const { return contentionFree; }
+    IRadio::TransmissionState cachedTx() const { return transmissionState; }
+    void reserveNav(simtime_t duration) { Enter_Method("reserveNav"); setOrExtendNav(duration); }
+};
+Define_Module(MediumRx);
+
+// A permanently receptive, ordinary ad hoc MAC. The radio still performs
+// actual TX and explicit mode switches; there is no mesh/power policy.
+class TransceiverMac : public Ieee80211Mac {
+  protected:
+    void configureRadioMode(IRadio::RadioMode mode) override {
+        Ieee80211Mac::configureRadioMode(mode == IRadio::RADIO_MODE_TRANSMITTER || mode == IRadio::RADIO_MODE_RECEIVER ?
+            IRadio::RADIO_MODE_TRANSCEIVER : mode);
+    }
+  public:
+    void queueData(const char *name) {
+        Enter_Method("queueData");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setTransmitterAddress(getAddress());
+        header->setAddress3(getAddress());
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(32, 0x5a)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        processUpperFrame(packet, header);
+    }
+};
+Define_Module(TransceiverMac);
+
+class PulsedNoise : public NoiseSource {
+  public:
+    void pulse() {
+        Enter_Method("pulse");
+        ASSERT(!transmissionTimer->isScheduled());
+        cancelEvent(sleepTimer);
+        startTransmission();
+    }
+};
+Define_Module(PulsedNoise);
+
+class Probe : public cSimpleModule, public cListener {
+    opp_component_ptr<cModule> publisher;
+    Ieee80211Radio *radio = nullptr;
+    MediumRx *rx = nullptr;
+    TransceiverMac *mac = nullptr;
+    cMessage *deferred = nullptr;
+    int switched = 0;
+    int synchronousSwitching = 0;
+    int synchronousMixed = 0;
+    int deadlineChecks = 0;
+    int dataTransmissions = 0;
+    int actualTxExclusions = 0;
+    bool armed = false;
+    bool wide = false;
+    bool complete = false;
+    void at(int us, int kind) { scheduleAt(SimTime(us, SIMTIME_US), new cMessage("probe", kind)); }
+    void free() const {
+        ASSERT(radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER || radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+        ASSERT(rx->isMediumFree() && rx->canContend());
+    }
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_LAST) return;
+        radio = check_and_cast<Ieee80211Radio *>(getModuleByPath("^.host.wlan[0].radio"));
+        wide = radio->hasContiguousAllocation();
+        // Subscribe after Rx on the same ancestor, so observations follow the
+        // consumer's synchronous update without changing producer ordering.
+        publisher = radio->getParentModule();
+        rx = check_and_cast<MediumRx *>(getModuleByPath("^.host.wlan[0].mac.rx"));
+        mac = check_and_cast<TransceiverMac *>(getModuleByPath("^.host.wlan[0].mac"));
+        publisher->subscribe(IRadio::radioModeChangedSignal, this);
+        publisher->subscribe(IRadio::transmissionStateChangedSignal, this);
+        publisher->subscribe(transmissionStartedSignal, this);
+        deferred = new cMessage("after radio producer completes");
+        // Insert both completion observers before either switch inserts its timer.
+        for (auto [time, kind] : {std::pair{1000, 1}, {2000, 2}, {3000, 3}, {5000, 5},
+                {6000, 6}, {7000, 3}, {8000, 5}, {11000, 11}, {11100, 12}, {11300, 13},
+                {12000, 14}, {13000, 15}, {13100, 16}, {14000, 17},
+                {15000, 18}, {15600, 19}, {16600, 20}})
+            at(time, kind);
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, intval_t value, cObject *) override {
+        Enter_Method_Silent();
+        if (signal == IRadio::radioModeChangedSignal && armed) {
+            ASSERT(radio->getRadioMode() == value);
+            if (value == IRadio::RADIO_MODE_SWITCHING) {
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                synchronousSwitching++;
+            }
+            else if (value == IRadio::RADIO_MODE_RECEIVER || value == IRadio::RADIO_MODE_TRANSCEIVER) {
+                // Mode publication precedes the fresh TX-state publication.
+                ASSERT(rx->cachedTx() == (value == IRadio::RADIO_MODE_RECEIVER ?
+                    IRadio::TRANSMISSION_STATE_IDLE : IRadio::TRANSMISSION_STATE_UNDEFINED));
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                synchronousMixed++;
+                if (!deferred->isScheduled()) scheduleAt(simTime(), deferred);
+            }
+        }
+        else if (signal == IRadio::transmissionStateChangedSignal && value == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+            ASSERT(!rx->isMediumFree() && !rx->canContend());
+            actualTxExclusions++;
+        }
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        if (signal == transmissionStartedSignal) {
+            auto transmission = check_and_cast<const ITransmission *>(object);
+            const auto name = std::string(transmission->getPacket()->getName());
+            if (name == "primary-queued" || name == "secondary-queued") {
+                ASSERT(radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+                if (wide) ASSERT(!radio->isPrimaryChannelBusy());
+                if (name == "primary-queued") ASSERT(simTime() >= SimTime(11500, SIMTIME_US));
+                else {
+                    ASSERT(simTime() < SimTime(13500, SIMTIME_US));
+                    ASSERT(radio->getReceptionState() == (wide ? IRadio::RECEPTION_STATE_BUSY : IRadio::RECEPTION_STATE_IDLE));
+                }
+                dataTransmissions++;
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message == deferred) {
+            free();
+            ASSERT(radio->getRadioMode() == (switched == 0 ? IRadio::RADIO_MODE_RECEIVER : IRadio::RADIO_MODE_TRANSCEIVER));
+            switched++;
+            return;
+        }
+        int kind = message->getKind();
+        delete message;
+        switch (kind) {
+            case 1:
+                ASSERT(radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+                ASSERT(radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_IDLE);
+                free(); // Parent failure: idle TRANSCEIVER is permanently busy.
+                break;
+            case 2:
+                armed = true;
+                radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+                break;
+            case 3:
+                ASSERT(radio->getRadioMode() == IRadio::RADIO_MODE_SWITCHING);
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                break;
+            case 5: {
+                auto snapshot = radio->getRadioModeState();
+                ASSERT(snapshot && snapshot->transition && snapshot->transition->endTime == simTime());
+                ASSERT(snapshot->mode == IRadio::RADIO_MODE_SWITCHING);
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                deadlineChecks++;
+                break;
+            }
+            case 6: free(); radio->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER); break;
+            case 11:
+                ASSERT(switched == 2 && synchronousSwitching == 2 && synchronousMixed == 2 && deadlineChecks == 2);
+                armed = false;
+                check_and_cast<PulsedNoise *>(getModuleByPath("^.primary"))->pulse();
+                break;
+            case 12:
+                if (wide) ASSERT(radio->isPrimaryChannelBusy());
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                mac->queueData("primary-queued");
+                break;
+            case 13: ASSERT(dataTransmissions == 0); ASSERT(!rx->isMediumFree()); break;
+            case 14: ASSERT(dataTransmissions == 1); free(); break;
+            case 15: check_and_cast<PulsedNoise *>(getModuleByPath("^.secondary"))->pulse(); break;
+            case 16:
+                ASSERT(radio->getReceptionState() == (wide ? IRadio::RECEPTION_STATE_BUSY : IRadio::RECEPTION_STATE_IDLE));
+                if (wide) ASSERT(!radio->isPrimaryChannelBusy());
+                free(); // Contiguous primary CCA, not whole-band reception state.
+                mac->queueData("secondary-queued");
+                break;
+            case 17: ASSERT(dataTransmissions == 2 && actualTxExclusions == 2); free(); break;
+            case 18:
+                rx->reserveNav(SimTime(500, SIMTIME_US));
+                ASSERT(!rx->isMediumFree() && !rx->canContend());
+                break;
+            case 19:
+                free();
+                rx->successfulFrameTransmitted(simTime(), SimTime(500, SIMTIME_US));
+                ASSERT(rx->isMediumFree() && !rx->canContend());
+                break;
+            case 20:
+                free();
+                rx->setContentionBlocked(true);
+                ASSERT(rx->isMediumFree() && !rx->canContend());
+                rx->setContentionBlocked(false);
+                free();
+                complete = true;
+                std::cout << "Rx medium mode/CCA/DATA/NAV/TXNAV: PASS contiguous=" << wide << "\n";
+                endSimulation();
+                break;
+        }
+    }
+    void finish() override { ASSERT(complete); }
+    using cListener::finish;
+  public:
+    ~Probe() override {
+        if (publisher) {
+            publisher->unsubscribe(IRadio::radioModeChangedSignal, this);
+            publisher->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+            publisher->unsubscribe(transmissionStartedSignal, this);
+        }
+        cancelAndDelete(deferred);
+    }
+};
+Define_Module(Probe);
+}
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+module TransceiverMac extends Ieee80211Mac {
+    parameters: @class(::Ieee80211RxMediumFree_1::TransceiverMac);
+}
+simple MediumRx extends Rx { parameters: @class(::Ieee80211RxMediumFree_1::MediumRx); }
+module PulsedNoise extends NoiseSource { parameters: @class(::Ieee80211RxMediumFree_1::PulsedNoise); }
+simple Probe { parameters: @class(::Ieee80211RxMediumFree_1::Probe); }
+network Test {
+    submodules:
+        radioMedium: Ieee80211DimensionalRadioMedium;
+        host: WirelessHost;
+        primary: PulsedNoise;
+        secondary: PulsedNoise;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.listeningFilter = false
+*.radioMedium.macAddressFilter = false
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].mac.typename = "TransceiverMac"
+**.wlan[*].mac.rx.typename = "MediumRx"
+**.wlan[*].mac.initialRadioMode = "transceiver"
+**.wlan[*].mac.qosStation = false
+**.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.dcf.rateSelection.dataFrameBandwidth = 20MHz
+**.wlan[*].opMode = "ac-complete"
+**.wlan[*].radio.typename = "Ieee80211DimensionalRadio"
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.bandwidth = ${wide=true,false} ? 40MHz : 20MHz
+**.wlan[*].radio.contiguousChannelAllocation = ${wide}
+**.wlan[*].radio.receiver.bandwidth = 20MHz
+# Receiver->Transceiver is2ms; Transceiver->Receiver is3ms. Other transitions0.
+**.wlan[*].radio.switchingTimes = "ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 3 0 0"
+*.primary.sleepInterval = 1s
+*.secondary.sleepInterval = 1s
+*.primary.transmitter.centerFrequency = 5180MHz
+*.secondary.transmitter.centerFrequency = 5200MHz
+*.primary.transmitter.duration = 500us
+*.secondary.transmitter.duration = 500us
+*.primary.transmitter.bandwidth = 20MHz
+*.secondary.transmitter.bandwidth = 20MHz
+*.primary.transmitter.power = 20W
+*.secondary.transmitter.power = 20W
+*.primary.transmitter.signalAnalogRepresentation = "dimensional"
+*.secondary.transmitter.signalAnalogRepresentation = "dimensional"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host.mobility.initialX = 10m
+*.primary.mobility.initialX = 0m
+*.secondary.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Rx medium mode/CCA/DATA/NAV/TXNAV: PASS
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+it doesn't own

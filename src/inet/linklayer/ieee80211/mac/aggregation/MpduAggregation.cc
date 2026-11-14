@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -16,30 +17,15 @@ Register_Class(MpduAggregation);
 
 Packet *MpduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
-    EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MPDU.\n";
-    auto aggregatedFrame = new Packet();
-    std::string aggregatedName;
-    for (size_t i = 0; i < frames->size(); i++) {
-        auto mpduSubframeHeader = makeShared<Ieee80211MpduSubframeHeader>();
-        auto frame = frames->at(i);
-        auto mpdu = frame->peekAll();
-        mpduSubframeHeader->setLength(mpdu->getChunkLength().get<B>());
-        aggregatedFrame->insertAtBack(mpduSubframeHeader);
-        aggregatedFrame->insertAtBack(mpdu);
-        aggregatedFrame->getRegionTags().copyTags(frame->getRegionTags(), B(0), aggregatedFrame->getFrontOffset() - frame->getDataLength(), frame->getDataLength());
-        int paddingLength = 4 - (mpduSubframeHeader->getChunkLength() + mpdu->getChunkLength()).get<B>() % 4;
-        if (i + 1 != frames->size() && paddingLength != 4) {
-            auto padding = makeShared<ByteCountChunk>(B(paddingLength));
-            aggregatedFrame->insertAtBack(padding);
-        }
-        if (i != 0)
-            aggregatedName.append("+");
-        aggregatedName.append(frame->getName());
+    return frames->empty() ? new Packet() : aggregateFrames(frames,{});
+}
+
+Packet *MpduAggregation::aggregateFrames(std::vector<Packet *> *frames, const MpduAggregationParameters& parameters)
+{
+    auto result = buildAmpdu(*frames,parameters.vht,parameters.minimumStartDistance);
+    for (auto frame : *frames)
         delete frame;
-    }
-    aggregatedFrame->setName(aggregatedName.c_str());
-    EV_TRACE << "Created A-MPDU " << *aggregatedFrame << ".\n";
-    return aggregatedFrame;
+    return result;
 }
 
 } /* namespace ieee80211 */

@@ -1,0 +1,269 @@
+%description:
+Real control reception tests PERR reason-specific sequence arithmetic, next-hop
+and validity filtering, TTL, unsupported entries/external bodies, closed-peer
+precursors and unknown transit. Supplemental native-control pressure installs
+25 synthetic destination records with different live precursor subsets; this
+does not model 25 radio endpoints. Pending error handoffs use the production
+global100TU limiter,19-distinct-destination codec bound, repair pruning and
+isolated owner restart policy. Production outgoing controls are fault-suppressed
+after their management handoff is observed to isolate each receive-table case.
+
+%file: HwmpPathError.cc
+#include "mesh/HwmpErrorSupport.h"
+class PathErrorDriver : public cSimpleModule, public cListener, public ITx::ICallback, public LifecycleController
+{
+    MacAddress d(int n) { char address[32]; snprintf(address,sizeof(address),"02:00:00:00:50:%02x",n); return MacAddress(address); }
+    std::vector<std::pair<simtime_t,std::vector<HwmpPerrDestination>>> handoffs;
+    std::map<MacAddress,std::vector<HwmpPerrDestination>> pressure;
+    std::map<MacAddress,std::vector<int>> pressureBatchSizes;
+    std::map<MacAddress,std::vector<HwmpPerrDestination>> basic;
+    std::optional<Hwmp::PathInfo> saved;
+    simtime_t restartEligibility;
+    bool afterRepair = false;
+    int repairedNotifications = 0, invalidLocalDeliveries = 0;
+    int expiredNotifications = 0, distinctMissing = 0, distinctUnreachable = 0;
+    simtime_t inactiveHistory;
+    void prepRange(int first, int count, uint32_t sn = 10) {
+        auto body = makeShared<Ieee80211HwmpFrame>(); int index = 0;
+        for (int n = first; n < first+count; n++) {
+            if (first == 0 && n == 8) continue;
+            auto prep = testPrep(d(n),meshMib(0)->address,(first == 0 && (n == 4 || n == 5)) ? UINT32_MAX : sn,0,(first == 0 && n == 7) ? 5 : 3000);
+            body->setPrepsArraySize(index+1); body->setPreps(index++,prep);
+        }
+        body->setChunkLength(B(33*index)); sendHwmpTest(1,body,meshMib(0)->address);
+    }
+    void precursors(int station, int first, int count, uint32_t sn, int lifetime = 3000) {
+        auto preq = testPreq(meshMib(station)->address,d(first),sn,sn,4); preq.setTtl(1); preq.setLifetime(lifetime); preq.setTargetsArraySize(count);
+        for (int i = 0; i < count; i++) { HwmpPreqTarget target; target.flags = 4; target.address = d(first+i); preq.setTargets(i,target); }
+        sendHwmpTest(station,testBody(preq),meshMib(0)->address);
+    }
+    void sendError(int n, uint32_t sn = 0, uint16_t reason = RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION, uint8_t ttl = 8) {
+        sendHwmpTest(1,testBody(std::vector<HwmpPerrDestination>{testError(d(n),sn,reason)},ttl),meshMib(0)->address);
+    }
+    template<typename Operation> void lifecycle(cModule *module) {
+        auto operation = new Operation(); LifecycleOperation::StringMap parameters;
+        operation->initialize(module,parameters); ASSERT(initiateOperation(operation));
+    }
+    void unknown(int station, int n, int sequence) { injectMeshTransit(station,0,meshMib(station)->address,d(n),sequence,this); }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        network->subscribe(registerSignal("hwmpTestHandoff"),this); network->subscribe(registerSignal("packetSentToUpper"),this);
+        const std::pair<int,int> events[] = {{5,0},{10,1},{15,2},{45,3},{50,4},{60,5},{70,6},{80,7},{85,8},{90,9},
+            {100,10},{105,11},{110,12},{120,13},{130,14},{140,15},{145,16},{150,17},{155,18},{160,19},{170,20},{180,21},{185,22},{190,23},{195,24},{200,25},{205,26},
+            {210,27},{215,28},{220,29},{225,30},{230,31},{235,32},{240,33},{245,34},{410,35},{420,36},{430,37},{440,38},{450,39},{510,40},{520,41},{900,42},
+            {920,43},{930,44},{940,45},{945,46},{990,47},{1000,48},{1010,49},{1015,50},{1020,51},{1021,52},{1030,53},
+            {1100,54},{1110,55},{1120,56},{1130,57},{1135,58},{1140,59},{1145,60},{1150,61},{1155,62},{1250,63},{1280,64}};
+        for (auto event : events) scheduleAt(SimTime(event.first,SIMTIME_MS),new cMessage("error-case",event.second));
+        const std::pair<int,int> extra[] = {{1300,65},{1310,66},{1320,67},{1330,68},{1340,69},{1345,70},{1350,71},{1355,72},{1356,73},{1380,74},{1390,75},
+            {1400,76},{1410,77},{1420,78},{1430,79},{1440,80},{1450,81},{1460,82},{1470,83},{1480,84},{1490,85},{1495,86},{1496,87},{1500,88},
+            {1690,89},{1700,90},{1710,91},{1720,92},{1730,93},{1740,94},{1760,95}};
+        for (auto event : extra) scheduleAt(SimTime(event.first,SIMTIME_MS),new cMessage("extra-error-case",event.second));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (source == meshInterface(0)->getSubmodule("mac") && signal == registerSignal("packetSentToUpper")) invalidLocalDeliveries++;
+        if (source != meshManagement(0) || signal != registerSignal("hwmpTestHandoff")) return;
+        auto body = packet->peekAtFront<Ieee80211HwmpFrame>();
+        for (size_t i = 0; i < body->getPerrsArraySize(); i++) {
+            auto perr = body->getPerrs(i); auto recipient = packet->getTag<MacAddressReq>()->getDestAddress();
+            ASSERT(perr.getDestinationsArraySize() >= 1 && perr.getDestinationsArraySize() <= 19);
+            if (!handoffs.empty()) ASSERT(simTime()-handoffs.back().first >= SimTime(102400,SIMTIME_US));
+            std::set<MacAddress> unique; std::vector<HwmpPerrDestination> entries; int pressureCount = 0;
+            for (size_t j = 0; j < perr.getDestinationsArraySize(); j++) {
+                auto entry = perr.getDestinations(j); ASSERT(unique.insert(entry.address).second && entry.flags == 0); entries.push_back(entry);
+                if (!(entry.address < d(20)) && !(entry.address > d(44))) {
+                    ASSERT(perr.getTtl() == 7 && entry.sequenceNumber == 11 && entry.reasonCode == RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION);
+                    pressure[recipient].push_back(entry); pressureCount++;
+                }
+                if (!(entry.address > d(15))) { ASSERT(perr.getTtl() == 7); basic[entry.address].push_back(entry); }
+                if (entry.address == d(99) && afterRepair) { ASSERT(entry.sequenceNumber == 51); repairedNotifications++; }
+                if (entry.address == d(111)) expiredNotifications++;
+                if (entry.address == d(112)) {
+                    ASSERT(perr.getTtl() == 31);
+                    if (entry.reasonCode == RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION) { ASSERT(entry.sequenceNumber == 0); distinctMissing++; }
+                    else { ASSERT(entry.reasonCode == RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE && entry.sequenceNumber == 11); distinctUnreachable++; }
+                }
+            }
+            if (pressureCount) pressureBatchSizes[recipient].push_back(pressureCount);
+            handoffs.push_back({simTime(),entries});
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        switch (message->getKind()) {
+            case 0: meshManagement(0)->openPeer(meshMib(1)->address); break;
+            case 1: meshManagement(0)->openPeer(meshMib(2)->address); break;
+            case 2: meshManagement(0)->openPeer(meshMib(3)->address); break;
+            case 3:
+                for (int i : {1,2,3}) ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(i)->address));
+                check_and_cast<HwmpTestManagement *>(meshManagement(0))->suppressHwmp(true); break;
+            case 4: prepRange(0,16); break;
+            case 5: sendHwmpTest(3,testBody(testPrep(d(6),meshMib(0)->address,11,0,3000)),meshMib(0)->address); break;
+            case 6: precursors(2,0,16,100); break;
+            case 7: precursors(3,0,16,200); break;
+            case 8: {
+                auto preq = testPreq(d(8),d(90),300,10,5); preq.setTtl(1); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 9: unknown(2,80,1); break;
+            case 10: sendError(0); break;
+            case 11: ASSERT(*hwmp(0)->getPathInfo(d(0))->sequence == 11 && !hwmp(0)->findPath(d(0))); sendError(1,10,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 12: ASSERT(hwmp(0)->findPath(d(1))); saved = hwmp(0)->getPathInfo(d(1)); sendError(1,9,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 13: ASSERT(saved == hwmp(0)->getPathInfo(d(1))); sendError(1,10+0x80000000U,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 14: ASSERT(saved == hwmp(0)->getPathInfo(d(1))); sendError(1,11,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 15: ASSERT(!hwmp(0)->findPath(d(1)) && *hwmp(0)->getPathInfo(d(1))->sequence == 11); break;
+            case 16: sendError(2,10); break;
+            case 17: ASSERT(!hwmp(0)->findPath(d(2)) && *hwmp(0)->getPathInfo(d(2))->sequence == 10); break;
+            case 18: saved = hwmp(0)->getPathInfo(d(3)); sendError(3,9); break;
+            case 19: ASSERT(saved == hwmp(0)->getPathInfo(d(3))); sendError(3,10+0x80000000U); break;
+            case 20: ASSERT(saved == hwmp(0)->getPathInfo(d(3))); sendError(3,11); break;
+            case 21: ASSERT(!hwmp(0)->findPath(d(3)) && *hwmp(0)->getPathInfo(d(3))->sequence == 11); break;
+            case 22: sendError(4); break;
+            case 23: ASSERT(!hwmp(0)->findPath(d(4)) && *hwmp(0)->getPathInfo(d(4))->sequence == 0); break;
+            case 24: sendError(5,0,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 25: ASSERT(!hwmp(0)->findPath(d(5)) && *hwmp(0)->getPathInfo(d(5))->sequence == 0); break;
+            case 26: {
+                saved = hwmp(0)->getPathInfo(d(6));
+                std::vector<HwmpPerrDestination> entries{testError(d(6),12),testError(d(7),11),testError(d(8),11),testError(d(9),11,RC_MESH_PATH_ERROR_NO_PROXY_INFORMATION)};
+                sendHwmpTest(1,testBody(entries),meshMib(0)->address); break;
+            }
+            case 27:
+                ASSERT(saved == hwmp(0)->getPathInfo(d(6)) && !hwmp(0)->findPath(d(7)) && !hwmp(0)->findPath(d(8)) && hwmp(0)->findPath(d(9))); sendError(10,11,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE,1); break;
+            case 28: ASSERT(!hwmp(0)->findPath(d(10))); sendError(11,11,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE,0); break;
+            case 29: ASSERT(!hwmp(0)->findPath(d(11))); break;
+            case 30: {
+                auto external = testError(d(12),11); external.flags = 64; external.externalAddress = d(98);
+                sendHwmpTest(1,testBody(std::vector<HwmpPerrDestination>{external,testError(d(13),11)}),meshMib(0)->address); break;
+            }
+            case 31: ASSERT(hwmp(0)->findPath(d(12)) && hwmp(0)->findPath(d(13))); break;
+            case 32: sendHwmpTest(1,testBody(std::vector<HwmpPerrDestination>{testError(d(14),11,RC_MESH_PATH_ERROR_NO_PROXY_INFORMATION),testError(d(15),0)}),meshMib(0)->address); break;
+            case 33: ASSERT(hwmp(0)->findPath(d(14)) && !hwmp(0)->findPath(d(15)) && *hwmp(0)->getPathInfo(d(15))->sequence == 11); break;
+            case 34: ASSERT(!hwmp(0)->isDiscoveryActive(d(80)) && meshForwarding(0)->getNumPendingPackets() == 0); break;
+            case 35:
+                ASSERT(basic[d(0)].size() == 2 && basic[d(0)][0].sequenceNumber == 11);
+                ASSERT(basic[d(4)].size() == 2 && basic[d(4)][0].sequenceNumber == 0 && basic[d(5)].size() == 2);
+                ASSERT(basic[d(6)].empty() && basic[d(7)].empty() && basic[d(8)].empty() && basic[d(9)].empty() && basic[d(10)].empty() && basic[d(11)].empty());
+                prepRange(0,16,200); break;
+            case 36: prepRange(20,25); break;
+            case 37: precursors(2,20,20,101); break;
+            case 38: precursors(2,40,5,102); precursors(3,35,10,201); break;
+            case 39: unknown(2,81,2); break;
+            case 40: {
+                std::vector<HwmpPerrDestination> entries;
+                for (int n = 20; n < 45; n++) entries.push_back(testError(d(n),0));
+                sendHwmpTest(1,testBody(entries),meshMib(0)->address); break;
+            }
+            case 41:
+                for (int n = 20; n < 45; n++) ASSERT(!hwmp(0)->findPath(d(n)) && *hwmp(0)->getPathInfo(d(n))->sequence == 11);
+                ASSERT(errorProbe(0)->pendingCount(meshMib(2)->address) == 25 && errorProbe(0)->pendingCount(meshMib(3)->address) == 10); break;
+            case 42:
+                ASSERT(pressure[meshMib(2)->address].size() == 25 && pressure[meshMib(3)->address].size() == 10);
+                ASSERT(pressureBatchSizes[meshMib(2)->address] == std::vector<int>({19,6}) && pressureBatchSizes[meshMib(3)->address] == std::vector<int>({10})); break;
+            case 43: unknown(2,82,3); break;
+            case 44: sendError(0); break;
+            case 45: meshManagement(0)->closePeer(meshMib(2)->address); break;
+            case 46:
+                ASSERT(errorProbe(0)->pendingCount(meshMib(2)->address) == 0 && hwmp(0)->getPrecursorExpiry(meshMib(0)->address,meshMib(2)->address) == SIMTIME_ZERO);
+                for (int n = 0; n < 45; n++) { auto path = hwmp(0)->getPathInfo(d(n)); if (path) ASSERT(!path->precursors.count(meshMib(2)->address)); } break;
+            case 47: ASSERT(meshManagement(2)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::IDLE); meshManagement(0)->openPeer(meshMib(2)->address); break;
+            case 48: ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(2)->address)); injectMeshTransit(2,0,meshMib(2)->address,meshMib(0)->address,4,this,"old-self-precursor"); break;
+            case 49: ASSERT(invalidLocalDeliveries == 0); unknown(3,83,5); break;
+            case 50: restartEligibility = *errorProbe(0)->lastErrorHandoff()+SimTime(102400,SIMTIME_US); lifecycle<ModuleStopOperation>(hwmp(0)); ASSERT(errorProbe(0)->pendingCount() == 0); break;
+            case 51: lifecycle<ModuleStartOperation>(hwmp(0)); unknown(3,84,6); break;
+            case 52: ASSERT(errorProbe(0)->errorDeadline() == restartEligibility && simTime() < restartEligibility); break;
+            case 53: ASSERT(*errorProbe(0)->lastErrorHandoff() == restartEligibility); break;
+            case 54: sendHwmpTest(1,testBody(testPrep(d(99),meshMib(0)->address,10,0,3000)),meshMib(0)->address); break;
+            case 55: precursors(3,99,1,202); break;
+            case 56: unknown(2,85,7); break;
+            case 57: sendError(99); break;
+            case 58: ASSERT(errorProbe(0)->pendingFor(d(99)).size() == 1 && errorProbe(0)->pendingFor(d(99))[0].sequenceNumber == 11); break;
+            case 59: sendHwmpTest(1,testBody(testPrep(d(99),meshMib(0)->address,50,0,3000)),meshMib(0)->address); break;
+            case 60: ASSERT(hwmp(0)->findPath(d(99)) && errorProbe(0)->pendingFor(d(99)).empty()); afterRepair = true; break;
+            case 61: sendError(99); break;
+            case 62: ASSERT(errorProbe(0)->pendingFor(d(99)).size() == 1 && errorProbe(0)->pendingFor(d(99))[0].sequenceNumber == 51); break;
+            case 63: ASSERT(repairedNotifications == 1); break;
+            case 64: break;
+            case 65: sendHwmpTest(1,testBody(testPrep(d(110),meshMib(0)->address,10,0,3000)),meshMib(0)->address); break;
+            case 66: precursors(2,110,1,1000); break;
+            case 67:
+                ASSERT(hwmp(0)->getPrecursorExpiry(d(110),meshMib(2)->address) > simTime());
+                meshMib(0)->setMeshForwarding(false); sendError(110,11,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE); break;
+            case 68: ASSERT(!hwmp(0)->findPath(d(110)) && errorProbe(0)->pendingFor(d(110)).empty()); meshMib(0)->setMeshForwarding(true); break;
+            case 69: sendHwmpTest(1,testBody(testPrep(d(111),meshMib(0)->address,10,0,20)),meshMib(0)->address); break;
+            case 70: unknown(2,86,8); break;
+            case 71: precursors(2,111,1,1001); break;
+            case 72: sendError(111); break;
+            case 73: ASSERT(errorProbe(0)->pendingFor(d(111)).size() == 1); break;
+            case 74: sendHwmpTest(1,testBody(testPrep(d(114),meshMib(0)->address,10,0,3000)),meshMib(0)->address); break;
+            case 75: injectMeshTransit(2,0,meshMib(2)->address,d(114),20,this,"bad-precursor"); break;
+            case 76: injectMeshTransit(4,0,meshMib(4)->address,d(120),21,this,"nonpeer-transit"); break;
+            case 77: injectMeshTransit(2,0,meshMib(2)->address,d(121),22,this,"external-transit",1); break;
+            case 78: injectMeshTransit(2,0,meshMib(2)->address,d(122),23,this,"malformed-transit",2); break;
+            case 79: injectMeshTransit(2,0,meshMib(2)->address,d(123),24,this,"group-no-error",3); break;
+            case 80:
+                ASSERT(hwmp(0)->findPath(d(114)) && errorProbe(0)->pendingFor(d(114)).empty());
+                for (int n = 120; n < 124; n++) ASSERT(errorProbe(0)->pendingFor(d(n)).empty());
+                ASSERT(meshForwarding(0)->getNumPendingPackets() == 0); break;
+            case 81: ASSERT(expiredNotifications == 0 && errorProbe(0)->pendingFor(d(111)).empty()); break;
+            case 82: sendHwmpTest(1,testBody(testPrep(d(112),meshMib(0)->address,10,0,3000)),meshMib(0)->address); break;
+            case 83: precursors(2,112,1,1002); break;
+            case 84: unknown(2,87,25); break;
+            case 85: sendError(112,11,RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE,32); break;
+            case 86: unknown(2,112,26); break;
+            case 87: unknown(2,112,27); break;
+            case 88: {
+                auto values = errorProbe(0)->pendingFor(d(112)); ASSERT(values.size() == 2);
+                std::set<std::pair<int,uint32_t>> distinct; for (const auto& entry : values) distinct.insert({entry.reasonCode,entry.sequenceNumber});
+                ASSERT((distinct == std::set<std::pair<int,uint32_t>>{{RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION,0},{RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE,11}})); break;
+            }
+            case 89:
+                ASSERT(distinctMissing == 1 && distinctUnreachable == 1);
+                sendHwmpTest(1,testBody(testPrep(d(113),meshMib(0)->address,10,0,3000)),meshMib(0)->address); break;
+            case 90: precursors(2,113,1,1003); break;
+            case 91: unknown(2,88,28); break;
+            case 92:
+                ASSERT(errorProbe(0)->pendingCount() > 0); inactiveHistory = *errorProbe(0)->lastErrorHandoff();
+                lifecycle<ModuleStopOperation>(meshManagement(0));
+                ASSERT(errorProbe(0)->pendingCount() == 0 && errorProbe(0)->errorDeadline() == SIMTIME_ZERO && *errorProbe(0)->lastErrorHandoff() == inactiveHistory); break;
+            case 93: ASSERT(*errorProbe(0)->lastErrorHandoff() == inactiveHistory && errorProbe(0)->pendingCount() == 0); break;
+            case 94: lifecycle<ModuleStartOperation>(meshManagement(0)); break;
+            case 95: ASSERT(*errorProbe(0)->lastErrorHandoff() == inactiveHistory); emit(registerSignal("pathErrorComplete"),1L); break;
+        }
+        delete message;
+    }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+};
+Define_Module(PathErrorDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_path_error) {
+    return ProtocolTest("hwmp_path_error").once(on("driver").signal("pathErrorComplete").assertValue(1).within(1.77));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple PathErrorDriver { parameters: @class(::PathErrorDriver); @signal[pathErrorComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: PathErrorDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 1.8s
+*.numStations = 5
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "HwmpTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].pathSelection.typename = "HwmpErrorProbe"
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_path_error"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST hwmp_path_error: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_path_error: FAIL

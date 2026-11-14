@@ -13,7 +13,10 @@
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211AmpduObservationTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -41,6 +44,17 @@ const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet
 
 void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
+    if (packet->hasBitError() && packet->findTag<ieee80211::Ieee80211AmpduObservationTag>()) {
+        // Recorder observation context never authorizes production decoding.
+        // Corrupt FC/header bytes remain exact, opaque MAC/FCS bytes even for
+        // verbose printing or field filtering; no fabricated header is needed.
+        callback.startProtocolDataUnit(protocol);
+        callback.markIncorrect();
+        if (packet->getDataLength() != b(0))
+            callback.visitChunk(packet->popAtFront(packet->getDataLength()),protocol);
+        callback.endProtocolDataUnit(protocol);
+        return;
+    }
     // Pop the FCS trailer before the header so that a header whose length is only
     // bounded by the end of the frame -- an Ieee80211ActionFrameOther, which stores the
     // unmodelled action body up to the FCS -- does not read into the FCS.
@@ -58,10 +72,49 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         if (packet->getDataLength() == b(0)) {
             // the frame body is empty: a Null or QoS-Null data frame (and the
             // CF-Poll/CF-Ack data subtypes) carry no payload, so there is nothing to dissect
+            if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader))
+                if (mesh->getMeshControlPresent())
+                    callback.markIncorrect();
         }
         else if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
         else if (dataHeader->getAMsduPresent()) {
+            if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
+                std::unique_ptr<Packet> complete(packet->dup());
+                complete->setFrontOffset(packet->getFrontOffset() - header->getChunkLength());
+                complete->setBackOffset(packet->getBackOffset() + B(4));
+                std::vector<ieee80211::Ieee80211MeshAmsduPart> parts;
+                if (!ieee80211::parseMeshAmsdu(complete.get(), mesh, parts)) {
+                    callback.markIncorrect();
+                    callback.dissectPacket(packet, nullptr);
+                }
+                else {
+                    auto bodyEnd = packet->getBackOffset();
+                    for (const auto& part : parts) {
+                        if (packet->getFrontOffset() < complete->getFrontOffset() + part.controlOffset - B(14))
+                            callback.visitChunk(packet->popAtFront(complete->getFrontOffset() + part.controlOffset - B(14) - packet->getFrontOffset()), &Protocol::ieee80211Mac);
+                        callback.visitChunk(packet->popAtFront<ieee80211::Ieee80211MeshMsduSubframeHeader>(B(14)), &Protocol::ieee80211Mac);
+                        callback.visitChunk(packet->popAtFront<ieee80211::Ieee80211MeshControl>(B(6)), &Protocol::ieee80211Mac);
+                        auto end = packet->getFrontOffset() + part.payloadLength;
+                        packet->setBackOffset(end);
+                        if (part.payloadLength != B(0))
+                            callback.dissectPacket(packet, part.payloadLength >= B(3) ? computeLlcProtocol(packet) : nullptr);
+                        packet->setBackOffset(bodyEnd);
+                        packet->setFrontOffset(end);
+                    }
+                }
+                callback.visitChunk(trailer, &Protocol::ieee80211Mac);
+                callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
+                return;
+            }
+            if (dataHeader->getToDS() && dataHeader->getFromDS()) {
+                // Raw four-address A-MSDU has no interface-role context here.
+                // Preserve its whole MAC interval without guessing Basic versus Mesh.
+                callback.dissectPacket(packet, nullptr);
+                callback.visitChunk(trailer, &Protocol::ieee80211Mac);
+                callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
+                return;
+            }
             auto originalTrailerPopOffset = packet->getBackOffset();
             int paddingLength = 0;
             while (packet->getDataLength() > B(0)) {
@@ -80,8 +133,42 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
                 packet->setFrontOffset(msduEndOffset);
             }
         }
-        else
-            callback.dissectPacket(packet, computeLlcProtocol(packet));
+        else {
+            bool invalidMeshControl = false;
+            if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
+                if (mesh->getMeshControlPresent()) {
+                    if (packet->getDataLength() < B(6))
+                        invalidMeshControl = true;
+                    else {
+                        auto control = packet->popAtFront<ieee80211::Ieee80211MeshControl>(b(-1),
+                                Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+                        callback.visitChunk(control, &Protocol::ieee80211Mac);
+                        invalidMeshControl = control->isIncorrect() || control->isIncomplete();
+                    }
+                    if (invalidMeshControl)
+                        callback.markIncorrect();
+                }
+            }
+            if (packet->getDataLength() > b(0))
+                callback.dissectPacket(packet, invalidMeshControl ? nullptr : computeLlcProtocol(packet));
+        }
+    }
+    else if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshActionFrame>(header)) {
+        using namespace inet::ieee80211;
+        auto length = packet->getDataLength();
+        int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE;
+        if (length == b(0))
+            callback.markIncorrect();
+        else if (mesh->getCategory() == MESH_ACTION && mesh->getMeshAction() == MESH_HWMP_PATH_SELECTION)
+            callback.visitChunk(packet->popAtFront<Ieee80211HwmpFrame>(length, flags), &Protocol::ieee80211Mac);
+        else if (mesh->getCategory() == MESH_ACTION && mesh->getMeshAction() == MESH_LINK_METRIC_REPORT)
+            callback.visitChunk(packet->popAtFront<Ieee80211MeshLinkMetricFrame>(length, flags), &Protocol::ieee80211Mac);
+        else if (mesh->getMeshAction() == MESH_PEERING_OPEN)
+            callback.visitChunk(packet->popAtFront<Ieee80211MeshPeeringOpenFrame>(length, flags), &Protocol::ieee80211Mac);
+        else if (mesh->getMeshAction() == MESH_PEERING_CONFIRM)
+            callback.visitChunk(packet->popAtFront<Ieee80211MeshPeeringConfirmFrame>(length, flags), &Protocol::ieee80211Mac);
+        else if (mesh->getMeshAction() == MESH_PEERING_CLOSE)
+            callback.visitChunk(packet->popAtFront<Ieee80211MeshPeeringCloseFrame>(length, flags), &Protocol::ieee80211Mac);
     }
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header)) {
         // A fully modelled action (ADDBA/DELBA) and the Ieee80211ActionFrameOther that
@@ -96,18 +183,26 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         // bytes; unknown subtypes fall back to the generic mgmt dissector
         using namespace inet::ieee80211;
         if (packet->getDataLength() > b(0)) {
+            Ptr<const Chunk> body;
+            const auto length = packet->getDataLength();
+            const int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE;
             switch (mgmtHeader->getType()) {
-                case ST_BEACON: callback.visitChunk(packet->popAtFront<Ieee80211BeaconFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_PROBEREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211ProbeRequestFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_PROBERESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211ProbeResponseFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_ASSOCIATIONREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211AssociationRequestFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_ASSOCIATIONRESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211AssociationResponseFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_REASSOCIATIONREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211ReassociationRequestFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_REASSOCIATIONRESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211ReassociationResponseFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_AUTHENTICATION: callback.visitChunk(packet->popAtFront<Ieee80211AuthenticationFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_DEAUTHENTICATION: callback.visitChunk(packet->popAtFront<Ieee80211DeauthenticationFrame>(), &Protocol::ieee80211Mgmt); break;
-                case ST_DISASSOCIATION: callback.visitChunk(packet->popAtFront<Ieee80211DisassociationFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_BEACON: body = packet->popAtFront<Ieee80211BeaconFrame>(length, flags); break;
+                case ST_PROBEREQUEST: body = packet->popAtFront<Ieee80211ProbeRequestFrame>(length, flags); break;
+                case ST_PROBERESPONSE: body = packet->popAtFront<Ieee80211ProbeResponseFrame>(length, flags); break;
+                case ST_ASSOCIATIONREQUEST: body = packet->popAtFront<Ieee80211AssociationRequestFrame>(length, flags); break;
+                case ST_ASSOCIATIONRESPONSE: body = packet->popAtFront<Ieee80211AssociationResponseFrame>(length, flags); break;
+                case ST_REASSOCIATIONREQUEST: body = packet->popAtFront<Ieee80211ReassociationRequestFrame>(length, flags); break;
+                case ST_REASSOCIATIONRESPONSE: body = packet->popAtFront<Ieee80211ReassociationResponseFrame>(length, flags); break;
+                case ST_AUTHENTICATION: body = packet->popAtFront<Ieee80211AuthenticationFrame>(length, flags); break;
+                case ST_DEAUTHENTICATION: body = packet->popAtFront<Ieee80211DeauthenticationFrame>(length, flags); break;
+                case ST_DISASSOCIATION: body = packet->popAtFront<Ieee80211DisassociationFrame>(length, flags); break;
                 default: callback.dissectPacket(packet, &Protocol::ieee80211Mgmt); break;
+            }
+            if (body) {
+                callback.visitChunk(body, &Protocol::ieee80211Mgmt);
+                if (body->isIncorrect() || body->isIncomplete())
+                    callback.markIncorrect();
             }
         }
     }

@@ -1,0 +1,87 @@
+%description:
+The opt-in ac-complete catalog contains both GIs for all310 legal modeled VHT
+tuples, excluding the ten sparse standard holes. Its legacy rates, HT entries
+and reference timing remain shared. Legacy ac retains its exact tuple/GI/flag
+signature and fixed-rate traversal, including its historical mandatoryMCS8.
+
+%includes:
+#include <map>
+#include <set>
+#include <tuple>
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%global:
+using Tuple = std::tuple<int,int,int,bool>; // MHz,NSS,MCS,shortGI
+static std::map<Tuple,const IIeee80211Mode *> vhtModes(const Ieee80211ModeSet *set)
+{
+    std::map<Tuple,const IIeee80211Mode *> result;
+    for (int i=0;i<set->getNumModes();i++) {
+        auto mode = set->getMode(i);
+        if (mode->getVhtMcsIndex() < 0) continue;
+        Tuple tuple(MHz(mode->getDataMode()->getBandwidth()).get(),mode->getDataMode()->getNumberOfSpatialStreams(),
+                mode->getVhtMcsIndex(),mode->isVhtShortGuardInterval());
+        ASSERT(result.emplace(tuple,mode).second);
+    }
+    return result;
+}
+
+%activity:
+auto legacy = Ieee80211ModeSet::getModeSet("ac");
+auto complete = Ieee80211ModeSet::getModeSet("ac-complete");
+ASSERT(legacy->getNumModes() == 441 && complete->getNumModes() == 751);
+ASSERT(complete->getPhyType() == Ieee80211ModeSet::PhyType::VHT && complete->isHtOperationSupported());
+ASSERT(complete->getReferenceMode() == legacy->getReferenceMode());
+ASSERT(complete->getLegacyOperationalModes() == legacy->getLegacyOperationalModes());
+ASSERT(complete->getLegacyOperationalModes().size() == 3);
+ASSERT(complete->getReferenceMode()->getSifsTime() == SimTime(16,SIMTIME_US));
+ASSERT(complete->getReferenceMode()->getSlotTime() == SimTime(9,SIMTIME_US));
+auto oldModes = vhtModes(legacy), modes = vhtModes(complete);
+ASSERT(oldModes.size() == 310 && modes.size() == 620);
+
+// Independent sparse-grid oracle from the VHT MCS parameter tables, including
+// Table21-50's invalid80MHz/NSS6/MCS9 object despite its nonnull raw declaration.
+const std::set<std::tuple<int,int,int>> invalid = {
+    {20,1,9},{20,2,9},{20,4,9},{20,5,9},{20,7,9},{20,8,9},
+    {80,3,6},{80,7,6},{80,6,9},{160,3,9}};
+for (int width : {20,40,80,160}) for (int nss=1;nss<=8;nss++) for (int mcs=0;mcs<10;mcs++) {
+    bool legal = !invalid.count({width,nss,mcs});
+    for (bool shortGi : {false,true}) {
+        auto it = modes.find({width,nss,mcs,shortGi});
+        ASSERT((it != modes.end()) == legal);
+        if (!legal) continue;
+        auto mode = it->second;
+        ASSERT(complete->containsMode(mode));
+        ASSERT(complete->getIsMandatory(mode) == (!shortGi && nss == 1 && mcs <= 7));
+        auto concrete = check_and_cast<const Ieee80211VhtMode *>(mode);
+        ASSERT(Ieee80211VhtCompliantModes::getCompliantMode(concrete->getDataMode()->getModulationAndCodingScheme(),
+                Ieee80211VhtMode::BAND_5GHZ,Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+                shortGi ? Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) == mode);
+        bool oldShortGi = !(width == 20 && nss == 1);
+        ASSERT((oldModes.count({width,nss,mcs,shortGi}) != 0) == (shortGi == oldShortGi));
+        if (shortGi == oldShortGi) {
+            ASSERT(oldModes.at({width,nss,mcs,shortGi}) == mode);
+            ASSERT(legacy->getIsMandatory(mode) == (width == 20 && nss == 1));
+        }
+    }
+}
+int shared = 0;
+for (int i=0;i<legacy->getNumModes();i++) {
+    auto mode = legacy->getMode(i);
+    if (mode->getVhtMcsIndex() < 0) {
+        ASSERT(complete->containsMode(mode));
+        ASSERT(complete->getIsMandatory(mode) == legacy->getIsMandatory(mode));
+        shared++;
+    }
+}
+ASSERT(shared == 131);
+ASSERT(complete->getHtMcsSupported() == legacy->getHtMcsSupported());
+ASSERT(complete->getHtMcsMandatory() == legacy->getHtMcsMandatory());
+EV << "Complete VHT catalog verified; legacy ac signature unchanged.\n";
+
+%contains: stdout
+Complete VHT catalog verified; legacy ac signature unchanged.

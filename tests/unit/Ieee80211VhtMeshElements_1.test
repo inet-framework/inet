@@ -1,0 +1,85 @@
+%description:
+Independent IEEE 802.11-2024 VHT Capabilities and modern 160 MHz Operation
+octets, directional MCS maps, basic-set admission and bounded malformed input.
+These are wire-format fixtures; live mesh profile admission also requires HT.
+
+%includes:
+#include "inet/common/MemoryInputStream.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static Ptr<const Ieee80211MeshPeeringOpenFrame> decodeVht(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("literal-vht", makeShared<BytesChunk>(bytes));
+    return packet.popAtFront<Ieee80211MeshPeeringOpenFrame>(B(bytes.size()),
+            Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+}
+
+%activity:
+// 9.4.2.157: Max MPDU=7991,160 MHz,SGI80/160,A-MPDU exponent3.
+// Rx NSS1 supports0..9,NSS2 supports0..8; Tx NSS1 supports0..7.
+// 9.4.2.158: modern contiguous160 uses width1,segment0=42,segment1=50.
+const std::vector<uint8_t> literal = {
+    0,0, 1,1,0x8c,
+    0xbf,12, 0x65,0,0x80,1, 0xf6,0xff,0,0, 0xfc,0xff,0,0,
+    0xc0,5, 1,42,50,0xfc,0xff,
+    0x72,1,'m', 0x71,7,1,1,0,1,0,0,9, 0x75,4,0,0,0x34,0x12};
+auto decoded = decodeVht(literal);
+ASSERT(decoded->isCorrect());
+ASSERT(decoded->getVhtCapabilitiesPresent() && decoded->getVhtOperationPresent());
+auto capabilities = makeVhtCapabilities(decoded->getVhtCapabilities());
+ASSERT(capabilities.rxMcs[0] == 9 && capabilities.rxMcs[1] == 8 && capabilities.rxMcs[2] == -1);
+ASSERT(capabilities.txMcs[0] == 7 && capabilities.txMcs[1] == -1);
+ASSERT(capabilities.width160 && capabilities.shortGi80 && capabilities.shortGi160);
+ASSERT(capabilities.maxMpduLength == 7991 && capabilities.maxAmpduLengthExponent == 3);
+ASSERT(supportsBasicVhtMcs(capabilities, 0xfffc));
+ASSERT(!supportsBasicVhtMcs(capabilities, 0xfffd)); // Tx cannot satisfy0..8.
+ASSERT(!supportsBasicVhtMcs(capabilities, 0xfff0)); // Tx has no second stream.
+ASSERT(decoded->getVhtOperation().channelWidth == 1);
+ASSERT(decoded->getVhtOperation().centerFrequencySegment0 == 42);
+ASSERT(decoded->getVhtOperation().centerFrequencySegment1 == 50);
+
+auto frame = makeShared<Ieee80211MeshPeeringOpenFrame>();
+frame->setSupportedRatesArraySize(1); frame->setSupportedRates(0, 0x8c);
+frame->setMeshIdPresent(true); frame->setMeshIdArraySize(1); frame->setMeshId(0, 'm');
+frame->setMeshConfigurationPresent(true);
+MeshPeering peering; peering.localLinkId = 0x1234;
+frame->setMeshPeeringPresent(true); frame->setMeshPeering(peering);
+Ieee80211VhtCapabilities constructed;
+constructed.rxMcs[0] = 9; constructed.rxMcs[1] = 8; constructed.txMcs[0] = 7;
+constructed.width160 = true; constructed.shortGi80 = true; constructed.shortGi160 = true;
+constructed.maxMpduLength = 7991; constructed.maxAmpduLengthExponent = 3;
+frame->setVhtCapabilitiesPresent(true); frame->setVhtCapabilities(makeVhtCapabilitiesElement(constructed));
+Ieee80211VhtOperation operation; operation.width = MHz(160); operation.center0 = 42; operation.center1 = 50;
+frame->setVhtOperationPresent(true); frame->setVhtOperation(makeVhtOperationElement(operation));
+frame->setChunkLength(B(literal.size()));
+Packet encoded("independent-vht", frame);
+ASSERT(encoded.peekAllAsBytes()->getBytes() == literal);
+
+for (size_t cut = 7; cut < 26; cut++) {
+    std::vector<uint8_t> truncated(literal.begin(), literal.begin() + cut);
+    ASSERT(!decodeVht(truncated)->isCorrect());
+}
+auto malformed = literal; malformed[6] = 11;
+ASSERT(!decodeVht(malformed)->isCorrect());
+malformed = literal; malformed[6] = 13;
+ASSERT(!decodeVht(malformed)->isCorrect());
+malformed = literal; malformed.insert(malformed.end(), literal.begin() + 5, literal.begin() + 19);
+ASSERT(!decodeVht(malformed)->isCorrect());
+malformed = literal; malformed[7] |= 3;
+ASSERT(!decodeVht(malformed)->isCorrect());
+for (uint16_t map : {uint16_t(0), uint16_t(0xfffc), uint16_t(0xfff6), uint16_t(0xffff)})
+    ASSERT(encodeVhtMcsMap(decodeVhtMcsMap(map)) == map);
+constructed.rxMcs[0] = 6;
+bool rejected = false;
+try { makeVhtCapabilitiesElement(constructed); } catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+EV << "VHT mesh element bytes and admission maps verified.\n";
+
+%contains: stdout
+VHT mesh element bytes and admission maps verified.

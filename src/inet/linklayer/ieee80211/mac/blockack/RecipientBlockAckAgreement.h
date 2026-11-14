@@ -23,6 +23,7 @@ class INET_API RecipientBlockAckAgreement : public cObject
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
     bool isAddbaResponseSent = false;
+    bool aMsduPermitted = false;
     simtime_t expirationTime = -1;
     SequenceNumberCyclic highestReceivedSequence;
     int highestReceivedFragment = 0;
@@ -57,6 +58,9 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
     virtual void addbaResposneSent() { isAddbaResponseSent = true; }
+    bool getIsAddbaResponseSent() const { return isAddbaResponseSent; }
+    bool isAMsduPermitted() const { return aMsduPermitted; }
+    void setAMsduPermitted(bool permitted) { aMsduPermitted = permitted; }
     virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
     virtual simtime_t getExpirationTime() { return expirationTime; }
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);

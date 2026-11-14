@@ -1,0 +1,431 @@
+%description:
+Delayed actual beacon completion starts AW. Group PPDU start qualifies PostAW
+even when completion straddles AW; receiver group holding uses MoreData or
+continuous physical idle rather than a configured VI TXOP or virtual NAV.
+
+%file: MeshAwakeWindow.cc
+#include "mesh/MeshDozeSupport.h"
+
+class WindowManagementFixture : public Ieee80211MgmtMesh
+{
+  public:
+    void queueProbeResponse(MacAddress peer) { Enter_Method("queueProbeResponse"); sendBeacon(true,peer); }
+};
+Define_Module(WindowManagementFixture);
+
+class WindowMacFixture : public Ieee80211MeshMac
+{
+  public:
+    bool beaconReleased = false, firstReleased = false, secondReleased = false, holdProbe = false;
+    bool isFrameTransmissionEligible(const Packet *packet, simtime_t start) const override {
+        if (getContainingNode(this)->getIndex() == 0) {
+            auto header=packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_BEACON && simTime() >= SimTime(100,SIMTIME_MS) && !beaconReleased) return false;
+            if (header->getType() == ST_PROBERESPONSE && holdProbe) return false;
+            if (std::string(packet->getName()) == "window-first" && !firstReleased) return false;
+            if (std::string(packet->getName()) == "window-second" && !secondReleased) return false;
+        }
+        return Ieee80211MeshMac::isFrameTransmissionEligible(packet,start);
+    }
+};
+Define_Module(WindowMacFixture);
+
+class WindowDriver : public cSimpleModule, public cListener
+{
+    simtime_t beaconEnd, awEnd, firstStart, firstEnd, secondStart, secondEnd, postEnd;
+    int groupAir=0, groupRx=0, edges=0, probes=0;
+    WindowMacFixture *mac(int i) const { return check_and_cast<WindowMacFixture *>(meshInterface(i)->getSubmodule("mac")); }
+    DozePowerFixture *power(int i) const { return check_and_cast<DozePowerFixture *>(meshInterface(i)->getSubmodule("powerSavePolicy")); }
+    IRadio *radio(int i) const { return check_and_cast<IRadio *>(meshInterface(i)->getSubmodule("radio")); }
+    Hcf *hcf(int i) const { return check_and_cast<Hcf *>(meshInterface(i)->getSubmodule("mac")->getSubmodule("hcf")); }
+    int fault() const { return par("receiverFault"); }
+    void at(simtime_t time,int kind,short priority=0) {
+        auto event=new cMessage("window-check",kind); event->setSchedulingPriority(priority); scheduleAt(time,event);
+    }
+  protected:
+    void initialize() override {
+        for (auto signal : {transmissionStartedSignal,transmissionEndedSignal,packetSentToUpperSignal})
+            getSimulation()->getSystemModule()->subscribe(signal,this);
+        at(SimTime(1,SIMTIME_MS),0); at(SimTime(60,SIMTIME_MS),1);
+        at(SimTime(65,SIMTIME_MS),5);
+        at(SimTime(90,SIMTIME_MS),2); at(SimTime(110,SIMTIME_MS),3);
+        at(SimTime(120,SIMTIME_MS),4);
+        at(fault()==8 ? SimTime(5300,SIMTIME_MS) : fault()==7 ? SimTime(175,SIMTIME_MS) : SimTime(160,SIMTIME_MS),30);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        if (signal == packetSentToUpperSignal) {
+            auto packet=dynamic_cast<Packet *>(object);
+            if (source == mac(1) && packet && std::string(packet->getName()).find("window-") == 0) groupRx++;
+            return;
+        }
+        if (source != meshInterface(0)->getSubmodule("radio")) return;
+        auto transmission=check_and_cast<const Ieee80211Transmission *>(object);
+        auto packet=transmission->getPacket();
+        auto phy=Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto header=packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+        if (header->getType() == ST_BEACON && signal == transmissionEndedSignal
+                && simTime() > SimTime(100,SIMTIME_MS) && beaconEnd==0) {
+            ASSERT(simTime() >= SimTime(120,SIMTIME_MS)); beaconEnd=simTime();
+            at(simTime(),10);
+        }
+        if (header->getType()==ST_PROBERESPONSE && signal==transmissionEndedSignal) {
+            ASSERT(fault()==3 || fault()==7);
+            auto body=packet->peekDataAt<Ieee80211ProbeResponseFrame>(phy->getChunkLength()+header->getChunkLength());
+            ASSERT(body->getMeshAwakeWindowPresent() && body->getMeshAwakeWindow()==10);
+            probes++; at(simTime(),21);
+        }
+        std::string name=packet->getName();
+        if (name != "window-first" && name != "window-second") return;
+        auto mesh=staticPtrCast<const Ieee80211MeshDataHeader>(header);
+        ASSERT(mesh->getAckPolicy() == NO_ACK);
+        if (signal == transmissionStartedSignal) {
+            groupAir++;
+            if ((fault()!=6 && fault()!=9) || name=="window-first") ASSERT(radio(1)->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+            if (name == "window-first") {
+                firstStart=simTime(); ASSERT(firstStart < awEnd && transmission->getEndTime() > awEnd);
+                ASSERT(mesh->getMoreData());
+            }
+            else { secondStart=simTime(); ASSERT(!mesh->getMoreData()); }
+        }
+        else if (name == "window-first") { firstEnd=simTime(); at(simTime(),13); }
+        else { secondEnd=simTime(); at(simTime(),14); }
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind(); delete event;
+        auto tick=SimTime::fromRaw(1);
+        if (kind == 0) { meshManagement(0)->openPeer(meshMib(1)->address); meshManagement(1)->openPeer(meshMib(0)->address); }
+        else if (kind == 1) {
+            power(0)->requestMode(meshMib(1)->address,MeshPowerMode::LIGHT_SLEEP);
+        }
+        else if (kind == 5) {
+            power(1)->requestMode(meshMib(0)->address,MeshPowerMode::LIGHT_SLEEP);
+        }
+        else if (kind == 2) {
+            for (int i=0;i<2;i++) ASSERT(meshMib(i)->findMeshPeerPowerState(meshMib(1-i)->address)->local == MeshPowerMode::LIGHT_SLEEP);
+            if (fault()!=3 && fault()!=7 && fault()!=8)
+                for (auto name : {"window-first","window-second"})
+                    check_and_cast<IMeshForwarding *>(mac(0)->getSubmodule("ds"))->processSourceMsdu(
+                        phyMsdu(name,MacAddress("01:00:5e:00:00:01"),2000));
+        }
+        else if (kind == 3) {
+            ASSERT(meshManagement(0)->isBeaconPending() && power(0)->awaitingOwnBeacon());
+            ASSERT(power(0)->ownWindowEnd() < SimTime(100,SIMTIME_MS));
+            ASSERT(radio(0)->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+            ASSERT(radio(1)->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+        }
+        else if (kind == 4) { mac(0)->beaconReleased=true; hcf(0)->meshPowerEligibilityChanged(); }
+        else if (kind == 10) {
+            awEnd=power(0)->ownWindowEnd();
+            ASSERT(awEnd == beaconEnd + SimTime(10240,SIMTIME_US));
+            if (fault()==7 || fault()==8) {
+                at(awEnd+SimTime(200,SIMTIME_US),26);
+                at(SimTime(149500,SIMTIME_US),27);
+                at(SimTime(150,SIMTIME_MS),22);
+                at(SimTime(150010,SIMTIME_US),28); at(SimTime(151,SIMTIME_MS),29);
+                if (fault()==8) {
+                    at(SimTime(5150,SIMTIME_MS)-SimTime::fromRaw(1),32);
+                    at(SimTime(5150,SIMTIME_MS),33,-100);
+                    at(SimTime(5150200,SIMTIME_US),34);
+                }
+            }
+            else if (fault()==3) at(beaconEnd+SimTime(5,SIMTIME_MS),22);
+            else at(awEnd-SimTime(1,SIMTIME_MS),11);
+            at(awEnd-tick,12);
+        }
+        else if (kind == 11) { mac(0)->firstReleased=true; hcf(0)->meshPowerEligibilityChanged(); }
+        else if (kind == 12) { ASSERT(power(0)->requiresAwake()); edges++; }
+        else if (kind == 13) {
+            ASSERT(firstStart < awEnd && firstEnd > awEnd);
+            postEnd=power(0)->postWindowEnd(); ASSERT(postEnd == firstEnd + SimTime(10240,SIMTIME_US));
+            at(fault()==6 ? postEnd+SimTime(1,SIMTIME_MS) : fault()==9 ? postEnd : simTime()+SimTime(1,SIMTIME_MS),15);
+            if (fault()) at(simTime()+SimTime(500,SIMTIME_US),20);
+            at(postEnd-tick,16);
+            if (fault()==6) at(postEnd+SimTime(200,SIMTIME_US),25);
+            if (fault() == 1) {
+                auto idle=hcf(1)->getGroupDeliveryIdleTime();
+                at(firstEnd+idle-SimTime(10,SIMTIME_US),18);
+                at(firstEnd+idle+SimTime(200,SIMTIME_US),19);
+            }
+        }
+        else if (kind == 14) {
+            if (fault()==6 || fault()==9) {
+                ASSERT(power(0)->postWindowEnd()==postEnd && secondEnd>postEnd);
+                if (fault()==9) ASSERT(secondStart==postEnd); // Equality does not requalify timed AW.
+                at(secondEnd+SimTime(200,SIMTIME_US),17);
+            }
+            else {
+                // The active AW includes its timed extension. A start inside
+                // PostAW qualifies completion plus the nominal advertised AW.
+                ASSERT(power(0)->postWindowEnd()==secondEnd+SimTime(10240,SIMTIME_US));
+                ASSERT(power(0)->postWindowEnd()>postEnd);
+                postEnd=power(0)->postWindowEnd();
+                at(postEnd-tick,16); at(postEnd+SimTime(200,SIMTIME_US),17);
+            }
+            if (fault() == 2) {
+                auto idle=hcf(1)->getGroupDeliveryIdleTime();
+                at(secondEnd+idle-SimTime(10,SIMTIME_US),18);
+                at(secondEnd+idle+SimTime(200,SIMTIME_US),19);
+            }
+        }
+        else if (kind == 15) { mac(0)->secondReleased=true; hcf(0)->meshPowerEligibilityChanged(); }
+        else if (kind == 16) { ASSERT(power(0)->requiresAwake()); edges++; }
+        else if (kind == 17) {
+            std::cout << "window post edge t=" << simTime() << " mode=" << radio(0)->getRadioMode()
+                << " " << power(0)->describeObligations() << " air=" << groupAir << " received=" << groupRx << std::endl;
+            ASSERT(radio(0)->getRadioMode() == IRadio::RADIO_MODE_SLEEP); edges++;
+        }
+        else if (kind == 18) { ASSERT(radio(1)->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER); edges++; }
+        else if (kind == 19) {
+            ASSERT(radio(1)->getRadioMode() == IRadio::RADIO_MODE_SLEEP);
+            auto rx=check_and_cast<IRx *>(mac(1)->getSubmodule("rx"));
+            ASSERT(rx->getTxnavRemaining() > 0); // Virtual reservations cannot extend PHY group idle.
+            edges++;
+        }
+        else if (kind == 20) {
+            auto rx=check_and_cast<IRx *>(mac(1)->getSubmodule("rx"));
+            rx->frameTransmitted(SimTime(20,SIMTIME_MS));
+            rx->successfulFrameTransmitted(simTime(),SimTime(20,SIMTIME_MS));
+            ASSERT(!rx->isMediumFree() && rx->getTxnavRemaining() > 0);
+        }
+        else if (kind == 21) {
+            ASSERT(power(0)->ownWindowEnd()==simTime()+SimTime(10240,SIMTIME_US));
+            ASSERT(power(0)->ownWindowEnd()>awEnd);
+            awEnd=power(0)->ownWindowEnd();
+            at(awEnd-SimTime::fromRaw(1),23); at(awEnd+SimTime(200,SIMTIME_US),24);
+        }
+        else if (kind == 22) {
+            if (fault()==8) mac(0)->holdProbe=true;
+            check_and_cast<WindowManagementFixture *>(meshManagement(0))->queueProbeResponse(meshMib(1)->address);
+        }
+        else if (kind == 23) { ASSERT(power(0)->requiresAwake()); edges++; }
+        else if (kind == 24) { ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_SLEEP); edges++; }
+        else if (kind == 25) {
+            ASSERT(simTime()>power(0)->ownWindowEnd() && simTime()>power(0)->postWindowEnd());
+            ASSERT(power(0)->requiresAwake() && radio(0)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+            bool pending=false;
+            for (const auto& frame : hcf(0)->getMeshBufferedFrames()) pending |= frame.kind==MeshBufferedFrame::Kind::PAYLOAD && frame.receiver.isMulticast();
+            ASSERT(pending); edges++;
+        }
+        else if (kind==26) ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_SLEEP);
+        else if (kind==27) power(1)->opportunity(meshMib(0)->address,SimTime(170,SIMTIME_MS));
+        else if (kind==28) {
+            auto inventory=hcf(0)->getMeshBufferedFrames();
+            ASSERT(inventory.size()==1 && inventory.front().receiver==meshMib(1)->address);
+            ASSERT(inventory.front().kind==MeshBufferedFrame::Kind::PROBE_RESPONSE);
+            auto tim=power(0)->getTim(0,1,{});
+            ASSERT(tim.bitmapLength==1 && tim.partialVirtualBitmap[0]==0 && !(tim.bitmapControl&1));
+        }
+        else if (kind==29) {
+            ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+            ASSERT(fault()==8 ? probes==0 : probes==1);
+        }
+        else if (kind==32) {
+            ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+            auto inventory=hcf(0)->getMeshBufferedFrames();
+            ASSERT(inventory.size()==1 && inventory.front().deadline==SimTime(5150,SIMTIME_MS));
+        }
+        else if (kind==33) ASSERT(hcf(0)->getMeshBufferedFrames().empty());
+        else if (kind==34) ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_SLEEP && hcf(0)->getMeshBufferedFrames().empty());
+        else if (kind == 30) {
+            if (fault()==3 || fault()==7) ASSERT(probes==1 && groupAir==0 && groupRx==0 && edges==3);
+            else if (fault()==8) ASSERT(probes==0 && groupAir==0 && groupRx==0 && edges==1);
+            else {
+                ASSERT(groupAir == 2 && groupRx == (fault() ? 1 : 2));
+                ASSERT(edges == (fault()==1 || fault()==2 ? 6 : fault()==9 ? 3 : 4));
+                ASSERT(secondEnd > firstEnd);
+                if (fault()==6 || fault()==9) ASSERT(secondEnd>postEnd); else ASSERT(secondEnd<postEnd);
+            }
+            emit(registerSignal("windowComplete"),1L);
+        }
+    }
+};
+Define_Module(WindowDriver);
+
+class WindowObligationDriver : public cSimpleModule
+{
+    DozePowerFixture *power(int i) const { return check_and_cast<DozePowerFixture *>(meshInterface(i)->getSubmodule("powerSavePolicy")); }
+    IRadio *radio() const { return check_and_cast<IRadio *>(meshInterface(0)->getSubmodule("radio")); }
+    void at(int ms,int kind) { scheduleAt(SimTime(ms,SIMTIME_MS),new cMessage("obligation-check",kind)); }
+  protected:
+    void initialize() override {
+        at(1,0); at(60,1); at(65,2); at(130,3); at(135,4); at(140,5);
+        at(180,6); at(200,7); at(221,8); at(230,9); at(249,10);
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind(); delete event;
+        if (kind==0) {
+            check_and_cast<WindowMacFixture *>(meshInterface(0)->getSubmodule("mac"))->beaconReleased=true;
+            for (int peer : {1,2}) meshManagement(0)->openPeer(meshMib(peer)->address);
+        }
+        else if (kind==1) power(0)->requestMode(meshMib(1)->address,MeshPowerMode::LIGHT_SLEEP);
+        else if (kind==2) power(1)->requestMode(meshMib(0)->address,MeshPowerMode::LIGHT_SLEEP);
+        else if (kind==3) {
+            ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(1)->address)->local==MeshPowerMode::LIGHT_SLEEP);
+            ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(2)->address)->local==MeshPowerMode::ACTIVE);
+            ASSERT(power(0)->ownWindowEnd()<simTime() && power(0)->opportunityEnd(meshMib(1)->address)<simTime());
+            ASSERT(power(0)->opportunityEnd(meshMib(2)->address)<simTime());
+            ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER && power(0)->requiresAwake());
+        }
+        else if (kind==4) power(0)->requestMode(meshMib(2)->address,MeshPowerMode::LIGHT_SLEEP);
+        else if (kind==5) ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_SLEEP);
+        else if (kind==6) {
+            ASSERT(power(0)->opportunityEnd(meshMib(1)->address)>simTime());
+            ASSERT(power(0)->opportunityEnd(meshMib(2)->address)>simTime());
+            ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+        }
+        else if (kind==7) {
+            ASSERT(power(0)->opportunityEnd(meshMib(2)->address)<simTime());
+            ASSERT(power(0)->opportunityEnd(meshMib(1)->address)>simTime() && power(0)->ownWindowEnd()<simTime());
+            ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+        }
+        else if (kind==8) ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_SLEEP);
+        else if (kind==9) meshManagement(0)->openPeer(MacAddress("0a:aa:00:00:00:fe"));
+        else {
+            ASSERT(meshManagement(0)->getMeshWakeSchedule().peeringPending);
+            ASSERT(radio()->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER && power(0)->requiresAwake());
+            auto hcf=check_and_cast<Hcf *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"));
+            ASSERT(!hcf->hasActiveExchange() && hcf->getMeshBufferedFrames().empty());
+            emit(registerSignal("windowComplete"),1L);
+        }
+    }
+};
+Define_Module(WindowObligationDriver);
+
+class WindowExchangeDriver : public cSimpleModule, public cListener
+{
+    simtime_t dataStart, dataEnd, opportunity;
+    bool ackEnded=false;
+    int delivered=0, samples=0;
+    DozePowerFixture *power(int i) const { return check_and_cast<DozePowerFixture *>(meshInterface(i)->getSubmodule("powerSavePolicy")); }
+    IRadio *radio(int i) const { return check_and_cast<IRadio *>(meshInterface(i)->getSubmodule("radio")); }
+    void at(simtime_t time,int kind) { scheduleAt(time,new cMessage("straddling-exchange",kind)); }
+    void source(const char *name,int bytes=0) {
+        check_and_cast<IMeshForwarding *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("ds"))
+            ->processSourceMsdu(phyMsdu(name,meshMib(1)->address,bytes));
+    }
+  protected:
+    void initialize() override {
+        for (auto signal : {transmissionStartedSignal,transmissionEndedSignal,packetSentToUpperSignal,
+                Hcf::meshDataAttemptCompletedSignal,IRadio::radioModeChangedSignal})
+            getSimulation()->getSystemModule()->subscribe(signal,this);
+        at(SimTime(1,SIMTIME_MS),0); at(SimTime(50,SIMTIME_MS),1);
+        at(SimTime(60,SIMTIME_MS),2); at(SimTime(65,SIMTIME_MS),3);
+        at(SimTime(188900,SIMTIME_US),4); at(SimTime(200,SIMTIME_MS),5);
+    }
+    void receiveSignal(cComponent *sourceModule,simsignal_t,long mode,cObject *) override {
+        if (sourceModule!=meshInterface(0)->getSubmodule("radio") && sourceModule!=meshInterface(1)->getSubmodule("radio")) return;
+        if (mode==IRadio::RADIO_MODE_SLEEP) ASSERT(dataStart==0 || ackEnded);
+    }
+    void receiveSignal(cComponent *sourceModule,simsignal_t signal,cObject *object,cObject *details) override {
+        auto packet=dynamic_cast<Packet *>(object);
+        if (signal==packetSentToUpperSignal) {
+            if (sourceModule==meshInterface(1)->getSubmodule("mac") && packet && std::string(packet->getName())=="straddling-unicast") delivered++;
+            return;
+        }
+        if (signal==Hcf::meshDataAttemptCompletedSignal) {
+            if (packet && std::string(packet->getName())=="straddling-unicast") {
+                ASSERT(check_and_cast<MeshDataAttempt *>(details)->acknowledged); samples++;
+            }
+            return;
+        }
+        auto transmission=dynamic_cast<const Ieee80211Transmission *>(object);
+        if (!transmission) return;
+        packet=const_cast<Packet *>(transmission->getPacket());
+        if (std::string(packet->getName())=="straddling-unicast") {
+            if (signal==transmissionStartedSignal) {
+                dataStart=simTime(); opportunity=power(0)->opportunityEnd(meshMib(1)->address);
+                ASSERT(dataStart<opportunity && transmission->getEndTime()>opportunity);
+            }
+            else { dataEnd=simTime(); ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER); }
+        }
+        if (sourceModule==meshInterface(1)->getSubmodule("radio") && dataEnd>0 && !ackEnded) {
+            auto phy=Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+            if (packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength())->getType()!=ST_ACK) return;
+            ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER && radio(1)->getRadioMode()==IRadio::RADIO_MODE_TRANSCEIVER);
+            if (signal==transmissionStartedSignal) ASSERT(simTime()-dataEnd>=SimTime(16,SIMTIME_US) && simTime()-dataEnd<SimTime(17,SIMTIME_US));
+            else ackEnded=true;
+        }
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind(); delete event;
+        if (kind==0) {
+            check_and_cast<WindowMacFixture *>(meshInterface(0)->getSubmodule("mac"))->beaconReleased=true;
+            meshManagement(0)->openPeer(meshMib(1)->address);
+        }
+        else if (kind==1) source("exchange-primer");
+        else if (kind==2) power(0)->requestMode(meshMib(1)->address,MeshPowerMode::LIGHT_SLEEP);
+        else if (kind==3) power(1)->requestMode(meshMib(0)->address,MeshPowerMode::LIGHT_SLEEP);
+        else if (kind==4) source("straddling-unicast",2000);
+        else {
+            ASSERT(ackEnded && delivered==1 && samples==1 && dataEnd>opportunity);
+            ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_SLEEP && radio(1)->getRadioMode()==IRadio::RADIO_MODE_SLEEP);
+            emit(registerSignal("windowComplete"),1L);
+        }
+    }
+};
+Define_Module(WindowExchangeDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_awake_window) {
+    ProtocolTest test("mesh_awake_window");
+    test.once(on("driver").signal("windowComplete").assertValue(1).within(5.4));
+    int fault=getSimulation()->getSystemModule()->getSubmodule("driver")->par("receiverFault");
+    if (fault == 1 || fault == 6 || fault == 9) test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("pk.name == 'window-second'").drop());
+    if (fault == 2) test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("pk.name == 'window-second'").mutate([](Packet *packet) { packet->setBitError(true); }));
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple DozePowerFixture extends MeshPowerSave { parameters: @class(::DozePowerFixture); }
+simple WindowManagementFixture extends Ieee80211MgmtMesh { parameters: @class(::WindowManagementFixture); }
+module WindowMacFixture extends Ieee80211MeshMac { parameters: @class(::WindowMacFixture); }
+moduleinterface IWindowDriver { parameters: int receiverFault; }
+simple WindowDriver like IWindowDriver { parameters: int receiverFault; @class(::WindowDriver); @signal[windowComplete](type=long); }
+simple WindowObligationDriver like IWindowDriver { parameters: int receiverFault; @class(::WindowObligationDriver); @signal[windowComplete](type=long); }
+simple WindowExchangeDriver like IWindowDriver { parameters: int receiverFault; @class(::WindowExchangeDriver); @signal[windowComplete](type=long); }
+network Test extends MeshPairNetwork {
+    parameters:
+        int receiverFault;
+        string driverType=receiverFault==4 ? "WindowObligationDriver" : (receiverFault==5 ? "WindowExchangeDriver" : "WindowDriver");
+    submodules: driver: <driverType> like IWindowDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=5400ms
+*.receiverFault=${receiverFault=0..9}
+*.driver.receiverFault=${receiverFault}
+*.numStations=${receiverFault}==4 ? 3 : 2
+*.radioMedium.typename="Ieee80211ScalarTapRadioMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="DozePowerFixture"
+*.station[*].wlan[0].mac.typename="WindowMacFixture"
+*.station[*].wlan[0].mac.ds.initialTtl=1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=6Mbps
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit=0s
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].mgmt.typename="WindowManagementFixture"
+*.station[1..2].wlan[0].mgmt.meshAwakeWindow=${receiverFault}==4 ? 40.96ms : 10.24ms
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[2].wlan[0].mgmt.initialTsf=51.2ms
+*.station[*].wlan[0].radio.switchingTimes="ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="mesh_awake_window"
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_awake_window: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_awake_window: FAIL

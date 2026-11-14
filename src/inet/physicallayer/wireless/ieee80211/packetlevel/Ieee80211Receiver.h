@@ -26,6 +26,9 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
 
   protected:
     virtual void initialize(int stage) override;
+    bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part,
+            const IInterference *interference, const ISnir *snir) const override;
+    W computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const override;
 
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;

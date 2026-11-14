@@ -44,6 +44,8 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 
     virtual const cGate *getRadioGate() const override { return gate("radioIn"); }
     virtual RadioMode getRadioMode() const override { return radioMode; }
+    std::optional<simtime_t> getRadioModeSwitchingTime(RadioMode from, RadioMode to) const override { return std::nullopt; }
+    std::optional<RadioModeState> getRadioModeState() const override { return std::nullopt; }
     virtual void setRadioMode(RadioMode radioMode) override { this->radioMode = radioMode; }
     virtual ReceptionState getReceptionState() const override { return RECEPTION_STATE_UNDEFINED; }
     virtual TransmissionState getTransmissionState() const override { return transmissionState; }

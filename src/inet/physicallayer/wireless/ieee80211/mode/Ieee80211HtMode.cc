@@ -277,9 +277,12 @@ unsigned int Ieee80211HtDataMode::computeNumberOfCodedBitsPerSubcarrierSum() con
 
 unsigned int Ieee80211HtDataMode::computeNumberOfBccEncoders() const
 {
-    // When the BCC FEC encoder is used, a single encoder is used, except that two encoders
-    // are used when the selected MCS has a PHY rate greater than 300 Mb/s (see 20.6).
-    return getGrossBitrate() > Mbps(300) ? 2 : 1;
+    // IEEE Std 802.11-2024, 19.3.11.4: use the net PHY rate with 800 ns GI.
+    unsigned int codedBitsPerSymbol = computeNumberOfCodedBitsPerSubcarrierSum() * getNumberOfDataSubcarriers();
+    auto correction = getCode() ? getCode()->getForwardErrorCorrection() : nullptr;
+    unsigned int dataBitsPerSymbol = correction ? correction->getDecodedLength(codedBitsPerSymbol) : codedBitsPerSymbol;
+    auto longSymbol = Ieee80211HtTimingRelatedParametersBase::getSymbolInterval();
+    return bps(dataBitsPerSymbol / longSymbol) > Mbps(300) ? 2 : 1;
 }
 
 const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
@@ -290,6 +293,16 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
     unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
     int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get<b>() / dataBitsPerSymbol)); // TODO getBitLength(dataLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
+}
+
+const simtime_t Ieee80211HtMode::getDuration(b dataLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataLength);
+    // IEEE Std 802.11-2024, 19.4.3 Eq19-90/91/92: only mixed SGI rounds
+    // the complete DATA contribution; greenfield retains raw short symbols.
+    if (isHtShortGuardInterval() && preambleMode->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+        dataDuration = ceil(dataDuration, preambleMode->getSymbolInterval());
+    return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataDuration + getSignalExtensionTime();
 }
 
 const simtime_t Ieee80211HtMode::getSlotTime() const

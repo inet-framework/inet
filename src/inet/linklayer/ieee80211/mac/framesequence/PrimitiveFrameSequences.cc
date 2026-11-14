@@ -10,6 +10,40 @@
 namespace inet {
 namespace ieee80211 {
 
+IFrameSequenceStep *AmpduFs::prepareStep(FrameSequenceContext *context)
+{
+    if (step == 0) {
+        auto prepared = context->getQoSContext()->preparedData.get();
+        ASSERT(prepared && prepared->psdu && !prepared->members.empty());
+        return new AggregateTransmitStep(prepared->psdu.release(), prepared->members,
+            context->getIfs(), prepared->blockAckTimeout);
+    }
+    if (step == 1) {
+        auto sent = check_and_cast<AggregateTransmitStep *>(context->getLastStep());
+        bool live = std::any_of(sent->members.begin(),sent->members.end(),[context](Packet *p) {
+            return context->getInProgressFrames()->containsFrame(p);
+        });
+        return live ? new ReceiveStep(sent->responseTimeout) : nullptr;
+    }
+    return nullptr;
+}
+
+bool AmpduFs::completeStep(FrameSequenceContext *context)
+{
+    if (step++ == 0)
+        return true;
+    auto receive = check_and_cast<IReceiveStep *>(context->getLastStep());
+    auto packet = receive->getReceivedFrame();
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(packet->peekAtFront<Ieee80211MacHeader>());
+    auto sent = check_and_cast<AggregateTransmitStep *>(context->getStep(firstStep));
+    auto header = sent->members.front()->peekAtFront<Ieee80211DataHeader>();
+    return response && context->isForUs(response) && response->getReceiverAddress() == header->getTransmitterAddress()
+        && response->getTransmitterAddress() == header->getReceiverAddress() && response->getTidInfo() == header->getTid()
+        && !response->getMultiTid() && response->getCompressedBitmap() && response->getFragmentNumber() == 0
+        && response->getStartingSequenceNumber().isSpecified() && response->getBlockAckBitmap().getSize() == 64
+        && response->getChunkLength() == LENGTH_COMPRESSED_BLOCKACK-B(4) && packet->getDataLength() == LENGTH_COMPRESSED_BLOCKACK;
+}
+
 // TODO remove isForUs checks it's already done in framesequencehandler
 
 void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)

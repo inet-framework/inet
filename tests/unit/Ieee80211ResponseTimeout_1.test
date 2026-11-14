@@ -43,7 +43,7 @@ class TestRateSelection : public SimpleModule, public IRateSelection, public IQo
             const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role) override
     { ASSERT(role == ResponseQueryRole::PREDICT); return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet,
-            const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role) override
+            const Ptr<const Ieee80211TwoAddressHeader>& blockAckReq, ResponseQueryRole role) override
     { ASSERT(role == ResponseQueryRole::PREDICT); return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
             const Ptr<const Ieee80211MacHeader>& header) override { return responseMode; }

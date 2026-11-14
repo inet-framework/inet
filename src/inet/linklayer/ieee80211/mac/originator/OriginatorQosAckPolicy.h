@@ -40,7 +40,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const override;
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const override;
-    virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const override;
+    virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& eliciting) const override;
 };
 
 } /* namespace ieee80211 */

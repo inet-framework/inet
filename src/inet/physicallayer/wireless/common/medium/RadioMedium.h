@@ -327,6 +327,7 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
     virtual const IMediumLimitCache *getMediumLimitCache() const override { return mediumLimitCache; }
     virtual const INeighborCache *getNeighborCache() const override { return neighborCache; }
     virtual const ICommunicationCache *getCommunicationCache() const override { return communicationCache; }
+    bool supportsInterferenceObservation() const override;
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;

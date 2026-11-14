@@ -134,6 +134,16 @@ class INET_API IRadioMedium : public virtual IPrintableObject
     virtual const ICommunicationCache *getCommunicationCache() const = 0;
 
     /**
+     * After initialization, returns whether modeled interference arrivals are
+     * delivered without listenability, destination-address, or communication-
+     * range-only filtering while a radio is in receiver or transceiver mode.
+     * Interference-range filtering is permitted. This promises arrival
+     * visibility, not successful decoding or analog-model accuracy. A radio
+     * must account separately for intervals in which it cannot observe.
+     */
+    virtual bool supportsInterferenceObservation() const = 0;
+
+    /**
      * Adds a new radio to the medium. An exception is thrown if the
      * radio is already added. The radio may immediately start new transmissions
      * and will potentially receive all ongoing and further transmissions.

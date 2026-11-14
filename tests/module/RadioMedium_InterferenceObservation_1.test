@@ -1,0 +1,262 @@
+%description:
+The medium's interference-observation capability predicts real signal arrival
+visibility, independently of packet decodability. A sends one ping to nearby C;
+B is outside communication range but inside interference range, and its offset
+40 MHz listening overlaps half of A's 20 MHz signal without permitting decode.
+Observe actual arrival start/end, no attempted reception or upper packet, and
+positive interference/energy during the signal. Listening, address and
+communication-range filters suppress B's arrival and report no guarantee.
+Interference-range filtering and receptive-mode radio filtering retain it.
+
+%extraargs: -r 0..5
+
+%file: test.cc
+#include <iostream>
+#include <memory>
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace RadioMedium_InterferenceObservation_1 {
+
+class Probe : public cSimpleModule, public cListener
+{
+    IRadioMedium *medium = nullptr;
+    IRadio *sender = nullptr;
+    IRadio *observer = nullptr;
+    opp_component_ptr<cModule> mediumModule;
+    opp_component_ptr<cModule> observerModule;
+    cMessage *during = nullptr;
+    cMessage *after = nullptr;
+    int transmissionId = -1;
+    int arrivals = 0;
+    int endings = 0;
+    int attempts = 0;
+    int delivered = 0;
+    int scenario = -1;
+    bool sampled = false;
+    bool checked = false;
+
+    bool expectedCapability() const { return scenario == 0 || scenario == 4 || scenario == 5; }
+
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage != INITSTAGE_LAST)
+            return;
+        scenario = par("scenario");
+        mediumModule = getModuleByPath("^.radioMedium");
+        medium = check_and_cast<IRadioMedium *>(mediumModule.get());
+        sender = check_and_cast<IRadio *>(getModuleByPath("^.a.wlan[0].radio"));
+        observerModule = getModuleByPath("^.b.wlan[0].radio");
+        observer = check_and_cast<IRadio *>(observerModule.get());
+        ASSERT(medium->supportsInterferenceObservation() == expectedCapability());
+        ASSERT(observer->getRadioMode() == IRadio::RADIO_MODE_RECEIVER || observer->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+        auto separation = sender->getAntenna()->getMobility()->getCurrentPosition().distance(
+                observer->getAntenna()->getMobility()->getCurrentPosition());
+        auto communicationRange = medium->getMediumLimitCache()->getMaxCommunicationRange().get();
+        auto interferenceRange = medium->getMediumLimitCache()->getMaxInterferenceRange().get();
+        ASSERT(std::isfinite(communicationRange) && separation > communicationRange);
+        ASSERT(std::isfinite(interferenceRange) && separation < interferenceRange);
+        mediumModule->subscribe(IRadioMedium::signalDepartureStartedSignal, this);
+        mediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
+        mediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
+        observerModule->subscribe(receptionStartedSignal, this);
+        observerModule->subscribe(packetSentToUpperSignal, this);
+        during = new cMessage("sample interference");
+        after = new cMessage("check arrival completion");
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override
+    {
+        Enter_Method_Silent();
+        if (signal == IRadioMedium::signalDepartureStartedSignal) {
+            auto transmission = check_and_cast<const ITransmission *>(object);
+            if (transmissionId != -1 || transmission->getTransmitterRadioId() != sender->getId())
+                return;
+            // The actual Tx-produced address indication makes the address-filter
+            // control distinguish this observer from the intended receiver.
+            auto addresses = transmission->getPacket()->findTag<MacAddressInd>();
+            ASSERT(addresses && !addresses->getDestAddress().isMulticast());
+            transmissionId = transmission->getId();
+            auto arrival = medium->getArrival(observer, transmission);
+            ASSERT(arrival->getEndTime() > arrival->getStartTime());
+            scheduleAt(arrival->getStartTime() + (arrival->getEndTime() - arrival->getStartTime()) / 2, during);
+            scheduleAt(arrival->getEndTime() + SimTime::fromRaw(1), after);
+        }
+        else if (signal == packetSentToUpperSignal && source == observerModule)
+            delivered++;
+        else {
+            auto reception = check_and_cast<const IReception *>(object);
+            if (reception->getReceiverRadio() != observer || reception->getTransmission()->getId() != transmissionId)
+                return;
+            if (signal == IRadioMedium::signalArrivalStartedSignal)
+                arrivals++;
+            else if (signal == IRadioMedium::signalArrivalEndedSignal)
+                endings++;
+            else if (signal == receptionStartedSignal)
+                attempts++;
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (message == during) {
+            auto transmission = medium->getTransmission(transmissionId);
+            auto position = observer->getAntenna()->getMobility()->getCurrentPosition();
+            std::unique_ptr<const IListening> listening(observer->getReceiver()->createListening(
+                    observer, simTime(), simTime() + SimTime::fromRaw(1), position, position));
+            ASSERT(!observer->getReceiver()->computeIsReceptionPossible(listening.get(), transmission));
+            std::unique_ptr<const IInterference> interference(medium->computeInterference(observer, listening.get()));
+            bool found = false;
+            for (auto reception : *interference->getInterferingReceptions())
+                found |= reception->getTransmission()->getId() == transmissionId;
+            ASSERT(found);
+            std::unique_ptr<const IListeningDecision> energy(medium->listenOnMedium(observer, listening.get()));
+            ASSERT(energy->isListeningPossible());
+            ASSERT(arrivals == (expectedCapability() ? 1 : 0));
+            ASSERT(attempts == 0 && delivered == 0);
+            if (expectedCapability())
+                ASSERT(observer->getReceptionState() == IRadio::RECEPTION_STATE_BUSY);
+            sampled = true;
+        }
+        else if (message == after) {
+            ASSERT(sampled);
+            ASSERT(arrivals == (expectedCapability() ? 1 : 0));
+            ASSERT(endings == arrivals && attempts == 0 && delivered == 0);
+            auto position = observer->getAntenna()->getMobility()->getCurrentPosition();
+            std::unique_ptr<const IListening> listening(observer->getReceiver()->createListening(
+                    observer, simTime(), simTime() + SimTime::fromRaw(1), position, position));
+            std::unique_ptr<const IListeningDecision> energy(medium->listenOnMedium(observer, listening.get()));
+            ASSERT(!energy->isListeningPossible());
+            ASSERT(medium->supportsInterferenceObservation() == expectedCapability());
+            checked = true;
+            std::cout << "interference observation scenario " << scenario << ": PASS arrivals=" << arrivals << std::endl;
+        }
+        else
+            throw cRuntimeError("Unexpected probe message");
+    }
+
+    void finish() override
+    {
+        ASSERT(transmissionId != -1 && sampled && checked);
+        ASSERT(attempts == 0 && delivered == 0);
+    }
+
+  public:
+    using cListener::finish;
+
+    ~Probe() override
+    {
+        if (mediumModule) {
+            mediumModule->unsubscribe(IRadioMedium::signalDepartureStartedSignal, this);
+            mediumModule->unsubscribe(IRadioMedium::signalArrivalStartedSignal, this);
+            mediumModule->unsubscribe(IRadioMedium::signalArrivalEndedSignal, this);
+        }
+        if (observerModule) {
+            observerModule->unsubscribe(receptionStartedSignal, this);
+            observerModule->unsubscribe(packetSentToUpperSignal, this);
+        }
+        cancelAndDelete(during);
+        cancelAndDelete(after);
+    }
+};
+
+Define_Module(Probe);
+
+} // namespace RadioMedium_InterferenceObservation_1
+
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+
+simple Probe
+{
+    parameters:
+        int scenario;
+        @class(Probe);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211DimensionalRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        a: AdhocHost;
+        b: AdhocHost;
+        c: AdhocHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 0.55s
+cmdenv-express-mode = true
+record-vector-results = false
+*.probe.scenario = ${scenario=0..5}
+*.radioMedium.listeningFilter = ${scenario} == 1
+*.radioMedium.macAddressFilter = ${scenario} == 2
+*.radioMedium.rangeFilter = ${scenario} == 3 ? "communicationRange" : (${scenario} == 4 ? "interferenceRange" : "")
+*.radioMedium.radioModeFilter = ${scenario} == 5
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.mediumLimitCache.centerFrequency = 5.01GHz
+*.radioMedium.mediumLimitCache.minReceptionPower = -30dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -110dBm
+**.arp.typename = "GlobalArp"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+*.a.mobility.initialX = 0m
+*.c.mobility.initialX = 0.1m
+*.b.mobility.initialX = 100m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+*.b.wlan[0].radio.channelNumber = 1
+*.b.wlan[0].radio.receiver.bandwidth = 40MHz
+**.wlan[*].radio.typename = "Ieee80211DimensionalRadio"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].radio.bandName = "5 GHz (20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.bandwidth = 20MHz
+**.wlan[*].radio.receiver.bandwidth = 20MHz
+**.wlan[*].radio.receiver.sensitivity = -30dBm
+**.wlan[*].radio.receiver.energyDetection = -95dBm
+*.a.numApps = 1
+*.a.app[0].typename = "PingApp"
+*.a.app[0].destAddr = "c"
+*.a.app[0].count = 1
+*.a.app[0].startTime = 0.5s
+
+%contains: stdout
+interference observation scenario 0: PASS arrivals=1
+%contains: stdout
+interference observation scenario 1: PASS arrivals=0
+%contains: stdout
+interference observation scenario 2: PASS arrivals=0
+%contains: stdout
+interference observation scenario 3: PASS arrivals=0
+%contains: stdout
+interference observation scenario 4: PASS arrivals=1
+%contains: stdout
+interference observation scenario 5: PASS arrivals=1
+%not-contains: stderr
+undisposed object:

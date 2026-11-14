@@ -29,7 +29,8 @@ class INET_API IOriginatorQoSAckPolicy
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const = 0;
-    virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const = 0;
+    // Eliciting frame may be an explicit BAR or DATA in an implicit-BAR A-MPDU.
+    virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& eliciting) const = 0;
 };
 
 } // namespace ieee80211

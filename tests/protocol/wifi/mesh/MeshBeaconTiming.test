@@ -1,0 +1,295 @@
+%description:
+Live production beacon timestamps/FCS at6/24Mb/s, initial-TSF DTIM phase,
+signed neighbor-offset metadata, TBTT-adjusting invalidation, zero drift and
+bounded residual clock slowing. VO/VI TXOP successors must defer across TBTT;
+queue overflow must release the pending-beacon latch. An isolated management
+stop makes late callbacks inert while the NIC remains operational.
+
+%file: MeshBeaconTiming.cc
+#include "mesh/MeshTestSupport.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::protocoltest;
+
+class MeshTimingManagement : public Ieee80211MgmtMesh
+{
+  public:
+    void queueBeacon() { Enter_Method("queueBeacon"); sendBeacon(); }
+};
+Define_Module(MeshTimingManagement);
+
+class MeshTimingDriver : public cSimpleModule, public cListener, public LifecycleController
+{
+    int beaconCount[4] = {};
+    int dataCount[2] = {};
+    bool dataDuringBeaconWait = false;
+    bool overflowSeen = false;
+    std::unique_ptr<Packet> retained;
+    std::vector<uint8_t> retainedBytes;
+    simtime_t interval = SimTime(102400, SIMTIME_US);
+
+    static uint32_t independentCrc(const std::vector<uint8_t>& bytes) {
+        uint32_t crc = 0xffffffff;
+        for (size_t i = 0; i < bytes.size() - 4; i++) {
+            crc ^= bytes[i];
+            for (int bit = 0; bit < 8; bit++)
+                crc = (crc >> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+        return ~crc;
+    }
+    void injectOffset(int offset, bool adjusting, bool fast) {
+        auto body = makeShared<Ieee80211ProbeResponseFrame>();
+        body->setHasTimestamp(true);
+        body->setBeaconInterval(interval);
+        body->setCapabilityInformation(1 << 9);
+        body->setMeshIdPresent(true);
+        const auto& id = meshMib(0)->getMeshId();
+        body->setMeshIdArraySize(id.size());
+        for (size_t i = 0; i < id.size(); i++)
+            body->setMeshId(i, id[i]);
+        body->setMeshConfigurationPresent(true);
+        auto configuration = meshMib(0)->getMeshConfiguration();
+        if (adjusting)
+            configuration.capability |= 1 << 5;
+        body->setMeshConfiguration(configuration);
+        Ieee80211SupportedRatesElement rates;
+        const double values[] = {6,9,12,18,24,36,48,54};
+        rates.numRates = 8;
+        for (int i = 0; i < 8; i++) {
+            rates.rate[i] = values[i];
+            rates.basicRate[i] = i == 0 || i == 2 || i == 4;
+        }
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(12 + 2 + 10 + 2 + id.size() + 9));
+        if (fast) {
+            body->setUnmodelledElementsArraySize(22);
+            body->setUnmodelledElements(0, 221);
+            body->setUnmodelledElements(1, 20);
+            body->setUnmodelledElementPositionsArraySize(1);
+            body->setUnmodelledElementPositions(0, 4);
+            body->setChunkLength(body->getChunkLength() + B(22));
+        }
+        const Ieee80211OfdmMode *receivedMode = fast ? &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz
+            : &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz;
+        auto duration = receivedMode->getDuration(B(24) + body->getChunkLength() + B(4));
+        auto reference = simTime() - duration + SimTime(fast ? 28 : 52, SIMTIME_US);
+        body->setTimestamp(int64_t(reference.inUnit(SIMTIME_US)) + offset);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_PROBERESPONSE);
+        header->setReceiverAddress(meshMib(0)->address);
+        header->setTransmitterAddress(meshMib(1)->address);
+        header->setAddress3(meshMib(1)->address);
+        auto packet = new Packet("controlled-timestamp", header);
+        packet->insertAtBack(body);
+        auto time = packet->addTag<SignalTimeInd>();
+        time->setStartTime(simTime() - duration);
+        time->setEndTime(simTime());
+        packet->addTag<Ieee80211ModeInd>()->setMode(receivedMode);
+        sendDirect(packet, meshInterface(0)->getSubmodule("mac")->gate("mgmtOut"));
+    }
+    void queueData(int tid) {
+        auto mac = check_and_cast<Ieee80211Mac *>(meshInterface(0)->getSubmodule("mac"));
+        for (int i = 0; i < 2; i++) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->setChunkLength(B(26));
+            header->setTid(tid);
+            header->setReceiverAddress(meshMib(1)->address);
+            header->setTransmitterAddress(meshMib(0)->address);
+            header->setAddress3(meshMib(1)->address);
+            auto packet = new Packet("encoded-contention-fixture", header);
+            packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100, 0)));
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            mac->processUpperFrame(packet, header);
+        }
+    }
+  protected:
+    void initialize() override {
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetSentToLower"), this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetDropped"), this);
+        for (int i = 0; i < 6; i++)
+            scheduleAt(SimTime(10 + i, SIMTIME_MS), new cMessage("clock", i));
+        scheduleAt(interval - SimTime(302, SIMTIME_US), new cMessage("voice", 10));
+        scheduleAt(interval - SimTime(10, SIMTIME_US), new cMessage("overflow", 11));
+        scheduleAt(interval - SimTime(1, SIMTIME_US), new cMessage("queue-precondition", 18));
+        scheduleAt(SimTime(120, SIMTIME_MS), new cMessage("first-period", 12));
+        scheduleAt(SimTime(225, SIMTIME_MS), new cMessage("second-period", 14));
+        scheduleAt(SimTime(330, SIMTIME_MS), new cMessage("residual", 15));
+        scheduleAt(SimTime(450, SIMTIME_MS), new cMessage("stop", 16));
+        scheduleAt(SimTime(550, SIMTIME_MS), new cMessage("final", 17));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (!packet)
+            return;
+        if (signal == registerSignal("packetDropped")) {
+            if (source->getFullPath().find("station[2].wlan[0].mac.hcf.edca.edcaf[3].pendingQueue") != std::string::npos
+                    && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BEACON)
+                overflowSeen = true;
+            return;
+        }
+        int station = -1;
+        for (int i = 0; i < 4; i++)
+            if (source == meshInterface(i)->getSubmodule("mac"))
+                station = i;
+        if (station < 0)
+            return;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (station == 0 && header->getType() == ST_DATA_WITH_QOS) {
+            auto data = staticPtrCast<const Ieee80211DataHeader>(header);
+            int ac = data->getTid() == 7 ? 0 : 1;
+            dataCount[ac]++;
+            if (simTime() >= interval && meshManagement(0)->isBeaconPending())
+                dataDuringBeaconWait = true;
+            ASSERT(!data->getRetry());
+        }
+        if (header->getType() != ST_BEACON)
+            return;
+        if (station < 2) {
+            auto body = packet->peekAt<Ieee80211BeaconFrame>(B(24));
+            auto bytes = packet->peekAllAsBytes()->getBytes();
+            auto crc = independentCrc(bytes);
+            for (int i = 0; i < 4; i++)
+                ASSERT(bytes[bytes.size() - 4 + i] == uint8_t(crc >> (8 * i)));
+            auto offset = SimTime(station == 0 ? 52 : 28, SIMTIME_US);
+            auto initial = station == 0 ? SIMTIME_ZERO : interval;
+            auto slowing = station == 0 ? SimTime(std::min(100000, 40960 * beaconCount[0]), SIMTIME_NS) : SIMTIME_ZERO;
+            ASSERT(body->getHasTimestamp());
+            ASSERT(body->getTimestamp() == (simTime() + offset + initial - slowing).inUnit(SIMTIME_US));
+            ASSERT(body->getTimPresent() && body->getTim().partialVirtualBitmap[0] == 0);
+            if (station == 1)
+                ASSERT(body->getTim().dtimCount == ((beaconCount[1] + 1) % 2));
+            ASSERT(body->getMeshAwakeWindowPresent() == (body->getTim().dtimCount == 0));
+            if (station == 0 && beaconCount[0] == 1) {
+                retained.reset(packet->dup());
+                take(retained.get());
+                retainedBytes = bytes;
+            }
+        }
+        beaconCount[station]++;
+    }
+    void handleMessage(cMessage *message) override {
+        int kind = message->getKind();
+        auto management = meshManagement(0);
+        int64_t offset = 0;
+        switch (kind) {
+            case 0: injectOffset(-200, false, false); break;
+            case 1: injectOffset(-200, false, true); break;
+            case 2:
+                ASSERT(management->getNeighborOffset(meshMib(1)->address, offset) && offset == -200);
+                ASSERT(management->getPendingClockDrift() == SIMTIME_ZERO);
+                ASSERT(management->getNextTbtt() == interval);
+                break;
+            case 3: injectOffset(0, true, true); break;
+            case 4:
+                ASSERT(!management->getNeighborOffset(meshMib(1)->address, offset));
+                injectOffset(200, false, false);
+                break;
+            case 5: injectOffset(100, false, true); break;
+            case 10: queueData(7); break;
+            case 11:
+                meshManagement(2)->openPeer(meshMib(3)->address);
+                break;
+            case 18:
+                ASSERT(check_and_cast<queueing::IPacketQueue *>(meshInterface(2)->getSubmodule("mac")
+                    ->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf", 3)
+                    ->getSubmodule("pendingQueue"))->getNumPackets() == 1);
+                break;
+            case 12:
+                ASSERT(meshListeningBand(2).first - meshListeningBand(0).first == MHz(60));
+                ASSERT(meshListeningBand(0).second == MHz(20) && meshListeningBand(2).second == MHz(20));
+                ASSERT(management->getPendingClockDrift() == SimTime(59040, SIMTIME_NS));
+                ASSERT(management->getNextTbtt() == interval * 2 + SimTime(40960, SIMTIME_NS));
+                ASSERT(dataCount[0] == 2 && !dataDuringBeaconWait);
+                scheduleAt(management->getNextTbtt() - SimTime(302, SIMTIME_US), new cMessage("video", 13));
+                break;
+            case 13: queueData(5); break;
+            case 14:
+                ASSERT(management->getPendingClockDrift() == SimTime(18080, SIMTIME_NS));
+                ASSERT(management->getNextTbtt() == interval * 3 + SimTime(81920, SIMTIME_NS));
+                ASSERT(dataCount[1] == 2 && !dataDuringBeaconWait);
+                ASSERT(overflowSeen && beaconCount[2] >= 2);
+                break;
+            case 15:
+                ASSERT(management->getPendingClockDrift() == SIMTIME_ZERO);
+                ASSERT(management->getNextTbtt() == interval * 4 + SimTime(100, SIMTIME_US));
+                ASSERT(retained && retained->peekAllAsBytes()->getBytes() == retainedBytes);
+                break;
+            case 16: {
+                check_and_cast<MeshTimingManagement *>(management)->queueBeacon();
+                auto operation = new ModuleStopOperation();
+                LifecycleOperation::StringMap parameters;
+                operation->initialize(management, parameters);
+                ASSERT(initiateOperation(operation));
+                Packet late("late-callback");
+                management->prepareManagementTransmission(&late, SIMTIME_ZERO, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+                management->managementTransmissionComplete(&late);
+                ASSERT(!management->isMeshManagementActive() && management->getNextTbtt() == SIMTIME_ZERO);
+                break;
+            }
+            case 17:
+                ASSERT(!management->isMeshManagementActive() && management->getNextTbtt() == SIMTIME_ZERO);
+                emit(registerSignal("meshTimingCasesComplete"), 1L);
+                break;
+        }
+        delete message;
+    }
+};
+Define_Module(MeshTimingDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_beacon_timing)
+{
+    return ProtocolTest("mesh_beacon_timing")
+        .intercept(tap("radioMedium").to("station[0]").filterPacket("ieee80211mac.type == 8").drop())
+        .intercept(tap("radioMedium").to("station[1]").filterPacket("ieee80211mac.type == 8").drop())
+        .once(on("driver").signal("meshTimingCasesComplete").assertValue(1)
+            .describe("production TSF, FCS, ordering, overflow and stopped-owner checks complete").within(0.56));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple MeshTimingManagement extends Ieee80211MgmtMesh {
+    parameters:
+        @class(::MeshTimingManagement);
+        @lifecycleSupport;
+}
+simple MeshTimingDriver { parameters: @class(::MeshTimingDriver); @signal[meshTimingCasesComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: MeshTimingDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 4
+sim-time-limit = 560ms
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].mgmt.typename = "MeshTimingManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[0].wlan[0].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
+*.station[1].wlan[0].mac.hcf.rateSelection.mgmtFrameBitrate = 24Mbps
+*.station[1].wlan[0].mgmt.initialTsf = 102.4ms
+*.station[1].wlan[0].mgmt.dtimPeriod = 2
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMin = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMax = 0
+*.station[2].wlan[0].mac.hcf.edca.edcaf[3].pendingQueue.packetCapacity = 1
+*.station[2].wlan[0].mac.hcf.edca.edcaf[3].contention.backoffOptimization = false
+*.station[2..3].wlan[0].radio.channelNumber = 3
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "mesh_beacon_timing"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_beacon_timing: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_beacon_timing: FAIL

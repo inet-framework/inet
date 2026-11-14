@@ -1,0 +1,96 @@
+%description:
+Open mesh peerings over the production management/MAC/HCF/radio path. Four
+stations form two pairs with metric IDs 1 and 2; cross-profile neighbors must
+not establish. Observe beacon/Open/Confirm frames and committed peer state,
+including distinct Link-ID and AID ownership. No data forwarding is claimed.
+
+%file: MeshPeering.cc
+#include "WifiTestSupport.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtMesh.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::protocoltest;
+
+class MeshPeeringObserver : public cSimpleModule
+{
+  protected:
+    void initialize() override { scheduleAt(SimTime(250, SIMTIME_MS), new cMessage("check")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto network = getSimulation()->getSystemModule();
+        for (int i = 0; i < 4; i++) {
+            auto interface = network->getSubmodule("station", i)->getSubmodule("wlan", 0);
+            auto management = check_and_cast<Ieee80211MgmtMesh *>(interface->getSubmodule("mgmt"));
+            auto mib = check_and_cast<Ieee80211Mib *>(interface->getSubmodule("mib"));
+            auto other = network->getSubmodule("station", i ^ 1)->getSubmodule("wlan", 0);
+            auto peerMib = check_and_cast<Ieee80211Mib *>(other->getSubmodule("mib"));
+            auto peerManagement = check_and_cast<Ieee80211MgmtMesh *>(other->getSubmodule("mgmt"));
+            ASSERT(mib->isMeshPeerEstablished(peerMib->address));
+            ASSERT(management->getPeerState(peerMib->address) == Ieee80211MgmtMesh::ESTAB);
+            ASSERT(management->getLocalLinkId(peerMib->address) == peerManagement->getPeerLinkId(mib->address));
+            ASSERT(management->getLocalAid(peerMib->address) > 0);
+            ASSERT(management->getLocalAid(peerMib->address) == peerManagement->getPeerAid(mib->address));
+            ASSERT(management->getPeerDeadline(peerMib->address) == SIMTIME_ZERO);
+            int64_t offset = 0;
+            ASSERT(management->getNeighborOffset(peerMib->address, offset));
+            int64_t expectedOffset = (i % 2 == 0 ? 1 : -1) * 25600;
+            ASSERT(offset >= expectedOffset - 1 && offset <= expectedOffset + 1);
+            auto incompatible = network->getSubmodule("station", i ^ 2)->getSubmodule("wlan", 0);
+            ASSERT(!mib->isMeshPeerEstablished(check_and_cast<Ieee80211Mib *>(incompatible->getSubmodule("mib"))->address));
+        }
+        emit(registerSignal("meshPairsEstablished"), 1L);
+    }
+};
+Define_Module(MeshPeeringObserver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_peering)
+{
+    return ProtocolTest("mesh_peering")
+        .meanwhile(atLeastTimes(1, on("station[0].wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 8").describe("production mesh beacon").within(0.26)))
+        .meanwhile(atLeastTimes(1, on("station[0].wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return isManagementAction(c.event, MESH_SELF_PROTECTED_ACTION, MESH_PEERING_OPEN); })
+            .describe("production mesh Open").within(0.26)))
+        .meanwhile(atLeastTimes(1, on("station[0].wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return isManagementAction(c.event, MESH_SELF_PROTECTED_ACTION, MESH_PEERING_CONFIRM); })
+            .describe("production mesh Confirm").within(0.26)))
+        .once(on("observer").signal("meshPairsEstablished").assertValue(1)
+            .describe("both matching metric pairs establish with reciprocal AIDs and Link IDs").within(0.26));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple MeshPeeringObserver {
+    parameters:
+        @class(::MeshPeeringObserver);
+        @signal[meshPairsEstablished](type=long);
+}
+network Test extends MeshPairNetwork {
+    submodules:
+        observer: MeshPeeringObserver;
+}
+
+%inifile: test.ini
+[General]
+network = Test
+*.numStations = 4
+*.station[*].mobility.initialX = 20m
+*.station[1].wlan[0].mgmt.initialTsf = 25.6ms
+*.station[2].wlan[0].mgmt.initialTsf = 51.2ms
+*.station[3].wlan[0].mgmt.initialTsf = 76.8ms
+*.station[0..1].wlan[0].pathSelectionMetricId = 1
+*.station[2..3].wlan[0].pathSelectionMetricId = 2
+*.station[0].wlan[0].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
+*.station[1].wlan[0].mac.hcf.rateSelection.mgmtFrameBitrate = 24Mbps
+*.station[1].wlan[0].mgmt.dtimPeriod = 2
+*.tester.testName = "mesh_peering"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_peering: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_peering: FAIL

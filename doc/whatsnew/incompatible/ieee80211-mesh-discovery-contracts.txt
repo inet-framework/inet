@@ -1,0 +1,3 @@
+Mesh component contracts include source discovery and HWMP control exchange
+
+External implementations of IMeshPathSelection, IMeshForwarding or IMeshManagement must implement the new typed discovery, queue-readiness and HWMP-body methods. These contracts keep queued packet ownership in forwarding and route/protocol state in path selection. The development migration guide describes the callbacks, lifecycle behavior and synchronous ownership boundaries.

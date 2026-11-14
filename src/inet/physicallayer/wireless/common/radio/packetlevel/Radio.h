@@ -247,6 +247,8 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual const cGate *getRadioGate() const override { return radioIn; }
 
     virtual RadioMode getRadioMode() const override { return radioMode; }
+    std::optional<simtime_t> getRadioModeSwitchingTime(RadioMode from, RadioMode to) const override;
+    std::optional<RadioModeState> getRadioModeState() const override;
     virtual void setRadioMode(RadioMode newRadioMode) override;
 
     virtual ReceptionState getReceptionState() const override { return receptionState; }

@@ -1,0 +1,16 @@
+<scenario>
+    <at t="0.5s">
+        <set-mesh-power-mode module="station[1].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-01" mode="light-sleep"/>
+        <set-mesh-power-mode module="station[1].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-03" mode="light-sleep"/>
+    </at>
+    <at t="0.55s">
+        <set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="light-sleep"/>
+        <set-mesh-power-mode module="station[2].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="light-sleep"/>
+    </at>
+    <at t="4s">
+        <set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="active"/>
+        <set-mesh-power-mode module="station[1].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-01" mode="active"/>
+        <set-mesh-power-mode module="station[1].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-03" mode="active"/>
+        <set-mesh-power-mode module="station[2].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="active"/>
+    </at>
+</scenario>

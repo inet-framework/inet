@@ -19,6 +19,7 @@ class INET_API TransmitStep : public ITransmitStep
     Completion completion = Completion::UNDEFINED;
     Packet *frameToTransmit = nullptr;
     simtime_t ifs = -1;
+    simtime_t ppduStart = -1; // Actual start acceptance, not the admitted future start.
     simtime_t ppduEnd = -1;
     bool owner = false;
 
@@ -36,6 +37,9 @@ class INET_API TransmitStep : public ITransmitStep
     virtual Packet *getFrameToTransmit() override { return frameToTransmit; }
     virtual simtime_t getIfs() override { return ifs; }
     simtime_t getPpduEnd() const { return ppduEnd; }
+    simtime_t getPpduStart() const { return ppduStart; }
+    void setPpduStart(simtime_t time) { ppduStart = time; }
+    bool ownsFrame() const { return owner; }
     void setPpduEnd(simtime_t time) { ppduEnd = time; }
 };
 
@@ -51,6 +55,17 @@ class INET_API RtsTransmitStep : public TransmitStep
     {}
 
     virtual const Packet *getProtectedFrame() { return protectedFrame; }
+};
+
+/** Owns the transmitted PSDU, borrowing the ordered originals until the
+ * sequence releases all references through InProgressFrames. */
+class INET_API AggregateTransmitStep : public TransmitStep
+{
+  public:
+    std::vector<Packet *> members;
+    simtime_t responseTimeout;
+    AggregateTransmitStep(Packet *psdu, std::vector<Packet *> members, simtime_t ifs, simtime_t timeout) :
+        TransmitStep(psdu, ifs, true), members(std::move(members)), responseTimeout(timeout) {}
 };
 
 class INET_API ReceiveStep : public IReceiveStep

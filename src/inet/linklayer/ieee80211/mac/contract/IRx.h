@@ -8,6 +8,8 @@
 #ifndef __INET_IRX_H
 #define __INET_IRX_H
 
+#include <memory>
+
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
@@ -15,6 +17,8 @@
 
 namespace inet {
 namespace ieee80211 {
+
+struct Ieee80211AmpduLayout;
 
 /**
  * Abstract interface for Rx processes. The Rx process checks received frames for
@@ -52,6 +56,14 @@ class INET_API IRx
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
     virtual bool lowerFrameReceived(Packet *packet) = 0;
+    // Admit radio-normalized transport before MAC observers. No ownership transfer;
+    // false leaves an opaque erroneous packet for the ordinary corrupt-frame path.
+    virtual bool prepareReceivedFrame(Packet *packet) = 0;
+    // Borrows the PHY-wrapped actual PPDU. Structural failure returns no prefix;
+    // success returns owned bare copies of FCS-correct members only. No NAV,
+    // peer, duplicate or reorder state changes occur during this preparation.
+    virtual bool prepareReceivedAmpdu(const Packet *packet, Ieee80211AmpduLayout& layout,
+        std::vector<std::unique_ptr<Packet>>& members) = 0;
     // Discard local interval evidence when its semantic context is no longer valid.
     virtual void invalidateInterframeHistory() = 0;
 };

@@ -14,6 +14,8 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -34,7 +36,7 @@ void Tx::initialize(int stage)
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(findModuleByPath(par("rxModule")));
         WATCH(transmitting);
-        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE");
+        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : frame ? "WAIT_READY" : "IDLE");
         WATCH_EXPR("txFramePrefix", frame ? std::string(frame->getName()) + "\n" : "");
     }
 }
@@ -50,6 +52,50 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     this->updateLocalNav = updateLocalNav;
+    auto mode = packet->findTag<physicallayer::Ieee80211ModeReq>();
+    if (mode && mode->getTxVector().ampdu) {
+        Ieee80211AmpduLayout layout;
+        bool vht = mode->getTxVector().format == physicallayer::Ieee80211TxVector::VHT;
+        if (!findAmpdu(packet, b(0), B(packet->getDataLength()), vht, layout))
+            throw cRuntimeError("Invalid outgoing A-MPDU layout");
+        std::vector<std::unique_ptr<Packet>> copies;
+        std::vector<Packet *> members;
+        for (const auto& item : layout.members) {
+            auto member = std::make_unique<Packet>("A-MPDU member", packet->peekDataAt(item.offset, item.length));
+            member->copyTags(*packet);
+            member->copyRegionTags(*packet, packet->getFrontOffset()+item.offset, b(0), item.length);
+            finalizeMpdu(member.get());
+            members.push_back(member.get());
+            copies.push_back(std::move(member));
+        }
+        // Retain the caller's delimiter and spacing bytes; replace only members.
+        for (size_t i = 0; i < layout.members.size(); i++)
+            packet->replaceAt(members[i]->peekData(), layout.members[i].offset, layout.members[i].length);
+        completionHeader = members.front()->peekAtFront<Ieee80211MacHeader>();
+    }
+    else {
+        finalizeMpdu(packet);
+        completionHeader = nullptr;
+    }
+    this->frame = packet->dup();
+    admittedStart = simTime() + ifs;
+    ASSERT(!endIfsTimer->isScheduled() && !transmitting);
+    if (mac->defersTransmissionStart()) {
+        if (ifs > 0)
+            scheduleAt(admittedStart, endIfsTimer);
+        mac->requestTransmissionReadiness();
+        return;
+    }
+    if (ifs == 0) {
+        transmitting = true;
+        mac->sendDownFrame(frame->dup());
+    }
+    else
+        scheduleAfter(ifs, endIfsTimer);
+}
+
+void Tx::finalizeMpdu(Packet *packet)
+{
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
@@ -72,15 +118,66 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         delete[] buffer;
     }
     packet->insertAtBack(updatedTrailer);
-    this->frame = packet->dup();
-    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
-    if (ifs == 0) {
-        // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+}
+
+bool Tx::cancelPendingTransmission(ITx::ICallback *callback)
+{
+    Enter_Method("cancelPendingTransmission");
+    if (callback != txCallback || !frame || transmitting)
+        return false;
+    if (endIfsTimer->isScheduled()) cancelEvent(endIfsTimer);
+    auto old = frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    updateLocalNav = false;
+    completionHeader = nullptr;
+    admittedStart = -1;
+    delete old;
+    return true;
+}
+
+void Tx::cancelUnstartedTransmission()
+{
+    ASSERT(frame && txCallback && !transmitting);
+    if (endIfsTimer->isScheduled()) cancelEvent(endIfsTimer);
+    std::unique_ptr<Packet> old(frame);
+    auto callback = txCallback;
+    frame = nullptr;
+    txCallback = nullptr;
+    completionHeader = nullptr;
+    updateLocalNav = false;
+    admittedStart = -1;
+    // The callback may finish/delete the sequence and submit another frame.
+    callback->transmissionCancelled(old.get());
+}
+
+void Tx::resumePendingTransmission()
+{
+    Enter_Method("resumePendingTransmission");
+    if (!frame || !txCallback || transmitting || simTime() < admittedStart)
+        return;
+    if (simTime() > admittedStart) {
+        cancelUnstartedTransmission();
+        return;
     }
-    else
-        scheduleAfter(ifs, endIfsTimer);
+    if (!mac->isTransmissionReady()) {
+        // An equal-now physical completion must run before readiness exists.
+        // Its mode notification schedules the continuation; never poll here.
+        if (!mac->isRadioReadyForTransmission(admittedStart))
+            cancelUnstartedTransmission();
+        return;
+    }
+    auto callback = txCallback;
+    auto id = frame->getId();
+    bool accepted = callback->prepareTransmissionStart(frame, admittedStart);
+    if (!frame || frame->getId() != id || txCallback != callback)
+        return;
+    if (!accepted) {
+        cancelUnstartedTransmission();
+        return;
+    }
+    transmitting = true;
+    mac->sendDownFrame(frame->dup());
 }
 
 void Tx::radioTransmissionFinished()
@@ -90,7 +187,8 @@ void Tx::radioTransmissionFinished()
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;
         ASSERT(txCallback != nullptr);
-        const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
+        auto mode = frame->findTag<physicallayer::Ieee80211ModeReq>();
+        auto header = mode && mode->getTxVector().ampdu ? completionHeader : frame->peekAtFront<Ieee80211MacHeader>();
         auto duration = header->getDurationField();
         auto tmpFrame = frame;
         auto tmpTxCallback = txCallback;
@@ -98,7 +196,9 @@ void Tx::radioTransmissionFinished()
         frame = nullptr;
         txCallback = nullptr;
         updateLocalNav = false;
-        tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
+        completionHeader = nullptr;
+        admittedStart = -1;
+        tmpTxCallback->transmissionComplete(tmpFrame, header);
         delete tmpFrame;
         if (completedUpdateLocalNav)
             rx->frameTransmitted(duration);
@@ -109,6 +209,10 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
+        if (mac->defersTransmissionStart()) {
+            mac->requestTransmissionReadiness();
+            return;
+        }
         transmitting = true;
         mac->sendDownFrame(frame->dup());
     }

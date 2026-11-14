@@ -40,7 +40,9 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 
   protected:
     typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
-    typedef std::pair<MacAddress, SequenceControlField> Key;
+    // bool selects the explicit native mesh SNS5 Null namespace; ordinary
+    // management/non-QoS Sequence Control remains in the false namespace.
+    typedef std::pair<MacAddress, std::pair<bool, SequenceControlField>> Key;
     std::map<QoSKey, Status> ackStatuses;
     std::map<Key, Status> mgmtAckStatuses;
 
@@ -49,6 +51,7 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 
     virtual Status getQoSDataAckStatus(const QoSKey& id);
     virtual Status getMgmtOrNonQoSAckStatus(const Key& id);
+    Key getMgmtOrNonQoSAckKey(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const;
 
     void printAckStatuses();
 
@@ -65,6 +68,8 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement);
     virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    void processTransmittedAmpduMember(const Ptr<const Ieee80211DataHeader>& header);
+    void processUnansweredAmpduMember(const Ptr<const Ieee80211DataHeader>& header);
     virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 

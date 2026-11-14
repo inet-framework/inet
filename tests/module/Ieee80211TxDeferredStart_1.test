@@ -1,0 +1,318 @@
+%description:
+Exercise generic Tx retained-copy admission with real radio transmission.
+Legacy zero/positive IFS, exact readiness, explicit refusal, a missed start,
+silent IFS/readiness cancellation and reentrant replacement retain one copy.
+Cancellation does not publish completion or NAV. Transport-level HT aggregate
+copies exercise the same path without claiming mesh/Block Ack policy coverage.
+
+%extraargs: -r 0..11
+
+%file: test.cc
+#include <iostream>
+#include <map>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211TxDeferredStart_1 {
+class TrackedPacket : public Packet {
+  public:
+    inline static std::map<int64_t, int> destroyed;
+    TrackedPacket(const char *name, const Ptr<const Chunk>& data) : Packet(name, data) {}
+    TrackedPacket(const TrackedPacket& other) : Packet(other) {}
+    TrackedPacket *dup() const override { return new TrackedPacket(*this); }
+    ~TrackedPacket() override { ++destroyed[getId()]; }
+};
+
+class DeferredRx : public Rx {
+  public:
+    int navCalls = 0;
+    void frameTransmitted(simtime_t duration) override {
+        ++navCalls;
+        Rx::frameTransmitted(duration);
+    }
+};
+Define_Module(DeferredRx);
+
+class DeferredTx : public Tx {
+  public:
+    int64_t pendingId() const { return frame ? frame->getId() : -1; }
+    bool hasPendingFields() const {
+        return frame || txCallback || completionHeader || updateLocalNav || admittedStart != -1 || endIfsTimer->isScheduled();
+    }
+};
+Define_Module(DeferredTx);
+
+// Controlled generic readiness provider, with no mesh/power-save components.
+class DeferredMac : public Ieee80211Mac {
+    cMessage *resume = nullptr;
+  protected:
+    void initialize(int stage) override {
+        Ieee80211Mac::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) resume = new cMessage("readiness continuation");
+    }
+    void handleSelfMessage(cMessage *message) override {
+        if (message == resume) tx->resumePendingTransmission();
+        else Ieee80211Mac::handleSelfMessage(message);
+    }
+  public:
+    bool ready = true;
+    bool predicted = true;
+    bool defersTransmissionStart() const override { return par("deferred"); }
+    bool isTransmissionReady() const override { return ready; }
+    bool isRadioReadyForTransmission(simtime_t) const override { return predicted; }
+    void requestTransmissionReadiness() override {
+        Enter_Method("requestTransmissionReadiness");
+        if (!resume->isScheduled()) scheduleAt(simTime(), resume);
+    }
+    ~DeferredMac() override { cancelAndDelete(resume); }
+};
+Define_Module(DeferredMac);
+
+class Probe : public cSimpleModule, public cListener, public ITx::ICallback {
+    DeferredMac *mac = nullptr;
+    DeferredRx *rx = nullptr;
+    DeferredTx *tx = nullptr;
+    opp_component_ptr<cModule> publisher;
+    std::vector<TrackedPacket *> originals;
+    int scenario = 0;
+    int starts = 0;
+    int admissions = 0;
+    int cancelled = 0;
+    int completed = 0;
+    int64_t cancelledId = -1;
+    int64_t completionId = -1;
+    int64_t originalCopyId = -1;
+    simtime_t actualStart = -1;
+    simtime_t duration = -1;
+    bool accept = true;
+    bool finished = false;
+    simtime_t delay() const {
+        return scenario == 1 || scenario == 2 || scenario == 4 || scenario == 5 || scenario == 6 || scenario == 8 || scenario == 10 || scenario == 11 ?
+            SimTime(16, SIMTIME_US) : SIMTIME_ZERO;
+    }
+    bool aggregate() const { return scenario == 9 || scenario == 10; }
+    void at(int us, int kind) { scheduleAt(SimTime(us, SIMTIME_US), new cMessage("probe", kind)); }
+    TrackedPacket *packet(const char *name) {
+        TrackedPacket *result;
+        auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+        auto mode = modes->getMode(aggregate() ? Mbps(6.5) : Mbps(6), MHz(20), 1);
+        if (aggregate()) {
+            std::vector<std::unique_ptr<Packet>> storage;
+            std::vector<Packet *> members;
+            for (int i = 0; i < 2; ++i) {
+                auto header = makeShared<Ieee80211DataHeader>();
+                header->setType(ST_DATA_WITH_QOS);
+                header->setChunkLength(B(26));
+                header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+                header->setTransmitterAddress(mac->getAddress());
+                header->setTid(3);
+                header->setSequenceNumber(SequenceNumberCyclic(37+i));
+                header->setDurationField(SimTime(64, SIMTIME_US));
+                auto member = std::make_unique<Packet>("member", header);
+                member->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(8, i)));
+                member->insertAtBack(makeShared<Ieee80211MacTrailer>());
+                members.push_back(member.get()); storage.push_back(std::move(member));
+            }
+            std::unique_ptr<Packet> psdu(buildAmpdu(members, false));
+            result = new TrackedPacket(name, psdu->peekData());
+            result->addTag<PacketProtocolTag>()->setProtocol(&Protocol::unknown);
+        }
+        else {
+            auto header = makeShared<Ieee80211AckFrame>();
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+            header->setDurationField(SimTime(64, SIMTIME_US));
+            result = new TrackedPacket(name, header);
+            result->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            result->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        }
+        Ieee80211TxVector vector(mode);
+        vector.ampdu = aggregate();
+        result->addTag<Ieee80211ModeReq>()->setTxVector(vector);
+        originals.push_back(result);
+        return result;
+    }
+    void submit(const char *name, simtime_t ifs) {
+        auto original = packet(name);
+        Ptr<const Ieee80211MacHeader> front;
+        if (aggregate()) {
+            Ieee80211AmpduLayout layout;
+            ASSERT(findAmpdu(original, b(0), B(original->getDataLength()), false, layout));
+            front = original->peekDataAt<Ieee80211MacHeader>(layout.members.front().offset);
+        }
+        else front = original->peekAtFront<Ieee80211MacHeader>();
+        tx->transmitFrame(original, front, ifs, true, this);
+    }
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_LAST) return;
+        scenario = par("scenario");
+        mac = check_and_cast<DeferredMac *>(getModuleByPath("^.host.wlan[0].mac"));
+        rx = check_and_cast<DeferredRx *>(getModuleByPath("^.host.wlan[0].mac.rx"));
+        tx = check_and_cast<DeferredTx *>(getModuleByPath("^.host.wlan[0].mac.tx"));
+        publisher = getModuleByPath("^.host.wlan[0].radio");
+        publisher->subscribe(transmissionStartedSignal, this);
+        TrackedPacket::destroyed.clear();
+        at(1000, 0); at(1008, 1); at(1016, 2); at(1020, 3); at(2000, 4);
+    }
+    bool prepareTransmissionStart(const Packet *copy, simtime_t start) override {
+        Enter_Method("prepareTransmissionStart");
+        ASSERT(tx->hasTransmission());
+        ASSERT(start == simTime());
+        ASSERT(copy->getId() != originals.front()->getId());
+        ++admissions;
+        return accept;
+    }
+    void transmissionCancelled(const Packet *copy) override {
+        Enter_Method("transmissionCancelled");
+        ASSERT(!tx->hasTransmission());
+        ASSERT(rx->navCalls == 0 && starts == 0 && completed == 0);
+        ASSERT(TrackedPacket::destroyed[copy->getId()] == 0);
+        ++cancelled; cancelledId = copy->getId();
+        if (scenario == 7) {
+            accept = true;
+            submit("replacement", SIMTIME_ZERO);
+            ASSERT(tx->hasTransmission());
+        }
+    }
+    void transmissionComplete(Packet *copy, const Ptr<const Ieee80211MacHeader>& header) override {
+        Enter_Method("transmissionComplete");
+        ASSERT(!tx->hasTransmission());
+        ASSERT(rx->navCalls == 0 && starts == 1);
+        ASSERT(header->getDurationField() == SimTime(64, SIMTIME_US));
+        ASSERT(simTime() == actualStart + duration);
+        if (!aggregate()) ASSERT(duration == SimTime(44, SIMTIME_US));
+        ++completed; completionId = copy->getId();
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        auto transmission = check_and_cast<const ITransmission *>(object);
+        ++starts; actualStart = simTime(); duration = transmission->getEndTime()-simTime();
+        ASSERT(starts == 1);
+        ASSERT(actualStart == SimTime(1, SIMTIME_MS) + delay());
+    }
+    void handleMessage(cMessage *message) override {
+        int kind = message->getKind(); delete message;
+        if (kind == 0) {
+            accept = scenario != 3 && scenario != 7 && scenario != 9;
+            mac->ready = scenario != 4 && scenario != 5 && scenario != 8 && scenario != 11;
+            mac->predicted = scenario != 11;
+            submit("original", delay());
+            originalCopyId = tx->pendingId();
+            if (scenario >= 2) ASSERT(tx->hasTransmission() && starts == 0);
+        }
+        else if (kind == 1 && scenario == 6) {
+            ASSERT(tx->hasTransmission());
+            ASSERT(tx->cancelPendingTransmission(this));
+            ASSERT(!tx->hasTransmission());
+            ASSERT(!tx->hasPendingFields());
+        }
+        else if (kind == 2 && scenario == 4) {
+            ASSERT(tx->hasTransmission() && starts == 0);
+            tx->resumePendingTransmission(); // Not ready at the exact admitted instant.
+            ASSERT(tx->hasTransmission());
+            mac->ready = true;
+            mac->requestTransmissionReadiness();
+        }
+        else if (kind == 3 && (scenario == 5 || scenario == 8)) {
+            ASSERT(tx->hasTransmission() && starts == 0);
+            if (scenario == 8) ASSERT(tx->cancelPendingTransmission(this));
+            else { mac->ready = true; mac->requestTransmissionReadiness(); }
+        }
+        else if (kind == 4) {
+            bool air = scenario <= 2 || scenario == 4 || scenario == 7 || scenario == 10;
+            ASSERT(!tx->hasTransmission());
+            ASSERT(!tx->hasPendingFields());
+            ASSERT(TrackedPacket::destroyed[originalCopyId] == 1);
+            ASSERT(starts == int(air) && completed == int(air) && rx->navCalls == int(air));
+            ASSERT(cancelled == int(scenario == 3 || scenario == 5 || scenario == 7 || scenario == 9 || scenario == 11));
+            int expectedAdmissions = scenario == 7 ? 2 : (scenario == 2 || scenario == 3 || scenario == 4 || scenario == 9 || scenario == 10 ? 1 : 0);
+            ASSERT(admissions == expectedAdmissions);
+            if (cancelledId >= 0) ASSERT(TrackedPacket::destroyed[cancelledId] == 1);
+            if (completionId >= 0) ASSERT(TrackedPacket::destroyed[completionId] == 1);
+            for (auto original : originals) {
+                ASSERT(TrackedPacket::destroyed[original->getId()] == 0);
+                ASSERT(original->getCreationTime() == SimTime(1, SIMTIME_MS));
+                delete original;
+            }
+            originals.clear();
+            finished = true;
+            std::cout << "Deferred Tx scenario=" << scenario << ": PASS\n";
+            endSimulation();
+        }
+    }
+    void finish() override { ASSERT(finished); }
+    using cListener::finish;
+  public:
+    ~Probe() override {
+        if (publisher) publisher->unsubscribe(transmissionStartedSignal, this);
+        for (auto packet : originals) delete packet;
+    }
+};
+Define_Module(Probe);
+}
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module DeferredMac extends Ieee80211Mac {
+    parameters: bool deferred; @class(::Ieee80211TxDeferredStart_1::DeferredMac);
+}
+simple DeferredRx extends Rx { parameters: @class(::Ieee80211TxDeferredStart_1::DeferredRx); }
+simple DeferredTx extends Tx { parameters: @class(::Ieee80211TxDeferredStart_1::DeferredTx); }
+simple Probe { parameters: int scenario; @class(::Ieee80211TxDeferredStart_1::Probe); }
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 3ms
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+*.probe.scenario = ${scenario=0..11}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "ac-complete"
+**.wlan[*].mac.qosStation = false
+**.wlan[*].mac.typename = "DeferredMac"
+**.wlan[*].mac.deferred = ${scenario} >= 2
+**.wlan[*].mac.rx.typename = "DeferredRx"
+**.wlan[*].mac.tx.typename = "DeferredTx"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Deferred Tx scenario=11: PASS
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+it doesn't own

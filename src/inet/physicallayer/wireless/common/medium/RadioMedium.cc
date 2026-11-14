@@ -190,6 +190,11 @@ void RadioMedium::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
+bool RadioMedium::supportsInterferenceObservation() const
+{
+    return !listeningFilter && !macAddressFilter && rangeFilter != RANGE_FILTER_COMMUNICATION_RANGE;
+}
+
 bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const
 {
     const auto& macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();

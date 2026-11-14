@@ -18,6 +18,18 @@ namespace ieee80211 {
 class INET_API IRecipientQosMacDataService
 {
   public:
+    class ICallback
+    {
+      public:
+        virtual ~ICallback() {}
+        // The service owns packet. Observe once after receipt/duplicate bookkeeping,
+        // before deletion or reordering. Arguments are immutable borrows for this call.
+        // Existing peer/agreement state may be withdrawn, but the executing owners
+        // must survive and this flow must not be recursively received or reestablished.
+        virtual void recipientMemberReceived(const Packet *packet,
+                const Ptr<const Ieee80211DataHeader>& header, bool duplicate) = 0;
+    };
+
     static simsignal_t packetDefragmentedSignal;
     static simsignal_t packetDeaggregatedSignal;
 
@@ -27,7 +39,8 @@ class INET_API IRecipientQosMacDataService
     virtual void clearPeer(MacAddress peer) = 0;
 
     // HCF supplies the observed SIFS or permitted RIFS relation for this frame.
-    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe = false) = 0;
+    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader,
+            IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, ICallback *callback, bool interframe = false) = 0;
     virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
     virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
 };

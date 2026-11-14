@@ -1,0 +1,3 @@
+Mesh forwarding and metrics expose aggregation lifecycle contracts
+
+External mesh forwarding, mesh MAC and metric implementations must implement commit-time source finalization, source-owner availability, pending-source retirement and aggregation-only estimate reset. These contracts keep preview and retry paths separate from new identity allocation and make isolated forwarding stop/crash/deletion retire uncommitted MAC entries. The development migration guide describes the required ownership.

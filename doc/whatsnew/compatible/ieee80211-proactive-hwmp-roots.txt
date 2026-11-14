@@ -1,0 +1,5 @@
+Proactive PREQ and RANN roots in native IEEE 802.11 meshes
+
+HWMP now supports proactive PREQ roots with either Proactive PREP flag value, and RANN roots with individual root confirmation. Ordinary on-demand discovery remains available. A local source-demand notification generates the flag-zero proactive reply before DATA lookup, including after an idle period when an existing lookup alone would not refresh the reverse path.
+
+RANN-containing and confirmation-containing Actions obey station-wide limits while retaining independent root histories. Batches share the intended receiver and respect the non-HT management body limit; excess work waits for a later eligible Action. Received RANN Interval updates one shared scalar used by scheduling and local advertisements. Root control decisions publish copied completed-state observations. Root originator scheduling is disabled unless a root mode is selected.

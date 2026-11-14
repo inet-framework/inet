@@ -1,0 +1,88 @@
+%description:
+Actual light sleep, nonzero/zero public switching and readiness strictly before
+own/peer TBTT. Real peering, empty unicast TIMs, and later ACTIVE DATA progress.
+
+%file: MeshLightSleep.cc
+#include "mesh/MeshDozeSupport.h"
+#include "mesh/MeshDozeReadinessSupport.h"
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_light_sleep) {
+    ProtocolTest test("mesh_light_sleep");
+    test.once(on("driver").signal("dozeComplete").assertValue(1).within(0.4));
+    if (getSimulation()->getSystemModule()->par("scenario").intValue()==15)
+        test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 25").nth(2).drop());
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module ManagedMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+simple DozePowerFixture extends MeshPowerSave { parameters: @class(::DozePowerFixture); }
+moduleinterface IDozeDriver { parameters: int scenario; bool zeroDelay; }
+simple DozeDriver like IDozeDriver { parameters: int scenario; bool zeroDelay; @class(::DozeDriver); @signal[dozeComplete](type=long); }
+simple ManagedDriver like IDozeDriver { parameters: int scenario; bool zeroDelay; @class(::ManagedDriver); @signal[dozeComplete](type=long); }
+simple NaturalPolicyDriver like IDozeDriver { parameters: int scenario; bool zeroDelay; @class(::NaturalPolicyDriver); @signal[dozeComplete](type=long); }
+module ManagedMacFixture extends Ieee80211MeshMac { parameters: @class(::ManagedMacFixture); }
+module ManagedHcfFixture extends Hcf { parameters: @class(::ManagedHcfFixture); }
+simple ManagedTxFixture extends Tx { parameters: @class(::ManagedTxFixture); }
+network Test extends MeshPairNetwork {
+    parameters:
+        int scenario;
+        string driverType = scenario < 2 ? "DozeDriver" : ((scenario>=12 && scenario<=14) || scenario>=16 ? "NaturalPolicyDriver" : "ManagedDriver");
+    submodules: driver: <driverType> like IDozeDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=400ms
+*.scenario=${scenario=0..18}
+*.driver.scenario=${scenario}
+*.driver.zeroDelay=${scenario}==1 || ${scenario}==3
+*.numStations=2
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="DozePowerFixture"
+*.radioMedium.typename="${scenario}"=="10" || "${scenario}"=="15" ? "ManagedMedium" : "Ieee80211ScalarTapRadioMedium"
+*.station[*].wlan[0].phyProfile="${scenario}"=="10" || "${scenario}"=="15" ? "ht" : "ofdm"
+*.station[*].wlan[0].radio.typename="${scenario}"=="10" || "${scenario}"=="15" ? "Ieee80211DimensionalRadio" : "Ieee80211ScalarRadio"
+*.station[*].wlan[0].radio.bandName="${scenario}"=="10" || "${scenario}"=="15" ? "5 GHz (mapped 20 MHz)" : "5 GHz (20 MHz)"
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported=${scenario}==10 || ${scenario}==15
+*.station[*].wlan[0].mac.hcf.originatorAckPolicy.blockAckTimeout=${scenario}==15 ? 500us : -1s
+*.station[*].wlan[0].mac.hcf.blockAckVariant="compressed"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename="${scenario}"=="10" || "${scenario}"=="15" ? "BasicMpduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily="${scenario}"=="10" || "${scenario}"=="15" ? "ht" : "auto"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs=${scenario}==10 || ${scenario}==15 ? 7 : -1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval="${scenario}"=="10" || "${scenario}"=="15" ? "long" : "auto"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth=20MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=${scenario}==10 || ${scenario}==15 ? -1bps : 6Mbps
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams=${scenario}==10 || ${scenario}==15 ? 1 : -1
+*.station[*].wlan[0].mac.typename="${scenario}"=="0" || "${scenario}"=="1" ? "Ieee80211MeshMac" : "ManagedMacFixture"
+*.station[*].wlan[0].mac.hcf.typename="${scenario}"=="0" || "${scenario}"=="1" ? "Hcf" : "ManagedHcfFixture"
+*.station[*].wlan[0].mac.tx.typename="${scenario}"=="0" || "${scenario}"=="1" ? "Tx" : "ManagedTxFixture"
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].msduLifetime=${scenario}==8 ? 5ms : 512ms
+*.station[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold=65536B
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit=${scenario}==11 ? 5ms : 0s
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.protectionMechanism="${scenario}"=="11" ? "multiple" : "single"
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].pathSelection.preqMinInterval=${scenario}==7 ? 1ms : 102.4ms
+*.station[*].wlan[0].pathSelection.netDiameterTraversalTime=${scenario}==7 ? 5ms : 512ms
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[*].wlan[0].radio.switchingTimes=${scenario}==1 || ${scenario}==3 ? "ms 0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 0" : (${scenario}==8 ? "ms 0 0 0 0 0  0 0 0 0 10  0 0 0 0 0  0 0 0 0 0  0 1 0 0 0" : "ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0")
+**.fcsMode="computed"
+*.tester.testName="mesh_light_sleep"
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_light_sleep: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_light_sleep: FAIL

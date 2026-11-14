@@ -1,0 +1,7 @@
+<config>
+    <interface hosts="station[0]" names="wlan0" address="10.0.0.1" netmask="255.255.255.0"/>
+    <interface hosts="station[1]" names="wlan0" address="10.0.0.2" netmask="255.255.255.0"/>
+    <interface hosts="station[2]" names="wlan0" address="10.0.0.3" netmask="255.255.255.0"/>
+    <interface hosts="station[3]" names="wlan0" address="10.0.0.4" netmask="255.255.255.0"/>
+    <route hosts="station[*]" destination="10.0.0.0" netmask="255.255.255.0" interface="wlan0"/>
+</config>

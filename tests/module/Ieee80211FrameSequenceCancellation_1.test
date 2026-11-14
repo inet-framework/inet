@@ -1,0 +1,309 @@
+%description:
+After a real first channel grant, explicitly detach Tx and invoke the native
+HCF/DCF pre-air cancellation disposition. The production sequence handler keeps
+the live original and finishes without failed/transmitted processing. Reopen
+the controlled source and require real DATA/ACK progress with the same sequence.
+During its real ACK wait, an injected unrelated recipient cancellation must leave
+that wait unchanged. This is generic owner evidence, not mesh/BA admission proof.
+
+%extraargs: -r 0..1
+
+%file: test.cc
+#include <iostream>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211FrameSequenceCancellation_1 {
+class OwnerTx : public Tx {
+  public:
+    Packet *copyPending() const { ASSERT(frame && !transmitting); return frame->dup(); }
+};
+Define_Module(OwnerTx);
+
+class OwnerMac : public Ieee80211Mac {
+    cMessage *resume = nullptr;
+  protected:
+    void initialize(int stage) override {
+        Ieee80211Mac::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) resume = new cMessage("controlled resume");
+    }
+    void handleSelfMessage(cMessage *message) override {
+        if (message == resume) tx->resumePendingTransmission();
+        else Ieee80211Mac::handleSelfMessage(message);
+    }
+  public:
+    bool ready = false;
+    bool eligible = true;
+    bool defersTransmissionStart() const override { return true; }
+    bool isTransmissionReady() const override { return ready; }
+    bool isRadioReadyForTransmission(simtime_t) const override { return true; }
+    bool isFrameTransmissionEligible(const Packet *packet, simtime_t time) const override {
+        return eligible && Ieee80211Mac::isFrameTransmissionEligible(packet, time);
+    }
+    void requestTransmissionReadiness() override {
+        Enter_Method("requestTransmissionReadiness");
+        if (!resume->isScheduled()) scheduleAt(simTime(), resume);
+    }
+    void queueData(MacAddress destination, bool qos) {
+        Enter_Method("queueData");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
+        header->setChunkLength(qos ? B(26) : B(24));
+        header->setReceiverAddress(destination);
+        header->setTransmitterAddress(getAddress());
+        header->setAddress3(destination);
+        auto packet = new Packet("owner-data", header);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(16, 0x5a)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        processUpperFrame(packet, header);
+    }
+    ~OwnerMac() override { cancelAndDelete(resume); }
+};
+Define_Module(OwnerMac);
+
+class SinkMac : public Ieee80211Mac {
+  public:
+    void sendUpFrame(Packet *packet) override { Enter_Method("sendUpFrame"); take(packet); delete packet; }
+};
+Define_Module(SinkMac);
+
+class OwnerHcf : public Hcf {
+  public:
+    int failures = 0;
+    int transmitted = 0;
+    InProgressFrames *frames = nullptr;
+    void capture() {
+        ASSERT(edca->getChannelOwner());
+        frames = edca->getChannelOwner()->getInProgressFrames();
+    }
+    const FrameSequenceContext *context() const { return frameSequenceHandler->getContext(); }
+    bool running() const { return frameSequenceHandler->isSequenceRunning(); }
+    bool waiting() const { return running() && dynamic_cast<IReceiveStep *>(context()->getLastStep()) && startRxTimer->isScheduled(); }
+    bool released() const { return edca->getChannelOwner() == nullptr; }
+    bool noRetryEntry(Packet *packet) {
+        try {
+            edca->getEdcaf(AC_BE)->getRecoveryProcedure()->getRetryCount(packet, packet->peekAtFront<Ieee80211DataHeader>());
+            return false;
+        }
+        catch (const cRuntimeError& error) {
+            ASSERT(strstr(error.what(), "retry counter entry doesn't exist"));
+            return true;
+        }
+    }
+    int status(Packet *packet) { return int(edca->getEdcaf(AC_BE)->getAckHandler()->getQoSDataAckStatus(packet->peekAtFront<Ieee80211DataHeader>())); }
+    simtime_t deadline(Packet *packet) { return edca->getLifetimeHandler()->getDeadline(packet); }
+    void cancel(const Packet *copy) { transmissionCancelled(copy); }
+    void resumeSource() { Enter_Method("resumeSource"); updateContention(); }
+  protected:
+    void originatorProcessFailedFrame(Packet *packet) override { ++failures; Hcf::originatorProcessFailedFrame(packet); }
+    void originatorProcessTransmittedFrame(Packet *packet) override { ++transmitted; Hcf::originatorProcessTransmittedFrame(packet); }
+};
+Define_Module(OwnerHcf);
+
+class OwnerDcf : public Dcf {
+  public:
+    bool eligible = true;
+    int failures = 0;
+    int transmitted = 0;
+    InProgressFrames *frames = nullptr;
+    void capture() { frames = channelAccess->getInProgressFrames(); }
+    const FrameSequenceContext *context() const { return frameSequenceHandler->getContext(); }
+    bool running() const { return frameSequenceHandler->isSequenceRunning(); }
+    bool waiting() const { return running() && dynamic_cast<IReceiveStep *>(context()->getLastStep()) && startRxTimer->isScheduled(); }
+    int retries(Packet *packet) { return recoveryProcedure->getRetryCount(packet, packet->peekAtFront<Ieee80211DataOrMgmtHeader>()); }
+    int status(Packet *packet) { return int(ackHandler->getAckStatus(packet->peekAtFront<Ieee80211DataOrMgmtHeader>())); }
+    void cancel(const Packet *copy) { transmissionCancelled(copy); }
+    void resumeSource() { Enter_Method("resumeSource"); channelAccess->requestChannel(this); }
+  protected:
+    bool hasFrameToTransmit() override { return eligible && Dcf::hasFrameToTransmit(); }
+    void originatorProcessFailedFrame(Packet *packet) override { ++failures; Dcf::originatorProcessFailedFrame(packet); }
+    void originatorProcessTransmittedFrame(Packet *packet) override { ++transmitted; Dcf::originatorProcessTransmittedFrame(packet); }
+};
+Define_Module(OwnerDcf);
+
+class Probe : public cSimpleModule, public cListener {
+    OwnerMac *mac = nullptr;
+    OwnerTx *tx = nullptr;
+    OwnerHcf *hcf = nullptr;
+    OwnerDcf *dcf = nullptr;
+    InProgressFrames *frames = nullptr;
+    opp_component_ptr<cModule> publisher;
+    bool qos = false;
+    int64_t originalId = -1;
+    int originalSequence = -1;
+    int actual = 0;
+    int isolatedRecipient = 0;
+    bool done = false;
+    bool running() const { return qos ? hcf->running() : dcf->running(); }
+    void cancel(const Packet *copy) { if (qos) hcf->cancel(copy); else dcf->cancel(copy); }
+    int failures() const { return qos ? hcf->failures : dcf->failures; }
+    int transmitted() const { return qos ? hcf->transmitted : dcf->transmitted; }
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_LAST) return;
+        qos = par("qos");
+        mac = check_and_cast<OwnerMac *>(getModuleByPath("^.a.wlan[0].mac"));
+        tx = check_and_cast<OwnerTx *>(getModuleByPath("^.a.wlan[0].mac.tx"));
+        dcf = check_and_cast<OwnerDcf *>(getModuleByPath("^.a.wlan[0].mac.dcf"));
+        if (qos) hcf = check_and_cast<OwnerHcf *>(getModuleByPath("^.a.wlan[0].mac.hcf"));
+        publisher = getModuleByPath("^.a.wlan[0].radio");
+        publisher->subscribe(transmissionStartedSignal, this);
+        publisher->subscribe(transmissionEndedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("queue", 0));
+        scheduleAt(SimTime(2, SIMTIME_MS), new cMessage("cancel", 1));
+        scheduleAt(SimTime(4, SIMTIME_MS), new cMessage("check", 2));
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        auto transmission = check_and_cast<const physicallayer::ITransmission *>(object);
+        if (strcmp(transmission->getPacket()->getName(), "owner-data")) return;
+        if (signal == transmissionStartedSignal) {
+            auto packet = transmission->getPacket();
+            auto phy = packet->peekAtFront<physicallayer::Ieee80211PhyHeader>();
+            auto header = packet->peekDataAt<Ieee80211DataHeader>(phy->getChunkLength());
+            ASSERT(header->getSequenceNumber().get() == originalSequence && !header->getRetry());
+            ++actual;
+        }
+        else {
+            ASSERT(qos ? hcf->waiting() : dcf->waiting());
+            auto context = qos ? hcf->context() : dcf->context();
+            auto receive = context->getLastStep();
+            auto response = new Packet("unrelated recipient ACK", makeShared<Ieee80211AckFrame>());
+            cancel(response);
+            delete response;
+            ASSERT((qos ? hcf->context() : dcf->context()) == context);
+            ASSERT(context->getLastStep() == receive && (qos ? hcf->waiting() : dcf->waiting()));
+            ASSERT(frames->getLength() == 1 && frames->getFrames(0)->getId() == originalId);
+            ++isolatedRecipient;
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int kind = message->getKind(); delete message;
+        if (kind == 0) {
+            auto destination = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.b.wlan[0].mac"))->getAddress();
+            mac->queueData(destination, qos);
+        }
+        else if (kind == 1) {
+            ASSERT(tx->hasTransmission() && running() && actual == 0);
+            if (qos) { hcf->capture(); frames = hcf->frames; } else { dcf->capture(); frames = dcf->frames; }
+            ASSERT(frames->getLength() == 1);
+            auto original = frames->getFrames(0);
+            originalId = original->getId();
+            auto header = original->peekAtFront<Ieee80211DataHeader>();
+            originalSequence = header->getSequenceNumber().get();
+            ASSERT(!header->getRetry());
+            auto creation = original->getCreationTime();
+            auto arrival = original->getArrivalTime();
+            auto deadline = qos ? hcf->deadline(original) : SIMTIME_ZERO;
+            int beforeStatus = qos ? hcf->status(original) : dcf->status(original);
+            if (qos) ASSERT(hcf->noRetryEntry(original));
+            mac->eligible = false; dcf->eligible = false;
+            auto copy = tx->copyPending();
+            ASSERT(tx->cancelPendingTransmission(qos ? static_cast<ITx::ICallback *>(hcf) : static_cast<ITx::ICallback *>(dcf)));
+            ASSERT(!tx->hasTransmission());
+            cancel(copy); delete copy;
+            ASSERT(!running() && !tx->hasTransmission() && failures() == 0 && transmitted() == 0);
+            if (qos) ASSERT(hcf->released());
+            ASSERT(frames->containsFrame(original) && frames->getLength() == 1);
+            ASSERT(original->getId() == originalId && original->getCreationTime() == creation && original->getArrivalTime() == arrival);
+            ASSERT(original->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() == originalSequence);
+            ASSERT(!original->peekAtFront<Ieee80211DataHeader>()->getRetry());
+            if (qos) ASSERT(hcf->noRetryEntry(original));
+            else ASSERT(dcf->retries(original) == 0);
+            ASSERT((qos ? hcf->status(original) : dcf->status(original)) == beforeStatus);
+            if (qos) ASSERT(hcf->deadline(original) == deadline);
+            mac->ready = mac->eligible = dcf->eligible = true;
+            if (qos) hcf->resumeSource(); else dcf->resumeSource();
+        }
+        else {
+            ASSERT(actual == 1 && isolatedRecipient == 1 && !running() && !tx->hasTransmission());
+            ASSERT(frames->getLength() == 0 && failures() == 0 && transmitted() == 1);
+            done = true;
+            std::cout << "Native sequence cancellation qos=" << qos << ": PASS\n";
+            endSimulation();
+        }
+    }
+    void finish() override { ASSERT(done); }
+    using cListener::finish;
+  public:
+    ~Probe() override {
+        if (publisher) { publisher->unsubscribe(transmissionStartedSignal, this); publisher->unsubscribe(transmissionEndedSignal, this); }
+    }
+};
+Define_Module(Probe);
+}
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module OwnerMac extends Ieee80211Mac { parameters: @class(::Ieee80211FrameSequenceCancellation_1::OwnerMac); }
+module SinkMac extends Ieee80211Mac { parameters: @class(::Ieee80211FrameSequenceCancellation_1::SinkMac); }
+simple OwnerTx extends Tx { parameters: @class(::Ieee80211FrameSequenceCancellation_1::OwnerTx); }
+module OwnerHcf extends Hcf { parameters: @class(::Ieee80211FrameSequenceCancellation_1::OwnerHcf); }
+module OwnerDcf extends Dcf { parameters: @class(::Ieee80211FrameSequenceCancellation_1::OwnerDcf); }
+simple Probe { parameters: bool qos; @class(::Ieee80211FrameSequenceCancellation_1::Probe); }
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        a: WirelessHost;
+        b: WirelessHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+*.probe.qos = ${qos=false,true}
+*.a.wlan[*].mac.typename = "OwnerMac"
+*.a.wlan[*].mac.tx.typename = "OwnerTx"
+*.a.wlan[*].mac.dcf.typename = "OwnerDcf"
+*.a.wlan[*].mac.hcf.typename = "OwnerHcf"
+*.b.wlan[*].mac.typename = "SinkMac"
+**.wlan[*].mac.qosStation = ${qos}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.*.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.*.rtsPolicy.rtsThreshold = 4096B
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+*.a.mobility.initialX = 0m
+*.b.mobility.initialX = 1m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Native sequence cancellation qos=0: PASS
+%contains: stdout
+Native sequence cancellation qos=1: PASS
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+it doesn't own

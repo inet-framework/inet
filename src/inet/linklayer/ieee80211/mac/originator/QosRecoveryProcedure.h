@@ -28,6 +28,9 @@ namespace ieee80211 {
  */
 class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProcedure
 {
+  private:
+    // Private retry-key namespace, never a wire TID or a BA agreement TID.
+    static constexpr Tid MESH_NULL_RETRY_NAMESPACE = -1;
 
   protected:
     ICwCalculator *cwCalculator = nullptr;
@@ -35,6 +38,11 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     using RetryKey = std::pair<MacAddress, std::pair<Tid, SequenceControlField>>;
     std::map<RetryKey, int> shortRetryCounter; // SRC
     std::map<RetryKey, int> longRetryCounter; // LRC
+    struct BlockAckRecovery {
+        std::map<int64_t, RetryKey> covered;
+        int failures = 0; // Genuine BAR response expirations, initial attempt included.
+    };
+    std::map<std::pair<MacAddress, Tid>, BlockAckRecovery> blockAckRecoveries;
 
     // TODO these counters should be per AC, it's not done here but as separate recovery procedure modules
     int stationLongRetryCounter = 0; // QLRC
@@ -70,6 +78,7 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& protectedHeader);
     virtual void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
+    void ampduMemberTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
 
     virtual bool isRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
     virtual int getRetryCount(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
@@ -77,6 +86,13 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
 
     virtual void retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
     void dropFrame(const Ptr<const Ieee80211DataHeader>& header);
+    void beginBlockAckRecovery(MacAddress peer, Tid tid, const std::vector<Packet *>& originals);
+    void cancelBlockAckRecovery(MacAddress peer, Tid tid);
+    std::set<int64_t> finishBlockAckRecovery(MacAddress peer, Tid tid);
+    bool hasBlockAckRecovery(MacAddress peer, Tid tid) const;
+    std::string describeBlockAckRecoveries() const;
+    // Removes terminal procedure ownership before returning covered live identities.
+    std::set<int64_t> blockAckRecoveryExpired(MacAddress peer, Tid tid, const std::set<int64_t>& live);
 
     virtual int getLongRetryLimit() { return longRetryLimit; }
     virtual int getShortRetryLimit() { return shortRetryLimit; }

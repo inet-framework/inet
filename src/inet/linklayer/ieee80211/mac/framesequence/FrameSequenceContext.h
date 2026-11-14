@@ -37,6 +37,10 @@ enum class DataPreparationResult { LEGACY, READY, DEFERRED };
 struct INET_API PreparedDataTransmission : public cObject
 {
     std::unique_ptr<PreparedQosData> preparation;
+    std::vector<std::unique_ptr<PreparedQosData>> memberPreparations;
+    std::vector<Packet *> members; // Nonempty only for an implicit-BAR A-MPDU, including one-member recovery.
+    std::unique_ptr<Packet> psdu;
+    simtime_t blockAckTimeout = -1;
     Packet *frame = nullptr; // Borrowed from preparation, or from InProgressFrames after commitment.
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     const physicallayer::IIeee80211Mode *dataMode = nullptr;
@@ -54,12 +58,13 @@ struct INET_API PreparedDataTransmission : public cObject
 class INET_API QoSContext
 {
   public:
-    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure, BlockAckVariant variant = BlockAckVariant::BASIC) :
+    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure, BlockAckVariant variant = BlockAckVariant::BASIC, bool prepareNormalAckData = false) :
         ackPolicy(ackPolicy),
         blockAckProcedure(blockAckProcedure),
         blockAckAgreementHandler(blockAckAgreementHandler),
         txopProcedure(txopProcedure),
-        blockAckVariant(variant)
+        blockAckVariant(variant),
+        prepareNormalAckData(prepareNormalAckData)
     {}
 
     IOriginatorQoSAckPolicy *ackPolicy = nullptr;
@@ -67,6 +72,7 @@ class INET_API QoSContext
     IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
     TxopProcedure *txopProcedure = nullptr;
     const BlockAckVariant blockAckVariant;
+    const bool prepareNormalAckData;
     std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
     std::unique_ptr<PreparedDataTransmission> preparedData;
 };

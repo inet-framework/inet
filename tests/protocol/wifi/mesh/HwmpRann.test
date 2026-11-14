@@ -1,0 +1,187 @@
+%description:
+Live root-relay-leaf RANN confirmation with both metric IDs. RANN does not
+create a DATA path or propagate before the held confirming PREP arrives.
+Individual PREQ uses the recorded sender with no prior path and bypasses the
+full group-ID cache. Source expiry preserves pending confirmation. Controlled
+wire-order Interval updates prove one shared scalar and preserved forwarded
+wire values at exact sending boundaries. Isolated restart preserves the scalar
+and Action histories. Root facts expose coherent completed copied state.
+
+%file: HwmpRann.cc
+#include "mesh/HwmpRootSupport.h"
+class RannDriver : public cSimpleModule, public cListener, public RootFactChecks, public LifecycleController
+{
+    MacAddress synthetic = MacAddress("02:00:00:00:60:01");
+    MacAddress other = MacAddress("02:00:00:00:60:02");
+    int confirmations[3] = {}, realConfirmations[3] = {}, propagated = 0, delivered = 0, expired = 0;
+    std::optional<simtime_t> lastRann[3], lastConfirm[3], lastLocalRootPreq[3];
+    simtime_t beforeBoundary, boundary, beforeRestart;
+    bool changedForwardSeen = false, ownChangedSeen = false;
+    uint32_t downSequence = 0;
+    std::optional<simtime_t> downRann, downConfirmation;
+    template<typename Operation> void lifecycle(cModule *module) {
+        auto operation = new Operation(); LifecycleOperation::StringMap parameters; operation->initialize(module,parameters); ASSERT(initiateOperation(operation));
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto name : {"hwmpTestHandoff","packetSentToUpper","packetDropped"}) network->subscribe(registerSignal(name),this);
+        network->subscribe(Hwmp::rootUpdatedSignal,this);
+        const int times[] = {5,10,20,50,60,69,70,90,100,145,190,200,230,240,245,250,280,290};
+        for (int i = 0; i < 18; i++) scheduleAt(SimTime(times[i],SIMTIME_MS),new cMessage("rann-case",i));
+        for (auto event : {std::pair<int,int>{300,20},{330,21},{340,22},{345,23},{380,24},{390,25}})
+            scheduleAt(SimTime(event.first,SIMTIME_MS),new cMessage("inactive-root-case",event.second));
+    }
+    void receiveSignal(cComponent *source, simsignal_t, bool value, cObject *details) override { checkRootFact(source,value,details); }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (source == meshInterface(0)->getSubmodule("mac") && signal == registerSignal("packetSentToUpper")) delivered++;
+        if (source == meshForwarding(1) && signal == registerSignal("packetDropped") && std::string(packet->getName()) == "expires-with-confirmation") expired++;
+        for (int i = 0; i < 3; i++) {
+            if (source != meshManagement(i) || signal != registerSignal("hwmpTestHandoff")) continue;
+            auto body = packet->peekAtFront<Ieee80211HwmpFrame>(); ASSERT(body->getChunkLength() <= MAX_MESH_ACTION_BODY_LENGTH);
+            bool localConfirmation = false;
+            for (size_t j = 0; j < body->getPreqsArraySize(); j++) {
+                const auto& preq = body->getPreqs(j);
+                if (preq.getFlags() == 2 && preq.getOriginator() == meshMib(i)->address) {
+                    localConfirmation = true; confirmations[i]++;
+                    ASSERT(preq.getDiscoveryId() == 0 && preq.getHopCount() == 0 && preq.getMetric() == 0 && preq.getTargets(0).flags == 1);
+                    ASSERT(preq.getLifetime() == 96 && preq.getTargetsArraySize() == 1);
+                    auto target = preq.getTargets(0).address;
+                    ASSERT(packet->getTag<MacAddressReq>()->getDestAddress() == rootProbe(i)->rannSender(target));
+                    ASSERT(rootProbe(i)->lastTargetPreq(target) == simTime() && !rootProbe(i)->confirmationPending(target));
+                    if (target == meshMib(0)->address) { realConfirmations[i]++; lastLocalRootPreq[i] = simTime(); }
+                }
+                else if (preq.getFlags() == 2 && i == 1 && preq.getTargets(0).address == meshMib(0)->address)
+                    ASSERT(rootProbe(1)->lastTargetPreq(meshMib(0)->address) == lastLocalRootPreq[1]);
+                else if (i == 1 && preq.getOriginator() == meshMib(1)->address && preq.getTargets(0).address == meshMib(0)->address)
+                    lastLocalRootPreq[1] = simTime();
+            }
+            if (localConfirmation) {
+                ASSERT(rootProbe(i)->lastConfirmation() == simTime());
+                if (lastConfirm[i]) ASSERT(simTime()-*lastConfirm[i] >= SimTime(49152,SIMTIME_US)); lastConfirm[i] = simTime();
+            }
+            bool realRann = false;
+            for (size_t j = 0; j < body->getRannsArraySize(); j++) realRann |= body->getRanns(j).root == meshMib(0)->address;
+            if (realRann) {
+                ASSERT(rootProbe(i)->lastRann() == simTime());
+                if (lastRann[i]) ASSERT(simTime()-*lastRann[i] >= SimTime(int64_t(rootProbe(i)->sharedIntervalTus())*1024,SIMTIME_US));
+                lastRann[i] = simTime();
+            }
+            for (size_t j = 0; j < body->getRannsArraySize(); j++) {
+                const auto& rann = body->getRanns(j);
+                if (rann.root != meshMib(0)->address) continue;
+                if (i == 0) {
+                    ASSERT(rann.hopCount == 0 && rann.metric == 0 && rann.interval == rootProbe(0)->sharedIntervalTus());
+                    if (simTime() > SimTime(200,SIMTIME_MS) && rann.interval == 16) ownChangedSeen = true;
+                }
+                if (i == 1) {
+                    ASSERT(hwmp(1)->findPath(rann.root) && rann.hopCount == 1 && rann.metric == outgoingMetric(1,0)); propagated++;
+                    ASSERT(rootProbe(1)->lastPropagation(rann.root) == simTime() && !rootProbe(1)->propagationPending(rann.root));
+                    if (rann.sequenceNumber == 1000) { ASSERT(rann.interval == 48 && rootProbe(1)->sharedIntervalTus() == 64 && simTime() == boundary); changedForwardSeen = true; }
+                }
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() == 100) { ASSERT(rootProbe(1)->lastRann() == beforeBoundary); delete message; return; }
+        if (message->getKind() == 101) { ASSERT(changedForwardSeen && rootProbe(1)->lastRann() == boundary); delete message; return; }
+        switch (message->getKind()) {
+            case 0: rootManagement(0)->holdPreps(true); meshManagement(0)->openPeer(meshMib(1)->address); break;
+            case 1: meshManagement(1)->openPeer(meshMib(2)->address); break;
+            case 2: {
+                auto preq = testPreq(synthetic,other,1,1,5); preq.setTtl(1); sendHwmpTest(0,testBody(preq),meshMib(1)->address); break;
+            }
+            case 3:
+                ASSERT(rootManagement(0)->heldCount() > 0 && rootProbe(1)->hasAnnouncement(meshMib(0)->address));
+                ASSERT(!hwmp(1)->findPath(meshMib(0)->address) && !rootProbe(2)->hasAnnouncement(meshMib(0)->address) && propagated == 0);
+                ASSERT(hwmp(0)->getSeenIdentityCount() == 0 && hwmp(1)->getSeenIdentityCount() == 1); break;
+            case 4: sourceHwmp(this,1,meshMib(0)->address,"expires-with-confirmation"); break;
+            case 5: ASSERT(expired == 1 && meshForwarding(1)->getNumPendingPackets() == 0 && !hwmp(1)->isDiscoveryActive(meshMib(0)->address) && rootProbe(1)->confirmationPending(meshMib(0)->address)); break;
+            case 6: rootManagement(0)->releasePreps(); break;
+            case 7:
+                ASSERT(hwmp(1)->findPath(meshMib(0)->address) && hwmp(2)->findPath(meshMib(0)->address) && propagated > 0 && delivered == 0);
+                ASSERT(hwmp(1)->getSeenIdentityCount() == 1 && rootProbe(1)->groupIdCounter() == 1 && rootProbe(2)->groupIdCounter() == 0); break;
+            case 8: {
+                ASSERT(realConfirmations[1] == 1); rootManagement(0)->dropRanns(true);
+                beforeBoundary = *rootProbe(1)->lastRann(); boundary = beforeBoundary+SimTime(65536,SIMTIME_US);
+                auto body = rootRannBody(meshMib(0)->address,1000,48);
+                HwmpRann second; second.root = other; second.sequenceNumber = 1; second.interval = 64; second.ttl = 8;
+                body->setRannsArraySize(2); body->setRanns(1,second); body->setChunkLength(B(46));
+                hwmp(1)->processHwmp(body,meshMib(0)->address,MacAddress::BROADCAST_ADDRESS);
+                ASSERT(rootProbe(1)->sharedIntervalTus() == 64 && rootProbe(1)->wireInterval(meshMib(0)->address) == 48);
+                ASSERT(rootProbe(1)->confirmationIntervalTus() == 48);
+                auto before = new cMessage("before-interval",100); before->setSchedulingPriority(-1); scheduleAt(boundary-SimTime(1,SIMTIME_NS),before);
+                auto at = new cMessage("at-interval",101); at->setSchedulingPriority(1); scheduleAt(boundary,at); break;
+            }
+            case 9: ASSERT(changedForwardSeen); rootManagement(0)->dropRanns(false); break;
+            case 10: ASSERT(realConfirmations[1] >= 2 && realConfirmations[2] >= 2 && hwmp(2)->findPath(meshMib(0)->address) && meshForwarding(1)->getNumPendingPackets() == 0); break;
+            case 11: sendHwmpTest(1,rootRannBody(synthetic,10,16,0,1),meshMib(0)->address); break;
+            case 12: ASSERT(rootProbe(0)->sharedIntervalTus() == 16 && ownChangedSeen); break;
+            case 13: beforeRestart = *rootProbe(0)->lastRann(); lifecycle<ModuleStopOperation>(hwmp(0)); ASSERT(!rootProbe(0)->rootWorkScheduled() && !rootProbe(0)->localRootTimerScheduled()); break;
+            case 14: lifecycle<ModuleStartOperation>(hwmp(0)); ASSERT(rootProbe(0)->sharedIntervalTus() == 16 && *rootProbe(0)->lastRann() == beforeRestart); break;
+            case 15: ASSERT(*rootProbe(0)->lastRann() >= beforeRestart && (*rootProbe(0)->lastRann() == beforeRestart || *rootProbe(0)->lastRann()-beforeRestart >= SimTime(16384,SIMTIME_US))); break;
+            case 16: ASSERT(*rootProbe(0)->lastRann() > beforeRestart && rootProbe(0)->sharedIntervalTus() == 16 && rootEvents > 15); break;
+            case 17: break;
+            case 20:
+                lifecycle<ModuleStopOperation>(meshManagement(0)); meshManagement(1)->closePeer(meshMib(0)->address);
+                downSequence = hwmp(0)->getSequenceNumber(); downRann = rootProbe(0)->lastRann(); downConfirmation = rootProbe(0)->lastConfirmation(); break;
+            case 21:
+                ASSERT(hwmp(0)->getSequenceNumber() == downSequence && rootProbe(0)->lastRann() == downRann && rootProbe(0)->lastConfirmation() == downConfirmation);
+                ASSERT(rootProbe(0)->rootWorkScheduled() && rootProbe(0)->rootWorkDeadline() > simTime()); break;
+            case 22: lifecycle<ModuleStartOperation>(meshManagement(0)); break;
+            case 23: ASSERT(meshManagement(1)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::IDLE); meshManagement(0)->openPeer(meshMib(1)->address); break;
+            case 24: ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address) && hwmp(0)->getSequenceNumber() > downSequence && rootProbe(0)->lastRann() > downRann); break;
+            case 25: emit(registerSignal("rannComplete"),1L); break;
+        }
+        delete message;
+    }
+};
+Define_Module(RannDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_rann) {
+    return ProtocolTest("hwmp_rann")
+        .intercept(tap("radioMedium").from("station[0]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[0]").drop())
+        .once(on("driver").signal("rannComplete").assertValue(1).within(0.4));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple RannDriver { parameters: @class(::RannDriver); @signal[rannComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: RannDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 400ms
+*.numStations = 3
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "RootTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].pathSelection.typename = "HwmpRootProbe"
+*.station[*].wlan[0].pathSelectionMetricId = ${metricId=1,2}
+*.station[*].wlan[0].pathSelection.rannInterval = 32.768ms
+*.station[*].wlan[0].pathSelection.confirmationInterval = 49.152ms
+*.station[*].wlan[0].pathSelection.preqMinInterval = 16.384ms
+*.station[*].wlan[0].pathSelection.activePathToRootTimeout = 98.304ms
+*.station[*].wlan[0].pathSelection.activePathTimeout = 98.304ms
+*.station[0].wlan[0].pathSelection.rootMode = 4
+*.station[1].wlan[0].pathSelection.seenIdentityCapacity = 1
+*.station[1].wlan[0].mac.ds.maxPendingWait = 8ms
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[0].wlan[0]":24Mbps,"Test.station[2].wlan[0]":12Mbps}
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_rann"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..1
+%contains: stdout
+PROTOCOLTEST hwmp_rann: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_rann: FAIL

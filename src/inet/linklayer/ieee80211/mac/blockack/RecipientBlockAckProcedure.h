@@ -28,6 +28,8 @@ class INET_API RecipientBlockAckProcedure : public IRecipientBlockAckProcedure
   public:
     virtual void processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) override;
     virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override;
+    void processReceivedAmpdu(Packet *elicitingPacket, const Ptr<const Ieee80211DataHeader>& header,
+        RecipientBlockAckAgreement *agreement, simtime_t responseDuration, IProcedureCallback *callback) override;
 };
 
 } /* namespace ieee80211 */

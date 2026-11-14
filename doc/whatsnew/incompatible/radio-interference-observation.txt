@@ -1,0 +1,3 @@
+Radio media declare interference-arrival visibility
+
+External IRadioMedium implementations must implement the new const supportsInterferenceObservation() query. It reports whether relevant modeled interference arrivals reach radios in receiver or transceiver mode without listenability, destination-address or communication-range-only delivery filtering; it does not promise decoding or analog-model accuracy. RadioMedium derives the answer from its existing effective configuration. This addition changes no signal delivery, timing or random-number use.

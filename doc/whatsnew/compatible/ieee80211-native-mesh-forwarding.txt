@@ -1,0 +1,3 @@
+Native IEEE 802.11 mesh forwarding
+
+The optional mesh interface forwards native unicast and group data through established peer links, preserving mesh endpoints while updating hop addresses and TTL. It filters nonpeers, expired or unauthorized forwarding information and mesh duplicates. Group forwarding works without a path provider; unicast uses the optional path-selection contract. Closing a peer retires its pending data and cancels a transmission still waiting for IFS, while allowing unrelated peers to progress. HWMP discovery is added separately.

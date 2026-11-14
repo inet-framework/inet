@@ -41,8 +41,17 @@ QosAckHandler::Status QosAckHandler::getMgmtOrNonQoSAckStatus(const Key& id)
 
 QosAckHandler::Status QosAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    auto id = std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    auto id = getMgmtOrNonQoSAckKey(header);
     return getMgmtOrNonQoSAckStatus(id);
+}
+
+QosAckHandler::Key QosAckHandler::getMgmtOrNonQoSAckKey(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
+{
+    // Table 10-5 SNS5 has no counter. Its legal fixed SC must not alias
+    // independently retained SNS1 management work with the same receiver/SC.
+    bool meshNull = header->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+    return {header->getReceiverAddress(), {meshNull,
+        SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
 }
 
 QosAckHandler::Status QosAckHandler::getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header)
@@ -62,7 +71,7 @@ void QosAckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, 
         ackStatuses[id] = Status::NORMAL_ACK_ARRIVED;
     }
     else {
-        auto id = std::make_pair(ackedHeader->getReceiverAddress(), SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber()));
+        auto id = getMgmtOrNonQoSAckKey(ackedHeader);
         auto status = getMgmtOrNonQoSAckStatus(id);
         if (status == Status::FRAME_NOT_YET_TRANSMITTED)
             throw cRuntimeError("ackedFrame = %s is not yet transmitted", ackedHeader->getName());
@@ -85,9 +94,22 @@ void QosAckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader
     }
     else {
         ASSERT(getMgmtOrNonQoSAckStatus(dataOrMgmtHeader) == Status::WAITING_FOR_NORMAL_ACK);
-        auto id = std::make_pair(dataOrMgmtHeader->getReceiverAddress(), SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber()));
+        auto id = getMgmtOrNonQoSAckKey(dataOrMgmtHeader);
         mgmtAckStatuses[id] = Status::NORMAL_ACK_NOT_ARRIVED;
     }
+}
+
+void QosAckHandler::processTransmittedAmpduMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), 0)));
+    ackStatuses[id] = Status::WAITING_FOR_BLOCK_ACK;
+}
+
+void QosAckHandler::processUnansweredAmpduMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), 0)));
+    if (getQoSDataAckStatus(id) == Status::WAITING_FOR_BLOCK_ACK || getQoSDataAckStatus(id) == Status::BLOCK_ACK_NOT_ARRIVED)
+        ackStatuses[id] = Status::BLOCK_ACK_NOT_YET_REQUESTED;
 }
 
 void QosAckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
@@ -98,7 +120,7 @@ void QosAckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOr
         ackStatuses.erase(id);
     }
     else {
-        auto id = std::make_pair(dataOrMgmtHeader->getReceiverAddress(), SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber()));
+        auto id = getMgmtOrNonQoSAckKey(dataOrMgmtHeader);
         mgmtAckStatuses.erase(id);
     }
 }
@@ -226,7 +248,7 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
         }
     }
     else
-        mgmtAckStatuses[std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()))] = Status::WAITING_FOR_NORMAL_ACK;
+        mgmtAckStatuses[getMgmtOrNonQoSAckKey(header)] = Status::WAITING_FOR_NORMAL_ACK;
 }
 
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement)
@@ -296,7 +318,7 @@ void QosAckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader
         ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
     }
     else {
-        auto id = std::make_pair(dataOrMgmtHeader->getReceiverAddress(), SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber()));
+        auto id = getMgmtOrNonQoSAckKey(dataOrMgmtHeader);
         auto status = getMgmtOrNonQoSAckStatus(id);
         ASSERT(status != Status::WAITING_FOR_NORMAL_ACK);
         mgmtAckStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;

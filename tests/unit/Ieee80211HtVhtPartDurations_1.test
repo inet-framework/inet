@@ -3,9 +3,9 @@ Check the part durations of the IEEE 802.11 HT and VHT modes, without a
 network. Ieee80211Transmitter computes the data duration as the total duration
 minus the preamble duration and the header duration. For every HT and VHT mode
 of the "n(mixed-2.4Ghz)" and "ac" mode sets, and for a short and a long PSDU,
-that difference must be the duration of the data symbols plus the signal
-extension: the HT-SIG or VHT-SIG-A field is the header part, and the preamble
-does not contain it.
+that difference must be the once-rounded DATA contribution plus the signal
+extension. Raw SGI symbols can end before that residual. HT-SIG or VHT-SIG-A
+is the header part, and the preamble does not contain it.
 
 %includes:
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
@@ -25,7 +25,12 @@ for (const char *name : {"n(mixed-2.4Ghz)", "ac"}) {
             continue;
         for (B length : {B(28), B(1500)}) {
             simtime_t dataDuration = mode->getDuration(length) - mode->getPreambleMode()->getDuration() - mode->getHeaderMode()->getDuration();
-            simtime_t expectedDataDuration = mode->getDataMode()->getDuration(length) + mode->getSignalExtensionTime();
+            simtime_t expectedDataDuration = mode->getDataMode()->getDuration(length);
+            auto ht = dynamic_cast<const Ieee80211HtMode *>(mode);
+            if (mode->isVhtShortGuardInterval() || (ht && ht->isHtShortGuardInterval()
+                    && ht->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED))
+                expectedDataDuration = ceil(expectedDataDuration, SimTime(4, SIMTIME_US));
+            expectedDataDuration += mode->getSignalExtensionTime();
             if (dataDuration != expectedDataDuration)
                 EV << "mismatch: " << name << " " << mode->getName() << " " << length << ": data duration " << dataDuration << " instead of " << expectedDataDuration << "\n";
             numChecked++;

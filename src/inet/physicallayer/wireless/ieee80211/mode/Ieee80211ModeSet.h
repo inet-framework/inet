@@ -43,6 +43,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   private:
     static std::vector<Entry> getHtModeEntries(bool use5Ghz);
     static std::vector<Entry> appendHtModeEntries(std::vector<Entry> entries, bool use5Ghz);
+    static std::vector<Entry> getCompleteVhtModeEntries(const Ieee80211ModeSet& legacy);
 
   protected:
     std::string name;

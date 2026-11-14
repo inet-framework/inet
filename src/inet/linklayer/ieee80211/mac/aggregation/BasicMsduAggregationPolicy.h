@@ -8,6 +8,8 @@
 #ifndef __INET_BASICMSDUAGGREGATIONPOLICY_H
 #define __INET_BASICMSDUAGGREGATIONPOLICY_H
 
+#include <functional>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduAggregationPolicy.h"
 
@@ -16,6 +18,9 @@ namespace ieee80211 {
 
 class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, public SimpleModule
 {
+  private:
+    std::vector<Packet *> *collectAggregateFrames(size_t count, const std::function<Packet *(size_t)>& getCandidate);
+
   protected:
     bool qOsCheck = false;
     int subframeNumThreshold = -1;
@@ -29,6 +34,7 @@ class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, publi
 
   public:
     virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *queue) override;
+    std::vector<Packet *> *computeAggregateFrames(const std::vector<Packet *>& candidates) override;
 };
 
 } /* namespace ieee80211 */

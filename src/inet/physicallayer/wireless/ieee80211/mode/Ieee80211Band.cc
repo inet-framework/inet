@@ -136,7 +136,8 @@ const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (2
 // Model subset: Table E-4 classes 115, 116, and 117; centers follow Equation (17-27).
 // Permitted HT40 pairs restrict validation; they do not enable 40 MHz PHY operation.
 const Ieee80211EnumeratedBand Ieee80211CompliantBands::band5GHzMapped20MHz("5 GHz (mapped 20 MHz)",
-        { MHz(5180), MHz(5200), MHz(5220), MHz(5240) }, { 36, 40, 44, 48 }, { { 36, 40 }, { 44, 48 } });
+        { MHz(5180), MHz(5200), MHz(5220), MHz(5240), MHz(5260), MHz(5280), MHz(5300), MHz(5320) },
+        { 36, 40, 44, 48, 52, 56, 60, 64 }, { { 36, 40 }, { 44, 48 }, { 52, 56 }, { 60, 64 } });
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz (40 MHz)", GHz(5), MHz(40), 12);
 

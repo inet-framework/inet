@@ -1,0 +1,5 @@
+HWMP invalidates broken paths and propagates path errors
+
+Native mesh path selection now reacts to committed peer closure and genuine terminal DATA ACK timeouts, invalidating affected next-hop routes immediately and sending PERR notifications to their live precursors. Received PERRs apply reason-specific sequence rules; unknown transit unicast receives a no-forwarding-information response without entering a source discovery queue. Later source traffic can discover an alternate path.
+
+One interface-wide handoff limiter bounds deferred notifications. Actions contain at most nineteen distinct destinations and preserve each recipient's affected subset. Repaired paths remove obsolete unhanded errors, and closing a peer removes its old precursor admission. Internal collisions, rejected exchanges, unsent drops and retired callbacks do not constitute terminal radio failure.
