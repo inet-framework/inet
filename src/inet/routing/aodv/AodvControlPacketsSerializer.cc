@@ -13,6 +13,26 @@
 namespace inet {
 namespace aodv {
 
+template<typename T>
+static void writeExtensions(MemoryOutputStream& stream, const T& message)
+{
+    for (size_t i = 0; i < message.getExtensionsArraySize(); ++i)
+        stream.writeByte(message.getExtensions(i));
+}
+
+template<typename T>
+static void readExtensions(MemoryInputStream& stream, const Ptr<T>& message)
+{
+    auto size = stream.getRemainingLength().get<B>();
+    if (size < 0 || size > 65535) {
+        message->markIncorrect();
+        return;
+    }
+    message->setExtensionsArraySize(size);
+    for (size_t i = 0; i < size; ++i)
+        message->setExtensions(i, stream.readByte());
+}
+
 Register_Serializer(AodvControlPacket, AodvControlPacketsSerializer);
 
 Register_Serializer(Rreq, AodvControlPacketsSerializer);
@@ -39,7 +59,8 @@ void AodvControlPacketsSerializer::serializeFields(MemoryOutputStream& stream, c
             stream.writeUint32Be(aodvRreq->getDestSeqNum());
             stream.writeIpv4Address(aodvRreq->getOriginatorAddr().toIpv4());
             stream.writeUint32Be(aodvRreq->getOriginatorSeqNum());
-            if (aodvRreq->getChunkLength() != B(24))
+            writeExtensions(stream, *aodvRreq);
+            if (aodvRreq->getChunkLength() != B(24 + aodvRreq->getExtensionsArraySize()))
                 throw cRuntimeError("Cannot serialize the AODV RREQ (IPv4): chunkLength is %d bytes, fixed-format RREQ requires 24 bytes.", (int)aodvRreq->getChunkLength().get<B>());
             break;
         }
@@ -58,7 +79,8 @@ void AodvControlPacketsSerializer::serializeFields(MemoryOutputStream& stream, c
             stream.writeUint32Be(aodvRreq->getOriginatorSeqNum());
             stream.writeIpv6Address(aodvRreq->getDestAddr().toIpv6());
             stream.writeIpv6Address(aodvRreq->getOriginatorAddr().toIpv6());
-            if (aodvRreq->getChunkLength() != B(48))
+            writeExtensions(stream, *aodvRreq);
+            if (aodvRreq->getChunkLength() != B(48 + aodvRreq->getExtensionsArraySize()))
                 throw cRuntimeError("Cannot serialize the AODV RREQ (IPv6): chunkLength is %d bytes, fixed-format RREQ requires 48 bytes.", (int)aodvRreq->getChunkLength().get<B>());
             break;
         }
@@ -74,7 +96,8 @@ void AodvControlPacketsSerializer::serializeFields(MemoryOutputStream& stream, c
             stream.writeUint32Be(aodvRrep->getDestSeqNum());
             stream.writeIpv4Address(aodvRrep->getOriginatorAddr().toIpv4());
             stream.writeUint32Be(aodvRrep->getLifeTime().inUnit(SIMTIME_MS));
-            if (aodvRrep->getChunkLength() != B(20))
+            writeExtensions(stream, *aodvRrep);
+            if (aodvRrep->getChunkLength() != B(20 + aodvRrep->getExtensionsArraySize()))
                 throw cRuntimeError("Cannot serialize the AODV RREP (IPv4): chunkLength is %d bytes, fixed-format RREP requires 20 bytes.", (int)aodvRrep->getChunkLength().get<B>());
             break;
         }
@@ -90,7 +113,8 @@ void AodvControlPacketsSerializer::serializeFields(MemoryOutputStream& stream, c
             stream.writeIpv6Address(aodvRrep->getDestAddr().toIpv6());
             stream.writeIpv6Address(aodvRrep->getOriginatorAddr().toIpv6());
             stream.writeUint32Be(aodvRrep->getLifeTime().inUnit(SIMTIME_MS));
-            if (aodvRrep->getChunkLength() != B(44))
+            writeExtensions(stream, *aodvRrep);
+            if (aodvRrep->getChunkLength() != B(44 + aodvRrep->getExtensionsArraySize()))
                 throw cRuntimeError("Cannot serialize the AODV RREP (IPv6): chunkLength is %d bytes, fixed-format RREP requires 44 bytes.", (int)aodvRrep->getChunkLength().get<B>());
             break;
         }
@@ -168,6 +192,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStre
             aodvRreq->setOriginatorAddr(L3Address(stream.readIpv4Address()));
             aodvRreq->setOriginatorSeqNum(stream.readUint32Be());
             aodvRreq->setChunkLength(B(24));
+            readExtensions(stream, aodvRreq);
             return aodvRreq;
         }
         case RREQ_IPv6: {
@@ -186,6 +211,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStre
             aodvRreq->setDestAddr(L3Address(stream.readIpv6Address()));
             aodvRreq->setOriginatorAddr(L3Address(stream.readIpv6Address()));
             aodvRreq->setChunkLength(B(48));
+            readExtensions(stream, aodvRreq);
             return aodvRreq;
         }
         case RREP: {
@@ -201,6 +227,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStre
             aodvRrep->setOriginatorAddr(L3Address(stream.readIpv4Address()));
             aodvRrep->setLifeTime(SimTime(stream.readUint32Be(), SIMTIME_MS));
             aodvRrep->setChunkLength(B(20));
+            readExtensions(stream, aodvRrep);
             return aodvRrep;
         }
         case RREP_IPv6: {
@@ -216,6 +243,7 @@ const Ptr<Chunk> AodvControlPacketsSerializer::deserializeFields(MemoryInputStre
             aodvRrep->setOriginatorAddr(L3Address(stream.readIpv6Address()));
             aodvRrep->setLifeTime(SimTime(stream.readUint32Be(), SIMTIME_MS));
             aodvRrep->setChunkLength(B(44));
+            readExtensions(stream, aodvRrep);
             return aodvRrep;
         }
         case RERR: {

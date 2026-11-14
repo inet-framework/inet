@@ -273,6 +273,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
      * drop a previously queued datagram
      */
     virtual void dropQueuedDatagram(const Packet *datagram) override;
+    virtual void failQueuedDatagram(const Packet *datagram) override;
 
     /**
      * re-injects a previously queued datagram

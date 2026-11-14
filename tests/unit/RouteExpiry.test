@@ -1,0 +1,28 @@
+%description:
+Checks the generic IRoute expiry contract through all three route providers.
+Zero denotes no expiry; an IPv6 finite expiry remains available through IRoute.
+
+%includes:
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/nexthop/NextHopRoute.h"
+
+%activity:
+using namespace inet;
+Ipv4Route ipv4;
+Ipv6Route ipv6(Ipv6Address("2001:db8::"), 64, IRoute::MANET);
+NextHopRoute nextHop;
+const IRoute *routes[] = {&ipv4, &ipv6, &nextHop};
+for (const auto *route : routes)
+    ASSERT(route->getNativeExpiryTime() == SIMTIME_ZERO);
+const simtime_t finiteExpiry = SimTime(123456789, SIMTIME_US);
+ipv6.setExpiryTime(finiteExpiry);
+ASSERT(routes[1]->getNativeExpiryTime() == finiteExpiry);
+ASSERT(routes[0]->getNativeExpiryTime() == SIMTIME_ZERO);
+ASSERT(routes[2]->getNativeExpiryTime() == SIMTIME_ZERO);
+ipv6.setExpiryTime(SIMTIME_ZERO);
+ASSERT(routes[1]->getNativeExpiryTime() == SIMTIME_ZERO);
+std::cout << "Route expiry providers PASS\n";
+
+%contains: stdout
+Route expiry providers PASS

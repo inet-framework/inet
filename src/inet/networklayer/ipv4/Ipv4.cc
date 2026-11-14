@@ -1198,14 +1198,19 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
-        for (int i = 0; i < packetQueue.getLength(); i++) {
-            auto packet = packetQueue.get(i);
+        std::vector<Packet *> failed;
+        while (!packetQueue.isEmpty())
+            failed.push_back(check_and_cast<Packet *>(packetQueue.pop()));
+        pendingPackets.erase(it);
+        for (auto packet : failed) {
             PacketDropDetails details;
             details.setReason(ADDRESS_RESOLUTION_FAILED);
             emit(packetDroppedSignal, packet, &details);
+            if (packet->findTag<InterfaceInd>())
+                sendIcmpError(packet, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_HOST_UNREACHABLE);
+            else
+                delete packet;
         }
-        packetQueue.clear();
-        pendingPackets.erase(it);
     }
 }
 
@@ -1260,6 +1265,20 @@ void Ipv4::dropQueuedDatagram(const Packet *packet)
         if (iter->packet == packet) {
             delete packet;
             queuedDatagramsForHooks.erase(iter);
+            return;
+        }
+    }
+}
+
+void Ipv4::failQueuedDatagram(const Packet *packet)
+{
+    Enter_Method("failQueuedDatagram()");
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); ++iter) {
+        if (iter->packet == packet) {
+            auto datagram = iter->packet;
+            queuedDatagramsForHooks.erase(iter);
+            take(datagram);
+            sendIcmpError(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_HOST_UNREACHABLE);
             return;
         }
     }

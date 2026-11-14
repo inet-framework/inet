@@ -536,8 +536,9 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
                 MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
 
             if (membership->interfaceId != -1) {
-                NetworkInterface *ie = ift->getInterfaceById(membership->interfaceId);
-                removeMulticastAddressFromInterface(ie, membership->multicastAddress, oldFilterMode, membership->sourceList);
+                NetworkInterface *ie = ift->findInterfaceById(membership->interfaceId);
+                if (ie)
+                    removeMulticastAddressFromInterface(ie, membership->multicastAddress, oldFilterMode, membership->sourceList);
             }
             else {
                 for (int j = 0; j < ift->getNumInterfaces(); ++j) {

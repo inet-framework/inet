@@ -687,6 +687,12 @@ void NextHopForwarding::dropQueuedDatagram(const Packet *datagram)
     }
 }
 
+void NextHopForwarding::failQueuedDatagram(const Packet *datagram)
+{
+    Enter_Method("failQueuedDatagram()");
+    dropQueuedDatagram(datagram);
+}
+
 void NextHopForwarding::reinjectQueuedDatagram(const Packet *datagram)
 {
     Enter_Method("reinjectDatagram()");

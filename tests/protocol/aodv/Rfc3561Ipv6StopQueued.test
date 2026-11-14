@@ -1,0 +1,100 @@
+%description:
+Native IPv6 compatibility for discovery, ACKs, data and serial-number freshness.
+
+%file: Peer.cc
+#include "../../AodvIpv6AdvancedPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvIpv6AdvancedPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        @class(::AodvIpv6AdvancedPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvSubnetSource like IApp
+{
+    parameters:
+        @class(::AodvSubnetSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.4s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addDirectRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='peer' address='2001:db8:1::2' dupAddrDetectTransmits='0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.netDiameter = 1
+*.dut.aodv.ttlStart = 1
+*.dut.aodv.ttlThreshold = 1
+*.dut.aodv.rreqRetries = 0
+*.dut.aodv.rreqRatelimit = 1
+*.dut.aodv.nodeTraversalTime = 0.01s
+*.dut.aodv.activeRouteTimeout = 0.05s
+*.dut.aodv.deletePeriod = 0.1s
+*.dut.tcp.stopOperationTimeout = 0s
+*.dut.tcp.stopOperationExtraTime = 0s
+*.dut.wlan[*].radio.initialRadioMode = "receiver"
+**.ipv6.ipv6.sendRedirects = false
+*.peer.app[0].scenario = "StopQueued"
+*.*.hasIpv4 = false
+*.*.hasIpv6 = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.neighbourDiscovery.routerBootupTime = 0s
+**.ipv6.neighbourDiscovery.hostBootupTime = 0s
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.dut.aodv.routingTableModule = "^.ipv6.routingTable"
+*.dut.aodv.networkProtocolModule = "^.ipv6.ipv6"
+*.dut.numApps = 1
+*.peer.forwarding = false
+*.dut.app[0].typename = "AodvSubnetSource"
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvIpv6AdvancedPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[0].typename = "AckingWirelessInterface"
+**.wlan[0].radio.typename = "GenericUnitDiskRadio"
+**.wlan[0].bitrate = 1Mbps
+**.wlan[0].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[0].radio.transmitter.headerLength = 4b
+**.wlan[0].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV IPv6 StopQueued: PASS

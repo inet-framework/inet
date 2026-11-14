@@ -1,0 +1,3 @@
+AODV precursors include their link interface
+
+AODV precursor entries now include an interface ID. Code inspecting or adding AodvRouteData precursors must use the interface-qualified API.

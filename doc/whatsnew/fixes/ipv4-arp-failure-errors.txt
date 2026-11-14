@@ -1,0 +1,3 @@
+IPv4 routers report exhausted ARP resolution
+
+When native ARP retries are exhausted for a forwarded datagram, IPv4 can return Host Unreachable to its source. The ARP-pending batch is detached before native ICMP reporting and each original is disposed of once. Initial cache misses, local-host traffic, ICMP suppression and lifecycle cancellation retain their separate policies.

@@ -1,0 +1,109 @@
+%description:
+RFC 3561 sections 6.11/6.12: error state, notifications and actual precursor delivery.
+
+%file: Peer.cc
+#include "../../AodvHelloPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.networklayer.ipv4.Ipv4;
+import inet.node.inet.AdhocHost;
+import inet.node.ethernet.Eth100M;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvObservationIpv4 extends Ipv4
+{
+    parameters:
+        string observationMode = default("");
+        double observationDelivery @unit(s) @mutable = default(0s);
+        @class(::AodvObservationIpv4);
+}
+simple AodvDataSource like IApp
+{
+    parameters:
+        string destinations = default("10.0.0.99");
+        double emitTime @unit(s) = default(0.16s);
+        int localPort = default(12345);
+        string nextHop = default("10.0.0.1");
+        string outputInterface = default("wlan1");
+        @class(::AodvDataSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvHelloPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        bool ethernet = default(false);
+        double startTime @unit(s) = default(0.01s);
+        @class(::AodvHelloPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        dut: AodvRouter;
+        peer: AdhocHost;
+    connections:
+        dut.ethg[0] <--> Eth100M { delay = 1ms; } <--> peer.ethg[0];
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.5s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.peer.forwarding = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' names='eth0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='eth0' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+*.dut.aodv.interface = "eth0"
+*.peer.app[0].ethernet = true
+**.numWlanInterfaces = 0
+**.numEthInterfaces = 1
+**.eth[*].typename = "EthernetInterface"
+**.eth[*].duplexMode = true
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = true
+*.peer.numApps = 1
+*.dut.numApps = 1
+*.dut.app[0].typename = "UdpSink"
+*.dut.app[0].localPort = 54321
+*.dut.ipv4.ip.typename = "AodvObservationIpv4"
+*.dut.ipv4.ip.observationMode = "Data"
+*.peer.app[0].scenario = "Data"
+*.dut.aodv.helloInterval = 0.1s
+*.dut.aodv.allowedHelloLoss = 2
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.peer.app[0].typename = "AodvHelloPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV HelloLossData: PASS

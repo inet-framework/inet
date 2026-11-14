@@ -1,0 +1,3 @@
+AODV subnet exports support bounded candidate cooperation
+
+Exports can name trusted candidates and a common coordination interface. A separate UDP announcement profile transfers prefix-owned counter knowledge and elects the lowest eligible address after qualification. The model requires reliable bounded-delay delivery on a common connected network and fail-stop failures; it does not guarantee single authority during arbitrary partitions. Candidate cooperation remains opt-in.

@@ -1,0 +1,96 @@
+%description:
+RFC 3561 sections 9 and 9.1: Forwarding through native UDP/IP and Hello observation.
+See hello-interval-extension.md for assertions and evidence limits.
+
+%file: Peer.cc
+#include "../../AodvHelloIntervalPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.routing.aodv.Aodv;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple HelloIntervalAodv extends Aodv
+{
+    parameters:
+        stopOperationTimeout = default(1s);
+        stopOperationExtraTime = default(0s);
+        @lifecycleSupport;
+}
+module HelloIntervalRouter extends AdhocHost
+{
+    submodules:
+        aodv: HelloIntervalAodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
+}
+simple AodvHelloIntervalPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        double startTime @unit(s) = default(0.01s);
+        @class(::AodvHelloIntervalPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvHelloIntervalTest
+{
+    parameters:
+        bool withSecondDut = default(false);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: HelloIntervalRouter;
+        dut2: HelloIntervalRouter if withSecondDut;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvHelloIntervalTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.3s
+seed-set = 0
+simtime-resolution = ps
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='dut2' address='10.0.0.4' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.dut*.aodv.jitter = 0s
+*.dut*.aodv.periodicJitter = 0s
+*.dut*.aodv.useHelloMessages = true
+*.dut*.aodv.helloInterval = 0.1s
+*.dut*.aodv.allowedHelloLoss = 2
+*.peer.numApps = 1
+*.peer.numWlanInterfaces = 2
+*.peer.forwarding = false
+*.peer.app[0].typename = "AodvHelloIntervalPeer"
+*.peer.app[0].scenario = "Forwarding"
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 100Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+
+%contains: stdout
+AODV HelloIntervalExtensionForwarding: PASS

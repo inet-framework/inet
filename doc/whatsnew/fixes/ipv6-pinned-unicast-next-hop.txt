@@ -1,0 +1,3 @@
+IPv6 resolves explicitly selected unicast next hops
+
+A locally originated IPv6 packet with both an output interface and a concrete next hop now uses native next-hop resolution instead of a broadcast destination MAC. This also applies when reactive routing releases a queued packet. Multicast and existing interface-only neighbor-discovery output retain their paths.

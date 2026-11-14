@@ -1,0 +1,3 @@
+AODV selected IPv6 interfaces
+
+Explicit AODV interface selection supports distinct non-link-local IPv6 identities. Each selected interface joins the control multicast group, while discovery copies share one originator identity, request ID and rate-budget charge. Native neighbor discovery remains independent of AODV route discovery.

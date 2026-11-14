@@ -1,0 +1,65 @@
+%description:
+Real ARP exhaustion for an absent connected member: StopPending.
+Forwarded eligible packets report Host Unreachable, local-origin policy remains silent.
+See arp-failure-unreachable.md for timing, ownership and parent-comparison limits.
+
+%file: Peer.cc
+#include "../../ArpFailureUnreachablePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.networklayer.ipv4.Ipv4;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+simple ArpFailureUnreachablePeer like IApp
+{
+    parameters:
+        string scenario = default("StopPending");
+        @class(::ArpFailureUnreachablePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple ArpFailureIpv4 extends Ipv4
+{
+    parameters:
+        @class(::ArpFailureIpv4);
+}
+network ArpFailureNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        hostA: StandardHost;
+        router: Router;
+        hostB: StandardHost;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ArpFailureNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 0.8s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+**.stopOperationTimeout = 0s
+**.stopOperationExtraTime = 0s
+*.configurator.config = xml("<config><interface hosts='hostA' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='router' names='eth0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='router' names='eth1' address='10.0.1.1' netmask='255.255.255.0'/><interface hosts='hostB' address='10.0.1.2' netmask='255.255.255.0'/></config>")
+*.router.hasStatus = true
+*.configurator.addDefaultRoutes = true
+*.configurator.addSubnetRoutes = true
+*.router.ipv4.ip.typename = "ArpFailureIpv4"
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "ArpFailureUnreachablePeer"
+*.hostB.numApps = 0
+**.ipv4.arp.typename = "Arp"
+**.ipv4.arp.retryTimeout = 0.1s
+**.ipv4.arp.retryCount = 3
+
+%contains: stdout
+ARP FAILURE UNREACHABLE StopPending: PASS
