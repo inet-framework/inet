@@ -79,6 +79,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     std::vector<std::string> configuredInterfaceNames;
     std::map<int, L3Address> selectedAddresses;
     std::string primaryInterfaceName;
+    L3Address selfAddress;
+    bool primaryResetPending = false;
     bool usingIpv6 = false;
     long numSent = 0;
     long numReceived = 0;
@@ -238,6 +240,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void forgetInterface(int interfaceId);
     void rememberRemovedRoute(IRoute *route);
     bool isUsableInterface(const NetworkInterface *candidate) const;
+    bool isPrimaryAvailable() const;
     bool isSelectedInterface(const NetworkInterface *candidate) const;
     bool isLocalAodvAddress(const L3Address& address) const;
     bool resolvePreviousHop(const Packet *packet, Link& link) const;

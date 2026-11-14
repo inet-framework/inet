@@ -248,6 +248,10 @@ void Aodv::checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packet
 
 void Aodv::processPacket(Packet *packet)
 {
+    if (!isPrimaryAvailable()) {
+        delete packet;
+        return;
+    }
     // Validate before bindings or liveness can be changed by reserved control input.
     try {
         auto control = packet->peekAtFront<AodvControlPacket>();
@@ -484,6 +488,11 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
     if (destination.isBroadcast() || destination.isMulticast() || routingTable->isLocalAddress(destination) ||
             classifyDatagram(datagram) != DatagramKind::DATA)
         return ACCEPT;
+
+    if (!isPrimaryAvailable()) {
+        auto route = selectDataRoute(destination);
+        return route && route->getSource() != this && prepareDataPacket(datagram, route) ? ACCEPT : DROP;
+    }
 
     L3Address target = destination;
     if (hasExternalGateway && isExternalAddress(destination)) {
@@ -734,7 +743,7 @@ void Aodv::releaseEligiblePackets()
 
 L3Address Aodv::getSelfIPAddress() const
 {
-    return interface->getNetworkAddress();
+    return selfAddress;
 }
 
 void Aodv::delayDatagram(Packet *datagram)
@@ -1470,12 +1479,15 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obje
             return; // multicast membership changes do not change the selected identity
 #endif
         auto candidate = changed ? changed->getNetworkInterface() : dynamic_cast<NetworkInterface *>(object);
-        if (!candidate || candidate == interface || std::find(configuredInterfaceNames.begin(), configuredInterfaceNames.end(),
+        if (!candidate || std::find(configuredInterfaceNames.begin(), configuredInterfaceNames.end(),
                 candidate->getInterfaceName()) == configuredInterfaceNames.end())
             return;
         auto previous = selectedAddresses.find(candidate->getInterfaceId());
         bool invalidated = signalID == interfaceDeletedSignal || !isUsableInterface(candidate) ||
             (previous != selectedAddresses.end() && previous->second != candidate->getNetworkAddress());
+        if (candidate->getInterfaceName() == primaryInterfaceName &&
+                (invalidated || interface != candidate || selfAddress != candidate->getNetworkAddress()))
+            primaryResetPending = true;
         if (invalidated)
             forgetInterface(candidate->getInterfaceId());
         if (!interfaceChangeTimer->isScheduled())
@@ -1808,10 +1820,20 @@ void Aodv::forgetInterface(int interfaceId)
         scheduleLinkTimer(neighborTimer, neighborDeadlines);
 }
 
+bool Aodv::isPrimaryAvailable() const
+{
+    return interface && !primaryResetPending && isSelectedInterface(interface) &&
+        isUsableInterface(interface) && interface->getNetworkAddress() == selfAddress;
+}
+
 void Aodv::reconcileInterfaces()
 {
+    bool reset = primaryResetPending;
+    primaryResetPending = false;
     auto losses = std::move(pendingInterfaceLosses);
     pendingInterfaceLosses.clear();
+    if (reset)
+        clearState();
     auto primary = interfaceTable->findInterfaceByName(primaryInterfaceName.c_str());
     interface = isUsableInterface(primary) ? primary : nullptr;
     selectedInterfaces.clear();
@@ -1835,9 +1857,22 @@ void Aodv::reconcileInterfaces()
         if (usingIpv6)
             socket.joinMulticastGroup(addressType->getBroadcastAddress(), candidate->getInterfaceId());
     }
-    for (const auto& entry : losses)
-        queueRouteError(entry.second.destinations, entry.second.precursors, false, *jitterPar);
-    releaseEligiblePackets();
+    if (interface && reset) {
+        selfAddress = interface->getNetworkAddress();
+        recovering = true;
+        recoveryDeadline = simTime() + deletePeriod;
+        scheduleAt(recoveryDeadline, recoveryTimer);
+        rateEpoch = simTime();
+        rateWindow = 0;
+        scheduleAfter(1, counterTimer);
+        if (helloMsgTimer)
+            scheduleAfter(helloInterval - samplePeriodicJitter(), helloMsgTimer);
+    }
+    if (!reset) {
+        for (const auto& entry : losses)
+            queueRouteError(entry.second.destinations, entry.second.precursors, false, *jitterPar);
+        releaseEligiblePackets();
+    }
     scheduleExpungeRoutes();
 }
 
@@ -1898,6 +1933,8 @@ void Aodv::configureInterfaces()
         configuredInterfaceNames.push_back(selected->getInterfaceName());
         selectedAddresses[selected->getInterfaceId()] = selected->getNetworkAddress();
     }
+    selfAddress = interface->getNetworkAddress();
+    primaryResetPending = false;
 }
 
 bool Aodv::isSelectedInterface(const NetworkInterface *candidate) const
@@ -2341,6 +2378,8 @@ void Aodv::refreshSourceRoute(Packet *packet)
 
 void Aodv::sendRERRWhenNoRouteToForward(Packet *packet)
 {
+    if (!isPrimaryAvailable())
+        return;
     auto destination = getNetworkProtocolHeader(packet)->getDestinationAddress();
     IRoute *retained = nullptr;
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
@@ -2436,7 +2475,7 @@ void Aodv::sendRREPACK(const Ptr<RrepAck>& reply, const L3Address& destination, 
 
 bool Aodv::canSendControl(AodvControlPacketType type) const
 {
-    return operationalState == OPERATING && (!recovering ||
+    return operationalState == OPERATING && isPrimaryAvailable() && (!recovering ||
         type == RERR || type == RERR_IPv6 || type == RREPACK || type == RREPACK_IPv6);
 }
 
