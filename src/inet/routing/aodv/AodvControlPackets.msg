@@ -50,6 +50,7 @@ class Rreq extends AodvControlPacket
     uint32_t destSeqNum;    // The latest sequence number received in the past by the originator for any route towards the destination.
     L3Address originatorAddr;    // The IP address of the node which originated the Route Request.
     uint32_t originatorSeqNum;    // The current sequence number to be used in the route entry pointing towards the originator of the route request.
+    uint8_t extensions[]; // RFC 3561 section 9 Type/Length/Data records, preserved by relays
 }
 
 //
@@ -68,6 +69,7 @@ class Rrep extends AodvControlPacket
     uint32_t destSeqNum;    // The destination sequence number associated to the route.
     L3Address originatorAddr;    // The IP address of the node which originated the RREQ for which the route is supplied.
     simtime_t lifeTime;     // The time in milliseconds for which nodes receiving the RREP consider the route to be valid.
+    uint8_t extensions[]; // RFC 3561 section 9 Type/Length/Data records, including Hello Interval
 }
 
 //

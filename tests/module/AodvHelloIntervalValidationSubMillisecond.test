@@ -1,0 +1,107 @@
+%description:
+A 999us Hello interval remains valid: native timer output advertises the
+conservative one-millisecond interval and an encodable lifetime. A public
+owned-route fixture supplies only the active-route condition for Hello output.
+
+%file: Probe.cc
+#include "inet/common/SimpleModule.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/routing/aodv/AodvControlPackets_m.h"
+#include "inet/routing/aodv/AodvRouteData.h"
+using namespace inet;
+using namespace inet::aodv;
+class HelloIntervalSubMillisecondProbe : public SimpleModule, public cListener
+{
+    int hellos = 0;
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_APPLICATION_LAYER) return;
+        auto table = check_and_cast<IRoutingTable *>(getModuleByPath("^.dut.ipv4.routingTable"));
+        auto interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.dut.interfaceTable"));
+        auto route = table->createRoute();
+        route->setSource(getModuleByPath("^.dut.aodv"));
+        route->setSourceType(IRoute::AODV);
+        route->setDestination(Ipv4Address("10.0.0.2"));
+        route->setPrefixLength(32);
+        route->setNextHop(Ipv4Address("10.0.0.2"));
+        route->setInterface(interfaces->findInterfaceByName("wlan0"));
+        route->setMetric(1);
+        auto data = new AodvRouteData();
+        data->setDestSeqNum(10);
+        data->setLifeTime(1);
+        route->setProtocolData(data);
+        table->addRoute(route);
+        getModuleByPath("^.dut.udp")->subscribe(packetSentToLowerSignal, this);
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto packet = check_and_cast<Packet *>(object);
+        auto header = dynamicPtrCast<const Rrep>(packet->peekDataAt<AodvControlPacket>(B(8)));
+        if (!header || !header->getOriginatorAddr().isUnspecified()) return;
+        ASSERT(header->getExtensionsArraySize() == 6);
+        const uint8_t expected[] = {1, 4, 0, 0, 0, 1};
+        for (size_t i = 0; i < 6; ++i) ASSERT(header->getExtensions(i) == expected[i]);
+        ASSERT(header->getLifeTime() == SimTime(1, SIMTIME_MS));
+        ++hellos;
+    }
+    void finish() override {
+        ASSERT(hellos >= 3);
+        std::cout << "AODV HelloInterval999us: PASS\n";
+    }
+};
+Define_Module(HelloIntervalSubMillisecondProbe);
+
+%file: test.ned
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple HelloIntervalSubMillisecondProbe
+{
+    parameters:
+        @class(::HelloIntervalSubMillisecondProbe);
+}
+network AodvHelloIntervalValidation
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        probe: HelloIntervalSubMillisecondProbe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvHelloIntervalValidation
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = true
+*.dut.aodv.helloInterval = 999us
+*.dut.aodv.allowedHelloLoss = 1
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].bitrate = 1Mbps
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV HelloInterval999us: PASS

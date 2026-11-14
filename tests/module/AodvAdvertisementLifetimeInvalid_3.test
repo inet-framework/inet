@@ -42,8 +42,9 @@ cmdenv-express-mode = true
 **.mobility.initialY = 10m
 **.mobility.initialZ = 0m
 *.dut.aodv.useHelloMessages = true
-*.dut.aodv.allowedHelloLoss = 1
-*.dut.aodv.helloInterval = 999us
+*.dut.aodv.deletePeriod = 15s
+*.dut.aodv.allowedHelloLoss = 2
+*.dut.aodv.helloInterval = 2147483.648s
 
 %exitcode: 1
 %contains: test.err

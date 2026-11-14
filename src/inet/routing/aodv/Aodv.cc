@@ -6,6 +6,7 @@
 
 
 #include "inet/routing/aodv/Aodv.h"
+#include "inet/routing/aodv/AodvExtensions.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -99,6 +100,9 @@ void Aodv::initialize(int stage)
         destinationOnlyFlag = par("destinationOnlyFlag");
         activeRouteTimeout = par("activeRouteTimeout");
         helloInterval = par("helloInterval");
+        encodedHelloInterval = helloInterval.trunc(SIMTIME_MS);
+        if (encodedHelloInterval < helloInterval)
+            encodedHelloInterval += SimTime(1, SIMTIME_MS);
         allowedHelloLoss = par("allowedHelloLoss");
         netDiameter = par("netDiameter");
         nodeTraversalTime = par("nodeTraversalTime");
@@ -132,14 +136,15 @@ void Aodv::initialize(int stage)
         }
         if (quantizeAdvertisementLifetime(myRouteTimeout) == SIMTIME_ZERO)
             throw cRuntimeError("AODV myRouteTimeout must fit 1..UINT32_MAX milliseconds");
-        if (helloInterval.raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
-                quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval) == SIMTIME_ZERO)
+        if (encodedHelloInterval.inUnit(SIMTIME_MS) > UINT32_MAX ||
+                encodedHelloInterval.raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
+                quantizeAdvertisementLifetime(allowedHelloLoss * encodedHelloInterval) == SIMTIME_ZERO)
             throw cRuntimeError("AODV allowedHelloLoss * helloInterval must fit 1..UINT32_MAX milliseconds");
         if (pathDiscoveryTime > SimTime::getMaxTime() / 2 || myRouteTimeout < 2 * pathDiscoveryTime)
             throw cRuntimeError("AODV myRouteTimeout must be at least 2 * pathDiscoveryTime");
-        if (useHelloMessages && activeRouteTimeout <= allowedHelloLoss * helloInterval)
+        if (useHelloMessages && activeRouteTimeout <= allowedHelloLoss * encodedHelloInterval)
             throw cRuntimeError("AODV activeRouteTimeout must exceed allowedHelloLoss * helloInterval when Hello is enabled");
-        if (deletePeriod < activeRouteTimeout || (useHelloMessages && deletePeriod < allowedHelloLoss * helloInterval))
+        if (deletePeriod < activeRouteTimeout || (useHelloMessages && deletePeriod < allowedHelloLoss * encodedHelloInterval))
             throw cRuntimeError("AODV deletePeriod must cover activeRouteTimeout and the enabled Hello-loss interval");
         WATCH(numSent);
         WATCH(numReceived);
@@ -233,6 +238,27 @@ void Aodv::checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packet
 
 void Aodv::processPacket(Packet *packet)
 {
+    // Validate before bindings or liveness can be changed by reserved control input.
+    try {
+        auto control = packet->peekAtFront<AodvControlPacket>();
+        uint32_t interval = 0;
+        bool valid = control->isCorrect();
+        if (auto reply = dynamicPtrCast<const Rrep>(control))
+            valid = valid && readAodvExtensions(*reply, interval);
+        else if (auto request = dynamicPtrCast<const Rreq>(control))
+            valid = valid && readAodvExtensions(*request, interval);
+        if (interval && (SimTime(interval, SIMTIME_MS).raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
+                SimTime(interval, SIMTIME_MS) * allowedHelloLoss > SimTime::getMaxTime() - simTime()))
+            valid = false;
+        if (!valid) {
+            delete packet;
+            return;
+        }
+    }
+    catch (const cRuntimeError&) {
+        delete packet;
+        return;
+    }
     auto indication = packet->findTag<InterfaceInd>();
     auto ingress = indication ? interfaceTable->findInterfaceById(indication->getInterfaceId()) : nullptr;
     if (!isSelectedInterface(ingress)) {
@@ -257,6 +283,7 @@ void Aodv::processPacket(Packet *packet)
     }
     else
         disableHelloObservation(ingress->getInterfaceId());
+    observeIncoming(packet);
     // KLUDGE I added this -1 after TTL decrement has been moved in Ipv4
     int receivedTTL = packet->getTag<HopLimitInd>()->getHopLimit();
     unsigned int arrivalPacketTTL = receivedTTL > 0 ? receivedTTL - 1 : 0;
@@ -423,8 +450,20 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
 {
     if (operationalState != OPERATING)
         return DROP;
-    if (!local)
-        observeIncoming(datagram);
+    if (!local) {
+        // Native ND remains observable, but reserved AODV UDP is observed only
+        // after complete message validation in processPacket().
+        auto kind = classifyDatagram(datagram);
+        bool nativeLinkControl = false;
+#ifdef INET_WITH_IPv6
+        if (usingIpv6) {
+            auto ipv6 = dynamicPtrCast<const Ipv6Header>(getNetworkProtocolHeader(datagram));
+            nativeLinkControl = ipv6 && ipv6->getProtocolId() == IP_PROT_IPv6_ICMP;
+        }
+#endif
+        if (kind == DatagramKind::DATA || nativeLinkControl)
+            observeIncoming(datagram);
+    }
     const auto& header = getNetworkProtocolHeader(datagram);
     auto destination = header->getDestinationAddress();
     if (destination.isBroadcast() || destination.isMulticast() || routingTable->isLocalAddress(destination) ||
@@ -1729,6 +1768,7 @@ void Aodv::clearState(bool disposeQueued)
     unusableBindings.clear();
     attributionWarnings.clear();
     neighborDeadlines.clear();
+    neighborIntervals.clear();
     disabledHelloObservation.clear();
     if (neighborTimer)
         cancelEvent(neighborTimer);
@@ -1806,12 +1846,18 @@ const Ptr<Rrep> Aodv::createHelloMessage(NetworkInterface *output)
 
     auto helloMessage = makeShared<Rrep>(); // TODO "AODV-HelloMsg");
     helloMessage->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
-    helloMessage->setChunkLength(usingIpv6 ? B(44) : B(20));
+    helloMessage->setChunkLength((usingIpv6 ? B(44) : B(20)) + B(6));
+    auto interval = uint32_t(encodedHelloInterval.inUnit(SIMTIME_MS));
+    helloMessage->setExtensionsArraySize(6);
+    helloMessage->setExtensions(0, 1);
+    helloMessage->setExtensions(1, 4);
+    for (unsigned int i = 0; i < 4; ++i)
+        helloMessage->setExtensions(i + 2, interval >> (24 - 8 * i));
 
     helloMessage->setDestAddr((output ? output : interface)->getNetworkAddress());
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
-    helloMessage->setLifeTime(quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval));
+    helloMessage->setLifeTime(quantizeAdvertisementLifetime(allowedHelloLoss * encodedHelloInterval));
 
     return helloMessage;
 }
@@ -1857,10 +1903,15 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
         return;
     auto sender = helloMessage->getDestAddr();
     Link link(sender, ingress->getInterfaceId());
+    uint32_t intervalMilliseconds = 0;
+    if (!readAodvExtensions(*helloMessage, intervalMilliseconds))
+        return;
+    auto interval = intervalMilliseconds ? SimTime(intervalMilliseconds, SIMTIME_MS) : helloInterval;
     auto binding = neighborBindings.find(link);
     if (useHelloMessages && !disabledHelloObservation.count(link.second) && binding != neighborBindings.end() &&
             !unusableBindings.count({link.second, binding->second})) {
-        neighborDeadlines[link] = simTime() + allowedHelloLoss * helloInterval;
+        neighborIntervals[link] = interval;
+        neighborDeadlines[link] = simTime() + allowedHelloLoss * interval;
         scheduleLinkTimer(neighborTimer, neighborDeadlines);
     }
     auto route = findExactRoute(sender);
@@ -1870,7 +1921,7 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
     // RFC 3561 sections 6.1 and 6.9. A Hello cannot replace fresher retained state.
     if (data && data->hasValidDestNum() && !AodvSequence::isAtLeast(sequence, data->getDestSeqNum()))
         return;
-    auto lifetime = simTime() + std::max(helloMessage->getLifeTime(), allowedHelloLoss * helloInterval);
+    auto lifetime = simTime() + std::max(helloMessage->getLifeTime(), allowedHelloLoss * interval);
     if (data && data->isActive())
         lifetime = std::max(lifetime, data->getLifeTime());
     if (route)
@@ -2191,8 +2242,10 @@ void Aodv::disableHelloObservation(int interfaceId)
     EV_WARN << "AODV Hello loss detection disabled on interface " << interfaceId
             << " until restart: immediate sender attribution is unavailable or unstable." << endl;
     for (auto it = neighborDeadlines.begin(); it != neighborDeadlines.end();)
-        if (it->first.second == interfaceId)
+        if (it->first.second == interfaceId) {
+            neighborIntervals.erase(it->first);
             it = neighborDeadlines.erase(it);
+        }
         else
             ++it;
     scheduleLinkTimer(neighborTimer, neighborDeadlines);
@@ -2226,7 +2279,7 @@ void Aodv::observeIncoming(const Packet *packet)
         return; // valid metadata from an unlearned sender cannot arm a deadline
     auto armed = neighborDeadlines.find(binding->second);
     if (armed != neighborDeadlines.end()) {
-        armed->second = simTime() + allowedHelloLoss * helloInterval;
+        armed->second = simTime() + allowedHelloLoss * neighborIntervals.at(binding->second);
         scheduleLinkTimer(neighborTimer, neighborDeadlines);
     }
 }
@@ -2238,6 +2291,7 @@ void Aodv::handleNeighborTimer()
     for (auto it = neighborDeadlines.begin(); it != neighborDeadlines.end();)
         if (it->second <= simTime()) {
             lost.push_back(it->first);
+            neighborIntervals.erase(it->first);
             it = neighborDeadlines.erase(it);
         }
         else

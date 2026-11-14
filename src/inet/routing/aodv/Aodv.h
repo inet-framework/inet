@@ -89,6 +89,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
     simtime_t helloInterval;
+    simtime_t encodedHelloInterval;
     unsigned int netDiameter = 0;
     unsigned int rreqRetries = 0;
     unsigned int rreqRatelimit = 0;
@@ -151,6 +152,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     std::map<Link, simtime_t> pendingAcks;
     std::map<Link, simtime_t> blacklist;
     std::map<Link, simtime_t> neighborDeadlines;
+    std::map<Link, simtime_t> neighborIntervals;
     std::set<int> disabledHelloObservation;
     std::map<Link, MacAddress> neighborBindings;
     std::map<MacLink, Link> inverseBindings;
