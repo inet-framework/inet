@@ -119,6 +119,7 @@ class INET_API Interception
   public:
     std::string tapName;          // tap module name (a sibling of the tester)
     std::string matchExpression;  // PacketFilter expression over the dissected frame
+    std::function<bool(const Packet *)> packetPredicate; // typed inspection, AND with the expression
     long minimumBytes = 0;        // also require the (inner) frame to be at least this big
     std::string fromNode;         // the frame comes from this node; "" = any
     std::string toNode;           // the frame goes to this node; "" = any
@@ -137,6 +138,7 @@ class INET_API Interception
     std::string description;      // optional human phrase
 
     Interception& filterPacket(const char *expr) { matchExpression = expr; return *this; }
+    Interception& filterPacket(std::function<bool(const Packet *)> predicate) { packetPredicate = std::move(predicate); return *this; }
     Interception& minBytes(long n) { minimumBytes = n; return *this; }
     Interception& nth(int k) { occurrence = k; return *this; }
     // Act on the k-th match and on every match after it. A rule that must remove a segment
