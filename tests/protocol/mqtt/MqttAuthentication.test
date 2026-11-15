@@ -1,0 +1,78 @@
+%description:
+Production clients authenticate to a production broker with a nonempty username
+and empty password. The publisher must encode a present, zero-length password,
+receive an accepted CONNACK and deliver an exact binary payload to the subscriber.
+A separate production client with a wrong password must be refused.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_authentication")
+        .meanwhile(exactlyTimes(1, on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p = c.event.packet->peekAtFront<MqttPacket>();
+                return p->getType() == CONNECT && p->getUserNamePresent() &&
+                    std::string(p->getUserName()) == "alice" && p->getPasswordPresent() &&
+                    p->getPasswordArraySize() == 0;
+            }).within(1)))
+        .meanwhile(exactlyTimes(1, on("publisher.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p = c.event.packet->peekAtFront<MqttPacket>();
+                return p->getType() == CONNACK && p->getReturnCode() == 0;
+            }).within(1)))
+        .meanwhile(exactlyTimes(1, on("publisher.app[1]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p = c.event.packet->peekAtFront<MqttPacket>();
+                return p->getType() == CONNACK && p->getReturnCode() == 4;
+            }).within(1)))
+        .meanwhile(never(on("publisher.app[1]").signal("connectionChanged").filterValue(1).within(2)))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                return c.event.packet->peekAtFront<MqttPacket>()->getType() == SUBACK;
+            }).within(1))
+        .once(on("subscriber.app[0]").signal("packetSentToUpper")
+            .assertEvent([](const MatchContext& c) {
+                return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0, 255, 65});
+            }).within(1))
+        .never(on("subscriber.app[0]").signal("packetSentToUpper").within(0.5));
+}
+
+%activity:
+EV << "MQTT authentication fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 2
+*.publisher.app[*].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[1].clientIdentifier = "rejected"
+*.publisher.app[*].connectAddress = "broker"
+*.publisher.app[*].startTime = 0.1s
+*.publisher.app[*].reconnectInterval = 10s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='auth/value' payload='00ff41'/></mqtt>")
+*.publisher.app[1].workload = xml("<mqtt><publish at='0.7s' topic='auth/value' payload='42'/></mqtt>")
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='auth/value'/></mqtt>")
+*.publisher.app[1].password = "wrong"
+**.app[*].userName = "alice"
+**.app[*].password = ""
+
+%contains: stdout
+PROTOCOLTEST mqtt_authentication: PASS
