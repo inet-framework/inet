@@ -14,6 +14,7 @@ class INET_API MqttBroker : public ApplicationBase, public TcpSocket::ICallback
     SocketMap socketMap;
     std::map<int, MqttConnection> connections;
     std::map<std::string, MqttSession> sessions;
+    std::map<std::string, Ptr<const MqttPacket>> retained;
     cMessage *timeoutTimer = nullptr;
 
     void initialize(int stage) override;

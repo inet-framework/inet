@@ -31,6 +31,8 @@ MqttClient::~MqttClient()
     cancelAndDelete(connectTimer);
     cancelAndDelete(timeoutTimer);
     cancelAndDelete(workTimer);
+    cancelAndDelete(pingTimer);
+    cancelAndDelete(pingResponseTimer);
 }
 
 void MqttClient::initialize(int stage)
@@ -38,13 +40,16 @@ void MqttClient::initialize(int stage)
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         connectTimer = new cMessage("connect"); timeoutTimer = new cMessage("connectionTimeout"); workTimer = new cMessage("work");
+        pingTimer = new cMessage("keepAlive"); pingResponseTimer = new cMessage("pingResponse");
         socket.setCallback(this); socket.setOutputGate(gate("socketOut"));
         if (par("connectPort").intValue() < 1 || par("connectPort").intValue() > 65535 ||
                 par("startTime").doubleValue() < 0 || par("reconnectInterval").doubleValue() <= 0 ||
                 par("connectTimeout").doubleValue() <= 0 || par("pingResponseTimeout").doubleValue() <= 0 || par("stopOperationTimeout").doubleValue() <= 0)
             throw cRuntimeError("Invalid MQTT port or timing parameter");
-        if (par("keepAlive").intValue() != 0 || *par("willTopic").stringValue())
-            throw cRuntimeError("This MQTT stage supports keepalive zero and no Will");
+        if (par("keepAlive").intValue() < 0 || par("keepAlive").intValue() > 65535 ||
+                par("willQos").intValue() < 0 || par("willQos").intValue() > 2 ||
+                (*par("willTopic").stringValue() && !MqttTopicFilter::isValidTopic(par("willTopic").stdstringValue())))
+            throw cRuntimeError("Invalid MQTT keepalive or Will configuration");
         readWorkload();
     }
 }
@@ -66,7 +71,6 @@ void MqttClient::readWorkload()
         if (name == "publish") {
             packet->setType(PUBLISH); packet->setQos(qos); packet->setTopic(attribute("topic"));
             packet->setRetain(std::string(attribute("retain", "false")) == "true");
-            if (packet->getRetain()) throw cRuntimeError("Retained messages are not implemented in this stage");
             if (!MqttTopicFilter::isValidTopic(packet->getTopic())) throw cRuntimeError("Invalid MQTT workload topic");
             auto bytes = mqttHexPayload(attribute("payload", "")); packet->setPayloadArraySize(bytes.size());
             for (size_t i = 0; i < bytes.size(); i++) packet->setPayload(i, bytes[i]);
@@ -99,6 +103,7 @@ void MqttClient::connect()
     socket.bind(*local ? L3AddressResolver().resolve(local) : L3Address(), par("localPort"));
     connection = MqttConnection();
     connection.cleanSession = par("cleanSession");
+    connection.keepAlive = par("keepAlive");
     socket.connect(L3AddressResolver().resolve(par("connectAddress")), par("connectPort"));
     scheduleAt(simTime() + par("connectTimeout"), timeoutTimer);
 }
@@ -110,12 +115,22 @@ void MqttClient::sendControl(const Ptr<MqttPacket>& packet)
     message->addTag<PacketProtocolTag>()->setProtocol(&mqttProtocol);
     emit(registerSignal("packetSentToLower"), message);
     socket.send(message);
+    if (connection.phase == MqttConnection::ACTIVE && connection.keepAlive) {
+        cancelEvent(pingTimer);
+        scheduleAt(simTime() + SimTime(connection.keepAlive), pingTimer);
+    }
 }
 
 void MqttClient::socketEstablished(TcpSocket *)
 {
     auto packet = makeShared<MqttPacket>(); packet->setType(CONNECT);
     packet->setClientIdentifier(par("clientIdentifier")); packet->setCleanSession(connection.cleanSession);
+    packet->setKeepAlive(connection.keepAlive);
+    if (*par("willTopic").stringValue()) {
+        packet->setWill(true); packet->setWillTopic(par("willTopic")); packet->setWillQos(par("willQos")); packet->setWillRetain(par("willRetain"));
+        auto bytes = mqttHexPayload(par("willPayload").stdstringValue()); packet->setWillPayloadArraySize(bytes.size());
+        for (size_t i = 0; i < bytes.size(); i++) packet->setWillPayload(i, bytes[i]);
+    }
     std::string user = par("userName"), password = par("password");
     packet->setUserNamePresent(!user.empty() || !password.empty()); packet->setUserName(user.c_str());
     packet->setPasswordPresent(packet->getUserNamePresent()); packet->setPasswordArraySize(password.size());
@@ -184,6 +199,7 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
         sendPendingSubscription();
         for (auto& outgoing : session.flush()) sendControl(outgoing);
         emit(registerSignal("connectionChanged"), 1L);
+        if (connection.keepAlive && !pingTimer->isScheduled()) scheduleAt(simTime() + SimTime(connection.keepAlive), pingTimer);
         scheduleWork(); return;
     }
     if (packet->getType() == SUBACK || packet->getType() == UNSUBACK) {
@@ -212,6 +228,7 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
             auto ack = makeShared<MqttPacket>(); ack->setType(packet->getQos() == 1 ? PUBACK : PUBREC); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
         }
     }
+    else if (packet->getType() == PINGRESP) cancelEvent(pingResponseTimer);
     else if (packet->getType() == PUBREL) {
         session.incomingQos2.erase(packet->getPacketIdentifier());
         auto ack = makeShared<MqttPacket>(); ack->setType(PUBCOMP); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
@@ -246,6 +263,7 @@ void MqttClient::failConnection()
 {
     connection.phase = MqttConnection::CLOSING;
     cancelEvent(timeoutTimer); cancelEvent(workTimer);
+    cancelEvent(pingTimer); cancelEvent(pingResponseTimer);
     socket.getReadBuffer()->clear();
     if (socket.isOpen()) socket.abort();
     if (pendingSubscription) {
@@ -261,10 +279,12 @@ void MqttClient::failConnection()
 void MqttClient::disconnect()
 {
     cancelEvent(connectTimer); cancelEvent(timeoutTimer); cancelEvent(workTimer);
+    cancelEvent(pingTimer); cancelEvent(pingResponseTimer);
     if (connection.phase == MqttConnection::ACTIVE) {
         auto packet = makeShared<MqttPacket>(); packet->setType(DISCONNECT); sendControl(packet);
     }
     connection.phase = MqttConnection::CLOSING;
+    cancelEvent(pingTimer);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::PEER_CLOSED) socket.close();
     else if (socket.isOpen()) socket.abort();
 }
@@ -278,6 +298,7 @@ void MqttClient::handleStopOperation(LifecycleOperation *)
 void MqttClient::handleCrashOperation(LifecycleOperation *)
 {
     cancelEvent(connectTimer); cancelEvent(timeoutTimer); cancelEvent(workTimer);
+    cancelEvent(pingTimer); cancelEvent(pingResponseTimer);
     socket.destroy(); socket.getReadBuffer()->clear(); connection.phase = MqttConnection::CLOSING;
 }
 void MqttClient::handleMessageWhenUp(cMessage *message)
@@ -285,6 +306,11 @@ void MqttClient::handleMessageWhenUp(cMessage *message)
     if (message == connectTimer) connect();
     else if (message == timeoutTimer) failConnection();
     else if (message == workTimer) runWork();
+    else if (message == pingResponseTimer) failConnection();
+    else if (message == pingTimer) {
+        auto packet = makeShared<MqttPacket>(); packet->setType(PINGREQ); sendControl(packet);
+        if (!pingResponseTimer->isScheduled()) scheduleAt(simTime() + par("pingResponseTimeout"), pingResponseTimer);
+    }
     else if (socket.belongsToSocket(message)) socket.processMessage(message);
     else delete message;
 }

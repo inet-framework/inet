@@ -23,6 +23,8 @@ class INET_API MqttClient : public ApplicationBase, public TcpSocket::ICallback
     cMessage *connectTimer = nullptr;
     cMessage *timeoutTimer = nullptr;
     cMessage *workTimer = nullptr;
+    cMessage *pingTimer = nullptr;
+    cMessage *pingResponseTimer = nullptr;
 
     void initialize(int stage) override;
     int numInitStages() const override { return NUM_INIT_STAGES; }

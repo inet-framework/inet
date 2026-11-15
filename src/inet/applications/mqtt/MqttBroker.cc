@@ -65,8 +65,7 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
                 std::string(packet->getUserName()) != par("userName").stdstringValue() || password != par("password").stdstringValue())) refusal = 4;
         auto response = makeShared<MqttPacket>(); response->setType(CONNACK); response->setReturnCode(refusal);
         if (refusal) { sendControl(socket, response); closeConnection(socket); return; }
-        if (packet->getKeepAlive() || packet->getWill())
-            throw cRuntimeError("Requested MQTT behavior is not supported in this implementation stage");
+        if (packet->getWill() && !MqttTopicFilter::isValidTopic(packet->getWillTopic())) throw cRuntimeError("Invalid MQTT Will topic");
         // Section 3.1.4: disconnect an old connection before activating its replacement.
         for (auto& pair : connections) {
             if (pair.first != socket->getSocketId() && pair.second.phase == MqttConnection::ACTIVE && pair.second.clientIdentifier == id)
@@ -76,6 +75,15 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
         if (!present) sessions[id] = MqttSession();
         response->setSessionPresent(present);
         connection.clientIdentifier = id; connection.cleanSession = packet->getCleanSession();
+        connection.keepAlive = packet->getKeepAlive();
+        if (connection.keepAlive) connection.deadline = simTime() + SimTime(connection.keepAlive * 1.5);
+        if (packet->getWill()) {
+            auto will = makeShared<MqttPacket>(); will->setType(PUBLISH); will->setTopic(packet->getWillTopic());
+            will->setQos(packet->getWillQos()); will->setRetain(packet->getWillRetain());
+            will->setPayloadArraySize(packet->getWillPayloadArraySize());
+            for (size_t i = 0; i < packet->getWillPayloadArraySize(); i++) will->setPayload(i, packet->getWillPayload(i));
+            connection.will = will;
+        }
         connection.phase = MqttConnection::ACTIVE;
         sendControl(socket, response);
         for (auto& outgoing : sessions.at(id).retry()) sendControl(socket, outgoing);
@@ -99,8 +107,18 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
             else session.subscriptions.erase(filter);
         }
         sendControl(socket, response);
+        if (packet->getType() == SUBSCRIBE) {
+            for (size_t i = 0; i < packet->getFiltersArraySize(); i++)
+                for (auto& entry : retained)
+                    if (MqttTopicFilter::matches(packet->getFilters(i), entry.first)) {
+                        auto copy = staticPtrCast<MqttPacket>(entry.second->dupShared());
+                        copy->setQos(std::min(copy->getQos(), packet->getResults(i))); copy->setRetain(true);
+                        session.enqueue(copy);
+                    }
+            for (auto& outgoing : session.flush()) sendControl(socket, outgoing);
+        }
     }
-    else if (packet->getType() == PUBLISH && !packet->getRetain()) {
+    else if (packet->getType() == PUBLISH) {
         if (!MqttTopicFilter::isValidTopic(packet->getTopic())) throw cRuntimeError("Invalid MQTT topic");
         if (session.acceptPublication(packet)) route(packet);
         if (packet->getQos()) {
@@ -115,11 +133,19 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
         session.incomingQos2.erase(packet->getPacketIdentifier());
         auto ack = makeShared<MqttPacket>(); ack->setType(PUBCOMP); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(socket, ack);
     }
-    else if (packet->getType() == DISCONNECT) closeConnection(socket);
+    else if (packet->getType() == PINGREQ) {
+        auto response = makeShared<MqttPacket>(); response->setType(PINGRESP); sendControl(socket, response);
+    }
+    else if (packet->getType() == DISCONNECT) { connection.will = nullptr; closeConnection(socket); }
     else throw cRuntimeError("Unexpected MQTT packet in active broker connection");
 }
 void MqttBroker::route(const Ptr<const MqttPacket>& packet)
 {
+    // Section 3.3.1.3: retained records are independent of any client's session.
+    if (packet->getRetain()) {
+        if (packet->getPayloadArraySize() == 0) retained.erase(packet->getTopic());
+        else retained[packet->getTopic()] = packet;
+    }
     for (auto& pair : sessions) {
         auto& session = pair.second;
         int granted = -1;
@@ -144,7 +170,9 @@ void MqttBroker::closeConnection(TcpSocket *socket)
     if (found == connections.end() || found->second.phase == MqttConnection::CLOSING) return;
     auto& connection = found->second;
     connection.phase = MqttConnection::CLOSING;
+    auto will = connection.will; connection.will = nullptr;
     if (connection.cleanSession) sessions.erase(connection.clientIdentifier);
+    if (will) route(will);
     socket->getReadBuffer()->clear();
     if (socket->getState() == TcpSocket::CONNECTED || socket->getState() == TcpSocket::PEER_CLOSED) socket->close();
     else if (socket->isOpen()) socket->abort();
@@ -158,10 +186,14 @@ void MqttBroker::socketDataArrived(TcpSocket *socket, Packet *message, bool)
     socket->getReadBuffer()->push(message->peekData()); delete message;
     try {
         while (auto packet = MqttConnection::extract(*socket->getReadBuffer())) {
+            connection.lastReceived = simTime();
+            if (connection.phase == MqttConnection::ACTIVE && connection.keepAlive)
+                connection.deadline = simTime() + SimTime(connection.keepAlive * 1.5);
             Packet observation("mqttReceived", packet); emit(registerSignal("packetReceivedFromLower"), &observation);
             receiveControl(socket, packet);
             if (connection.phase == MqttConnection::CLOSING) break;
         }
+        scheduleTimeout();
     }
     catch (cRuntimeError& error) { EV_WARN << error.what() << endl; closeConnection(socket); }
 }
@@ -170,14 +202,15 @@ void MqttBroker::scheduleTimeout()
     cancelEvent(timeoutTimer);
     simtime_t next = SimTime::getMaxTime();
     for (auto& pair : connections)
-        if (pair.second.phase == MqttConnection::WAITING) next = std::min(next, pair.second.deadline);
+        if (pair.second.phase == MqttConnection::WAITING || (pair.second.phase == MqttConnection::ACTIVE && pair.second.keepAlive))
+            next = std::min(next, pair.second.deadline);
     if (next != SimTime::getMaxTime()) scheduleAt(std::max(simTime(), next), timeoutTimer);
 }
 void MqttBroker::handleMessageWhenUp(cMessage *message)
 {
     if (message == timeoutTimer) {
         for (auto& pair : connections)
-            if (pair.second.phase == MqttConnection::WAITING && pair.second.deadline <= simTime())
+            if ((pair.second.phase == MqttConnection::WAITING || (pair.second.phase == MqttConnection::ACTIVE && pair.second.keepAlive)) && pair.second.deadline <= simTime())
                 closeConnection(check_and_cast<TcpSocket *>(socketMap.getSocketById(pair.first)));
         scheduleTimeout();
     }
@@ -195,7 +228,7 @@ void MqttBroker::handleCrashOperation(LifecycleOperation *)
     cancelEvent(timeoutTimer);
     for (auto& pair : socketMap.getMap()) pair.second->destroy();
     listener.destroy();
-    socketMap.deleteSockets(); connections.clear(); sessions.clear();
+    socketMap.deleteSockets(); connections.clear(); sessions.clear(); retained.clear();
 }
 void MqttBroker::socketPeerClosed(TcpSocket *socket) { closeConnection(socket); }
 void MqttBroker::socketClosed(TcpSocket *socket) { closeConnection(socket); }
