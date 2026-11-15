@@ -1,6 +1,6 @@
 # AODV remaining-feature implementation evidence
 
-> **Kind:** report · **Status:** snapshot 2026-11-14 · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../../../plan/pending/aodv-remaining-features.md), [model coverage](coverage.md)
+> **Kind:** report · **Status:** snapshot 2026-11-14 · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../../../plan/done/aodv-remaining-features.md), [model coverage](coverage.md)
 
 The implementation starts at `8c331c8ec7`. This record separates observed behavior from static checks and unexecuted comparisons. It supplements the earlier correction-series results; neither source inspection nor fingerprints establish complete RFC conformance.
 

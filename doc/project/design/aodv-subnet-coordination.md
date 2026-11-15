@@ -1,6 +1,6 @@
 # AODV subnet authority and cooperation
 
-> **Kind:** design · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [RFC 3561 sections 7–9](https://www.rfc-editor.org/rfc/rfc3561.html#section-7), [implementation plan](../../../plan/pending/aodv-remaining-features.md)
+> **Kind:** design · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [RFC 3561 sections 7–9](https://www.rfc-editor.org/rfc/rfc3561.html#section-7), [implementation plan](../../../plan/done/aodv-remaining-features.md)
 
 This design defines an opt-in INET profile for authoritative subnet replies, recovery of a retained subnet sequence floor, and election among trusted routers on one common attached network. It supplies the C9a contract required before C8–C10 implementation. It does not claim an allocated AODV extension or interoperability with an independently defined IPv6 AODV protocol.
 
