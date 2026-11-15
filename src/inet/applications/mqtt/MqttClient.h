@@ -37,6 +37,8 @@ class INET_API MqttClient : public ApplicationBase, public TcpSocket::ICallback
     void runWork();
     void sendControl(const Ptr<MqttPacket>& packet);
     void receiveControl(const Ptr<MqttPacket>& packet);
+    void sendPendingSubscription();
+    void deliverPublication(const Ptr<const MqttPacket>& packet);
     void failConnection();
 
     void socketEstablished(TcpSocket *socket) override;

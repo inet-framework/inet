@@ -43,8 +43,8 @@ void MqttClient::initialize(int stage)
                 par("startTime").doubleValue() < 0 || par("reconnectInterval").doubleValue() <= 0 ||
                 par("connectTimeout").doubleValue() <= 0 || par("pingResponseTimeout").doubleValue() <= 0 || par("stopOperationTimeout").doubleValue() <= 0)
             throw cRuntimeError("Invalid MQTT port or timing parameter");
-        if (!par("cleanSession").boolValue() || par("keepAlive").intValue() != 0 || *par("willTopic").stringValue())
-            throw cRuntimeError("This MQTT implementation stage supports only Clean Session, keepalive zero and no Will");
+        if (par("keepAlive").intValue() != 0 || *par("willTopic").stringValue())
+            throw cRuntimeError("This MQTT stage supports keepalive zero and no Will");
         readWorkload();
     }
 }
@@ -62,7 +62,7 @@ void MqttClient::readWorkload()
         auto packet = makeShared<MqttPacket>();
         std::string name = element->getTagName();
         int qos = std::stoi(attribute("qos", "0"));
-        if (qos != 0) throw cRuntimeError("This MQTT stage supports only QoS 0");
+        if (qos < 0 || qos > 1) throw cRuntimeError("This MQTT stage supports QoS 0 and 1");
         if (name == "publish") {
             packet->setType(PUBLISH); packet->setQos(qos); packet->setTopic(attribute("topic"));
             packet->setRetain(std::string(attribute("retain", "false")) == "true");
@@ -140,8 +140,22 @@ void MqttClient::runWork()
         else session.subscriptions.erase(packet->getFilters(0));
     }
     actionIndex++;
-    sendControl(packet);
+    if (packet->getType() == PUBLISH) {
+        session.enqueue(packet);
+        for (auto& outgoing : session.flush()) sendControl(outgoing);
+    }
+    else sendControl(packet);
     scheduleWork();
+}
+
+void MqttClient::sendPendingSubscription()
+{
+    if (!pendingSubscription || pendingSubscription->getPacketIdentifier()) return;
+    int identifier = session.allocateIdentifier();
+    if (!identifier) return;
+    auto packet = staticPtrCast<MqttPacket>(pendingSubscription->dupShared());
+    packet->setPacketIdentifier(identifier); pendingSubscription = packet;
+    sendControl(packet);
 }
 
 void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
@@ -152,6 +166,22 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
         if (packet->getReturnCode() != 0) { failConnection(); return; }
         cancelEvent(timeoutTimer); connection.phase = MqttConnection::ACTIVE;
         if (workloadOrigin < SIMTIME_ZERO) workloadOrigin = simTime();
+        if (!packet->getSessionPresent()) {
+            pendingSubscription = nullptr;
+            if (!session.subscriptions.empty()) {
+                auto restore = makeShared<MqttPacket>(); restore->setType(SUBSCRIBE);
+                restore->setFiltersArraySize(session.subscriptions.size()); restore->setResultsArraySize(session.subscriptions.size());
+                size_t i = 0;
+                for (auto& subscription : session.subscriptions) {
+                    restore->setFilters(i, subscription.first.c_str()); restore->setResults(i++, subscription.second);
+                }
+                pendingSubscription = restore;
+            }
+        }
+        // Recovery uses existing identifiers and must not wait for a new SUBSCRIBE identifier.
+        for (auto& outgoing : session.retry()) sendControl(outgoing);
+        sendPendingSubscription();
+        for (auto& outgoing : session.flush()) sendControl(outgoing);
         emit(registerSignal("connectionChanged"), 1L);
         scheduleWork(); return;
     }
@@ -166,18 +196,30 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
                 if (packet->getResults(i) != 128 && packet->getResults(i) > pendingSubscription->getResults(i))
                     throw cRuntimeError("MQTT broker granted a higher QoS than requested");
         session.releaseIdentifier(packet->getPacketIdentifier()); pendingSubscription = nullptr;
+        for (auto& outgoing : session.flush()) sendControl(outgoing);
         scheduleWork();
     }
-    else if (packet->getType() == PUBLISH && packet->getQos() == 0 && MqttTopicFilter::isValidTopic(packet->getTopic())) {
-        auto payload = makeShared<BytesChunk>([&]() {
-            std::vector<uint8_t> bytes;
-            for (size_t i = 0; i < packet->getPayloadArraySize(); i++) bytes.push_back(packet->getPayload(i));
-            return bytes;
-        }());
-        Packet delivered("publication", payload);
-        emit(registerSignal("packetSentToUpper"), &delivered);
+    else if (packet->getType() == PUBACK) {
+        session.acknowledge(packet);
+        sendPendingSubscription();
+        for (auto& outgoing : session.flush()) sendControl(outgoing);
+        scheduleWork();
+    }
+    else if (packet->getType() == PUBLISH && packet->getQos() <= 1 && MqttTopicFilter::isValidTopic(packet->getTopic())) {
+        deliverPublication(packet);
+        if (packet->getQos()) {
+            auto ack = makeShared<MqttPacket>(); ack->setType(PUBACK); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
+        }
     }
     else throw cRuntimeError("Unexpected MQTT packet in active client");
+}
+
+void MqttClient::deliverPublication(const Ptr<const MqttPacket>& packet)
+{
+    std::vector<uint8_t> bytes;
+    for (size_t i = 0; i < packet->getPayloadArraySize(); i++) bytes.push_back(packet->getPayload(i));
+    Packet delivered("publication", makeShared<BytesChunk>(bytes));
+    emit(registerSignal("packetSentToUpper"), &delivered);
 }
 
 void MqttClient::socketDataArrived(TcpSocket *, Packet *message, bool)
@@ -201,7 +243,11 @@ void MqttClient::failConnection()
     cancelEvent(timeoutTimer); cancelEvent(workTimer);
     socket.getReadBuffer()->clear();
     if (socket.isOpen()) socket.abort();
-    if (pendingSubscription) { session.releaseIdentifier(pendingSubscription->getPacketIdentifier()); pendingSubscription = nullptr; }
+    if (pendingSubscription) {
+        session.releaseIdentifier(pendingSubscription->getPacketIdentifier());
+        pendingSubscription = staticPtrCast<MqttPacket>(pendingSubscription->dupShared()); pendingSubscription->setPacketIdentifier(0);
+    }
+    if (connection.cleanSession) session.clearExchanges();
     emit(registerSignal("connectionChanged"), 0L);
     if (operationalState == State::OPERATING && !connectTimer->isScheduled()) scheduleAt(simTime() + par("reconnectInterval"), connectTimer);
     else if (operationalState == State::STOPPING_OPERATION) finishActiveOperation();

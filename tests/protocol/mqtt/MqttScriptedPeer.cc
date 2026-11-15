@@ -2,6 +2,12 @@
 #include "MqttScriptedPeer.h"
 namespace inet::mqtttest {
 Define_Module(MqttScriptedPeer);
+void MqttScriptedPeer::renew()
+{
+    Enter_Method("renew");
+    socketMap.removeSocket(&mainSocket);
+    mainSocket.getReadBuffer()->clear(); mainSocket.renewSocket(); socketMap.addSocket(&mainSocket);
+}
 void MqttScriptedPeer::sendBytes(TcpSocket& socket, const std::vector<uint8_t>& bytes)
 {
     Enter_Method("sendBytes");

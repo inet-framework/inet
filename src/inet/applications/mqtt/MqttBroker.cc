@@ -65,17 +65,21 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
                 std::string(packet->getUserName()) != par("userName").stdstringValue() || password != par("password").stdstringValue())) refusal = 4;
         auto response = makeShared<MqttPacket>(); response->setType(CONNACK); response->setReturnCode(refusal);
         if (refusal) { sendControl(socket, response); closeConnection(socket); return; }
-        if (!packet->getCleanSession() || packet->getKeepAlive() || packet->getWill())
+        if (packet->getKeepAlive() || packet->getWill())
             throw cRuntimeError("Requested MQTT behavior is not supported in this implementation stage");
         // Section 3.1.4: disconnect an old connection before activating its replacement.
         for (auto& pair : connections) {
             if (pair.first != socket->getSocketId() && pair.second.phase == MqttConnection::ACTIVE && pair.second.clientIdentifier == id)
                 closeConnection(check_and_cast<TcpSocket *>(socketMap.getSocketById(pair.first)));
         }
-        sessions[id] = MqttSession();
+        bool present = sessions.find(id) != sessions.end() && !packet->getCleanSession();
+        if (!present) sessions[id] = MqttSession();
+        response->setSessionPresent(present);
         connection.clientIdentifier = id; connection.cleanSession = packet->getCleanSession();
         connection.phase = MqttConnection::ACTIVE;
         sendControl(socket, response);
+        for (auto& outgoing : sessions.at(id).retry()) sendControl(socket, outgoing);
+        for (auto& outgoing : sessions.at(id).flush()) sendControl(socket, outgoing);
         emit(registerSignal("connectionChanged"), 1L);
         scheduleTimeout(); return;
     }
@@ -89,32 +93,44 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
             std::string filter = packet->getFilters(i);
             if (!MqttTopicFilter::isValidFilter(filter)) throw cRuntimeError("Invalid MQTT filter");
             if (packet->getType() == SUBSCRIBE) {
-                int granted = std::min(packet->getResults(i), 0);
+                int granted = std::min(packet->getResults(i), 1);
                 session.subscriptions[filter] = granted; response->setResults(i, granted);
             }
             else session.subscriptions.erase(filter);
         }
         sendControl(socket, response);
     }
-    else if (packet->getType() == PUBLISH && packet->getQos() == 0 && !packet->getRetain()) {
+    else if (packet->getType() == PUBLISH && packet->getQos() <= 1 && !packet->getRetain()) {
         if (!MqttTopicFilter::isValidTopic(packet->getTopic())) throw cRuntimeError("Invalid MQTT topic");
         route(packet);
+        if (packet->getQos()) {
+            auto ack = makeShared<MqttPacket>(); ack->setType(PUBACK); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(socket, ack);
+        }
+    }
+    else if (packet->getType() == PUBACK) {
+        session.acknowledge(packet);
+        for (auto& outgoing : session.flush()) sendControl(socket, outgoing);
     }
     else if (packet->getType() == DISCONNECT) closeConnection(socket);
     else throw cRuntimeError("Unexpected MQTT packet in active broker connection");
 }
 void MqttBroker::route(const Ptr<const MqttPacket>& packet)
 {
-    for (auto& pair : connections) {
-        if (pair.second.phase != MqttConnection::ACTIVE) continue;
-        auto& session = sessions.at(pair.second.clientIdentifier);
-        bool matching = false;
+    for (auto& pair : sessions) {
+        auto& session = pair.second;
+        int granted = -1;
         for (auto& subscription : session.subscriptions)
-            matching |= MqttTopicFilter::matches(subscription.first, packet->getTopic());
-        if (matching) {
+            if (MqttTopicFilter::matches(subscription.first, packet->getTopic())) granted = std::max(granted, subscription.second);
+        TcpSocket *recipient = nullptr;
+        for (auto& connection : connections)
+            if (connection.second.phase == MqttConnection::ACTIVE && connection.second.clientIdentifier == pair.first)
+                recipient = check_and_cast<TcpSocket *>(socketMap.getSocketById(connection.first));
+        int qos = std::min(granted, packet->getQos());
+        if (granted >= 0 && (recipient || qos > 0)) {
             auto copy = staticPtrCast<MqttPacket>(packet->dupShared());
-            copy->setRetain(false); copy->setDuplicate(false); copy->setQos(0); copy->setPacketIdentifier(0);
-            sendControl(check_and_cast<TcpSocket *>(socketMap.getSocketById(pair.first)), copy);
+            copy->setRetain(false); copy->setDuplicate(false); copy->setQos(qos); copy->setPacketIdentifier(0);
+            session.enqueue(copy);
+            if (recipient) for (auto& outgoing : session.flush()) sendControl(recipient, outgoing);
         }
     }
 }

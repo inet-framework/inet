@@ -16,6 +16,7 @@ class MqttScriptedPeer : public protocoltest::TcpTestApp
     std::function<void(MqttScriptedPeer&, TcpSocket&, const Ptr<mqtt::MqttPacket>&)> responder;
     void sendBytes(TcpSocket& socket, const std::vector<uint8_t>& bytes);
     void sendMqtt(TcpSocket& socket, const Ptr<mqtt::MqttPacket>& packet);
+    void renew();
 };
 }
 #endif
