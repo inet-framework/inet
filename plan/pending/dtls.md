@@ -1,6 +1,6 @@
 # DTLS implementation plan
 
-**Status:** proposed, revision 7, 2026-11-15. This task prepares a plan only. No implementation or runtime validation is complete. The user requires the same cryptographic modeling approach as INET IPsec; that decision is part of this plan. The user also accepted separating reusable TLS handshake components from DTLS delivery and recovery, without implementing TLS over TCP first. This authorization covers the plan revision; protocol implementation remains outside this task.
+**Status:** proposed, revision 7, 2026-11-15. Execution of the whole plan, validation, push and upstream PR was authorized by the user on 2026-11-16. Implementation is in progress; no completed runtime validation is claimed at this checkpoint. The user requires the same cryptographic modeling approach as INET IPsec; that decision is part of this plan. The user also accepted separating reusable TLS handshake components from DTLS delivery and recovery, without implementing TLS over TCP first. The current authorization covers implementation of the selected profile as well as publication.
 
 **Checkout:** `/home/miguel/workspace/inet-dtls`, commit `91219b0fa7d2794ee67ac8a3dd45c3a09cfc45b0`. The existing local edit to `AGENTS.md` is outside this plan and must be preserved.
 
@@ -277,7 +277,7 @@ The work is complete when every selected profile feature has a concrete passing 
 
 The user-selected IPsec approach and reusable TLS-content/DTLS-control separation are fixed for this plan; implementing TLS over TCP first is excluded. DTLS 1.3 and the concrete profile, limits and defaults above are proposed design choices. C1 resolves clause-level obligations before dependent code; if a mandatory mechanism cannot fit this profile, revise its scope explicitly. No performance calibration, security proof, actual cryptographic verification, runtime tests or rendered-diagram checks have been completed by writing this plan.
 
-Planning follows the current [series rule](../../doc/project/rule/pull-request.md#pr-series-plan) and [protocol-test rule](../../doc/project/rule/testing.md#tr-plan-protocol), using the [plan guide](../../doc/project/guide/write-an-implementation-plan.md). The separate draft approval procedure is not treated as activated merely by its presence. Implementation is outside the present request.
+Planning follows the current [series rule](../../doc/project/rule/pull-request.md#pr-series-plan) and [protocol-test rule](../../doc/project/rule/testing.md#tr-plan-protocol), using the [plan guide](../../doc/project/guide/write-an-implementation-plan.md). The separate draft approval procedure is not treated as activated merely by its presence. Implementation and publication are authorized by the 2026-11-16 request.
 
 ## Plan preparation checks
 

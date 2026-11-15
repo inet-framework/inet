@@ -46,6 +46,7 @@ Every decision in document order. The identifier links to the decision; the stat
 | [D-FEATURES](#d-features) | Optional functionality is partitioned into features that can be switched off |
 | [D-STABLE-CODES](#d-stable-codes) | Externally visible numeric codes have stable identities |
 | [D-FINGERPRINT](#d-fingerprint) | A behavioral regression is caught by a trajectory fingerprint |
+| [D-DTLS-COMPOSITION](#d-dtls-composition) | DTLS uses the application slot and UDP, with reusable TLS content |
 
 ## The decisions
 
@@ -250,6 +251,18 @@ Interference, reception and errors are computed on the Signal.
 - *Serves* `R-RUN-REPRO`, and the ability to refactor at all.
 - *Costs* a baseline that must be updated deliberately, and a strict limit on what it proves: a fingerprint says *that* behavior changed, never *whether the new behavior is correct*. That is why it never replaces a test of the claim.
 - *Kept true by* [AR-QUAL-FINGERPRINT](../rule/architecture.md#ar-qual-fingerprint), [AR-QUAL-DETERMINISM](../rule/architecture.md#ar-qual-determinism), [AR-QUAL-TRACEABILITY](../rule/architecture.md#ar-qual-traceability), and [rule/testing.md](../rule/testing.md).
+
+### D-DTLS-COMPOSITION
+
+**DTLS uses the application slot and UDP, with reusable TLS content.**
+
+A compound application supplies a replaceable `IDtls` engine through the existing `IApp` slot. The engine owns its UDP socket, per-peer associations and directional processing queues. Generic TLS message bodies and encodings live separately from DTLS record transport, fragmentation and recovery; a future TLS endpoint can reuse that content without making TCP a dependency of DTLS.
+
+*Serves* — packet-level studies of setup overhead, unreliable datagrams, handshake loss and processing costs using existing host composition and socket dispatch.
+
+*Costs* — applications use the DTLS socket contract rather than the ordinary UDP application API. The selected IPsec-style cryptographic abstraction cannot provide real ciphertext, authentication or authenticated disambiguation of aliased record numbers. Its configuration and evidence must expose these limits.
+
+*Kept true by* — [AR-EXT-NOCORE](../rule/architecture.md#ar-ext-nocore), [AR-ORG-CONTRACTS](../rule/architecture.md#ar-org-contracts), [AR-COM-SOCKETS](../rule/architecture.md#ar-com-sockets) and [AR-MOD-FIDELITY](../rule/architecture.md#ar-mod-fidelity).
 
 ## What the rules produce together
 

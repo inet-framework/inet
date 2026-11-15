@@ -51,7 +51,7 @@ A whole-document seal is declared in the document's own header, as `**Seal:** wh
 | --- | --- | ---: | ---: | ---: |
 | `audit/architecture-exceptions.md` | by row | 0 | 0 | 0 |
 | `audit/naming-exceptions.md` | by row | 0 | 0 | 0 |
-| `design/decisions.md` | by decision | 0 | 0 | 20 |
+| `design/decisions.md` | by decision | 0 | 0 | 21 |
 | `design/node-anatomy.md` | by section | 0 | 0 | 6 |
 | `design/packet-anatomy.md` | by section | 0 | 0 | 5 |
 | `design/protocol-anatomy.md` | by section | 0 | 0 | 5 |
