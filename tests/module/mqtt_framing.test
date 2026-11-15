@@ -5,6 +5,9 @@ lengths and UTF-8. These helper checks do not replace TCP integration cases.
 %includes:
 #include "inet/applications/mqtt/MqttConnection.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/applications/mqtt/MqttProtocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/printer/PacketPrinter.h"
 
 %activity:
 using namespace inet;
@@ -35,10 +38,59 @@ ASSERT(MqttPacketSerializer::frameLength({0x30,0xff,0xff,0xff,0x7f}) == 26843546
 bool rejected = false;
 try { MqttPacketSerializer::frameLength({0x30,0x80,0x80,0x80,0x80}); } catch (cRuntimeError&) { rejected = true; }
 ASSERT(rejected);
+for (int flags:{1,8,32}) {
+    auto invalid=connect; invalid[9]=flags;
+    rejected=false;
+    try { MqttPacketSerializer::decode(invalid); } catch (cRuntimeError&) { rejected=true; }
+    ASSERT(rejected);
+}
 ASSERT(!MqttPacketSerializer::isValidUtf8(std::string("a\0b",3)));
 ASSERT(!MqttPacketSerializer::isValidUtf8("\xc0\x80"));
 ASSERT(!MqttPacketSerializer::isValidUtf8("\xed\xa0\x80"));
 ASSERT(MqttPacketSerializer::isValidUtf8("\xe2\x82\xac"));
+auto bom=makeShared<MqttPacket>(); bom->setType(PUBLISH); bom->setTopic("\xef\xbb\xbft");
+ASSERT(std::string(MqttPacketSerializer::decode(MqttPacketSerializer::encode(*bom))->getTopic())=="\xef\xbb\xbft");
+auto oversized=makeShared<MqttPacket>(); oversized->setType(PUBLISH); oversized->setTopic(std::string(65536,'t').c_str());
+rejected=false;
+try { MqttPacketSerializer::encode(*oversized); } catch (cRuntimeError&) { rejected=true; }
+ASSERT(rejected);
+oversized->setTopic(std::string(65535,'t').c_str());
+ASSERT(std::string(MqttPacketSerializer::decode(MqttPacketSerializer::encode(*oversized))->getTopic()).size()==65535);
+// Independent examples for every control type, including binary-zero payloads.
+for (auto wire : std::vector<std::vector<uint8_t>>{
+        {0x20,2,0,0}, {0x30,5,0,1,'t',0,255}, {0x32,7,0,1,'t',0x12,0x34,0,255},
+        {0x34,7,0,1,'t',0x12,0x34,0,255}, {0x40,2,0x12,0x34}, {0x50,2,0x12,0x34},
+        {0x62,2,0x12,0x34}, {0x70,2,0x12,0x34},
+        {0x82,12,0,1,0,1,'a',0,0,3,'b','/','+',2}, {0x90,4,0,1,0,2},
+        {0xa2,5,0,1,0,1,'t'}, {0xb0,2,0,1}, {0xc0,0}, {0xd0,0}, {0xe0,0},
+        {0x10,0x19,0,4,'M','Q','T','T',4,0xf6,0,2,0,1,'c',0,1,'w',0,1,0,0,1,'u',0,1,255}}) {
+    auto p = MqttPacketSerializer::decode(wire);
+    ASSERT(MqttPacketSerializer::encode(*p) == wire);
+}
+for (auto wire : std::vector<std::vector<uint8_t>>{{0,0},{0xc1,0},{0xc0,1,0},{0x20,2,1,4},
+        {0x38,3,0,1,'t'},{0x40,2,0,0},{0x82,6,0,1,0,1,'t',3},{0x90,3,0,1,3}}) {
+    bool failed = false;
+    try { MqttPacketSerializer::decode(wire); } catch (cRuntimeError&) { failed = true; }
+    ASSERT(failed);
+}
+std::vector<size_t> lengths = {127,128,16383,16384,2097151,2097152};
+std::vector<std::vector<uint8_t>> digits = {{127},{128,1},{255,127},{128,128,1},{255,255,127},{128,128,128,1}};
+for (size_t i=0;i<lengths.size();i++) {
+    auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic("t");
+    p->setPayloadArraySize(lengths[i]-3);
+    auto wire=MqttPacketSerializer::encode(*p);
+    ASSERT(std::equal(digits[i].begin(),digits[i].end(),wire.begin()+1));
+    ASSERT(MqttPacketSerializer::frameLength(wire)==wire.size());
+    ASSERT(MqttPacketSerializer::decode(wire)->getPayloadArraySize()==lengths[i]-3);
+}
+// Packet inspection tolerates TCP captures that start/end inside a control packet.
+PacketPrinter printer;
+for (auto wire:std::vector<std::vector<uint8_t>>{{0x10},{0x30,8,0,1,'t'},{0,0},{0xc0,0,0xd0,0}}) {
+    Packet observed("inspection",makeShared<BytesChunk>(wire));
+    observed.addTag<PacketProtocolTag>()->setProtocol(&mqttProtocol);
+    ASSERT(!printer.printPacketToString(&observed).empty());
+    ASSERT(observed.peekDataAsBytes()->getBytes()==wire);
+}
 EV << "MQTT framing PASS\n";
 
 %contains: stdout

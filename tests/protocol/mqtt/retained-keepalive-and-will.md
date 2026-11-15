@@ -26,4 +26,10 @@ sequenceDiagram
     end
 ```
 
-These initial cases do not establish all planned timeout boundaries, zero keepalive, missing PINGRESP, partition, takeover, retained QoS combinations or graceful Will suppression. Additional probes and their results must remain explicit in the coverage ledger. Diagram rendering is unverified.
+`MqttBrokerLiveness.test` adds keepalive-zero, silent expiry, partial-PUBLISH reception, complete-PING renewal, DISCONNECT suppression, protocol-error Will and identifier-takeover Will. Expiry is checked at three seconds from the remote CONNACK/PINGRESP observation, with one-millisecond tolerance for the known symmetric path. Renewal is sent well away from expiry. A separate TCP connection sends no CONNECT and must expire without a CONNACK. Six-second count/absence guards bound Will observations.
+
+`MqttMissingPingResponse.test` withholds PINGRESP from a production client. The first unanswered ping must disconnect it at its configured two-second response bound; later pings cannot extend that bound. Its outstanding QoS 1 publication must not be retransmitted while the connection is active.
+
+`MqttPartitionWill.test` drops link frames through the shared tap for three seconds while an observer stays connected locally to the broker. No Will may be delivered during the first 0.5s after partition onset; failure detection must then cause exactly one QoS 1 notification with byte `ff`.
+
+`MqttBrokerPersistence.test` shuts down the broker with an active retained QoS 2 Will, then restarts it. A live subscriber receives the Will at its granted QoS 1 with RETAIN false. A late subscriber and its resubscription each replay the saved Will and ordinary retained value at QoS 0 with RETAIN true. These records outlive deletion of the clean publisher session. After broker crash, a still later subscriber receives no replay; a new publication proves recovery. Results and limits are in the [coverage ledger](../../../doc/project/evidence/model/mqtt/coverage.md). Diagram rendering is unverified.

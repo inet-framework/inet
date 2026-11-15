@@ -11,7 +11,9 @@ class MqttScriptedPeer : public protocoltest::TcpTestApp
 {
   protected:
     void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
+    void socketPeerClosed(TcpSocket *socket) override;
   public:
+    bool closeOnPeerClose = false;
     std::vector<Ptr<const mqtt::MqttPacket>> received;
     std::function<void(MqttScriptedPeer&, TcpSocket&, const Ptr<mqtt::MqttPacket>&)> responder;
     void sendBytes(TcpSocket& socket, const std::vector<uint8_t>& bytes);

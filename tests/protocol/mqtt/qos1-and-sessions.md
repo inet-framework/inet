@@ -21,4 +21,6 @@ sequenceDiagram
     B->>S: Queued PUBLISH with recipient identifier
 ```
 
-These cases establish normal QoS 1 and offline queueing. Interrupted ACKs, exhaustion, subscription-reconciliation boundaries and ordering across identifier wrap require the additional planned probes; their completion must be recorded separately. Execution status is in the model coverage ledger. Rendering is unverified.
+`MqttClientRecovery.test` and `MqttBrokerRecovery.test` interrupt both production sender roles before PUBACK. Each resumed PUBLISH must retain its original identifier and set DUP. The receiver may hand a QoS 1 retransmission onward again; these tests make no exactly-once claim for that QoS.
+
+`MqttIdentifierExhaustion.test` leaves all 65,535 sender identifiers outstanding, then queues one more publication. A persistent reconnect with Session Present false must retry the old messages despite having no identifier available for subscription restoration. ACK of identifier 2 permits restoration SUBSCRIBE; its SUBACK releases the identifier again and must flush the queued publication. The test checks the full identifier set, absence of zero and original/retry counts. Workload publications are spaced by 100 microseconds to let TCP drain while MQTT acknowledgements remain withheld. A failure to flush after SUBACK was found and corrected by this probe. Execution status is in the [coverage ledger](../../../doc/project/evidence/model/mqtt/coverage.md). Rendering is unverified.

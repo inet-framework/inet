@@ -31,7 +31,7 @@ static void release(MqttScriptedPeer& app) {
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("mqtt_qos2_reconnect")
-        .meanwhile(exactlyTimes(1,on("subscriber.app[0]").signal("packetSentToUpper").within(4)))
+        .meanwhile(exactlyTimes(2,on("subscriber.app[0]").signal("packetSentToUpper").within(4)))
         .act(action().at(0.3).run<MqttScriptedPeer>("publisher.app[0]", [](auto& app) { app.socket().connect(app.addressOf("broker"),1883); }))
         .once(on("publisher.app[0]").signal("socketEstablished").within(1))
         .act(action().run<MqttScriptedPeer>("publisher.app[0]",connectMqtt))
@@ -49,6 +49,11 @@ Define_ProtocolTestProgram()
         .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBREC)).within(1))
         .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
         .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
+        // PUBCOMP completes ownership: the same identifier now denotes a new publication.
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { publish(app,false); }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBREC)).within(1))
         .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
         .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
         .never(on("subscriber.app[0]").signal("packetSentToUpper").within(1));

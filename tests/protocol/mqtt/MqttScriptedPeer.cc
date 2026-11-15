@@ -2,6 +2,11 @@
 #include "MqttScriptedPeer.h"
 namespace inet::mqtttest {
 Define_Module(MqttScriptedPeer);
+void MqttScriptedPeer::socketPeerClosed(TcpSocket *socket)
+{
+    TcpTestApp::socketPeerClosed(socket);
+    if (closeOnPeerClose && socket->getState() == TcpSocket::PEER_CLOSED) socket->close();
+}
 void MqttScriptedPeer::renew()
 {
     Enter_Method("renew");

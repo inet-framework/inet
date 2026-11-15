@@ -16,6 +16,10 @@ static MatchPredicate packetType(int type) {
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("mqtt_qos2")
+        .meanwhile(exactlyTimes(1,on("observer.app[0]").signal("packetReceivedFromLower").filterEvent(packetType(PUBLISH))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getQos()==0; }).within(2)))
+        .meanwhile(exactlyTimes(1,on("publisher.app[1]").signal("packetReceivedFromLower").filterEvent(packetType(PUBLISH))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getQos()==1; }).within(2)))
         .once(on("subscriber.app[0]").signal("packetSentToUpper").within(2))
         .once(on("subscriber.app[0]").signal("packetSentToLower").filterEvent(packetType(PUBREC)).within(0.1))
         .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(packetType(PUBREL)).within(1))
@@ -33,12 +37,23 @@ seed-set = 0
 sim-time-limit = 4s
 *.broker.numApps = 1
 *.broker.app[0].typename = "MqttBroker"
-*.publisher.numApps = 1
+*.publisher.numApps = 2
 *.publisher.app[0].typename = "MqttClient"
 *.publisher.app[0].clientIdentifier = "publisher"
 *.publisher.app[0].connectAddress = "broker"
 *.publisher.app[0].startTime = 0.1s
 *.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='2' payload='41'/></mqtt>")
+*.publisher.app[1].typename = "MqttClient"
+*.publisher.app[1].clientIdentifier = "qos1"
+*.publisher.app[1].connectAddress = "broker"
+*.publisher.app[1].startTime = 0.1s
+*.publisher.app[1].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='1'/></mqtt>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "qos0"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].startTime = 0.1s
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='0'/></mqtt>")
 *.subscriber.numApps = 1
 *.subscriber.app[0].typename = "MqttClient"
 *.subscriber.app[0].clientIdentifier = "subscriber"

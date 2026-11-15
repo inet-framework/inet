@@ -5,6 +5,7 @@ The peers do not implement MQTT session semantics in this codec-only stage.
 %includes:
 #include "ProtocolTest.h"
 #include "MqttScriptedPeer.h"
+#include "MqttReferenceVectors.h"
 
 %file: peer.cc
 #include "../../MqttScriptedPeer.cc"
@@ -18,6 +19,12 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("mqtt_wire")
         .act(action().at(0).run<MqttScriptedPeer>("host2.app[0]", [](auto& app) {
+            for (const char *hex : mqttReferenceVectors) {
+                std::string text(hex); std::vector<uint8_t> bytes;
+                for (size_t i=0; i<text.size(); i+=2) bytes.push_back(std::stoul(text.substr(i,2),nullptr,16));
+                auto decoded = MqttPacketSerializer::decode(bytes);
+                ASSERT(MqttPacketSerializer::encode(*decoded) == bytes);
+            }
             app.socket().bind(1883); app.socket().listen();
         }))
         .act(action().at(0.1).run<MqttScriptedPeer>("host1.app[0]", [](auto& app) {

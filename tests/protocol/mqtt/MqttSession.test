@@ -51,7 +51,12 @@ Define_ProtocolTestProgram()
             .assertEvent([](const MatchContext& c) {
                 auto p=c.event.packet->peekAtFront<MqttPacket>();
                 return p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==0x41;
-            }).within(1));
+            }).within(1))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH))
+            .assertEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==0x42;
+            }).within(1))
+        .never(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH)).within(0.5));
 }
 
 %activity:
@@ -79,7 +84,7 @@ sim-time-limit = 5s
 *.publisher.app[0].clientIdentifier = "publisher"
 *.publisher.app[0].connectAddress = "broker"
 *.publisher.app[0].startTime = 0.5s
-*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='1' payload='41'/></mqtt>")
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='1' payload='41'/><publish at='0.6s' topic='factory/value' payload='44'/><publish at='0.7s' topic='factory/value' qos='1' payload='42'/></mqtt>")
 
 %contains: stdout
 PROTOCOLTEST mqtt_session: PASS
