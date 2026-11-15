@@ -1,6 +1,6 @@
 # DSDV paper extension execution record
 
-> **Kind:** report · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [plan](../../../../../plan/pending/dsdv-paper-extensions.md)
+> **Kind:** report · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [plan](../../../../../plan/done/dsdv-paper-extensions.md)
 
 The extension was developed from the implementation pending upstream in PR #1444 at `dc594f8b2e0b2cd6c7ef23f484af356143202e00`. The user authorized implementation and publication on 2026-11-14. This branch's prerequisite copy ends at `ab395478ab8182e3c2f635901e1f3d770096a2c6`: its reviewer-document placement, size explanations, observer icon and two prose claims were corrected during the whole-PR audit. The original PR and its branches were not rewritten. Every mapped prerequisite and extension commit retains identical production source, feature dependencies and fingerprint-store bytes; the only test-input change is the forwarding observer's display icon. The focused forwarding rerun passes (`/tmp/dsdv-extensions-display-forwarding.log`). This record's no-baseline-change claims apply to the extension commits; inherited prerequisite baseline changes remain in #1444's own evidence.
 
