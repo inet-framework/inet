@@ -62,7 +62,7 @@ void MqttClient::readWorkload()
         auto packet = makeShared<MqttPacket>();
         std::string name = element->getTagName();
         int qos = std::stoi(attribute("qos", "0"));
-        if (qos < 0 || qos > 1) throw cRuntimeError("This MQTT stage supports QoS 0 and 1");
+        if (qos < 0 || qos > 2) throw cRuntimeError("MQTT QoS must be 0, 1 or 2");
         if (name == "publish") {
             packet->setType(PUBLISH); packet->setQos(qos); packet->setTopic(attribute("topic"));
             packet->setRetain(std::string(attribute("retain", "false")) == "true");
@@ -167,6 +167,7 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
         cancelEvent(timeoutTimer); connection.phase = MqttConnection::ACTIVE;
         if (workloadOrigin < SIMTIME_ZERO) workloadOrigin = simTime();
         if (!packet->getSessionPresent()) {
+            session.incomingQos2.clear();
             pendingSubscription = nullptr;
             if (!session.subscriptions.empty()) {
                 auto restore = makeShared<MqttPacket>(); restore->setType(SUBSCRIBE);
@@ -199,17 +200,21 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
         for (auto& outgoing : session.flush()) sendControl(outgoing);
         scheduleWork();
     }
-    else if (packet->getType() == PUBACK) {
-        session.acknowledge(packet);
+    else if (packet->getType() == PUBACK || packet->getType() == PUBREC || packet->getType() == PUBCOMP) {
+        if (auto reply = session.acknowledge(packet)) sendControl(reply);
         sendPendingSubscription();
         for (auto& outgoing : session.flush()) sendControl(outgoing);
         scheduleWork();
     }
-    else if (packet->getType() == PUBLISH && packet->getQos() <= 1 && MqttTopicFilter::isValidTopic(packet->getTopic())) {
-        deliverPublication(packet);
+    else if (packet->getType() == PUBLISH && MqttTopicFilter::isValidTopic(packet->getTopic())) {
+        if (session.acceptPublication(packet)) deliverPublication(packet);
         if (packet->getQos()) {
-            auto ack = makeShared<MqttPacket>(); ack->setType(PUBACK); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
+            auto ack = makeShared<MqttPacket>(); ack->setType(packet->getQos() == 1 ? PUBACK : PUBREC); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
         }
+    }
+    else if (packet->getType() == PUBREL) {
+        session.incomingQos2.erase(packet->getPacketIdentifier());
+        auto ack = makeShared<MqttPacket>(); ack->setType(PUBCOMP); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(ack);
     }
     else throw cRuntimeError("Unexpected MQTT packet in active client");
 }

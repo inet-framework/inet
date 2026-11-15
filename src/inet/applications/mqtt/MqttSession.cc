@@ -38,23 +38,36 @@ std::vector<Ptr<MqttPacket>> MqttSession::retry() const
     std::vector<Ptr<MqttPacket>> result;
     for (int identifier : outgoingOrder) {
         auto packet = staticPtrCast<MqttPacket>(outgoing.at(identifier)->dupShared());
-        packet->setDuplicate(true);
+        packet->setDuplicate(packet->getType() == PUBLISH);
         result.push_back(packet);
     }
     return result;
 }
-void MqttSession::acknowledge(const Ptr<const MqttPacket>& packet)
+Ptr<MqttPacket> MqttSession::acknowledge(const Ptr<const MqttPacket>& packet)
 {
     auto found = outgoing.find(packet->getPacketIdentifier());
-    if (found == outgoing.end()) return;
-    if (packet->getType() != PUBACK || found->second->getQos() != 1)
+    if (found == outgoing.end()) return nullptr;
+    if (packet->getType() == PUBREC && (found->second->getQos() == 2 || found->second->getType() == PUBREL)) {
+        // Section 4.3.3: after PUBREC retain PUBREL, never resend the old PUBLISH.
+        auto release = makeShared<MqttPacket>(); release->setType(PUBREL); release->setPacketIdentifier(found->first);
+        found->second = release;
+        return release;
+    }
+    if (!((packet->getType() == PUBACK && found->second->getType() == PUBLISH && found->second->getQos() == 1) ||
+            (packet->getType() == PUBCOMP && found->second->getType() == PUBREL)))
         throw cRuntimeError("MQTT acknowledgement does not match the pending exchange");
     int identifier = found->first;
     releaseIdentifier(identifier); outgoing.erase(found);
     outgoingOrder.erase(std::find(outgoingOrder.begin(), outgoingOrder.end(), identifier));
+    return nullptr;
+}
+bool MqttSession::acceptPublication(const Ptr<const MqttPacket>& packet)
+{
+    // Section 4.3.3 Method B: keep the identifier until PUBREL, hand off only once.
+    return packet->getQos() != 2 || incomingQos2.insert(packet->getPacketIdentifier()).second;
 }
 void MqttSession::clearExchanges()
 {
-    allocatedIdentifiers.clear(); outgoing.clear(); outgoingOrder.clear(); pendingPublications.clear(); nextIdentifier = 1;
+    allocatedIdentifiers.clear(); outgoing.clear(); outgoingOrder.clear(); incomingQos2.clear(); pendingPublications.clear(); nextIdentifier = 1;
 }
 }

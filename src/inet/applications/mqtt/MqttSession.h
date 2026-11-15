@@ -13,12 +13,14 @@ struct INET_API MqttSession
     std::deque<Ptr<const MqttPacket>> pendingPublications;
     std::map<int, Ptr<const MqttPacket>> outgoing;
     std::deque<int> outgoingOrder;
+    std::set<int> incomingQos2;
     int allocateIdentifier();
     void releaseIdentifier(int identifier);
     void enqueue(const Ptr<const MqttPacket>& publication);
     std::vector<Ptr<MqttPacket>> flush();
     std::vector<Ptr<MqttPacket>> retry() const;
-    void acknowledge(const Ptr<const MqttPacket>& packet);
+    Ptr<MqttPacket> acknowledge(const Ptr<const MqttPacket>& packet);
+    bool acceptPublication(const Ptr<const MqttPacket>& packet);
     void clearExchanges();
 };
 }

@@ -93,23 +93,27 @@ void MqttBroker::receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet
             std::string filter = packet->getFilters(i);
             if (!MqttTopicFilter::isValidFilter(filter)) throw cRuntimeError("Invalid MQTT filter");
             if (packet->getType() == SUBSCRIBE) {
-                int granted = std::min(packet->getResults(i), 1);
+                int granted = packet->getResults(i);
                 session.subscriptions[filter] = granted; response->setResults(i, granted);
             }
             else session.subscriptions.erase(filter);
         }
         sendControl(socket, response);
     }
-    else if (packet->getType() == PUBLISH && packet->getQos() <= 1 && !packet->getRetain()) {
+    else if (packet->getType() == PUBLISH && !packet->getRetain()) {
         if (!MqttTopicFilter::isValidTopic(packet->getTopic())) throw cRuntimeError("Invalid MQTT topic");
-        route(packet);
+        if (session.acceptPublication(packet)) route(packet);
         if (packet->getQos()) {
-            auto ack = makeShared<MqttPacket>(); ack->setType(PUBACK); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(socket, ack);
+            auto ack = makeShared<MqttPacket>(); ack->setType(packet->getQos() == 1 ? PUBACK : PUBREC); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(socket, ack);
         }
     }
-    else if (packet->getType() == PUBACK) {
-        session.acknowledge(packet);
+    else if (packet->getType() == PUBACK || packet->getType() == PUBREC || packet->getType() == PUBCOMP) {
+        if (auto reply = session.acknowledge(packet)) sendControl(socket, reply);
         for (auto& outgoing : session.flush()) sendControl(socket, outgoing);
+    }
+    else if (packet->getType() == PUBREL) {
+        session.incomingQos2.erase(packet->getPacketIdentifier());
+        auto ack = makeShared<MqttPacket>(); ack->setType(PUBCOMP); ack->setPacketIdentifier(packet->getPacketIdentifier()); sendControl(socket, ack);
     }
     else if (packet->getType() == DISCONNECT) closeConnection(socket);
     else throw cRuntimeError("Unexpected MQTT packet in active broker connection");
