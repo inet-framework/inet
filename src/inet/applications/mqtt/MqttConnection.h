@@ -15,7 +15,6 @@ struct INET_API MqttConnection
     bool cleanSession = true;
     Ptr<const MqttPacket> will;
     simtime_t deadline = SIMTIME_ZERO;
-    simtime_t lastReceived = SIMTIME_ZERO;
     int keepAlive = 0;
 
     static Ptr<MqttPacket> extract(ChunkQueue& queue);

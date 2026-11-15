@@ -25,6 +25,7 @@ class INET_API MqttClient : public ApplicationBase, public TcpSocket::ICallback
     cMessage *workTimer = nullptr;
     cMessage *pingTimer = nullptr;
     cMessage *pingResponseTimer = nullptr;
+    bool resetSessionAfterCrash = false;
 
     void initialize(int stage) override;
     int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -32,6 +33,8 @@ class INET_API MqttClient : public ApplicationBase, public TcpSocket::ICallback
     void handleStartOperation(LifecycleOperation *operation) override;
     void handleStopOperation(LifecycleOperation *operation) override;
     void handleCrashOperation(LifecycleOperation *operation) override;
+    void handleActiveOperationTimeout(cMessage *message) override;
+    void handleMessageWhenDown(cMessage *message) override;
     void readWorkload();
     void connect();
     void disconnect();

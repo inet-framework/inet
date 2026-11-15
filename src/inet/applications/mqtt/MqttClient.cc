@@ -44,7 +44,8 @@ void MqttClient::initialize(int stage)
         socket.setCallback(this); socket.setOutputGate(gate("socketOut"));
         if (par("connectPort").intValue() < 1 || par("connectPort").intValue() > 65535 ||
                 par("startTime").doubleValue() < 0 || par("reconnectInterval").doubleValue() <= 0 ||
-                par("connectTimeout").doubleValue() <= 0 || par("pingResponseTimeout").doubleValue() <= 0 || par("stopOperationTimeout").doubleValue() <= 0)
+                par("connectTimeout").doubleValue() <= 0 || par("pingResponseTimeout").doubleValue() <= 0 ||
+                par("stopOperationTimeout").doubleValue() <= 0)
             throw cRuntimeError("Invalid MQTT port or timing parameter");
         if (par("keepAlive").intValue() < 0 || par("keepAlive").intValue() > 65535 ||
                 par("willQos").intValue() < 0 || par("willQos").intValue() > 2 ||
@@ -66,11 +67,15 @@ void MqttClient::readWorkload()
         };
         auto packet = makeShared<MqttPacket>();
         std::string name = element->getTagName();
-        int qos = std::stoi(attribute("qos", "0"));
+        std::string qosText = attribute("qos", "0");
+        if (qosText.size() != 1 || qosText[0] < '0' || qosText[0] > '2') throw cRuntimeError("Invalid MQTT workload QoS");
+        int qos = qosText[0] - '0';
         if (qos < 0 || qos > 2) throw cRuntimeError("MQTT QoS must be 0, 1 or 2");
         if (name == "publish") {
             packet->setType(PUBLISH); packet->setQos(qos); packet->setTopic(attribute("topic"));
-            packet->setRetain(std::string(attribute("retain", "false")) == "true");
+            std::string retain = attribute("retain", "false");
+            if (retain != "true" && retain != "false") throw cRuntimeError("Invalid MQTT retain boolean");
+            packet->setRetain(retain == "true");
             if (!MqttTopicFilter::isValidTopic(packet->getTopic())) throw cRuntimeError("Invalid MQTT workload topic");
             auto bytes = mqttHexPayload(attribute("payload", "")); packet->setPayloadArraySize(bytes.size());
             for (size_t i = 0; i < bytes.size(); i++) packet->setPayload(i, bytes[i]);
@@ -102,7 +107,7 @@ void MqttClient::connect()
     const char *local = par("localAddress");
     socket.bind(*local ? L3AddressResolver().resolve(local) : L3Address(), par("localPort"));
     connection = MqttConnection();
-    connection.cleanSession = par("cleanSession");
+    connection.cleanSession = resetSessionAfterCrash || par("cleanSession").boolValue();
     connection.keepAlive = par("keepAlive");
     socket.connect(L3AddressResolver().resolve(par("connectAddress")), par("connectPort"));
     scheduleAt(simTime() + par("connectTimeout"), timeoutTimer);
@@ -180,6 +185,7 @@ void MqttClient::receiveControl(const Ptr<MqttPacket>& packet)
             throw cRuntimeError("Expected MQTT CONNACK with consistent Session Present");
         if (packet->getReturnCode() != 0) { failConnection(); return; }
         cancelEvent(timeoutTimer); connection.phase = MqttConnection::ACTIVE;
+        resetSessionAfterCrash = false;
         if (workloadOrigin < SIMTIME_ZERO) workloadOrigin = simTime();
         if (!packet->getSessionPresent()) {
             session.incomingQos2.clear();
@@ -300,6 +306,20 @@ void MqttClient::handleCrashOperation(LifecycleOperation *)
     cancelEvent(connectTimer); cancelEvent(timeoutTimer); cancelEvent(workTimer);
     cancelEvent(pingTimer); cancelEvent(pingResponseTimer);
     socket.destroy(); socket.getReadBuffer()->clear(); connection.phase = MqttConnection::CLOSING;
+    session = MqttSession(); pendingSubscription = nullptr; actionIndex = 0; workloadOrigin = -1;
+    resetSessionAfterCrash = true;
+}
+void MqttClient::handleActiveOperationTimeout(cMessage *)
+{
+    // A stop timeout aborts transport; it is not a loss of the retained local session.
+    socket.destroy();
+    failConnection();
+}
+void MqttClient::handleMessageWhenDown(cMessage *message)
+{
+    // TCP may report completion after an application-only shutdown has finished.
+    if (!message->isSelfMessage()) delete message;
+    else ApplicationBase::handleMessageWhenDown(message);
 }
 void MqttClient::handleMessageWhenUp(cMessage *message)
 {

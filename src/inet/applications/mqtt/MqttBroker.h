@@ -23,6 +23,10 @@ class INET_API MqttBroker : public ApplicationBase, public TcpSocket::ICallback
     void handleStartOperation(LifecycleOperation *operation) override;
     void handleStopOperation(LifecycleOperation *operation) override;
     void handleCrashOperation(LifecycleOperation *operation) override;
+    void handleActiveOperationTimeout(cMessage *message) override;
+    void handleMessageWhenDown(cMessage *message) override;
+    void reapClosed();
+    void checkStopComplete();
     void sendControl(TcpSocket *socket, const Ptr<MqttPacket>& packet);
     void receiveControl(TcpSocket *socket, const Ptr<MqttPacket>& packet);
     void closeConnection(TcpSocket *socket);

@@ -20,7 +20,8 @@ void MqttBroker::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         timeoutTimer = new cMessage("connectionDeadlines");
         listener.setCallback(this); listener.setOutputGate(gate("socketOut"));
-        if (par("localPort").intValue() < 1 || par("localPort").intValue() > 65535 || par("connectTimeout").doubleValue() <= 0 || par("stopOperationTimeout").doubleValue() <= 0)
+        if (par("localPort").intValue() < 1 || par("localPort").intValue() > 65535 || par("connectTimeout").doubleValue() <= 0 ||
+                par("stopOperationTimeout").doubleValue() <= 0)
             throw cRuntimeError("Invalid MQTT broker port or timeout");
     }
 }
@@ -186,7 +187,6 @@ void MqttBroker::socketDataArrived(TcpSocket *socket, Packet *message, bool)
     socket->getReadBuffer()->push(message->peekData()); delete message;
     try {
         while (auto packet = MqttConnection::extract(*socket->getReadBuffer())) {
-            connection.lastReceived = simTime();
             if (connection.phase == MqttConnection::ACTIVE && connection.keepAlive)
                 connection.deadline = simTime() + SimTime(connection.keepAlive * 1.5);
             Packet observation("mqttReceived", packet); emit(registerSignal("packetReceivedFromLower"), &observation);
@@ -214,14 +214,25 @@ void MqttBroker::handleMessageWhenUp(cMessage *message)
                 closeConnection(check_and_cast<TcpSocket *>(socketMap.getSocketById(pair.first)));
         scheduleTimeout();
     }
-    else if (auto socket = check_and_cast_nullable<TcpSocket *>(socketMap.findSocketFor(message))) socket->processMessage(message);
-    else if (listener.belongsToSocket(message)) listener.processMessage(message);
-    else delete message;
+    else {
+        if (auto socket = check_and_cast_nullable<TcpSocket *>(socketMap.findSocketFor(message))) socket->processMessage(message);
+        else if (listener.belongsToSocket(message)) listener.processMessage(message);
+        else delete message;
+        // Delete terminal sockets only after processMessage has returned from callbacks.
+        reapClosed(); checkStopComplete();
+    }
 }
 void MqttBroker::handleStopOperation(LifecycleOperation *)
 {
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    // Route all Wills before beginning recipient connection closure.
+    for (auto& pair : connections) {
+        auto will = pair.second.will; pair.second.will = nullptr;
+        if (will) route(will);
+    }
     for (auto& pair : connections) closeConnection(check_and_cast<TcpSocket *>(socketMap.getSocketById(pair.first)));
     listener.close(); cancelEvent(timeoutTimer);
+    checkStopComplete();
 }
 void MqttBroker::handleCrashOperation(LifecycleOperation *)
 {
@@ -229,6 +240,32 @@ void MqttBroker::handleCrashOperation(LifecycleOperation *)
     for (auto& pair : socketMap.getMap()) pair.second->destroy();
     listener.destroy();
     socketMap.deleteSockets(); connections.clear(); sessions.clear(); retained.clear();
+}
+void MqttBroker::reapClosed()
+{
+    std::vector<TcpSocket *> closed;
+    for (auto& entry : socketMap.getMap()) {
+        auto socket = check_and_cast<TcpSocket *>(entry.second);
+        if (socket->getState() == TcpSocket::CLOSED || socket->getState() == TcpSocket::SOCKERROR) closed.push_back(socket);
+    }
+    for (auto socket : closed) {
+        connections.erase(socket->getSocketId()); socketMap.removeSocket(socket); delete socket;
+    }
+}
+void MqttBroker::checkStopComplete()
+{
+    if (operationalState == State::STOPPING_OPERATION && socketMap.size() == 0 && !listener.isOpen()) finishActiveOperation();
+}
+void MqttBroker::handleActiveOperationTimeout(cMessage *)
+{
+    for (auto& entry : socketMap.getMap()) entry.second->destroy();
+    listener.destroy(); socketMap.deleteSockets(); connections.clear();
+    finishActiveOperation();
+}
+void MqttBroker::handleMessageWhenDown(cMessage *message)
+{
+    if (!message->isSelfMessage()) delete message;
+    else ApplicationBase::handleMessageWhenDown(message);
 }
 void MqttBroker::socketPeerClosed(TcpSocket *socket) { closeConnection(socket); }
 void MqttBroker::socketClosed(TcpSocket *socket) { closeConnection(socket); }
