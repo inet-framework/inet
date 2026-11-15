@@ -1,0 +1,45 @@
+%description:
+MQTT production framing: all short-packet split points, concatenation, malformed
+lengths and UTF-8. These helper checks do not replace TCP integration cases.
+
+%includes:
+#include "inet/applications/mqtt/MqttConnection.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+%activity:
+using namespace inet;
+using namespace inet::mqtt;
+std::vector<uint8_t> connect = {0x10, 0x0d, 0,4,'M','Q','T','T',4,2,0,0,0,1,'c'};
+for (size_t split = 0; split <= connect.size(); split++) {
+    ChunkQueue queue;
+    if (split) queue.push(makeShared<BytesChunk>(std::vector<uint8_t>(connect.begin(), connect.begin()+split)));
+    auto packet = MqttConnection::extract(queue);
+    ASSERT(bool(packet) == (split == connect.size()));
+    if (split < connect.size()) {
+        queue.push(makeShared<BytesChunk>(std::vector<uint8_t>(connect.begin()+split,connect.end())));
+        packet = MqttConnection::extract(queue);
+    }
+    ASSERT(packet && packet->getType() == CONNECT);
+    ASSERT(MqttPacketSerializer::encode(*packet) == connect);
+    ASSERT(queue.getLength() == B(0));
+}
+ChunkQueue queue;
+queue.push(makeShared<BytesChunk>(std::vector<uint8_t>{0xc0,0,0xd0,0,0x10}));
+ASSERT(MqttConnection::extract(queue)->getType() == PINGREQ);
+ASSERT(MqttConnection::extract(queue)->getType() == PINGRESP);
+ASSERT(!MqttConnection::extract(queue));
+ASSERT(queue.getLength() == B(1));
+queue.clear();
+ASSERT(queue.getLength() == B(0));
+ASSERT(MqttPacketSerializer::frameLength({0x30,0xff,0xff,0xff,0x7f}) == 268435460);
+bool rejected = false;
+try { MqttPacketSerializer::frameLength({0x30,0x80,0x80,0x80,0x80}); } catch (cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+ASSERT(!MqttPacketSerializer::isValidUtf8(std::string("a\0b",3)));
+ASSERT(!MqttPacketSerializer::isValidUtf8("\xc0\x80"));
+ASSERT(!MqttPacketSerializer::isValidUtf8("\xed\xa0\x80"));
+ASSERT(MqttPacketSerializer::isValidUtf8("\xe2\x82\xac"));
+EV << "MQTT framing PASS\n";
+
+%contains: stdout
+MQTT framing PASS
