@@ -21,6 +21,7 @@ extend INET with new protocols or other components using C++, the
    ch-network-nodes
    ch-network-interfaces
    ch-apps
+   ch-mqtt
    ch-transport
    ch-ipv4
    ch-ipv6

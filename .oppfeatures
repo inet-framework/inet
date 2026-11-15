@@ -1095,6 +1095,14 @@
         compileFlags = "-DINET_WITH_MQTT"
         />
     <feature
+        id = "MqttExamples"
+        name = "MQTT examples"
+        description = "Wired publish/subscribe, QoS, retained value and reconnect examples."
+        initiallyEnabled = "true"
+        requires = "Mqtt TcpInet Ipv4 Ethernet LinkLayerConfiguratorsCommon"
+        nedPackages = "inet.examples.mqtt"
+        />
+    <feature
         id = "MqttTests"
         name = "MQTT tests"
         description = "Deterministic MQTT protocol and lifecycle fixtures."

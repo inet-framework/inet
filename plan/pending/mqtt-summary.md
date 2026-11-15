@@ -1,12 +1,12 @@
 # MQTT implementation summary
 
-> **Kind:** design · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [MQTT implementation plan](mqtt.md)
+> **Kind:** design · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [MQTT implementation plan](mqtt.md)
 
-The proposal adds MQTT clients and a broker to INET. A simulation will be able to connect sensors, services and other applications through publish/subscribe messaging, while the existing TCP/IP stack determines network delay, congestion and connection failures. The first target is MQTT 3.1.1, including all three delivery quality levels, persistent sessions, retained messages, keepalive and Will messages.
+The implementation adds MQTT clients and a broker to INET. A simulation can connect sensors, services and other applications through publish/subscribe messaging, while the existing TCP/IP stack determines network delay, congestion and connection failures. The supported version is MQTT 3.1.1, including all three delivery quality levels, persistent sessions, retained messages, keepalive and Will messages.
 
-This is a summary of the proposed implementation, not a description of an available model. The [detailed plan](mqtt.md) owns the exact behavior, commit boundaries and test assignments. Implementation and runtime validation have not started.
+The [detailed plan](mqtt.md) owns the implementation stages and test assignments. The [user guide](../../doc/src/users-guide/ch-mqtt.rst) explains configuration, and the [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) records executed validation and its limits.
 
-## What the model will do
+## What the model does
 
 A client can publish messages, subscribe to messages, or do both. Publishers send to a topic, such as `factory/line1/temperature`. Subscribers tell the broker which topics they want. The filter `factory/+/temperature`, for example, matches the temperature topic for one factory line. The broker finds the matching subscribers and sends each an appropriate copy.
 
@@ -24,7 +24,7 @@ Before a client starts its workload, it establishes TCP and completes MQTT's CON
 
 ## Where the behavior belongs
 
-The new package will live under `src/inet/applications/mqtt/`. Clients and brokers fit the existing application slots in ordinary INET hosts. They use existing sockets, packet buffers and lifecycle support, with no new host type or changes to the protected packet subsystem.
+The package lives under `src/inet/applications/mqtt/`. Clients and brokers fit the existing application slots in ordinary INET hosts. They use existing sockets, packet buffers and lifecycle support, with no new host type or changes to the protected packet subsystem.
 
 ```mermaid
 flowchart TD
@@ -56,7 +56,7 @@ flowchart LR
     F --> PB[Complete packet B]
 ```
 
-The framing code checks MQTT's encoded lengths before decoding the packet. Any incomplete suffix remains buffered until more bytes arrive. Connection cleanup clears that suffix before the socket is reused, so an abandoned packet cannot corrupt a later connection. Exact split-point checks will test the framing helper directly; separate TCP tests will check that the real applications use it correctly.
+The framing code checks MQTT's encoded lengths before decoding the packet. Any incomplete suffix remains buffered until more bytes arrive. Connection cleanup clears that suffix before the socket is reused, so an abandoned packet cannot corrupt a later connection. Exact split-point checks test the framing helper directly; separate TCP tests check that the real applications use it correctly.
 
 ## What the delivery quality levels mean
 
@@ -83,7 +83,7 @@ sequenceDiagram
     Note over S: Identifier 17 becomes available again
 ```
 
-If PUBLISH repeats before PUBREL arrives, the receiver answers with PUBREC without another handoff. A repeated PUBREL receives PUBCOMP. The tests will interrupt both parts of the handshake and check the resulting recovery. This guarantee concerns MQTT delivery within its session; it does not make an external application's processing transactional or preserve data lost in a broker crash.
+If PUBLISH repeats before PUBREL arrives, the receiver answers with PUBREC without another handoff. A repeated PUBREL receives PUBCOMP. The tests interrupt both parts of the handshake and check the resulting recovery. This guarantee concerns MQTT delivery within its session; it does not make an external application's processing transactional or preserve data lost in a broker crash.
 
 ## Recovering after disconnection
 
@@ -106,7 +106,7 @@ flowchart TD
 
 Recovery exchanges continue while subscription restoration waits. This matters when unfinished publications occupy every packet identifier: their acknowledgements must free identifiers before a new SUBSCRIBE can be sent. Ordinary TCP loss recovery remains TCP's job; the model adds no periodic MQTT resend timer to a connection that remains open.
 
-Ordinary client stop/start preserves the workload position and desired subscriptions, with exchange persistence governed by the connection's Clean Session value. A client crash loses runtime state and restarts its workload; its first accepted connection resets incompatible broker state using Clean Session true. An ordinary broker stop/start retains persistent sessions and retained messages, while a broker crash loses them under the proposed in-memory storage model.
+Ordinary client stop/start preserves the workload position and desired subscriptions, with exchange persistence governed by the connection's Clean Session value. A client crash loses runtime state and restarts its workload; its first accepted connection resets incompatible broker state using Clean Session true. An ordinary broker stop/start retains persistent sessions and retained messages, while a broker crash loses them under the in-memory storage model.
 
 ## Retained messages and failure notifications
 
@@ -148,10 +148,10 @@ Each stage corresponds to one planned commit and builds on the preceding stage. 
 
 The early stages are deliberately incomplete and must describe that limited scope. The final supported profile is reached only after all the required mechanisms and their tests are present.
 
-## What completion will establish
+## What the evidence checks
 
-The evidence must show more than a successful publication. It will check actual wire bytes, routing recipients, acknowledgements, replay, duplicate suppression, malformed input, timeout behavior and state lifetime. Scripted peers will create faults that a well-behaved production endpoint would not generate. Direct framing and lifecycle checks will cover properties that packet observations alone cannot establish.
+The tests check actual wire bytes, routing recipients, acknowledgements, replay, duplicate suppression, malformed input, timeout behavior and state lifetime. Scripted peers create faults that a well-behaved production endpoint would not generate. Direct framing and lifecycle checks cover properties that packet observations alone cannot establish.
 
-The final pass will run the MQTT suite and selected existing TCP tests, check builds with MQTT enabled and disabled, and compare selected exchanges with independently captured Mosquitto traffic. That last comparison checks bytes and behavior offline; it is not a claim of live interoperability. The examples will report delivered payload counts and throughput, including duplicate deliveries, separately from MQTT/TCP traffic.
+The [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) lists the MQTT and selected TCP checks, feature-on/off builds, examples and documentation results. The [Mosquitto comparison](../../tests/protocol/mqtt/reference-comparison.md) checks bytes and selected exchanges offline; it is not a claim of live interoperability. The examples report delivered payload counts and byte totals, including duplicate deliveries, separately from MQTT/TCP traffic; dividing byte totals by the observation duration gives throughput.
 
 The initial scope excludes MQTT 5.0, MQTT-SN, TLS, WebSockets, clustering, bridges, durable storage and a configurable broker capacity model. It uses real packet bytes and protocol state without adding CPU or disk timing. Experiments must fit available host memory. Diagram rendering remains unverified because a Mermaid renderer is not available in the current environment.
