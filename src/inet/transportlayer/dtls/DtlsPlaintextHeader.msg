@@ -8,7 +8,8 @@ import inet.transportlayer.tls.TlsClientHello;
 
 namespace inet::dtls;
 
-// RFC 9147 section 4: epoch-zero record header.
+// RFC 9147 section 4 epoch-zero header; RFC 6347's header also uses this
+// representation for protected records with their full epoch and sequence.
 class DtlsPlaintextHeader extends FieldsChunk
 {
     chunkLength = B(13);

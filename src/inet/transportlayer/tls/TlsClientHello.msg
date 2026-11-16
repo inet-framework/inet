@@ -15,6 +15,7 @@ class TlsClientHello extends FieldsChunk
     uint8_t sessionId[];
     uint16_t cipherSuites[];
     uint8_t compressionMethods[];
+    bool extensionsPresent = true; // Legacy DTLS 1.2 may omit the entire vector
     uint8_t extensions[];
 }
 
@@ -25,6 +26,7 @@ class TlsServerHello extends FieldsChunk
     uint8_t sessionId[];
     uint16_t cipherSuite = 0x1301;
     uint8_t compressionMethod = 0;
+    bool extensionsPresent = true;
     uint8_t extensions[];
 }
 

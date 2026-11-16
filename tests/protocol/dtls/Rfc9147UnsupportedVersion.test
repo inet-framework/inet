@@ -18,9 +18,12 @@ return ProtocolTest("rfc9147_unsupported_version")
     .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
         auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 70;
     }).within(1))
-
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
     .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
         require(app.establishedCount == 0 && app.receivedMarkers.empty(), "rejected offer cannot establish or deliver data");
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.errorCount == 1 && app.establishedCount == 0 && app.maximumDatagramSize() == 0, "record representation alone does not enable DTLS 1.2 negotiation");
     }));
 }
 %activity:

@@ -1,0 +1,82 @@
+%description:
+The concrete DTLS 1.2 GCM shape preserves content/tags, handles empty datagrams,
+checks nonce/length boundaries and leaves rejected input unchanged. This is a
+helper module check; it makes no successful 1.2 negotiation claim.
+%file: Fixture.cc
+#include <iostream>
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/Dtls12RecordProtection.h"
+#include "inet/transportlayer/dtls/DtlsRecordState.h"
+
+namespace Dtls12RecordProtection_1 {
+using namespace inet;
+using namespace inet::dtls;
+static void check(bool condition) { if (!condition) throw cRuntimeError("DTLS 1.2 protection invariant failed"); }
+class Fixture : public cSimpleModule {
+  protected:
+    void initialize() override {
+        Packet packet("content", makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3}));
+        packet.addRegionTag<CreationTimeTag>(B(1), B(1))->setCreationTime(SimTime(123));
+        Dtls12RecordProtection::protect(&packet, 1, 0x010203040506ULL);
+        check(packet.getDataLength() == B(27));
+        check(packet.peekAtFront<Dtls12ExplicitNonce>(B(8))->getValue() == 0x0001010203040506ULL);
+        check(packet.getRegionTag<CreationTimeTag>(B(9),B(1))->getCreationTime() == SimTime(123));
+        auto before = packet.peekData();
+        check(!Dtls12RecordProtection::unprotect(&packet, 1, 0x010203040507ULL) && packet.peekData() == before);
+        check(!Dtls12RecordProtection::unprotect(&packet, 2, 0x010203040506ULL) && packet.peekData() == before);
+        check(Dtls12RecordProtection::unprotect(&packet, 1, 0x010203040506ULL));
+        check(packet.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({1,2,3}));
+        check(packet.getRegionTag<CreationTimeTag>(B(1),B(1))->getCreationTime() == SimTime(123));
+        Packet empty("empty");
+        Dtls12RecordProtection::protect(&empty, 1, 0);
+        check(empty.getDataLength() == B(24) && Dtls12RecordProtection::unprotect(&empty,1,0) && empty.getDataLength() == b(0));
+        Packet maximum("maximum", makeShared<ByteCountChunk>(B(16384)));
+        Dtls12RecordProtection::protect(&maximum,65535,(uint64_t(1)<<48)-1);
+        check(maximum.getDataLength() == B(16408));
+        check(Dtls12RecordProtection::unprotect(&maximum,65535,(uint64_t(1)<<48)-1) && maximum.getDataLength() == B(16384));
+        for (int kind=0; kind<3; ++kind) {
+            Packet invalid("invalid", makeShared<ByteCountChunk>(B(kind == 0 ? 16385 : 1)));
+            auto original = invalid.peekData();
+            bool rejected = false;
+            try { Dtls12RecordProtection::protect(&invalid,kind == 1 ? 0 : 1,kind == 2 ? uint64_t(1)<<48 : 0); }
+            catch (const cRuntimeError&) { rejected = true; }
+            check(rejected && invalid.peekData() == original);
+        }
+        Packet bits("bits", makeShared<BitsChunk>(std::vector<bool>{true}));
+        bool rejected = false;
+        try { Dtls12RecordProtection::protect(&bits,1,0); } catch (const cRuntimeError&) { rejected = true; }
+        check(rejected && bits.getDataLength() == b(1));
+        Packet shortBody("truncated", makeShared<ByteCountChunk>(B(23)));
+        before = shortBody.peekData();
+        check(!Dtls12RecordProtection::unprotect(&shortBody,1,0) && shortBody.peekData() == before);
+        auto nonce = makeShared<Dtls12ExplicitNonce>(); nonce->setValue(uint64_t(1)<<48);
+        Packet raw("no retained cipher metadata", nonce);
+        raw.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0xaa}));
+        raw.insertAtBack(makeShared<ByteCountChunk>(B(16)));
+        before = raw.peekData();
+        check(!Dtls12RecordProtection::unprotect(&raw,1,0) && raw.peekData() == before);
+        DtlsRecordState replay(64);
+        check(replay.accept((uint64_t(1)<<48)-1));
+        check(!replay.accept((uint64_t(1)<<48)-1));
+        check(replay.accept((uint64_t(1)<<48)-2));
+        check(!replay.accept((uint64_t(1)<<48)-65));
+        std::cout << "DTLS 1.2 record protection PASS" << std::endl;
+    }
+};
+Define_Module(Fixture);
+}
+%file: TestNetwork.ned
+simple ProtectionFixture { @class(::Dtls12RecordProtection_1::Fixture); }
+network TestNetwork { submodules: fixture: ProtectionFixture; }
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1s
+seed-set = 0
+%contains: stdout
+DTLS 1.2 record protection PASS

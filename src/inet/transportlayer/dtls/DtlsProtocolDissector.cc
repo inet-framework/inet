@@ -18,7 +18,7 @@ void DtlsProtocolDissector::dissect(Packet *packet, const Protocol *, ICallback&
         try {
             auto first = packet->peekAtFront<BytesChunk>(B(1))->getByte(0);
             b bodyLength;
-            if (first == 21 || first == 22 || first == 26) {
+            if (first == 20 || first == 21 || first == 22 || first == 23 || first == 26) {
                 if (packet->getDataLength() < B(13))
                     throw cRuntimeError("Truncated DTLS plaintext header");
                 auto header = packet->popAtFront<DtlsPlaintextHeader>(B(13));

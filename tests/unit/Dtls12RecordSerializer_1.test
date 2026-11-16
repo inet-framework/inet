@@ -1,0 +1,74 @@
+%description:
+Independent octets for the legacy record header, CCS and explicit nonce; full
+epoch/sequence boundaries and generic dissection without enabling negotiation.
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/DtlsProtocolDissector.h"
+
+using namespace inet;
+using namespace inet::dtls;
+class LegacyObserver : public ProtocolDissector::ICallback {
+  public:
+    int headers = 0;
+    bool incorrect = false;
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override { incorrect = true; }
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *) override { if (dynamicPtrCast<const DtlsPlaintextHeader>(chunk)) ++headers; }
+    void dissectPacket(Packet *, const Protocol *) override { throw cRuntimeError("Unexpected nested dissection"); }
+};
+template<typename T> bool rejects(const std::vector<uint8_t>& bytes) {
+    try { Packet p("invalid", makeShared<BytesChunk>(bytes)); p.popAtFront<T>(B(bytes.size())); return false; }
+    catch (const cRuntimeError&) { return true; }
+}
+%activity:
+auto header = makeShared<DtlsPlaintextHeader>();
+header->setContentType(23);
+header->setEpoch(0xabcd);
+header->setSequenceNumber(0x010203040506ULL);
+header->setLength(24);
+Packet p("record", header);
+auto octets = p.peekDataAsBytes()->getBytes();
+ASSERT(octets == std::vector<uint8_t>({23,0xfe,0xfd,0xab,0xcd,1,2,3,4,5,6,0,24}));
+Packet raw("raw", makeShared<BytesChunk>(octets));
+auto parsed = raw.popAtFront<DtlsPlaintextHeader>(B(13));
+ASSERT(parsed->getEpoch() == 0xabcd && parsed->getSequenceNumber() == 0x010203040506ULL && parsed->getContentType() == 23);
+auto nonce = makeShared<Dtls12ExplicitNonce>();
+nonce->setValue(0xabcd010203040506ULL);
+Packet n("nonce", nonce);
+ASSERT(n.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0xab,0xcd,1,2,3,4,5,6}));
+Packet nr("raw nonce", n.peekDataAsBytes());
+ASSERT(nr.popAtFront<Dtls12ExplicitNonce>(B(8))->getValue() == 0xabcd010203040506ULL);
+auto ccs = makeShared<Dtls12ChangeCipherSpec>();
+Packet c("CCS", ccs);
+ASSERT(c.peekDataAsBytes()->getBytes() == std::vector<uint8_t>{1});
+ASSERT(rejects<Dtls12ChangeCipherSpec>({0}) && rejects<Dtls12ChangeCipherSpec>({2}) && rejects<Dtls12ExplicitNonce>({0,1,2}));
+auto maximum = makeShared<DtlsPlaintextHeader>();
+maximum->setEpoch(65535);
+maximum->setSequenceNumber((uint64_t(1) << 48) - 1);
+Packet maxPacket("maximum", maximum);
+auto maxBytes = maxPacket.peekDataAsBytes()->getBytes();
+ASSERT(std::vector<uint8_t>(maxBytes.begin()+3, maxBytes.begin()+11) == std::vector<uint8_t>(8,255));
+auto overflow = makeShared<DtlsPlaintextHeader>();
+overflow->setSequenceNumber(uint64_t(1) << 48);
+Packet invalid("overflow", overflow);
+bool rejected = false;
+try { invalid.peekDataAsBytes(); } catch (const cRuntimeError&) { rejected = true; }
+if (!rejected) throw cRuntimeError("48-bit legacy record overflow accepted");
+auto ccsHeader = makeShared<DtlsPlaintextHeader>();
+ccsHeader->setContentType(20); ccsHeader->setLength(1);
+Packet combined("two legacy records", ccsHeader);
+combined.insertAtBack(ccs);
+combined.insertAtBack(header);
+combined.insertAtBack(makeShared<ByteCountChunk>(B(24)));
+LegacyObserver observer;
+DtlsProtocolDissector dissector;
+dissector.dissect(&combined, nullptr, observer);
+ASSERT(observer.headers == 2 && !observer.incorrect && combined.getDataLength() == b(0));
+std::cout << "DTLS 1.2 record serializers PASS" << std::endl;
+%contains: stdout
+DTLS 1.2 record serializers PASS

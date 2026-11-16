@@ -40,7 +40,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C10 | PHA | Twenty-two PHA cases; contextual serializers, offer/store units and existing controls | DONE: full 230-case debug suite passes; final byte-bound correction passes 31 focused cases |
 | C11a | Existing fragmentation-request API | Immediate/delayed Ipv6DontFragmentRequest; source-fragmentation control | DONE: parent reproduces both defects; fresh debug child passes all three cases |
 | C11 | PMTU | Rfc9147PathMtu and routed/interaction cases; flight/path units | DONE: 247 debug protocol cases pass before final startup guard; final 22 protocol controls and 16 module cases pass; 11 units pass |
-| C12 | 12-RECORD | Dtls12RecordSerializer_1, Dtls12HandshakeSerializer_1; unsupported-version control | NOT_STARTED |
+| C12 | 12-RECORD | Dtls12RecordSerializer_1, Dtls12HandshakeSerializer_1; unsupported-version control | DONE: 13 debug units, one protection/replay module and five production 1.3 controls pass; 1.2 negotiation remains disabled |
 | C13 | VERSION, 12-RECOVERY | Rfc6347Handshake, Recovery, Datagrams; Rfc9147VersionNegotiation | NOT_STARTED |
 | C14 | 12-SESSION | Rfc6347Resumption | NOT_STARTED |
 | C15 | 12-PATH | Rfc9146ConnectionId, Rfc6347PathMtu | NOT_STARTED |
@@ -256,3 +256,26 @@ opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^te
 ```
 
 Scoped engine/contract/application architecture, DTLS naming, source protection, document seals, release formatting and reviewer links pass. The global interface gate has the same sixteen unrelated findings and no `IDtls` finding; the C++ checker remains unavailable without clang-tidy. Release-mode execution, exact-parent comparisons and fingerprints have not run for C11. No stored baseline changed.
+
+## C12 implementation contract
+
+Validated before implementation against RFC 6347 §§4.1–4.3, RFC 5246 §§7.1/7.4, RFC 5288 §3, RFC 5487 §2, RFC 4279 §2 and RFC 8422 §5. Reuse the existing 13-byte record and 12-byte handshake headers, ClientHello cookie representation, ServerHello, CertificateVerify and variable Finished body where their fields agree. Add concrete 1.2-only HelloVerifyRequest, Certificate, PSK/ECDHE key exchange, CertificateRequest, ServerHelloDone, ChangeCipherSpec and explicit-nonce chunks with a local serializer. The selected ECDHE profile uses secp256r1's 65-byte uncompressed point and ECDSA/SHA-256; selected PSK identity/hint vectors use their actual two-byte lengths. Certificate bodies retain modeled opaque bytes. Do not add a cryptographic plugin or second engine.
+
+The concrete 1.2 record helper represents an eight-byte explicit nonce (epoch plus full 48-bit record sequence), retained encrypted content and sixteen-byte tag, with no 1.3 inner content-type octet. It checks byte alignment, record bounds, expected nonce and retained shape, preserves payload region tags, transfers no caller packet ownership and leaves input unchanged on failed unprotection. Empty datagrams remain representable. Reuse existing replay-window storage with full record numbers; no 1.2 negotiation or application send path is enabled in C12. Extend generic dissection to recognize CCS/application legacy-format records; preserve existing 1.3 parsing and default negotiation.
+
+Planned verification: independent-octet serializer units for both key-exchange families, malformed vectors and CCS/nonces; module checks for protection overhead, empty content, nonce bounds, replay and failure preservation; existing unsupported-version and successful 1.3 controls through production UDP. Optional Hello extension omission is represented explicitly and accepted only with the legacy DTLS version `0xfefd`; successful 1.3 negotiation still requires its supported-version/key-share extensions through the existing consumer. Default-present flags preserve all existing encodings. Source protection remains open for all selected DTLS/TLS targets. Tests and build are not yet run for C12.
+
+### C12 implementation and verification
+
+Implemented the concrete bodies and serializer in `Dtls12HelloVerifyRequest.msg`/`Dtls12PacketSerializer`, the 1.2 protection helper and explicit legacy extension-presence fields in the shared Hello bodies. The [reviewer document](../../../../../tests/protocol/dtls/dtls12-record-foundation.md) maps exact fields, independent octet oracles, helper observations and production control limits. The generic dissector recognizes legacy CCS/application headers; the negotiation engine still refuses a 1.2-only offer. The extended rejection control requires one client error, no establishment/delivery and zero application-size availability.
+
+After a fresh matching debug build, **all thirteen DTLS/TLS units, one new protection/replay module case and five production 1.3 controls pass**, with nonzero selections and exit zero. Build logs are `c12-build-debug.log`, `c12-final-build-debug.log` and `c12-naming-build-debug.log`; the last reflects the message-file naming correction. Final runner logs are `c12-final-unit-console.log`, `c12-final-module-console.log` and `c12-final-protocol-*`. An earlier handshake-unit fixture attempted to modify a chunk after packet insertion; copying before modification corrected that fixture. No production behavior was changed to satisfy that failure.
+
+```sh
+make -j8 MODE=debug
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(Dtls|Tls).*'
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls12RecordProtection_1.test'
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(UnsupportedVersion|Handshake|PskHandshake|ClientAuthentication|PathMtuLateAck)\.test$' --log-file audit/dtls-extensions/c12-final-protocol-runner.log
+```
+
+Scoped DTLS/TLS architecture and naming, selected document links, release formatting, source protection and document seals pass. The earlier global interface/link findings and unavailable clang-tidy remain. Release execution and fingerprints are not run at this stage. Helper success establishes no 1.2 handshake, replay integration or application delivery. No stored baseline changed.

@@ -74,6 +74,11 @@ void TlsHandshakeSerializer::writeClientSuffix(MemoryOutputStream& s, const Ptr<
     s.writeUint8(compressionCount);
     for (size_t i = 0; i < compressionCount; i++)
         s.writeUint8(h->getCompressionMethods(i));
+    if (!h->getExtensionsPresent()) {
+        if (h->getLegacyVersion() != 0xfefd || extensionsLength != 0)
+            throw cRuntimeError("Only legacy DTLS may omit an empty extension vector");
+        return;
+    }
     s.writeUint16Be(extensionsLength);
     for (size_t i = 0; i < extensionsLength; i++)
         s.writeUint8(h->getExtensions(i));
@@ -107,10 +112,15 @@ void TlsHandshakeSerializer::readClientSuffix(MemoryInputStream& s, const Ptr<Tl
     auto compressionLength = s.readUint8();
     if (compressionLength == 0)
         throw cRuntimeError("Empty TLS compression vector");
-    requireBytes(s, compressionLength + 2);
+    requireBytes(s, compressionLength);
     h->setCompressionMethodsArraySize(compressionLength);
     for (size_t i = 0; i < compressionLength; i++)
         h->setCompressionMethods(i, s.readUint8());
+    if (h->getLegacyVersion() == 0xfefd && s.getRemainingLength() == b(0)) {
+        h->setExtensionsPresent(false);
+        return;
+    }
+    requireBytes(s, 2);
     auto extensionsLength = s.readUint16Be();
     requireBytes(s, extensionsLength);
     h->setExtensionsArraySize(extensionsLength);
@@ -136,9 +146,13 @@ void TlsHandshakeSerializer::serializeFields(MemoryOutputStream& s, const Ptr<co
             s.writeUint8(serverHello->getSessionId(i));
         s.writeUint16Be(serverHello->getCipherSuite());
         s.writeUint8(serverHello->getCompressionMethod());
-        s.writeUint16Be(serverHello->getExtensionsArraySize());
-        for (size_t i = 0; i < serverHello->getExtensionsArraySize(); i++)
-            s.writeUint8(serverHello->getExtensions(i));
+        if (serverHello->getExtensionsPresent()) {
+            s.writeUint16Be(serverHello->getExtensionsArraySize());
+            for (size_t i = 0; i < serverHello->getExtensionsArraySize(); i++)
+                s.writeUint8(serverHello->getExtensions(i));
+        }
+        else if (serverHello->getLegacyVersion() != 0xfefd || serverHello->getExtensionsArraySize() != 0)
+            throw cRuntimeError("Only legacy DTLS may omit an empty extension vector");
     }
     else if (auto body = dynamicPtrCast<const TlsEncryptedExtensions>(chunk))
         writeVector(s, body->getExtensionsArraySize(), 2, [&](size_t i) { return body->getExtensions(i); });
@@ -243,12 +257,17 @@ const Ptr<Chunk> TlsHandshakeSerializer::deserializeFields(MemoryInputStream& s,
     auto length = s.readUint8();
     if (length > 32)
         throw cRuntimeError("TLS session ID exceeds 32 bytes");
-    requireBytes(s, length + 5);
+    requireBytes(s, length + 3);
     h->setSessionIdArraySize(length);
     for (size_t i = 0; i < length; i++)
         h->setSessionId(i, s.readUint8());
     h->setCipherSuite(s.readUint16Be());
     h->setCompressionMethod(s.readUint8());
+    if (h->getLegacyVersion() == 0xfefd && s.getRemainingLength() == b(0)) {
+        h->setExtensionsPresent(false);
+        return h;
+    }
+    requireBytes(s, 2);
     auto extensionsLength = s.readUint16Be();
     requireBytes(s, extensionsLength);
     h->setExtensionsArraySize(extensionsLength);
