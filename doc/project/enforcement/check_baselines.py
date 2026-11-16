@@ -17,6 +17,10 @@ PR-SPLIT-BASELINE for a baseline in another repository.
   CR-OBL-BASELINE          the Change: trailer of the cause commit names the baseline that moves
   CR-OBL-INERT             a commit below the behavior level moves no pin over a result
 
+The same rules hold for the fingerprints in tests/fingerprint/store.json of the INET tree. The INET
+commit that changes the store holds the "Baseline changes:" list of its fingerprint changes, with a
+reason on each line.
+
 A result is a .sca file of the statistics repository, or an image of the media repository that a
 chart of an analysis file of the INET tree exports. A commit of a baseline repository that changes
 no result, such as documentation media, needs no record, and a pin can move over it.
@@ -44,11 +48,13 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import baseline_summary  # noqa: E402
+import fingerprint_moves  # noqa: E402
 from baseline_pins import PinError, git, is_full_hash, read_baselines  # noqa: E402
 
 FAIL_LINES = 100
 NOTE_LINES = 30
 FORMS = ("commit", "forward", "reverse", "first-record", "removal", "environment")
+STORE = "tests/fingerprint/store.json"
 REDUCTION_FORMS = ("forward", "reverse")
 # a path whose content can change a result: model source, simulations and the Python of the project
 SOURCE_PATH = re.compile(r"^(src|examples|showcases|tutorials|tests/networks|python)/")
@@ -225,6 +231,42 @@ def check_list(report, where, message, expected):
     changed = sum(1 for line in expected if " changed" in line.split("(")[0])
     if changed > 1:
         report.note(f"{where} has {changed} lines of changed entries: do their reasons name one cause? If not, the commit holds more than one change (PR-SPLIT-ONE-CHANGE)")
+
+
+def message_of(commit):
+    return git("log", "-1", "--format=%B", commit).stdout
+
+
+def store_at(commit):
+    out = git("show", f"{commit}:{STORE}", check=False)
+    return fingerprint_moves.parse(out.stdout if out.returncode == 0 else "")
+
+
+def fingerprint_changes(commit):
+    """[(kind, line)] of the fingerprint changes of a commit, against its first parent."""
+    parent = git("rev-parse", "--verify", "--quiet", f"{commit}^", check=False).stdout.strip()
+    if parent and git("diff", "--quiet", parent, commit, "--", STORE, check=False).returncode == 0:
+        return []
+    return fingerprint_moves.categories(store_at(parent) if parent else {}, store_at(commit))
+
+
+def check_fingerprints(report, commits):
+    """TR-BASELINE-PROVENANCE and CR-OBL-BASELINE for the fingerprint store.
+    Returns {commit: [(kind, line)]} of the commits that change fingerprint entries."""
+    report.section("TR-BASELINE-PROVENANCE: the fingerprint changes of each commit")
+    steps = {}
+    for commit in commits:
+        changes = fingerprint_changes(commit)
+        if not changes:
+            continue
+        steps[commit] = changes
+        check_list(report, f"{short(commit)} fingerprints", message_of(commit), [line for _, line in changes])
+        obligations = obligations_of(commit)
+        if obligations is not None and "?" not in obligations and "fingerprint" not in obligations:
+            report.flag(f"{short(commit)} changes the fingerprint store, and its Change: trailer does not name 'fingerprint' (CR-OBL-BASELINE)")
+    print(f"  {len(steps)} commit(s) change fingerprint entries")
+    report.end_section()
+    return steps
 
 
 def check_pins(report, commits, base, baselines):
@@ -445,6 +487,14 @@ def main(argv=None):
                     report.flag(f"{short(commit)} moves {len(entries)} pins, and their baseline commits do not have the same attribution; one cause has one attribution, with the same reduction file")
             report.end_section()
 
+            fingerprint_steps = check_fingerprints(report, commits)
+
+            if fingerprint_steps:
+                print()
+                print("== the fingerprint changes (for the reviewer) ==")
+                for commit, changes in fingerprint_steps.items():
+                    print(f"  {short(commit)} {subject_of(commit)}")
+                    print("\n".join("    " + line for _, line in changes))
             if usable:
                 print()
                 print("== the baseline commits (the record, for the reviewer) ==")
@@ -460,7 +510,7 @@ def main(argv=None):
     if report.violations:
         print("FAIL: see doc/project/rule/testing.md (TR-BASELINE-*) and doc/project/guide/change-a-baseline.md.")
         return 1
-    print("PASS: the pins and the baseline records are clean. Whether an analysis is true, and whether a")
+    print("PASS: the pins and the baseline records are clean. Whether a reason is true, and whether a")
     print("      reduction gives the results that it claims, needs a run and a reviewer.")
     return 0
 
