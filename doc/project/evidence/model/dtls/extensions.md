@@ -36,7 +36,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C6 | CID | Eight negotiation/budget/isolation/lifecycle cases; record/dissector unit; allocator module | DONE: fresh debug build; 45 combined protocol, 6 unit, 7 module PASS |
 | C7 | CID-REQUEST, EXCHANGE | Fourteen CID update/request protocol cases; serializer unit; existing controls | DONE: fresh debug build; 59 combined protocol, 7 unit, 7 module PASS |
 | C8 | HEARTBEAT | Thirteen heartbeat protocol cases; serializer unit; selected existing controls | DONE: fresh debug build; 22 combined protocol, 8 unit, 7 module PASS |
-| C9 | PATH | Rfc9147Migration; routed/NAT fixtures | NOT_STARTED |
+| C9 | PATH | Seventeen migration cases; NAT translation, switched/routed IPv4 and routed IPv6, rebind/error checks | DONE: 60 protocol, eight unit and seven module cases pass in debug |
 | C10 | PHA | Rfc9147PostHandshakeAuth | NOT_STARTED |
 | C11a | Existing fragmentation-request API | tests/protocol/ipv6/Ipv6DontFragmentRequest; source-fragmentation control | NOT_STARTED |
 | C11 | PMTU | Rfc9147PathMtu; flight/path units | NOT_STARTED |
@@ -157,3 +157,20 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds
 ```
 
 Artifacts are `c8-build-debug.log` and `c8-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Scoped DTLS/TLS architecture and naming, source protection, document seals, release formatting and selected DTLS/standard documentation links pass. The missing C++ checker and prior global interface/link findings remain unresolved. Release, exact-parent and fingerprint comparisons remain unrun. No stored expectation changed.
+
+## C9 execution
+
+Implemented one candidate and one confirmed path per association, replay-window freshness checks before acceptance, correlated return validation, bounded candidate replies and confirmed-path ordinary output. Local source/interface selection reserves a peer spare CID. Explicit single-association socket rebind uses a fresh UDP socket ID, holds application output without charging completed service twice, and rejects stale transport indications. Rebind validation failure retires the association; ordinary candidate timeout preserves the confirmed path. Retained-key validation allows lost KeyUpdate ACK recovery. The [reviewer document](../../../../../tests/protocol/dtls/migration.md) explains configuration, observations, API outcomes and the finite IPv6 limitation.
+
+A fresh debug library passes **60 distinct protocol cases** across the combined 58-case selection and two additional routed cases. The 17 new migration cases cover NAT, switched and routed IPv4, routed IPv6, ordering/freshness, competing candidates, permission and malformed-record refusal, timeout, real port replacement, occupied-port error, multiple-peer refusal, cancelled diagnostic probes and KeyUpdate recovery. Eight units and seven module controls also pass with nonzero selection and exit zero. The occupied-port case expects simulation exit 1 inside the test harness and passes as an expected configuration-error check.
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(Migration.*|Heartbeat.*|ConnectionId.*|Handshake|PskHandshake|ClientAuthentication|EarlyData|Resumption|KeyUpdate|Multihomed|PlainAlertLocalIdentity)\.test$' --log-file audit/dtls-extensions/c9-final-protocol-runner.log
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147MigrationIpv6\.test$' --log-file audit/dtls-extensions/c9-ipv6-runner.log
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147MigrationRouted\.test$' --log-file audit/dtls-extensions/c9-routed-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(TlsHandshakeParameters|TlsHandshakeSerializer|DtlsRecordSerializer|DtlsTicketSelection|DtlsSessionStore|TlsNewSessionTicket|DtlsConnectionIdUpdateSerializer|DtlsHeartbeatSerializer)_1\.test$' --log-file audit/dtls-extensions/c9-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds|EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c9-final-module-runner.log
+```
+
+The combined selector executed before the two routed cases were added; rerunning it now selects 60 cases. Raw build, runner and console logs have the above prefixes under `audit/dtls-extensions/`. Scoped engine/contract/application architecture, DTLS naming, source protection, document seals, release-note formatting and DTLS documentation links pass. The C++ checker remains unavailable because `clang-tidy` is absent; prior global interface/link findings remain unresolved. Release, exact-parent, fingerprint and active-validation stop/crash checks remain unrun. PHA and PMTU interactions belong to their later stages. No stored expectation changed, and the unrelated `AGENTS.md` edit remains excluded.

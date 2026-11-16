@@ -67,6 +67,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     uint64_t nextConnectionId = 1;
     uint64_t nextHeartbeatToken = 1;
     bool startHeartbeatProbe(AssociationId id, size_t udpBytes = 0);
+    static bool sameTuple(const DtlsPath& a, const DtlsPath& b);
     std::map<std::vector<uint8_t>, AssociationId> cidIndex;
     std::vector<uint8_t> allocateConnectionId(AssociationId id);
     void removeConnectionIds(AssociationId id);
@@ -133,7 +134,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void beginClose(AssociationId id);
     void resumeApplications(AssociationId id);
     void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2,
-                   const std::vector<uint8_t>& cid = {});
+                   const std::vector<uint8_t>& cid = {}, int interfaceId = -1);
     bool enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,
                            DtlsProcessingQueue::Eligibility eligible = {}, DtlsProcessingQueue::Completion skipped = {},
                            DtlsProcessingQueue::Completion started = {}, bool recordDelay = true);
@@ -156,6 +157,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     bool requestConnectionIds(AssociationId id, int count) override;
     bool provideConnectionIds(AssociationId id, int count, bool immediate) override;
     bool activateSpareConnectionId(AssociationId id) override;
+    bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId) override;
+    bool rebindLocalPort(AssociationId id, int port) override;
 };
 
 } // namespace inet::dtls

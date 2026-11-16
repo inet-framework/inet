@@ -1,0 +1,51 @@
+%description:
+Rebind clears the old socket's live probe before validating with a fresh token.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int requests = 0;
+return establish("rfc9147_migration_rebind_probe")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).nth(1).drop())
+    .meanwhile(exactlyTimes(1, on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_OUTPUT_REFUSED).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) ++requests; return false; }).within(3)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return heartbeat(c, 2); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.rebindPort(4438); }))
+    .once(on("host1.app[0].driver").signal("pathChanged").within(1))
+    .never(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(1.2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.migrationResults == std::vector<bool>{true} && app.confirmedPaths.size() == 1 && app.errorCount == 0 && requests == 2, "old request and deadline are cleared while one new validation request completes"); }));
+}
+%activity:
+EV << "rebind live probe compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.probeTimeout = 1s
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_rebind_probe: PASS

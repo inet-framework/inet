@@ -1,0 +1,6 @@
+DTLS Validated Path Changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom ``IDtls`` implementations must provide ``migrateLocal(handle, address, interfaceId)`` and ``rebindLocalPort(handle, port)``. Every ``ICallback`` implementation must add ``pathChanged(handle, const DtlsPath&)``. Copy the borrowed path when retaining it; it contains local address/port, peer address/port and interface ID. ``DtlsSocket`` forwards the operations, with interface ID ``-1`` selecting the interface owning the requested address. Existing send/open calls keep their runtime behavior when migration is disabled.
+
+Enable ``migrationEnabled``, ``connectionIdEnabled`` and ``heartbeatEnabled``. Deliberate 1.3 local movement requires both heartbeat permissions, both nonempty CID directions and a suitable peer-provided spare; request IDs before moving. Address movement requires a wildcard-bound socket and an owned local address. Port rebinding requires one established association without a listener or half-open peer and a free target port. A ``true`` result admits validation; the path callback reports confirmation. Failure after socket replacement invalidates the handle through the existing error callback. An occupied port remains a UDP simulation configuration error.

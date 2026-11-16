@@ -37,6 +37,8 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<AssociationId> closedHandles;
     std::vector<bool> updateResults;
     std::vector<bool> cidResults;
+    std::vector<bool> migrationResults;
+    std::vector<inet::dtls::DtlsPath> confirmedPaths;
     std::vector<bool> earlyResults;
     std::vector<int> earlyMarkers;
     bool closeOnEarlyData = false;
@@ -137,6 +139,11 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
         earlyResults.push_back(accepted);
         emit(registerSignal("earlyDataStatus"), accepted ? 1L : 0L);
     }
+    void pathChanged(AssociationId, const inet::dtls::DtlsPath& path) override
+    {
+        confirmedPaths.push_back(path);
+        emit(registerSignal("pathChanged"), (long)confirmedPaths.size());
+    }
     void sendEarlyMarker(int marker, int bytes = 32)
     {
         scheduleCommand([this, marker, bytes]() {
@@ -193,6 +200,14 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     void activateCid()
     {
         scheduleCommand([this]() { cidResults.push_back(engine->activateSpareConnectionId(lastHandle())); });
+    }
+    void rebindPort(int port)
+    {
+        scheduleCommand([this, port]() { migrationResults.push_back(engine->rebindLocalPort(lastHandle(), port)); });
+    }
+    void migrateAddress(const L3Address& address, int interfaceId = -1)
+    {
+        scheduleCommand([this, address, interfaceId]() { migrationResults.push_back(engine->migrateLocal(lastHandle(), address, interfaceId)); });
     }
     void sendBits(int bitCount)
     {

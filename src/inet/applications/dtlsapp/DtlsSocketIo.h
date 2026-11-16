@@ -23,6 +23,7 @@ class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback
     void dataArrived(IDtls::AssociationId id, Packet *packet) override;
     void earlyDataArrived(IDtls::AssociationId id, Packet *packet) override;
     void earlyDataStatus(IDtls::AssociationId id, bool accepted) override;
+    void pathChanged(IDtls::AssociationId id, const DtlsPath& path) override;
     void sendError(IDtls::AssociationId id, long packetId, const char *reason) override;
     void error(IDtls::AssociationId id, const char *reason) override;
     void closed(IDtls::AssociationId id) override;

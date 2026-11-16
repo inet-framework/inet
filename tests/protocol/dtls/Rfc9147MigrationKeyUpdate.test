@@ -1,0 +1,51 @@
+%description:
+A lost KeyUpdate ACK can cross local rebind; validation uses retained keys and
+then independent KeyUpdate recovery advances the sending epoch on the new path.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_migration_key_update")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop())
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.rebindPort(4438); app.sendMarker(33); }))
+    .unordered({on("host1.app[0].driver").signal("pathChanged").within(1), on("host2.app[0].driver").signal("pathChanged").within(1)})
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return protectedRecord(c, 0); }).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>{true} && app.migrationResults == std::vector<bool>{true} && app.establishedCount == 1 && app.errorCount == 0, "local rebind and KeyUpdate recover without replacing the association"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{33} && app.confirmedPaths.size() == 1 && app.confirmedPaths[0].peerPort == 4438 && app.errorCount == 0, "retained-key validation precedes new-epoch ordinary data"); }));
+}
+%activity:
+EV << "migration KeyUpdate overlap compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[*].dtls.rekeyAfterRecords = 1
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_key_update: PASS

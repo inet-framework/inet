@@ -32,6 +32,8 @@ class INET_API DtlsSocket
     bool requestConnectionIds(AssociationId id, int count = 1) { checkEngine(); return engine->requestConnectionIds(id, count); }
     bool provideConnectionIds(AssociationId id, int count = 1, bool immediate = true) { checkEngine(); return engine->provideConnectionIds(id, count, immediate); }
     bool activateSpareConnectionId(AssociationId id) { checkEngine(); return engine->activateSpareConnectionId(id); }
+    bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId = -1) { checkEngine(); return engine->migrateLocal(id, address, interfaceId); }
+    bool rebindLocalPort(AssociationId id, int port) { checkEngine(); return engine->rebindLocalPort(id, port); }
 
   protected:
     void checkEngine() const {

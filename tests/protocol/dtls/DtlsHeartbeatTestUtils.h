@@ -4,6 +4,8 @@
 
 #include "DtlsTestUtils.h"
 #include "inet/transportlayer/dtls/Dtls.h"
+#include "inet/common/socket/SocketTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet::protocoltest::dtls {
 
@@ -13,6 +15,13 @@ class ProbeDtls : public inet::dtls::Dtls
 {
   public:
     std::vector<bool> probeAdmissions;
+    int socketIdForTest() const { return udpSocket.getSocketId(); }
+    void injectStaleSocketClose(int socketId) {
+        Enter_Method("injectStaleSocketClose");
+        auto indication = new Indication("old UDP socket indication", UDP_I_SOCKET_CLOSED);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
+        handleMessageWhenUp(indication);
+    }
     void probePeer(size_t bytes = 0) {
         auto handle = associations.empty() ? 0 : associations.begin()->first;
         probeAdmissions.push_back(startHeartbeatProbe(handle, bytes));

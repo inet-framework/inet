@@ -80,6 +80,13 @@ void DtlsSocketIo::earlyDataStatus(IDtls::AssociationId id, bool accepted)
     EV_INFO << "DTLS association " << id << " early data " << (accepted ? "accepted" : "rejected") << endl;
 }
 
+void DtlsSocketIo::pathChanged(IDtls::AssociationId id, const DtlsPath& path)
+{
+    Enter_Method("pathChanged");
+    EV_INFO << "DTLS association " << id << " path " << path.localAddress << ":" << path.localPort << " -> " << path.peerAddress << ":" << path.peerPort << endl;
+    emit(registerSignal("pathChanged"), (long)id);
+}
+
 void DtlsSocketIo::error(IDtls::AssociationId id, const char *reason)
 {
     if (id == clientId)

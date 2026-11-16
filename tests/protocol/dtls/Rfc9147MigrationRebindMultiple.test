@@ -1,0 +1,51 @@
+%description:
+Two established peers sharing one client engine prevent local socket movement.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_migration_rebind_multiple")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.openPeer("host2", 4435); }))
+    .once(on("host2.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(1, false); })
+        .run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { app.provideCids(1, false); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(1).within(1))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(1).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 2 && app.handles.size() == 2, "one engine owns two established peers with spares"); app.rebindPort(4438); app.sendMarker(31, 32, app.handles.front()); app.sendMarker(32, 32, app.handles.back()); }))
+    .unordered({on("host2.app[0].driver").signal("packetSentToUpper").within(1), on("host2.app[1].driver").signal("packetSentToUpper").within(1)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.migrationResults == std::vector<bool>{false} && app.confirmedPaths.empty() && app.errorCount == 0, "multiple associations refuse movement without changing either path"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{31}, "first association still delivers"); })
+        .run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{32}, "second association still delivers"); }));
+}
+%activity:
+EV << "multiple-association rebind compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 1
+*.host2.numApps = 2
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host2.app[1].localPort = 4435
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_rebind_multiple: PASS

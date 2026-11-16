@@ -28,6 +28,7 @@ class INET_API DtlsRecordState
     bool accept(uint64_t sequenceNumber);
     // Distinguishes an untouched window from one that accepted record zero.
     [[nodiscard]] bool hasRecords() const { return initialized; }
+    [[nodiscard]] uint64_t getHighestAccepted() const { ASSERT(initialized); return highest; }
 };
 
 } // namespace inet::dtls

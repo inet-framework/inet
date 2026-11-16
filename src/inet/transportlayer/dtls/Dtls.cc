@@ -8,7 +8,9 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -163,6 +165,10 @@ void Dtls::handleMessageWhenUp(cMessage *message)
         return;
     else if (udpSocket.belongsToSocket(message))
         udpSocket.processMessage(message);
+    else if (auto tagged = dynamic_cast<ITaggedObject *>(message); tagged && par("migrationEnabled").boolValue() && tagged->getTags().findTag<SocketInd>()) {
+        emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
+        delete message;
+    }
     else
         throw cRuntimeError("Unexpected message '%s' at DTLS engine", message->getName());
 }
@@ -353,7 +359,7 @@ void Dtls::removePrevalidation(uint64_t id)
 }
 
 void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence, uint64_t epoch,
-                     const std::vector<uint8_t>& cid)
+                     const std::vector<uint8_t>& cid, int interfaceId)
 {
     auto alert = makeShared<DtlsAlert>();
     alert->setLevel(2);
@@ -380,6 +386,8 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
     (*packet)->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
     if (!localAddress.isUnspecified())
         (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(localAddress);
+    if (interfaceId >= 0)
+        (*packet)->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     auto delay = encrypted ? SimTime(par("protectOutDelay").doubleValue()) : SIMTIME_ZERO;
     auto overhead = 22 + cid.size();
     if (!enqueueProcessing(outputProcessing.get(), 0, (*packet)->getByteLength(), delay, [this, peerAddress, peerPort, packet, encrypted, overhead]() {
@@ -422,7 +430,7 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
             number = association->nextEpoch2Record++;
         if (permitted && available)
             sendAlert(association->localAddress, association->peerAddress, association->peerPort, alertDescription, encrypted, number, epoch,
-                      association->cidNegotiated ? association->peerCid : std::vector<uint8_t>{});
+                      association->cidNegotiated ? association->peerCid : std::vector<uint8_t>{}, association->localInterfaceId);
     }
     auto callback = association->callback;
     if (association->earlyRequested && !association->earlyStatusReported)
@@ -734,6 +742,10 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     auto it = associations.find(id);
     if (it == associations.end() || (it->second->flight != flight && !it->second->findPostHandshakeExchange(flight)))
         return;
+    if (it->second->isRebinding()) {
+        flight->cancelReservation(index);
+        return;
+    }
     bool isPostHandshake = it->second->findPostHandshakeExchange(flight) != nullptr;
     auto fragment = flight->get(index);
     size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 12 + it->second->recordOverhead());
@@ -755,7 +767,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     auto eligible = [this, id, flight, index]() {
         auto current = associations.find(id);
         auto exchange = current != associations.end() ? current->second->findPostHandshakeExchange(flight) : nullptr;
-        return current != associations.end() && !current->second->closing &&
+        return current != associations.end() && !current->second->closing && !current->second->isRebinding() &&
                (current->second->flight == flight || (exchange && !exchange->recoveryExpired)) &&
                flight->get(index).queued && !flight->get(index).acknowledged;
     };
@@ -820,6 +832,8 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!current->second->localAddress.isUnspecified())
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+        if (current->second->localInterfaceId >= 0)
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(current->second->localInterfaceId);
         auto peer = current->second->peerAddress;
         auto port = current->second->peerPort;
         if (reservedCredit <= current->second->reservedBytes) {
@@ -917,7 +931,7 @@ void Dtls::resumeApplications(AssociationId id)
     while (true) {
         auto it = associations.find(id);
         if (it == associations.end() || it->second->closing || it->second->state != HandshakeState::ESTABLISHED ||
-            it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->pendingPackets.empty())
+            it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding() || it->second->pendingPackets.empty())
             return;
         auto pending = std::move(it->second->pendingPackets.front());
         it->second->pendingPackets.pop_front();
@@ -943,7 +957,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
         return;
     }
-    if (it->second->keyUpdate().flight || it->second->peerResponseDue) {
+    if (it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding()) {
         holdApplication(id, std::unique_ptr<Packet>(packet), sampledDelay, paid);
         return;
     }
@@ -967,10 +981,12 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             return false;
         if (current->second->recordOverhead() != overhead)
             return false;
+        if (current->second->isRebinding())
+            return false;
         return *started || (!current->second->keyUpdate().flight && !current->second->peerResponseDue &&
                (current->second->nextApplicationRecord < uint64_t(par("rekeyAfterRecords").intValue()) || current->second->sendEpoch >= Association::MAX_SEND_EPOCH));
     };
-    auto skipped = [this, id, packetId, retained, delay, paid, overhead]() {
+    auto skipped = [this, id, packetId, retained, delay, paid, overhead, started]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return;
@@ -979,6 +995,10 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             auto callback = current->second->callback;
             retained->reset();
             callback->sendError(id, packetId, "DTLS header budget changed before output handoff");
+            return;
+        }
+        if (current->second->isRebinding()) {
+            holdApplication(id, std::move(*retained), delay, paid || *started);
             return;
         }
         if (!holdApplication(id, std::move(*retained), delay, paid))
@@ -1010,6 +1030,8 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
             if (!current->second->localAddress.isUnspecified())
                 packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+            if (current->second->localInterfaceId >= 0)
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(current->second->localInterfaceId);
             auto peer = current->second->peerAddress;
             auto port = current->second->peerPort;
             auto outgoing = retained->release();
@@ -1128,6 +1150,10 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
     auto association = associations.find(id);
     if (association == associations.end())
         return;
+    if (association->second->isRebinding()) {
+        association->second->pendingAcks.insert(records.begin(), records.end());
+        return;
+    }
     int overhead = sendEpoch == 0 ? 13 : association->second->recordOverhead();
     if (udpLimit < overhead + 18) {
         failAssociation(id, "DTLS UDP payload limit cannot carry an ACK");
@@ -1147,9 +1173,6 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
             ack->setSequenceNumbers(i, records[begin + i].second);
         }
         ack->setChunkLength(B(2 + 16 * count));
-        auto peer = current->second->peerAddress;
-        auto port = current->second->peerPort;
-        auto localAddress = current->second->localAddress;
         auto delay = sendEpoch == 0 ? SIMTIME_ZERO : processingDelay(id, "protectOutDelay");
         size_t bytes = overhead + 2 + 16 * count;
         size_t reservedCredit = current->second->serverSide && !current->second->addressValidated ? bytes : 0;
@@ -1161,7 +1184,21 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
                 continue;
             current->second->reservedBytes += reservedCredit;
         }
-        if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, sendEpoch, ack, peer, port, localAddress, reservedCredit]() {
+        auto eligible = [this, id]() {
+            auto it = associations.find(id);
+            return it != associations.end() && !it->second->closing && !it->second->isRebinding();
+        };
+        auto skipped = [this, id, ack, reservedCredit]() {
+            auto it = associations.find(id);
+            if (it == associations.end())
+                return;
+            if (reservedCredit <= it->second->reservedBytes)
+                it->second->reservedBytes -= reservedCredit;
+            if (!it->second->closing)
+                for (size_t i = 0; i < ack->getEpochsArraySize(); ++i)
+                    it->second->pendingAcks.emplace(ack->getEpochs(i), ack->getSequenceNumbers(i));
+        };
+        if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, sendEpoch, ack, reservedCredit]() {
             auto it = associations.find(id);
             if (it == associations.end())
                 return;
@@ -1205,15 +1242,19 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
                 emit(recordOverheadSignal, (long)it->second->recordOverhead());
             }
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-            if (!localAddress.isUnspecified())
-                packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(localAddress);
+            if (!it->second->localAddress.isUnspecified())
+                packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(it->second->localAddress);
+            if (it->second->localInterfaceId >= 0)
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(it->second->localInterfaceId);
+            auto peer = it->second->peerAddress;
+            auto port = it->second->peerPort;
             if (reservedCredit) {
                 it->second->reservedBytes -= reservedCredit;
                 it->second->sentBytes += reservedCredit;
             }
             emit(packetSentToLowerSignal, packet);
             udpSocket.sendTo(packet, peer, port);
-        })) {
+        }, eligible, skipped)) {
             auto it = associations.find(id);
             if (it != associations.end())
                 it->second->reservedBytes -= reservedCredit;
@@ -1947,10 +1988,14 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
         return;
     auto retained = std::make_shared<std::unique_ptr<Packet>>(body->dup());
     auto delay = processingDelay(id, "protectInDelay");
-    if (!inputProcessing->enqueueContinuation(id, recordBytes, delay, [this, id, epoch, truncatedSequence, sequenceBits, retained]() {
+    if (!inputProcessing->enqueueContinuation(id, recordBytes, delay, [this, id, epoch, truncatedSequence, sequenceBits, retained, recordBytes]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return;
+        if (auto socket = (*retained)->findTag<SocketInd>(); socket && socket->getSocketId() != udpSocket.getSocketId()) {
+            emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
+            return;
+        }
         uint8_t contentType;
         if (!DtlsRecordProtection::unprotect(retained->get(), contentType)) {
             emit(recordDroppedSignal, (long)MALFORMED_RECORD);
@@ -2000,6 +2045,19 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             emit(recordDroppedSignal, (long)REPLAY);
             return;
         }
+        auto path = association.receivedPath(retained->get());
+        bool changedPath = !sameTuple(path, association.currentPath());
+        bool fresh = association.isNewerRecord(logicalEpoch, sequence);
+        if (changedPath) {
+            if (logicalEpoch < 3 || (contentType != 21 && contentType != 22 && contentType != 23 && contentType != 24 && contentType != 26) ||
+                !association.considerPath(path, fresh)) {
+                emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
+                return;
+            }
+            current = associations.find(id);
+            if (current == associations.end())
+                return;
+        }
         auto retirePrevious = [this, &association, logicalEpoch]() {
             if (logicalEpoch == association.receiveEpoch && !par("resumptionEnabled").boolValue() && !association.cidNegotiated)
                 association.previousReceiveEpoch.reset();
@@ -2039,8 +2097,8 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             }
             return;
         }
-        if (logicalEpoch == association.receiveEpoch && contentType == 24 && association.state == HandshakeState::ESTABLISHED && !association.closing) {
-            association.receiveHeartbeat(logicalEpoch, sequence, retained->get());
+        if ((logicalEpoch == association.receiveEpoch || changedPath) && contentType == 24 && association.state == HandshakeState::ESTABLISHED && !association.closing) {
+            association.receiveHeartbeat(logicalEpoch, sequence, retained->get(), path, fresh, changedPath, recordBytes);
             return;
         }
         if (logicalEpoch >= 3 && contentType == 23) {
@@ -2222,6 +2280,8 @@ void Dtls::beginClose(AssociationId id)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!current->second->localAddress.isUnspecified())
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+        if (current->second->localInterfaceId >= 0)
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(current->second->localInterfaceId);
         auto peer = current->second->peerAddress;
         auto port = current->second->peerPort;
         emit(packetSentToLowerSignal, packet);
@@ -2606,8 +2666,10 @@ void Dtls::parseDatagram(Packet *packet)
                     if (match->second->peerAddress != peerAddress || match->second->peerPort != peerPort ||
                         (!match->second->localAddress.isUnspecified() && match->second->localAddress != localAddress) ||
                         (match->second->localPort >= 0 && match->second->localPort != localPort)) {
-                        emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
-                        return;
+                        if (!par("migrationEnabled").boolValue() || match->second->state != HandshakeState::ESTABLISHED) {
+                            emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
+                            return;
+                        }
                     }
                 }
                 else for (auto it = associations.begin(); it != associations.end(); ++it) {
@@ -2639,6 +2701,17 @@ void Dtls::parseDatagram(Packet *packet)
                     auto tags = packet->getRegionTags();
                     Packet body("DTLS protected record", packet->removeAtFront(length));
                     body.getRegionTags().copyTags(tags, bodyOffset, body.getFrontOffset(), length);
+                    if (par("migrationEnabled").boolValue()) {
+                        auto address = body.addTag<L3AddressInd>();
+                        address->setSrcAddress(peerAddress);
+                        address->setDestAddress(localAddress);
+                        auto port = body.addTag<L4PortInd>();
+                        port->setSrcPort(peerPort);
+                        port->setDestPort(localPort);
+                        if (auto interface = packet->findTag<InterfaceInd>())
+                            body.addTag<InterfaceInd>()->setInterfaceId(interface->getInterfaceId());
+                        body.addTag<SocketInd>()->setSocketId(udpSocket.getSocketId());
+                    }
                     if (match != associations.end())
                         handleProtectedHandshake(match->first, header->getEpochBits(), header->getSequenceNumber(), header->getSequenceNumberLength() * 8, &body, (B(headerLength) + length).get<B>());
                     else

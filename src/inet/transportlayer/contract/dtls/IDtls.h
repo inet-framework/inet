@@ -15,6 +15,14 @@ struct DtlsOpenOptions {
     bool offerEarlyData = false;
 };
 
+struct DtlsPath {
+    L3Address localAddress;
+    int localPort = -1;
+    L3Address peerAddress;
+    int peerPort = -1;
+    int interfaceId = -1;
+};
+
 /** The local interface of a datagram security engine. */
 class INET_API IDtls
 {
@@ -34,6 +42,8 @@ class INET_API IDtls
         virtual void earlyDataArrived(AssociationId id, Packet *packet) = 0;
         // Client admission outcome, not an acknowledgement of any datagram.
         virtual void earlyDataStatus(AssociationId id, bool accepted) = 0;
+        // Confirmed endpoint change; the association handle remains valid.
+        virtual void pathChanged(AssociationId id, const DtlsPath& path) = 0;
         // A rejected or cancelled application packet; the association may remain usable.
         virtual void sendError(AssociationId id, long packetId, const char *reason) = 0;
         // Invalidates the named handle. A forced local close may subsequently
@@ -65,6 +75,10 @@ class INET_API IDtls
     virtual bool provideConnectionIds(AssociationId id, int count, bool immediate) = 0;
     // Select and consume the oldest retained peer-provided spare, if any.
     virtual bool activateSpareConnectionId(AssociationId id) = 0;
+    // Synchronous admission; confirmation is reported through pathChanged.
+    virtual bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId) = 0;
+    // Replaces the socket only for one established association without a listener or half-open peers.
+    virtual bool rebindLocalPort(AssociationId id, int port) = 0;
 };
 
 } // namespace inet::dtls

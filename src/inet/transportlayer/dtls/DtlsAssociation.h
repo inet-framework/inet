@@ -76,6 +76,23 @@ class INET_API DtlsAssociation
     int peerPort = -1;
     L3Address localAddress;
     int localPort = -1;
+    int localInterfaceId = -1;
+    struct CandidatePath {
+        DtlsPath path;
+        std::vector<uint8_t> peerCid;
+        bool reboundSocket = false;
+    };
+    std::optional<CandidatePath> candidatePath;
+    DtlsPath currentPath() const;
+    DtlsPath receivedPath(const Packet *packet) const;
+    bool isNewerRecord(uint64_t epoch, uint64_t number) const;
+    bool considerPath(const DtlsPath& path, bool fresh);
+    void tryStartPathValidation();
+    void finishPathValidation(bool success);
+    bool isRebinding() const { return candidatePath && candidatePath->reboundSocket; }
+    const std::vector<uint8_t>& cidForPath(const DtlsPath& path) const;
+    bool hasMigrationCid() const;
+    std::vector<uint8_t> takeMigrationCid();
     HandshakeState state = HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     tls::TlsHandshakeParameters::Offer offer;
     tls::TlsHandshakeParameters::Selection selection;
@@ -91,8 +108,11 @@ class INET_API DtlsAssociation
     std::map<uint8_t, std::pair<uint16_t, std::vector<uint8_t>>> lastPeerCidMessages;
     bool heartbeatNegotiated = false;
     bool peerAllowsHeartbeat = false;
+    enum class ProbePurpose { DIAGNOSTIC = 0, PATH_VALIDATION = 1 };
     struct HeartbeatProbe {
         std::vector<uint8_t> payload;
+        DtlsPath path;
+        ProbePurpose purpose = ProbePurpose::DIAGNOSTIC;
         size_t udpBytes = 0;
         bool queued = false;
         simtime_t retryTimeout = 1;
@@ -100,11 +120,11 @@ class INET_API DtlsAssociation
         std::unique_ptr<cMessage> deadline;
     };
     std::unique_ptr<HeartbeatProbe> probe;
-    bool startHeartbeatProbe(size_t udpBytes);
+    bool startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose = ProbePurpose::DIAGNOSTIC);
     void pumpHeartbeatProbe();
     void finishHeartbeatProbe(IDtls::ProbeResult result);
-    void receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *body);
-    bool sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request);
+    void receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *body, const DtlsPath& path, bool fresh, bool changed, size_t receivedBytes);
+    bool sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request, const DtlsPath& path, size_t replyLimit = 0);
     Ptr<DtlsHeartbeat> makeHeartbeat(uint8_t type, const std::vector<uint8_t>& payload, size_t padding);
     bool requestConnectionIds(int count);
     bool provideConnectionIds(int count, bool immediate);
@@ -114,7 +134,7 @@ class INET_API DtlsAssociation
     void finishConnectionIdUpdate();
     void serveConnectionIdRequest(uint8_t count);
     size_t recordOverhead() const { return 22 + (cidNegotiated ? peerCid.size() : 0); }
-    Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length) const;
+    Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride = nullptr) const;
     std::optional<DtlsSessionStore::Entry> offeredSession;
     bool earlyRequested = false;
     bool earlyOffered = false;

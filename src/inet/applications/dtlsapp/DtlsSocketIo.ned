@@ -15,6 +15,7 @@ simple DtlsSocketIo extends SimpleModule
         string destAddress = default("");
         bool acceptEarlyData = default(false); // Explicit policy before completed authentication
         @signal[earlyPacketReceived](type=inet::Packet);
+        @signal[pathChanged](type=long);
         int destPort = default(-1);
         @lifecycleSupport();
         @signal[packetSent](type=inet::Packet);

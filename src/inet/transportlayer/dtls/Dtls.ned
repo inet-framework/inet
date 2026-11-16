@@ -21,6 +21,7 @@ simple Dtls extends SimpleModule like IDtls
         bool clientAuthentication = default(false);
         bool connectionIdEnabled = default(false);
         bool heartbeatEnabled = default(false);
+        bool migrationEnabled = default(false);
         bool heartbeatAcceptRequests = default(true);
         double probeTimeout @unit(s) = default(16s); // At least one second; one shared probe per association
         bool receiveConnectionId = default(true); // Eight-byte receive CID, or an empty offer when false
@@ -29,6 +30,7 @@ simple Dtls extends SimpleModule like IDtls
         @signal[connectionIdChanged](type=long);
         @signal[connectionIdRequestTimeout](type=long);
         @signal[probeResult](type=long); // IDtls::ProbeResult
+        @signal[pathChanged](type=long); // Association handle; callback carries the confirmed endpoints
         bool resumptionEnabled = default(false); // cache/issue modeled stateful tickets
         bool earlyDataEnabled = default(false); // Requires resumptionEnabled; explicit application admission only
         int earlyDataBytes @unit(B) = default(4096B); // Allowance in newly issued tickets when enabled

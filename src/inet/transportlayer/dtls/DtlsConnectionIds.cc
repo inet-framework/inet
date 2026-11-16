@@ -273,10 +273,14 @@ void DtlsAssociation::applyConnectionIdMessage(uint8_t type, uint16_t sequence)
     if (changed) {
         peerCid = ids.front();
         sparePeerCids.clear();
+        if (candidatePath)
+            candidatePath->peerCid = peerCid;
     }
     auto capacity = engine.par("maxReceiveConnectionIds").intValue();
     for (const auto& cid : ids)
-        if (cid != peerCid && std::find(sparePeerCids.begin(), sparePeerCids.end(), cid) == sparePeerCids.end() && sparePeerCids.size() + 1 < size_t(capacity))
+        if (cid != peerCid && (!candidatePath || cid != candidatePath->peerCid) &&
+            std::find(sparePeerCids.begin(), sparePeerCids.end(), cid) == sparePeerCids.end() &&
+            sparePeerCids.size() + 1 + (candidatePath && candidatePath->peerCid != peerCid ? 1 : 0) < size_t(capacity))
             sparePeerCids.push_back(cid);
     cidRequestUnfulfilled = false;
     auto request = postHandshakeExchanges.find(9);
@@ -289,16 +293,17 @@ void DtlsAssociation::applyConnectionIdMessage(uint8_t type, uint16_t sequence)
         owner.emit(cComponent::registerSignal("connectionIdChanged"), (long)handle);
 }
 
-Ptr<DtlsCiphertextHeader> DtlsAssociation::makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length) const
+Ptr<DtlsCiphertextHeader> DtlsAssociation::makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride) const
 {
     auto header = makeShared<DtlsCiphertextHeader>();
     header->setEpochBits(epoch & 3);
     header->setSequenceNumber(number & 0xffff);
     header->setLength(length);
     if (cidNegotiated) {
-        header->setConnectionIdArraySize(peerCid.size());
-        for (size_t i = 0; i < peerCid.size(); ++i)
-            header->setConnectionId(i, peerCid[i]);
+        const auto& cid = cidOverride ? *cidOverride : peerCid;
+        header->setConnectionIdArraySize(cid.size());
+        for (size_t i = 0; i < cid.size(); ++i)
+            header->setConnectionId(i, cid[i]);
     }
     header->setChunkLength(B(5 + header->getConnectionIdArraySize()));
     return header;

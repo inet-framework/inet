@@ -183,7 +183,7 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
                 if (!entry.second->flight->get(i).acknowledged && entry.second->flight->get(i).epoch < sendEpoch)
                     return false;
     // RFC 9846 Section 4.7.3 forbids another requested update until a subsequent peer KeyUpdate.
-    if (state != HandshakeState::ESTABLISHED || closing || keyUpdate().flight ||
+    if (state != HandshakeState::ESTABLISHED || closing || isRebinding() || keyUpdate().flight ||
         (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
         return false;
     auto timeout = SimTime(engine.par("handshakeTimeout").doubleValue());
@@ -346,7 +346,7 @@ void DtlsAssociation::applyKeyUpdate(uint64_t epoch, uint64_t recordSequence, ui
     auto current = owner.associations.find(handle);
     if (current == owner.associations.end())
         return;
-    if (current->second->peerResponseDue && !current->second->keyUpdate().flight) {
+    if (current->second->peerResponseDue && !current->second->keyUpdate().flight && !current->second->isRebinding()) {
         current->second->peerResponseDue = false;
         if (!current->second->requestUpdate(false) && owner.containsAssociation(handle))
             owner.failAssociation(handle, "DTLS KeyUpdate response could not start");
