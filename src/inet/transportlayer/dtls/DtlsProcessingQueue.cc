@@ -32,6 +32,19 @@ bool DtlsProcessingQueue::enqueue(AssociationId associationId, size_t bytes, sim
     return true;
 }
 
+bool DtlsProcessingQueue::enqueueContinuation(AssociationId associationId, size_t bytes, simtime_t delay, Completion complete, Eligibility eligible, Completion skipped, Completion started)
+{
+    bytes = std::max(size_t(1), bytes);
+    if (active || delay < SIMTIME_ZERO || !complete)
+        throw cRuntimeError("Invalid DTLS processing operation");
+    if (bytes > limit - occupied)
+        return false;
+    occupied += bytes;
+    pending.push_front({associationId, bytes, delay, std::move(complete), std::move(eligible), std::move(skipped), std::move(started)});
+    pump();
+    return true;
+}
+
 void DtlsProcessingQueue::pump()
 {
     if (active || pumping)

@@ -16,6 +16,7 @@ network TestNetwork
 %file: ProcessingQueueFixture.cc
 #include <memory>
 #include <iostream>
+#include <vector>
 #include "inet/transportlayer/dtls/DtlsProcessingQueue.h"
 
 using namespace omnetpp;
@@ -29,6 +30,7 @@ class ProcessingQueueFixture : public cSimpleModule
     std::unique_ptr<DtlsProcessingQueue> output;
     cMessage *finishTimer = nullptr;
     int completed = 0;
+    std::vector<int> continuationOrder;
 
   protected:
     virtual void initialize() override {
@@ -40,12 +42,17 @@ class ProcessingQueueFixture : public cSimpleModule
         bool skipped = false, started = false;
         ASSERT(output->enqueue(1, 1, 1, [] { throw cRuntimeError("ineligible operation ran"); }, [] { return false; }, [&] { skipped = true; }, [&] { started = true; }));
         ASSERT(skipped && !started && output->getOccupiedBytes() == 0);
-        ASSERT(input->enqueue(1, 2, 2, [&] { ASSERT(simTime() == 2); ++completed; }));
+        ASSERT(input->enqueue(1, 2, 2, [&] {
+            ASSERT(simTime() == 2);
+            ASSERT(input->enqueueContinuation(8, 1, SIMTIME_ZERO, [&] { continuationOrder.push_back(1); }));
+            ++completed;
+        }));
         ASSERT(input->enqueue(2, 1, 1, [&] { throw cRuntimeError("cancelled operation ran"); }));
         ASSERT(!input->enqueue(3, 1, 1, [] {}));
         ASSERT(output->enqueue(3, 1, 1, [&] {
             ASSERT(simTime() == 1);
             input->cancel(2);
+            ASSERT(input->enqueue(7, 1, SIMTIME_ZERO, [&] { continuationOrder.push_back(2); }));
             ASSERT(output->enqueue(6, 1, SIMTIME_ZERO, [&] { ++completed; }));
             ++completed;
         }));
@@ -63,6 +70,7 @@ class ProcessingQueueFixture : public cSimpleModule
             ASSERT(message == finishTimer);
             output->cancel(5);
             ASSERT(completed == 4);
+            ASSERT(continuationOrder == std::vector<int>({1, 2}));
             ASSERT(input->getOccupiedBytes() == 0 && output->getOccupiedBytes() == 0);
             ASSERT(input->enqueue(9, 1, 100, [&] { throw cRuntimeError("teardown operation ran"); }));
             ASSERT(input->getOccupiedBytes() == 1);
