@@ -8,6 +8,7 @@
 #define __INET_COAP_COAPSERVER_H
 
 #include <cstdint>
+#include <deque>
 #include <map>
 #include <string>
 #include <vector>
@@ -35,6 +36,19 @@ struct INET_API CoapResourceEntry
 };
 
 /**
+ * Scheduled deferred separate response owned by CoapServer.
+ */
+struct INET_API CoapPendingSeparateResponse
+{
+    simtime_t dueAt = SIMTIME_ZERO;
+    CoapPeerEndpoint peer;
+    bool confirmable = true;
+    std::vector<uint8_t> token;
+    Ptr<CoapHeader> header;
+    std::vector<uint8_t> payload;
+};
+
+/**
  * CoAP over UDP server application hosting configured XML resources.
  */
 class INET_API CoapServer : public CoapEndpointBase
@@ -43,11 +57,16 @@ class INET_API CoapServer : public CoapEndpointBase
     simtime_t responseDelay = SIMTIME_ZERO;
     uint32_t defaultMaxAgeSeconds = 60;
     std::map<std::string, CoapResourceEntry> resources;
+    std::deque<CoapPendingSeparateResponse> pendingSeparateResponses;
 
     static simsignal_t requestHandledSignal;
 
   protected:
     virtual void parseAndValidateParameters() override;
+    virtual simtime_t getNextSubclassDeadline() const override;
+    virtual void onSubclassTimer(simtime_t now) override;
+    virtual void onEndpointStop() override;
+    virtual void onEndpointCrash() override;
     virtual void loadXmlResources(cXMLElement *root);
     static std::string normalizeResourcePath(const std::string& rawPath);
     static std::string extractPathFromHeader(const CoapHeader& header);

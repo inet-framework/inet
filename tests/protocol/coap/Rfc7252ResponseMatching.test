@@ -27,13 +27,17 @@ class TestSeamCoapClient : public CoapClient
         configureTokenGeneratorForTest(initialVal, remaining);
     }
 
-    void setMidExhaustedForTest(uint16_t initialMid, simtime_t dur) {
-        configureMidGeneratorForTest(initialMid, true, dur);
+    void reserveSpecificMidForTest(uint16_t mid, simtime_t dur) {
+        generatorsInitialized = true;
+        nextMessageId = mid;
+        simtime_t exp = simTime() + dur;
+        reservedOutgoingMids[mid] = exp;
+        midReservationOrder.emplace_back(mid, exp);
     }
 
-    uint64_t sendManualGet(const std::string& host, int port, const std::string& uri) {
+    uint64_t sendManualGet(const std::string& host, int port, const std::string& uri, bool isConfirmable = false) {
         return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
-                COAP_CODE_GET, false, uri, {});
+                COAP_CODE_GET, isConfirmable, uri, {});
     }
 };
 
@@ -145,8 +149,8 @@ Define_ProtocolTest(coap_response_matching)
                 throw cRuntimeError("Expected timeout around 250s, got t=%s", simTime().str().c_str());
         }))
 
-        // Scenario D: Token wrap (UINT64_MAX -> 0 -> exhausted) & MID exhaustion reject cleanly via capacityRejected.
-        .meanwhile(exactlyTimes(2, on("hostA.app[0]").signal("capacityRejected").within(7.0)))
+        // Scenario D: Token wrap (UINT64_MAX -> 0 -> exhausted) & MID reservation exclusion.
+        .meanwhile(exactlyTimes(1, on("hostA.app[0]").signal("capacityRejected").within(7.0)))
         .act(action().at(255.0).run<TestSeamCoapClient>("hostA.app[0]", [](TestSeamCoapClient& cli) {
             cli.setTokenTestParams(std::numeric_limits<uint64_t>::max(), 2);
             if (cli.sendManualGet("hostB", 5683, "/wrap1") == 0)
@@ -158,12 +162,123 @@ Define_ProtocolTest(coap_response_matching)
         }))
         .act(action().at(256.0).run<TestSeamCoapClient>("hostA.app[0]", [](TestSeamCoapClient& cli) {
             cli.setTokenTestParams(1000, 100);
-            cli.setMidExhaustedForTest(0x1234, 10.0);
-            if (cli.sendManualGet("hostB", 5683, "/mid-exhaust") != 0)
-                throw cRuntimeError("Expected MID exhaustion to return 0 cleanly");
+            cli.reserveSpecificMidForTest(0x1234, 10.0);
+            if (cli.sendManualGet("hostB", 5683, "/mid-skip") == 0)
+                throw cRuntimeError("Expected request with skipped MID 0x1235 to send");
         }))
-        // Let the 2s meanwhile guard close cleanly after both actions run.
-        .never(on("hostA.app[0]").signal("requestAborted").within(1.5));
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.messageId == 0x1235;
+                  })
+                  .within(1.0))
+
+        // Scenario E: C3 CON ACK matching:
+        // - correct token + wrong MID ACK: no completion, retry continues
+        // - correct MID + wrong token ACK: no completion, retry continues
+        // - valid Empty ACK (matching MID, TKL=0): stops retry
+        // - valid separate CON 2.05 completing once; retired token late CON 2.05 gets RST.
+        .act(action().at(260.0).run<TestSeamCoapClient>("hostA.app[0]", [](TestSeamCoapClient& cli) {
+            cli.sendManualGet("hostB", 5683, "/con-ack-match", true);
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .capture("cMid", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      decodeRawCoap(ev.packet->peekDataAsBytes()->getBytes(), raw);
+                      return cValue(static_cast<intval_t>(raw.messageId));
+                  })
+                  .capture("cTokHex", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      decodeRawCoap(ev.packet->peekDataAsBytes()->getBytes(), raw);
+                      return cValue(bytesToHexString(raw.token).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[0]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      // Inject ACK with RIGHT token and WRONG MID.
+                      RawCoapMessage wrongMidAck;
+                      wrongMidAck.type = 2; wrongMidAck.code = COAP_CODE_CONTENT;
+                      wrongMidAck.messageId = static_cast<uint16_t>(req.messageId ^ 0x0001U);
+                      wrongMidAck.token = req.token;
+                      wrongMidAck.payload = asciiBytes("wrong-mid");
+                      peer->scheduleRawSend(simTime() + 0.05, last.srcAddr.str(), last.srcPort, encodeRawCoap(wrongMidAck), "WrongMidAck");
+                      return true;
+                  })
+                  .within(1.0))
+        // Retry #1 must STILL arrive in [2s, 3s] because wrong-MID ACK did not stop retry.
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[0]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      if (req.messageId != static_cast<uint16_t>(ctx.get("cMid").intValue()))
+                          return false;
+                      // Inject ACK with RIGHT MID and WRONG token.
+                      RawCoapMessage wrongTokAck;
+                      wrongTokAck.type = 2; wrongTokAck.code = COAP_CODE_CONTENT;
+                      wrongTokAck.messageId = req.messageId;
+                      wrongTokAck.token = {0xDE, 0xAD, 0xBE, 0xEF};
+                      wrongTokAck.payload = asciiBytes("wrong-tok-ack");
+                      peer->scheduleRawSend(simTime() + 0.05, last.srcAddr.str(), last.srcPort, encodeRawCoap(wrongTokAck), "WrongTokAck");
+                      return true;
+                  })
+                  .within(3.5))
+        // Retry #2 must STILL arrive in [4s, 6s] because wrong-token non-empty ACK is not a valid ACK!
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[0]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      if (req.messageId != static_cast<uint16_t>(ctx.get("cMid").intValue()))
+                          return false;
+                      // Now send valid Empty ACK to stop retry.
+                      RawCoapMessage emptyAck;
+                      emptyAck.type = 2; emptyAck.code = 0; emptyAck.messageId = req.messageId;
+                      peer->scheduleRawSend(simTime() + 0.02, last.srcAddr.str(), last.srcPort, encodeRawCoap(emptyAck), "ValidEmptyAck");
+
+                      // After 10s without retry, deliver separate CON 2.05 response with retained token.
+                      RawCoapMessage sepResp;
+                      sepResp.type = 0; sepResp.code = COAP_CODE_CONTENT; sepResp.messageId = 0x8801;
+                      sepResp.token = req.token;
+                      sepResp.payload = asciiBytes("sep-done");
+                      peer->scheduleRawSend(simTime() + 10.0, last.srcAddr.str(), last.srcPort, encodeRawCoap(sepResp), "ValidSepCon");
+
+                      // 1s AFTER completion, send another CON 2.05 with same (now retired) token -> expects RST.
+                      RawCoapMessage lateSep = sepResp;
+                      lateSep.messageId = 0x8802;
+                      lateSep.payload = asciiBytes("late-after-retire");
+                      peer->scheduleRawSend(simTime() + 11.0, last.srcAddr.str(), last.srcPort, encodeRawCoap(lateSep), "LateRetiredCon");
+                      return true;
+                  })
+                  .within(6.5))
+        // Expect NO retransmissions for 9.5s while awaiting separate response.
+        .never(on("hostB.app[0]").signal("packetReceivedFromLower").within(9.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.5))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.messageId == 0x8801;
+                  })
+                  .within(0.5))
+        // Expect Empty RST for late CON 2.05 on retired token, and NO second requestCompleted.
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 3 && raw.code == 0 && raw.messageId == 0x8802;
+                  })
+                  .within(2.0))
+        .never(on("hostA.app[0]").signal("requestCompleted").within(0.5))
+        .never(on("hostA.app[0]").signal("requestAborted").within(0.5));
 }
 
 %activity:
@@ -182,7 +297,7 @@ simple TestSeamCoapClient extends CoapClient
 
 [General]
 network = inet.protocoltest.coap.CoapPairNetwork
-sim-time-limit = 270s
+sim-time-limit = 300s
 seed-set = 0
 *.tester.testName = "coap_response_matching"
 

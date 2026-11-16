@@ -85,6 +85,40 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
         simtime_t expiresAt = SIMTIME_ZERO;
     };
 
+    struct CoapOutboundItem {
+        uint64_t outboundId = 0;
+        CoapPeerEndpoint peer;
+        bool peerIsMulticast = false;
+        bool confirmable = false;
+        bool isRequest = false;
+        uint64_t requestId = 0;
+        std::vector<uint8_t> token;
+        std::string packetName;
+        Ptr<CoapHeader> header;
+        std::vector<uint8_t> payload;
+    };
+
+    struct CoapOutboundExchange {
+        uint64_t exchangeId = 0;
+        CoapPeerEndpoint peer;
+        uint16_t messageId = 0;
+        bool isRequest = false;
+        uint64_t requestId = 0;
+        std::vector<uint8_t> token;
+        std::string packetName;
+        std::vector<uint8_t> wireBytes;
+        simtime_t initialTimeout = SIMTIME_ZERO;
+        simtime_t currentTimeout = SIMTIME_ZERO;
+        simtime_t nextRetryAt = SIMTIME_ZERO;
+        int retransmitCount = 0;
+    };
+
+    struct CoapPeerCongestionState {
+        int activeConfirmables = 0;
+        bool inProbingBackoff = false;
+        simtime_t probingEarliestAt = SIMTIME_ZERO;
+    };
+
   protected:
     // Cached NED parameters
     L3Address localAddress;
@@ -108,8 +142,6 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     simtime_t nonLifetime = 145.0;
 
     int maxPendingRequests = 64;
-    int maxDuplicateEntries = 256;
-    int maxDuplicatePerPeer = 64;
     int maxPendingOutboundPerEndpoint = 64;
     int maxIncomingBlockSize = 65536;
     int preferredBlockSize = 1024;
@@ -127,14 +159,20 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     uint16_t nextMessageId = 0;
     std::deque<std::pair<uint16_t, simtime_t>> midReservationOrder;
     std::map<uint16_t, simtime_t> reservedOutgoingMids;
+    bool midPoolExhausted = false;
 
     // Transient operational state cleared on stop / crash
     uint64_t nextRequestId = 1;
+    uint64_t nextOutboundId = 1;
+    uint64_t nextExchangeId = 1;
     std::map<std::vector<uint8_t>, CoapPendingRequest> pendingRequests;
     std::map<std::pair<CoapPeerEndpoint, uint16_t>, std::vector<uint8_t>> outboundMidToToken;
-    std::deque<CoapDuplicateKey> duplicateOrder;
+    std::map<std::pair<CoapPeerEndpoint, uint16_t>, CoapOutboundExchange> activeExchanges;
+    std::map<CoapPeerEndpoint, CoapPeerCongestionState> peerCongestion;
+    std::deque<CoapOutboundItem> outboundQueue;
+    std::deque<CoapDuplicateKey> conDuplicateOrder;
+    std::deque<CoapDuplicateKey> nonDuplicateOrder;
     std::map<CoapDuplicateKey, CoapDuplicateEntry> duplicateEntries;
-    std::map<CoapPeerEndpoint, int> duplicatePeerCounts;
 
     // Statistics signals
     static simsignal_t retransmissionSignal;
@@ -162,7 +200,7 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     virtual void parseAndValidateParameters();
     virtual void initializeCountersOnce();
     virtual void bindSocket();
-    virtual void clearTransientState();
+    virtual void clearTransientState(bool clearDuplicates);
 
     // Timer management
     virtual void rescheduleDeadlineTimer();
@@ -176,7 +214,7 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
 
     // Allocation helpers & test seams
     virtual bool allocateToken(std::vector<uint8_t>& tokenOut);
-    virtual bool allocateMessageId(uint16_t& midOut);
+    virtual bool allocateMessageId(uint16_t& midOut, bool emitOnFailure = true);
     void configureTokenGeneratorForTest(uint64_t initialValue, uint64_t remainingCount);
     void configureMidGeneratorForTest(uint16_t initialMid, bool reserveAll = false, simtime_t reserveDuration = SIMTIME_ZERO);
     void purgeExpiredMidReservations(simtime_t now);
@@ -184,19 +222,29 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     // Packet construction, parsing, and transmission
     Packet *buildCoapPacket(const char *name, const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload) const;
     bool parseInboundDatagram(Packet *packet, Ptr<CoapHeader>& headerOut, std::vector<uint8_t>& payloadOut) const;
-    void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort);
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort);
     void sendEmptyMessage(CoapMessageType type, uint16_t messageId, const L3Address& destAddr, int destPort);
+    void sendEmptyMessageAndCacheDuplicate(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer);
+    bool submitOutboundMessage(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
+            bool isRequest, uint64_t requestId, const std::vector<uint8_t>& token, const char *packetName,
+            const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload);
+    bool sendConfirmablePing(const CoapPeerEndpoint& peer, uint64_t& exchangeIdOut);
+    void pumpOutboundQueue(simtime_t now);
+    void processConfirmableRetransmissions(simtime_t now);
+    void markPeerReachable(const CoapPeerEndpoint& peer);
 
     // Deduplication
     void purgeExpiredDuplicates(simtime_t now);
     bool checkAndHandleDuplicate(const CoapPeerEndpoint& peer, uint16_t messageId, CoapMessageType type);
     void recordDuplicateEntry(const CoapPeerEndpoint& peer, uint16_t messageId, bool isConfirmable, simtime_t lifetime);
+    void cacheDuplicateResponse(const CoapPeerEndpoint& peer, uint16_t messageId, Packet *responsePacket);
 
     // Request-response matching & virtual handlers
     bool registerPendingRequest(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
-            uint8_t requestCode, const std::vector<uint8_t>& token, uint16_t mid, uint64_t& requestIdOut);
+            uint8_t requestCode, const std::vector<uint8_t>& token, uint64_t& requestIdOut);
     void removePendingRequest(const std::vector<uint8_t>& token);
     void expirePendingRequests(simtime_t now);
+    void cancelConfirmableExchangesForRequest(uint64_t requestId);
 
     virtual bool isRecognizedRequestOption(uint16_t optionNumber) const;
     virtual bool isRecognizedResponseOption(uint16_t optionNumber) const;
@@ -208,6 +256,7 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload);
     virtual void handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t messageId);
     virtual void handleReset(const CoapPeerEndpoint& peer, uint16_t messageId);
+    virtual void onOutboundExchangeFailed(uint64_t exchangeId, const CoapPeerEndpoint& peer, uint16_t messageId, const char *reason) {}
     virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) {}
     virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) {}

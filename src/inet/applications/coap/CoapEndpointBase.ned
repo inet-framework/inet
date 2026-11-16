@@ -33,8 +33,6 @@ simple CoapEndpointBase like IApp
         double processingDelay @unit(s) = default(2s);
 
         int maxPendingRequests = default(64);
-        int maxDuplicateEntries = default(256);
-        int maxDuplicatePerPeer = default(64);
         int maxPendingOutboundPerEndpoint = default(64);
         int maxIncomingBlockSize @unit(B) = default(65536B);
         int preferredBlockSize @unit(B) = default(1024B);

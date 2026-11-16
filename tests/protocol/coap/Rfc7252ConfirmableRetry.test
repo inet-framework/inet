@@ -1,0 +1,264 @@
+%description:
+
+RFC 7252 Sections 4.2, 4.4, 4.8 -- Confirmable request retransmission,
+exponential backoff (0, T, 3T, 7T, 15T; fail at 31T with T in [2s,3s]) across
+seeds 0, 1, 2 for IPv4 & IPv6, post-failure stale response rejection, and
+endpoint recovery.
+
+%includes:
+#include <cmath>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class RetryTestServer : public CoapServer
+{
+  protected:
+    int dropsRemaining = 1;
+    bool blackholeAll = false;
+
+  protected:
+    virtual void initialize(int stage) override {
+        CoapServer::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            dropsRemaining = par("dropsRemaining");
+            blackholeAll = par("blackholeAll");
+        }
+    }
+
+    virtual void socketDataArrived(UdpSocket *arrSocket, Packet *packet) override {
+        if (blackholeAll || dropsRemaining > 0) {
+            if (dropsRemaining > 0)
+                --dropsRemaining;
+            delete packet;
+            return;
+        }
+        CoapServer::socketDataArrived(arrSocket, packet);
+    }
+
+  public:
+    void setBlackhole(bool bh) { blackholeAll = bh; }
+
+    void sendRawFromServerPort(const char *destHost, int destPort, const std::vector<uint8_t>& wireBytes) {
+        Enter_Method_Silent();
+        Packet *pkt = new Packet("LateStaleResp");
+        pkt->insertAtBack(makeShared<BytesChunk>(wireBytes));
+        sendCoapPacket(pkt, L3AddressResolver().resolve(destHost), destPort);
+    }
+};
+
+class RetryTestClient : public CoapClient
+{
+  public:
+    std::vector<simtime_t> txTimes;
+    std::vector<uint16_t> txMids;
+    std::vector<std::vector<uint8_t>> txTokens;
+    std::vector<uint8_t> lastBlackholeToken;
+    uint16_t lastBlackholeMid = 0;
+
+    uint64_t sendConGet(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, true, uri, {});
+    }
+
+    void resetCapture() {
+        txTimes.clear();
+        txMids.clear();
+        txTokens.clear();
+    }
+
+  protected:
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        RawCoapMessage raw;
+        if (decodeRawCoap(packet->peekDataAsBytes()->getBytes(), raw) && raw.type == 0) {
+            txTimes.push_back(simTime());
+            txMids.push_back(raw.messageId);
+            txTokens.push_back(raw.token);
+            lastBlackholeMid = raw.messageId;
+            lastBlackholeToken = raw.token;
+        }
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+};
+
+Define_Module(RetryTestServer);
+Define_Module(RetryTestClient);
+
+Define_ProtocolTest(coap_confirmable_retry)
+{
+    return ProtocolTest("coap_confirmable_retry")
+        // Phase 1 (t=1s): IPv4 & IPv6 recovery after dropping 1st CON transmission.
+        .once(on("hostA.app[0]").signal("requestCompleted").within(5.0))
+        .once(on("host6A.app[0]").signal("requestCompleted").within(5.0))
+        .act(action().after(0.01).run<RetryTestClient>("hostA.app[0]", [](RetryTestClient& cli) {
+            if (cli.getCompletedResponses().size() != 1 || cli.txTimes.size() != 2)
+                throw cRuntimeError("Expected 1 completed response and 2 CON transmissions (1 drop + 1 retry), got %zu / %zu",
+                        cli.getCompletedResponses().size(), cli.txTimes.size());
+            if (cli.txMids[0] != cli.txMids[1] || cli.txTokens[0] != cli.txTokens[1])
+                throw cRuntimeError("Retry changed MID or Token");
+            cli.resetCapture();
+        }))
+        .act(action().after(0.01).run<RetryTestServer>("hostB.app[0]", [](RetryTestServer& srv) {
+            srv.setBlackhole(true);
+        }))
+
+        // Phase 2 (t=10s): Blackhole CON -> 5 sends at 0, T, 3T, 7T, 15T, fail at 31T with T in [2s, 3s].
+        .act(action().at(10.0).run<RetryTestClient>("hostA.app[0]", [](RetryTestClient& cli) {
+            cli.sendConGet("hostB", 5683, "/blackhole");
+        }))
+        .once(on("hostA.app[0]").signal("requestFailed").within(96.0))
+        .act(action().after(0.001).run<RetryTestClient>("hostA.app[0]", [](RetryTestClient& cli) {
+            if (cli.txTimes.size() != 5)
+                throw cRuntimeError("Expected exactly 5 transmissions (1 initial + 4 retries), got %zu", cli.txTimes.size());
+            simtime_t t0 = cli.txTimes[0];
+            simtime_t T = cli.txTimes[1] - t0;
+            if (T < 2.0 || T > 3.0)
+                throw cRuntimeError("Initial timeout T=%s out of [2s, 3s]", T.str().c_str());
+
+            simtime_t eps = SimTime(1, SIMTIME_US);
+            if (std::fabs((cli.txTimes[2] - t0 - 3 * T).dbl()) > eps.dbl() ||
+                std::fabs((cli.txTimes[3] - t0 - 7 * T).dbl()) > eps.dbl() ||
+                std::fabs((cli.txTimes[4] - t0 - 15 * T).dbl()) > eps.dbl())
+                throw cRuntimeError("Retry offsets deviated from 0, T, 3T, 7T, 15T");
+
+            simtime_t failOffset = simTime() - t0;
+            if (std::fabs((failOffset - 31 * T).dbl()) > SimTime(2, SIMTIME_MS).dbl())
+                throw cRuntimeError("Failure occurred at offset %s instead of 31*T=%s",
+                        failOffset.str().c_str(), (31 * T).str().c_str());
+
+            for (size_t i = 1; i < cli.txTimes.size(); ++i) {
+                if (cli.txMids[i] != cli.txMids[0] || cli.txTokens[i] != cli.txTokens[0])
+                    throw cRuntimeError("Retransmission %zu mutated MID or Token", i);
+            }
+        }))
+
+        // Phase 3: Assert no retry through 100s after t0=10s (i.e. up to t=110s).
+        .never(on("hostA.app[0]").signal("packetSentToLower").within(10.0))
+
+        // Inject late stale CON response from (hostB, 5683) matching timed-out token -> client sends RST and does NOT complete.
+        .act(action().at(112.0).run<RetryTestClient>("hostA.app[0]", [](RetryTestClient& cli) {
+            auto *srv = check_and_cast<RetryTestServer *>(getSimulation()->getModuleByPath("hostB.app[0]"));
+            RawCoapMessage stale;
+            stale.type = 0; stale.code = COAP_CODE_CONTENT;
+            stale.messageId = 0x5555;
+            stale.token = cli.lastBlackholeToken;
+            stale.payload = asciiBytes("too-late");
+            srv->sendRawFromServerPort("hostA", cli.par("localPort").intValue(), encodeRawCoap(stale));
+        }))
+        .never(on("hostA.app[0]").signal("requestCompleted").within(0.5))
+
+        // Phase 4: Re-enable server and verify client still completes a fresh CON GET after max retry+probing window.
+        .act(action().at(125.0).run<RetryTestServer>("hostB.app[0]", [](RetryTestServer& srv) {
+            srv.setBlackhole(false);
+        }))
+        .act(action().at(125.1).run<RetryTestClient>("hostA.app[0]", [](RetryTestClient& cli) {
+            cli.sendConGet("hostB", 5683, "/ok");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(5.0));
+}
+
+%activity:
+EV << "coap_confirmable_retry compiled\n";
+
+%file: RetryTestServer.ned
+import inet.applications.coap.CoapServer;
+
+simple RetryTestServer extends CoapServer
+{
+    parameters:
+        @class(RetryTestServer);
+        int dropsRemaining = default(1);
+        bool blackholeAll = default(false);
+}
+
+%file: RetryTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple RetryTestClient extends CoapClient
+{
+    parameters:
+        @class(RetryTestClient);
+}
+
+%file: CoapRetryDualStackNet.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+network CoapRetryDualStackNet
+{
+    submodules:
+        tester: ProtocolTester;
+        configurator: Ipv4NetworkConfigurator;
+        configurator6: Ipv6FlatNetworkConfigurator;
+        hostA: StandardHost;
+        hostB: StandardHost;
+        host6A: StandardHost;
+        host6B: StandardHost;
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        host6A.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> host6B.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapRetryDualStackNet
+sim-time-limit = 140s
+seed-set = ${seed=0, 1, 2}
+*.tester.testName = "coap_confirmable_retry"
+
+*.host*.ipv4.arp.typename = "GlobalArp"
+*.hostA.hasIpv6 = false
+*.hostB.hasIpv6 = false
+*.host6A.hasIpv4 = false
+*.host6A.hasIpv6 = true
+*.host6B.hasIpv4 = false
+*.host6B.hasIpv6 = true
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "RetryTestClient"
+*.hostA.app[0].localPort = 15683
+*.hostA.app[0].peerAddress = "hostB"
+*.hostA.app[0].confirmable = true
+*.hostA.app[0].requestUri = "/ok"
+*.hostA.app[0].startTime = 1.0s
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "RetryTestServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].dropsRemaining = 1
+*.hostB.app[0].resources = xml("<resources><resource path='/ok' contentFormat='0'>retry-ok</resource></resources>")
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+*.host6A.numApps = 1
+*.host6A.app[0].typename = "RetryTestClient"
+*.host6A.app[0].peerAddress = "host6B"
+*.host6A.app[0].confirmable = true
+*.host6A.app[0].requestUri = "/ok6"
+*.host6A.app[0].startTime = 1.0s
+
+*.host6B.numApps = 1
+*.host6B.app[0].typename = "RetryTestServer"
+*.host6B.app[0].localPort = 5683
+*.host6B.app[0].dropsRemaining = 1
+*.host6B.app[0].resources = xml("<resources><resource path='/ok6' contentFormat='0'>retry6-ok</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_confirmable_retry: PASS
+
+%not-contains: stdout
+FAIL
