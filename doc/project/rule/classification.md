@@ -243,7 +243,7 @@ Three answers are acceptable, and silence is not one of them:
 2. **They move**, with a baseline commit and the reason under [TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance).
 3. **`?`** — the author has not run them yet. This is honest and a reviewer can act on it.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): a commit that moves a pin over a result names that baseline in its trailer; T4 — the reviewer asks in the other cases; T2 — the statistical and chart tests run on each pull request that changes a path that can change a result.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): a commit that moves a pin over a result, or that changes the fingerprint store, names that baseline in its trailer; T4 — the reviewer asks in the other cases; T2 — the statistical and chart tests run on each pull request that changes a path that can change a result.*
 
 ## The group (CR-GROUP)
 

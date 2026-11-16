@@ -28,11 +28,11 @@ Every test rule in document order.
 | Rule | Statement |
 | --- | --- |
 | [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes only after explicit approval, never as a side effect |
-| [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause and its reason |
+| [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause, and gives a reason for each category of its changes |
 | [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update travels with the change that causes it |
 | [TR-BASELINE-PIN](#tr-baseline-pin) | Each commit pins the commit of each baseline repository |
 | [TR-BASELINE-PARENT](#tr-baseline-parent) | A baseline changes only for a test that passes on the parent commit and that the change moves |
-| [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution) | A baseline change in another repository is attributed to a small change, and a run proves the attribution |
+| [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution) | The code that moves baseline values is the smallest fragment that produces them, and a run proves it |
 
 **Determinism**
 
@@ -168,16 +168,36 @@ The statistical and chart baselines are in other repositories. There, the propos
 
 Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is one explanation for 31 rows and it is complete. What is not complete is a count.
 
-**In a baseline repository, the commit message holds the record.** One baseline commit holds the result files that one INET commit moves, and its message has four parts:
+**The commit that changes a baseline holds a reason for each category of its changes.** A tool computes the categories, and the author writes a reason on each line, after " — ":
 
-1. **The analysis.** For each group of moved results: what moves, in which direction, by how much, and why the INET change causes that move. For a chart, say how the picture changes.
-2. **The summary.** The `Moved results:` block that [baseline_summary.py](../enforcement/baseline_summary.py) computes. The block gives the tests, the rows, the groups of tests whose moved rows have the same names, and the names with the range of their relative change. The gate computes the block again, so the block in a message is always true. Each group of the block needs its explanation in the analysis.
-3. **`INET-Subject:`** the exact subject of the INET commit that moves the pin. A hash cannot be the link, because the hash changes when the change lands with a rebase. A re-record whose cause is on the target branch already uses `INET-Commit:` with the hash.
-4. **`Attribution:`** one of the forms of [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution).
+```
+Baseline changes:
+  statistical tests changed, large (44; examples/manetrouting 19, ...): queueLength, packetDrop and 1104 more — a reception can draw two random numbers, so the drops and the queues move
+  fingerprint runs added (3; examples/foo 3) — the commit adds the example foo
+```
+
+| Baseline | The categories, one line each | The commit that holds the list |
+| --- | --- | --- |
+| Statistics | test files added, removed, renamed (equal rows) or changed; a changed test file goes to the line of its size class and of the group of its moved row names | the baseline commit in `statistics` |
+| Charts | images added, removed, renamed (equal bytes) or changed | the baseline commit in `media` |
+| Fingerprints | runs added, removed, renamed (equal fingerprints) or changed (one line for each pattern of changed ingredient sets); ingredient sets added or removed; a new limit or expected result | the INET commit that changes `tests/fingerprint/store.json` |
+
+The size class of a changed test file comes from the largest relative change of its rows:
+
+| Class | Largest relative change |
+| --- | --- |
+| large | 1 % or more, a change from or to zero, a change that is not finite, or a changed text |
+| minor | less than 1 % |
+| noise | at most 1e-9: the level of the differences of another compiler or C library |
+| rows | no value changes; rows are only added or removed |
+
+[baseline_summary.py](../enforcement/baseline_summary.py) computes the list of statistics and charts, and [fingerprint_moves.py](../enforcement/fingerprint_moves.py) the list of fingerprints. More prose in the message is welcome, but the list is the part that a gate checks.
+
+**In a baseline repository, the commit message also holds the link.** `INET-Subject:` is the exact subject of the INET commit that moves the pin. A hash cannot be the link, because the hash changes when the change lands with a rebase. A re-record whose cause is on the target branch already uses `INET-Commit:` with the hash. `Attribution:` names one of the forms of [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution).
 
 The INET commit keeps its own task: its message says which behavior changes and why the new behavior is correct. `git blame` on a baseline file then shows the commit that explains its values.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh) for the parts of the record and for the computed summary of a baseline commit in another repository; T4 — agent review of the message against the diff, row group by row group.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the list is the computed one, each line has a reason, and a baseline commit has its link; T4 — agent review of the reasons against the diff, line by line.*
 
 ### TR-BASELINE-COMMIT
 
@@ -219,9 +239,13 @@ Regenerate only what moves. A blanket regeneration takes in drift that has no re
 
 ### TR-BASELINE-ATTRIBUTION
 
-**A baseline change in another repository is attributed to a small change, and a run proves the attribution.**
+**The code that moves baseline values is the smallest code fragment that produces them, and a run proves it.**
 
-A reviewer accepts new baseline values because the reviewer can read a small change and see that it is correct. A summary and an analysis are not sufficient when the cause is a large commit: the reader cannot see which part of the commit moves the results. The `Attribution:` trailer of the baseline commit names one form:
+A reviewer accepts new baseline values because the reviewer can read a small change and see that it is correct. Reasons are not sufficient when the cause is a large commit: the reader cannot see which part of the commit moves the results. A commit that changes 100 lines and moves 500 baseline entries is wrong when 10 changed lines move the same 500 entries. Then the 10 lines are the commit, and the other 90 lines go into a commit before it that moves no baseline. Or a reduction shows the 10 lines.
+
+**The number of moved entries is no measure.** A change can move all fingerprints, charts or statistics for a good reason; the size of its code fragment is the measure.
+
+The `Attribution:` trailer names one form. For statistics and charts it is in the baseline commit, and a reduction is a file in its folder `attribution/`. For fingerprints it is in the INET commit, and a reduction is the patch after a line `Reduction:` in its message; with no trailer, the form is `commit`, or the form of the baseline commits that the same INET commit pins.
 
 | Form | Claim | Proof |
 | --- | --- | --- |
@@ -232,11 +256,11 @@ A reviewer accepts new baseline values because the reviewer can read a small cha
 | `removal` | The INET commit removes the test. | The baseline commit only removes files. |
 | `environment` | No source change is the cause: a new version of OMNeT++, of a tool, of a compiler or of a library. | The INET commit changes no source, and its message names the version change. |
 
-Prefer `commit`. [PR-SPLIT-PREPARE](pull-request.md#pr-split-prepare) gives that form: the series first prepares with no change of results, and a last, small commit turns the behavior on. Write a reduction only when that commit cannot be small. A reduction is an experiment. It does not have to be code that can land. It is a file in the folder `attribution/` of the baseline commit. When one INET commit moves two pins, the two baseline commits have the same attribution and the same file.
+Prefer `commit`. [PR-SPLIT-PREPARE](pull-request.md#pr-split-prepare) gives that form: the series first prepares with no change of results, and a last, small commit turns the behavior on. Write a reduction only when that commit cannot be small. A reduction is an experiment. It does not have to be code that can land. One INET commit has one attribution: its baseline commits, and its own message when it also moves fingerprints, name the same form and the same patch. The forms `first-record`, `removal` and `environment` are for statistics and charts; a fingerprint change that only adds, removes or renames entries, or that changes no source line, needs no form.
 
-**Small has a number.** The limit counts the changed lines of the files that can change a result: the model source, the simulations and the Python of the project, without documents and images. It applies to the INET commit of the `commit` form and to a reduction. Above 100 lines the gate fails. Above 30 lines the gate gives a note, and the reviewer asks if a smaller change shows the same move. The numbers come from `master`: of the 70 commits between 2026-09-22 and 2026-11-11 that move a fingerprint baseline together with a source change, 71 % change 30 lines or fewer, and 87 % change 100 lines or fewer.
+**Small has a number.** The limit counts the changed lines of the files that can change a result: the model source, the simulations and the Python of the project, without documents and images. It applies to the INET commit of the `commit` form and to a reduction, for each kind of baseline. Above 100 lines the gate fails. Above 30 lines the gate gives a note, and the reviewer asks if a smaller change shows the same move. The numbers come from `master`: of the 70 commits between 2026-09-22 and 2026-11-11 that move a fingerprint baseline together with a source change, 71 % change 30 lines or fewer, and 87 % change 100 lines or fewer.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, and files that only come or only go; T2 — [check-baseline-attribution.sh](../enforcement/check-baseline-attribution.sh) runs the moved tests that prove the form, for each pull request and by hand; T5 — whether the small change is easy to understand.*
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, files that only come or only go, and one attribution for each INET commit; T2 — [check-baseline-attribution.sh](../enforcement/check-baseline-attribution.sh) runs the moved tests that prove the form, for each pull request and by hand; T5 — whether the small change is easy to understand.*
 
 ## Determinism
 

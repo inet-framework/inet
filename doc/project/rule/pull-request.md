@@ -71,6 +71,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | --- | --- |
 | [PR-REQ-TOPIC](#pr-req-topic) | One pull request, one topic |
 | [PR-REQ-STORY](#pr-req-story) | The description starts with a summary, then gives the commits and the evidence |
+| [PR-REQ-BASELINES](#pr-req-baselines) | The description summarizes the baseline changes of each commit that changes a baseline |
 | [PR-REQ-ARCH](#pr-req-arch) | The description names the architectural surface |
 | [PR-REQ-CLEAN](#pr-req-clean) | No leftovers |
 
@@ -431,13 +432,32 @@ A description has three parts, in this order:
 
 1. **A summary that answers the [reviewer's questions](#the-reviewers-questions)** for the whole pull request: the problem, how we know that it is real and worth solving, what changes, and how. Then the risk: what can break, and for whom. A few short paragraphs: a reviewer reads them in about five minutes and then knows what to expect from the commits. The summary describes the change at the level of components and contracts; it does not repeat the commit messages.
 2. **The commits, in the order to read them**, one line each. Say which commits only prepare and which commit moves behavior ([PR-SPLIT-PREPARE](#pr-split-prepare)). The architectural surface ([PR-REQ-ARCH](#pr-req-arch)) follows the commits.
-3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every baseline update (*Contributor workflow*, step 6), and what remains unverified. For a baseline in another repository, name its pull request or its branch in that repository.
+3. **The evidence.** The tests that ran, with the exact commands and the resulting status, every baseline update (*Contributor workflow*, step 6), and what remains unverified. For a baseline in another repository, name its pull request or its branch in that repository. The section of [PR-REQ-BASELINES](#pr-req-baselines) summarizes the baseline changes.
 
 A reviewer who stops after the summary must still be able to answer the reviewer's questions. Long material — a table for each test, a log excerpt, the complete account of moved baselines — goes to the end of the description, or into the plan.
 
 **The description scales with the pull request.** A pull request of one small commit can use that commit's message as its whole description. A series needs a summary of its own, because no single commit answers the questions for the whole series. Headings are optional.
 
 *Enforced at T3 — [check-pr-description.sh](../enforcement/check-pr-description.sh) gives notes for a description with no opening, with evidence before the summary, or with an opening that starts with actions or is a list of changes and names no problem, and for a large series or a long description whose first 150 words name no problem; T4 — agent review: can a reviewer restate the answers to the reviewer's questions, and the risk, from the summary alone, in about five minutes?*
+
+### PR-REQ-BASELINES
+
+**The description summarizes the baseline changes of each commit that changes a baseline**
+
+A series can have more than one commit that changes a baseline: the fingerprint store, or the pin of a statistical or chart baseline over a result. The reviewer needs one place that says what each of them moves and why. The description has a section "Baseline changes" with one entry for each such commit: its subject, then a summary of its baseline changes in your words.
+
+```
+## Baseline changes
+
+- physicallayer: change: decide the header and the data of a reception separately
+  141 statistical tests and 6 charts move: a reception can draw two random numbers ...
+- tcp: fix: TcpWestwood takes an RTT sample from each ACK of new data
+  7 fingerprint runs move, because the congestion window of TcpWestwood changes.
+```
+
+The list of each commit, with a reason for each category, stays in the commit ([TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance)). The section is the summary of the series; the report of the gate prints the computed lists beside it.
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh), in the pull-request audit: the section exists when a commit changes a baseline, and it names each such commit with a summary; T4 — whether the summary is true.*
 
 ### PR-REQ-ARCH
 
@@ -555,4 +575,5 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 | PR-MSG-SUMMARY | T3+T4 | note: a first paragraph above 120 words, a body above 300 words, or a body that opens with an action and names no problem (T3) + agent review: can a reviewer restate the answers to the reviewer's questions from the summary alone? (T4) |
 | PR-MSG-WHY, PR-MSG-GENERIC, PR-MSG-STANDALONE | T4 | agent review of the message against the diff |
 | PR-REQ-STORY | T3+T4 | notes from the description gate (T3) + agent review: can a reviewer restate the answers from the summary alone? (T4) |
+| PR-REQ-BASELINES | T3+T4 | the baseline gate: a section "Baseline changes" that names each commit that changes a baseline, with a summary (T3) + agent review of the summaries (T4) |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |
