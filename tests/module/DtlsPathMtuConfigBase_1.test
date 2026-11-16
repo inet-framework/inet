@@ -1,0 +1,25 @@
+%description:
+Reject a base too small for the minimum heartbeat record.
+%file: TestNetwork.ned
+import inet.node.inet.StandardHost;
+network TestNetwork
+{
+    submodules:
+        host: StandardHost;
+    connections allowunconnected:
+}
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+simtime-resolution = ps
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.pathMtuDiscoveryEnabled = true
+*.host.app[0].dtls.pathMtuBase = 48B
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > configuration-error.out || true
+%contains: configuration-error.out
+Invalid DTLS path MTU base, ceiling or timer profile

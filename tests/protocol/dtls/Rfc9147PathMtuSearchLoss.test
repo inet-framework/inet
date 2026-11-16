@@ -1,0 +1,66 @@
+%description:
+Drop each 896-byte probe without ICMP. Three actual handoffs with fresh tokens and
+fresh records stop the search at 768 UDP bytes; ordinary data remains usable.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<int> sizes;
+static std::set<uint64_t> records;
+static std::vector<std::vector<uint8_t>> tokens;
+return ProtocolTest("rfc9147_pmtu_search_loss")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { auto u = findChunk<UdpHeader>(p); return packetHeartbeat(p, 1) && u && u->getTotalLengthField() > B(776); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (heartbeat(c, 1)) {
+            sizes.push_back(c.event.packet->getByteLength());
+            if (sizes.back() == 896) {
+                records.insert(findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber());
+                auto h = findChunk<inet::dtls::DtlsHeartbeat>(c.event.packet);
+                std::vector<uint8_t> token;
+                for (size_t i = 0; i < h->getPayloadArraySize(); ++i) token.push_back(h->getPayload(i));
+                tokens.push_back(token);
+            }
+        }
+        return false;
+    }).within(12)))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(9))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(sizes == std::vector<int>({512,640,768,896,896,896}) && records.size() == 3 && tokens.size() == 3 && tokens[0] != tokens[1] && tokens[1] != tokens[2] && tokens[0] != tokens[2], "three timed attempts share one bounded probe slot and use fresh record numbers and correlation tokens");
+        require(app.maximumDatagramSize() == 738 && app.maximumDatagramSizes == std::vector<size_t>({482,610,738}) && app.errorCount == 0, "failed growth preserves the last confirmed budget");
+        app.sendMarker(210, 800); app.sendMarker(211, 700);
+    }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(1), on("host2.app[0].driver").signal("packetSentToUpper").within(1)})
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{211}, "application datagrams are refused or delivered whole, never fragmented by DTLS"); }));
+}
+%activity:
+EV << "path MTU search loss compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 14s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_pmtu_search_loss: PASS

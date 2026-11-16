@@ -33,7 +33,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
     if (operationalState != OPERATING || it == associations.end() || it->second->callback != requester || it->second->serverSide ||
         !it->second->earlyOffered || it->second->retried || it->second->closing || it->second->state == HandshakeState::ESTABLISHED ||
         (it->second->earlyStatusReported && !it->second->earlyAccepted) || bytes.get<b>() % 8 != 0 ||
-        bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue()) ||
+        bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget()) ||
         uint64_t(bytes.get<B>()) > it->second->offeredSession->earlyDataBytes - it->second->earlySentBytes) {
         retained->reset();
         requester->sendError(id, packetId, "DTLS early send is unavailable or exceeds its allowance");
@@ -84,7 +84,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
         emit(recordOverheadSignal, (long)current->second->recordOverhead());
         emit(packetSentSignal, outgoing);
         emit(packetSentToLowerSignal, outgoing);
-        udpSocket.sendTo(outgoing, peer, port);
+        sendUdp(outgoing, peer, port);
     }, eligible, skipped)) {
         auto current = associations.find(id);
         if (current != associations.end()) {

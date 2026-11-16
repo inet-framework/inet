@@ -65,6 +65,13 @@ void DtlsSocketIo::authenticationResult(IDtls::AssociationId id, bool success, c
     emit(registerSignal("authenticationResult"), success ? 1L : 0L);
 }
 
+void DtlsSocketIo::maximumDatagramSizeChanged(IDtls::AssociationId id, size_t bytes)
+{
+    Enter_Method("maximumDatagramSizeChanged");
+    EV_INFO << "DTLS association " << id << " maximum application datagram: " << bytes << " bytes" << endl;
+    emit(registerSignal("maximumDatagramSizeChanged"), long(bytes));
+}
+
 void DtlsSocketIo::sendError(IDtls::AssociationId id, long packetId, const char *reason)
 {
     EV_WARN << "DTLS send " << packetId << " on association " << id << " failed: " << reason << endl;

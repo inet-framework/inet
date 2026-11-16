@@ -36,7 +36,8 @@ class INET_API IDtls
 {
   public:
     using AssociationId = uint64_t;
-    enum ProbeResult { PROBE_SUCCEEDED = 1, PROBE_TIMED_OUT = 2, PROBE_OUTPUT_REFUSED = 3 };
+    enum ProbeResult { PROBE_SUCCEEDED = 1, PROBE_TIMED_OUT = 2, PROBE_OUTPUT_REFUSED = 3,
+        PROBE_UNSUPPORTED = 4, PROBE_CANCELLED = 5, PROBE_PACKET_TOO_BIG = 6 };
 
     class INET_API ICallback
     {
@@ -54,6 +55,8 @@ class INET_API IDtls
         virtual void pathChanged(AssociationId id, const DtlsPath& path) = 0;
         // Server-only outcome for an admitted request; failure accompanies handle invalidation.
         virtual void authenticationResult(AssociationId id, bool success, const char *identity) = 0;
+        // Initial confirmation, a changed maximum or recovery; zero reports an unavailable path.
+        virtual void maximumDatagramSizeChanged(AssociationId id, size_t bytes) = 0;
         // A rejected or cancelled application packet; the association may remain usable.
         virtual void sendError(AssociationId id, long packetId, const char *reason) = 0;
         // Invalidates the named handle. A forced local close may subsequently
@@ -93,6 +96,8 @@ class INET_API IDtls
     virtual bool requestClientAuthentication(AssociationId id) = 0;
     // Established peer state, including a saved ticket snapshot, without a fresh PHA claim.
     virtual bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const = 0;
+    // Application payload bytes; zero for an invalid, unestablished or unavailable handle.
+    virtual size_t getMaximumDatagramSize(AssociationId id) const = 0;
 };
 
 } // namespace inet::dtls

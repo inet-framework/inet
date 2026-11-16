@@ -1,0 +1,102 @@
+%description:
+A genuine routed PTB shrinks a retained PHA response. A delayed ACK for an old
+large fragment covers queued replacements; active obsolete work pays its full
+service while unstarted work skips freely. CID work survives the resize.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool authentication = false, generation = false, finished = false, resized = false;
+static int generations = 0, charges = 0, wire = 0;
+static uint64_t oldNumber = UINT64_MAX;
+static simtime_t replacementStart = -1, oldAckAt = -1;
+auto oldAck = [](const Packet *p) {
+    auto a = findChunk<inet::dtls::DtlsAck>(p);
+    if (!a || oldNumber == UINT64_MAX) return false;
+    for (size_t i = 0; i < a->getEpochsArraySize(); ++i)
+        if (a->getEpochs(i) == 3 && a->getSequenceNumbers(i) == oldNumber) return true;
+    return false;
+};
+return ProtocolTest("pmtu_late_ack")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { auto u = findChunk<UdpHeader>(p); return packetHeartbeat(p, 1) && u && u->getTotalLengthField() == B(1208); }).nth(2).delay(0.5))
+    .meanwhile(tap("tap").from("router").filterPacket(oldAck).nth(1).delay(0.4))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) {
+        if (authentication && std::abs(c.event.value - 0.03) < 1e-9) { generation = true; ++generations; }
+        if (generation && !finished && std::abs(c.event.value - 0.1) < 1e-9) { ++charges; if (resized && replacementStart < SIMTIME_ZERO) replacementStart = simTime(); }
+        return false;
+    }).within(18)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([oldAck](const MatchContext& c) { if (resized && oldAck(c.event.packet)) oldAckAt = simTime(); return false; }).within(18)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (generation && !finished) {
+            auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+            require(h && (h->getMessageType() == 11 || h->getMessageType() == 15 || h->getMessageType() == 20), "response fence excludes unrelated output");
+            ++wire;
+            if (oldNumber == UINT64_MAX && h->getMessageType() == 11) oldNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber();
+            if (h->getMessageType() == 20) finished = true;
+        }
+        return false;
+    }).within(18)))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1170).within(4))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return heartbeat(c, 1) && c.event.packet->getByteLength() == 1200; }).within(3))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { authentication = true; app.requestAuthentication(); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(1))
+    .act(action().run<NetworkInterface>("router.eth[2]", [](NetworkInterface& nic) { nic.setMtu(620); }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(1, true); app.sendMarker(251, 800); app.sendMarker(252, 400); }))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(482).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver&) { resized = true; }))
+    .unordered({on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(7), on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(562).within(7), on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(7), on("host2.app[0].driver").signal("packetSentToUpper").within(7)})
+    .act(action().after(0.3).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.errorCount == 0 && app.cidResults == std::vector<bool>{true} && finished, "resized authentication and retained CID exchange complete");
+        require(generations == 4, "three authentication bodies and one CID body pay logical service exactly once");
+        require(charges == wire + 2, "active superseded parent and ACKed replacement pay service but emit no record");
+        require(replacementStart >= SIMTIME_ZERO && oldAckAt > replacementStart && oldAckAt < replacementStart + SimTime(0.1), "old range ACK arrives during active replacement service");
+        app.sendMarker(250, 550);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.receivedMarkers == std::vector<int>({252,250}) && app.authenticationResults == std::vector<bool>{true}, "queued oversized datagram is rejected and fitting data resumes on the reduced path"); }));
+}
+%activity:
+EV << "late ACK compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.certificateBytes = 4096B
+*.host1.app[*].dtls.protectOutDelay = 100ms
+*.host1.app[*].dtls.handshakeOutDelay = 30ms
+*.host*.app[*].dtls.handshakeInDelay = 40ms
+*.host2.app[*].dtls.pathMtuDiscoveryEnabled = false
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.pathMtuConfirmationInterval = 2s
+*.host*.app[*].dtls.pathMtuRaiseInterval = 20s
+*.router.ipv4.icmp.quoteLength = 64B
+network = inet.protocoltest.dtls.DtlsPathMtuNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.router.eth[2].mac.mtu = 1228B
+*.router.eth[0].mac.mtu = 1228B
+*.router.eth[1].mac.mtu = 1228B
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/><interface hosts='router' names='eth0' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='host1' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/><interface hosts='router' names='eth1' address='10.0.2.2' netmask='255.255.255.0'/><interface hosts='router' names='eth2' address='10.0.3.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='10.0.3.2' netmask='255.255.255.0'/><route hosts='host1' destination='10.0.3.2' netmask='255.255.255.255' gateway='10.0.1.2' interface='eth0'/><route hosts='host2' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/></config>")
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST pmtu_late_ack: PASS

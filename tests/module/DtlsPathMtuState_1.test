@@ -1,0 +1,69 @@
+%description:
+Finite PMTU state-policy helper: base, 128-byte growth, hint ceiling, confirmation
+failure, ERROR recovery, unsupported permission and migration reset. This fixture
+does not exercise heartbeat output, ICMP delivery, queues or path routing.
+%file: MtuFixture.cc
+#include <iostream>
+#include "inet/transportlayer/dtls/DtlsPathMtuState.h"
+namespace DtlsPathMtuState_1 {
+using namespace inet;
+using namespace inet::dtls;
+class Fixture : public cSimpleModule
+{
+  protected:
+    void initialize() override {
+        using Phase = DtlsPathMtuState::Phase;
+        DtlsPathMtuState state(512, 900);
+        ASSERT(state.getPhase() == Phase::BASE && state.getProbeSize() == 512 && state.getUdpBudget() == 512);
+        state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCHING && state.getProbeSize() == 640);
+        state.succeeded();
+        ASSERT(state.getUdpBudget() == 640 && state.getProbeSize() == 768);
+        ASSERT(!state.packetTooBig(800));
+        ASSERT(state.packetTooBig(700) && state.getUdpBudget() == 640 && state.getProbeSize() == 700);
+        state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCH_COMPLETE && state.getUdpBudget() == 700);
+        state.raise();
+        ASSERT(state.getProbeSize() == 828);
+        state.failed();
+        ASSERT(state.getPhase() == Phase::SEARCH_COMPLETE && state.getUdpBudget() == 700);
+        state.failed();
+        state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCHING);
+        state.failed();
+        state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCH_COMPLETE && state.getUdpBudget() == 512);
+        state.failed();
+        ASSERT(state.getPhase() == Phase::BASE && state.getUdpBudget() == 512);
+        state.failed();
+        ASSERT(state.getPhase() == Phase::ERROR && !state.isAvailable() && state.getProbeSize() == 512);
+        state.succeeded();
+        ASSERT(state.isAvailable() && state.getPhase() == Phase::SEARCHING);
+        ASSERT(state.packetTooBig(400) && state.getPhase() == Phase::ERROR);
+        state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCHING && state.getProbeSize() == 640);
+        state.reset();
+        ASSERT(state.isAvailable() && state.getProbeSize() == 512);
+        state.unsupported();
+        ASSERT(state.getProbeSize() == 0 && state.getUdpBudget() == 512 && state.isAvailable());
+        state.failed();
+        ASSERT(state.getPhase() == Phase::UNSUPPORTED);
+        state.reset();
+        state.succeeded(); state.succeeded(); state.succeeded(); state.succeeded(); state.succeeded();
+        ASSERT(state.getPhase() == Phase::SEARCH_COMPLETE && state.getUdpBudget() == 900);
+        std::cout << "DTLS PMTU state PASS" << std::endl;
+    }
+};
+Define_Module(Fixture);
+}
+%file: TestNetwork.ned
+simple MtuFixture { @class(::DtlsPathMtuState_1::Fixture); }
+network TestNetwork { submodules: fixture: MtuFixture; }
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1s
+seed-set = 0
+%contains: stdout
+DTLS PMTU state PASS

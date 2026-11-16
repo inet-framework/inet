@@ -1,0 +1,59 @@
+%description:
+A delayed PTB for the first attempt cannot change a later attempt with a fresh record and token.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int discarded = 0;
+return ProtocolTest("pmtu_stalequote")
+    .meanwhile(anyNumberOfTimes(on("router.ipv4.ip").signal("packetDropped").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) ++discarded; return false; }).within(12)))
+    .meanwhile(tap("tap").from("router").filterPacket("icmpv4.type == 3 && icmpv4.code == 4").nth(1).delay(1.4))
+    .meanwhile(tap("tap").from("router").filterPacket("icmpv4.type == 3 && icmpv4.code == 4").drop())
+    .never(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_PACKET_TOO_BIG).within(6))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(3))
+
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.maximumDatagramSize() == 738 && app.errorCount == 0 && discarded > 0, "forward limit follows the actual routed bottleneck");
+        app.sendMarker(220, 738 - 20);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize() == 1170 && app.receivedMarkers == std::vector<int>{220}, "reverse path independently reaches its 1200-byte ceiling"); app.sendMarker(221, 1100); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{221}, "asymmetric routed delivery succeeds in both directions"); }));
+}
+%activity:
+EV << "routed path MTU compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.dtls.DtlsPathMtuNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 14s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.router.eth[2].mac.mtu = 828B
+*.router.eth[0].mac.mtu = 1228B
+*.router.eth[1].mac.mtu = 1228B
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/><interface hosts='router' names='eth0' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='host1' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/><interface hosts='router' names='eth1' address='10.0.2.2' netmask='255.255.255.0'/><interface hosts='router' names='eth2' address='10.0.3.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='10.0.3.2' netmask='255.255.255.0'/><route hosts='host1' destination='10.0.3.2' netmask='255.255.255.255' gateway='10.0.1.2' interface='eth0'/><route hosts='host2' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/></config>")
+*.router.ipv4.icmp.quoteLength = 64B
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST pmtu_stalequote: PASS

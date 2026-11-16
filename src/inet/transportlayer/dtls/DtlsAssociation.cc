@@ -18,10 +18,14 @@ DtlsAssociation::DtlsAssociation(Dtls& engine, size_t reassemblyLimit) : engine(
     retentionTimer = std::make_unique<cMessage>("dtlsFinalAckRetention");
     postHandshakeExchanges.emplace(24, std::make_unique<DtlsPostHandshakeExchange>(engine, "Update"));
     closeDeadline = std::make_unique<cMessage>("dtlsCloseDeadline");
+    if (engine.par("pathMtuDiscoveryEnabled").boolValue())
+        pathMtu = std::make_unique<PathMtuDiscovery>(engine.par("pathMtuBase").intValue(), engine.par("pathMtuProbeCeiling").intValue());
 }
 
 void DtlsAssociation::cancelTimers()
 {
+    if (pathMtu)
+        engine.cancelEvent(pathMtu->timer.get());
     if (probe) {
         engine.cancelEvent(probe->retryTimer.get());
         engine.cancelEvent(probe->deadline.get());
@@ -36,12 +40,25 @@ void DtlsAssociation::cancelTimers()
 
 bool DtlsAssociation::handleTimer(cMessage *message)
 {
+    if (pathMtu && message == pathMtu->timer.get()) {
+        handlePathMtuTimer();
+        return true;
+    }
     if (probe && message == probe->deadline.get()) {
         finishHeartbeatProbe(IDtls::PROBE_TIMED_OUT);
         return true;
     }
     if (probe && message == probe->retryTimer.get()) {
-        probe->retryTimeout = std::min(SimTime(60), probe->retryTimeout * 2);
+        if (probe->purpose == ProbePurpose::PATH_MTU && (keyUpdate().flight || peerResponseDue)) {
+            finishHeartbeatProbe(IDtls::PROBE_OUTPUT_REFUSED);
+            return true;
+        }
+        if (probe->purpose == ProbePurpose::PATH_MTU && probe->transmissions >= 3) {
+            finishHeartbeatProbe(IDtls::PROBE_TIMED_OUT);
+            return true;
+        }
+        auto maximum = probe->purpose == ProbePurpose::PATH_MTU ? std::max(SimTime(60), SimTime(engine.par("pathMtuProbeTimeout").doubleValue())) : SimTime(60);
+        probe->retryTimeout = std::min(maximum, probe->retryTimeout * 2);
         pumpHeartbeatProbe();
         return true;
     }
@@ -186,7 +203,7 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
     if (state != HandshakeState::ESTABLISHED || closing || isRebinding() || keyUpdate().flight ||
         (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
         return false;
-    if (engine.par("postHandshakeAuthEnabled").boolValue()) {
+    if (engine.par("postHandshakeAuthEnabled").boolValue() || pathMtu) {
         auto limit = engine.par("maxPendingBytes").intValue();
         auto occupied = retainedPostHandshakeBytes() + pendingBytes;
         if (limit <= 0 || occupied > size_t(limit) || 13 > size_t(limit) - occupied)
@@ -375,7 +392,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
     if (!buildingFlight || !flight || !body)
         throw cRuntimeError("DTLS handshake message has no active flight");
     auto size = body->getChunkLength().get<B>();
-    auto udpLimit = engine.par("udpPayloadLimit").intValue();
+    auto udpLimit = udpPayloadBudget();
     int overhead = epoch == 0 ? 25 : 12 + recordOverhead();
     if (udpLimit <= overhead || size <= 0 || size > 0xffffff)
         throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
@@ -430,6 +447,8 @@ void DtlsAssociation::pumpFlight()
 {
     // RFC 9147 Section 5.8.3 limits each burst before ACK-driven progress.
     if (pumpingFlight || buildingFlight || generationPending || !flight || flight->isComplete())
+        return;
+    if (!prepareFlight(flight))
         return;
     pumpingFlight = true;
     auto currentFlight = flight;
@@ -520,8 +539,12 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
                         return;
                     }
                 }
-                else
+                else {
                     owner.resumeApplications(handle);
+                    auto current = owner.associations.find(handle);
+                    if (current != owner.associations.end())
+                        current->second->tryStartPathMtuProbe();
+                }
                 if (!owner.containsAssociation(handle))
                     return;
             }
@@ -985,7 +1008,7 @@ void DtlsAssociation::sendServerFlight()
     bool clientAuth = clientAuthRequested;
     Ptr<Chunk> certificate;
     Ptr<Chunk> verify;
-    auto udpLimit = owner.par("udpPayloadLimit").intValue();
+    auto udpLimit = udpPayloadBudget();
     auto wireSize = [udpLimit](size_t length, int overhead) {
         if (udpLimit <= overhead)
             throw cRuntimeError("DTLS UDP payload limit cannot carry a handshake fragment");

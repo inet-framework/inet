@@ -17,6 +17,7 @@ simple DtlsSocketIo extends SimpleModule
         @signal[earlyPacketReceived](type=inet::Packet);
         @signal[pathChanged](type=long);
         @signal[authenticationResult](type=long);
+        @signal[maximumDatagramSizeChanged](type=long);
         int destPort = default(-1);
         @lifecycleSupport();
         @signal[packetSent](type=inet::Packet);

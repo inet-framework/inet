@@ -13,6 +13,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 #include "inet/transportlayer/dtls/DtlsRecordProtection.h"
@@ -84,6 +86,18 @@ simtime_t Dtls::processingDelay(AssociationId id, const char *operation)
 void Dtls::handleStartOperation(LifecycleOperation *)
 {
     preferences = tls::TlsHandshakeParameters::parsePreferences(par("cipherSuites"), par("keyExchangeGroups"), par("signatureSchemes"));
+    if (par("pathMtuDiscoveryEnabled").boolValue()) {
+        auto base = par("pathMtuBase").intValue();
+        auto ceiling = par("pathMtuProbeCeiling").intValue();
+        auto minimum = 49 + (par("connectionIdEnabled").boolValue() ? 8 : 0);
+        auto timeout = par("pathMtuProbeTimeout").doubleValue();
+        auto confirmation = par("pathMtuConfirmationInterval").doubleValue();
+        auto raise = par("pathMtuRaiseInterval").doubleValue();
+        if (base < minimum || ceiling < base || ceiling > par("udpPayloadLimit").intValue() || ceiling > 16406 ||
+            !std::isfinite(timeout) || timeout < 1 || !std::isfinite(confirmation) || confirmation <= 0 ||
+            !std::isfinite(raise) || raise <= confirmation || SimTime(confirmation) <= SIMTIME_ZERO || SimTime(raise) <= SimTime(confirmation))
+            throw cRuntimeError("Invalid DTLS path MTU base, ceiling or timer profile");
+    }
     if (par("heartbeatEnabled").boolValue() && (!std::isfinite(par("probeTimeout").doubleValue()) || par("probeTimeout").doubleValue() < 1))
         throw cRuntimeError("DTLS probeTimeout must be finite and at least one second");
     if (std::string(par("profile").stringValue()) == "psk" && std::none_of(preferences.cipherSuites.begin(), preferences.cipherSuites.end(), [](auto code) {
@@ -395,7 +409,7 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
         if (encrypted)
             emit(recordOverheadSignal, (long)overhead);
         emit(packetSentToLowerSignal, outgoing);
-        udpSocket.sendTo(outgoing, peerAddress, peerPort);
+        sendUdp(outgoing, peerAddress, peerPort);
     }))
         emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
 }
@@ -566,7 +580,7 @@ void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
     hello->setChunkLength(B(40 + extensions.size()));
-    auto limit = par("udpPayloadLimit").intValue();
+    auto limit = initialPayloadBudget();
     if (limit <= 25) {
         emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
         return;
@@ -675,7 +689,7 @@ void Dtls::pumpRetry(uint64_t id)
             current->reservedBytes -= bytes;
             current->sentBytes += bytes;
             emit(packetSentToLowerSignal, packet);
-            udpSocket.sendTo(packet, peer, port);
+            sendUdp(packet, peer, port);
             current = findPrevalidation(id);
             if (!current || current->retryFlight != flight)
                 return;
@@ -745,7 +759,12 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     if (it == associations.end() || (it->second->flight != flight && !it->second->findPostHandshakeExchange(flight)))
         return;
     if (it->second->isRebinding() || !it->second->permitsOutput(flight)) {
-        flight->cancelReservation(index);
+        if (it->second->keyUpdate().flight == flight)
+            it->second->updateRecordSkipped(flight, index);
+        else if (it->second->findPostHandshakeExchange(flight))
+            flight->cancelReservation(index);
+        else
+            it->second->flightRecordSkipped(flight, index, 0);
         return;
     }
     bool isPostHandshake = it->second->findPostHandshakeExchange(flight) != nullptr;
@@ -771,15 +790,27 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         auto exchange = current != associations.end() ? current->second->findPostHandshakeExchange(flight) : nullptr;
         return current != associations.end() && !current->second->closing && !current->second->isRebinding() && current->second->permitsOutput(flight) &&
                (current->second->flight == flight || (exchange && !exchange->recoveryExpired)) &&
-               flight->get(index).queued && !flight->get(index).acknowledged;
+               flight->get(index).queued && !flight->get(index).acknowledged && flight->isFirstTransmissionOrdered(index) &&
+               (!current->second->pathMtu || flight->get(index).epoch == 0 ||
+                flight->get(index).data->getChunkLength() + B(12 + current->second->recordOverhead()) <= B(current->second->udpPayloadBudget()));
     };
     auto skipped = [this, id, flight, index, reservedCredit]() {
         auto current = associations.find(id);
         if (current != associations.end()) {
             if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordSkipped(flight, index);
-            else if (current->second->findPostHandshakeExchange(flight))
+            else if (current->second->findPostHandshakeExchange(flight)) {
                 flight->cancelReservation(index);
+                if (current->second->pathMtu && current->second->prepareFlight(flight)) {
+                    current = associations.find(id);
+                    if (current != associations.end())
+                        for (const auto& entry : current->second->postHandshakeExchanges)
+                            if (entry.second->flight == flight) {
+                                current->second->pumpPostHandshake(entry.first);
+                                return;
+                            }
+                }
+            }
             else
                 current->second->flightRecordSkipped(flight, index, reservedCredit);
         }
@@ -789,7 +820,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         if (current == associations.end() || (current->second->flight != flight && !current->second->findPostHandshakeExchange(flight)))
             return;
         auto fragment = flight->get(index);
-        if (fragment.epoch != 0 && fragment.data->getChunkLength() + B(12 + current->second->recordOverhead()) > B(par("udpPayloadLimit").intValue())) {
+        if (fragment.epoch != 0 && fragment.data->getChunkLength() + B(12 + current->second->recordOverhead()) > B(current->second->udpPayloadBudget())) {
             failAssociation(id, "DTLS CID update exceeds retained handshake record budget");
             return;
         }
@@ -843,7 +874,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
             current->second->sentBytes += reservedCredit;
         }
         emit(packetSentToLowerSignal, packet);
-        udpSocket.sendTo(packet, peer, port);
+        sendUdp(packet, peer, port);
         current = associations.find(id);
         if (current != associations.end()) {
             if (current->second->keyUpdate().flight == flight)
@@ -926,6 +957,9 @@ void Dtls::establish(AssociationId id)
         if (it != associations.end())
             it->second->issueTicket();
     }
+    it = associations.find(id);
+    if (it != associations.end())
+        it->second->startPathMtuDiscovery();
     resumeApplications(id);
 }
 
@@ -936,7 +970,7 @@ bool Dtls::holdApplication(AssociationId id, std::unique_ptr<Packet> packet, std
         return false;
     auto bytes = std::max(size_t(1), (size_t)packet->getByteLength());
     auto limit = par("maxPendingBytes").intValue();
-    auto occupied = it->second->pendingBytes + (par("postHandshakeAuthEnabled").boolValue() ? it->second->retainedPostHandshakeBytes() : 0);
+    auto occupied = it->second->pendingBytes + ((par("postHandshakeAuthEnabled").boolValue() || it->second->pathMtu) ? it->second->retainedPostHandshakeBytes() : 0);
     if (it->second->closing || limit <= 0 || bytes > size_t(limit) || occupied > size_t(limit) - bytes) {
         auto callback = it->second->callback;
         auto packetId = packet->getId();
@@ -954,7 +988,7 @@ void Dtls::resumeApplications(AssociationId id)
     while (true) {
         auto it = associations.find(id);
         if (it == associations.end() || it->second->closing || it->second->state != HandshakeState::ESTABLISHED ||
-            it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding() || it->second->authenticationOutput || it->second->pendingPackets.empty())
+            it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding() || it->second->authenticationOutput || it->second->isPathUnavailable() || it->second->pendingPackets.empty())
             return;
         auto pending = std::move(it->second->pendingPackets.front());
         it->second->pendingPackets.pop_front();
@@ -974,13 +1008,13 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto callback = it->second->callback;
     auto packetId = packet->getId();
     auto bytes = packet->getDataLength();
-    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue()) ||
+    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget()) ||
         it->second->closing) {
         delete packet;
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
         return;
     }
-    if (it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding() || it->second->authenticationOutput) {
+    if (it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->isRebinding() || it->second->authenticationOutput || it->second->isPathUnavailable()) {
         holdApplication(id, std::unique_ptr<Packet>(packet), sampledDelay, paid);
         return;
     }
@@ -998,18 +1032,19 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto started = std::make_shared<bool>(false);
     auto overhead = it->second->recordOverhead();
     it->second->processingPacketIds.insert(packetId);
-    auto eligible = [this, id, started, overhead]() {
+    auto eligible = [this, id, started, overhead, bytes]() {
         auto current = associations.find(id);
         if (current == associations.end() || current->second->closing)
             return false;
         if (current->second->recordOverhead() != overhead)
             return false;
-        if (current->second->isRebinding() || current->second->authenticationOutput)
+        if (current->second->isRebinding() || current->second->authenticationOutput || current->second->isPathUnavailable() ||
+            bytes + B(current->second->recordOverhead()) > B(current->second->udpPayloadBudget()))
             return false;
         return *started || (!current->second->keyUpdate().flight && !current->second->peerResponseDue &&
                (current->second->nextApplicationRecord < uint64_t(par("rekeyAfterRecords").intValue()) || current->second->sendEpoch >= Association::MAX_SEND_EPOCH));
     };
-    auto skipped = [this, id, packetId, retained, delay, paid, overhead, started]() {
+    auto skipped = [this, id, packetId, retained, delay, paid, overhead, started, bytes]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return;
@@ -1020,7 +1055,13 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             callback->sendError(id, packetId, "DTLS header budget changed before output handoff");
             return;
         }
-        if (current->second->isRebinding() || current->second->authenticationOutput) {
+        if (bytes + B(current->second->recordOverhead()) > B(current->second->udpPayloadBudget())) {
+            auto callback = current->second->callback;
+            retained->reset();
+            callback->sendError(id, packetId, "DTLS path payload budget decreased before output handoff");
+            return;
+        }
+        if (current->second->isRebinding() || current->second->authenticationOutput || current->second->isPathUnavailable()) {
             holdApplication(id, std::move(*retained), delay, paid || *started);
             return;
         }
@@ -1061,7 +1102,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             emit(recordOverheadSignal, (long)current->second->recordOverhead());
             emit(packetSentSignal, outgoing);
             emit(packetSentToLowerSignal, outgoing);
-            udpSocket.sendTo(outgoing, peer, port);
+            sendUdp(outgoing, peer, port);
         }
     }, eligible, skipped, [started]() { *started = true; }, !paid)) {
         auto current = associations.find(id);
@@ -1177,10 +1218,10 @@ void Dtls::sendFinalAck(AssociationId id, uint64_t sequence)
 void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std::vector<std::pair<uint64_t, uint64_t>>& records)
 {
     // RFC 9147 Sections 7 and 7.1 identify acknowledged records by epoch and sequence number.
-    auto udpLimit = par("udpPayloadLimit").intValue();
     auto association = associations.find(id);
     if (association == associations.end())
         return;
+    auto udpLimit = association->second->udpPayloadBudget();
     if (association->second->isRebinding() || association->second->authenticationOutput) {
         association->second->pendingAcks.insert(records.begin(), records.end());
         return;
@@ -1215,9 +1256,10 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
                 continue;
             current->second->reservedBytes += reservedCredit;
         }
-        auto eligible = [this, id]() {
+        auto eligible = [this, id, ack, sendEpoch]() {
             auto it = associations.find(id);
-            return it != associations.end() && !it->second->closing && !it->second->isRebinding() && !it->second->authenticationOutput;
+            return it != associations.end() && !it->second->closing && !it->second->isRebinding() && !it->second->authenticationOutput &&
+                   (!it->second->pathMtu || sendEpoch == 0 || ack->getChunkLength() + B(it->second->recordOverhead()) <= B(it->second->udpPayloadBudget()));
         };
         auto skipped = [this, id, ack, reservedCredit]() {
             auto it = associations.find(id);
@@ -1228,13 +1270,15 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
             if (!it->second->closing)
                 for (size_t i = 0; i < ack->getEpochsArraySize(); ++i)
                     it->second->pendingAcks.emplace(ack->getEpochs(i), ack->getSequenceNumbers(i));
+            if (it->second->pathMtu && !it->second->closing && !it->second->isRebinding() && !it->second->authenticationOutput)
+                it->second->flushAcknowledgements(it->second->sendEpoch);
         };
         if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, sendEpoch, ack, reservedCredit]() {
             auto it = associations.find(id);
             if (it == associations.end())
                 return;
             auto actualEpoch = sendEpoch >= 3 ? it->second->sendEpoch : sendEpoch;
-            if (actualEpoch != 0 && ack->getChunkLength() + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue())) {
+            if (actualEpoch != 0 && ack->getChunkLength() + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget())) {
                 failAssociation(id, "DTLS CID update exceeds retained ACK budget");
                 return;
             }
@@ -1284,7 +1328,7 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
                 it->second->sentBytes += reservedCredit;
             }
             emit(packetSentToLowerSignal, packet);
-            udpSocket.sendTo(packet, peer, port);
+            sendUdp(packet, peer, port);
         }, eligible, skipped)) {
             auto it = associations.find(id);
             if (it != associations.end())
@@ -1312,7 +1356,7 @@ void Dtls::acknowledgePrevalidation(PrevalidationAttempt *attempt, uint64_t reco
     }
     constexpr size_t BYTES = 31; // plaintext header, ACK vector length, and one record number
     auto credit = attempt->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : attempt->receivedBytes * 3;
-    if (par("udpPayloadLimit").intValue() < (int)BYTES || attempt->sentBytes > credit ||
+    if (initialPayloadBudget() < (int)BYTES || attempt->sentBytes > credit ||
         attempt->reservedBytes > credit - attempt->sentBytes || BYTES > credit - attempt->sentBytes - attempt->reservedBytes ||
         attempt->nextRecord >= (uint64_t(1) << 48))
         return;
@@ -1350,7 +1394,7 @@ void Dtls::acknowledgePrevalidation(PrevalidationAttempt *attempt, uint64_t reco
         current->reservedBytes -= BYTES;
         current->sentBytes += BYTES;
         emit(packetSentToLowerSignal, packet);
-        udpSocket.sendTo(packet, peer, port);
+        sendUdp(packet, peer, port);
     }, [findAttempt]() { return findAttempt() != nullptr; })) {
         if (auto current = findAttempt())
             current->reservedBytes -= BYTES;
@@ -1396,7 +1440,7 @@ void Dtls::failPrevalidation(PrevalidationAttempt *attempt, uint8_t alertDescrip
     attempt = current->get();
     attempt->reservedBytes = 0;
     auto credit = attempt->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : attempt->receivedBytes * 3;
-    if (par("udpPayloadLimit").intValue() < (int)BYTES || attempt->sentBytes > credit ||
+    if (initialPayloadBudget() < (int)BYTES || attempt->sentBytes > credit ||
         attempt->reservedBytes > credit - attempt->sentBytes || BYTES > credit - attempt->sentBytes - attempt->reservedBytes ||
         attempt->nextRecord >= (uint64_t(1) << 48)) {
         removePrevalidation(id);
@@ -1432,7 +1476,7 @@ void Dtls::failPrevalidation(PrevalidationAttempt *attempt, uint8_t alertDescrip
         current->reservedBytes -= BYTES;
         current->sentBytes += BYTES;
         emit(packetSentToLowerSignal, packet);
-        udpSocket.sendTo(packet, peer, port);
+        sendUdp(packet, peer, port);
         removePrevalidation(id);
     }, [findAttempt]() { return findAttempt() != nullptr; }))
         removePrevalidation(id);
@@ -2319,7 +2363,7 @@ void Dtls::beginClose(AssociationId id)
         auto peer = current->second->peerAddress;
         auto port = current->second->peerPort;
         emit(packetSentToLowerSignal, packet);
-        udpSocket.sendTo(packet, peer, port);
+        sendUdp(packet, peer, port);
         finishClose(id, false);
     }))
         finishClose(id, true);
@@ -2772,6 +2816,28 @@ void Dtls::parseDatagram(Packet *packet)
 
 void Dtls::socketErrorArrived(UdpSocket *, Indication *indication)
 {
+    if (par("pathMtuDiscoveryEnabled").boolValue()) {
+        const Packet *quote = nullptr;
+        int mtu = -1;
+        if (auto error = indication->findTag<Icmpv4ErrorInd>(); error && error->getType() == ICMP_DESTINATION_UNREACHABLE && error->getCode() == ICMP_DU_FRAGMENTATION_NEEDED) {
+            quote = error->getOriginalPacket();
+            mtu = error->getMtu();
+        }
+        else if (auto error = indication->findTag<Icmpv6ErrorInd>(); error && error->getType() == ICMPv6_PACKET_TOO_BIG) {
+            quote = error->getOriginalPacket();
+            mtu = error->getMtu();
+        }
+        if (quote) {
+            std::vector<AssociationId> handles;
+            for (const auto& entry : associations)
+                handles.push_back(entry.first);
+            for (auto handle : handles) {
+                auto it = associations.find(handle);
+                if (it != associations.end())
+                    it->second->handlePacketTooBig(quote, mtu);
+            }
+        }
+    }
     EV_WARN << "DTLS UDP error " << indication->getName() << endl;
     delete indication;
 }

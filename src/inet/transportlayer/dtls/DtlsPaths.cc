@@ -47,14 +47,14 @@ bool DtlsAssociation::hasMigrationCid() const
 {
     // 22 fixed record bytes, 3 heartbeat header bytes, 8 token bytes and 16 padding bytes.
     return std::any_of(sparePeerCids.begin(), sparePeerCids.end(), [this](const auto& cid) {
-        return !cid.empty() && 49 + std::max(cid.size(), localCid.size()) <= uint64_t(engine.par("udpPayloadLimit").intValue());
+        return !cid.empty() && 49 + std::max(cid.size(), localCid.size()) <= uint64_t(engine.initialPayloadBudget());
     });
 }
 
 std::vector<uint8_t> DtlsAssociation::takeMigrationCid()
 {
     auto it = std::find_if(sparePeerCids.begin(), sparePeerCids.end(), [this](const auto& cid) {
-        return !cid.empty() && 49 + std::max(cid.size(), localCid.size()) <= uint64_t(engine.par("udpPayloadLimit").intValue());
+        return !cid.empty() && 49 + std::max(cid.size(), localCid.size()) <= uint64_t(engine.initialPayloadBudget());
     });
     ASSERT(it != sparePeerCids.end());
     auto cid = std::move(*it);
@@ -84,6 +84,10 @@ bool DtlsAssociation::considerPath(const DtlsPath& path, bool fresh)
         candidatePath = CandidatePath{path, peerCid, false};
         if (hasMigrationCid())
             candidatePath->peerCid = takeMigrationCid();
+        if (probe && probe->purpose == ProbePurpose::PATH_MTU) {
+            finishHeartbeatProbe(IDtls::PROBE_CANCELLED);
+            return true;
+        }
         tryStartPathValidation();
     }
     return true;
@@ -115,6 +119,7 @@ void DtlsAssociation::finishPathValidation(bool success)
             owner.failAssociation(handle, "DTLS path validation failed after local socket rebind");
         return;
     }
+    auto maximum = owner.getMaximumDatagramSize(handle);
     auto changedCid = peerCid != pending.peerCid;
     peerCid = std::move(pending.peerCid);
     localAddress = pending.path.localAddress;
@@ -126,6 +131,10 @@ void DtlsAssociation::finishPathValidation(bool success)
     if (changedCid)
         owner.emit(cComponent::registerSignal("connectionIdChanged"), (long)handle);
     auto it = owner.associations.find(handle);
+    if (it == owner.associations.end() || it->second->closing)
+        return;
+    it->second->resetPathMtuDiscovery(maximum);
+    it = owner.associations.find(handle);
     if (it == owner.associations.end() || it->second->closing)
         return;
     owner.emit(cComponent::registerSignal("pathChanged"), (long)handle);
@@ -181,7 +190,8 @@ bool Dtls::migrateLocal(AssociationId id, const L3Address& address, int interfac
         address.isUnspecified() || *par("localAddress").stringValue())
         return false;
     auto& association = *it->second;
-    if (association.state != HandshakeState::ESTABLISHED || association.closing || association.candidatePath || association.probe || association.authenticationActive() ||
+    if (association.state != HandshakeState::ESTABLISHED || association.closing || association.candidatePath ||
+        (association.probe && association.probe->purpose != Association::ProbePurpose::PATH_MTU) || association.authenticationActive() ||
         !association.cidNegotiated || association.localCid.empty() || association.peerCid.empty() || !association.hasMigrationCid() || nextHeartbeatToken == 0 ||
         association.nextApplicationRecord >= Association::MAX_PROTECTED_RECORDS ||
         !association.heartbeatNegotiated || !association.peerAllowsHeartbeat || !par("heartbeatAcceptRequests").boolValue())
@@ -199,7 +209,12 @@ bool Dtls::migrateLocal(AssociationId id, const L3Address& address, int interfac
         return false;
     auto cid = association.takeMigrationCid();
     association.candidatePath = Association::CandidatePath{path, std::move(cid), false};
-    association.tryStartPathValidation();
+    if (association.probe)
+        association.finishHeartbeatProbe(IDtls::PROBE_CANCELLED);
+    it = associations.find(id);
+    if (it == associations.end())
+        return false;
+    it->second->tryStartPathValidation();
     it = associations.find(id);
     return it != associations.end() && it->second->candidatePath.has_value();
 }
@@ -220,7 +235,7 @@ bool Dtls::rebindLocalPort(AssociationId id, int port)
     if (!ready(*it->second))
         return false;
     if (it->second->probe)
-        it->second->finishHeartbeatProbe(IDtls::PROBE_OUTPUT_REFUSED);
+        it->second->finishHeartbeatProbe(it->second->probe->purpose == Association::ProbePurpose::PATH_MTU ? IDtls::PROBE_CANCELLED : IDtls::PROBE_OUTPUT_REFUSED);
     it = associations.find(id);
     if (it == associations.end() || !ready(*it->second) || it->second->probe)
         return false;

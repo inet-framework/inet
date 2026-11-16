@@ -69,6 +69,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     uint64_t nextAuthenticationContext = 1;
     bool startHeartbeatProbe(AssociationId id, size_t udpBytes = 0);
     static bool sameTuple(const DtlsPath& a, const DtlsPath& b);
+    int64_t initialPayloadBudget() const;
+    void sendUdp(Packet *packet, const L3Address& peerAddress, int peerPort);
     std::map<std::vector<uint8_t>, AssociationId> cidIndex;
     std::vector<uint8_t> allocateConnectionId(AssociationId id);
     void removeConnectionIds(AssociationId id);
@@ -164,6 +166,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     bool rebindLocalPort(AssociationId id, int port) override;
     bool requestClientAuthentication(AssociationId id) override;
     bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const override;
+    size_t getMaximumDatagramSize(AssociationId id) const override;
 };
 
 } // namespace inet::dtls

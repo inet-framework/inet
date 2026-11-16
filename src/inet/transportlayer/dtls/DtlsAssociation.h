@@ -15,6 +15,7 @@
 #include "inet/transportlayer/dtls/DtlsHandshakeReassembly.h"
 #include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
 #include "inet/transportlayer/dtls/DtlsPostHandshakeExchange.h"
+#include "inet/transportlayer/dtls/DtlsPathMtuState.h"
 #include "inet/transportlayer/dtls/DtlsSessionStore.h"
 #include "inet/transportlayer/tls/TlsHandshakeParameters.h"
 
@@ -114,6 +115,27 @@ class INET_API DtlsAssociation
     const std::vector<uint8_t>& cidForPath(const DtlsPath& path) const;
     bool hasMigrationCid() const;
     std::vector<uint8_t> takeMigrationCid();
+    struct PathMtuDiscovery {
+        DtlsPathMtuState state;
+        std::unique_ptr<cMessage> timer = std::make_unique<cMessage>("dtlsPathMtuSchedule");
+        bool probeDue = false;
+        std::optional<simtime_t> raiseAt;
+        std::optional<simtime_t> pausedAt;
+        std::optional<simtime_t> pausedTimerRemaining;
+        PathMtuDiscovery(size_t base, size_t ceiling) : state(base, ceiling) {}
+    };
+    std::unique_ptr<PathMtuDiscovery> pathMtu;
+    int64_t udpPayloadBudget() const;
+    bool isPathUnavailable() const { return pathMtu && !pathMtu->state.isAvailable(); }
+    void startPathMtuDiscovery();
+    void resetPathMtuDiscovery(size_t previousMaximum);
+    void tryStartPathMtuProbe();
+    void finishPathMtuProbe(IDtls::ProbeResult result, size_t size, std::optional<size_t> hint);
+    void schedulePathMtuProbe();
+    void handlePathMtuTimer();
+    bool prepareFlight(const std::shared_ptr<DtlsHandshakeFlight>& value);
+    void notifyPathMtu(size_t previousMaximum, bool confirmed = false);
+    void handlePacketTooBig(const Packet *quote, int mtu);
     HandshakeState state = HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     tls::TlsHandshakeParameters::Offer offer;
     tls::TlsHandshakeParameters::Selection selection;
@@ -129,7 +151,7 @@ class INET_API DtlsAssociation
     std::map<uint8_t, std::pair<uint16_t, std::vector<uint8_t>>> lastPeerCidMessages;
     bool heartbeatNegotiated = false;
     bool peerAllowsHeartbeat = false;
-    enum class ProbePurpose { DIAGNOSTIC = 0, PATH_VALIDATION = 1 };
+    enum class ProbePurpose { DIAGNOSTIC = 0, PATH_VALIDATION = 1, PATH_MTU = 2 };
     struct HeartbeatProbe {
         std::vector<uint8_t> payload;
         DtlsPath path;
@@ -137,7 +159,15 @@ class INET_API DtlsAssociation
         size_t udpBytes = 0;
         bool queued = false;
         std::optional<simtime_t> pausedDeadline;
+        std::optional<simtime_t> pausedRetry;
         bool suspended = false;
+        unsigned transmissions = 0;
+        struct Handoff {
+            uint64_t epoch;
+            uint64_t number;
+            std::vector<uint8_t> cid;
+        };
+        std::optional<Handoff> lastHandoff;
         simtime_t retryTimeout = 1;
         std::unique_ptr<cMessage> retryTimer;
         std::unique_ptr<cMessage> deadline;
@@ -145,7 +175,7 @@ class INET_API DtlsAssociation
     std::unique_ptr<HeartbeatProbe> probe;
     bool startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose = ProbePurpose::DIAGNOSTIC);
     void pumpHeartbeatProbe();
-    void finishHeartbeatProbe(IDtls::ProbeResult result);
+    void finishHeartbeatProbe(IDtls::ProbeResult result, std::optional<size_t> hint = {});
     void receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *body, const DtlsPath& path, bool fresh, bool changed, size_t receivedBytes);
     bool sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request, const DtlsPath& path, size_t replyLimit = 0);
     Ptr<DtlsHeartbeat> makeHeartbeat(uint8_t type, const std::vector<uint8_t>& payload, size_t padding);

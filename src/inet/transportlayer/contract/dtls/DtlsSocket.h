@@ -36,6 +36,7 @@ class INET_API DtlsSocket
     bool rebindLocalPort(AssociationId id, int port) { checkEngine(); return engine->rebindLocalPort(id, port); }
     bool requestClientAuthentication(AssociationId id) { checkEngine(); return engine->requestClientAuthentication(id); }
     bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const { checkEngine(); return engine->getPeerAuthentication(id, result); }
+    size_t getMaximumDatagramSize(AssociationId id) const { checkEngine(); return engine->getMaximumDatagramSize(id); }
 
   protected:
     void checkEngine() const {

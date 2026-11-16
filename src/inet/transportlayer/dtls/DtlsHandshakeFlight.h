@@ -29,6 +29,8 @@ class INET_API DtlsHandshakeFlight
         bool establishAfterSend = false;
         bool serverFinished = false;
         unsigned transmissions = 0;
+        bool superseded = false;
+        std::vector<size_t> replacements;
     };
     struct AckResult {
         bool matched = false;
@@ -38,19 +40,26 @@ class INET_API DtlsHandshakeFlight
 
   protected:
     struct SentRecord {
-        size_t fragmentIndex;
+        uint16_t messageSequence;
+        uint32_t offset;
+        uint32_t length;
         simtime_t handoffTime;
         bool retransmitted;
     };
     std::vector<Fragment> fragments;
     std::map<std::pair<uint64_t, uint64_t>, SentRecord> sentRecords;
     std::set<std::pair<uint64_t, uint16_t>> measuredMessages;
+    std::map<std::pair<uint64_t, uint16_t>, std::map<uint32_t, uint32_t>> acknowledgedRanges;
 
   public:
     size_t add(uint8_t messageType, uint16_t messageSequence, uint32_t messageLength, uint32_t offset, uint64_t epoch, const Ptr<const Chunk>& data, bool establishAfterSend = false, bool serverFinished = false);
     [[nodiscard]] size_t size() const { return fragments.size(); }
     [[nodiscard]] const Fragment& get(size_t index) const { return fragments.at(index); }
-    void markReady(size_t index) { fragments.at(index).ready = true; }
+    void markReady(size_t index);
+    // Split protected fragments without reusing indices captured by queued operations.
+    // Plaintext flights already fit the fixed initial base and are left unchanged.
+    bool refragment(size_t maximumBodyBytes);
+    [[nodiscard]] bool isFirstTransmissionOrdered(size_t index) const;
     bool reserve(size_t index);
     void cancelReservation(size_t index);
     void requestRetransmission();

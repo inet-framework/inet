@@ -132,9 +132,15 @@ bool DtlsAssociation::activateSpareConnectionId()
 {
     if (state != HandshakeState::ESTABLISHED || closing || !cidNegotiated || sparePeerCids.empty())
         return false;
+    auto& owner = engine;
+    auto handle = id;
+    auto maximum = owner.getMaximumDatagramSize(handle);
     peerCid = std::move(sparePeerCids.front());
     sparePeerCids.pop_front();
-    engine.emit(cComponent::registerSignal("connectionIdChanged"), (long)id);
+    owner.emit(cComponent::registerSignal("connectionIdChanged"), (long)handle);
+    auto it = owner.associations.find(handle);
+    if (it != owner.associations.end())
+        it->second->notifyPathMtu(maximum);
     return true;
 }
 
@@ -288,6 +294,7 @@ void DtlsAssociation::applyConnectionIdMessage(uint8_t type, uint16_t sequence)
     lastPeerCidMessages[type] = {sequence, bytes};
     ++nextPeerMessage;
     bool changed = usage == 0;
+    auto maximum = engine.getMaximumDatagramSize(id);
     if (changed) {
         peerCid = ids.front();
         sparePeerCids.clear();
@@ -309,6 +316,9 @@ void DtlsAssociation::applyConnectionIdMessage(uint8_t type, uint16_t sequence)
     owner.emit(cComponent::registerSignal("connectionIdsReceived"), (long)ids.size());
     if (changed && owner.containsAssociation(handle))
         owner.emit(cComponent::registerSignal("connectionIdChanged"), (long)handle);
+    auto it = owner.associations.find(handle);
+    if (changed && it != owner.associations.end())
+        it->second->notifyPathMtu(maximum);
 }
 
 Ptr<DtlsCiphertextHeader> DtlsAssociation::makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride) const

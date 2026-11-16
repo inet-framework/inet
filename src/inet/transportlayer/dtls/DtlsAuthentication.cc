@@ -94,7 +94,8 @@ size_t DtlsAssociation::retainedPostHandshakeBytes() const
     for (const auto& entry : postHandshakeExchanges)
         if (entry.second->flight)
             for (size_t i = 0; i < entry.second->flight->size(); ++i)
-                bytes += entry.second->flight->get(i).data->getChunkLength().get<B>() + 12;
+                if (!entry.second->flight->get(i).superseded)
+                    bytes += entry.second->flight->get(i).data->getChunkLength().get<B>() + 12;
     return bytes;
 }
 

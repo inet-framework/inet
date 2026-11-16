@@ -1,0 +1,60 @@
+%description:
+Two associations share one client engine. Failed base discovery suspends only
+one handle; the other retains its confirmed budget and exchanges data.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool blackhole = false;
+return ProtocolTest("pmtu_isolation")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { auto u = findChunk<UdpHeader>(p); return blackhole && packetHeartbeat(p, 1) && u && u->getDestinationPort() == 4433; }).drop())
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1170).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.openPeer("host2", 4435); }))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1170).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.handles.size() == 2 && app.handles.front() != app.handles.back(), "separate handles share the same engine"); blackhole = true; }))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(0).within(18))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.maximumDatagramHandles.back() == app.handles.front() && app.engine->getMaximumDatagramSize(app.handles.front()) == 0 && app.maximumDatagramSize() == 1170, "only the blackholed handle loses send availability");
+        app.sendMarker(160, 100, app.handles.front()); app.sendMarker(161, 1100);
+    }))
+    .once(on("host2.app[1].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{161}, "unrelated flow delivers while its sibling is suspended"); app.sendMarker(162, 1100); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{162} && app.errorCount == 0 && app.establishedCount == 2, "unrelated reverse data delivers on the established engine"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers.empty(), "suspended sibling's application remains queued"); }));
+}
+%activity:
+EV << "isolation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 28s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 1
+*.host2.numApps = 2
+*.host2.app[1].localPort = 4435
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.pathMtuConfirmationInterval = 2s
+*.host*.app[*].dtls.pathMtuRaiseInterval = 20s
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST pmtu_isolation: PASS

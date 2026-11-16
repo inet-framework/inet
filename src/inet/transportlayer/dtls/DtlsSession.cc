@@ -88,7 +88,7 @@ bool DtlsAssociation::startPostHandshakeFlight(uint32_t key, const std::vector<s
     if (closing || localMessagesExhausted || messages.empty() || messages.size() > 65536u - nextLocalMessage ||
         (existing != postHandshakeExchanges.end() && existing->second->flight))
         return false;
-    auto maximum = std::min<int64_t>(owner.par("udpPayloadLimit").intValue() - int64_t(12 + recordOverhead()), DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
+    auto maximum = std::min<int64_t>(udpPayloadBudget() - int64_t(12 + recordOverhead()), DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     if (maximum <= 0)
         return false;
     size_t retained = 0;
@@ -96,7 +96,7 @@ bool DtlsAssociation::startPostHandshakeFlight(uint32_t key, const std::vector<s
         auto size = message.second->getChunkLength().get<B>();
         retained += size + 12 * std::max<int64_t>(1, (size + maximum - 1) / maximum);
     }
-    if (owner.par("postHandshakeAuthEnabled").boolValue()) {
+    if (owner.par("postHandshakeAuthEnabled").boolValue() || pathMtu) {
         auto limit = owner.par("maxPendingBytes").intValue();
         auto occupied = retainedPostHandshakeBytes() + pendingBytes;
         if (limit <= 0 || occupied > size_t(limit) || retained > size_t(limit) - occupied)
@@ -162,6 +162,8 @@ void DtlsAssociation::pumpPostHandshake(uint32_t key)
     if (closing || it == postHandshakeExchanges.end() || !it->second->flight || it->second->recoveryExpired || !permitsOutput(it->second->flight))
         return;
     auto value = it->second->flight;
+    if (!prepareFlight(value))
+        return;
     auto handle = id;
     auto& owner = engine;
     size_t queued = 0;
@@ -191,7 +193,7 @@ void DtlsAssociation::postHandshakeRecordHandedOff(const std::shared_ptr<DtlsHan
     if (!exchange->firstTransmissionComplete && !exchange->authenticationContext.empty()) {
         bool complete = true;
         for (size_t i = 0; i < value->size(); ++i)
-            complete &= value->get(i).transmissions != 0;
+            complete &= value->get(i).superseded || value->get(i).transmissions != 0;
         if (complete) {
             exchange->firstTransmissionComplete = true;
             authenticationOutput.reset();
@@ -203,6 +205,12 @@ void DtlsAssociation::postHandshakeRecordHandedOff(const std::shared_ptr<DtlsHan
     auto it = owner.associations.find(handle);
     if (resume && it != owner.associations.end())
         it->second->resumeDeferredOutput();
+    else if (it != owner.associations.end() && it->second->pathMtu)
+        for (const auto& entry : it->second->postHandshakeExchanges)
+            if (entry.second->flight == value) {
+                it->second->pumpPostHandshake(entry.first);
+                return;
+            }
 }
 
 void DtlsAssociation::pruneRetainedSendCounters()

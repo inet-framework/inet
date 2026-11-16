@@ -41,6 +41,8 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<bool> authenticationAdmissions;
     std::vector<bool> authenticationResults;
     std::vector<AssociationId> authenticationHandles;
+    std::vector<size_t> maximumDatagramSizes;
+    std::vector<AssociationId> maximumDatagramHandles;
     std::vector<std::string> authenticationIdentities;
     std::vector<inet::dtls::DtlsPath> confirmedPaths;
     std::vector<bool> earlyResults;
@@ -155,6 +157,13 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
         authenticationIdentities.push_back(identity);
         emit(registerSignal("authenticationResult"), success ? 1L : 0L);
     }
+    void maximumDatagramSizeChanged(AssociationId id, size_t bytes) override
+    {
+        maximumDatagramSizes.push_back(bytes);
+        maximumDatagramHandles.push_back(id);
+        emit(registerSignal("maximumDatagramSizeChanged"), long(bytes));
+    }
+    size_t maximumDatagramSize() const { return engine->getMaximumDatagramSize(lastHandle()); }
     void requestAuthentication() { scheduleCommand([this]() { authenticationAdmissions.push_back(engine->requestClientAuthentication(lastHandle())); }); }
     inet::dtls::DtlsPeerAuthentication peerAuthentication() const
     {

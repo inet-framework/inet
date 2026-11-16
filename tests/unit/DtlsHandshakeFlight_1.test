@@ -87,6 +87,59 @@ auto completeMessage = eligible.acknowledge(2, 30, SimTime(3.75));
 ASSERT(completeMessage.matched && completeMessage.flightComplete);
 ASSERT(completeMessage.rtt && *completeMessage.rtt == SimTime(0.5));
 ASSERT(!eligible.acknowledge(2, 30, SimTime(4)).rtt);
+
+auto six = makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3,4,5,6});
+six->markImmutable();
+DtlsHandshakeFlight split;
+auto original = split.add(11, 9, 6, 0, 3, six);
+split.markReady(original);
+ASSERT(split.reserve(original));
+split.handedOff(original, 50, SimTime(5));
+ASSERT(split.refragment(2) && split.size() == 4 && split.get(original).superseded);
+ASSERT(!split.reserve(original));
+for (size_t i = 1; i < 4; ++i) {
+    ASSERT(split.get(i).offset == (i - 1) * 2 && split.get(i).messageSequence == 9 && split.get(i).messageLength == 6);
+    ASSERT(split.reserve(i));
+}
+split.handedOff(1, 51, SimTime(5.1));
+ASSERT(split.acknowledge(3, 51, SimTime(5.2)).matched && !split.isComplete());
+ASSERT(split.get(1).acknowledged && !split.get(2).acknowledged);
+auto preSplitAck = split.acknowledge(3, 50, SimTime(5.3));
+ASSERT(preSplitAck.matched && preSplitAck.flightComplete && !preSplitAck.rtt);
+ASSERT(split.get(2).acknowledged && split.get(3).acknowledged);
+split.cancelReservation(2);
+split.cancelReservation(3);
+ASSERT(!split.reserve(2) && !split.reserve(3) && !split.acknowledge(3, 50, SimTime(5.4)).matched);
+
+DtlsHandshakeFlight pendingGeneration;
+original = pendingGeneration.add(11, 10, 6, 0, 3, six);
+ASSERT(pendingGeneration.refragment(2));
+ASSERT(pendingGeneration.refragment(1));
+pendingGeneration.markReady(original); // The original queued logical operation completes after both splits.
+size_t leaves = 0;
+for (size_t i = 0; i < pendingGeneration.size(); ++i)
+    if (!pendingGeneration.get(i).superseded) {
+        ASSERT(pendingGeneration.get(i).ready && pendingGeneration.get(i).data->getChunkLength() == B(1));
+        ASSERT(pendingGeneration.reserve(i));
+        pendingGeneration.handedOff(i, 100 + leaves++, SimTime(6));
+    }
+ASSERT(leaves == 6 && !pendingGeneration.acknowledge(3, 50, SimTime(6.1)).matched);
+for (size_t i = 0; i < leaves; ++i)
+    ASSERT(pendingGeneration.acknowledge(3, 100 + i, SimTime(6.2)).matched);
+ASSERT(pendingGeneration.isComplete());
+DtlsHandshakeFlight ordered;
+original = ordered.add(11, 11, 6, 0, 3, six);
+auto verifyIndex = ordered.add(15, 12, 2, 0, 3, bytes);
+ordered.markReady(original); ordered.markReady(verifyIndex);
+ASSERT(ordered.reserve(original) && ordered.reserve(verifyIndex));
+ASSERT(ordered.refragment(2) && !ordered.isFirstTransmissionOrdered(verifyIndex));
+ordered.cancelReservation(verifyIndex);
+ASSERT(!ordered.reserve(verifyIndex));
+for (size_t i = 2; i < ordered.size(); ++i) {
+    ASSERT(ordered.reserve(i));
+    ordered.handedOff(i, 200 + i, SimTime(7));
+}
+ASSERT(ordered.isFirstTransmissionOrdered(verifyIndex) && ordered.reserve(verifyIndex));
 EV << "DTLS handshake flight PASS\n";
 
 %contains: stdout

@@ -25,6 +25,7 @@ class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback
     void earlyDataStatus(IDtls::AssociationId id, bool accepted) override;
     void pathChanged(IDtls::AssociationId id, const DtlsPath& path) override;
     void authenticationResult(IDtls::AssociationId id, bool success, const char *identity) override;
+    void maximumDatagramSizeChanged(IDtls::AssociationId id, size_t bytes) override;
     void sendError(IDtls::AssociationId id, long packetId, const char *reason) override;
     void error(IDtls::AssociationId id, const char *reason) override;
     void closed(IDtls::AssociationId id) override;
