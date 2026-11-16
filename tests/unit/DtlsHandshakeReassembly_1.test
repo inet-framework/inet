@@ -1,0 +1,51 @@
+%description:
+Bounded handshake reassembly preserves identical overlaps, rejects conflicting
+bytes atomically, and releases advertised-body reservations when consumed.
+
+%includes:
+#include "inet/transportlayer/dtls/DtlsHandshakeReassembly.h"
+
+using namespace inet::dtls;
+
+%activity:
+using Result = DtlsHandshakeReassembly::Result;
+DtlsHandshakeReassembly reassembly(8);
+ASSERT(reassembly.insert(11, 1, 5, 0, {}) == Result::EMPTY);
+ASSERT(reassembly.getEntryCount() == 0 && reassembly.getReservedBytes() == 0);
+ASSERT(reassembly.insert(11, 1, 5, 4, {50}) == Result::INCOMPLETE);
+ASSERT(reassembly.getEntryCount() == 1 && reassembly.getReservedBytes() == 5);
+ASSERT(reassembly.insert(11, 1, 5, 1, {20, 30, 40}) == Result::INCOMPLETE);
+ASSERT(reassembly.insert(11, 1, 5, 2, {30, 40, 50}) == Result::INCOMPLETE);
+ASSERT(reassembly.insert(11, 2, 4, 0, {1}) == Result::LIMIT);
+ASSERT(reassembly.getEntryCount() == 1 && reassembly.getReservedBytes() == 5);
+ASSERT(reassembly.insert(11, 1, 5, 0, {99, 88}) == Result::CONFLICT);
+ASSERT(reassembly.insert(12, 1, 5, 0, {10}) == Result::CONFLICT);
+ASSERT(reassembly.insert(11, 1, 6, 0, {10}) == Result::CONFLICT);
+ASSERT(reassembly.insert(11, 1, 5, 6, {}) == Result::OUT_OF_RANGE);
+// If conflict handling had installed the new byte 99 before checking overlap,
+// filling the missing prefix with 10 would fail instead of completing.
+ASSERT(reassembly.insert(11, 1, 5, 0, {10}) == Result::COMPLETE);
+ASSERT(reassembly.isComplete(1));
+auto message = reassembly.take(1);
+ASSERT(message.type == 11);
+ASSERT(message.body == std::vector<uint8_t>({10, 20, 30, 40, 50}));
+ASSERT(reassembly.getEntryCount() == 0 && reassembly.getReservedBytes() == 0);
+ASSERT(reassembly.insert(11, 2, 4, 0, {1, 2, 3, 4}) == Result::COMPLETE);
+ASSERT(reassembly.insert(11, 3, 5, 0, {9}) == Result::LIMIT);
+ASSERT(reassembly.insert(11, 3, 0x1000000, 0, {}) == Result::OUT_OF_RANGE);
+ASSERT(reassembly.getReservedBytes() == 4 && reassembly.getEntryCount() == 1);
+reassembly.clear();
+ASSERT(!reassembly.isComplete(2));
+ASSERT(reassembly.getReservedBytes() == 0 && reassembly.getEntryCount() == 0);
+DtlsHandshakeReassembly sequences(8);
+ASSERT(sequences.insert(1, 0, 4, 1, {2}) == Result::INCOMPLETE);
+ASSERT(sequences.insert(1, 1, 4, 0, {3, 4, 5, 6}) == Result::COMPLETE);
+ASSERT(sequences.hasEntry(0) && sequences.hasEntry(1));
+ASSERT(sequences.take(1).body == std::vector<uint8_t>({3, 4, 5, 6}));
+ASSERT(sequences.getEntryCount() == 1);
+ASSERT(sequences.hasEntry(0) && !sequences.hasEntry(1));
+ASSERT(!sequences.isComplete(0));
+EV << "DTLS handshake reassembly PASS\n";
+
+%contains: stdout
+DTLS handshake reassembly PASS
