@@ -66,6 +66,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     uint64_t nextTicketSerial = 1;
     uint64_t nextConnectionId = 1;
     uint64_t nextHeartbeatToken = 1;
+    uint64_t nextAuthenticationContext = 1;
     bool startHeartbeatProbe(AssociationId id, size_t udpBytes = 0);
     static bool sameTuple(const DtlsPath& a, const DtlsPath& b);
     std::map<std::vector<uint8_t>, AssociationId> cidIndex;
@@ -117,9 +118,11 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void handleProtectedHandshake(AssociationId id, uint16_t epoch, uint16_t truncatedSequence, unsigned sequenceBits, Packet *body, size_t recordBytes);
     void handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, uint16_t truncatedSequence, unsigned sequenceBits, Packet *body, size_t recordBytes);
     void sendServerFlight(AssociationId id);
-    Ptr<Chunk> makeCertificate() const;
+    Ptr<Chunk> makeCertificate(const std::vector<uint8_t>& context = {}) const;
+    Ptr<Chunk> makeCertificateRequest(const std::vector<uint8_t>& context = {}) const;
+    int checkCertificateRequest(Packet *body, bool postHandshake, std::vector<uint8_t>& context, uint16_t& signature) const;
     Ptr<Chunk> makeCertificateVerify(uint16_t scheme) const;
-    int checkCertificate(Packet *body) const;
+    int checkCertificate(Packet *body, const std::vector<uint8_t>& context = {}) const;
     int checkCertificateVerify(Packet *body, uint16_t& selectedScheme) const;
     void sendFinalAck(AssociationId id, uint64_t sequence);
     void sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std::vector<std::pair<uint64_t, uint64_t>>& records);
@@ -159,6 +162,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     bool activateSpareConnectionId(AssociationId id) override;
     bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId) override;
     bool rebindLocalPort(AssociationId id, int port) override;
+    bool requestClientAuthentication(AssociationId id) override;
+    bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const override;
 };
 
 } // namespace inet::dtls

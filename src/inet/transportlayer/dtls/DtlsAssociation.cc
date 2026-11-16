@@ -186,6 +186,12 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
     if (state != HandshakeState::ESTABLISHED || closing || isRebinding() || keyUpdate().flight ||
         (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
         return false;
+    if (engine.par("postHandshakeAuthEnabled").boolValue()) {
+        auto limit = engine.par("maxPendingBytes").intValue();
+        auto occupied = retainedPostHandshakeBytes() + pendingBytes;
+        if (limit <= 0 || occupied > size_t(limit) || 13 > size_t(limit) - occupied)
+            return false;
+    }
     auto timeout = SimTime(engine.par("handshakeTimeout").doubleValue());
     if (timeout <= SIMTIME_ZERO)
         return false;
@@ -530,7 +536,7 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
     for (auto& entry : postHandshakeExchanges) {
         auto type = entry.first;
         auto& exchange = *entry.second;
-        if (type == 24 || type >= 256 || !exchange.flight)
+        if (type == 24 || !isOutgoingExchange(type) || !exchange.flight)
             continue;
         bool progress = false;
         for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
@@ -543,7 +549,7 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
             owner.cancelEvent(exchange.retransmissionTimer.get());
             if (exchange.flight->isComplete()) {
                 exchange.flight.reset();
-                if (type != 9 || !cidRequestUnfulfilled)
+                if (type != 13 && (type != 9 || !cidRequestUnfulfilled))
                     owner.cancelEvent(exchange.deadline.get());
                 pruneRetainedSendCounters();
                 if (type == 10) {
@@ -560,6 +566,11 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
             }
         }
     }
+    for (auto it = postHandshakeExchanges.begin(); it != postHandshakeExchanges.end();)
+        if (it->first >= AUTHENTICATION_RESPONSE_BASE && !it->second->flight)
+            it = postHandshakeExchanges.erase(it);
+        else
+            ++it;
     if (!flight)
         return;
     bool progress = false;
@@ -736,7 +747,7 @@ bool DtlsAssociation::retainHandshakeFragment(uint64_t recordSequence, Packet *b
 
 void DtlsAssociation::scheduleNextHandshake()
 {
-    if (processingHandshake || !reassembly.isComplete(nextPeerMessage))
+    if (processingHandshake || nextPeerMessage > 65535 || !reassembly.isComplete(nextPeerMessage))
         return;
     auto messageSequence = nextPeerMessage;
     auto recordSequence = completeRecordNumbers.at(messageSequence);
@@ -908,6 +919,8 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
         appendExtension(extensions, 42, {});
     if (owner.par("heartbeatEnabled").boolValue())
         appendExtension(extensions, 15, {uint8_t(owner.par("heartbeatAcceptRequests").boolValue() ? 1 : 2)});
+    if (owner.par("postHandshakeAuthEnabled").boolValue())
+        appendExtension(extensions, 49, {});
     if (cidOffered) {
         std::vector<uint8_t> cid = {uint8_t(localCid.size())};
         cid.insert(cid.end(), localCid.begin(), localCid.end());
@@ -1043,17 +1056,7 @@ void DtlsAssociation::sendServerFlight()
     if (!owner.containsAssociation(handle))
         return;
     if (useCertificate && clientAuth) {
-        auto request = makeShared<tls::TlsCertificateRequest>();
-        std::vector<uint8_t> signatureExtension;
-        appendUint16(signatureExtension, 13);
-        appendUint16(signatureExtension, 2 + owner.preferences.signatures.size() * 2);
-        appendUint16(signatureExtension, owner.preferences.signatures.size() * 2);
-        for (auto signature : owner.preferences.signatures)
-            appendUint16(signatureExtension, signature);
-        request->setExtensionsArraySize(signatureExtension.size());
-        for (size_t i = 0; i < signatureExtension.size(); ++i)
-            request->setExtensions(i, signatureExtension[i]);
-        request->setChunkLength(B(3 + signatureExtension.size()));
+        auto request = owner.makeCertificateRequest();
         owner.sendProtectedHandshake(handle, 13, messageSequence++, request);
         if (!owner.containsAssociation(handle))
             return;
@@ -1345,63 +1348,10 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         engine.reportEarlyData(id, acceptedEarly);
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE && handshake->getMessageType() == 13 && !clientAuthRequested) {
-        Ptr<const tls::TlsCertificateRequest> request;
-        try {
-            request = body->popAtFront<tls::TlsCertificateRequest>(body->getDataLength());
-        }
-        catch (const cRuntimeError&) {
-            engine.failAssociation(id, "malformed CertificateRequest", 50);
-            return;
-        }
-        if (body->getDataLength() != b(0)) {
-            engine.failAssociation(id, "trailing CertificateRequest data", 50);
-            return;
-        }
-        if (request->getRequestContextArraySize() != 0) {
-            engine.failAssociation(id, "invalid handshake CertificateRequest context", 47);
-            return;
-        }
-        bool compatible = false;
-        size_t pos = 0, end = request->getExtensionsArraySize();
-        std::set<uint16_t> seen;
-        while (pos < end) {
-            if (end - pos < 4) {
-                engine.failAssociation(id, "truncated CertificateRequest extension", 50);
-                return;
-            }
-            auto type = (uint16_t(request->getExtensions(pos)) << 8) | request->getExtensions(pos + 1);
-            auto length = (uint16_t(request->getExtensions(pos + 2)) << 8) | request->getExtensions(pos + 3);
-            pos += 4;
-            if (length > end - pos) {
-                engine.failAssociation(id, "truncated CertificateRequest extension", 50);
-                return;
-            }
-            if (!seen.insert(type).second) {
-                engine.failAssociation(id, "duplicate CertificateRequest extension", 47);
-                return;
-            }
-            if (type == 13) {
-                if (length < 4) {
-                    engine.failAssociation(id, "invalid signature algorithms vector", 50);
-                    return;
-                }
-                auto vectorLength = (uint16_t(request->getExtensions(pos)) << 8) | request->getExtensions(pos + 1);
-                if (vectorLength != length - 2 || vectorLength % 2) {
-                    engine.failAssociation(id, "invalid signature algorithms vector", 50);
-                    return;
-                }
-                for (size_t i = pos + 2; i < pos + length; i += 2) {
-                    auto scheme = (uint16_t(request->getExtensions(i)) << 8) | request->getExtensions(i + 1);
-                    if (!compatible && std::find(engine.preferences.signatures.begin(), engine.preferences.signatures.end(), scheme) != engine.preferences.signatures.end()) {
-                        clientAuthSignature = scheme;
-                        compatible = true;
-                    }
-                }
-            }
-            pos += length;
-        }
-        if (!compatible) {
-            engine.failAssociation(id, "no compatible requested signature algorithm", seen.count(13) ? 40 : 109);
+        std::vector<uint8_t> context;
+        auto alert = engine.checkCertificateRequest(body, false, context, clientAuthSignature);
+        if (alert) {
+            engine.failAssociation(id, "invalid initial CertificateRequest", alert);
             return;
         }
         ++nextPeerMessage;

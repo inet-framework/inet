@@ -91,7 +91,7 @@ bool DtlsAssociation::considerPath(const DtlsPath& path, bool fresh)
 
 void DtlsAssociation::tryStartPathValidation()
 {
-    if (!candidatePath || probe || closing)
+    if (!candidatePath || probe || closing || authenticationActive())
         return;
     auto& owner = engine;
     auto handle = id;
@@ -156,7 +156,7 @@ void DtlsAssociation::finishPathValidation(bool success)
             return;
     }
     for (auto& entry : it->second->postHandshakeExchanges)
-        if (entry.first != 24 && entry.first < 256 && entry.second->flight) {
+        if (entry.first != 24 && isOutgoingExchange(entry.first) && entry.second->flight) {
             entry.second->flight->requestRetransmission();
             it->second->pumpPostHandshake(entry.first);
             it = owner.associations.find(handle);
@@ -181,7 +181,7 @@ bool Dtls::migrateLocal(AssociationId id, const L3Address& address, int interfac
         address.isUnspecified() || *par("localAddress").stringValue())
         return false;
     auto& association = *it->second;
-    if (association.state != HandshakeState::ESTABLISHED || association.closing || association.candidatePath || association.probe ||
+    if (association.state != HandshakeState::ESTABLISHED || association.closing || association.candidatePath || association.probe || association.authenticationActive() ||
         !association.cidNegotiated || association.localCid.empty() || association.peerCid.empty() || !association.hasMigrationCid() || nextHeartbeatToken == 0 ||
         association.nextApplicationRecord >= Association::MAX_PROTECTED_RECORDS ||
         !association.heartbeatNegotiated || !association.peerAllowsHeartbeat || !par("heartbeatAcceptRequests").boolValue())
@@ -212,7 +212,7 @@ bool Dtls::rebindLocalPort(AssociationId id, int port)
         associations.size() != 1 || listener || !prevalidationAttempts.empty() || port <= 0 || port > 65535)
         return false;
     auto ready = [this, port](const Association& association) {
-        return association.state == HandshakeState::ESTABLISHED && !association.closing && !association.candidatePath &&
+        return association.state == HandshakeState::ESTABLISHED && !association.closing && !association.candidatePath && !association.authenticationActive() &&
                association.cidNegotiated && !association.localCid.empty() && !association.peerCid.empty() && association.hasMigrationCid() && nextHeartbeatToken != 0 &&
                association.nextApplicationRecord < Association::MAX_PROTECTED_RECORDS &&
                association.heartbeatNegotiated && association.peerAllowsHeartbeat && par("heartbeatAcceptRequests").boolValue() && port != association.localPort;

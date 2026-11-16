@@ -34,7 +34,7 @@ Ptr<DtlsHeartbeat> DtlsAssociation::makeHeartbeat(uint8_t type, const std::vecto
 
 bool DtlsAssociation::startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose)
 {
-    if (state != HandshakeState::ESTABLISHED || closing || !heartbeatNegotiated || !peerAllowsHeartbeat || probe ||
+    if (state != HandshakeState::ESTABLISHED || closing || authenticationActive() || !heartbeatNegotiated || !peerAllowsHeartbeat || probe ||
         (purpose == ProbePurpose::DIAGNOSTIC && (keyUpdate().flight || peerResponseDue)) ||
         (purpose == ProbePurpose::PATH_VALIDATION && !candidatePath) || engine.nextHeartbeatToken == 0 ||
         nextApplicationRecord >= (purpose == ProbePurpose::PATH_VALIDATION ? MAX_PROTECTED_RECORDS : uint64_t(engine.par("rekeyAfterRecords").intValue())))
@@ -64,7 +64,7 @@ bool DtlsAssociation::startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose)
 
 void DtlsAssociation::pumpHeartbeatProbe()
 {
-    if (!probe || probe->queued || closing)
+    if (!probe || probe->queued || closing || probe->suspended || authenticationActive())
         return;
     auto& owner = engine;
     auto handle = id;
@@ -112,7 +112,7 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
     auto payload = request && probe ? probe->payload : std::vector<uint8_t>{};
     auto eligible = [&owner, handle, payload, request, overhead, path]() {
         auto it = owner.associations.find(handle);
-        if (it == owner.associations.end() || it->second->closing ||
+        if (it == owner.associations.end() || it->second->closing || it->second->authenticationActive() ||
             22 + (it->second->cidNegotiated ? it->second->cidForPath(path).size() : 0) != overhead)
             return false;
         auto& association = *it->second;
@@ -125,8 +125,12 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
     };
     auto skipped = [&owner, handle, request, payload]() {
         auto it = owner.associations.find(handle);
-        if (request && it != owner.associations.end() && !it->second->closing && it->second->probe && it->second->probe->payload == payload)
-            it->second->finishHeartbeatProbe(IDtls::PROBE_OUTPUT_REFUSED);
+        if (request && it != owner.associations.end() && !it->second->closing && it->second->probe && it->second->probe->payload == payload) {
+            if (it->second->probe->suspended)
+                it->second->probe->queued = false;
+            else
+                it->second->finishHeartbeatProbe(IDtls::PROBE_OUTPUT_REFUSED);
+        }
     };
     return owner.enqueueProcessing(owner.outputProcessing.get(), handle, bytes, delay, [&owner, handle, body, request, path, payload]() {
         auto it = owner.associations.find(handle);
@@ -153,6 +157,8 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
         if (request && it != owner.associations.end() && !it->second->closing && it->second->probe && it->second->probe->payload == payload) {
             auto& probe = *it->second->probe;
             probe.queued = false;
+            if (probe.suspended)
+                return;
             if (!probe.deadline->isScheduled())
                 owner.scheduleAt(simTime() + SimTime(owner.par("probeTimeout").doubleValue()), probe.deadline.get());
             owner.scheduleAt(simTime() + probe.retryTimeout, probe.retryTimer.get());
@@ -164,7 +170,7 @@ void DtlsAssociation::receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *
 {
     // A validation request may cross KeyUpdate on a new path. Previous keys
     // remain usable there; ordinary heartbeat requests still use the current epoch.
-    if ((epoch != receiveEpoch && !changed) || !heartbeatNegotiated || !engine.hasConsistentEncoding(body))
+    if ((epoch != receiveEpoch && !changed) || !heartbeatNegotiated || authenticationActive() || !engine.hasConsistentEncoding(body))
         return;
     Ptr<const DtlsHeartbeat> heartbeat;
     try {
@@ -192,6 +198,33 @@ void DtlsAssociation::receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *
             candidatePath->path.interfaceId = path.interfaceId;
         finishHeartbeatProbe(IDtls::PROBE_SUCCEEDED);
     }
+}
+
+void DtlsAssociation::suspendHeartbeatForAuthentication()
+{
+    if (!probe || probe->suspended)
+        return;
+    probe->suspended = true;
+    if (probe->deadline->isScheduled())
+        probe->pausedDeadline = std::max(SimTime::fromRaw(1), probe->deadline->getArrivalTime() - simTime());
+    engine.cancelEvent(probe->deadline.get());
+    engine.cancelEvent(probe->retryTimer.get());
+}
+
+void DtlsAssociation::resumeHeartbeatAfterAuthentication()
+{
+    if (authenticationActive() || closing)
+        return;
+    if (probe && probe->suspended) {
+        probe->suspended = false;
+        if (probe->pausedDeadline) {
+            engine.scheduleAt(simTime() + *probe->pausedDeadline, probe->deadline.get());
+            probe->pausedDeadline.reset();
+        }
+        pumpHeartbeatProbe();
+    }
+    else
+        tryStartPathValidation();
 }
 
 } // namespace inet::dtls

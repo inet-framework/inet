@@ -38,6 +38,10 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<bool> updateResults;
     std::vector<bool> cidResults;
     std::vector<bool> migrationResults;
+    std::vector<bool> authenticationAdmissions;
+    std::vector<bool> authenticationResults;
+    std::vector<AssociationId> authenticationHandles;
+    std::vector<std::string> authenticationIdentities;
     std::vector<inet::dtls::DtlsPath> confirmedPaths;
     std::vector<bool> earlyResults;
     std::vector<int> earlyMarkers;
@@ -143,6 +147,21 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     {
         confirmedPaths.push_back(path);
         emit(registerSignal("pathChanged"), (long)confirmedPaths.size());
+    }
+    void authenticationResult(AssociationId id, bool success, const char *identity) override
+    {
+        authenticationResults.push_back(success);
+        authenticationHandles.push_back(id);
+        authenticationIdentities.push_back(identity);
+        emit(registerSignal("authenticationResult"), success ? 1L : 0L);
+    }
+    void requestAuthentication() { scheduleCommand([this]() { authenticationAdmissions.push_back(engine->requestClientAuthentication(lastHandle())); }); }
+    inet::dtls::DtlsPeerAuthentication peerAuthentication() const
+    {
+        inet::dtls::DtlsPeerAuthentication result;
+        if (!engine->getPeerAuthentication(lastHandle(), result))
+            throw cRuntimeError("no established peer authentication state");
+        return result;
     }
     void sendEarlyMarker(int marker, int bytes = 32)
     {

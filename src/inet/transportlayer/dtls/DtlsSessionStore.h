@@ -20,6 +20,8 @@ class INET_API DtlsSessionStore
         L3Address peerAddress;
         int peerPort = -1;
         std::string peerIdentity;
+        bool peerCertificateAuthenticated = false;
+        std::string authenticatedPeerIdentity;
         uint16_t version = 0xfefc;
         uint16_t cipherSuite = 0x1301;
         uint8_t hashBytes = 32;

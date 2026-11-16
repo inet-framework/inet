@@ -1,0 +1,53 @@
+%description:
+Ticket, CID update, KeyUpdate and PHA retain independent recovery through losses and an ordered handshake-sequence gap.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int tickets = 0, requests = 0, cids = 0;
+return ProtocolTest("pha_overlap")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 4); }).nth(1).delay(0.5))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 13); }).nth(1).drop())
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (handshake(c, 4)) ++tickets; if (handshake(c, 13)) ++requests; if (handshake(c, 10)) ++cids; return false; }).within(8)))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(); app.provideCids(1, true); app.requestAuthentication(); app.sendMarker(79); }))
+    .unordered({on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(6), on("host1.app[0].driver").signal("packetSentToUpper").within(6)})
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.updateResults == std::vector<bool>{true} && app.cidResults == std::vector<bool>{true} && app.authenticationAdmissions == std::vector<bool>{true} && app.authenticationResults == std::vector<bool>{true} && app.errorCount == 0, "all independently owned exchanges complete");
+        require(tickets >= 2 && requests >= 2 && cids >= 2, "selective losses trigger independent recovery");
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{79} && app.errorCount == 0 && app.authenticationResults.empty(), "ordinary traffic and server-only PHA outcome survive overlap"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.resumptionEnabled = true
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_overlap: PASS

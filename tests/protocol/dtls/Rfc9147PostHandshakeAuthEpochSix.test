@@ -1,0 +1,47 @@
+%description:
+PHA remains application-epoch traffic when epoch six aliases the initial handshake epoch bits.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("pha_epochsix")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .act(action().after(0.2).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .act(action().after(0.2).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .act(action().after(0.2).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>({true,true,true}), "three completed requested updates"); app.sendMarker(77); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.authenticationResults == std::vector<bool>{true} && app.receivedMarkers == std::vector<int>{77}, "PHA epoch-six headers sharing epoch-two bits do not enter the initial handshake"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_epochsix: PASS

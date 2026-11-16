@@ -48,6 +48,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
     void earlyDataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected early data"); }
     void earlyDataStatus(IDtls::AssociationId, bool accepted) override { ASSERT(!accepted); ++earlyRejections; }
     void pathChanged(IDtls::AssociationId, const DtlsPath&) override { throw cRuntimeError("unexpected path change"); }
+    void authenticationResult(IDtls::AssociationId, bool, const char *) override { throw cRuntimeError("unexpected authentication result"); }
     virtual void sendError(IDtls::AssociationId, long, const char *) override { ++sendErrors; }
     virtual void error(IDtls::AssociationId, const char *) override {
         ++errors;

@@ -68,7 +68,14 @@ bool DtlsAssociation::requestConnectionIds(int count)
         cidRequestUnfulfilled = false;
         return false;
     }
-    return startPostHandshake(9, body, "ConnectionIdRequest");
+    auto& owner = engine;
+    auto handle = id;
+    if (startPostHandshake(9, body, "ConnectionIdRequest"))
+        return true;
+    auto it = owner.associations.find(handle);
+    if (it != owner.associations.end())
+        it->second->cidRequestUnfulfilled = false;
+    return false;
 }
 
 bool DtlsAssociation::provideConnectionIds(int count, bool immediate)
@@ -107,7 +114,18 @@ bool DtlsAssociation::provideConnectionIds(int count, bool immediate)
     body->markImmutable();
     pendingLocalCids = std::move(allocated);
     pendingCidsImmediate = immediate;
-    return startPostHandshake(10, body, "ConnectionIdUpdate");
+    auto& owner = engine;
+    auto handle = id;
+    if (startPostHandshake(10, body, "ConnectionIdUpdate"))
+        return true;
+    auto it = owner.associations.find(handle);
+    if (it != owner.associations.end()) {
+        for (const auto& cid : it->second->pendingLocalCids)
+            owner.cidIndex.erase(cid);
+        it->second->pendingLocalCids.clear();
+        it->second->pendingCidsImmediate = false;
+    }
+    return false;
 }
 
 bool DtlsAssociation::activateSpareConnectionId()

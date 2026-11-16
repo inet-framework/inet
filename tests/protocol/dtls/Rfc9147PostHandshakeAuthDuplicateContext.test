@@ -1,0 +1,54 @@
+%description:
+A new request cannot reuse a context whose response is still retained for ACK recovery.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<uint8_t> firstContext;
+return establish("pha_duplicatecontext")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto request = findChunk<inet::tls::TlsCertificateRequest>(c.event.packet);
+        if (request && firstContext.empty()) for (size_t i = 0; i < request->getRequestContextArraySize(); ++i) firstContext.push_back(request->getRequestContext(i));
+        return false;
+    }).within(5)))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 13); }).nth(2).mutate([](Packet *p) {
+        mutateNestedHeader<inet::tls::TlsCertificateRequest>(p, [](auto& request) { for (size_t i = 0; i < firstContext.size(); ++i) request.setRequestContext(i, firstContext[i]); });
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(2), on("host2.app[0].driver").signal("authenticationResult").filterValue(0).within(2)})
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.authenticationResults == std::vector<bool>({true,false}), "context reuse cannot create a second success"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_duplicatecontext: PASS

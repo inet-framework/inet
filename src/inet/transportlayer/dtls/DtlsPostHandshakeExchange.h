@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
 
@@ -25,6 +26,8 @@ class INET_API DtlsPostHandshakeExchange
     std::optional<uint16_t> receivingSequence;
     bool receivingQueued = false;
     bool recoveryExpired = false;
+    std::vector<uint8_t> authenticationContext;
+    bool firstTransmissionComplete = false;
 
     DtlsPostHandshakeExchange(cSimpleModule& owner, const std::string& name);
     ~DtlsPostHandshakeExchange();

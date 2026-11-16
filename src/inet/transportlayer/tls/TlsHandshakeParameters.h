@@ -43,6 +43,7 @@ class INET_API TlsHandshakeParameters
     };
     struct Offer {
         bool hasEarlyData = false;
+        bool hasPostHandshakeAuth = false;
         bool hasConnectionId = false;
         uint8_t heartbeatMode = 0;
         std::vector<uint8_t> connectionId;

@@ -5,6 +5,8 @@
 #ifndef INET_IDTLS_H
 #define INET_IDTLS_H
 
+#include <string>
+
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 
@@ -21,6 +23,12 @@ struct DtlsPath {
     L3Address peerAddress;
     int peerPort = -1;
     int interfaceId = -1;
+};
+
+struct DtlsPeerAuthentication {
+    std::string identity;
+    bool certificateAuthenticated = false;
+    bool resumed = false;
 };
 
 /** The local interface of a datagram security engine. */
@@ -44,6 +52,8 @@ class INET_API IDtls
         virtual void earlyDataStatus(AssociationId id, bool accepted) = 0;
         // Confirmed endpoint change; the association handle remains valid.
         virtual void pathChanged(AssociationId id, const DtlsPath& path) = 0;
+        // Server-only outcome for an admitted request; failure accompanies handle invalidation.
+        virtual void authenticationResult(AssociationId id, bool success, const char *identity) = 0;
         // A rejected or cancelled application packet; the association may remain usable.
         virtual void sendError(AssociationId id, long packetId, const char *reason) = 0;
         // Invalidates the named handle. A forced local close may subsequently
@@ -79,6 +89,10 @@ class INET_API IDtls
     virtual bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId) = 0;
     // Replaces the socket only for one established association without a listener or half-open peers.
     virtual bool rebindLocalPort(AssociationId id, int port) = 0;
+    // One server request at a time; external-PSK full handshakes cannot admit it.
+    virtual bool requestClientAuthentication(AssociationId id) = 0;
+    // Established peer state, including a saved ticket snapshot, without a fresh PHA claim.
+    virtual bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const = 0;
 };
 
 } // namespace inet::dtls

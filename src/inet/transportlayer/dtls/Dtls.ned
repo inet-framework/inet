@@ -22,6 +22,8 @@ simple Dtls extends SimpleModule like IDtls
         bool connectionIdEnabled = default(false);
         bool heartbeatEnabled = default(false);
         bool migrationEnabled = default(false);
+        bool postHandshakeAuthEnabled = default(false); // Advertise support (client) or admit requests (server)
+        bool postHandshakeCertificateAvailable = default(true); // If false, decline with an empty certificate list
         bool heartbeatAcceptRequests = default(true);
         double probeTimeout @unit(s) = default(16s); // At least one second; one shared probe per association
         bool receiveConnectionId = default(true); // Eight-byte receive CID, or an empty offer when false

@@ -37,7 +37,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C7 | CID-REQUEST, EXCHANGE | Fourteen CID update/request protocol cases; serializer unit; existing controls | DONE: fresh debug build; 59 combined protocol, 7 unit, 7 module PASS |
 | C8 | HEARTBEAT | Thirteen heartbeat protocol cases; serializer unit; selected existing controls | DONE: fresh debug build; 22 combined protocol, 8 unit, 7 module PASS |
 | C9 | PATH | Seventeen migration cases; NAT translation, switched/routed IPv4 and routed IPv6, rebind/error checks | DONE: 60 protocol, eight unit and seven module cases pass in debug |
-| C10 | PHA | Rfc9147PostHandshakeAuth | NOT_STARTED |
+| C10 | PHA | Twenty-two PHA cases; contextual serializers, offer/store units and existing controls | DONE: full 230-case debug suite passes; final byte-bound correction passes 31 focused cases |
 | C11a | Existing fragmentation-request API | tests/protocol/ipv6/Ipv6DontFragmentRequest; source-fragmentation control | NOT_STARTED |
 | C11 | PMTU | Rfc9147PathMtu; flight/path units | NOT_STARTED |
 | C12 | 12-RECORD | Dtls12RecordSerializer_1, Dtls12HandshakeSerializer_1; unsupported-version control | NOT_STARTED |
@@ -174,3 +174,28 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds
 ```
 
 The combined selector executed before the two routed cases were added; rerunning it now selects 60 cases. Raw build, runner and console logs have the above prefixes under `audit/dtls-extensions/`. Scoped engine/contract/application architecture, DTLS naming, source protection, document seals, release-note formatting and DTLS documentation links pass. The C++ checker remains unavailable because `clang-tidy` is absent; prior global interface/link findings remain unresolved. Release, exact-parent, fingerprint and active-validation stop/crash checks remain unrun. PHA and PMTU interactions belong to their later stages. No stored expectation changed, and the unrelated `AGENTS.md` edit remains excluded.
+
+## C10 implementation contract
+
+Validated against the current source before implementation: `DtlsAssociation` owns request context, response recovery, shared handshake sequences and the temporary output fence. `Dtls` owns synchronous server admission, immutable ticket snapshots and callback cleanup. ClientHello advertises empty extension 49; external-PSK full handshakes refuse requests, while certificate and ticket-selected associations may admit one server request. Contexts combine a lifetime serial and modeled randomness. Client responses allocate consecutive Certificate/CertificateVerify/Finished messages; recovery owners remain distinct when a later request arrives before an old response's ACK. Aggregate retained bodies and held application data use the configured pending-byte bound. Heartbeat retries/deadlines pause during authentication; unrelated associations continue. Default-off behavior retains its old path.
+
+The source trace covers all callback implementations, both processing queues, ACK/retransmission/deadline owners, epoch aliasing, initial certificate context handling and session-store entries. Proposed direct evidence is the C10 protocol selection for negotiation, server-only results, contexts, fragmented ordering, queue limits, loss/deadline, overlap, probe suspension and saved-ticket identity. Build and helper controls will verify integration; they will not substitute for those new production cases. Source paths are unsealed. No runtime validation is claimed by this contract.
+
+### C10 execution and evidence
+
+Implemented the contract above. The [reviewer document](../../../../../tests/protocol/dtls/post-handshake-authentication.md) owns the finite policy, API, topology and per-case observations. Contextual certificate construction and request parsing are shared with initial authentication. Separate response owners permit repeated requests during old response ACK recovery; the output fence covers first-transmission service/handoff and releases deferred work per association. Heartbeat deadlines retain their remaining duration while paused. Ticket entries retain immutable peer-authentication snapshots.
+
+A fresh debug library passes the **full 230-case DTLS protocol suite**, including all 22 new authentication cases, with exit zero. Ten helper units and seven module controls pass. A final source audit then added the missing 13-byte KeyUpdate admission check to the enabled shared retained-byte bound. After rebuilding, **31 focused protocol cases** pass: all 22 authentication cases and nine handshake/update/CID/ticket controls. The request-budget case now directly checks KeyUpdate refusal too. Two engine/sender module controls pass against this final library. The final serializer rerun also includes the contextual empty-Certificate encoding added after the initial ten-unit run. This distinguishes the broad pre-correction run from the final directly affected checks.
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/dtls$' -f '\.test$' --log-file audit/dtls-extensions/c10-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(TlsHandshakeParameters|TlsHandshakeSerializer|DtlsRecordSerializer|DtlsTicketSelection|DtlsSessionStore|TlsNewSessionTicket|DtlsConnectionIdUpdateSerializer|DtlsHeartbeatSerializer|DtlsHandshakeFlight|DtlsHandshakeReassembly)_1\.test$' --log-file audit/dtls-extensions/c10-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds|EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c10-final-module-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f 'TlsHandshakeSerializer_1\.test$' --log-file audit/dtls-extensions/c10-final-serializer-runner.log
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(PostHandshakeAuth.*|KeyUpdate|KeyUpdateInputCost|SimultaneousUpdates|UpdatePeerIsolation|ConnectionIdUpdateOverlap|Resumption|Handshake|PskHandshake|ClientAuthentication)\.test$' --log-file audit/dtls-extensions/c10-budget-final-protocol-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(SenderState|EngineLifecycle)_1\.test$' --log-file audit/dtls-extensions/c10-budget-final-module-runner.log
+```
+
+Build logs are `c10-build-debug.log` and `c10-budget-build-debug.log`; runner/console pairs use the above prefixes under `audit/dtls-extensions/`. The earlier sequential full-suite attempt was interrupted deliberately to switch to the supported concurrent mode; its partial logs are `c10-partial-sequential-*` and are not a complete run. Only one protocol runner used a suite work directory at a time. Scoped engine/TLS/contract/application architecture, DTLS/TLS naming, source protection, document seals, release formatting and selected documentation links pass. The global interface gate still fails on the same 16 unchanged classes, with no `IDtls` finding (`c10-interfaces.log`). The C++ checker remains unavailable without `clang-tidy`; prior global link failures, release, exact-parent, fingerprint and active-authentication stop/crash execution remain unrun. No stored expectation changed.

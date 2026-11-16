@@ -1,0 +1,63 @@
+%description:
+An 8192-byte certificate response excludes application, CID, KeyUpdate and ACK output until its first Finished handoff.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool block = false, finished = false, interleaved = false;
+static int fragments = 0;
+static uint16_t certSequence = 0, verifySequence = 0, finishedSequence = 0;
+return establish("pha_ordering")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        if (!finished && h && h->getMessageType() == 11) { block = true; ++fragments; certSequence = h->getMessageSequence(); }
+        if (block && (!h || (h->getMessageType() != 11 && h->getMessageType() != 15 && h->getMessageType() != 20))) interleaved = true;
+        if (block && h && h->getMessageType() == 15) verifySequence = h->getMessageSequence();
+        if (block && h && h->getMessageType() == 20) { finishedSequence = h->getMessageSequence(); block = false; finished = true; }
+        return false;
+    }).within(8)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(71); app.update(); app.provideCids(1, true); }))
+    .unordered({on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(5), on("host2.app[0].driver").signal("packetSentToUpper").within(5)})
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.authenticationResults == std::vector<bool>{true} && app.receivedMarkers == std::vector<int>{71} && app.errorCount == 0, "fragmented response and deferred application deliver");
+        require(finished && !interleaved && fragments > 80 && verifySequence == certSequence + 1 && finishedSequence == verifySequence + 1, "consecutive response sequence and no intervening wire message");
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>{true} && app.cidResults == std::vector<bool>{true} && app.errorCount == 0, "independent work resumes after the response block"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.certificateBytes = 8192B
+*.host*.app[*].dtls.udpPayloadLimit = 128B
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.handshakeInDelay = 20ms
+*.host*.app[*].dtls.handshakeOutDelay = 20ms
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_ordering: PASS

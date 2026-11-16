@@ -1,0 +1,52 @@
+%description:
+An outstanding server heartbeat pauses across a long client authentication response, resumes with its token, and does not expire during the pause.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool requested = false;
+static int probesDuring = 0;
+return establish("pha_probepause")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).nth(1).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (requested && heartbeat(c, 1)) ++probesDuring; return false; }).within(8)))
+    .act(action().after(0.1).run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return heartbeat(c, 2); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { requested = true; app.requestAuthentication(); }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(6))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(probesDuring == 0 && app.errorCount == 0, "no heartbeat output or deadline while authentication is active"); requested = false; }))
+    .once(on("host2.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).within(0.2))
+    .act(action().after(1.2).run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{true}, "original probe resumes successfully after a longer-than-deadline authentication"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.handshakeOutDelay = 600ms
+*.host2.app[*].dtls.probeTimeout = 1s
+*.host*.app[*].dtls.heartbeatEnabled = true
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_probepause: PASS

@@ -190,6 +190,11 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
             while (pos < end)
                 result.pskModes.push_back(bytes[pos++]);
         }
+        else if (type == 49) {
+            if (length != 0)
+                return "invalid post_handshake_auth extension length";
+            result.hasPostHandshakeAuth = true;
+        }
         else if (type == 15) {
             if (length != 1)
                 return "invalid heartbeat extension length";

@@ -18,7 +18,7 @@ The scenario must supply a free port. UDP reports a collision as a simulation co
 
 Confirmation calls `ICallback::pathChanged(handle, DtlsPath)` with local address/port, peer address/port and interface ID. The handle remains stable. `DtlsSocket` forwards both local operations; `DtlsSocketIo` logs the confirmed tuple and emits `pathChanged`. Probe failure remains separately observable through `probeResult`; a local rebind failure also uses the existing association error callback.
 
-A validation request may cross KeyUpdate while previous read keys remain available. The model permits such requests on a changed path and can send them before its KeyUpdate ACK; this is a deliberate exception to RFC 6520 §3's recommendation to discard older-epoch heartbeat requests. It prevents a lost ACK and path change from blocking each other's recovery. Confirmation still requires freshness, and ordinary heartbeat processing retains its current-epoch policy. PHA suspension belongs to C10.
+A validation request may cross KeyUpdate while previous read keys remain available. The model permits such requests on a changed path and can send them before its KeyUpdate ACK; this is a deliberate exception to RFC 6520 §3's recommendation to discard older-epoch heartbeat requests. It prevents a lost ACK and path change from blocking each other's recovery. Confirmation still requires freshness, and ordinary heartbeat processing retains its current-epoch policy. [Post-handshake authentication](post-handshake-authentication.md) pauses validation and refuses local moves during its active phase.
 
 ## Fixtures and direct evidence
 

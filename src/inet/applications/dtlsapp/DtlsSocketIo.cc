@@ -58,6 +58,13 @@ void DtlsSocketIo::dataArrived(IDtls::AssociationId, Packet *packet)
     send(packet, "trafficOut");
 }
 
+void DtlsSocketIo::authenticationResult(IDtls::AssociationId id, bool success, const char *identity)
+{
+    Enter_Method("authenticationResult");
+    EV_INFO << "DTLS association " << id << " authentication " << (success ? "succeeded: " : "failed: ") << identity << endl;
+    emit(registerSignal("authenticationResult"), success ? 1L : 0L);
+}
+
 void DtlsSocketIo::sendError(IDtls::AssociationId id, long packetId, const char *reason)
 {
     EV_WARN << "DTLS send " << packetId << " on association " << id << " failed: " << reason << endl;

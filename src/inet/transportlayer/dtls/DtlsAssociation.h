@@ -54,8 +54,29 @@ class INET_API DtlsAssociation
     std::unique_ptr<cMessage> delayedAckTimer;
     std::unique_ptr<cMessage> retentionTimer;
     std::unique_ptr<cMessage> closeDeadline;
-    // RFC 9147 Section 5.8.4: outgoing owners use handshake type; incoming CID owners set bit 8.
-    std::map<uint16_t, std::unique_ptr<DtlsPostHandshakeExchange>> postHandshakeExchanges;
+    // Outgoing single messages use their type; incoming owners set bit 8.
+    // PHA response flights use a separate range indexed by the peer request sequence.
+    std::map<uint32_t, std::unique_ptr<DtlsPostHandshakeExchange>> postHandshakeExchanges;
+    static constexpr uint32_t AUTHENTICATION_RESPONSE_BASE = 0x10000;
+    static bool isOutgoingExchange(uint32_t key) { return key < 256 || key >= AUTHENTICATION_RESPONSE_BASE; }
+    struct AuthenticationRequest {
+        std::vector<uint8_t> context;
+        uint8_t expectedType = 11;
+        std::string identity;
+    };
+    std::optional<AuthenticationRequest> authenticationRequest;
+    std::optional<uint32_t> authenticationOutput;
+    bool peerCertificateAuthenticated = false;
+    std::string authenticatedPeerIdentity;
+    bool authenticationActive() const;
+    bool permitsOutput(const std::shared_ptr<DtlsHandshakeFlight>& value) const;
+    size_t retainedPostHandshakeBytes() const;
+    bool requestClientAuthentication();
+    void receiveAuthentication(uint64_t epoch, uint64_t number, Packet *body);
+    void applyAuthentication(uint8_t type, uint16_t sequence);
+    void resumeDeferredOutput();
+    void suspendHeartbeatForAuthentication();
+    void resumeHeartbeatAfterAuthentication();
     DtlsPostHandshakeExchange& keyUpdate() { return *postHandshakeExchanges.at(24); }
     bool updateRequested = false;
     bool awaitingPeerUpdate = false;
@@ -115,6 +136,8 @@ class INET_API DtlsAssociation
         ProbePurpose purpose = ProbePurpose::DIAGNOSTIC;
         size_t udpBytes = 0;
         bool queued = false;
+        std::optional<simtime_t> pausedDeadline;
+        bool suspended = false;
         simtime_t retryTimeout = 1;
         std::unique_ptr<cMessage> retryTimer;
         std::unique_ptr<cMessage> deadline;
@@ -148,7 +171,9 @@ class INET_API DtlsAssociation
     DtlsPostHandshakeExchange *findPostHandshakeExchange(const std::shared_ptr<DtlsHandshakeFlight>& value);
     void issueTicket();
     bool startPostHandshake(uint8_t type, const Ptr<Chunk>& body, const char *name);
-    void pumpPostHandshake(uint8_t type);
+    bool startPostHandshakeFlight(uint32_t key, const std::vector<std::pair<uint8_t, Ptr<Chunk>>>& messages, const char *name,
+                                 const std::vector<uint8_t>& context = {});
+    void pumpPostHandshake(uint32_t key);
     void postHandshakeRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& value, size_t index, uint64_t number);
     void pruneRetainedSendCounters();
     void receiveTicket(uint64_t epoch, uint64_t number, Packet *body);
@@ -188,7 +213,8 @@ class INET_API DtlsAssociation
     std::array<uint8_t, 32> clientRandom{};
     std::vector<uint8_t> clientShare;
     uint16_t serverMessageBase = 0;
-    uint16_t nextPeerMessage = 0;
+    uint32_t nextPeerMessage = 0;
+    uint32_t initialPeerMessageEnd = 0;
     bool processingHandshake = false;
     uint8_t processingHandshakeType = 0;
     std::vector<uint8_t> processingHandshakeBody;

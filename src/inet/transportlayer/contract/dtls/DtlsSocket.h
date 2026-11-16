@@ -34,6 +34,8 @@ class INET_API DtlsSocket
     bool activateSpareConnectionId(AssociationId id) { checkEngine(); return engine->activateSpareConnectionId(id); }
     bool migrateLocal(AssociationId id, const L3Address& address, int interfaceId = -1) { checkEngine(); return engine->migrateLocal(id, address, interfaceId); }
     bool rebindLocalPort(AssociationId id, int port) { checkEngine(); return engine->rebindLocalPort(id, port); }
+    bool requestClientAuthentication(AssociationId id) { checkEngine(); return engine->requestClientAuthentication(id); }
+    bool getPeerAuthentication(AssociationId id, DtlsPeerAuthentication& result) const { checkEngine(); return engine->getPeerAuthentication(id, result); }
 
   protected:
     void checkEngine() const {

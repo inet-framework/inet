@@ -1,0 +1,58 @@
+%description:
+A peer tuple can become a candidate during PHA; validation waits for authentication while the original return path remains usable.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool translate = false, authenticating = false;
+static int prematureProbes = 0;
+return establish("pha_migration")
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *) { return translate; }).mutate([](Packet *p) { mutateHeader<UdpHeader>(p, [](auto& h) { h.setSrcPort(5534); }); }))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.destPort == 5534").mutate([](Packet *p) { mutateHeader<UdpHeader>(p, [](auto& h) { h.setDestPort(4434); }); }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (authenticating && heartbeat(c, 1)) ++prematureProbes; return false; }).within(8)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { authenticating = true; app.requestAuthentication(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { translate = true; app.rebindPort(4438); }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(3))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(prematureProbes == 0 && app.confirmedPaths.empty(), "candidate probing waits until authentication completes"); authenticating = false; }))
+    .once(on("host2.app[0].driver").signal("pathChanged").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.confirmedPaths[0].peerPort == 5534 && app.authenticationResults == std::vector<bool>{true}, "candidate validates after PHA"); app.sendMarker(78); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.migrationResults == std::vector<bool>{false} && app.receivedMarkers == std::vector<int>{78} && app.errorCount == 0, "local rebind refuses during the response, and actual NAT return delivery succeeds afterward"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.handshakeOutDelay = 200ms
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_migration: PASS

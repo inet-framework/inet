@@ -45,6 +45,8 @@ void DtlsAssociation::issueTicket()
     entry.peerAddress = peerAddress;
     entry.peerPort = peerPort;
     entry.peerIdentity = owner.par("identity").stdstringValue();
+    entry.peerCertificateAuthenticated = peerCertificateAuthenticated;
+    entry.authenticatedPeerIdentity = authenticatedPeerIdentity;
     entry.cipherSuite = selection.cipherSuite;
     entry.hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
     entry.issuedAt = simTime();
@@ -75,59 +77,89 @@ void DtlsAssociation::issueTicket()
 
 bool DtlsAssociation::startPostHandshake(uint8_t type, const Ptr<Chunk>& body, const char *name)
 {
+    return startPostHandshakeFlight(type, {{type, body}}, name);
+}
+
+bool DtlsAssociation::startPostHandshakeFlight(uint32_t key, const std::vector<std::pair<uint8_t, Ptr<Chunk>>>& messages,
+                                              const char *name, const std::vector<uint8_t>& context)
+{
     auto& owner = engine;
-    auto existing = postHandshakeExchanges.find(type);
-    if (closing || localMessagesExhausted || (existing != postHandshakeExchanges.end() && existing->second->flight))
+    auto existing = postHandshakeExchanges.find(key);
+    if (closing || localMessagesExhausted || messages.empty() || messages.size() > 65536u - nextLocalMessage ||
+        (existing != postHandshakeExchanges.end() && existing->second->flight))
         return false;
-    auto exchange = std::make_unique<DtlsPostHandshakeExchange>(owner, name);
-    auto flight = std::make_shared<DtlsHandshakeFlight>();
-    exchange->flight = flight;
-    auto size = body->getChunkLength().get<B>();
     auto maximum = std::min<int64_t>(owner.par("udpPayloadLimit").intValue() - int64_t(12 + recordOverhead()), DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     if (maximum <= 0)
         return false;
-    auto sequence = nextLocalMessage;
-    if (nextLocalMessage == std::numeric_limits<uint16_t>::max())
-        localMessagesExhausted = true;
-    else
-        ++nextLocalMessage;
-    if (size <= maximum)
-        flight->add(type, sequence, size, 0, sendEpoch, body);
-    else {
-        Packet packet("DTLS ticket body", body);
-        auto bytes = packet.peekDataAsBytes()->getBytes();
-        for (size_t offset = 0; offset < bytes.size(); offset += maximum) {
-            auto length = std::min<size_t>(maximum, bytes.size() - offset);
-            auto part = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + offset + length));
-            part->markImmutable();
-            flight->add(type, sequence, size, offset, sendEpoch, part);
-        }
+    size_t retained = 0;
+    for (const auto& message : messages) {
+        auto size = message.second->getChunkLength().get<B>();
+        retained += size + 12 * std::max<int64_t>(1, (size + maximum - 1) / maximum);
     }
+    if (owner.par("postHandshakeAuthEnabled").boolValue()) {
+        auto limit = owner.par("maxPendingBytes").intValue();
+        auto occupied = retainedPostHandshakeBytes() + pendingBytes;
+        if (limit <= 0 || occupied > size_t(limit) || retained > size_t(limit) - occupied)
+            return false;
+    }
+    auto exchange = std::make_unique<DtlsPostHandshakeExchange>(owner, name);
+    auto flight = std::make_shared<DtlsHandshakeFlight>();
+    exchange->flight = flight;
+    exchange->authenticationContext = context;
+    std::vector<std::pair<size_t, size_t>> ranges;
+    auto sequence = uint32_t(nextLocalMessage);
+    for (const auto& message : messages) {
+        auto begin = flight->size();
+        message.second->markImmutable();
+        auto size = message.second->getChunkLength().get<B>();
+        if (size <= maximum)
+            flight->add(message.first, sequence, size, 0, sendEpoch, message.second);
+        else {
+            Packet packet("DTLS post-handshake body", message.second);
+            auto bytes = packet.peekDataAsBytes()->getBytes();
+            for (size_t offset = 0; offset < bytes.size(); offset += maximum) {
+                auto length = std::min<size_t>(maximum, bytes.size() - offset);
+                auto part = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + offset + length));
+                part->markImmutable();
+                flight->add(message.first, sequence, size, offset, sendEpoch, part);
+            }
+        }
+        ranges.emplace_back(begin, flight->size());
+        ++sequence;
+    }
+    localMessagesExhausted = sequence == 65536;
+    nextLocalMessage = std::min<uint32_t>(sequence, 65535);
     owner.scheduleAt(simTime() + SimTime(owner.par("handshakeTimeout").doubleValue()), exchange->deadline.get());
-    postHandshakeExchanges[type] = std::move(exchange);
+    postHandshakeExchanges[key] = std::move(exchange);
     auto handle = id;
-    auto delay = owner.processingDelay(handle, "handshakeOutDelay");
-    if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, size + 12, delay, [&owner, handle, flight, type]() {
-        auto it = owner.associations.find(handle);
-        if (it == owner.associations.end() || !it->second->findPostHandshakeExchange(flight))
-            return;
-        for (size_t i = 0; i < flight->size(); ++i)
-            flight->markReady(i);
-        it->second->pumpPostHandshake(type);
-    }, [&owner, handle, flight]() {
-        auto it = owner.associations.find(handle);
-        return it != owner.associations.end() && !it->second->closing && it->second->findPostHandshakeExchange(flight);
-    })) {
-        owner.failAssociation(handle, type == 4 ? "DTLS ticket generation queue is full" : "DTLS post-handshake generation queue is full");
-        return false;
+    for (size_t m = 0; m < messages.size(); ++m) {
+        auto range = ranges[m];
+        auto delay = owner.processingDelay(handle, "handshakeOutDelay");
+        if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, messages[m].second->getChunkLength().get<B>() + 12, delay,
+            [&owner, handle, flight, key, range]() {
+                auto it = owner.associations.find(handle);
+                if (it == owner.associations.end() || !it->second->findPostHandshakeExchange(flight))
+                    return;
+                for (size_t i = range.first; i < range.second; ++i)
+                    flight->markReady(i);
+                it->second->pumpPostHandshake(key);
+            }, [&owner, handle, flight]() {
+                auto it = owner.associations.find(handle);
+                return it != owner.associations.end() && !it->second->closing && it->second->findPostHandshakeExchange(flight);
+            })) {
+            owner.failAssociation(handle, key == 4 ? "DTLS ticket generation queue is full" : "DTLS post-handshake generation queue is full");
+            return false;
+        }
+        if (!owner.containsAssociation(handle))
+            return false;
     }
     return true;
 }
 
-void DtlsAssociation::pumpPostHandshake(uint8_t type)
+void DtlsAssociation::pumpPostHandshake(uint32_t key)
 {
-    auto it = postHandshakeExchanges.find(type);
-    if (closing || it == postHandshakeExchanges.end() || !it->second->flight || it->second->recoveryExpired)
+    auto it = postHandshakeExchanges.find(key);
+    if (closing || it == postHandshakeExchanges.end() || !it->second->flight || it->second->recoveryExpired || !permitsOutput(it->second->flight))
         return;
     auto value = it->second->flight;
     auto handle = id;
@@ -153,8 +185,24 @@ void DtlsAssociation::postHandshakeRecordHandedOff(const std::shared_ptr<DtlsHan
     value->handedOff(index, number, simTime());
     if (!exchange->recoveryExpired && !exchange->retransmissionTimer->isScheduled())
         engine.scheduleAt(simTime() + exchange->timeout, exchange->retransmissionTimer.get());
+    auto& owner = engine;
+    auto handle = id;
+    bool resume = false;
+    if (!exchange->firstTransmissionComplete && !exchange->authenticationContext.empty()) {
+        bool complete = true;
+        for (size_t i = 0; i < value->size(); ++i)
+            complete &= value->get(i).transmissions != 0;
+        if (complete) {
+            exchange->firstTransmissionComplete = true;
+            authenticationOutput.reset();
+            resume = true;
+        }
+    }
     if (retransmission)
-        engine.emit(Dtls::handshakeRetransmissionSignal, (long)id);
+        owner.emit(Dtls::handshakeRetransmissionSignal, (long)handle);
+    auto it = owner.associations.find(handle);
+    if (resume && it != owner.associations.end())
+        it->second->resumeDeferredOutput();
 }
 
 void DtlsAssociation::pruneRetainedSendCounters()
@@ -255,6 +303,8 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
                     entry.peerAddress = it->second->peerAddress;
                     entry.peerPort = it->second->peerPort;
                     entry.peerIdentity = owner.par("identity").stdstringValue();
+                    entry.peerCertificateAuthenticated = it->second->peerCertificateAuthenticated;
+                    entry.authenticatedPeerIdentity = it->second->authenticatedPeerIdentity;
                     entry.cipherSuite = it->second->selection.cipherSuite;
                     entry.hashBytes = tls::TlsHandshakeParameters::findCipherSuite(entry.cipherSuite)->hashBytes;
                     entry.issuedAt = simTime();
