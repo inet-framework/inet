@@ -1,6 +1,6 @@
 # MQTT username and empty-password admission
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 The C2 connection increment must allow a production client to represent the exact username/password pair configured at the broker. A nonempty username enables the broker's admission policy; its password may be empty. This is the model's admission contract over ordinary TCP, not a cryptographic authentication-service model.
 

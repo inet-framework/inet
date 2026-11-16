@@ -1,6 +1,6 @@
 # MQTT model profile
 
-> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [protocol features](../../protocol/mqtt/features.md), [implementation plan](../../../../../plan/pending/mqtt.md)
+> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [protocol features](../../protocol/mqtt/features.md), [implementation plan](../../../../../plan/done/mqtt.md)
 
 The model provides MQTT 3.1.1 clients and broker over TCP, with actual packet bytes, QoS 0–2, topic routing, persistent sessions, retained publications, keepalive and Wills. Broker storage is in memory; crash loses its stored state. There is no CPU, disk, authentication-service, TLS, WebSocket, clustering or broker capacity model. The identifier policy accepts 1–23 ASCII alphanumeric bytes. Offline QoS 0 storage is disabled; live overlapping subscriptions produce one copy at the highest matching granted QoS capped by publication QoS. QoS 2 uses Method B.
 

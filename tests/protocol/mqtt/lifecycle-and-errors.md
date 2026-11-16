@@ -1,6 +1,6 @@
 # MQTT lifecycle and malformed exchanges
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 C6 completes lifecycle transitions and malformed-exchange handling. Earlier stages provide per-resource cancellation but not post-crash reset policy or safe deletion of terminal accepted sockets. The client now restarts a crashed workload and resets incompatible broker state with Clean Session true until acceptance. The broker reaps closed sockets after callbacks, retains eligible data on ordinary stop and clears it on crash. The five-second graceful-stop timeout destroys transport without silently turning an ordinary stop into application state loss.
 

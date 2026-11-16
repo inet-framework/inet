@@ -1,6 +1,6 @@
 # MQTT retained values keepalive and Wills
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 C5 implements retained publication state, connection-owned Wills and liveness deadlines under MQTT 3.1.1 sections 3.1.2.5–3.1.2.10, 3.3.1.3 and 3.12–3.14. C4 has QoS exchanges but none of these features. Retained records live outside session maps, and Wills are removed on DISCONNECT or published once when the owning connection closes abnormally.
 

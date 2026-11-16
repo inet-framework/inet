@@ -2,7 +2,7 @@
 
 > **Kind:** design · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [protocol anatomy](../../doc/project/design/protocol-anatomy.md), [architecture](../../doc/project/rule/architecture.md), [testing](../../doc/project/rule/testing.md)
 
-Execution of C1–C7 and the C6b verification increment is complete. The [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) records the passing integrated checks, exact commands and remaining verification limits. This plan remains under `pending` until the change lands upstream.
+Execution of C1–C7 and the C6b verification increment is complete. The [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) records the passing integrated checks, exact commands and remaining verification limits. This completed plan and its summary are archived under `plan/done`.
 
 ## Intended result and scope
 

@@ -1,6 +1,6 @@
 # MQTT wire format
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 C1 implements MQTT 3.1.1 sections 1.5 and 2 and the control packet layouts in chapter 3. No MQTT codec exists on its parent. The packet serializer and framer provide the missing representation; this commit does not claim a client or broker state machine.
 

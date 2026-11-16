@@ -1,6 +1,6 @@
 # MQTT QoS 1 and sessions
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 C3 adds MQTT 3.1.1 sections 3.1.2.4, 3.4 and 4.3.2–4.6. C2 has only transient QoS 0 operation. Session-owned publication queues and outgoing acknowledgements now survive eligible transport disconnection, with independent identifier allocation per sender. A broker's subscriber delivery has its own acknowledgement; it never borrows the incoming publisher's identifier.
 

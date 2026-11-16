@@ -2,6 +2,26 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [model profile](conformance.md), [protocol checks](../../protocol/mqtt/checks.md)
 
+## Empty-password credential regression
+
+The connection increment includes `MqttAuthentication.test` and its [reviewer document](../../../../../tests/protocol/mqtt/authentication.md). With username `alice` and matching empty passwords, the production client includes a present zero-length password field, the production broker accepts the connection, and the subscriber receives the exact bytes `00 ff 41`. A separate client with password `wrong` receives CONNACK code 4 and never becomes active. Anonymous admission remains covered by `MqttConnect.test`.
+
+On 2026-11-16, the new fixture was first executed against the unchanged PR head `73e8f28a285acc2305a8a963c3c6ecb95e59fc12` library. It compiled and ran, but failed at one second because the client omitted the password field and the matching sessions were refused. After changing MqttClient's Password Present decision to follow User Name Present, a fresh debug build passed, followed by all three explicitly selected authentication, anonymous connection and routing tests. Both controls used General/run 0/seed 0 and the same fixture. This is a compatible before/after integrated control; C2's immediate parent lacks production MQTT endpoints and was not claimed to run this fixture.
+
+Commands from the INET root after `source .envrc`:
+
+```sh
+opp_run_protocol_tests --load . -p inet -m debug --no-build \
+  -w '^tests/protocol/mqtt$' -f 'MqttAuthentication[.]test$' --no-concurrent
+make MODE=debug -j4
+opp_run_protocol_tests --load . -p inet -m debug --no-build \
+  -w '^tests/protocol/mqtt$' -f 'Mqtt(Authentication|Connect|Routing)[.]test$' --no-concurrent
+```
+
+The pre-correction runner exits 1 with one observed unexpected failure. The corrected build and runner exit 0, with three observed passes. Raw logs are `/tmp/pr1461-auth-before{,-console}.log`, `/tmp/pr1461-correction-debug.log` and `/tmp/pr1461-auth-after{,-console}.log`. These focused results supplement the original verification below; they do not rerun its release, feature-off, full serializer or external-reference campaigns. The fixed series' reconstruction and per-commit evidence are recorded separately from those historical results.
+
+## Original integrated verification
+
 The implemented MQTT 3.1.1 profile passes the 24-case protocol suite and five focused module cases. Debug/release compilation, an MQTT-disabled build, two existing TCP controls, five examples and the user-guide build also complete. The full serializer suite passes all 296 cases, including all 15 MQTT variants and three new radiotap cases. Global architecture, naming and interface findings are identical to the pinned upstream baseline.
 
 Execution took place on 2026-11-15–16 in `/home/miguel/workspace/inet-mqtt`, branch `feat/mqtt`. The source and verification revision is `224611ccfa88db2bfa240d87464d1ebbf42d247a`; the final documentation/examples commit adds no compiled MQTT source change. The series starts above upstream `91219b0fa7d2794ee67ac8a3dd45c3a09cfc45b0`; its original plan commit is `2d084b9f2b0ab8cb1ed154b3c92838a30225bba5`. The pre-existing `AGENTS.md` edit is excluded. Results describe the final integrated files, not separately rerun historical stages after fixture backports.

@@ -1,6 +1,6 @@
 # MQTT connection and routing
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/pending/mqtt.md)
+> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan](../../../plan/done/mqtt.md)
 
 C2 introduces production applications for MQTT 3.1.1 sections 3.1–3.3, 3.8–3.11 and 4.7. Its parent has only a codec/framer. The client now establishes a TCP connection and sends CONNECT, and the broker admits the connection and answers CONNACK. The clean-session QoS 0 stage does not claim persistence, nonzero keepalive, Wills or retained messages.
 
