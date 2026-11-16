@@ -4,6 +4,7 @@ expires at the boundary, preserves original expiry on duplicate delivery, and
 selects only a compatible peer context.
 
 %includes:
+#include "../DtlsTestAssertions.h"
 #include "inet/transportlayer/dtls/DtlsSessionStore.h"
 using namespace inet;
 using namespace inet::dtls;
@@ -16,72 +17,72 @@ a.peerIdentity = "peer";
 a.peerPort = 4433;
 a.issuedAt = 0;
 a.expiresAt = 10;
-ASSERT(!store.insert(a, 0));
+DTLS_TEST_CHECK(!store.insert(a, 0));
 store.configure(2);
-ASSERT(store.insert(a, 0));
+DTLS_TEST_CHECK(store.insert(a, 0));
 auto duplicate = a;
 duplicate.expiresAt = 100;
-ASSERT(!store.insert(duplicate, 1));
+DTLS_TEST_CHECK(!store.insert(duplicate, 1));
 duplicate.peerCertificateAuthenticated = true;
 duplicate.authenticatedPeerIdentity = "new identity";
-ASSERT(!store.insert(duplicate, 1));
-ASSERT(!store.find({1}, false, 1)->peerCertificateAuthenticated && store.find({1}, false, 1)->authenticatedPeerIdentity.empty());
-ASSERT(store.find({1}, false, 9)->expiresAt == SimTime(10));
-ASSERT(!store.find({1}, true, 0));
-ASSERT(!store.find({1}, false, 10));
-ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 9));
-ASSERT(!store.select(L3Address(), 4434, "peer", 0xfefc, 9));
-ASSERT(!store.select(L3Address(), 4433, "other", 0xfefc, 9));
-ASSERT(!store.select(L3Address(), 4433, "peer", 0xfefd, 9));
+DTLS_TEST_CHECK(!store.insert(duplicate, 1));
+DTLS_TEST_CHECK(!store.find({1}, false, 1)->peerCertificateAuthenticated && store.find({1}, false, 1)->authenticatedPeerIdentity.empty());
+DTLS_TEST_CHECK(store.find({1}, false, 9)->expiresAt == SimTime(10));
+DTLS_TEST_CHECK(!store.find({1}, true, 0));
+DTLS_TEST_CHECK(!store.find({1}, false, 10));
+DTLS_TEST_CHECK(store.select(L3Address(), 4433, "peer", 0xfefc, 9));
+DTLS_TEST_CHECK(!store.select(L3Address(), 4434, "peer", 0xfefc, 9));
+DTLS_TEST_CHECK(!store.select(L3Address(), 4433, "other", 0xfefc, 9));
+DTLS_TEST_CHECK(!store.select(L3Address(), 4433, "peer", 0xfefd, 9));
 auto b = a;
 b.ticket = {2};
 b.serverSide = true;
-ASSERT(store.insert(b, 0));
+DTLS_TEST_CHECK(store.insert(b, 0));
 auto c = a;
 c.ticket = {3};
-ASSERT(store.insert(c, 0));
-ASSERT(store.size() == 2);
-ASSERT(!store.find({1}, false, 0));
-ASSERT(store.find({2}, true, 0));
-ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0)->ticket == c.ticket);
+DTLS_TEST_CHECK(store.insert(c, 0));
+DTLS_TEST_CHECK(store.size() == 2);
+DTLS_TEST_CHECK(!store.find({1}, false, 0));
+DTLS_TEST_CHECK(store.find({2}, true, 0));
+DTLS_TEST_CHECK(store.select(L3Address(), 4433, "peer", 0xfefc, 0)->ticket == c.ticket);
 c.ticket = {4};
 c.expiresAt = 20;
-ASSERT(store.insert(c, 10));
-ASSERT(store.size() == 1); // expired entries release both roles' capacity
+DTLS_TEST_CHECK(store.insert(c, 10));
+DTLS_TEST_CHECK(store.size() == 1); // expired entries release both roles' capacity
 store.clear();
-ASSERT(store.size() == 0 && !store.find({4}, false, 10));
+DTLS_TEST_CHECK(store.size() == 0 && !store.find({4}, false, 10));
 auto early = a;
 early.ticket = {5};
 early.serverSide = true;
 early.earlyDataBytes = 64;
 std::vector<uint8_t> random(32, 0x11);
-ASSERT(store.insert(early, 0));
-ASSERT(store.consumeEarly({5}, random, 7, 0));
-ASSERT(store.consumeEarly({5}, random, 7, 1)); // same live owning attempt
-ASSERT(!store.consumeEarly({5}, random, 8, 1)); // replacement cannot reuse admission
+DTLS_TEST_CHECK(store.insert(early, 0));
+DTLS_TEST_CHECK(store.consumeEarly({5}, random, 7, 0));
+DTLS_TEST_CHECK(store.consumeEarly({5}, random, 7, 1)); // same live owning attempt
+DTLS_TEST_CHECK(!store.consumeEarly({5}, random, 8, 1)); // replacement cannot reuse admission
 random[0] = 0x22;
-ASSERT(!store.consumeEarly({5}, random, 7, 1));
-ASSERT(store.find({5}, true, 1)->earlyConsumed);
-ASSERT(!store.insert(early, 1)); // duplicate issuance cannot restore admission
-ASSERT(!store.consumeEarly({5}, random, 8, 1));
-ASSERT(!store.consumeEarly({5}, random, 7, 10)); // exact expiry
+DTLS_TEST_CHECK(!store.consumeEarly({5}, random, 7, 1));
+DTLS_TEST_CHECK(store.find({5}, true, 1)->earlyConsumed);
+DTLS_TEST_CHECK(!store.insert(early, 1)); // duplicate issuance cannot restore admission
+DTLS_TEST_CHECK(!store.consumeEarly({5}, random, 8, 1));
+DTLS_TEST_CHECK(!store.consumeEarly({5}, random, 7, 10)); // exact expiry
 store.configure(1);
-ASSERT(store.insert(early, 0));
-ASSERT(store.consumeEarly({5}, random, 7, 0));
+DTLS_TEST_CHECK(store.insert(early, 0));
+DTLS_TEST_CHECK(store.consumeEarly({5}, random, 7, 0));
 early.ticket = {6};
-ASSERT(store.insert(early, 0));
-ASSERT(!store.consumeEarly({5}, random, 8, 1)); // evicted identity is unknown
-ASSERT(store.consumeEarly({6}, random, 8, 1));
+DTLS_TEST_CHECK(store.insert(early, 0));
+DTLS_TEST_CHECK(!store.consumeEarly({5}, random, 8, 1)); // evicted identity is unknown
+DTLS_TEST_CHECK(store.consumeEarly({6}, random, 8, 1));
 store.clear();
-ASSERT(!store.consumeEarly({6}, random, 9, 1));
+DTLS_TEST_CHECK(!store.consumeEarly({6}, random, 9, 1));
 store.configure(2);
 a.ticket = {7}; a.hashBytes = 32;
-ASSERT(store.insert(a, 0));
+DTLS_TEST_CHECK(store.insert(a, 0));
 a.ticket = {8}; a.hashBytes = 48;
-ASSERT(store.insert(a, 0));
-ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {32})->ticket == std::vector<uint8_t>{7});
-ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {48})->ticket == std::vector<uint8_t>{8});
-ASSERT(!store.select(L3Address(), 4433, "peer", 0xfefc, 0, {64}));
+DTLS_TEST_CHECK(store.insert(a, 0));
+DTLS_TEST_CHECK(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {32})->ticket == std::vector<uint8_t>{7});
+DTLS_TEST_CHECK(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {48})->ticket == std::vector<uint8_t>{8});
+DTLS_TEST_CHECK(!store.select(L3Address(), 4433, "peer", 0xfefc, 0, {64}));
 EV << "DTLS session store PASS\n";
 
 %contains: stdout

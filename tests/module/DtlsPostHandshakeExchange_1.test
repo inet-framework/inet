@@ -14,6 +14,7 @@ network TestNetwork
 }
 
 %file: ExchangeFixture.cc
+#include "../DtlsTestAssertions.h"
 #include <iostream>
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/dtls/DtlsPostHandshakeExchange.h"
@@ -41,13 +42,13 @@ class ExchangeFixture : public cSimpleModule
             exchange->flight = std::make_shared<DtlsHandshakeFlight>();
             exchange->flight->add(24, 1, 1, 0, 3, bytes);
             exchange->flight->markReady(0);
-            ASSERT(exchange->flight->reserve(0));
+            DTLS_TEST_CHECK(exchange->flight->reserve(0));
         }
         first->flight->handedOff(0, 7, simTime());
         second->flight->handedOff(0, 8, simTime());
-        ASSERT(first->flight->acknowledge(3, 7, simTime()).flightComplete);
-        ASSERT(!second->flight->acknowledge(3, 7, simTime()).matched);
-        ASSERT(!second->flight->isComplete());
+        DTLS_TEST_CHECK(first->flight->acknowledge(3, 7, simTime()).flightComplete);
+        DTLS_TEST_CHECK(!second->flight->acknowledge(3, 7, simTime()).matched);
+        DTLS_TEST_CHECK(!second->flight->isComplete());
         scheduleAt(1, first->retransmissionTimer.get());
         scheduleAt(3, first->deadline.get());
         scheduleAt(2, second->retransmissionTimer.get());
@@ -62,25 +63,25 @@ class ExchangeFixture : public cSimpleModule
     void handleMessage(cMessage *message) override {
         if (message == cancelFirst) {
             first->cancelTimers();
-            ASSERT(!first->retransmissionTimer->isScheduled() && !first->deadline->isScheduled());
-            ASSERT(second->retransmissionTimer->getArrivalTime() == 2);
-            ASSERT(second->deadline->getArrivalTime() == 4);
+            DTLS_TEST_CHECK(!first->retransmissionTimer->isScheduled() && !first->deadline->isScheduled());
+            DTLS_TEST_CHECK(second->retransmissionTimer->getArrivalTime() == 2);
+            DTLS_TEST_CHECK(second->deadline->getArrivalTime() == 4);
             first.reset();
         }
         else if (second && message == second->retransmissionTimer.get()) {
-            ASSERT(simTime() == 2 && !first);
+            DTLS_TEST_CHECK(simTime() == 2 && !first);
             second->timeout *= 2;
             second->flight->requestRetransmission();
-            ASSERT(second->timeout == 2 && second->flight->reserve(0));
-            ASSERT(second->deadline->getArrivalTime() == 4);
+            DTLS_TEST_CHECK(second->timeout == 2 && second->flight->reserve(0));
+            DTLS_TEST_CHECK(second->deadline->getArrivalTime() == 4);
             retried = true;
         }
         else if (message == destroySecond) {
-            ASSERT(retried && second->deadline->isScheduled());
+            DTLS_TEST_CHECK(retried && second->deadline->isScheduled());
             second.reset();
         }
         else if (message == finish) {
-            ASSERT(retried && !first && !second);
+            DTLS_TEST_CHECK(retried && !first && !second);
             std::cout << "DTLS independent post-handshake recovery PASS" << std::endl;
         }
         else

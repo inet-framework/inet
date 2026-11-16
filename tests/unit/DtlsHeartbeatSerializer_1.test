@@ -1,6 +1,7 @@
 %description:
 Exact heartbeat octets, ignored padding and malformed/truncated length rejection.
 %includes:
+#include "../DtlsTestAssertions.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
@@ -17,10 +18,10 @@ body->setChunkLength(B(21));
 Packet packet("heartbeat", body);
 std::vector<uint8_t> oracle = {2,0,2,0xab,0xcd};
 for (size_t i = 0; i < 16; ++i) oracle.push_back(i);
-ASSERT(packet.peekDataAsBytes()->getBytes() == oracle);
+DTLS_TEST_CHECK(packet.peekDataAsBytes()->getBytes() == oracle);
 Packet input("input", makeShared<BytesChunk>(oracle));
 auto decoded = input.popAtFront<DtlsHeartbeat>(B(21));
-ASSERT(decoded->getType() == 2 && decoded->getPayloadArraySize() == 2 && decoded->getPaddingArraySize() == 16 && decoded->getPayload(1) == 0xcd);
+DTLS_TEST_CHECK(decoded->getType() == 2 && decoded->getPayloadArraySize() == 2 && decoded->getPaddingArraySize() == 16 && decoded->getPayload(1) == 0xcd);
 for (size_t count = 0; count < oracle.size(); ++count) {
     Packet prefix("prefix", makeShared<BytesChunk>(std::vector<uint8_t>(oracle.begin(), oracle.begin() + count)));
     bool rejected = false;
@@ -33,7 +34,7 @@ Packet overclaim("overclaim", makeShared<BytesChunk>(oracle));
 bool rejected = false;
 try { overclaim.popAtFront<DtlsHeartbeat>(overclaim.getDataLength()); }
 catch (const cRuntimeError&) { rejected = true; }
-ASSERT(rejected);
+DTLS_TEST_CHECK(rejected);
 EV << "Heartbeat serializer PASS\n";
 %contains: stdout
 Heartbeat serializer PASS

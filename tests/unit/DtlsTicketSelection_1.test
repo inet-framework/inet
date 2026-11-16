@@ -3,6 +3,7 @@ Only server tickets with the configured peer identity and supported hash may
 select ticket authentication. Unknown or incompatible tickets use the ordinary
 certificate selection while preserving the offered key-share retry requirement.
 %includes:
+#include "../DtlsTestAssertions.h"
 #include "inet/transportlayer/dtls/DtlsAssociation.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 using namespace inet;
@@ -37,25 +38,25 @@ entry.ticket = {'T'};
 entry.serverSide = true;
 entry.peerIdentity = "peer";
 entry.expiresAt = 100;
-ASSERT(store.insert(entry, 0));
+DTLS_TEST_CHECK(store.insert(entry, 0));
 Parameters::Offer offer;
 Parameters::Selection selection;
-ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
-ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK && selection.selectedPsk == 0 && selection.retryKeyShare);
+DTLS_TEST_CHECK(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+DTLS_TEST_CHECK(selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK && selection.selectedPsk == 0 && selection.retryKeyShare);
 store.clear();
 entry.hashBytes = 48;
-ASSERT(store.insert(entry, 0));
-ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
-ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+DTLS_TEST_CHECK(store.insert(entry, 0));
+DTLS_TEST_CHECK(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+DTLS_TEST_CHECK(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
 store.clear();
 entry.hashBytes = 32;
 entry.peerIdentity = "other";
-ASSERT(store.insert(entry, 0));
-ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
-ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+DTLS_TEST_CHECK(store.insert(entry, 0));
+DTLS_TEST_CHECK(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+DTLS_TEST_CHECK(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
 store.clear();
-ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
-ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+DTLS_TEST_CHECK(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+DTLS_TEST_CHECK(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
 EV << "DTLS ticket selection PASS\n";
 %contains: stdout
 DTLS ticket selection PASS

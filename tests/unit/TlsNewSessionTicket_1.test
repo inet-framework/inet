@@ -3,6 +3,7 @@ TLS 1.3 NewSessionTicket uses network byte order and length-prefixed nonce,
 nonempty ticket and extensions. Truncation and an empty ticket are rejected.
 
 %includes:
+#include "../DtlsTestAssertions.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/tls/TlsClientHello_m.h"
@@ -26,27 +27,27 @@ ticket->setExtensions(3, 0);
 ticket->setChunkLength(B(20));
 Packet packet("ticket", ticket);
 auto bytes = packet.peekDataAsBytes()->getBytes();
-ASSERT(bytes == std::vector<uint8_t>({1,2,3,4,0xa1,0xa2,0xa3,0xa4,1,0x55,0,2,0x66,0x77,0,4,0,42,0,0}));
+DTLS_TEST_CHECK(bytes == std::vector<uint8_t>({1,2,3,4,0xa1,0xa2,0xa3,0xa4,1,0x55,0,2,0x66,0x77,0,4,0,42,0,0}));
 Packet input("input", makeShared<BytesChunk>(bytes));
 auto decoded = input.popAtFront<TlsNewSessionTicket>(B(bytes.size()));
-ASSERT(decoded->getTicketLifetime() == 0x01020304);
-ASSERT(decoded->getTicketAgeAdd() == 0xa1a2a3a4);
-ASSERT(decoded->getTicketNonce(0) == 0x55);
-ASSERT(decoded->getTicketArraySize() == 2 && decoded->getTicket(1) == 0x77);
-ASSERT(decoded->getExtensionsArraySize() == 4);
+DTLS_TEST_CHECK(decoded->getTicketLifetime() == 0x01020304);
+DTLS_TEST_CHECK(decoded->getTicketAgeAdd() == 0xa1a2a3a4);
+DTLS_TEST_CHECK(decoded->getTicketNonce(0) == 0x55);
+DTLS_TEST_CHECK(decoded->getTicketArraySize() == 2 && decoded->getTicket(1) == 0x77);
+DTLS_TEST_CHECK(decoded->getExtensionsArraySize() == 4);
 for (size_t size = 0; size < bytes.size(); ++size) {
     Packet shortInput("short", makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin(), bytes.begin() + size)));
     bool rejected = false;
     try { shortInput.popAtFront<TlsNewSessionTicket>(B(size)); }
     catch (const cRuntimeError&) { rejected = true; }
-    ASSERT(rejected);
+    DTLS_TEST_CHECK(rejected);
 }
 std::vector<uint8_t> emptyTicket(13, 0);
 Packet empty("empty ticket", makeShared<BytesChunk>(emptyTicket));
 bool rejected = false;
 try { empty.popAtFront<TlsNewSessionTicket>(B(13)); }
 catch (const cRuntimeError&) { rejected = true; }
-ASSERT(rejected);
+DTLS_TEST_CHECK(rejected);
 EV << "TLS NewSessionTicket PASS\n";
 
 %contains: stdout

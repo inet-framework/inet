@@ -3,6 +3,7 @@ Observe real recovery and pre-validation timers, then stop or crash the owning
 hosts and check that their engine state and scheduled events are released.
 
 %file: RecoveryLifecycleFixture.cc
+#include "../DtlsTestAssertions.h"
 #include <iostream>
 #include "inet/transportlayer/dtls/Dtls.h"
 
@@ -48,20 +49,20 @@ class RecoveryLifecycleFixture : public cSimpleModule, public cListener
         auto delayedAck = check_and_cast<TestDtls *>(getModuleByPath("^.client.app[3].dtls"));
         prevalidation->subscribe("packetSentToLower", this);
         wait(1.0001);
-        ASSERT(hasTimer(retention, "dtlsFinalAckRetention"));
-        ASSERT(hasTimer(prevalidation, "dtlsPrevalidationDeadline"));
-        ASSERT(hasTimer(prevalidation, "dtlsRetryRetransmission"));
-        ASSERT(hasTimer(retry, "dtlsRetransmission"));
-        ASSERT(hasTimer(delayedAck, "dtlsDelayedAck"));
+        DTLS_TEST_CHECK(hasTimer(retention, "dtlsFinalAckRetention"));
+        DTLS_TEST_CHECK(hasTimer(prevalidation, "dtlsPrevalidationDeadline"));
+        DTLS_TEST_CHECK(hasTimer(prevalidation, "dtlsRetryRetransmission"));
+        DTLS_TEST_CHECK(hasTimer(retry, "dtlsRetransmission"));
+        DTLS_TEST_CHECK(hasTimer(delayedAck, "dtlsDelayedAck"));
         wait(0.0009);
         for (auto engine : {retention, prevalidation, retry, delayedAck}) {
-            ASSERT(engine->pendingState() == 0);
-            ASSERT(engine->processingBytes() == 0);
-            ASSERT(!hasTimer(engine, "dtlsFinalAckRetention"));
-            ASSERT(!hasTimer(engine, "dtlsPrevalidationDeadline"));
-            ASSERT(!hasTimer(engine, "dtlsRetryRetransmission"));
-            ASSERT(!hasTimer(engine, "dtlsRetransmission"));
-            ASSERT(!hasTimer(engine, "dtlsDelayedAck"));
+            DTLS_TEST_CHECK(engine->pendingState() == 0);
+            DTLS_TEST_CHECK(engine->processingBytes() == 0);
+            DTLS_TEST_CHECK(!hasTimer(engine, "dtlsFinalAckRetention"));
+            DTLS_TEST_CHECK(!hasTimer(engine, "dtlsPrevalidationDeadline"));
+            DTLS_TEST_CHECK(!hasTimer(engine, "dtlsRetryRetransmission"));
+            DTLS_TEST_CHECK(!hasTimer(engine, "dtlsRetransmission"));
+            DTLS_TEST_CHECK(!hasTimer(engine, "dtlsDelayedAck"));
         }
         wait(2);
         prevalidation->unsubscribe("packetSentToLower", this);

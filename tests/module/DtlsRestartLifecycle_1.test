@@ -3,6 +3,7 @@ Use real peers to stop during application protection, observe graceful alert
 handoff, restart, crash without an alert, and establish again on the same node.
 
 %file: RestartLifecycleFixture.cc
+#include "../DtlsTestAssertions.h"
 #include <iostream>
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/dtls/Dtls.h"
@@ -60,28 +61,28 @@ class RestartLifecycleFixture : public cSimpleModule, public cListener
         client->subscribe("associationEstablished", this);
         client->subscribe("packetSentToLower", this);
         wait(1.4);
-        ASSERT(establishments == 1 && closes == 0 && applications == 0);
+        DTLS_TEST_CHECK(establishments == 1 && closes == 0 && applications == 0);
         wait(0.3);
-        ASSERT(closes == 0 && applications == 0);
+        DTLS_TEST_CHECK(closes == 0 && applications == 0);
         wait(1.1);
-        ASSERT(closes == 1 && applications == 0 && firstCloseHandoff == SimTime(2.6));
+        DTLS_TEST_CHECK(closes == 1 && applications == 0 && firstCloseHandoff == SimTime(2.6));
         wait(2);
-        ASSERT(establishments == 2 && closes == 1);
+        DTLS_TEST_CHECK(establishments == 2 && closes == 1);
         wait(0.4);
-        ASSERT(closes == 1);
+        DTLS_TEST_CHECK(closes == 1);
         wait(2.2);
-        ASSERT(establishments == 3 && closes == 1);
+        DTLS_TEST_CHECK(establishments == 3 && closes == 1);
         wait(0.15);
-        ASSERT(currentHandle != 0);
+        DTLS_TEST_CHECK(currentHandle != 0);
         client->close(currentHandle);
         wait(0.15);
-        ASSERT(closes == 1);
+        DTLS_TEST_CHECK(closes == 1);
         wait(1.1);
-        ASSERT(closes == 2 && secondCloseHandoff == SimTime(8.55));
+        DTLS_TEST_CHECK(closes == 2 && secondCloseHandoff == SimTime(8.55));
         wait(1.6);
-        ASSERT(establishments == 4 && closes == 2);
+        DTLS_TEST_CHECK(establishments == 4 && closes == 2);
         wait(3);
-        ASSERT(establishments == 4 && closes == 2);
+        DTLS_TEST_CHECK(establishments == 4 && closes == 2);
         client->unsubscribe("packetSentToLower", this);
         client->unsubscribe("associationEstablished", this);
         std::cout << "DTLS restart lifecycle PASS" << std::endl;

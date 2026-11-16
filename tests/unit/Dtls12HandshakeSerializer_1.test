@@ -2,6 +2,7 @@
 DTLS 1.2 handshake bodies have independent length/octet oracles. Reused legacy
 Hello forms distinguish absent extensions from an empty encoded vector.
 %includes:
+#include "../DtlsTestAssertions.h"
 #include "inet/common/MemoryOutputStream.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -32,9 +33,9 @@ ticket->setTicketLifetime(0x01020304);
 ticket->setTicketArraySize(3); ticket->setTicket(0,0xaa); ticket->setTicket(1,0xbb); ticket->setTicket(2,0xcc);
 oracle(ticket, {1,2,3,4,0,3,0xaa,0xbb,0xcc});
 oracle(makeShared<Dtls12NewSessionTicket>(), {0,0,0,0,0,0});
-ASSERT(rejects<Dtls12NewSessionTicket>({0,0,1}));
-ASSERT(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,2,0xaa}));
-ASSERT(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,0,0xaa}));
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,1}));
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,2,0xaa}));
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,0,0xaa}));
 auto hvr = makeShared<Dtls12HelloVerifyRequest>();
 hvr->setCookieArraySize(3);
 for (size_t i=0; i<3; ++i) hvr->setCookie(i, 0xa0+i);
@@ -75,13 +76,13 @@ oracle(finished, std::vector<uint8_t>(12,0xcc));
 auto done = makeShared<Dtls12ServerHelloDone>();
 MemoryOutputStream empty;
 Chunk::serialize(empty, done, b(0), b(0));
-ASSERT(empty.getLength() == b(0));
-ASSERT(rejects<Dtls12HelloVerifyRequest>({0xfe,0xff,3,1}));
-ASSERT(rejects<Dtls12Certificate>({0,0,4,0,0,2,1}));
-ASSERT(rejects<Dtls12PskClientKeyExchange>({0,0}));
-ASSERT(rejects<Dtls12EcdheClientKeyExchange>({2,4}));
-ASSERT(rejects<Dtls12CertificateRequest>({1,64,0,1,4,0,0}));
-ASSERT(rejects<Dtls12EcdheServerKeyExchange>({1,0,23,1,4,4,3,0,1,0}));
+DTLS_TEST_CHECK(empty.getLength() == b(0));
+DTLS_TEST_CHECK(rejects<Dtls12HelloVerifyRequest>({0xfe,0xff,3,1}));
+DTLS_TEST_CHECK(rejects<Dtls12Certificate>({0,0,4,0,0,2,1}));
+DTLS_TEST_CHECK(rejects<Dtls12PskClientKeyExchange>({0,0}));
+DTLS_TEST_CHECK(rejects<Dtls12EcdheClientKeyExchange>({2,4}));
+DTLS_TEST_CHECK(rejects<Dtls12CertificateRequest>({1,64,0,1,4,0,0}));
+DTLS_TEST_CHECK(rejects<Dtls12EcdheServerKeyExchange>({1,0,23,1,4,4,3,0,1,0}));
 auto client = makeShared<DtlsClientHello>();
 client->setCipherSuitesArraySize(1); client->setCipherSuites(0,0x00a8);
 client->setCompressionMethodsArraySize(1); client->setCompressionMethods(0,0);

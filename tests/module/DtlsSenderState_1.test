@@ -3,6 +3,7 @@ Exercise the actual association's protected/plaintext record allocation and
 sending-epoch boundaries without generating astronomical numbers of packets.
 
 %file: SenderStateFixture.cc
+#include "../DtlsTestAssertions.h"
 #include <iostream>
 #include <limits>
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -29,17 +30,17 @@ class ProbeAssociation : public DtlsAssociation
     void check() {
         uint64_t number = 0;
         nextEpoch0Record = MAX_PLAINTEXT_RECORDS - 1;
-        ASSERT(allocatePlaintextRecord(number) && number == MAX_PLAINTEXT_RECORDS - 1);
-        ASSERT(!allocatePlaintextRecord(number));
+        DTLS_TEST_CHECK(allocatePlaintextRecord(number) && number == MAX_PLAINTEXT_RECORDS - 1);
+        DTLS_TEST_CHECK(!allocatePlaintextRecord(number));
         nextApplicationRecord = MAX_PROTECTED_RECORDS - 1;
-        ASSERT(allocateApplicationRecord(number) && number == MAX_PROTECTED_RECORDS - 1);
-        ASSERT(!allocateApplicationRecord(number));
+        DTLS_TEST_CHECK(allocateApplicationRecord(number) && number == MAX_PROTECTED_RECORDS - 1);
+        DTLS_TEST_CHECK(!allocateApplicationRecord(number));
         nextApplicationRecord = std::numeric_limits<uint64_t>::max();
-        ASSERT(!allocateApplicationRecord(number));
+        DTLS_TEST_CHECK(!allocateApplicationRecord(number));
         sendEpoch = MAX_SEND_EPOCH - 1;
-        ASSERT(advanceSendEpoch() && sendEpoch == MAX_SEND_EPOCH && nextApplicationRecord == 0);
-        ASSERT(!advanceSendEpoch() && sendEpoch == MAX_SEND_EPOCH);
-        ASSERT(MAX_REKEY_AFTER_RECORDS == (uint64_t(1) << 23));
+        DTLS_TEST_CHECK(advanceSendEpoch() && sendEpoch == MAX_SEND_EPOCH && nextApplicationRecord == 0);
+        DTLS_TEST_CHECK(!advanceSendEpoch() && sendEpoch == MAX_SEND_EPOCH);
+        DTLS_TEST_CHECK(MAX_REKEY_AFTER_RECORDS == (uint64_t(1) << 23));
         state = HandshakeState::ESTABLISHED;
         receiveEpoch = 3;
         receiveEpoch3 = std::make_unique<DtlsRecordState>(64);
@@ -58,8 +59,8 @@ class ProbeAssociation : public DtlsAssociation
         checkFragment(1, 0, {});
         checkFragment(2, 0, {0});
         checkFragment(1, 1, {0});
-        ASSERT(receiveEpoch == 3 && nextPeerMessage == 42 && !receiveEpoch3->hasRecords());
-        ASSERT(getReassemblyEntryCount() == 0 && getReassemblyBytes() == 0 && pendingAcks.empty());
+        DTLS_TEST_CHECK(receiveEpoch == 3 && nextPeerMessage == 42 && !receiveEpoch3->hasRecords());
+        DTLS_TEST_CHECK(getReassemblyEntryCount() == 0 && getReassemblyBytes() == 0 && pendingAcks.empty());
     }
 };
 
@@ -104,7 +105,7 @@ class SenderStateFixture : public cSimpleModule, public IDtls::ICallback
     void pathChanged(IDtls::AssociationId, const DtlsPath&) override { throw cRuntimeError("unexpected path change"); }
     void authenticationResult(IDtls::AssociationId, bool, const char *) override { throw cRuntimeError("unexpected authentication result"); }
     void maximumDatagramSizeChanged(IDtls::AssociationId, size_t) override { throw cRuntimeError("unexpected size change"); }
-    void sendError(IDtls::AssociationId, long, const char *) override { ASSERT(destroyed); ++sendErrors; }
+    void sendError(IDtls::AssociationId, long, const char *) override { DTLS_TEST_CHECK(destroyed); ++sendErrors; }
     void error(IDtls::AssociationId, const char *) override { ++errors; }
     void closed(IDtls::AssociationId) override { throw cRuntimeError("unexpected close"); }
   protected:
@@ -115,15 +116,15 @@ class SenderStateFixture : public cSimpleModule, public IDtls::ICallback
         association.check();
         auto handle = engine->installProbe(this, true);
         engine->send(handle, new TrackedPacket(destroyed), this);
-        ASSERT(destroyed && sendErrors == 1 && errors == 1);
+        DTLS_TEST_CHECK(destroyed && sendErrors == 1 && errors == 1);
         auto busyHandle = engine->installProbe(this, false);
-        ASSERT(engine->requestKeyUpdate(busyHandle, false));
-        ASSERT(!engine->requestKeyUpdate(busyHandle, false));
-        ASSERT(errors == 1 && sendErrors == 1);
-        ASSERT(engine->fillOutput());
+        DTLS_TEST_CHECK(engine->requestKeyUpdate(busyHandle, false));
+        DTLS_TEST_CHECK(!engine->requestKeyUpdate(busyHandle, false));
+        DTLS_TEST_CHECK(errors == 1 && sendErrors == 1);
+        DTLS_TEST_CHECK(engine->fillOutput());
         auto overflowHandle = engine->installProbe(this, false);
-        ASSERT(engine->requestKeyUpdate(overflowHandle, false));
-        ASSERT(errors == 2 && sendErrors == 1);
+        DTLS_TEST_CHECK(engine->requestKeyUpdate(overflowHandle, false));
+        DTLS_TEST_CHECK(errors == 2 && sendErrors == 1);
         std::cout << "DTLS sender state PASS" << std::endl;
     }
 };

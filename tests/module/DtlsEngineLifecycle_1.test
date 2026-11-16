@@ -4,6 +4,7 @@ The fixture schedules work on the engine's input queue; no handshake or
 application delivery is claimed by this test.
 
 %file: DtlsLifecycleFixture.cc
+#include "../DtlsTestAssertions.h"
 #include <iostream>
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -20,9 +21,9 @@ class TestDtls : public Dtls
     bool completed = false;
     void arm() {
         Enter_Method("arm");
-        ASSERT(isUp() && inputProcessing);
-        ASSERT(inputProcessing->enqueue(1, 1, 10, [this] { completed = true; }));
-        ASSERT(inputProcessing->getOccupiedBytes() == 1);
+        DTLS_TEST_CHECK(isUp() && inputProcessing);
+        DTLS_TEST_CHECK(inputProcessing->enqueue(1, 1, 10, [this] { completed = true; }));
+        DTLS_TEST_CHECK(inputProcessing->getOccupiedBytes() == 1);
     }
     bool up() const { return isUp(); }
     size_t queued() const { return inputProcessing ? inputProcessing->getOccupiedBytes() : 0; }
@@ -46,7 +47,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
     virtual void established(IDtls::AssociationId) override { throw cRuntimeError("unexpected establishment"); }
     virtual void dataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected data"); }
     void earlyDataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected early data"); }
-    void earlyDataStatus(IDtls::AssociationId, bool accepted) override { ASSERT(!accepted); ++earlyRejections; }
+    void earlyDataStatus(IDtls::AssociationId, bool accepted) override { DTLS_TEST_CHECK(!accepted); ++earlyRejections; }
     void pathChanged(IDtls::AssociationId, const DtlsPath&) override { throw cRuntimeError("unexpected path change"); }
     void authenticationResult(IDtls::AssociationId, bool, const char *) override { throw cRuntimeError("unexpected authentication result"); }
     void maximumDatagramSizeChanged(IDtls::AssociationId, size_t) override { throw cRuntimeError("unexpected size change"); }
@@ -62,7 +63,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
 
     void openAndQueue() {
         auto id = dtls->open(peer, 4433, this, DtlsOpenOptions{true, true});
-        ASSERT(id != 0);
+        DTLS_TEST_CHECK(id != 0);
         auto packet = new Packet("queued data", makeShared<BytesChunk>(std::vector<uint8_t>{42}));
         dtls->send(id, packet, this);
     }
@@ -72,28 +73,28 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
         dtls = check_and_cast<TestDtls *>(getModuleByPath("^.host.app[0].dtls"));
         dtls->subscribe("packetSentToLower", this);
         wait(0.5);
-        ASSERT(!dtls->up());
-        ASSERT(dtls->open(peer, 4433, this) == 0);
+        DTLS_TEST_CHECK(!dtls->up());
+        DTLS_TEST_CHECK(dtls->open(peer, 4433, this) == 0);
         wait(1);
-        ASSERT(dtls->up());
+        DTLS_TEST_CHECK(dtls->up());
         dtls->arm();
         openAndQueue();
         wait(1.5);
-        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
-        ASSERT(sendErrors == 1 && errors == 1 && closedCount == 1 && rejectedReconnects == 1 && sentPackets == 0);
-        ASSERT(earlyRejections == 1);
+        DTLS_TEST_CHECK(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        DTLS_TEST_CHECK(sendErrors == 1 && errors == 1 && closedCount == 1 && rejectedReconnects == 1 && sentPackets == 0);
+        DTLS_TEST_CHECK(earlyRejections == 1);
         wait(1.5);
-        ASSERT(dtls->up());
+        DTLS_TEST_CHECK(dtls->up());
         dtls->arm();
         openAndQueue();
         wait(1.5);
-        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
-        ASSERT(sendErrors == 2 && errors == 2 && closedCount == 2 && rejectedReconnects == 2 && sentPackets == 0);
-        ASSERT(earlyRejections == 2);
+        DTLS_TEST_CHECK(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        DTLS_TEST_CHECK(sendErrors == 2 && errors == 2 && closedCount == 2 && rejectedReconnects == 2 && sentPackets == 0);
+        DTLS_TEST_CHECK(earlyRejections == 2);
         wait(1.5);
-        ASSERT(dtls->up() && dtls->queued() == 0);
+        DTLS_TEST_CHECK(dtls->up() && dtls->queued() == 0);
         wait(8);
-        ASSERT(!dtls->completed && sentPackets == 0 && sendErrors == 2 && errors == 2 && closedCount == 2);
+        DTLS_TEST_CHECK(!dtls->completed && sentPackets == 0 && sendErrors == 2 && errors == 2 && closedCount == 2);
         dtls->unsubscribe("packetSentToLower", this);
         std::cout << "DTLS engine lifecycle PASS" << std::endl;
     }
