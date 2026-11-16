@@ -1,0 +1,63 @@
+%description:
+
+DTLS production-path variant FullDuplexCosts: implements an explicit plan requirement.
+UDP-backed production engine; seed 0; positive stimulus and outcome assertions.
+
+%includes:
+#include <cmath>
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static simtime_t burstAt;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_full_duplex_costs")
+    .meanwhile(exactlyTimes(2, on("host1.app[0].driver").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+        int marker = c.event.packet->peekDataAsBytes()->getByte(0);
+        return std::abs((c.event.time - burstAt - SimTime(marker == 3 ? 0.010 : 0.015)).dbl()) < 0.0001;
+    }).within(0.1)))
+    .meanwhile(exactlyTimes(2, on("host2.app[0].driver").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+        int marker = c.event.packet->peekDataAsBytes()->getByte(0);
+        return std::abs((c.event.time - burstAt - SimTime(marker == 1 ? 0.010 : 0.015)).dbl()) < 0.0001;
+    }).within(0.1)))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { burstAt = simTime(); app.sendMarker(1); app.sendMarker(2); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(3); app.sendMarker(4); }))
+    .unordered({
+        on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.time == burstAt + SimTime(0.005); }).within(0.01),
+        on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.time == burstAt + SimTime(0.005); }).within(0.01)
+    })
+    .unordered({
+        on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.time == burstAt + SimTime(0.01); }).within(0.01),
+        on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.time == burstAt + SimTime(0.01); }).within(0.01)
+    })
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({3, 4}), "reverse direction delivers its independent burst"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({1, 2}), "forward direction delivers its independent burst"); }));
+}
+%activity:
+EV << "rfc9147_full_duplex_costs compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.protectOutDelay = 5ms
+*.host*.app[0].dtls.protectInDelay = 3ms
+*.host*.app[0].dtls.handshakeOutDelay = 7ms
+*.host*.app[0].dtls.handshakeInDelay = 4ms
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_full_duplex_costs: PASS

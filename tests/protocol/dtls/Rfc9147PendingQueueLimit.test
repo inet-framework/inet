@@ -1,0 +1,55 @@
+%description:
+
+DTLS production-path variant PendingQueueLimit: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_pending_queue_limit")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .act(action().after(0.001).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        app.sendMarker(42, 32);
+        app.sendMarker(43, 1);
+        app.sendMarker(44, 0);
+    }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(0.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>{42}, "exact pending-byte capacity admits the first send only");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 2, "one-byte and empty sends each consume budget and report overflow"); }));
+}
+
+%activity:
+EV << "rfc9147_pending_queue_limit compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.maxPendingBytes = 32B
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_pending_queue_limit: PASS

@@ -2,6 +2,7 @@
 #include "inet/transportlayer/dtls/DtlsRecordProtection.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/EncryptedChunk.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 
@@ -31,11 +32,18 @@ bool DtlsRecordProtection::unprotect(Packet *packet, uint8_t& innerContentType)
         return false;
     try {
         auto encrypted = packet->peekAtFront<EncryptedChunk>(packet->getDataLength() - B(TAG_BYTES));
-        if (!encrypted->getChunk() || encrypted->getChunkLength() != encrypted->getChunk()->getChunkLength())
+        if (!encrypted->getChunk() || encrypted->getChunkLength() != encrypted->getChunk()->getChunkLength() ||
+            encrypted->getChunkLength() > B(MAX_INNER_BYTES) || encrypted->getChunkLength().get<b>() % 8 != 0)
             return false;
         Packet retained("DTLS retained plaintext", encrypted->getChunk());
+        while (retained.getDataLength() > b(0) && retained.peekAtBack<BytesChunk>(B(1))->getByte(0) == 0)
+            retained.popAtBack(B(1));
+        if (retained.getDataLength() == b(0))
+            return false;
         auto trailer = retained.popAtBack<DtlsInnerContentType>(B(1));
-        auto content = retained.removeData(Chunk::PF_ALLOW_EMPTY);
+        auto content = retained.peekData<Chunk>(Chunk::PF_ALLOW_EMPTY);
+        if (content->getChunkLength() > B(MAX_CONTENT_BYTES))
+            return false;
         auto type = trailer->getContentType();
         auto payloadTags = packet->getRegionTags();
         auto payloadOffset = packet->getFrontOffset();

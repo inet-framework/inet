@@ -447,7 +447,7 @@ void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress
     attempt->retryFlight = flight;
     attempt->retryQueued = attempt->retryBurst = 0;
     auto length = hello->getChunkLength().get<B>();
-    auto maximum = std::min<size_t>(limit - 25, 65535 - 12);
+    auto maximum = std::min<size_t>(limit - 25, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     if (size_t(length) <= maximum) {
         hello->markImmutable();
         flight->add(2, messageSequence, length, 0, 0, hello);
@@ -763,29 +763,37 @@ void Dtls::sendApplication(AssociationId id, Packet *packet)
     auto callback = it->second->callback;
     auto packetId = packet->getId();
     auto bytes = packet->getDataLength();
-    if (bytes + B(17) > B(65535) || bytes + B(22) > B(par("udpPayloadLimit").intValue()) || it->second->nextEpoch3Record >= (uint64_t(1) << 24)) {
+    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(22) > B(par("udpPayloadLimit").intValue()) ||
+        it->second->nextEpoch3Record >= (uint64_t(1) << 24)) {
         delete packet;
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
         return;
     }
     auto retained = std::make_shared<std::unique_ptr<Packet>>(packet);
-    DtlsRecordProtection::protect(packet, 23);
-    auto header = makeShared<DtlsCiphertextHeader>();
-    header->setEpochBits(3);
-    header->setSequenceNumber(it->second->nextEpoch3Record++ & 0xffff);
-    header->setLength(packet->getDataLength().get<B>());
-    packet->insertAtFront(header);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-    if (!it->second->localAddress.isUnspecified())
-        packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(it->second->localAddress);
-    auto peer = it->second->peerAddress;
-    auto port = it->second->peerPort;
     auto delay = SimTime(par("protectOutDelay").doubleValue());
     it->second->processingPacketIds.insert(packetId);
-    if (!enqueueProcessing(outputProcessing.get(), id, packet->getByteLength(), delay, [this, id, packetId, peer, port, retained]() {
+    if (!enqueueProcessing(outputProcessing.get(), id, size_t(bytes.get<B>()) + 22, delay, [this, id, packetId, retained]() {
         auto current = associations.find(id);
         if (current != associations.end()) {
             current->second->processingPacketIds.erase(packetId);
+            if (current->second->nextEpoch3Record >= (uint64_t(1) << 24)) {
+                auto callback = current->second->callback;
+                retained->reset();
+                callback->sendError(id, packetId, "DTLS application epoch record limit exceeded");
+                return;
+            }
+            auto packet = retained->get();
+            DtlsRecordProtection::protect(packet, 23);
+            auto header = makeShared<DtlsCiphertextHeader>();
+            header->setEpochBits(3);
+            header->setSequenceNumber(current->second->nextEpoch3Record++ & 0xffff);
+            header->setLength(packet->getDataLength().get<B>());
+            packet->insertAtFront(header);
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+            if (!current->second->localAddress.isUnspecified())
+                packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+            auto peer = current->second->peerAddress;
+            auto port = current->second->peerPort;
             auto outgoing = retained->release();
             emit(recordOverheadSignal, 22L);
             emit(packetSentSignal, outgoing);
@@ -899,7 +907,7 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
         failAssociation(id, "DTLS UDP payload limit cannot carry an ACK");
         return;
     }
-    size_t maxRecords = std::min<size_t>(4095, (udpLimit - overhead - 2) / 16);
+    size_t maxRecords = std::min<size_t>((DtlsRecordProtection::MAX_CONTENT_BYTES - 2) / 16, (udpLimit - overhead - 2) / 16);
     for (size_t begin = 0; begin < records.size(); begin += maxRecords) {
         auto current = associations.find(id);
         if (current == associations.end())
@@ -1909,6 +1917,11 @@ void Dtls::parseDatagram(Packet *packet)
                     return;
                 }
                 emit(recordAcceptedSignal, (long)header->getEpoch());
+                if (header->getLength() > DtlsRecordProtection::MAX_CONTENT_BYTES) {
+                    packet->removeAtFront(B(header->getLength()));
+                    emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                    continue;
+                }
                 if (header->getLength() != 0) {
                     Packet body("DTLS plaintext record", packet->removeAtFront(B(header->getLength())));
                     if (header->getContentType() == 22) {
@@ -2125,6 +2138,11 @@ void Dtls::parseDatagram(Packet *packet)
                     return;
                 }
                 emit(recordAcceptedSignal, (long)header->getEpochBits());
+                if (length > B(DtlsRecordProtection::MAX_CIPHERTEXT_BYTES)) {
+                    packet->removeAtFront(length);
+                    emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                    continue;
+                }
                 auto match = associations.end();
                 for (auto it = associations.begin(); it != associations.end(); ++it) {
                     if (it->second->peerAddress == peerAddress && it->second->peerPort == peerPort &&

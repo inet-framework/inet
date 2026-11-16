@@ -108,6 +108,39 @@ DtlsRecordProtection::protect(&emptyDatagram, 23);
 ASSERT(emptyDatagram.getDataLength() == B(17));
 ASSERT(DtlsRecordProtection::unprotect(&emptyDatagram, contentType));
 ASSERT(contentType == 23 && emptyDatagram.getDataLength() == B(0));
+// Stripping padding must retain the payload chunk and its region tags.
+auto payload = makeShared<ByteCountChunk>(B(3));
+Packet paddedInner("padded inner", payload);
+auto paddedType = makeShared<DtlsInnerContentType>();
+paddedType->setContentType(23);
+paddedInner.insertAtBack(paddedType);
+paddedInner.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0, 0}));
+auto paddedContent = paddedInner.removeData();
+paddedContent->markImmutable();
+Packet paddedRecord("padded record", makeShared<EncryptedChunk>(paddedContent, B(6)));
+paddedRecord.insertAtBack(makeShared<ByteCountChunk>(B(16)));
+paddedRecord.addRegionTag<CreationTimeTag>(B(1), B(1))->setCreationTime(SimTime(456));
+ASSERT(DtlsRecordProtection::unprotect(&paddedRecord, contentType));
+ASSERT(contentType == 23 && paddedRecord.getDataLength() == B(3));
+ASSERT(paddedRecord.peekAtFront<ByteCountChunk>(B(3)) == payload);
+ASSERT(paddedRecord.getRegionTag<CreationTimeTag>(B(1), B(1))->getCreationTime() == SimTime(456));
+// All-zero and oversized inner plaintext fail without changing the packet.
+auto zeroInner = makeShared<BytesChunk>(std::vector<uint8_t>{0, 0, 0});
+zeroInner->markImmutable();
+Packet zeroRecord("zero inner", makeShared<EncryptedChunk>(zeroInner, B(3)));
+zeroRecord.insertAtBack(makeShared<ByteCountChunk>(B(16)));
+auto zeroOriginal = zeroRecord.peekData();
+ASSERT(!DtlsRecordProtection::unprotect(&zeroRecord, contentType));
+ASSERT(zeroRecord.peekData() == zeroOriginal);
+std::vector<uint8_t> excessiveBytes(16386, 0);
+excessiveBytes[16384] = 23;
+auto excessiveInner = makeShared<BytesChunk>(excessiveBytes);
+excessiveInner->markImmutable();
+Packet excessiveRecord("oversized inner", makeShared<EncryptedChunk>(excessiveInner, B(16386)));
+excessiveRecord.insertAtBack(makeShared<ByteCountChunk>(B(16)));
+auto excessiveOriginal = excessiveRecord.peekData();
+ASSERT(!DtlsRecordProtection::unprotect(&excessiveRecord, contentType));
+ASSERT(excessiveRecord.peekData() == excessiveOriginal);
 EV << "DTLS record serialization PASS\n";
 
 %contains: stdout

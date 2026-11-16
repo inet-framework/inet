@@ -6,6 +6,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/dtls/IDtls.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -136,6 +137,14 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     void update(bool requestPeer = false)
     {
         scheduleCommand([this, requestPeer]() { updateResults.push_back(engine->requestKeyUpdate(lastHandle(), requestPeer)); });
+    }
+    void sendBits(int bitCount)
+    {
+        scheduleCommand([this, bitCount]() {
+            auto packet = new Packet("dtls-test-unaligned-data");
+            packet->insertAtBack(makeShared<BitsChunk>(std::vector<bool>(bitCount, true)));
+            engine->send(lastHandle(), packet, this);
+        });
     }
     void closePeer(AssociationId id = 0)
     {

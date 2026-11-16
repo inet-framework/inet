@@ -12,8 +12,8 @@ The selected behavioral profile and exclusions are in [scope.md](scope.md). Exec
 | Establishment/cookie/negotiation | The 38 C3 cases mapped in [association-establishment.md](../../../../../tests/protocol/dtls/association-establishment.md) | PASS for the selected profile and listed invalid-input boundaries |
 | Peer independence | AssociationIsolation, Multihomed, SameTupleReplacement and AmplificationIsolation | PASS |
 | Flight recovery | The 38 C4 cases mapped in [handshake-recovery.md](../../../../../tests/protocol/dtls/handshake-recovery.md) | PASS for the selected recovery and resource boundaries |
-| Datagrams and overhead | Rfc9147ApplicationDatagrams, RecordOverhead | Basic queued delivery PASS in C3; complete C5 matrix NOT_RUN |
-| Replay/invalid input | Rfc9147ReplayWindow, InvalidRecord | NOT_RUN |
+| Datagrams and overhead | The 23 C5 cases mapped in [protected-datagrams.md](../../../../../tests/protocol/dtls/protected-datagrams.md) | PASS for delivery, processing, capacity and record/padding boundaries |
+| Replay/invalid input | Rfc9147ReplayWindow, ReplayWindow8, InvalidRecord, MalformedInner and RecordSizeLimits | PASS within the documented truncated-number reconstruction scope |
 | Updates and close | Rfc9147KeyUpdate, Close | NOT_RUN |
 | Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue, DtlsRecoveryLifecycle | Association, processing and recovery-timer cancellation PASS; C6 graceful close/restart extensions NOT_RUN |
 

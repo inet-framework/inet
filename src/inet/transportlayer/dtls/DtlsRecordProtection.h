@@ -11,6 +11,9 @@ class INET_API DtlsRecordProtection
 {
   public:
     static constexpr int TAG_BYTES = 16;
+    static constexpr int MAX_CONTENT_BYTES = 1 << 14;
+    static constexpr int MAX_INNER_BYTES = MAX_CONTENT_BYTES + 1;
+    static constexpr int MAX_CIPHERTEXT_BYTES = MAX_CONTENT_BYTES + 256;
     static void protect(Packet *packet, uint8_t innerContentType);
     // On success replaces the protected payload with its retained content.
     // A false result leaves the packet unchanged. No cryptographic check occurs.

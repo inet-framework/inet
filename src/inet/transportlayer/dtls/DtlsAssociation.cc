@@ -7,6 +7,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/dtls/Dtls.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/DtlsRecordProtection.h"
 
 namespace inet::dtls {
 
@@ -92,7 +93,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
     int overhead = epoch == 0 ? 25 : 34;
     if (udpLimit <= overhead || size <= 0 || size > 0xffffff)
         throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
-    size_t maximum = std::min<size_t>(udpLimit - overhead, 65535 - (epoch == 0 ? 12 : 29));
+    size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     auto currentFlight = flight;
     std::vector<size_t> indices;
     if ((size_t)size <= maximum) {
@@ -547,7 +548,7 @@ void DtlsAssociation::sendServerFlight()
     auto wireSize = [udpLimit](size_t length, int overhead) {
         if (udpLimit <= overhead)
             throw cRuntimeError("DTLS UDP payload limit cannot carry a handshake fragment");
-        size_t maximum = std::min<size_t>(udpLimit - overhead, 65535 - (overhead == 25 ? 12 : 29));
+        size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
         return length + ((length + maximum - 1) / maximum) * overhead;
     };
     size_t flightBytes = wireSize(40 + 46 + (useCertificate ? 0 : 6), 25) + wireSize(2, 34) + wireSize(32, 34);

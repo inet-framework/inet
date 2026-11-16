@@ -1,0 +1,52 @@
+%description:
+
+DTLS production-path variant ApplicationReordering: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_application_reordering")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).nth(1).delay(0.05))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.03))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.06))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>({2, 1}), "unseen in-window records retain UDP arrival order");
+    }));
+}
+
+%activity:
+EV << "rfc9147_application_reordering compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_application_reordering: PASS
