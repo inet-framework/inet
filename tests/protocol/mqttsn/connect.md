@@ -12,6 +12,33 @@ MqttSnBrokerRefusal1–4 and the original refusal case cover all five MQTT refus
 
 Every positive event has a deadline. Scripted-peer expectations check message type and relevant fields in order; completion is asserted before simulation end. These are independent connection scenarios, not every possible simultaneous socket/UDP failure ordering.
 
+## Gateway credentials with an empty password
+
+`MqttSnAuthentication.test` connects the production gateway and sensor to the production MQTT broker with username `alice` and an empty password. MQTT 3.1.1 sections 3.1.2.8–3.1.2.9 distinguish a present zero-length password from an omitted password. The supplied broker requires both credential fields when username authentication is configured.
+
+The original gateway derives Password Present from whether the password string is nonempty, so its shared and per-sensor connections are refused despite matching credentials. The correction uses the same presence rule as the MQTT client: a configured username or password enables the username field and a present password field, including zero bytes. The fixture observes two gateway MQTT CONNECT packets with username `alice`, Password Present true and zero password bytes. The sensor must become active, publish binary bytes `00 ff 41` at QoS 1, and deliver those exact bytes to the authenticated MQTT observer.
+
+A second production gateway uses the wrong password. Its sensor must receive one MQTT-SN refusal and remain inactive throughout the 2.5-second observation window. Long retry/reconnect intervals prevent another attempt from confusing the refusal count. Both paths use the shared Ethernet topology above and seed 0. The same fixture runs against the pre-correction implementation and fails its acceptance/presence assertions; no missing API or fixture adaptation prevents that comparison.
+
+```mermaid
+sequenceDiagram
+    participant S as Sensor
+    participant G as Gateway
+    participant B as MQTT broker
+    participant O as MQTT observer
+    G->>B: Shared CONNECT, alice and present empty password
+    B->>G: CONNACK accepted
+    S->>G: MQTT-SN CONNECT
+    G->>B: Sensor CONNECT, same credentials
+    B->>G: CONNACK accepted
+    G->>S: MQTT-SN CONNACK accepted
+    S->>G: QoS 1 PUBLISH, bytes 00 ff 41
+    G->>B: MQTT PUBLISH
+    B->>O: Exact binary payload
+```
+
+This establishes gateway credential construction, broker admission and forwarding, with wrong-password refusal as a control. It does not establish encrypted authentication or external broker interoperability. Execution belongs to the coverage ledger; diagram rendering remains unverified.
+
 ```mermaid
 sequenceDiagram
     participant S as Sensor

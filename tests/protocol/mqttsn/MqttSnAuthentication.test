@@ -1,0 +1,79 @@
+%description:
+Matching username and empty-password credentials authenticate the gateway's
+shared and per-sensor connections. A binary sensor publication reaches an MQTT
+subscriber. A second gateway with a wrong password cannot admit its sensor.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+#include "inet/applications/mqtt/MqttProtocol.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnAuthentication");
+    test.meanwhile(exactlyTimes(2, on("gateway.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (c.event.packet->getTag<PacketProtocolTag>()->getProtocol() != &mqtt::mqttProtocol) return false;
+        auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>();
+        return p->getType() == mqtt::CONNECT && p->getUserNamePresent() && p->getPasswordPresent() &&
+            std::string(p->getUserName()) == "alice" && p->getPasswordArraySize() == 0;
+    }).within(2.5)));
+    test.meanwhile(never(on("secondSensor.app[0]").signal("sessionStateChanged").filterValue(2).within(2.5)));
+    test.meanwhile(exactlyTimes(1, on("secondSensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+        return p->getType() == mqttsn::CONNACK && p->getReturnCode() == mqttsn::NOT_SUPPORTED;
+    }).within(2.5)));
+    test.once(on("sensor.app[0]").signal("sessionStateChanged").filterValue(2).within(1));
+    test.once(on("observer.app[0]").signal("packetSentToUpper").assertEvent([](const MatchContext& c) {
+        return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0,255,65});
+    }).within(1.5));
+    return test;
+}
+
+%activity:
+EV << "MQTT-SN authenticated production broker forwarding\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.alternative.numApps = 1
+*.alternative.app[0].typename = "MqttSnGateway"
+*.alternative.app[0].brokerAddress = "broker"
+*.alternative.app[0].gatewayClientIdentifier = "rejectedgateway"
+*.alternative.app[0].advertise = false
+*.alternative.app[0].password = "wrong"
+*.alternative.app[0].reconnectInterval = 10s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].workload = xml("<mqttsn><publish at='300ms' topic='auth/value' qos='1' payload='00ff41'/></mqttsn>")
+*.secondSensor.numApps = 1
+*.secondSensor.app[0].typename = "MqttSnClient"
+*.secondSensor.app[0].clientIdentifier = "rejected"
+*.secondSensor.app[0].gatewayAddress = "alternative"
+*.secondSensor.app[0].startTime = 0.1s
+*.secondSensor.app[0].retryInterval = 10s
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='auth/value' qos='1'/></mqtt>")
+**.app[*].userName = "alice"
+**.app[*].password = ""
+
+%contains: stdout
+PROTOCOLTEST MqttSnAuthentication: PASS

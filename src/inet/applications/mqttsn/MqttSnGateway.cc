@@ -125,9 +125,9 @@ void MqttSnGateway::socketEstablished(TcpSocket *socket)
     packet->setClientIdentifier(peer->clientIdentifier.c_str()); packet->setCleanSession(peer->cleanSession);
     packet->setKeepAlive(par("brokerKeepAlive"));
     // MQTT 3.1.1, 3.1.2.8–3.1.2.9: an empty password is distinct from an absent password.
-    packet->setUserNamePresent(*par("userName").stringValue()); packet->setUserName(par("userName"));
-    packet->setPasswordPresent(*par("password").stringValue());
-    std::string password = par("password").stdstringValue(); packet->setPasswordArraySize(password.size());
+    std::string user = par("userName"), password = par("password");
+    packet->setUserNamePresent(!user.empty() || !password.empty()); packet->setUserName(user.c_str());
+    packet->setPasswordPresent(packet->getUserNamePresent()); packet->setPasswordArraySize(password.size());
     for (size_t i = 0; i < password.size(); i++) packet->setPassword(i, password[i]);
     brokerSend(*peer, packet);
 }
