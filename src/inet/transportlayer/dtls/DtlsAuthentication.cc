@@ -119,6 +119,8 @@ bool DtlsAssociation::permitsOutput(const std::shared_ptr<DtlsHandshakeFlight>& 
 
 bool DtlsAssociation::requestClientAuthentication()
 {
+    if (isDtls12())
+        return false;
     if (!engine.par("postHandshakeAuthEnabled").boolValue() || !serverSide || state != HandshakeState::ESTABLISHED || closing ||
         !offer.hasPostHandshakeAuth || authenticationRequest || candidatePath || engine.nextAuthenticationContext == 0 ||
         selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::EXTERNAL_PSK)

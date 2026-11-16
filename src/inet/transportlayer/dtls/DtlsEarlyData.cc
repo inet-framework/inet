@@ -30,7 +30,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
     auto packetId = packet->getId();
     auto it = associations.find(id);
     auto bytes = packet->getDataLength();
-    if (operationalState != OPERATING || it == associations.end() || it->second->callback != requester || it->second->serverSide ||
+    if (operationalState != OPERATING || it == associations.end() || it->second->isDtls12() || it->second->callback != requester || it->second->serverSide ||
         !it->second->earlyOffered || it->second->retried || it->second->closing || it->second->state == HandshakeState::ESTABLISHED ||
         (it->second->earlyStatusReported && !it->second->earlyAccepted) || bytes.get<b>() % 8 != 0 ||
         bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget()) ||

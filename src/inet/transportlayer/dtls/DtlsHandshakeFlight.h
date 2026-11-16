@@ -31,6 +31,7 @@ class INET_API DtlsHandshakeFlight
         unsigned transmissions = 0;
         bool superseded = false;
         std::vector<size_t> replacements;
+        uint8_t recordContentType = 22;
     };
     struct AckResult {
         bool matched = false;
@@ -52,7 +53,7 @@ class INET_API DtlsHandshakeFlight
     std::map<std::pair<uint64_t, uint16_t>, std::map<uint32_t, uint32_t>> acknowledgedRanges;
 
   public:
-    size_t add(uint8_t messageType, uint16_t messageSequence, uint32_t messageLength, uint32_t offset, uint64_t epoch, const Ptr<const Chunk>& data, bool establishAfterSend = false, bool serverFinished = false);
+    size_t add(uint8_t messageType, uint16_t messageSequence, uint32_t messageLength, uint32_t offset, uint64_t epoch, const Ptr<const Chunk>& data, bool establishAfterSend = false, bool serverFinished = false, uint8_t recordContentType = 22);
     [[nodiscard]] size_t size() const { return fragments.size(); }
     [[nodiscard]] const Fragment& get(size_t index) const { return fragments.at(index); }
     void markReady(size_t index);

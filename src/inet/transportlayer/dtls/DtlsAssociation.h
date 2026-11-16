@@ -44,11 +44,41 @@ class INET_API DtlsAssociation
     static constexpr uint64_t MAX_PLAINTEXT_RECORDS = uint64_t(1) << 48;
     static constexpr uint64_t MAX_PROTECTED_RECORDS = uint64_t(1) << 24;
     static constexpr uint64_t MAX_REKEY_AFTER_RECORDS = uint64_t(1) << 23;
+    static constexpr uint16_t DTLS_12 = 0xfefd;
+    static constexpr uint16_t PSK_AES_128_GCM_SHA256 = 0x00a8;
+    static constexpr uint16_t ECDHE_ECDSA_AES_128_GCM_SHA256 = 0xc02b;
     static constexpr std::array<uint8_t, 32> HELLO_RETRY_RANDOM = {
         0xcf, 0x21, 0xad, 0x74, 0xe5, 0x9a, 0x61, 0x11, 0xbe, 0x1d, 0x8c, 0x02, 0x1e, 0x65, 0xb8, 0x91,
         0xc2, 0xa2, 0x11, 0x16, 0x7a, 0xbb, 0x8c, 0x5e, 0x07, 0x9e, 0x09, 0xe2, 0xc8, 0xa8, 0x33, 0x9c
     };
     Dtls& engine;
+    struct LegacyHandshake {
+        enum class Phase { CLIENT_WAIT_SERVER_HELLO, CLIENT_WAIT_SERVER_CERTIFICATE,
+            CLIENT_WAIT_SERVER_KEY_EXCHANGE, CLIENT_WAIT_REQUEST_OR_DONE, CLIENT_WAIT_SERVER_DONE,
+            CLIENT_WAIT_SERVER_CCS, CLIENT_WAIT_SERVER_FINISHED, SERVER_WAIT_CLIENT_CERTIFICATE,
+            SERVER_WAIT_CLIENT_KEY_EXCHANGE, SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY,
+            SERVER_WAIT_CLIENT_CCS, SERVER_WAIT_CLIENT_FINISHED, COMPLETE };
+        Phase phase = Phase::CLIENT_WAIT_SERVER_HELLO;
+        bool pendingCcs = false;
+    };
+    std::unique_ptr<LegacyHandshake> legacyHandshake;
+    bool isDtls12() const { return selection.version == DTLS_12; }
+    void initializeDtls12(bool server, uint16_t helloSequence);
+    void sendClientHello12(const std::vector<uint8_t>& cookie = {});
+    void sendServerFlight12();
+    void sendClientFlight12();
+    void sendServerFinished12();
+    void appendChangeCipherSpec12();
+    void receiveHandshake12(Packet *body, uint64_t epoch);
+    void receiveHandshakeFragment12(Packet *body, uint64_t epoch);
+    void pumpHandshake12();
+    void processHandshake12(uint8_t type, uint16_t sequence, const std::vector<uint8_t>& bytes);
+    void receiveChangeCipherSpec12();
+    void refuseRenegotiation12();
+    void applyChangeCipherSpec12();
+    void retransmitFlight12();
+    void protectRecord(Packet *packet, uint8_t type, uint64_t epoch, uint64_t number);
+    bool writeCipherActive12() const;
     DtlsHandshakeReassembly reassembly;
     std::shared_ptr<DtlsHandshakeFlight> flight;
     std::unique_ptr<cMessage> retransmissionTimer;
@@ -186,7 +216,7 @@ class INET_API DtlsAssociation
     void applyConnectionIdMessage(uint8_t type, uint16_t sequence);
     void finishConnectionIdUpdate();
     void serveConnectionIdRequest(uint8_t count);
-    size_t recordOverhead() const { return 22 + (cidNegotiated ? peerCid.size() : 0); }
+    size_t recordOverhead() const { return isDtls12() ? 37 : 22 + (cidNegotiated ? peerCid.size() : 0); }
     Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride = nullptr) const;
     std::optional<DtlsSessionStore::Entry> offeredSession;
     bool earlyRequested = false;

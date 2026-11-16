@@ -1,0 +1,54 @@
+%description:
+Production DTLS 1.2 boundary check with real UDP records, seed 0 and explicit faults.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("replay12")
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); return h && h->getContentType()==23; }).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return (findChunk<inet::dtls::DtlsPlaintextHeader>(p) && findChunk<inet::dtls::DtlsPlaintextHeader>(p)->getContentType()==23); }).nth(1).duplicate(0.001, 2))
+    .meanwhile(tap("tap").copiesOnly().nth(2).delay(0.3))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        for (int marker = 10; marker < 80; marker++) app.sendMarker(marker, 1);
+    }))
+    .act(action().after(0.5).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        std::vector<int> expected{1};
+        for (int marker = 10; marker < 80; ++marker) expected.push_back(marker);
+        require(app.receivedMarkers == expected, "every distinct valid record arrives in order, with neither in-window duplicate nor old replay delivered");
+    }));
+}
+%activity:
+EV << "legacy boundary compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST replay12: PASS

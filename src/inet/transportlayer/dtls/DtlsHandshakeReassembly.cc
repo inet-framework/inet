@@ -9,7 +9,7 @@ void DtlsHandshakeReassembly::discard(uint16_t sequence)
 {
     auto it = entries.find(sequence);
     if (it != entries.end()) {
-        reservedBytes -= it->second.totalLength;
+        reservedBytes -= std::max(size_t(1), size_t(it->second.totalLength));
         entries.erase(it);
     }
 }
@@ -54,6 +54,18 @@ bool DtlsHandshakeReassembly::isComplete(uint16_t sequence) const
     return it != entries.end() && it->second.received == it->second.totalLength;
 }
 
+DtlsHandshakeReassembly::Result DtlsHandshakeReassembly::insertEmptyMessage(uint8_t type, uint16_t sequence)
+{
+    auto it = entries.find(sequence);
+    if (it != entries.end())
+        return it->second.type == type && it->second.totalLength == 0 ? Result::COMPLETE : Result::CONFLICT;
+    if (reservedBytes >= limit)
+        return Result::LIMIT;
+    entries.emplace(sequence, Entry{type, 0, {}, {}, 0});
+    ++reservedBytes;
+    return Result::COMPLETE;
+}
+
 size_t DtlsHandshakeReassembly::firstMissing(uint16_t sequence) const
 {
     auto it = entries.find(sequence);
@@ -61,6 +73,14 @@ size_t DtlsHandshakeReassembly::firstMissing(uint16_t sequence) const
         return 0;
     auto missing = std::find(it->second.present.begin(), it->second.present.end(), false);
     return missing - it->second.present.begin();
+}
+
+std::vector<uint8_t> DtlsHandshakeReassembly::getContiguousPrefix(uint16_t sequence) const
+{
+    auto it = entries.find(sequence);
+    if (it == entries.end())
+        return {};
+    return {it->second.bytes.begin(), it->second.bytes.begin() + firstMissing(sequence)};
 }
 
 DtlsHandshakeReassembly::Message DtlsHandshakeReassembly::take(uint16_t sequence)

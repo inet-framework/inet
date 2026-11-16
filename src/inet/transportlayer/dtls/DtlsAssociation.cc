@@ -129,6 +129,8 @@ bool DtlsAssociation::handleTimer(cMessage *message)
         return true;
     }
     if (message == retentionTimer.get()) {
+        if (isDtls12())
+            flight.reset();
         processedHandshakes.clear();
         receiveEpoch2.reset();
         return true;
@@ -138,6 +140,8 @@ bool DtlsAssociation::handleTimer(cMessage *message)
 
 void DtlsAssociation::noteHandshakeRecord(uint64_t epoch, uint64_t recordNumber, bool immediate)
 {
+    if (isDtls12())
+        return;
     pendingAcks.emplace(epoch, recordNumber);
     if (immediate)
         flushAcknowledgements(state == HandshakeState::ESTABLISHED ? sendEpoch : 2);
@@ -163,7 +167,8 @@ void DtlsAssociation::clearAcknowledgements()
 
 bool DtlsAssociation::allocateApplicationRecord(uint64_t& number)
 {
-    if (nextApplicationRecord >= tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->recordLimit)
+    auto limit = isDtls12() ? std::min<uint64_t>(MAX_PROTECTED_RECORDS,engine.par("rekeyAfterRecords").intValue()) : tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->recordLimit;
+    if (nextApplicationRecord >= limit)
         return false;
     number = nextApplicationRecord++;
     return true;
@@ -193,6 +198,8 @@ bool DtlsAssociation::advanceSendEpoch()
 
 bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
 {
+    if (isDtls12())
+        return false;
     // Keep at most the current and previous receive epochs live at the peer.
     for (const auto& entry : postHandshakeExchanges)
         if (entry.first != 24 && entry.second->flight && !entry.second->recoveryExpired)
@@ -394,7 +401,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
     auto size = body->getChunkLength().get<B>();
     auto udpLimit = udpPayloadBudget();
     int overhead = epoch == 0 ? 25 : 12 + recordOverhead();
-    if (udpLimit <= overhead || size <= 0 || size > 0xffffff)
+    if (udpLimit <= overhead || size < 0 || (!isDtls12() && size == 0) || size > 0xffffff)
         throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
     size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     auto currentFlight = flight;
@@ -454,7 +461,7 @@ void DtlsAssociation::pumpFlight()
     auto currentFlight = flight;
     auto& owner = engine;
     auto handle = id;
-    for (size_t i = 0; i < currentFlight->size() && burstLimit < 10; ++i) {
+    for (size_t i = 0; i < currentFlight->size() && (isDtls12() || burstLimit < 10); ++i) {
         if (!currentFlight->reserve(i))
             continue;
         ++burstLimit;
@@ -483,10 +490,14 @@ void DtlsAssociation::flightRecordHandedOff(const std::shared_ptr<DtlsHandshakeF
         --burstQueued;
     if (retransmission)
         engine.emit(Dtls::handshakeRetransmissionSignal, (long)id);
-    if (!pumpingFlight && burstQueued == 0 && !sentFlight->isComplete() && !retransmissionTimer->isScheduled())
+    if (!pumpingFlight && burstQueued == 0 && !sentFlight->isComplete() && !retransmissionTimer->isScheduled() &&
+        (!isDtls12() || state != HandshakeState::ESTABLISHED))
         engine.scheduleAt(simTime() + retransmissionTimeout, retransmissionTimer.get());
     auto& owner = engine;
     auto handle = id;
+    if (isDtls12() && fragment.messageType == 20 && fragment.recordContentType == 22 &&
+        fragment.offset + fragment.data->getChunkLength().get<B>() == fragment.messageLength)
+        ownFinishedHandedOff = true;
     if (!retransmission && fragment.establishAfterSend)
         owner.establish(handle);
     else if (!retransmission && fragment.serverFinished)
@@ -510,6 +521,8 @@ void DtlsAssociation::flightRecordSkipped(const std::shared_ptr<DtlsHandshakeFli
 
 void DtlsAssociation::acceptAck(const DtlsAck& ack)
 {
+    if (isDtls12())
+        return;
     if (ack.getEpochsArraySize() != ack.getSequenceNumbersArraySize())
         return;
     auto& owner = engine;
@@ -907,13 +920,15 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
             clientShare[i] = owner.intuniform(0, 255);
     if (group == Parameters::SECP256R1)
         clientShare[0] = 4;
-    hello->setCipherSuitesArraySize(owner.preferences.cipherSuites.size());
+    hello->setCipherSuitesArraySize(owner.preferences.cipherSuites.size() + (owner.allowDtls12 ? 1 : 0));
     for (size_t i = 0; i < owner.preferences.cipherSuites.size(); ++i)
         hello->setCipherSuites(i, owner.preferences.cipherSuites[i]);
+    if (owner.allowDtls12)
+        hello->setCipherSuites(owner.preferences.cipherSuites.size(),profile == "certificate" ? ECDHE_ECDSA_AES_128_GCM_SHA256 : PSK_AES_128_GCM_SHA256);
     hello->setCompressionMethodsArraySize(1);
     hello->setCompressionMethods(0, 0);
     std::vector<uint8_t> extensions;
-    appendExtension(extensions, 43, {2, 0xfe, 0xfc});
+    appendExtension(extensions, 43, owner.allowDtls12 ? std::vector<uint8_t>{4,0xfe,0xfc,0xfe,0xfd} : std::vector<uint8_t>{2,0xfe,0xfc});
     auto list = [](const std::vector<uint16_t>& values) {
         std::vector<uint8_t> bytes;
         appendUint16(bytes, values.size() * 2);
@@ -921,8 +936,14 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
             appendUint16(bytes, value);
         return bytes;
     };
-    appendExtension(extensions, 10, list(owner.preferences.groups));
-    appendExtension(extensions, 13, list(owner.preferences.signatures));
+    auto groups = owner.preferences.groups;
+    auto signatures = owner.preferences.signatures;
+    if (owner.allowDtls12 && profile == "certificate") {
+        if (std::find(groups.begin(),groups.end(),Parameters::SECP256R1) == groups.end()) groups.push_back(Parameters::SECP256R1);
+        if (std::find(signatures.begin(),signatures.end(),Parameters::ECDSA_P256_SHA256) == signatures.end()) signatures.push_back(Parameters::ECDSA_P256_SHA256);
+    }
+    appendExtension(extensions, 10, list(groups));
+    appendExtension(extensions, 13, list(signatures));
     std::vector<uint8_t> share;
     appendUint16(share, shareBytes + 4);
     appendUint16(share, group);
@@ -988,7 +1009,7 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
-    hello->setChunkLength(B(42 + 2 * owner.preferences.cipherSuites.size() + extensions.size()));
+    hello->setChunkLength(B(42 + 2 * hello->getCipherSuitesArraySize() + extensions.size()));
     auto decodeError = Parameters::decodeOffer(hello, offer);
     if (!decodeError.empty())
         throw cRuntimeError("Invalid locally generated ClientHello: %s", decodeError.c_str());
@@ -1127,6 +1148,7 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         owner.failAssociation(handle, "inconsistent ServerHello encoding", 50);
         return;
     }
+    auto encodedServerHello = body->peekDataAsBytes()->getBytes();
     Ptr<const tls::TlsServerHello> hello;
     try {
         hello = body->popAtFront<tls::TlsServerHello>(body->getDataLength());
@@ -1137,6 +1159,20 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     }
     if (body->getDataLength() != b(0)) {
         owner.failAssociation(handle, "trailing ServerHello data", 50);
+        return;
+    }
+    if (hello->getLegacyVersion() == DTLS_12 &&
+        (hello->getCipherSuite() == PSK_AES_128_GCM_SHA256 || hello->getCipherSuite() == ECDHE_ECDSA_AES_128_GCM_SHA256)) {
+        if (!owner.allowDtls12 || retried || messageSequence != 0) {
+            owner.failAssociation(handle,"Unacceptable DTLS 1.2 server selection",owner.allowDtls12 ? 47 : 70);
+            return;
+        }
+        initializeDtls12(false,0);
+        auto it=owner.associations.find(handle);
+        if (it == owner.associations.end()) return;
+        it->second->nextPeerMessage=1;
+        it->second->processedHandshakes[messageSequence]={2,encodedServerHello};
+        it->second->processHandshake12(2,messageSequence,encodedServerHello);
         return;
     }
     if (hello->getLegacyVersion() != 0xfefd || hello->getCompressionMethod() != 0 || hello->getSessionIdArraySize() != 0 ||

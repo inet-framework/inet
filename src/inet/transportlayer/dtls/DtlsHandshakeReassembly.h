@@ -37,9 +37,11 @@ class INET_API DtlsHandshakeReassembly
 
     // Empty fragments never allocate; invalid ranges never mutate retained data.
     Result insert(uint8_t type, uint16_t sequence, uint32_t totalLength, uint32_t offset, const std::vector<uint8_t>& fragment);
+    Result insertEmptyMessage(uint8_t type, uint16_t sequence);
     [[nodiscard]] bool isComplete(uint16_t sequence) const;
     [[nodiscard]] bool hasEntry(uint16_t sequence) const { return entries.find(sequence) != entries.end(); }
     [[nodiscard]] size_t firstMissing(uint16_t sequence) const;
+    [[nodiscard]] std::vector<uint8_t> getContiguousPrefix(uint16_t sequence) const;
     Message take(uint16_t sequence);
     void discard(uint16_t sequence);
     void clear();

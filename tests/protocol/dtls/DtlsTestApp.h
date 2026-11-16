@@ -48,6 +48,7 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<bool> earlyResults;
     std::vector<int> earlyMarkers;
     bool closeOnEarlyData = false;
+    bool closeOnData = false;
     int establishedCount = 0;
     int errorCount = 0;
     int closedCount = 0;
@@ -278,6 +279,8 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
         receivedHandles.push_back(id);
         emit(registerSignal("packetSentToUpper"), packet);
         delete packet;
+        if (closeOnData)
+            engine->close(id);
     }
     void sendError(AssociationId, long, const char *reason) override
     {

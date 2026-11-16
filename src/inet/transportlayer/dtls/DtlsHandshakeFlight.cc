@@ -8,12 +8,12 @@
 
 namespace inet::dtls {
 
-size_t DtlsHandshakeFlight::add(uint8_t messageType, uint16_t messageSequence, uint32_t messageLength, uint32_t offset, uint64_t epoch, const Ptr<const Chunk>& data, bool establishAfterSend, bool serverFinished)
+size_t DtlsHandshakeFlight::add(uint8_t messageType, uint16_t messageSequence, uint32_t messageLength, uint32_t offset, uint64_t epoch, const Ptr<const Chunk>& data, bool establishAfterSend, bool serverFinished, uint8_t recordContentType)
 {
     if (!data || !data->isImmutable() || messageLength > 0xffffff || offset > messageLength ||
         data->getChunkLength().get<b>() % 8 != 0 || data->getChunkLength() > B(messageLength - offset))
         throw cRuntimeError("Invalid DTLS flight fragment");
-    fragments.push_back({messageType, messageSequence, messageLength, offset, epoch, data, false, false, false, false, establishAfterSend, serverFinished, 0, false, {}});
+    fragments.push_back({messageType, messageSequence, messageLength, offset, epoch, data, false, false, false, false, establishAfterSend, serverFinished, 0, false, {}, recordContentType});
     return fragments.size() - 1;
 }
 
@@ -41,7 +41,7 @@ bool DtlsHandshakeFlight::refragment(size_t maximumBodyBytes)
             auto length = std::min<size_t>(maximumBodyBytes, size - offset);
             bool last = offset + length == size;
             auto index = add(original.messageType, original.messageSequence, original.messageLength, original.offset + offset,
-                             original.epoch, source.peekDataAt(B(offset), B(length)), last && original.establishAfterSend, last && original.serverFinished);
+                             original.epoch, source.peekDataAt(B(offset), B(length)), last && original.establishAfterSend, last && original.serverFinished, original.recordContentType);
             fragments[index].ready = original.ready;
             fragments[index].transmissions = original.transmissions;
             fragments[index].retransmissionDue = original.transmissions != 0;

@@ -55,6 +55,8 @@ bool Dtls::activateSpareConnectionId(AssociationId id)
 
 bool DtlsAssociation::requestConnectionIds(int count)
 {
+    if (isDtls12())
+        return false;
     auto existing = postHandshakeExchanges.find(9);
     if (state != HandshakeState::ESTABLISHED || closing || !cidNegotiated || peerCid.empty() ||
         count < 1 || count > 255 || cidRequestUnfulfilled ||
@@ -80,6 +82,8 @@ bool DtlsAssociation::requestConnectionIds(int count)
 
 bool DtlsAssociation::provideConnectionIds(int count, bool immediate)
 {
+    if (isDtls12())
+        return false;
     auto existing = postHandshakeExchanges.find(10);
     if (state != HandshakeState::ESTABLISHED || closing || !cidNegotiated || localCid.empty() ||
         localMessagesExhausted || count < 0 || count > 255 || (immediate && count == 0) ||
@@ -130,6 +134,8 @@ bool DtlsAssociation::provideConnectionIds(int count, bool immediate)
 
 bool DtlsAssociation::activateSpareConnectionId()
 {
+    if (isDtls12())
+        return false;
     if (state != HandshakeState::ESTABLISHED || closing || !cidNegotiated || sparePeerCids.empty())
         return false;
     auto& owner = engine;

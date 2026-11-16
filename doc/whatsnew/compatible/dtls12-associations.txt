@@ -1,0 +1,3 @@
+Opt-in DTLS 1.2 associations
+
+Add allowed-version selection with DTLS 1.3 preferred by default and opt-in DTLS 1.2 PSK/GCM or ECDHE-ECDSA/GCM full handshakes. The shared UDP engine models cookies, initial client authentication, CCS, legacy record overhead, replay and whole-flight recovery with independent final-response retention. Cryptographic operations remain abstract. DTLS 1.3-only APIs refuse selected 1.2 handles; record-use exhaustion ends them instead of sending KeyUpdate.

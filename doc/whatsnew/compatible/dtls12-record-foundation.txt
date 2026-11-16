@@ -1,3 +1,3 @@
 DTLS 1.2 record and handshake representations
 
-Add legacy handshake and ChangeCipherSpec chunks, explicit-nonce serialization, and concrete GCM-shaped record helpers with retained abstract plaintext. Existing generic Hello chunks represent omitted legacy extensions. This foundation does not enable DTLS 1.2 negotiation; existing engines remain DTLS 1.3-only.
+Add legacy handshake and ChangeCipherSpec chunks, explicit-nonce serialization, and concrete GCM-shaped record helpers with retained abstract plaintext. Existing generic Hello chunks represent omitted legacy extensions. The default engine profile remains DTLS 1.3.

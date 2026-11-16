@@ -31,6 +31,8 @@ bool DtlsAssociation::allocateRecord(uint64_t epoch, uint64_t& number)
 
 void DtlsAssociation::issueTicket()
 {
+    if (isDtls12())
+        return;
     // RFC 9846 Section 4.7.1: one stateful ticket issued after successful establishment.
     auto& owner = engine;
     if (!serverSide || closing || !owner.par("resumptionEnabled").boolValue() || owner.operationalState != Dtls::OPERATING ||

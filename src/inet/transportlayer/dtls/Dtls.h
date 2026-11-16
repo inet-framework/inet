@@ -27,6 +27,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     using Association = DtlsAssociation;
     using HandshakeState = DtlsAssociation::HandshakeState;
     tls::TlsHandshakeParameters::Preferences preferences;
+    bool allowDtls13 = true;
+    bool allowDtls12 = false;
 
     struct PrevalidationAttempt {
         uint64_t id = 0;
@@ -104,6 +106,13 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void socketClosed(UdpSocket *socket) override;
     void discardAll(const char *reason, bool notify);
     void parseDatagram(Packet *packet);
+    bool receiveRecord12(Packet *packet, const DtlsPath& path, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted);
+    bool handleClientHello12(PrevalidationAttempt *attempt, const Ptr<const DtlsClientHello>& hello, uint16_t sequence, const std::vector<uint8_t>& encoded);
+    bool isProcessedHello12(const DtlsPath& path, uint16_t sequence, const std::vector<uint8_t>& encoded) const;
+    void sendRetry12(PrevalidationAttempt *attempt, const Ptr<const DtlsClientHello>& hello, const std::vector<uint8_t>& encoded);
+    void requestCookieFromPrefix12(PrevalidationAttempt *attempt);
+    static std::vector<uint8_t> makeCookie(uint64_t issued, uint64_t started, const L3Address& local, int localPort, const L3Address& peer, int peerPort, const Ptr<const DtlsClientHello>& hello);
+    static uint64_t readUint64(const std::vector<uint8_t>& input, size_t offset);
     void sendClientHello(AssociationId id, const std::vector<uint8_t>& cookie = {});
     void sendRetry(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, const std::vector<uint8_t>& cookie, bool requestKeyShare, size_t receivedBytes, PrevalidationAttempt *attempt, uint16_t messageSequence);
     void pumpRetry(uint64_t id);
@@ -139,7 +148,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void beginClose(AssociationId id);
     void resumeApplications(AssociationId id);
     void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2,
-                   const std::vector<uint8_t>& cid = {}, int interfaceId = -1);
+                   const std::vector<uint8_t>& cid = {}, int interfaceId = -1, bool legacy = false);
     bool enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,
                            DtlsProcessingQueue::Eligibility eligible = {}, DtlsProcessingQueue::Completion skipped = {},
                            DtlsProcessingQueue::Completion started = {}, bool recordDelay = true);

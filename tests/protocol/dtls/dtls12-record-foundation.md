@@ -2,7 +2,7 @@
 
 > **Kind:** report · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [extension profile](../../../doc/project/evidence/standard/rfc9147/extensions.md), [execution ledger](../../../doc/project/evidence/model/dtls/extensions.md)
 
-This stage supplies representations and concrete helpers. Successful DTLS 1.2 negotiation is not enabled. The engine still negotiates only 1.3; receiving a 1.2-only offer produces `protocol_version`, not a 1.2 association. No 1.2 application delivery or flight recovery is claimed here.
+This document covers representations and concrete helpers introduced by C12. The subsequent [association stage](dtls12-associations.md) enables opt-in 1.2 negotiation and owns its production evidence. The default engine configuration still negotiates only 1.3 and refuses a 1.2-only offer.
 
 ## Represented fields
 
@@ -24,4 +24,4 @@ Legacy Hello bodies explicitly distinguish an omitted extension vector from an e
 | `Rfc9147UnsupportedVersion.test` | Two StandardHosts and PacketTap on two 1 ms half-links, seed 0, declared checksum/FCS modes and GlobalArp. Mutate a real ClientHello's supported-versions offer to 1.2 only. Require server alert 70, one client error, zero establishments/deliveries and zero available application size. |
 | Existing 1.3 controls | The ordinary certificate and PSK handshakes, initial client authentication and delayed range-ACK PMTU/PHA fixture use production UDP/IP/Ethernet. They check continued success after the shared Hello representation changes. |
 
-The exact selections, executed outcomes, build mode and limits belong to the linked execution ledger. No helper result proves a working 1.2 handshake, replay integration or application path; those are later stages.
+The exact selections, executed outcomes, build mode and limits belong to the linked execution ledger. No helper result proves a working 1.2 handshake, replay integration or application path; those are covered by the association stage's separate production tests.

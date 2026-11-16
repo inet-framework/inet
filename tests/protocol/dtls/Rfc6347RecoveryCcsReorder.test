@@ -1,0 +1,59 @@
+%description:
+A real lost/reordered flight recovers through production whole-flight retry.
+Fresh records preserve one establishment/delivery and logical verification costs.
+%includes:
+#include <set>
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::set<uint64_t> hvr,serverHello,clientFinished;
+static int serverChecks=0,clientChecks=0,certificateFragments=0,unified=0;
+return ProtocolTest("rfc6347_recoveryccsreorder")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(p); return h && h->getContentType()==20; }).nth(1).delay(0.15))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)) ++unified; auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); if (h && handshake(c,20)) clientFinished.insert(h->getSequenceNumber()); return false; }).within(6)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)) ++unified; auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); if (h && handshake(c,3)) hvr.insert(h->getSequenceNumber()); if (h && handshake(c,2)) serverHello.insert(h->getSequenceNumber()); if (handshake(c,11)) ++certificateFragments; return false; }).within(6)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value-0.011)<1e-9) ++clientChecks; return false; }).within(6)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value-0.011)<1e-9) ++serverChecks; return false; }).within(6)))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(5),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(5)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(clientFinished.size()>=2 && unified==0, "the actual fault requires fresh legacy flight records");
+        require(serverChecks==4 && clientChecks==4, "duplicates and replacement records do not recharge logical verification");
+        require(app.establishedCount==1 && app.errorCount==0, "one successful recovered client handle"); app.sendMarker(121,80);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers==std::vector<int>{121} && app.establishedCount==1 && app.errorCount==0, "one recovered forward datagram"); app.sendMarker(122,80); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "DTLS 1.2 recovery compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 7s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.udpPayloadLimit = 1200B
+*.host2.app[*].dtls.certificateBytes = 512B
+*.host*.app[*].dtls.handshakeInDelay = 11ms
+*.host*.app[*].dtls.handshakeOutDelay = 17ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc6347_recoveryccsreorder: PASS

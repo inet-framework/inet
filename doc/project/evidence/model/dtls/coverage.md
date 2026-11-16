@@ -4,7 +4,7 @@
 
 The selected behavioral profile and exclusions are in [scope.md](scope.md). Execution evidence is recorded in [results.md](results.md). A catalog entry or a planned test is not executed conformance evidence.
 
-The separately authorized extension series is tracked in [extensions.md](extensions.md). Its profile selection and planned cases do not widen the baseline's achieved coverage before implementation and execution.
+The extension series is tracked in [extensions.md](extensions.md), which owns each implemented stage's exact selections, revisions, results and remaining gaps. New tests and configured capabilities widen achieved coverage only after their recorded execution. The table below preserves the original default-profile evidence; the extension ledger and its linked reviewer documents cover opt-in behavior.
 
 ## Initial selection
 
@@ -21,4 +21,4 @@ The separately authorized extension series is tracked in [extensions.md](extensi
 | Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue, DtlsRecoveryLifecycle, DtlsRestartLifecycle, sender/configuration cases | PASS for processing/recovery ownership, close preservation, crash and repeated restart |
 | Asynchronous raw-header rejection | Four cases in [malformed-handshake-records.md](../../../../../tests/protocol/dtls/malformed-handshake-records.md) | PASS after the narrow decode correction; both queued variants fail on the preserved parent while zero-cost controls pass |
 
-No achieved standards-test depth is claimed until the selected cases have executed and their observations have been examined. Cryptographic validation, protected-packet byte export, CID/migration and the omitted optional handshake modes are not supported claims.
+No achieved standards-test depth is claimed until the selected cases have executed and their observations have been examined. Cryptographic validation and protected-packet byte export remain excluded. Optional wire features are limited to the finite profiles and executed checks in the extension ledger.

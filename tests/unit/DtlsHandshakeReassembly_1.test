@@ -13,6 +13,7 @@ DtlsHandshakeReassembly reassembly(8);
 ASSERT(reassembly.insert(11, 1, 5, 0, {}) == Result::EMPTY);
 ASSERT(reassembly.getEntryCount() == 0 && reassembly.getReservedBytes() == 0);
 ASSERT(reassembly.insert(11, 1, 5, 4, {50}) == Result::INCOMPLETE);
+ASSERT(reassembly.getContiguousPrefix(1).empty() && reassembly.getContiguousPrefix(99).empty());
 ASSERT(reassembly.getEntryCount() == 1 && reassembly.getReservedBytes() == 5);
 ASSERT(reassembly.insert(11, 1, 5, 1, {20, 30, 40}) == Result::INCOMPLETE);
 ASSERT(reassembly.insert(11, 1, 5, 2, {30, 40, 50}) == Result::INCOMPLETE);
@@ -25,6 +26,7 @@ ASSERT(reassembly.insert(11, 1, 5, 6, {}) == Result::OUT_OF_RANGE);
 // If conflict handling had installed the new byte 99 before checking overlap,
 // filling the missing prefix with 10 would fail instead of completing.
 ASSERT(reassembly.insert(11, 1, 5, 0, {10}) == Result::COMPLETE);
+ASSERT(reassembly.getContiguousPrefix(1) == std::vector<uint8_t>({10,20,30,40,50}));
 ASSERT(reassembly.isComplete(1));
 auto message = reassembly.take(1);
 ASSERT(message.type == 11);
@@ -39,6 +41,9 @@ ASSERT(!reassembly.isComplete(2));
 ASSERT(reassembly.getReservedBytes() == 0 && reassembly.getEntryCount() == 0);
 DtlsHandshakeReassembly sequences(8);
 ASSERT(sequences.insert(1, 0, 4, 1, {2}) == Result::INCOMPLETE);
+ASSERT(sequences.getContiguousPrefix(0).empty());
+ASSERT(sequences.insert(1, 0, 4, 0, {1}) == Result::INCOMPLETE);
+ASSERT(sequences.getContiguousPrefix(0) == std::vector<uint8_t>({1,2}));
 ASSERT(sequences.insert(1, 1, 4, 0, {3, 4, 5, 6}) == Result::COMPLETE);
 ASSERT(sequences.hasEntry(0) && sequences.hasEntry(1));
 ASSERT(sequences.take(1).body == std::vector<uint8_t>({3, 4, 5, 6}));
@@ -50,6 +55,19 @@ sequences.discard(0);
 ASSERT(!sequences.hasEntry(0) && sequences.hasEntry(2));
 ASSERT(sequences.getEntryCount() == 1 && sequences.getReservedBytes() == 4);
 sequences.discard(0); // an already released sequence is harmless
+DtlsHandshakeReassembly emptyMessages(1);
+ASSERT(emptyMessages.insert(14,0,0,0,{}) == Result::EMPTY);
+ASSERT(emptyMessages.insertEmptyMessage(14,0) == Result::COMPLETE);
+ASSERT(emptyMessages.insertEmptyMessage(14,0) == Result::COMPLETE);
+ASSERT(emptyMessages.insertEmptyMessage(11,0) == Result::CONFLICT);
+ASSERT(emptyMessages.insertEmptyMessage(14,1) == Result::LIMIT);
+ASSERT(emptyMessages.getReservedBytes() == 1 && emptyMessages.isComplete(0));
+ASSERT(emptyMessages.take(0).body.empty() && emptyMessages.getReservedBytes() == 0);
+ASSERT(emptyMessages.insertEmptyMessage(14,1) == Result::COMPLETE);
+emptyMessages.discard(1);
+ASSERT(emptyMessages.getReservedBytes() == 0 && emptyMessages.getEntryCount() == 0);
+DtlsHandshakeReassembly noEmptyCapacity(0);
+ASSERT(noEmptyCapacity.insertEmptyMessage(14,0) == Result::LIMIT);
 EV << "DTLS handshake reassembly PASS\n";
 
 %contains: stdout

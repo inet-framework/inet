@@ -1,0 +1,58 @@
+%description:
+A real version mismatch or framed downgrade/selection fault cannot establish
+an association. Explicit alerts and client invalidation are observed through UDP.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool marker=false;
+return ProtocolTest("version_negativeunoffered")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { auto h=findChunk<inet::tls::TlsServerHello>(p); return h && !hasHelloExtension(*h,44); }).nth(1).mutate([](Packet *p) {
+        mutateNestedHeader<inet::tls::TlsServerHello>(p,[](auto& h) {
+            h.setCipherSuite(0x00a8);
+            for (size_t i=0; i+4<=h.getExtensionsArraySize();) {
+                auto type=(h.getExtensions(i)<<8)|h.getExtensions(i+1);
+                auto size=(h.getExtensions(i+2)<<8)|h.getExtensions(i+3);
+                if (type==43 && size==2) { h.setExtensions(i+4,0xfe); h.setExtensions(i+5,0xfd); }
+                i+=4+size;
+            }
+        });
+    }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (auto h=findChunk<inet::tls::TlsServerHello>(c.event.packet)) { static const uint8_t value[]={'D','O','W','N','G','R','D',1}; bool match=true; for (size_t i=0; i<8; ++i) match &= h->getRandom(24+i)==value[i]; marker |= match; }
+        return false;
+    }).within(4)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a=findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription()==70; }).within(3))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount==1 && app.establishedCount==0 && app.maximumDatagramSize()==0, "invalid selection is never accepted"); require(marker==false, "the required downgrade sentinel is represented"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount==0 && app.receivedMarkers.empty(), "the failed exchange delivers no application data"); }));
+}
+%activity:
+EV << "negative version compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].dtls.versions = "1.3"
+*.host2.app[*].dtls.versions = "1.3"
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST version_negativeunoffered: PASS

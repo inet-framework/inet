@@ -7,7 +7,7 @@ package inet.transportlayer.dtls;
 import inet.common.SimpleModule;
 import inet.transportlayer.contract.IDtls;
 
-// Models DTLS 1.3 over UDP. Cryptographic content and verification are
+// Models DTLS 1.3 and opt-in DTLS 1.2 over UDP. Cryptographic content and verification are
 // abstracted: this model cannot provide actual confidentiality or integrity.
 simple Dtls extends SimpleModule like IDtls
 {
@@ -16,6 +16,7 @@ simple Dtls extends SimpleModule like IDtls
         @display("i=block/transport");
         string localAddress = default("");
         int localPort = default(-1);
+        string versions = default("1.3"); // Allowed versions; prefer 1.3 when both are offered
         bool cookieRequired = default(true);
         bool offerInitialKeyShare = default(true);
         bool clientAuthentication = default(false);
@@ -47,9 +48,9 @@ simple Dtls extends SimpleModule like IDtls
         double ticketLifetime @unit(s) = default(3600s); // integral seconds, 1..604800
         @signal[sessionResumed](type=long);
         string profile = default("psk");
-        string cipherSuites = default("TLS_AES_128_GCM_SHA256"); // Ordered allowed suites, server preference wins
-        string keyExchangeGroups = default("x25519");
-        string signatureSchemes = default("ecdsa_secp256r1_sha256");
+        string cipherSuites = default("TLS_AES_128_GCM_SHA256"); // 1.3 preferences; 1.2 uses the profile's fixed GCM suite
+        string keyExchangeGroups = default("x25519"); // Mixed certificate offers also include 1.2's secp256r1
+        string signatureSchemes = default("ecdsa_secp256r1_sha256"); // Mixed certificate offers also include 1.2's ECDSA/SHA-256
         volatile double aes128GcmHandshakeInDelay @unit(s) = default(handshakeInDelay);
         volatile double aes128GcmHandshakeOutDelay @unit(s) = default(handshakeOutDelay);
         volatile double aes128GcmProtectInDelay @unit(s) = default(protectInDelay);
