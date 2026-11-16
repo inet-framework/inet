@@ -235,6 +235,19 @@
         linkerFlags = ""
         />
     <feature
+        id = "DtlsExamples"
+        name = "DTLS examples"
+        description = "DTLS examples over IPv4 and IPv6 wired networks."
+        initiallyEnabled = "true"
+        requires = "Dtls Ethernet Ieee8021d Ipv4 Ipv6 LinkLayerConfiguratorsCommon Loopback PhysicalLayerWiredCommon Queueing TcpCommon TcpInet Udp VisualizationCanvas"
+        recommended = ""
+        labels = "example"
+        nedPackages = "inet.examples.dtls"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "DiffServ"
         name = "DiffServ"
         description = "Components for implementing Differentiated Services."
