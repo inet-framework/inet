@@ -4,6 +4,8 @@
 
 The selected behavioral profile and exclusions are in [scope.md](scope.md). Execution evidence is recorded in [results.md](results.md). A catalog entry or a planned test is not executed conformance evidence.
 
+The separately authorized extension series is tracked in [extensions.md](extensions.md). Its profile selection and planned cases do not widen the baseline's achieved coverage before implementation and execution.
+
 ## Initial selection
 
 | Feature | Planned evidence | Current result |
