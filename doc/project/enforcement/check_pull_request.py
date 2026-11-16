@@ -45,7 +45,8 @@ def gates(commit_range, description):
         ("check-includes.sh", "PR-SERIES-BUILDS: every #include resolves", [commit_range]),
         ("check-ned-params.sh", "PR-SERIES-BUILDS: every par() is declared", [commit_range]),
         ("check-whatsnew.sh", "RR-WHATSNEW-FILE, RR-MIGRATE-FILE", [commit_range]),
-        ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION", [commit_range]),
+        ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION, PR-REQ-BASELINES",
+         [commit_range] + (["--description-file" if description[0] == "--file" else "--pr", description[1]] if description else [])),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))

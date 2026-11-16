@@ -16,6 +16,8 @@ PR-SPLIT-BASELINE for a baseline in another repository.
   PR-SPLIT-BASELINE        the pin moves in the commit that causes the move
   CR-OBL-BASELINE          the Change: trailer of the cause commit names the baseline that moves
   CR-OBL-INERT             a commit below the behavior level moves no pin over a result
+  PR-REQ-BASELINES         the description of the pull request names each step that changes a
+                           baseline, with a summary of its baseline changes
 
 The same rules hold for the fingerprints in tests/fingerprint/store.json of the INET tree. The INET
 commit that changes the store holds the "Baseline changes:" list of its fingerprint changes, with a
@@ -35,6 +37,8 @@ the results that it claims, needs a run and a reviewer; this gate cannot say.
 Usage, from the INET repository root:
   check-baselines.sh BASE..HEAD
   check-baselines.sh BASE..HEAD --baseline-repository statistical=statistics --baseline-repository chart=media
+  check-baselines.sh BASE..HEAD --description-file FILE    also check the description of the pull request
+  check-baselines.sh BASE..HEAD --pr NUMBER                the same, with the description from GitHub
 
 Without --baseline-repository, the gate gets the baseline commits from the repository that inet.opp
 names at BASE. With it, the gate reads a local clone; that run does not prove that a commit is in
@@ -60,6 +64,7 @@ FORMS = ("commit", "forward", "reverse", "first-record", "removal", "environment
 FINGERPRINT_FORMS = ("commit", "forward", "reverse")
 STORE = "tests/fingerprint/store.json"
 REDUCTION_HEADING = "Reduction:"
+SECTION = "baseline changes"
 REDUCTION_FORMS = ("forward", "reverse")
 # a path whose content can change a result: model source, simulations and the Python of the project
 SOURCE_PATH = re.compile(r"^(src|examples|showcases|tutorials|tests/networks|python)/")
@@ -360,6 +365,58 @@ def check_fingerprints(report, commits, records):
     return steps
 
 
+def description_section(description):
+    """The text of the section "Baseline changes" of a description, or None. The section ends at the
+    next Markdown heading. An HTML comment, such as the text of the template, is not part of it."""
+    lines = re.sub(r"<!--.*?-->", "", description, flags=re.S).splitlines()
+    for index, line in enumerate(lines):
+        if line.strip().lstrip("#").strip().strip("*").strip().rstrip(":").strip().lower() == SECTION:
+            end = index + 1
+            while end < len(lines) and not lines[end].lstrip().startswith("#"):
+                end += 1
+            return "\n".join(lines[index + 1:end])
+    return None
+
+
+def check_description(report, description, steps):
+    """PR-REQ-BASELINES: the description names each step, with a summary of its baseline changes."""
+    report.section("PR-REQ-BASELINES: the description summarizes the baseline changes of each step")
+    if not steps:
+        print("  no commit changes a baseline")
+    elif description is None:
+        report.note("no description given; the summary of the baseline changes in the pull request is not checked")
+    else:
+        section = description_section(description)
+        if section is None:
+            report.flag(f"the description has no section 'Baseline changes', and {len(steps)} commit(s) change baselines; name each one with a summary of its baseline changes")
+        else:
+            subjects = [subject_of(step) for step in steps]
+            for subject in subjects:
+                start = section.find(subject)
+                if start < 0:
+                    report.flag(f"the section 'Baseline changes' of the description does not name the commit '{subject}'")
+                    continue
+                rest = section[start + len(subject):]
+                ends = [rest.find(other) for other in subjects if other != subject and rest.find(other) >= 0]
+                summary = rest[:min(ends)] if ends else rest
+                if not summary.strip(" \t\n:-—*`.,;()"):
+                    report.flag(f"the section 'Baseline changes' of the description names the commit '{subject}' with no summary")
+    report.end_section()
+
+
+def read_description(args):
+    """The description of the pull request, from a file or from GitHub, or None."""
+    if args.description_file:
+        with open(args.description_file, encoding="utf-8") as f:
+            return f.read()
+    if args.pr:
+        out = subprocess.run(["gh", "pr", "view", str(args.pr), "--json", "body", "--jq", ".body"], capture_output=True, text=True)
+        if out.returncode != 0:
+            raise RuntimeError(f"cannot read the description of #{args.pr}:\n{out.stderr.strip()}")
+        return out.stdout
+    return None
+
+
 def check_pins(report, commits, base, baselines):
     """TR-BASELINE-PIN on the INET side. Returns [(commit, parent, kind, old ref, new ref)] for each
     pin that moves, and the baseline entries of the base."""
@@ -493,6 +550,9 @@ def main(argv=None):
     parser.add_argument("range", metavar="BASE..HEAD")
     parser.add_argument("--baseline-repository", action="append", default=[], metavar="KIND=PATH",
                         help="read the baseline commits of a test kind from a local clone, or from another URL")
+    description = parser.add_mutually_exclusive_group()
+    description.add_argument("--description-file", help="a file that holds the description of the pull request")
+    description.add_argument("--pr", type=int, help="a pull request number, to read its description")
     args = parser.parse_args(argv)
     if ".." not in args.range or "..." in args.range or git("rev-parse", args.range, check=False).returncode != 0:
         print(f"error: '{args.range}' is not a valid commit range", file=sys.stderr)
@@ -579,6 +639,8 @@ def main(argv=None):
             report.end_section()
 
             fingerprint_steps = check_fingerprints(report, commits, records)
+            steps = [commit for commit in commits if commit in fingerprint_steps or any(record[0] == commit for record in records)]
+            check_description(report, read_description(args), steps)
 
             if fingerprint_steps:
                 print()
