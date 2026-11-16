@@ -16,6 +16,8 @@ class ProbeDtls : public inet::dtls::Dtls
   public:
     std::vector<bool> probeAdmissions;
     int socketIdForTest() const { return udpSocket.getSocketId(); }
+    void setNextConnectionIdForTest(uint64_t value) { nextConnectionId = value; }
+    bool hasNoAdmissionStateForTest() const { return associations.empty() && prevalidationAttempts.empty() && cidIndex.empty(); }
     void injectStaleSocketClose(int socketId) {
         Enter_Method("injectStaleSocketClose");
         auto indication = new Indication("old UDP socket indication", UDP_I_SOCKET_CLOSED);

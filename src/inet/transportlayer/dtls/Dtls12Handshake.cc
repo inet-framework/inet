@@ -76,14 +76,8 @@ void DtlsAssociation::initializeDtls12(bool server, uint16_t helloSequence)
     sparePeerCids.clear();
     if (!cidOffered)
         engine.removeConnectionIds(id);
-    if (server && cidNegotiated) {
+    if (server && cidNegotiated)
         peerCid = offer.connectionId;
-        if (engine.par("receiveConnectionId").boolValue()) {
-            localCid = engine.allocateConnectionId(id);
-            if (localCid.empty())
-                throw cRuntimeError("DTLS 1.2 receive CID allocation exhausted");
-        }
-    }
     heartbeatNegotiated = server && engine.par("heartbeatEnabled").boolValue() && offer.heartbeatMode != 0;
     peerAllowsHeartbeat = heartbeatNegotiated && offer.heartbeatMode == 1;
     pendingAcks.clear();

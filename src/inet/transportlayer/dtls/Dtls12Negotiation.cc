@@ -161,6 +161,14 @@ bool Dtls::handleClientHello12(PrevalidationAttempt *attempt, const Ptr<const Dt
     association->offer=offer;
     for (size_t i=0; i<32; ++i) association->clientRandom[i]=hello->getRandom(i);
     association->initializeDtls12(true,sequence);
+    if (association->cidNegotiated && par("receiveConnectionId").boolValue()) {
+        association->localCid=allocateConnectionId(association->id);
+        if (association->localCid.empty()) {
+            removePrevalidation(attempt->id);
+            emit(recordDroppedSignal,long(RESOURCE_LIMIT));
+            return true;
+        }
+    }
     association->prepareServerSession12(hello);
     association->addressValidated=validated;
     association->receivedBytes=attempt->receivedBytes;

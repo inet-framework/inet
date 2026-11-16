@@ -20,6 +20,7 @@ Local receive IDs are eight bytes or empty. Outgoing IDs support lengths 1–255
 | `ConnectionIdTags`, `InnerLimit` | Preserve region tags on actual output/delivery; allow 16383 application bytes with IP fragmentation when discovery is off, refuse 16384 and retain later usable data. |
 | `ConnectionIdUnknown`, `Missing`, `InnerType`, `WrongVersion` | Mutate real records to an unknown/missing CID, invalid inner type or live 1.3 association's CID. Require drop and surviving valid traffic. |
 | `ConnectionIdApiBounds`, `Lifecycle` | Refuse 1.3-only APIs; stop/crash and restart the server, requiring distinct IDs and usable new associations. |
+| `ConnectionIdExhaustion` | Set only the server's test allocator counter to zero before the real cookie exchange. Forbid malformed classification, require RESOURCE_LIMIT and empty admission/index state with no accepted callback. Restore the injected counter and require the client's genuine retry to establish once and deliver data. |
 | `ConnectionIdClose`, `Fatal`, `Renegotiation` | Observe protected closure, fatal decode alert, or warning no_renegotiation after a captured ClientHello. The warning preserves data. |
 
 Grouped names retain the `Rfc9146` prefix and `.test` suffix. Each fixture gives its exact schedule and assertions.
@@ -45,3 +46,9 @@ flowchart LR
 `PathMtuMigration` confirms the old path, lowers router MTUs to 620, validates the move, rejects queued oversized output and delivers fitting traffic. Both directions reset to base and independently confirm 546 application bytes. `PathMtuMigrationIpv6` lowers relevant egress MTUs from 2000 to 1280. Explicit interface selection in this checkout's IPv6 model emits Ethernet broadcasts; ICMPv6 suppresses feedback for those frames. This fixture requires both probe timeouts and conservative confirmation of 1152 UDP bytes (1106 application bytes), then usable reverse data. The separate fixed-path case owns the successful IPv6 PTB claim.
 
 These checks do not prove cryptographic authentication of a changed path or ICMP, real-endpoint interoperability, arbitrary CID receive lengths, IPv6 NAT or hardware performance. Mermaid rendering has not been checked.
+
+## C15b resource-admission correction
+
+The final integration audit found that legacy initialization threw when it could not allocate a server receive ID. The queued reassembly guard classified this as malformed input and retained prevalidation. The same fixture fails on the original library with a forbidden MALFORMED_RECORD at 0.26607968 s, then passes after moving allocation to the server admission owner. The corrected owner removes prevalidation and reports RESOURCE_LIMIT before inserting an association or invoking accepted. Normal allocation, numbering and wire output keep the same sequence of operations in the same event.
+
+The fixture bypasses only allocator exhaustion/rearming, not the Hello exchange, cookie validation, input service, retry or data path. Rearming the injected counter is test fault recovery; production namespaces still never rewind. Parent/child fixture hashes, matching builds, raw outputs and complete integration outcomes are recorded in the execution ledger.
