@@ -204,6 +204,30 @@ class CheckCommitsTest(unittest.TestCase):
         self.assertNotIn("extra blank line", result.stdout)
         self.assertNotIn("above 72 characters", result.stdout)
 
+    def test_a_reduction_patch_and_a_list_are_not_prose(self):
+        patch = ("diff --git a/src/inet/a/A.cc b/src/inet/a/A.cc\n"
+                 "index 1111111..2222222 100644\n--- a/src/inet/a/A.cc\n+++ b/src/inet/a/A.cc\n"
+                 "@@ -1 +1 @@\n-int a = 1;\n+int a = 0;\n" + "+// after review the old revision\n" * 40)
+        reasons = "\n".join(f"  fingerprint runs changed in x{n} (1; examples/a 1) — {self.words(30)}" for n in range(12))
+        self.commit(f"a: change: one value\n\nThe value was wrong.\n\nBaseline changes:\n{reasons}\n\n"
+                    f"Reduction:\n{patch}\nChange: src | behavior.change | -\nAttribution: reverse", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("adjacent prose lines", result.stdout)
+        self.assertNotIn("has a body of", result.stdout)
+        self.assertNotIn("says 'after review'", result.stdout)
+
+    def test_prose_after_the_list_still_counts(self):
+        self.commit(f"a: change: one value\n\nThe value was wrong.\n\nBaseline changes:\n"
+                    f"  fingerprint runs added (1; examples/b 1) — the commit adds b\n\n{self.words(301)}\n\n"
+                    "Change: src | behavior.change | -", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertIn("has a body of 305 words, above 300", result.stdout)
+
     def test_a_long_first_paragraph_gives_a_summary_note(self):
         self.commit(f"a: change: one value\n\n{self.words(121)}\n\nChange: src | behavior.change | -", {
             "src/inet/a/A.cc": "int a = 1;\n",

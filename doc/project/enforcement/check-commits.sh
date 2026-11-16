@@ -36,6 +36,11 @@ status=0
 flag() { echo "  VIOLATION: $1"; status=1; }
 # A note is advisory: it is worth seeing and it does not fail the gate.
 note() { echo "  note: $1"; }
+# The body without the reduction patch after a line "Reduction:", which is code, not prose; and the
+# prose without the "Baseline changes:" list. check-baselines.sh checks both (TR-BASELINE-PROVENANCE,
+# TR-BASELINE-ATTRIBUTION).
+before_reduction() { awk '/^Reduction:[[:space:]]*$/ {exit} {print}'; }
+prose_of() { before_reduction | awk '/^Baseline changes:[[:space:]]*$/ {list = 1; next} list && NF == 0 {list = 0} !list {print}'; }
 
 echo "== the series: $RANGE =="
 COMMITS=$(git log --format=%H --reverse "$RANGE")
@@ -77,7 +82,7 @@ echo "== PR-MSG-WRAP: one source line per paragraph, one blank line between para
 quiet=1
 while read -r sha; do
   [ -z "$sha" ] && continue
-  layout=$(git log -1 --format=%b "$sha" | python3 -c '
+  layout=$(git log -1 --format=%b "$sha" | before_reduction | python3 -c '
 import re
 import sys
 
@@ -145,7 +150,7 @@ echo "== PR-MSG-SUMMARY: the body starts with a short summary (notes only) =="
 quiet=1
 while read -r sha; do
   [ -z "$sha" ] && continue
-  body=$(git log -1 --format=%b "$sha" \
+  body=$(git log -1 --format=%b "$sha" | prose_of \
          | grep -vE '^(Change|Plan|Fixes|Closes|Refs|Co-Authored-By|Signed-off-by|Reviewed-by):')
   words=$(wc -w <<< "$body")
   first=$(awk 'NF == 0 && seen {exit} NF {seen = 1; print}' <<< "$body" | wc -w)
@@ -175,7 +180,7 @@ echo "== PR-MSG-FACTS: the final change, without revision history or test logs (
 quiet=1
 while read -r sha; do
   [ -z "$sha" ] && continue
-  msg=$(git log -1 --format=%b "$sha")
+  msg=$(git log -1 --format=%b "$sha" | before_reduction)
   history=$(grep -oiE 'audit correction|correction validation|after review|review round|former library|(earlier|previous) revision' <<< "$msg" | head -1)
   if [ -n "$history" ]; then
     note "${sha:0:9} says '$history': describe the final change, not the way to it"; quiet=0

@@ -19,7 +19,10 @@ PR-SPLIT-BASELINE for a baseline in another repository.
 
 The same rules hold for the fingerprints in tests/fingerprint/store.json of the INET tree. The INET
 commit that changes the store holds the "Baseline changes:" list of its fingerprint changes, with a
-reason on each line.
+reason on each line. When it changes fingerprint values, the code that moves them is small: the
+commit itself, or a reduction patch in its message after a line "Reduction:", with the trailer
+"Attribution: forward" or "Attribution: reverse". A commit that only adds, removes or renames runs
+or ingredient sets, or that changes no source line, has no size limit.
 
 A result is a .sca file of the statistics repository, or an image of the media repository that a
 chart of an analysis file of the INET tree exports. A commit of a baseline repository that changes
@@ -54,7 +57,9 @@ from baseline_pins import PinError, git, is_full_hash, read_baselines  # noqa: E
 FAIL_LINES = 100
 NOTE_LINES = 30
 FORMS = ("commit", "forward", "reverse", "first-record", "removal", "environment")
+FINGERPRINT_FORMS = ("commit", "forward", "reverse")
 STORE = "tests/fingerprint/store.json"
+REDUCTION_HEADING = "Reduction:"
 REDUCTION_FORMS = ("forward", "reverse")
 # a path whose content can change a result: model source, simulations and the Python of the project
 SOURCE_PATH = re.compile(r"^(src|examples|showcases|tutorials|tests/networks|python)/")
@@ -205,7 +210,8 @@ def patch_applies(text, tree):
         env = dict(os.environ, GIT_INDEX_FILE=os.path.join(folder, "index"))
         if subprocess.run(["git", "read-tree", tree], env=env, capture_output=True).returncode != 0:
             return False
-        return subprocess.run(["git", "apply", "--cached", "--check", patch], env=env, capture_output=True).returncode == 0
+        # --recount: a patch in a commit message can lose an empty line at its end
+        return subprocess.run(["git", "apply", "--cached", "--check", "--recount", patch], env=env, capture_output=True).returncode == 0
 
 
 def change_fields(commit):
@@ -237,6 +243,30 @@ def message_of(commit):
     return git("log", "-1", "--format=%B", commit).stdout
 
 
+def trailers_of(commit):
+    """{key: [values]} and the lines of the trailer block of an INET commit."""
+    out = git("log", "-1", "--format=%(trailers:only,unfold)", commit).stdout
+    trailers, lines = {}, [line for line in out.splitlines() if line.strip()]
+    for line in lines:
+        key, separator, value = line.partition(":")
+        if separator:
+            trailers.setdefault(key.strip(), []).append(value.strip())
+    return trailers, lines
+
+
+def reduction_in_message(message, trailer_lines):
+    """The patch after the line "Reduction:" of a commit message, up to its trailers, or None."""
+    lines = message.splitlines()
+    starts = [index for index, line in enumerate(lines) if line.strip() == REDUCTION_HEADING]
+    if not starts:
+        return None
+    end, trailers = len(lines), {line.strip() for line in trailer_lines}
+    while end > starts[0] + 1 and (not lines[end - 1].strip() or lines[end - 1].strip() in trailers):
+        end -= 1
+    text = "\n".join(lines[starts[0] + 1:end])
+    return text + "\n" if text.strip() else None
+
+
 def store_at(commit):
     out = git("show", f"{commit}:{STORE}", check=False)
     return fingerprint_moves.parse(out.stdout if out.returncode == 0 else "")
@@ -250,10 +280,69 @@ def fingerprint_changes(commit):
     return fingerprint_moves.categories(store_at(parent) if parent else {}, store_at(commit))
 
 
-def check_fingerprints(report, commits):
-    """TR-BASELINE-PROVENANCE and CR-OBL-BASELINE for the fingerprint store.
+def same_patch(a, b):
+    return [line.rstrip() for line in a.strip().splitlines()] == [line.rstrip() for line in b.strip().splitlines()]
+
+
+def check_fingerprint_attribution(report, commit, pinned):
+    """TR-BASELINE-ATTRIBUTION for a commit that changes fingerprint values. pinned is [(form,
+    reduction text)] of the baseline commits that the same commit pins: one cause has one attribution."""
+    where = f"{short(commit)} fingerprints"
+    parent = git("rev-parse", f"{commit}^").stdout.strip()
+    lines = source_lines(commit)
+    trailers, trailer_lines = trailers_of(commit)
+    values = trailers.get("Attribution", [])
+    reduction = reduction_in_message(message_of(commit), trailer_lines)
+    pinned_forms = {form for form, _ in pinned if form in FINGERPRINT_FORMS}
+    if len(values) > 1:
+        report.flag(f"{where} has {len(values)} Attribution trailers; one cause has one attribution")
+        return
+    if values:
+        fields = values[0].split()
+        if len(fields) != 1 or fields[0] not in FINGERPRINT_FORMS:
+            report.flag(f"{where} has the Attribution '{values[0]}'; for fingerprints the forms are commit, forward and reverse, with the patch after a line '{REDUCTION_HEADING}'")
+            return
+        form = fields[0]
+        if pinned_forms - {form}:
+            report.flag(f"{where} has the Attribution {form}, and its baseline commits have {', '.join(sorted(pinned_forms))}; one cause has one attribution")
+    else:
+        form = pinned_forms.pop() if len(pinned_forms) == 1 else "commit"
+    if form in REDUCTION_FORMS:
+        pinned_texts = [text for pinned_form, text in pinned if pinned_form == form and text]
+        if reduction is None and pinned_texts:
+            reduction = pinned_texts[0]
+        elif reduction is not None and any(not same_patch(reduction, text) for text in pinned_texts):
+            report.flag(f"{where} has a reduction in its message that differs from the reduction file of its baseline commits; one cause has one reduction")
+    if lines == 0:
+        return  # a tool or version change: the reasons of the list name it
+    if form == "commit":
+        if reduction is not None:
+            report.flag(f"{where} has a '{REDUCTION_HEADING}' patch and no Attribution forward or reverse")
+        elif lines > FAIL_LINES:
+            report.flag(f"{where}: {short(commit)} changes {lines} source lines, above {FAIL_LINES}, and moves fingerprint values; make the commit that moves them small, or give a forward or reverse reduction after a line '{REDUCTION_HEADING}'")
+        elif lines > NOTE_LINES:
+            report.note(f"{where}: {short(commit)} changes {lines} source lines, above {NOTE_LINES}, and moves fingerprint values: can a smaller change move the same fingerprints?")
+        return
+    if reduction is None:
+        report.flag(f"{where} has the Attribution {form} and no patch after a line '{REDUCTION_HEADING}'")
+        return
+    size = patch_lines(reduction)
+    if size > FAIL_LINES:
+        report.flag(f"{where} has a reduction of {size} changed lines, above {FAIL_LINES}")
+    elif size > NOTE_LINES:
+        report.note(f"{where} has a reduction of {size} changed lines, above {NOTE_LINES}: can a smaller change move the same fingerprints?")
+    tree, name = (parent, "the parent of the commit") if form == "forward" else (commit, "the commit")
+    if not patch_applies(reduction, tree):
+        report.flag(f"{where} has a {form} reduction that does not apply to {name}, {short(tree)}")
+
+
+def check_fingerprints(report, commits, records):
+    """TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION and CR-OBL-BASELINE for the fingerprint store.
     Returns {commit: [(kind, line)]} of the commits that change fingerprint entries."""
-    report.section("TR-BASELINE-PROVENANCE: the fingerprint changes of each commit")
+    report.section("TR-BASELINE-PROVENANCE and TR-BASELINE-ATTRIBUTION: the fingerprint changes of each commit")
+    pinned = {}
+    for commit, _, _, _, form, reduction_text, _, _ in records:
+        pinned.setdefault(commit, []).append((form, reduction_text))
     steps = {}
     for commit in commits:
         changes = fingerprint_changes(commit)
@@ -264,6 +353,8 @@ def check_fingerprints(report, commits):
         obligations = obligations_of(commit)
         if obligations is not None and "?" not in obligations and "fingerprint" not in obligations:
             report.flag(f"{short(commit)} changes the fingerprint store, and its Change: trailer does not name 'fingerprint' (CR-OBL-BASELINE)")
+        if any(kind == "changed" for kind, _ in changes):
+            check_fingerprint_attribution(report, commit, pinned.get(commit, []))
     print(f"  {len(steps)} commit(s) change fingerprint entries")
     report.end_section()
     return steps
@@ -487,7 +578,7 @@ def main(argv=None):
                     report.flag(f"{short(commit)} moves {len(entries)} pins, and their baseline commits do not have the same attribution; one cause has one attribution, with the same reduction file")
             report.end_section()
 
-            fingerprint_steps = check_fingerprints(report, commits)
+            fingerprint_steps = check_fingerprints(report, commits, records)
 
             if fingerprint_steps:
                 print()
