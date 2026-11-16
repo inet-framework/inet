@@ -1,0 +1,50 @@
+%description:
+A lost heartbeat response on one association does not block a shared peer engine.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_heartbeat_isolation")
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.destPort == 4434").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).drop())
+    .act(action().after(0.2).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); })
+        .run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "unrelated peer establishes"); app.sendMarker(44); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{44} && app.establishedCount == 2, "shared engine input remains usable during probe service"); app.sendMarker(55, 32, app.receivedHandles.back()); }))
+    .once(on("host1.app[1].driver").signal("packetSentToUpper").within(0.1))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(1.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0, "probe timeout is local to probe state"); })
+        .run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{55} && app.errorCount == 0, "unrelated peer replies before expiry"); }));
+}
+%activity:
+EV << "heartbeat isolation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[1].localPort = 4436
+*.host1.app[*].dtls.probeTimeout = 1s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_isolation: PASS

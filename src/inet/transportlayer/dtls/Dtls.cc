@@ -82,6 +82,8 @@ simtime_t Dtls::processingDelay(AssociationId id, const char *operation)
 void Dtls::handleStartOperation(LifecycleOperation *)
 {
     preferences = tls::TlsHandshakeParameters::parsePreferences(par("cipherSuites"), par("keyExchangeGroups"), par("signatureSchemes"));
+    if (par("heartbeatEnabled").boolValue() && (!std::isfinite(par("probeTimeout").doubleValue()) || par("probeTimeout").doubleValue() < 1))
+        throw cRuntimeError("DTLS probeTimeout must be finite and at least one second");
     if (std::string(par("profile").stringValue()) == "psk" && std::none_of(preferences.cipherSuites.begin(), preferences.cipherSuites.end(), [](auto code) {
         return tls::TlsHandshakeParameters::findCipherSuite(code)->hashBytes == 32;
     }))
@@ -1812,6 +1814,8 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         association->handshakeDeadline = std::make_unique<cMessage>("dtlsHandshakeDeadline");
         association->cidOffered = offer.hasConnectionId && par("connectionIdEnabled").boolValue();
         association->cidNegotiated = association->cidOffered;
+        association->heartbeatNegotiated = offer.heartbeatMode != 0 && par("heartbeatEnabled").boolValue();
+        association->peerAllowsHeartbeat = association->heartbeatNegotiated && offer.heartbeatMode == 1;
         if (association->cidNegotiated) {
             association->peerCid = offer.connectionId;
             if (par("receiveConnectionId").boolValue()) {
@@ -2033,6 +2037,10 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             catch (const cRuntimeError&) {
                 emit(recordDroppedSignal, (long)MALFORMED_RECORD);
             }
+            return;
+        }
+        if (logicalEpoch == association.receiveEpoch && contentType == 24 && association.state == HandshakeState::ESTABLISHED && !association.closing) {
+            association.receiveHeartbeat(logicalEpoch, sequence, retained->get());
             return;
         }
         if (logicalEpoch >= 3 && contentType == 23) {

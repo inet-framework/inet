@@ -61,6 +61,8 @@ This matrix selects requirements from the linked primary sources. It describes p
 
 [RFC 6520 §§2–4](https://www.rfc-editor.org/rfc/rfc6520.html#section-2): respect directional permissions and one outstanding request; validate body length, echo payload and include at least 16 padding bytes. [IANA](https://www.iana.org/assignments/tls-extensiontype-values/) places the 1.3 response extension in EncryptedExtensions.
 
+The selected model retransmits requests with a one-second initial interval, doubling to 60 seconds, within a finite probe deadline. Expiry reports probe failure while preserving ordinary data. This is a deliberate profile choice relative to RFC 6520 §3's connection-termination recommendation: later candidate-path and size-discovery failure must preserve a usable confirmed path. The [heartbeat reviewer document](../../../../../tests/protocol/dtls/heartbeat-probes.md) records the implemented bounds and evidence; PHA suspension remains owned by C10.
+
 ### DTLS-EXT-PHA
 
 [RFC 9846 §§4.3.6, 4.4.2, 4.7.2](https://datatracker.ietf.org/doc/html/rfc9846#section-4.7.2): only clients advertise PHA. External-PSK authentication cannot request it without another specification. Certificate or resumption authentication can use unique request contexts. The client does not learn server acceptance from its own response.

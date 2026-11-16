@@ -81,3 +81,10 @@ class DtlsRequestConnectionId extends FieldsChunk
     chunkLength = B(1);
     uint8_t numCids = 0;
 }
+
+class DtlsHeartbeat extends FieldsChunk
+{
+    uint8_t type = 1;
+    uint8_t payload[];
+    uint8_t padding[];
+}

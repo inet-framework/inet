@@ -24,6 +24,7 @@ class Dtls;
 class DtlsClientHello;
 class DtlsAck;
 class DtlsCiphertextHeader;
+class DtlsHeartbeat;
 
 /** Per-peer handshake, record and application state owned by one DTLS engine. */
 class INET_API DtlsAssociation
@@ -88,6 +89,23 @@ class INET_API DtlsAssociation
     bool cidRequestUnfulfilled = false;
     std::optional<uint8_t> deferredPeerCidRequest;
     std::map<uint8_t, std::pair<uint16_t, std::vector<uint8_t>>> lastPeerCidMessages;
+    bool heartbeatNegotiated = false;
+    bool peerAllowsHeartbeat = false;
+    struct HeartbeatProbe {
+        std::vector<uint8_t> payload;
+        size_t udpBytes = 0;
+        bool queued = false;
+        simtime_t retryTimeout = 1;
+        std::unique_ptr<cMessage> retryTimer;
+        std::unique_ptr<cMessage> deadline;
+    };
+    std::unique_ptr<HeartbeatProbe> probe;
+    bool startHeartbeatProbe(size_t udpBytes);
+    void pumpHeartbeatProbe();
+    void finishHeartbeatProbe(IDtls::ProbeResult result);
+    void receiveHeartbeat(uint64_t epoch, uint64_t number, Packet *body);
+    bool sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request);
+    Ptr<DtlsHeartbeat> makeHeartbeat(uint8_t type, const std::vector<uint8_t>& payload, size_t padding);
     bool requestConnectionIds(int count);
     bool provideConnectionIds(int count, bool immediate);
     bool activateSpareConnectionId();

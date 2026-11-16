@@ -1,0 +1,53 @@
+%description:
+Heartbeat retry uses fresh records and a bounded deadline; ordinary data continues.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::set<uint16_t> numbers;
+static int replies = 0;
+return establish("rfc9147_heartbeat_timeout")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (heartbeat(c, 1)) numbers.insert(findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber());
+        return false;
+    }).within(6)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 2)) ++replies; return false; }).within(6)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(5))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(numbers.size() == 3 && replies == 3 && dtls.probeAdmissions == std::vector<bool>{true}, "initial request and 1/2 second retry intervals precede deadline"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0, "probe expiry preserves association"); app.sendMarker(26); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); require(dtls.probeAdmissions == std::vector<bool>({true,true}), "expiry releases the single probe slot"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{26} && app.errorCount == 0, "application progress after probe expiry"); }));
+}
+%activity:
+EV << "heartbeat timeout compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.probeTimeout = 4s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_timeout: PASS

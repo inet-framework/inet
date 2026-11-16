@@ -16,6 +16,7 @@ Register_Serializer(DtlsAck, DtlsPacketSerializer);
 Register_Serializer(DtlsAlert, DtlsPacketSerializer);
 Register_Serializer(DtlsNewConnectionId, DtlsPacketSerializer);
 Register_Serializer(DtlsRequestConnectionId, DtlsPacketSerializer);
+Register_Serializer(DtlsHeartbeat, DtlsPacketSerializer);
 
 static void requireBytes(MemoryInputStream& stream, size_t size)
 {
@@ -92,6 +93,16 @@ void DtlsPacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<cons
     }
     else if (auto request = dynamicPtrCast<const DtlsRequestConnectionId>(chunk))
         s.writeUint8(request->getNumCids());
+    else if (auto heartbeat = dynamicPtrCast<const DtlsHeartbeat>(chunk)) {
+        if (heartbeat->getPaddingArraySize() < 16 || heartbeat->getPayloadArraySize() + heartbeat->getPaddingArraySize() + 3 > 16384)
+            throw cRuntimeError("Invalid DTLS heartbeat size or padding");
+        s.writeUint8(heartbeat->getType());
+        s.writeUint16Be(heartbeat->getPayloadArraySize());
+        for (size_t i = 0; i < heartbeat->getPayloadArraySize(); ++i)
+            s.writeUint8(heartbeat->getPayload(i));
+        for (size_t i = 0; i < heartbeat->getPaddingArraySize(); ++i)
+            s.writeUint8(heartbeat->getPadding(i));
+    }
     else if (auto alert = dynamicPtrCast<const DtlsAlert>(chunk)) {
         s.writeUint8(alert->getLevel());
         s.writeUint8(alert->getDescription());
@@ -198,6 +209,23 @@ const Ptr<Chunk> DtlsPacketSerializer::deserializeFields(MemoryInputStream& s, c
         auto request = makeShared<DtlsRequestConnectionId>();
         request->setNumCids(s.readUint8());
         return request;
+    }
+    if (typeInfo == typeid(DtlsHeartbeat)) {
+        auto size = s.getRemainingLength().get<B>();
+        requireBytes(s, 3);
+        auto type = s.readUint8();
+        auto length = s.readUint16Be();
+        if (size > 16384 || length + 19 > size)
+            throw cRuntimeError("Invalid DTLS heartbeat payload length or padding");
+        auto heartbeat = makeShared<DtlsHeartbeat>();
+        heartbeat->setType(type);
+        heartbeat->setPayloadArraySize(length);
+        for (size_t i = 0; i < length; ++i)
+            heartbeat->setPayload(i, s.readUint8());
+        heartbeat->setPaddingArraySize(size - 3 - length);
+        for (size_t i = 0; i < heartbeat->getPaddingArraySize(); ++i)
+            heartbeat->setPadding(i, s.readUint8());
+        return heartbeat;
     }
     if (typeInfo == typeid(DtlsAlert)) {
         requireBytes(s, 2);

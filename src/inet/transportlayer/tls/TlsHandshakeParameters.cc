@@ -190,6 +190,13 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
             while (pos < end)
                 result.pskModes.push_back(bytes[pos++]);
         }
+        else if (type == 15) {
+            if (length != 1)
+                return "invalid heartbeat extension length";
+            if (bytes[pos] != 1 && bytes[pos] != 2)
+                return "invalid heartbeat mode";
+            result.heartbeatMode = bytes[pos];
+        }
         else if (type == 54) {
             if (length == 0 || bytes[pos] != length - 1)
                 return "invalid connection_id extension";

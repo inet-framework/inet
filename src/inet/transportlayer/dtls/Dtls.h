@@ -65,6 +65,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     DtlsSessionStore sessions;
     uint64_t nextTicketSerial = 1;
     uint64_t nextConnectionId = 1;
+    uint64_t nextHeartbeatToken = 1;
+    bool startHeartbeatProbe(AssociationId id, size_t udpBytes = 0);
     std::map<std::vector<uint8_t>, AssociationId> cidIndex;
     std::vector<uint8_t> allocateConnectionId(AssociationId id);
     void removeConnectionIds(AssociationId id);

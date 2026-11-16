@@ -35,7 +35,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C5 | PROFILE | Eight profile/retry/hash/cost cases; extended negotiation/serializer/store units | DONE: fresh debug build; 37 combined protocol, 6 unit, 6 module PASS |
 | C6 | CID | Eight negotiation/budget/isolation/lifecycle cases; record/dissector unit; allocator module | DONE: fresh debug build; 45 combined protocol, 6 unit, 7 module PASS |
 | C7 | CID-REQUEST, EXCHANGE | Fourteen CID update/request protocol cases; serializer unit; existing controls | DONE: fresh debug build; 59 combined protocol, 7 unit, 7 module PASS |
-| C8 | HEARTBEAT | Rfc9147Heartbeat; serializer units | NOT_STARTED |
+| C8 | HEARTBEAT | Thirteen heartbeat protocol cases; serializer unit; selected existing controls | DONE: fresh debug build; 22 combined protocol, 8 unit, 7 module PASS |
 | C9 | PATH | Rfc9147Migration; routed/NAT fixtures | NOT_STARTED |
 | C10 | PHA | Rfc9147PostHandshakeAuth | NOT_STARTED |
 | C11a | Existing fragmentation-request API | tests/protocol/ipv6/Ipv6DontFragmentRequest; source-fragmentation control | NOT_STARTED |
@@ -142,3 +142,18 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds
 ```
 
 Artifacts are `c7-build-debug.log` and `c7-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Scoped engine/contract architecture and naming, source protection, document seals, release formatting and DTLS documentation links pass. The C++ gate cannot run because `clang-tidy` is absent from PATH (`c7-cpp.log`); this is not a pass. The previously recorded global interface/link failures remain outside this change. Release-mode execution, exact-parent trajectory checks and baseline comparisons remain unrun; stored expectations are unchanged. The new pure virtual CID operations have an incompatible release note and migration instructions for custom engines.
+
+## C8 execution
+
+Implemented opt-in ClientHello/EncryptedExtensions heartbeat negotiation, directional modes, typed body serialization and protected request/reply processing. The association owns one lazy probe slot and timers. Requests correlate an eight-byte lifetime token, retry with fresh record numbers, and stop at a finite deadline. Responses echo actual payload, discard request padding and fit the configured UDP budget. Local output refusal and expiry preserve ordinary data. The [reviewer document](../../../../../tests/protocol/dtls/heartbeat-probes.md) owns profile limits and the explicit departure from the standard's connection-termination recommendation. Its test-only subclass exposes the actual internal primitive without providing substitute protocol behavior.
+
+A fresh debug build passes **22 protocol cases**: thirteen heartbeat cases and nine existing disabled-feature/interaction controls. Eight units and seven module controls pass with exit zero and nonzero selection against the same library. Direct checks include exact queue/link costs, a 1,200-byte request with a 57-byte response from a 512-byte-budget peer, malformed lengths, negotiation modes, wrong/fresh-numbered unsolicited responses, retries/expiry, queue bounds, expired active work, shared-server progress, close/reconnect and SHA-384 certificate-origin resumption with CID and early data. The resumed fixture explicitly uses a 32-byte modeled certificate to fit the no-cookie amplification bound. PHA suspension and active-probe stop/crash execution remain later work.
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(Heartbeat.*|Handshake|PskHandshake|ClientAuthentication|EarlyData|Resumption|KeyUpdate|ConnectionId|ConnectionIdEarlyData|ConnectionIdUpdateOverlap)\.test$' --log-file audit/dtls-extensions/c8-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(TlsHandshakeParameters|TlsHandshakeSerializer|DtlsRecordSerializer|DtlsTicketSelection|DtlsSessionStore|TlsNewSessionTicket|DtlsConnectionIdUpdateSerializer|DtlsHeartbeatSerializer)_1\.test$' --log-file audit/dtls-extensions/c8-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds|EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c8-final-module-runner.log
+```
+
+Artifacts are `c8-build-debug.log` and `c8-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Scoped DTLS/TLS architecture and naming, source protection, document seals, release formatting and selected DTLS/standard documentation links pass. The missing C++ checker and prior global interface/link findings remain unresolved. Release, exact-parent and fingerprint comparisons remain unrun. No stored expectation changed.

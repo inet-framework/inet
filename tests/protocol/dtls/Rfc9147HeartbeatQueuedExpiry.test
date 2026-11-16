@@ -1,0 +1,54 @@
+%description:
+A retry already in service finishes its cost after expiry but cannot affect a new probe.
+%includes:
+#include <cmath>
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<simtime_t> sends;
+static int chargedLongServices = 0;
+return establish("rfc9147_heartbeat_queued_expiry")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).nth(1).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) sends.push_back(c.event.time); return false; }).within(8)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 3) < 1e-9) ++chargedLongServices; return false; }).within(8)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(2.1))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).within(6))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) {
+        require(dtls.probeAdmissions == std::vector<bool>({true,true}) && sends.size() == 2 && chargedLongServices == 2, "expired active work emits no request and does not retire the new probe");
+        require(std::abs((sends[1] - sends[0]).dbl() - 7) < 1e-9, "old retry and new request each finish their three-second service");
+    }));
+}
+%activity:
+EV << "queued heartbeat expiry compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host1.app[*].dtls.protectOutDelay = simTime() < 1s ? 5ms : 3s
+*.host2.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[*].dtls.probeTimeout = 2s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_queued_expiry: PASS

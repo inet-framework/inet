@@ -20,6 +20,7 @@ class INET_API IDtls
 {
   public:
     using AssociationId = uint64_t;
+    enum ProbeResult { PROBE_SUCCEEDED = 1, PROBE_TIMED_OUT = 2, PROBE_OUTPUT_REFUSED = 3 };
 
     class INET_API ICallback
     {

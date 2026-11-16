@@ -1,0 +1,75 @@
+%description:
+Heartbeat negotiation honors either disabled endpoint and both directional modes.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_heartbeat_permissions")
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[3].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[2].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<DtlsTestDriver>("host2.app[3].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "permission profile establishes"); }))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host1.app[1].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host1.app[2].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host1.app[3].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host2.app[1].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host2.app[2].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .act(action().run<ProbeDtls>("host2.app[3].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .unordered({on("host1.app[3].dtls").signal("probeResult").filterValue(1).within(1), on("host2.app[1].dtls").signal("probeResult").filterValue(1).within(1)})
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host1.app[1].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host1.app[2].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host1.app[3].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{true}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host2.app[1].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{true}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host2.app[2].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }))
+    .act(action().run<ProbeDtls>("host2.app[3].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>{false}, "negotiated directional permission controls local probes"); }));
+}
+%activity:
+EV << "heartbeat permissions compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 4
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host2.app[0].dtls.heartbeatEnabled = false
+*.host2.app[1].dtls.heartbeatAcceptRequests = false
+*.host1.app[2].dtls.heartbeatEnabled = false
+*.host1.app[3].dtls.heartbeatAcceptRequests = false
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.peerPort = 4435
+*.host2.app[1].localPort = 4435
+*.host1.app[2].localPort = 4438
+*.host1.app[2].driver.peerPort = 4437
+*.host2.app[2].localPort = 4437
+*.host1.app[3].localPort = 4440
+*.host1.app[3].driver.peerPort = 4439
+*.host2.app[3].localPort = 4439
+*.host*.app[*].dtls.heartbeatEnabled = true
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_permissions: PASS

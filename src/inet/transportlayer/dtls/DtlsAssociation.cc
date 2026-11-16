@@ -22,6 +22,10 @@ DtlsAssociation::DtlsAssociation(Dtls& engine, size_t reassemblyLimit) : engine(
 
 void DtlsAssociation::cancelTimers()
 {
+    if (probe) {
+        engine.cancelEvent(probe->retryTimer.get());
+        engine.cancelEvent(probe->deadline.get());
+    }
     engine.cancelEvent(retransmissionTimer.get());
     engine.cancelEvent(delayedAckTimer.get());
     engine.cancelEvent(retentionTimer.get());
@@ -32,6 +36,15 @@ void DtlsAssociation::cancelTimers()
 
 bool DtlsAssociation::handleTimer(cMessage *message)
 {
+    if (probe && message == probe->deadline.get()) {
+        finishHeartbeatProbe(IDtls::PROBE_TIMED_OUT);
+        return true;
+    }
+    if (probe && message == probe->retryTimer.get()) {
+        probe->retryTimeout = std::min(SimTime(60), probe->retryTimeout * 2);
+        pumpHeartbeatProbe();
+        return true;
+    }
     for (auto& entry : postHandshakeExchanges) {
         auto type = entry.first;
         if (type == 24)
@@ -777,8 +790,9 @@ int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello
     if (hello->getLegacyVersion() != 0xfefd || hello->getLegacyCookieArraySize() != 0 ||
         hello->getCompressionMethodsArraySize() != 1 || hello->getCompressionMethods(0) != 0)
         return 47;
-    if (!Parameters::decodeOffer(hello, offer).empty())
-        return 50;
+    auto decodeError = Parameters::decodeOffer(hello, offer);
+    if (!decodeError.empty())
+        return decodeError == "invalid heartbeat mode" ? 47 : 50;
     if (offer.hasSupportedGroups != offer.hasKeyShare)
         return 109;
     bool offersPskDhe = std::find(offer.pskModes.begin(), offer.pskModes.end(), Parameters::PSK_DHE_KE) != offer.pskModes.end();
@@ -892,6 +906,8 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     }
     if (earlyOffered && !retried)
         appendExtension(extensions, 42, {});
+    if (owner.par("heartbeatEnabled").boolValue())
+        appendExtension(extensions, 15, {uint8_t(owner.par("heartbeatAcceptRequests").boolValue() ? 1 : 2)});
     if (cidOffered) {
         std::vector<uint8_t> cid = {uint8_t(localCid.size())};
         cid.insert(cid.end(), localCid.begin(), localCid.end());
@@ -966,7 +982,7 @@ void DtlsAssociation::sendServerFlight()
     auto hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
     auto shareBytes = tls::TlsHandshakeParameters::keyShareBytes(selection.group);
     int protectedOverhead = 12 + recordOverhead();
-    size_t flightBytes = wireSize(40 + 14 + shareBytes + (useCertificate ? 0 : 6) + (cidNegotiated ? 5 + localCid.size() : 0), 25) + wireSize(earlyAccepted ? 6 : 2, protectedOverhead) + wireSize(hashBytes, protectedOverhead);
+    size_t flightBytes = wireSize(40 + 14 + shareBytes + (useCertificate ? 0 : 6) + (cidNegotiated ? 5 + localCid.size() : 0), 25) + wireSize(2 + (earlyAccepted ? 4 : 0) + (heartbeatNegotiated ? 5 : 0), protectedOverhead) + wireSize(hashBytes, protectedOverhead);
     if (useCertificate) {
         certificate = owner.makeCertificate();
         verify = owner.makeCertificateVerify(selection.signature);
@@ -1013,14 +1029,15 @@ void DtlsAssociation::sendServerFlight()
     if (!owner.containsAssociation(handle))
         return;
     auto encryptedExtensions = makeShared<tls::TlsEncryptedExtensions>();
-    if (earlyAccepted) {
-        encryptedExtensions->setExtensionsArraySize(4);
-        encryptedExtensions->setExtensions(0, 0);
-        encryptedExtensions->setExtensions(1, 42);
-        encryptedExtensions->setExtensions(2, 0);
-        encryptedExtensions->setExtensions(3, 0);
-    }
-    encryptedExtensions->setChunkLength(B(earlyAccepted ? 6 : 2));
+    std::vector<uint8_t> encryptedExtensionBytes;
+    if (earlyAccepted)
+        appendExtension(encryptedExtensionBytes, 42, {});
+    if (heartbeatNegotiated)
+        appendExtension(encryptedExtensionBytes, 15, {uint8_t(owner.par("heartbeatAcceptRequests").boolValue() ? 1 : 2)});
+    encryptedExtensions->setExtensionsArraySize(encryptedExtensionBytes.size());
+    for (size_t i = 0; i < encryptedExtensionBytes.size(); ++i)
+        encryptedExtensions->setExtensions(i, encryptedExtensionBytes[i]);
+    encryptedExtensions->setChunkLength(B(2 + encryptedExtensionBytes.size()));
     uint16_t messageSequence = base + 1;
     owner.sendProtectedHandshake(handle, 8, messageSequence++, encryptedExtensions);
     if (!owner.containsAssociation(handle))
@@ -1294,6 +1311,25 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
                 if (!seen.insert(type).second) {
                     engine.failAssociation(id, "duplicate encrypted extension", 47);
                     return;
+                }
+                if (type == 15) {
+                    if (offer.heartbeatMode == 0) {
+                        engine.failAssociation(id, "unoffered heartbeat extension", 110);
+                        return;
+                    }
+                    if (length != 1) {
+                        engine.failAssociation(id, "invalid heartbeat extension length", 50);
+                        return;
+                    }
+                    auto mode = extensions->getExtensions(pos);
+                    if (mode != 1 && mode != 2) {
+                        engine.failAssociation(id, "invalid heartbeat mode", 47);
+                        return;
+                    }
+                    heartbeatNegotiated = true;
+                    peerAllowsHeartbeat = mode == 1;
+                    pos += length;
+                    continue;
                 }
                 if (type != 42 || length != 0 || !earlyOffered || retried || this->selection.selectedPsk != 0 || !offeredSession || offeredSession->cipherSuite != selection.cipherSuite ||
                     selection.authenticationMode != tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) {
