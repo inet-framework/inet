@@ -1,0 +1,42 @@
+%description:
+
+A present cookie extension contains the formal Cookie vector {0,0}: zero cookie
+bytes violate its minimum length. This is a syntax error, distinct from absent
+extension retry handling and a well-formed opaque token with invalid binding.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_empty_cookie_extension")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).nth(1).mutate([](Packet *p) { editClientHello(p, [](auto& h) { editHelloExtension(h, 44, {0, 0}); }); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).within(2))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); auto b = findChunk<inet::dtls::DtlsClientHello>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1 && b && hasHelloExtension(*b, 44); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 50; }).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.acceptedEndpoints.empty(), "present empty cookie cannot become a fresh offer or full association"); }));
+}
+%activity:
+EV << "rfc9147_empty_cookie_extension compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+%contains: stdout
+PROTOCOLTEST rfc9147_empty_cookie_extension: PASS

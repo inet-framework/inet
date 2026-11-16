@@ -1,0 +1,50 @@
+%description:
+
+After a cookie retry identifies its chosen local address, a wildcard-bound client
+waits for the delayed ServerHello. At that point,
+an epoch-zero fatal alert from the same peer reaches another local address.
+The unrelated alert must leave that pending association intact.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_plain_alert_local_identity")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 14433").filterPacket([](const Packet *p) { return findChunk<inet::dtls::DtlsAlert>(p) != nullptr; }).mutate([](Packet *p) { require(mutateHeader<UdpHeader>(p, [](auto& h) { h.setSrcPort(4433); }), "alert uses pending association's remote source port"); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).within(2))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendRaw(rawFatalAlert(40), "host2%eth1", 4434); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsAlert>(c.event.packet) != nullptr; }).within(0.1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.establishedCount == 0, "other local tuple's plaintext alert cannot fail the pending attempt"); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(4))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "original local tuple completes its handshake"); }));
+}
+%activity:
+EV << "rfc9147_plain_alert_local_identity compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.dtls.DtlsMultihomedNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.host1.numApps = 1
+*.host2.numApps = 1
+*.host3.numApps = 0
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = true
+*.host2.app[*].server = false
+*.host1.app[*].driver.startTime = 0.1s
+*.host2.app[*].driver.startTime = 0.2s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host2.app[0].peerAddress = "host1"
+*.host1.app[0].dtls.handshakeOutDelay = 0.5s
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='host2' names='eth1' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='host3' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/><route hosts='host1' destination='10.0.1.2' netmask='255.255.255.255' gateway='10.0.0.2' interface='eth0'/></config>")
+%contains: stdout
+PROTOCOLTEST rfc9147_plain_alert_local_identity: PASS

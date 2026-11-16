@@ -34,6 +34,7 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<AssociationId> receivedHandles;
     std::vector<AssociationId> establishedHandles;
     std::vector<AssociationId> closedHandles;
+    std::vector<bool> updateResults;
     int establishedCount = 0;
     int errorCount = 0;
     int closedCount = 0;
@@ -134,7 +135,7 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     }
     void update(bool requestPeer = false)
     {
-        scheduleCommand([this, requestPeer]() { engine->requestKeyUpdate(lastHandle(), requestPeer); });
+        scheduleCommand([this, requestPeer]() { updateResults.push_back(engine->requestKeyUpdate(lastHandle(), requestPeer)); });
     }
     void closePeer(AssociationId id = 0)
     {

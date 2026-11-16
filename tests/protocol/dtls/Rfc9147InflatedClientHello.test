@@ -1,0 +1,46 @@
+%description:
+
+DTLS production-path negative InflatedClientHello: a malformed represented offer reaches the
+server and must elicit alert 50 without allocating a full association.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_inflated_client_hello")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { mutateNestedHeader<inet::dtls::DtlsClientHello>(p, [](auto& h) { h.setChunkLength(h.getChunkLength() + B(1)); });
+        mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setMessageLength(h.getMessageLength() + 1); h.setFragmentLength(h.getFragmentLength() + 1); });
+        require(mutateHeader<inet::dtls::DtlsPlaintextHeader>(p, [](auto& h) { h.setLength(h.getLength() + 1); }), "inflated body has record envelope");
+        require(mutateHeader<UdpHeader>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(1)); }), "inflated body has UDP envelope");
+        require(mutateHeader<Ipv4Header>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(1)); }), "inflated body has IPv4 envelope");
+        resizeTapEnvelope(p, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 50; }).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.acceptedEndpoints.empty(), "malformed offer cannot create or establish an association"); }));
+}
+%activity:
+EV << "rfc9147_inflated_client_hello compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+%contains: stdout
+PROTOCOLTEST rfc9147_inflated_client_hello: PASS

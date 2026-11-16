@@ -8,13 +8,13 @@ The selected behavioral profile and exclusions are in [scope.md](scope.md). Exec
 
 | Feature | Planned evidence | Current result |
 | --- | --- | --- |
-| Record framing | Rfc9147RecordParsing; serializer/state unit cases | PASS for the C2 foundation |
-| Establishment/cookie/negotiation | Rfc9147Handshake, CookieRetry, NegotiationFailure | NOT_RUN |
-| Peer independence | Rfc9147AssociationIsolation | NOT_RUN |
+| Record framing | Rfc9147RecordParsing; serializer/state unit cases | C2 foundation PASS |
+| Establishment/cookie/negotiation | The 38 C3 cases mapped in [association-establishment.md](../../../../../tests/protocol/dtls/association-establishment.md) | PASS for the selected profile and listed invalid-input boundaries |
+| Peer independence | AssociationIsolation, Multihomed, SameTupleReplacement and AmplificationIsolation | PASS |
 | Flight recovery | Rfc9147HandshakeLoss, FragmentReassembly, SelectiveAck | NOT_RUN |
-| Datagrams and overhead | Rfc9147ApplicationDatagrams, RecordOverhead | NOT_RUN |
+| Datagrams and overhead | Rfc9147ApplicationDatagrams, RecordOverhead | Basic queued delivery PASS in C3; complete C5 matrix NOT_RUN |
 | Replay/invalid input | Rfc9147ReplayWindow, InvalidRecord | NOT_RUN |
 | Updates and close | Rfc9147KeyUpdate, Close | NOT_RUN |
-| Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue | PASS for C2 queue and engine-shell ownership, later association extensions NOT_RUN |
+| Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue | C3 association/deadline/pending-send cancellation PASS; later recovery/close extensions NOT_RUN |
 
 No achieved standards-test depth is claimed until the selected cases have executed and their observations have been examined. Cryptographic validation, protected-packet byte export, CID/migration and the omitted optional handshake modes are not supported claims.

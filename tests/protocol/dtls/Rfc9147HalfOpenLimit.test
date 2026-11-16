@@ -1,0 +1,59 @@
+%description:
+
+DTLS production-path variant HalfOpenLimit: explicit C3 bounded-resource requirement.
+A certificate offer padded at the tap supplies ample credit to the selected later peer.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_half_open_limit")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").fromNth(2).drop())
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4436 || udp.srcPort == 4438").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).mutate([](Packet *p) { padCertificateOffer(p, 500); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host1.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0 && app.acceptedEndpoints.size() <= 1, "half-open limit does not allocate a second full candidate");
+    }))
+    .once(on("host1.app[2].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(2))
+    .once(on("host1.app[2].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "expired candidate releases capacity for a later peer"); }));
+}
+%activity:
+EV << "rfc9147_half_open_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 3
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.cookieRequired = false
+*.host2.app[0].dtls.certificateBytes = 1000B
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 0.3s
+*.host1.app[1].dtls.handshakeTimeout = 1s
+*.host1.app[2].localPort = 4438
+*.host1.app[2].driver.startTime = 2.5s
+*.host2.app[0].dtls.maxHalfOpen = 1
+*.host2.app[0].dtls.handshakeTimeout = 2s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_half_open_limit: PASS

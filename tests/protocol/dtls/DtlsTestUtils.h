@@ -5,6 +5,7 @@
 #include "ProtocolTest.h"
 #include "DtlsTestApp.h"
 #include "inet/common/packet/chunk/EncryptedChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 #include "inet/transportlayer/tls/TlsClientHello_m.h"
@@ -71,6 +72,16 @@ inline bool packetApplication(const Packet *packet)
 }
 
 inline bool packetAck(const Packet *packet) { return findChunk<inet::dtls::DtlsAck>(packet) != nullptr; }
+
+inline bool packetAckForEpoch(const Packet *packet, uint64_t epoch)
+{
+    auto ack = findChunk<inet::dtls::DtlsAck>(packet);
+    if (ack)
+        for (size_t i = 0; i < ack->getEpochsArraySize(); i++)
+            if (ack->getEpochs(i) == epoch)
+                return true;
+    return false;
+}
 
 template<typename T>
 inline bool mutateHeader(Packet *packet, std::function<void(T&)> change)
@@ -247,17 +258,22 @@ inline void replaceProtectedFragment(Packet *packet, uint32_t messageLength, uin
     header->setMessageLength(messageLength);
     header->setFragmentOffset(offset);
     header->setFragmentLength(bytes.size());
+    header->markImmutable();
     auto inner = makeShared<SequenceChunk>();
     inner->insertAtBack(header);
-    if (!bytes.empty())
-        inner->insertAtBack(makeShared<BytesChunk>(bytes));
+    if (!bytes.empty()) {
+        auto fragment = makeShared<BytesChunk>(bytes);
+        fragment->markImmutable();
+        inner->insertAtBack(fragment);
+    }
     auto type = makeShared<inet::dtls::DtlsInnerContentType>();
     type->setContentType(22);
+    type->markImmutable();
     inner->insertAtBack(type);
     inner->markImmutable();
     int length = B(inner->getChunkLength()).get() + 16;
     int delta = length - oldRecord->getLength();
-    mutateNestedHeader<EncryptedChunk>(packet, [&](auto& h) { h.setChunk(inner); h.setLength(B(length)); });
+    mutateNestedHeader<EncryptedChunk>(packet, [&](auto& h) { h.setChunk(inner); h.setLength(inner->getChunkLength()); });
     require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(packet, [=](auto& h) { h.setLength(length); }), "fragment has unified record header");
     require(mutateHeader<UdpHeader>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "fragment has UDP envelope");
     require(mutateHeader<Ipv4Header>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "fragment has IPv4 envelope");
@@ -291,6 +307,32 @@ inline void coalesceDuplicateClientHello(Packet *packet)
     resizeTapEnvelope(packet, delta);
 }
 
+inline void appendClientHelloTail(Packet *packet)
+{
+    auto hello = findChunk<inet::dtls::DtlsClientHello>(packet);
+    auto sequence = dynamicPtrCast<const SequenceChunk>(packet->peekData());
+    require(hello && sequence, "trailing-byte fault targets a typed ClientHello");
+    auto replacement = makeShared<SequenceChunk>();
+    bool inserted = false;
+    for (const auto& child : sequence->getChunks()) {
+        replacement->insertAtBack(child);
+        if (child == hello) {
+            auto tail = makeShared<BytesChunk>(std::vector<uint8_t>{0});
+            tail->markImmutable();
+            replacement->insertAtBack(tail);
+            inserted = true;
+        }
+    }
+    require(inserted, "trailing byte is inside handshake body before Ethernet trailer");
+    packet->removeData();
+    packet->insertAtBack(replacement);
+    mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(packet, [](auto& h) { h.setMessageLength(h.getMessageLength() + 1); h.setFragmentLength(h.getFragmentLength() + 1); });
+    require(mutateHeader<inet::dtls::DtlsPlaintextHeader>(packet, [](auto& h) { h.setLength(h.getLength() + 1); }), "trailing byte is inside record");
+    require(mutateHeader<UdpHeader>(packet, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(1)); }), "trailing byte is inside UDP");
+    require(mutateHeader<Ipv4Header>(packet, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(1)); }), "trailing byte is inside IPv4");
+    resizeTapEnvelope(packet, 1);
+}
+
 inline Packet *rawPlaintext(int contentType, int epoch, int length)
 {
     auto packet = new Packet("crafted-dtls-record");
@@ -310,6 +352,69 @@ inline Packet *rawCiphertext(int epochBits)
     header->setLength(17);
     packet->insertAtBack(header);
     packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(17)));
+    return packet;
+}
+
+inline Packet *rawFatalAlert(int description)
+{
+    auto packet = rawPlaintext(21, 0, 2);
+    auto alert = makeShared<inet::dtls::DtlsAlert>();
+    alert->setLevel(2);
+    alert->setDescription(description);
+    packet->insertAtBack(alert);
+    return packet;
+}
+
+inline Packet *rawProtectedFinished(uint16_t messageSequence)
+{
+    auto header = makeShared<inet::dtls::DtlsHandshakeHeader>();
+    header->setMessageType(20);
+    header->setMessageLength(32);
+    header->setMessageSequence(messageSequence);
+    header->setFragmentLength(32);
+    auto body = makeShared<inet::tls::TlsFinished>();
+    body->setChunkLength(B(32));
+    body->setVerifyDataArraySize(32);
+    auto type = makeShared<inet::dtls::DtlsInnerContentType>();
+    type->setContentType(22);
+    header->markImmutable();
+    body->markImmutable();
+    type->markImmutable();
+    auto inner = makeShared<SequenceChunk>();
+    inner->insertAtBack(header);
+    inner->insertAtBack(body);
+    inner->insertAtBack(type);
+    inner->markImmutable();
+    auto record = makeShared<inet::dtls::DtlsCiphertextHeader>();
+    record->setEpochBits(2);
+    record->setLength(61);
+    auto packet = new Packet("crafted-early-client-Finished");
+    packet->insertAtBack(record);
+    packet->insertAtBack(makeShared<EncryptedChunk>(inner, inner->getChunkLength()));
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(16)));
+    return packet;
+}
+
+inline Packet *rawProtectedFatalAlert(int description)
+{
+    auto alert = makeShared<inet::dtls::DtlsAlert>();
+    alert->setLevel(2);
+    alert->setDescription(description);
+    auto type = makeShared<inet::dtls::DtlsInnerContentType>();
+    type->setContentType(21);
+    alert->markImmutable();
+    type->markImmutable();
+    auto inner = makeShared<SequenceChunk>();
+    inner->insertAtBack(alert);
+    inner->insertAtBack(type);
+    inner->markImmutable();
+    auto record = makeShared<inet::dtls::DtlsCiphertextHeader>();
+    record->setEpochBits(2);
+    record->setLength(19);
+    auto packet = new Packet("crafted-epoch-two-fatal-alert");
+    packet->insertAtBack(record);
+    packet->insertAtBack(makeShared<EncryptedChunk>(inner, inner->getChunkLength()));
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(16)));
     return packet;
 }
 
