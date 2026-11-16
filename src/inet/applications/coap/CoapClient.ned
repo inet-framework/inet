@@ -35,10 +35,14 @@ simple CoapClient extends CoapEndpointBase
         @signal[requestFailed](type=long);
         @signal[requestAborted](type=long);
         @signal[requestLatency](type=simtime_t);
+        @signal[notificationReceived](type=long);
+        @signal[activeObservations](type=long);
 
         @statistic[requestStarted](title="requests started"; source=requestStarted; record=count,sum; interpolationmode=none);
         @statistic[requestCompleted](title="requests completed"; source=requestCompleted; record=count,sum; interpolationmode=none);
         @statistic[requestFailed](title="requests failed"; source=requestFailed; record=count,sum; interpolationmode=none);
         @statistic[requestAborted](title="requests aborted"; source=requestAborted; record=count,sum; interpolationmode=none);
         @statistic[requestLatency](title="request latency"; source=requestLatency; unit=s; record=stats,vector; interpolationmode=none);
+        @statistic[notificationReceived](title="observe notifications received"; source=notificationReceived; record=count,sum; interpolationmode=none);
+        @statistic[activeObservations](title="active observe relations"; source=activeObservations; record=vector,last,max; interpolationmode=sample-hold);
 }

@@ -20,5 +20,9 @@ simple CoapServer extends CoapEndpointBase
         double defaultMaxAge @unit(s) = default(60s);
 
         @signal[requestHandled](type=long);
+        @signal[activeObservers](type=long);
+        @signal[notificationSent](type=long);
         @statistic[requestHandled](title="server requests handled"; source=requestHandled; record=count,sum; interpolationmode=none);
+        @statistic[activeObservers](title="active observers"; source=activeObservers; record=vector,last,max; interpolationmode=sample-hold);
+        @statistic[notificationSent](title="notifications sent"; source=notificationSent; record=count,sum; interpolationmode=none);
 }
