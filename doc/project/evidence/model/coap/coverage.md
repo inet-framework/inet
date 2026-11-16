@@ -2,7 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc7252/catalog.md](../../standard/rfc7252/catalog.md), [rfc6690/catalog.md](../../standard/rfc6690/catalog.md), [rfc7641/catalog.md](../../standard/rfc7641/catalog.md), [rfc7959/catalog.md](../../standard/rfc7959/catalog.md), [rfc9175/catalog.md](../../standard/rfc9175/catalog.md), [features.md](../../protocol/coap/features.md), [results.md](results.md)
 
-The single place that holds the coverage state of the CoAP over UDP workflow, recording every selected catalog obligation, its protocol check section, the implemented `.test` file, and its final run verdict.
+The single place that holds the coverage state of the CoAP over UDP and CoAP over DTLS workflows, recording every selected catalog obligation, its protocol check section, the implemented `.test` file, and its final run verdict.
 
 ## Statement coverage
 
@@ -49,10 +49,10 @@ The single place that holds the coverage state of the CoAP over UDP workflow, re
 | [RFC7959-COMB-1](../../standard/rfc7959/catalog.md#rfc7959-comb-1) | covered | [combined-block1-upload-and-block2-response-transfer](../../protocol/coap/checks/blockwise.md#combined-block1-upload-and-block2-response-transfer) | `Rfc7959Block1Upload.test` | PASS |
 | [RFC7959-OBS-1](../../standard/rfc7959/catalog.md#rfc7959-obs-1) | covered | [observe-notification-with-block2-follow-up-retrieval](../../protocol/coap/checks/blockwise.md#observe-notification-with-block2-follow-up-retrieval), [observe-and-block2-version-change-supersession-and-recovery](../../protocol/coap/checks/blockwise.md#observe-and-block2-version-change-supersession-and-recovery) | `Rfc7959ObserveBlock2.test`, `Rfc7959ObserveVersionChange.test` | PASS |
 | [RFC9175-RTAG-1](../../standard/rfc9175/catalog.md#rfc9175-rtag-1) | covered | [request-tag-concurrent-block1-uploads](../../protocol/coap/checks/blockwise.md#request-tag-concurrent-block1-uploads) | `Rfc9175RequestTag.test` | PASS |
-| [RFC7252-DTLS-1](../../standard/rfc7252/catalog.md#rfc7252-dtls-1) | planned | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | `Rfc7252DtlsHandshakeAndExchange.test` *(planned C2)* | NOT_RUN |
-| [RFC7252-DTLS-2](../../standard/rfc7252/catalog.md#rfc7252-dtls-2) | planned | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | `Rfc7252DtlsHandshakeAndExchange.test` *(planned C2)* | NOT_RUN |
-| [RFC7252-DTLS-3](../../standard/rfc7252/catalog.md#rfc7252-dtls-3) | planned | [dtls-session-isolation-and-replacement-cleanup](../../protocol/coap/checks/dtls.md#dtls-session-isolation-and-replacement-cleanup), [confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls](../../protocol/coap/checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls), [observe-and-blockwise-lifecycle-over-dtls](../../protocol/coap/checks/dtls.md#observe-and-blockwise-lifecycle-over-dtls) | `Rfc7252DtlsSessionIsolation.test`, `Rfc7252DtlsReliabilityAndRekey.test`, `Rfc7641DtlsObserve.test`, `Rfc7959DtlsBlockwise.test` *(planned C2–C4)* | NOT_RUN |
-| [RFC9175-TOKEN-1](../../standard/rfc9175/catalog.md#rfc9175-token-1) | planned | [confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls](../../protocol/coap/checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls) | `Rfc7252DtlsReliabilityAndRekey.test` *(planned C3)* | NOT_RUN |
+| [RFC7252-DTLS-1](../../standard/rfc7252/catalog.md#rfc7252-dtls-1) | covered | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | `Rfc7252DtlsHandshakeAndExchange.test`, `Rfc7252DtlsIpv6Certificate.test` | PASS |
+| [RFC7252-DTLS-2](../../standard/rfc7252/catalog.md#rfc7252-dtls-2) | covered | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | `Rfc7252DtlsHandshakeAndExchange.test` | PASS |
+| [RFC7252-DTLS-3](../../standard/rfc7252/catalog.md#rfc7252-dtls-3) | covered | [dtls-session-isolation-and-replacement-cleanup](../../protocol/coap/checks/dtls.md#dtls-session-isolation-and-replacement-cleanup), [confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls](../../protocol/coap/checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls), [observe-and-blockwise-lifecycle-over-dtls](../../protocol/coap/checks/dtls.md#observe-and-blockwise-lifecycle-over-dtls) | `Rfc7252DtlsSessionIsolation.test`, `Rfc7252DtlsReliabilityAndRekey.test`, `Rfc7641DtlsObserve.test`, `Rfc7959DtlsBlockwise.test` | PASS |
+| [RFC9175-TOKEN-1](../../standard/rfc9175/catalog.md#rfc9175-token-1) | covered | [confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls](../../protocol/coap/checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls) | `Rfc7252DtlsReliabilityAndRekey.test` | PASS |
 
 ## Feature support
 
@@ -66,8 +66,8 @@ The single place that holds the coverage state of the CoAP over UDP workflow, re
 | [COAP-F-OBSERVE](../../protocol/coap/features.md#coap-f-observe) | RFC7641-REG-1, REG-2, NOTIFY-1, ORDER-1, SUPER-1, FRESH-1, CANCEL-1 (`PASS`) | supported |
 | [COAP-F-BLOCKWISE](../../protocol/coap/features.md#coap-f-blockwise) | RFC7959-OPT-1, B1-1, B2-1, NEG-1, ERR-1, COMB-1, RFC9175-RTAG-1 (`PASS`) | supported |
 | [COAP-F-OBSERVE-BLOCK2](../../protocol/coap/features.md#coap-f-observe-block2) | RFC7959-OBS-1 (`PASS`) | supported |
-| [COAP-F-DTLS](../../protocol/coap/features.md#coap-f-dtls) | RFC7252-DTLS-1..DTLS-3, RFC9175-TOKEN-1 (`NOT_RUN`, planned C2–C4) | planned |
+| [COAP-F-DTLS](../../protocol/coap/features.md#coap-f-dtls) | RFC7252-DTLS-1..DTLS-3, RFC9175-TOKEN-1 (`PASS`) | supported |
 
 ## Achieved level
 
-Achieved: **Level 3** (from [`standards.md`](../../protocol/coap/standards.md#target-level)), with `26/26` protocol tests passing under `opp_run_protocol_tests`.
+Achieved: **Level 3** (from [`standards.md`](../../protocol/coap/standards.md#target-level)), with `26/26` UDP protocol tests and `8/8` DTLS protocol tests passing under `opp_run_protocol_tests`.

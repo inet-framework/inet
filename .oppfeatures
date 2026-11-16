@@ -2094,6 +2094,19 @@
         linkerFlags = ""
         />
     <feature
+        id = "CoapDtlsExamples"
+        name = "CoAP over DTLS examples"
+        description = "Example simulations demonstrating CoAP over DTLS 1.3."
+        initiallyEnabled = "true"
+        requires = "CoapDtls Ethernet Ieee8022 Ipv4 Ipv6 Loopback PhysicalLayerWiredCommon Queueing Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "inet.examples.coapdtls"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "CoapTests"
         name = "CoAP protocol tests"
         description = "Protocol conformance tests for CoAP over UDP."

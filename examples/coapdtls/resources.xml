@@ -1,0 +1,5 @@
+<resources>
+    <resource path="/sensors/temp" methods="GET,PUT" contentFormat="0" obs="true" maxAge="60" rt="temperature" if="sensor" title="Room Temperature">21C</resource>
+    <resource path="/actuators/log" methods="GET,PUT,POST,DELETE" contentFormat="0" maxAge="60" rt="log" if="actuator" title="Device Log">boot</resource>
+    <resource path="/firmware/image" methods="GET,PUT" contentFormat="0" obs="true" maxAge="60" rt="firmware" if="ota" title="Firmware Image">FIRMWARE-V1-0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF</resource>
+</resources>

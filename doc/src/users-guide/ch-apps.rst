@@ -558,7 +558,17 @@ outcomes (``requestStarted``, ``requestCompleted``, ``requestFailed``,
 ``notificationSent``). See the ``examples/coap`` scenarios (``NonConfirmable``,
 ``ConfirmableLoss``, ``SeparateResponse``, ``ResourceDiscovery``, ``Observe``,
 ``Block1Upload``, ``Block2Download``, ``ObserveBlockwise``, and ``Ipv6``) for
-runnable configurations. DTLS (``coaps://``), OSCORE, forward/reverse proxying
-(returning ``5.05 Proxying Not Supported``), multicast CoAP, and TCP/TLS
-transports are not supported.
+runnable UDP configurations. For ``coaps://`` (default UDP port ``5684``), use
+the :ned:`CoapDtlsClient` and :ned:`CoapDtlsServer` compound ``IApp`` modules in
+``inet.applications.coapdtls``, which pair :ned:`CoapClient` / :ned:`CoapServer`
+with an internal :ned:`Dtls` engine (see :doc:`ch-dtls`). Configure CoAP options
+under ``app[i].coap.*`` and DTLS 1.3 parameters (``profile``,
+``clientAuthentication``, ``cookieRequired``, ``udpPayloadLimit``,
+``protectOutDelay``, ``rekeyAfterRecords``) under ``app[i].dtls.*``; note that
+DTLS mode rejects ``coap://`` URIs and multicast destinations. See
+``examples/coapdtls`` (``PskBasic``, ``CertificateMutualAuth``,
+``LossyObserveBlockwise``, ``ProcessingCost``, and ``Ipv6``) for runnable
+``coaps://`` scenarios. OSCORE, forward/reverse proxying (returning
+``5.05 Proxying Not Supported``), multicast DTLS, and TCP/TLS transports are not
+supported.
 

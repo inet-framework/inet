@@ -41,3 +41,25 @@ Executed protocol conformance suite and example verification record across commi
 - **Release compilation:** `make MODE=release -j8` — built `out/clang-release/src/libINET.so` cleanly (exit `0`).
 - **Feature-disabled isolation build & restore:** `opp_featuretool disable Coap CoapExamples CoapTests && make makefiles && make MODE=debug -j8 && opp_featuretool enable Coap CoapExamples && make makefiles && make MODE=debug -j8` — clean compilation both with `-Xinet/applications/coap` and after restoring `Coap`/`CoapExamples` (exit `0`).
 - **Example scenarios (`examples/coap/omnetpp.ini`, Cmdenv run `#0`, `seed-set = 0`):** `NonConfirmable`, `ConfirmableLoss` (`retransmission:count 1`, `requestCompleted:count 5`), `SeparateResponse`, `ResourceDiscovery`, `Observe` (`notificationReceived:count 4`), `Block1Upload`, `Block2Download`, `ObserveBlockwise` (`notificationReceived:count 2`), `Ipv6` — all exited with code `0`.
+
+## Executed CoAP-over-DTLS protocol test suite (`feat/coap-dtls`, `C2`–`C5`)
+
+| Test | Commit | Check / Scope | Outcome |
+| --- | --- | --- | --- |
+| `Rfc7252DtlsHandshakeAndExchange.test` | C2 | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | PASS |
+| `Rfc7252DtlsIpv6Certificate.test` | C2 | [dtls-handshake-coaps-addressing-and-multicast-rejection](../../protocol/coap/checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | PASS |
+| `Rfc7252DtlsSessionIsolation.test` | C2 | [dtls-session-isolation-and-replacement-cleanup](../../protocol/coap/checks/dtls.md#dtls-session-isolation-and-replacement-cleanup) | PASS |
+| `Rfc7252DtlsReliabilityAndRekey.test` | C3 | [confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls](../../protocol/coap/checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls) | PASS |
+| `Rfc7641DtlsObserve.test` | C4 | [observe-and-blockwise-lifecycle-over-dtls](../../protocol/coap/checks/dtls.md#observe-and-blockwise-lifecycle-over-dtls) | PASS |
+| `Rfc7959DtlsBlockwise.test` | C4 | [observe-and-blockwise-lifecycle-over-dtls](../../protocol/coap/checks/dtls.md#observe-and-blockwise-lifecycle-over-dtls) | PASS |
+| `CoapDtlsLifecycle.test` | C5 | Graceful stop, crash, and restart lifecycle recovery over DTLS | PASS |
+| `CoapDtlsStatistics.test` | C5 | CoAP and DTLS signal/statistic invariants | PASS |
+
+## Observed DTLS builds, tests, and example commands
+
+- **Debug & release builds (`make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release`):** Built `out/clang-debug/src/libINET_dbg.so` and `out/clang-release/src/libINET.so` cleanly (exit `0`).
+- **CoAP-over-DTLS suite (`opp_run_protocol_tests --load . -p inet -m debug -w '^tests/protocol/coapdtls$' -f '.*\.test$'`):** `[10/10] ◉ Tested test (8 concurrent): 8 PASS in 11.516` (exit `0`).
+- **UDP CoAP regression suite (`opp_run_protocol_tests --load . -p inet -m debug -w '^tests/protocol/coap$' -f '.*\.test$'`):** `[28/28] ◉ Tested test (26 concurrent): 26 PASS in 1:23.801` (exit `0`).
+- **DTLS baseline unit, module lifecycle, and protocol suites:** Unit tests `4 PASS in 7.484`, lifecycle module tests `3 PASS in 5.957`, protocol suite `129 PASS in 2:14.903` (exit `0`).
+- **Feature-matrix builds:** Clean `MODE=debug` compilation with `Coap=OFF, Dtls=ON`, with `Coap=ON, Dtls=OFF`, and after restoring `Coap CoapExamples Dtls CoapDtls CoapDtlsExamples` (exit `0`).
+- **Example scenarios (`examples/coapdtls/omnetpp.ini`, Cmdenv `-r 0 --sim-time-limit=10s`):** `PskBasic` (`requestCompleted:count 3`), `CertificateMutualAuth` (`requestCompleted:count 2`), `LossyObserveBlockwise` (`notificationReceived:count 2`), `ProcessingCost` (`requestCompleted:count 5`), and `Ipv6` (`requestCompleted:count 3`) — all exited with code `0`.

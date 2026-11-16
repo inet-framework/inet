@@ -1,0 +1,5 @@
+CoAP over DTLS 1.3 application models
+
+Added CoAP over DTLS 1.3 (`coaps://`, default UDP port `5684`) support to `inet.applications.coap` (`CoapEndpointBase`, `CoapClient`, `CoapServer`, `CoapProtocol`), along with the compound `IApp` modules `CoapDtlsClient` and `CoapDtlsServer` under `inet.applications.coapdtls` (`CoapDtls` and `CoapDtlsExamples` features in `.oppfeatures`).
+
+Endpoints gate outbound CoAP dispatch until DTLS association establishment completes, isolate confirmable exchanges, duplicate caches, separate responses, Observe relations, and Block1/Block2 transfers by DTLS `AssociationId`, preserve active exchanges across in-session DTLS `KeyUpdate` with monotonic 8-byte tokens, and tear down session-bound state cleanly on DTLS close, error, or lifecycle stop/crash.
