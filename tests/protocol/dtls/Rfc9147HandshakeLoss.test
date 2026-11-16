@@ -1,0 +1,58 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147HandshakeLoss. See the owning reviewer document in this suite
+and plan/pending/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+static uint64_t originalNumber;
+return ProtocolTest("rfc9147_handshake_loss")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434 && udp.destPort == 4433").nth(1).drop().describe("drop first ClientHello"))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).assertEvent([](const MatchContext& c) { originalNumber = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet)->getSequenceNumber(); return true; }).within(1))
+    .unordered({
+        on("host1.app[0].dtls").signal("handshakeRetransmission").notBefore(0.99).within(1.01),
+        on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).assertEvent([](const MatchContext& c) {
+            auto record = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+            return record && record->getEpoch() == 0 && record->getSequenceNumber() != originalNumber && findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence() == 0;
+        }).within(1.01)
+    })
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1, "client recovers a dropped first flight");
+        require(app.errorCount == 0, "single loss is recoverable");
+    }));
+}
+
+%activity:
+EV << "rfc9147_handshake_loss compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_handshake_loss: PASS

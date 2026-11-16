@@ -2,6 +2,7 @@
 #include "inet/transportlayer/dtls/Dtls.h"
 
 #include <algorithm>
+#include <climits>
 #include <limits>
 
 #include "inet/common/Protocol.h"
@@ -28,6 +29,7 @@ simsignal_t Dtls::associationEstablishedSignal = registerSignal("associationEsta
 simsignal_t Dtls::associationFailedSignal = registerSignal("associationFailed");
 simsignal_t Dtls::establishmentTimeSignal = registerSignal("establishmentTime");
 simsignal_t Dtls::recordOverheadSignal = registerSignal("recordOverhead");
+simsignal_t Dtls::reassemblyBytesSignal = registerSignal("reassemblyBytes");
 simsignal_t Dtls::handshakeRetransmissionSignal = registerSignal("handshakeRetransmission");
 simsignal_t Dtls::processingDelaySignal = registerSignal("processingDelay");
 
@@ -36,12 +38,12 @@ Dtls::~Dtls()
     discardAll("module destroyed", false);
 }
 
-bool Dtls::enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion)
+bool Dtls::enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,
+                             DtlsProcessingQueue::Eligibility eligible, DtlsProcessingQueue::Completion skipped)
 {
-    bool accepted = queue && queue->enqueue(id, bytes, delay, std::move(completion));
-    if (accepted)
+    return queue && queue->enqueue(id, bytes, delay, std::move(completion), std::move(eligible), std::move(skipped), [this, delay]() {
         emit(processingDelaySignal, delay.dbl());
-    return accepted;
+    });
 }
 
 bool Dtls::hasConsistentEncoding(const Packet *packet)
@@ -121,12 +123,14 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
         throw cRuntimeError("Invalid DTLS open request");
     auto halfOpenLimit = par("maxHalfOpen").intValue();
     auto timeout = SimTime(par("handshakeTimeout").doubleValue());
-    auto halfOpen = std::count_if(associations.begin(), associations.end(), [](const auto& entry) { return entry.second->state != HandshakeState::ESTABLISHED; });
     if (halfOpenLimit <= 0 || timeout <= SIMTIME_ZERO)
         throw cRuntimeError("Invalid DTLS handshake limit or timeout");
-    if (halfOpen >= halfOpenLimit || nextAssociationId == 0)
+    if (countHalfOpen() >= size_t(halfOpenLimit) || nextAssociationId == 0)
         return 0;
-    auto association = std::make_unique<Association>(*this);
+    auto reassemblyLimit = par("maxReassemblyBytes").intValue();
+    if (reassemblyLimit < 0)
+        throw cRuntimeError("Invalid DTLS reassembly limit");
+    auto association = std::make_unique<Association>(*this, reassemblyLimit);
     association->id = nextAssociationId++;
     association->startedAt = simTime();
     association->callback = callback;
@@ -154,6 +158,7 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
         auto it = associations.find(id);
         if (it != associations.end()) {
             cancelEvent(it->second->handshakeDeadline.get());
+            it->second->cancelTimers();
             associations.erase(it);
         }
         throw;
@@ -163,7 +168,26 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
 
 bool Dtls::handleHandshakeDeadline(cMessage *message)
 {
+    for (const auto& attempt : prevalidationAttempts) {
+        if (attempt->retryTimer.get() == message) {
+            auto id = attempt->id;
+            attempt->retryTimeout = std::min(SimTime(60), attempt->retryTimeout * 2);
+            if (attempt->retryFlight) {
+                attempt->retryFlight->requestRetransmission();
+                attempt->retryBurst = attempt->retryQueued;
+                pumpRetry(id);
+            }
+            return true;
+        }
+        if (attempt->deadline.get() == message) {
+            auto id = attempt->id;
+            removePrevalidation(id);
+            return true;
+        }
+    }
     for (const auto& entry : associations) {
+        if (entry.second->handleTimer(message))
+            return true;
         if (entry.second->handshakeDeadline.get() == message) {
             auto id = entry.first;
             failAssociation(id, "handshake timeout");
@@ -171,6 +195,62 @@ bool Dtls::handleHandshakeDeadline(cMessage *message)
         }
     }
     return false;
+}
+
+Dtls::PrevalidationAttempt *Dtls::findPrevalidation(uint64_t id) const
+{
+    for (const auto& attempt : prevalidationAttempts)
+        if (attempt->id == id)
+            return attempt.get();
+    return nullptr;
+}
+
+size_t Dtls::countHalfOpen() const
+{
+    size_t count = std::count_if(associations.begin(), associations.end(), [](const auto& entry) { return entry.second->state != HandshakeState::ESTABLISHED; });
+    for (const auto& attempt : prevalidationAttempts) {
+        bool ownedByCandidate = std::any_of(associations.begin(), associations.end(), [&](const auto& entry) {
+            const auto& candidate = *entry.second;
+            return candidate.serverSide && candidate.state != HandshakeState::ESTABLISHED &&
+                   candidate.localAddress == attempt->localAddress && candidate.localPort == attempt->localPort &&
+                   candidate.peerAddress == attempt->peerAddress && candidate.peerPort == attempt->peerPort;
+        });
+        if (!ownedByCandidate)
+            ++count;
+    }
+    return count;
+}
+
+void Dtls::emitReassemblyBytes()
+{
+    size_t total = 0;
+    auto add = [&total](size_t value) {
+        total = value > size_t(LONG_MAX) - total ? size_t(LONG_MAX) : total + value;
+    };
+    for (const auto& entry : associations)
+        add(entry.second->getReassemblyBytes());
+    for (const auto& entry : prevalidationAttempts)
+        add(entry->reassembly.getReservedBytes());
+    emit(reassemblyBytesSignal, (long)total);
+}
+
+void Dtls::removePrevalidation(uint64_t id)
+{
+    auto it = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+        [id](const auto& entry) { return entry->id == id; });
+    if (it == prevalidationAttempts.end())
+        return;
+    auto attempt = std::move(*it);
+    prevalidationAttempts.erase(it);
+    auto hadReassembly = attempt->reassembly.getReservedBytes() != 0;
+    cancelEvent(attempt->deadline.get());
+    cancelEvent(attempt->retryTimer.get());
+    if (inputProcessing)
+        inputProcessing->cancel(id);
+    if (outputProcessing)
+        outputProcessing->cancel(id);
+    if (hadReassembly)
+        emitReassemblyBytes();
 }
 
 void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence)
@@ -214,14 +294,22 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
         return;
     auto association = std::move(it->second);
     associations.erase(it);
+    auto hadReassembly = association->getReassemblyBytes() != 0;
+    association->cancelTimers();
     cancelEvent(association->handshakeDeadline.get());
     if (inputProcessing)
         inputProcessing->cancel(id);
     if (outputProcessing)
         outputProcessing->cancel(id);
+    if (hadReassembly)
+        emitReassemblyBytes();
     if (alertDescription >= 0) {
         bool encrypted = association->state != HandshakeState::CLIENT_WAIT_SERVER_HELLO;
-        if (!encrypted || association->nextEpoch2Record < (uint64_t(1) << 24))
+        size_t alertBytes = encrypted ? 24 : 15;
+        auto credit = association->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : association->receivedBytes * 3;
+        bool permitted = !association->serverSide || association->addressValidated ||
+            (association->sentBytes <= credit && alertBytes <= credit - association->sentBytes);
+        if (permitted && (!encrypted || association->nextEpoch2Record < (uint64_t(1) << 24)))
             sendAlert(association->localAddress, association->peerAddress, association->peerPort, alertDescription, encrypted, association->nextEpoch2Record++);
     }
     auto callback = association->callback;
@@ -279,12 +367,13 @@ static void appendUint64(std::vector<uint8_t>& output, uint64_t value)
         output.push_back(value >> (i * 8));
 }
 
-static std::vector<uint8_t> makeCookie(uint64_t issued, const L3Address& local, int localPort,
+static std::vector<uint8_t> makeCookie(uint64_t issued, uint64_t started, const L3Address& local, int localPort,
                                        const L3Address& peer, int peerPort, const Ptr<const DtlsClientHello>& hello)
 {
     // Opaque modeled token; it is not a cryptographic authenticator.
     std::vector<uint8_t> token;
     appendUint64(token, issued);
+    appendUint64(token, started);
     auto localString = local.str();
     auto peerString = peer.str();
     appendUint16(token, localString.size());
@@ -312,9 +401,26 @@ void Dtls::sendClientHello(AssociationId id, const std::vector<uint8_t>& cookie)
     if (it != associations.end())
         it->second->sendClientHello(cookie);
 }
-void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, const std::vector<uint8_t>& cookie, bool requestKeyShare, size_t receivedBytes)
+void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, const std::vector<uint8_t>& cookie, bool requestKeyShare, size_t receivedBytes, PrevalidationAttempt *attempt, uint16_t messageSequence)
 {
     // RFC 9147 Section 5.1 uses a cookie retry and bounds traffic before address validation.
+    (void)localAddress;
+    (void)peerAddress;
+    (void)peerPort;
+    (void)receivedBytes;
+    if (!attempt)
+        return;
+    auto id = attempt->id;
+    if (attempt->retryFlight && attempt->retryFlight->size() &&
+        attempt->retryFlight->get(0).messageSequence == messageSequence) {
+        if (!attempt->retryGenerating) {
+            cancelEvent(attempt->retryTimer.get());
+            attempt->retryFlight->requestRetransmission();
+            attempt->retryBurst = attempt->retryQueued;
+            pumpRetry(id);
+        }
+        return;
+    }
     auto hello = makeShared<tls::TlsServerHello>();
     hello->setLegacyVersion(0xfefd);
     for (size_t i = 0; i < 32; ++i)
@@ -331,127 +437,271 @@ void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
     hello->setChunkLength(B(40 + extensions.size()));
-    auto handshake = makeShared<DtlsHandshakeHeader>();
-    handshake->setMessageType(2);
-    handshake->setMessageLength(hello->getChunkLength().get<B>());
-    handshake->setFragmentLength(handshake->getMessageLength());
-    auto record = makeShared<DtlsPlaintextHeader>();
-    record->setLength((B(12) + hello->getChunkLength()).get<B>());
-    auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("DTLS HelloRetryRequest", hello));
-    (*packet)->insertAtFront(handshake);
-    (*packet)->insertAtFront(record);
-    (*packet)->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-    if (!localAddress.isUnspecified())
-        (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(localAddress);
-    auto bytes = (size_t)(*packet)->getByteLength();
-    if (receivedBytes < (bytes + 2) / 3 || bytes > (size_t)par("udpPayloadLimit").intValue()) {
+    auto limit = par("udpPayloadLimit").intValue();
+    if (limit <= 25) {
         emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
         return;
     }
+    cancelEvent(attempt->retryTimer.get());
+    auto flight = std::make_shared<DtlsHandshakeFlight>();
+    attempt->retryFlight = flight;
+    attempt->retryQueued = attempt->retryBurst = 0;
+    auto length = hello->getChunkLength().get<B>();
+    auto maximum = std::min<size_t>(limit - 25, 65535 - 12);
+    if (size_t(length) <= maximum) {
+        hello->markImmutable();
+        flight->add(2, messageSequence, length, 0, 0, hello);
+    }
+    else {
+        Packet source("DTLS HelloRetryRequest body", hello);
+        auto bytes = source.peekDataAsBytes()->getBytes();
+        for (size_t offset = 0; offset < bytes.size(); offset += maximum) {
+            auto count = std::min(maximum, bytes.size() - offset);
+            auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + offset + count));
+            chunk->markImmutable();
+            flight->add(2, messageSequence, length, offset, 0, chunk);
+        }
+    }
+    attempt->retryGenerating = true;
     auto delay = SimTime(par("handshakeOutDelay").doubleValue());
-    if (!enqueueProcessing(outputProcessing.get(), 0, bytes, delay, [this, peerAddress, peerPort, packet]() {
-        auto outgoing = packet->release();
-        emit(packetSentToLowerSignal, outgoing);
-        udpSocket.sendTo(outgoing, peerAddress, peerPort);
-    }))
+    if (!enqueueProcessing(outputProcessing.get(), id, length + 12, delay, [this, id, flight]() {
+        auto current = findPrevalidation(id);
+        if (!current || current->retryFlight != flight)
+            return;
+        for (size_t i = 0; i < flight->size(); ++i)
+            flight->markReady(i);
+        current->retryGenerating = false;
+        pumpRetry(id);
+    }, [this, id, flight]() { auto current = findPrevalidation(id); return current && current->retryFlight == flight; })) {
+        removePrevalidation(id);
         emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+    }
+}
+
+void Dtls::pumpRetry(uint64_t id)
+{
+    auto attempt = findPrevalidation(id);
+    if (!attempt || attempt->failing || attempt->retryPumping || attempt->retryGenerating || !attempt->retryFlight || attempt->retryFlight->isComplete())
+        return;
+    attempt->retryPumping = true;
+    auto flight = attempt->retryFlight;
+    for (size_t i = 0; i < flight->size() && attempt->retryBurst < 10; ++i) {
+        if (!flight->reserve(i))
+            continue;
+        auto bytes = size_t(flight->get(i).data->getChunkLength().get<B>()) + 25;
+        auto credit = attempt->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : attempt->receivedBytes * 3;
+        if (attempt->sentBytes > credit || attempt->reservedBytes > credit - attempt->sentBytes || bytes > credit - attempt->sentBytes - attempt->reservedBytes) {
+            flight->cancelReservation(i);
+            continue;
+        }
+        attempt->reservedBytes += bytes;
+        ++attempt->retryBurst;
+        ++attempt->retryQueued;
+        auto eligible = [this, id, flight, i]() {
+            auto current = findPrevalidation(id);
+            return current && current->retryFlight == flight && flight->get(i).queued && !flight->get(i).acknowledged;
+        };
+        auto skipped = [this, id, flight, i, bytes]() {
+            flight->cancelReservation(i);
+            auto current = findPrevalidation(id);
+            if (!current)
+                return;
+            current->reservedBytes -= bytes;
+            if (current->retryFlight == flight) {
+                if (current->retryQueued)
+                    --current->retryQueued;
+                if (current->retryBurst)
+                    --current->retryBurst;
+                if (!current->retryPumping)
+                    pumpRetry(id);
+            }
+        };
+        auto complete = [this, id, flight, i, bytes]() {
+            auto current = findPrevalidation(id);
+            if (!current || current->retryFlight != flight)
+                return;
+            if (current->nextRecord >= (uint64_t(1) << 48)) {
+                removePrevalidation(id);
+                return;
+            }
+            auto fragment = flight->get(i);
+            auto number = current->nextRecord++;
+            auto packet = new Packet("DTLS HelloRetryRequest", fragment.data);
+            auto handshake = makeShared<DtlsHandshakeHeader>();
+            handshake->setMessageType(fragment.messageType);
+            handshake->setMessageSequence(fragment.messageSequence);
+            handshake->setMessageLength(fragment.messageLength);
+            handshake->setFragmentOffset(fragment.offset);
+            handshake->setFragmentLength(fragment.data->getChunkLength().get<B>());
+            packet->insertAtFront(handshake);
+            auto record = makeShared<DtlsPlaintextHeader>();
+            record->setSequenceNumber(number);
+            record->setLength(packet->getDataLength().get<B>());
+            packet->insertAtFront(record);
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+            if (!current->localAddress.isUnspecified())
+                packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->localAddress);
+            auto peer = current->peerAddress;
+            auto port = current->peerPort;
+            current->reservedBytes -= bytes;
+            current->sentBytes += bytes;
+            emit(packetSentToLowerSignal, packet);
+            udpSocket.sendTo(packet, peer, port);
+            current = findPrevalidation(id);
+            if (!current || current->retryFlight != flight)
+                return;
+            bool retransmission = flight->get(i).transmissions != 0;
+            flight->handedOff(i, number, simTime());
+            if (current->retryQueued)
+                --current->retryQueued;
+            if (retransmission)
+                emit(handshakeRetransmissionSignal, (long)id);
+            current = findPrevalidation(id);
+            if (current && current->retryFlight == flight && !current->retryPumping && current->retryQueued == 0 &&
+                !flight->isComplete() && !current->retryTimer->isScheduled())
+                scheduleAt(simTime() + current->retryTimeout, current->retryTimer.get());
+        };
+        if (!enqueueProcessing(outputProcessing.get(), id, bytes, SIMTIME_ZERO, complete, eligible, skipped)) {
+            removePrevalidation(id);
+            emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+            return;
+        }
+        attempt = findPrevalidation(id);
+        if (!attempt || attempt->retryFlight != flight)
+            return;
+    }
+    attempt->retryPumping = false;
+    if (attempt->retryQueued == 0 && attempt->retryBurst != 0 && !flight->isComplete() && !attempt->retryTimer->isScheduled())
+        scheduleAt(simTime() + attempt->retryTimeout, attempt->retryTimer.get());
+}
+
+void Dtls::acknowledgeRetry(uint64_t id, const DtlsAck& ack)
+{
+    auto attempt = findPrevalidation(id);
+    if (!attempt || !attempt->retryFlight || ack.getEpochsArraySize() != ack.getSequenceNumbersArraySize())
+        return;
+    bool progress = false;
+    for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
+        auto result = attempt->retryFlight->acknowledge(ack.getEpochs(i), ack.getSequenceNumbers(i), simTime());
+        progress |= result.matched;
+        if (result.rtt)
+            attempt->retryTimeout = std::max(SimTime::fromRaw(1), *result.rtt * 1.5);
+    }
+    if (!progress)
+        return;
+    cancelEvent(attempt->retryTimer.get());
+    if (!attempt->retryFlight->isComplete()) {
+        attempt->retryFlight->requestRetransmission();
+        attempt->retryBurst = attempt->retryQueued;
+        pumpRetry(id);
+    }
 }
 
 void Dtls::sendPlainHandshake(AssociationId id, uint8_t messageType, uint16_t messageSequence, const Ptr<Chunk>& body)
 {
     auto it = associations.find(id);
-    if (it == associations.end())
-        return;
-    auto handshake = makeShared<DtlsHandshakeHeader>();
-    handshake->setMessageType(messageType);
-    handshake->setMessageSequence(messageSequence);
-    handshake->setMessageLength(body->getChunkLength().get<B>());
-    handshake->setFragmentLength(handshake->getMessageLength());
-    auto record = makeShared<DtlsPlaintextHeader>();
-    record->setSequenceNumber(messageSequence);
-    auto length = B(12) + body->getChunkLength();
-    if (length > B(65535) || length + B(13) > B(par("udpPayloadLimit").intValue()))
-        throw cRuntimeError("DTLS handshake message exceeds the configured UDP payload limit");
-    record->setLength(length.get<B>());
-    auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("DTLS handshake", body));
-    (*packet)->insertAtFront(handshake);
-    (*packet)->insertAtFront(record);
-    (*packet)->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-    if (!it->second->localAddress.isUnspecified())
-        (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(it->second->localAddress);
-    auto bytes = (*packet)->getByteLength();
-    auto peer = it->second->peerAddress;
-    auto port = it->second->peerPort;
-    auto delay = SimTime(par("handshakeOutDelay").doubleValue());
-    if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, bytes, peer, port, packet]() {
-        auto current = associations.find(id);
-        if (current != associations.end()) {
-            if (current->second->reservedBytes >= (size_t)bytes) {
-                current->second->reservedBytes -= bytes;
-                current->second->sentBytes += bytes;
-            }
-            auto outgoing = packet->release();
-            emit(packetSentToLowerSignal, outgoing);
-            udpSocket.sendTo(outgoing, peer, port);
-        }
-    }))
-        failAssociation(id, "DTLS output processing queue is full");
+    if (it != associations.end())
+        it->second->appendHandshake(messageType, messageSequence, 0, body);
 }
 
 void Dtls::sendProtectedHandshake(AssociationId id, uint8_t messageType, uint16_t messageSequence, const Ptr<Chunk>& body, bool establishAfterSend, bool serverFinished)
 {
     auto it = associations.find(id);
-    if (it == associations.end())
+    if (it != associations.end())
+        it->second->appendHandshake(messageType, messageSequence, 2, body, establishAfterSend, serverFinished);
+}
+void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHandshakeFlight>& flight, size_t index)
+{
+    auto it = associations.find(id);
+    if (it == associations.end() || it->second->flight != flight)
         return;
-    auto handshake = makeShared<DtlsHandshakeHeader>();
-    handshake->setMessageType(messageType);
-    handshake->setMessageSequence(messageSequence);
-    handshake->setMessageLength(body->getChunkLength().get<B>());
-    handshake->setFragmentLength(handshake->getMessageLength());
-    auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("DTLS protected handshake", body));
-    (*packet)->insertAtFront(handshake);
-    DtlsRecordProtection::protect(packet->get(), 22);
-    auto record = makeShared<DtlsCiphertextHeader>();
-    record->setEpochBits(2);
-    if (it->second->nextEpoch2Record >= (uint64_t(1) << 24))
-        throw cRuntimeError("DTLS handshake epoch record limit reached");
-    record->setSequenceNumber(it->second->nextEpoch2Record++ & 0xffff);
-    auto length = (*packet)->getDataLength();
-    if (length > B(65535) || length + B(5) > B(par("udpPayloadLimit").intValue()))
-        throw cRuntimeError("DTLS protected handshake exceeds the configured UDP payload limit");
-    record->setLength(length.get<B>());
-    (*packet)->insertAtFront(record);
-    (*packet)->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-    if (!it->second->localAddress.isUnspecified())
-        (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(it->second->localAddress);
-    auto bytes = (*packet)->getByteLength();
-    auto peer = it->second->peerAddress;
-    auto port = it->second->peerPort;
-    auto handshakeDelay = SimTime(par("handshakeOutDelay").doubleValue());
-    auto protectDelay = SimTime(par("protectOutDelay").doubleValue());
-    if (!enqueueProcessing(outputProcessing.get(), id, bytes, handshakeDelay, [this, id, bytes, peer, port, protectDelay, packet, establishAfterSend, serverFinished]() {
-        if (!enqueueProcessing(outputProcessing.get(), id, bytes, protectDelay, [this, id, bytes, peer, port, packet, establishAfterSend, serverFinished]() {
-            auto current = associations.find(id);
-            if (current != associations.end()) {
-                if (current->second->reservedBytes >= (size_t)bytes) {
-                    current->second->reservedBytes -= bytes;
-                    current->second->sentBytes += bytes;
-                }
-                auto outgoing = packet->release();
-                emit(recordOverheadSignal, 22L);
-                emit(packetSentToLowerSignal, outgoing);
-                udpSocket.sendTo(outgoing, peer, port);
-                if (establishAfterSend)
-                    establish(id);
-                else if (serverFinished) {
-                    auto current = associations.find(id);
-                    if (current != associations.end())
-                        current->second->serverFinishedHandedOff();
-                }
+    auto fragment = flight->get(index);
+    size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 34);
+    size_t reservedCredit = it->second->serverSide ? bytes : 0;
+    if (it->second->serverSide && fragment.transmissions != 0) {
+        if (!it->second->addressValidated) {
+            auto received = it->second->receivedBytes;
+            auto credit = received > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : received * 3;
+            if (it->second->sentBytes > credit || it->second->reservedBytes > credit - it->second->sentBytes ||
+                bytes > credit - it->second->sentBytes - it->second->reservedBytes) {
+                flight->cancelReservation(index);
+                --it->second->burstQueued;
+                --it->second->burstLimit;
+                return;
             }
-        }))
-            failAssociation(id, "DTLS output processing queue is full");
-    }))
+        }
+        it->second->reservedBytes += bytes;
+    }
+    auto eligible = [this, id, flight, index]() {
+        auto current = associations.find(id);
+        return current != associations.end() && current->second->flight == flight &&
+               flight->get(index).queued && !flight->get(index).acknowledged;
+    };
+    auto skipped = [this, id, flight, index, reservedCredit]() {
+        auto current = associations.find(id);
+        if (current != associations.end())
+            current->second->flightRecordSkipped(flight, index, reservedCredit);
+    };
+    auto complete = [this, id, flight, index, reservedCredit]() {
+        auto current = associations.find(id);
+        if (current == associations.end() || current->second->flight != flight)
+            return;
+        auto fragment = flight->get(index);
+        uint64_t recordNumber;
+        if (fragment.epoch == 0) {
+            if (current->second->nextEpoch0Record >= (uint64_t(1) << 48)) {
+                failAssociation(id, "DTLS plaintext record sequence exhausted");
+                return;
+            }
+            recordNumber = current->second->nextEpoch0Record++;
+        }
+        else {
+            if (current->second->nextEpoch2Record >= (uint64_t(1) << 24)) {
+                failAssociation(id, "DTLS handshake epoch record limit reached");
+                return;
+            }
+            recordNumber = current->second->nextEpoch2Record++;
+        }
+        auto packet = new Packet("DTLS handshake", fragment.data);
+        auto handshake = makeShared<DtlsHandshakeHeader>();
+        handshake->setMessageType(fragment.messageType);
+        handshake->setMessageSequence(fragment.messageSequence);
+        handshake->setMessageLength(fragment.messageLength);
+        handshake->setFragmentOffset(fragment.offset);
+        handshake->setFragmentLength(fragment.data->getChunkLength().get<B>());
+        packet->insertAtFront(handshake);
+        if (fragment.epoch == 0) {
+            auto header = makeShared<DtlsPlaintextHeader>();
+            header->setSequenceNumber(recordNumber);
+            header->setLength(packet->getDataLength().get<B>());
+            packet->insertAtFront(header);
+        }
+        else {
+            DtlsRecordProtection::protect(packet, 22);
+            auto header = makeShared<DtlsCiphertextHeader>();
+            header->setEpochBits(fragment.epoch & 3);
+            header->setSequenceNumber(recordNumber & 0xffff);
+            header->setLength(packet->getDataLength().get<B>());
+            packet->insertAtFront(header);
+            emit(recordOverheadSignal, 22L);
+        }
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+        if (!current->second->localAddress.isUnspecified())
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+        auto peer = current->second->peerAddress;
+        auto port = current->second->peerPort;
+        if (reservedCredit <= current->second->reservedBytes) {
+            current->second->reservedBytes -= reservedCredit;
+            current->second->sentBytes += reservedCredit;
+        }
+        emit(packetSentToLowerSignal, packet);
+        udpSocket.sendTo(packet, peer, port);
+        current = associations.find(id);
+        if (current != associations.end() && current->second->flight == flight)
+            current->second->flightRecordHandedOff(flight, index, recordNumber);
+    };
+    auto delay = fragment.epoch == 0 ? SIMTIME_ZERO : SimTime(par("protectOutDelay").doubleValue());
+    if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, complete, eligible, skipped))
         failAssociation(id, "DTLS output processing queue is full");
 }
 
@@ -464,6 +714,7 @@ void Dtls::establish(AssociationId id)
     auto limit = par("maxAssociations").intValue();
     auto old = associations.find(it->second->replacementId);
     bool replacesEstablished = old != associations.end() && old->second->state == HandshakeState::ESTABLISHED;
+    auto oldId = replacesEstablished ? old->first : 0;
     if (limit <= 0 || established - (replacesEstablished ? 1 : 0) >= limit) {
         failAssociation(id, "DTLS association limit reached", 40);
         return;
@@ -471,8 +722,19 @@ void Dtls::establish(AssociationId id)
     it->second->state = HandshakeState::ESTABLISHED;
     auto elapsed = simTime() - it->second->startedAt;
     cancelEvent(it->second->handshakeDeadline.get());
+    auto hadReassembly = it->second->reassembly.getReservedBytes() != 0;
+    it->second->reassembly.clear();
+    it->second->completeRecordNumbers.clear();
+    if (hadReassembly) {
+        emitReassemblyBytes();
+        it = associations.find(id);
+        if (it == associations.end())
+            return;
+    }
+    // RFC 9147 Section 5.8.1 retains the server's final response for at least twice the default MSL (240 seconds).
+    if (it->second->serverSide)
+        scheduleAt(simTime() + SimTime(240), it->second->retentionTimer.get());
     if (replacesEstablished) {
-        auto oldId = old->first;
         close(oldId);
         it = associations.find(id);
         if (it == associations.end())
@@ -624,49 +886,496 @@ void Dtls::sendFinalAck(AssociationId id, uint64_t sequence)
     auto it = associations.find(id);
     if (it == associations.end())
         return;
-    auto ack = makeShared<DtlsAck>();
-    ack->setEpochsArraySize(1);
-    ack->setEpochs(0, 2);
-    ack->setSequenceNumbersArraySize(1);
-    ack->setSequenceNumbers(0, sequence);
-    ack->setChunkLength(B(18));
-    auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("DTLS ACK", ack));
-    DtlsRecordProtection::protect(packet->get(), 26);
-    auto header = makeShared<DtlsCiphertextHeader>();
-    header->setEpochBits(3);
-    if (it->second->nextEpoch3Record >= (uint64_t(1) << 24))
-        throw cRuntimeError("DTLS application epoch record limit reached");
-    header->setSequenceNumber(it->second->nextEpoch3Record++ & 0xffff);
-    header->setLength((*packet)->getDataLength().get<B>());
-    (*packet)->insertAtFront(header);
-    (*packet)->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
-    if (!it->second->localAddress.isUnspecified())
-        (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(it->second->localAddress);
-    auto peer = it->second->peerAddress;
-    auto port = it->second->peerPort;
-    auto delay = SimTime(par("protectOutDelay").doubleValue());
-    auto bytes = (*packet)->getByteLength();
-    if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, peer, port, packet]() {
-        if (associations.find(id) != associations.end()) {
-            auto outgoing = packet->release();
-            emit(recordOverheadSignal, 22L);
-            emit(packetSentToLowerSignal, outgoing);
-            udpSocket.sendTo(outgoing, peer, port);
-        }
-    }))
-        failAssociation(id, "DTLS output processing queue is full");
+    it->second->pendingAcks.emplace(2, sequence);
+    it->second->flushAcknowledgements(3);
 }
 
-void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int localPort, const L3Address& peerAddress, int peerPort, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted)
+void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std::vector<std::pair<uint64_t, uint64_t>>& records)
+{
+    // RFC 9147 Sections 7 and 7.1 identify acknowledged records by epoch and sequence number.
+    auto udpLimit = par("udpPayloadLimit").intValue();
+    int overhead = sendEpoch == 0 ? 13 : 22;
+    if (udpLimit < overhead + 18) {
+        failAssociation(id, "DTLS UDP payload limit cannot carry an ACK");
+        return;
+    }
+    size_t maxRecords = std::min<size_t>(4095, (udpLimit - overhead - 2) / 16);
+    for (size_t begin = 0; begin < records.size(); begin += maxRecords) {
+        auto current = associations.find(id);
+        if (current == associations.end())
+            return;
+        auto count = std::min(maxRecords, records.size() - begin);
+        auto ack = makeShared<DtlsAck>();
+        ack->setEpochsArraySize(count);
+        ack->setSequenceNumbersArraySize(count);
+        for (size_t i = 0; i < count; ++i) {
+            ack->setEpochs(i, records[begin + i].first);
+            ack->setSequenceNumbers(i, records[begin + i].second);
+        }
+        ack->setChunkLength(B(2 + 16 * count));
+        auto peer = current->second->peerAddress;
+        auto port = current->second->peerPort;
+        auto localAddress = current->second->localAddress;
+        auto delay = sendEpoch == 0 ? SIMTIME_ZERO : SimTime(par("protectOutDelay").doubleValue());
+        size_t bytes = overhead + 2 + 16 * count;
+        size_t reservedCredit = current->second->serverSide && !current->second->addressValidated ? bytes : 0;
+        if (reservedCredit) {
+            auto received = current->second->receivedBytes;
+            auto credit = received > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : received * 3;
+            if (current->second->sentBytes > credit || current->second->reservedBytes > credit - current->second->sentBytes ||
+                reservedCredit > credit - current->second->sentBytes - current->second->reservedBytes)
+                continue;
+            current->second->reservedBytes += reservedCredit;
+        }
+        if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, [this, id, sendEpoch, ack, peer, port, localAddress, reservedCredit]() {
+            auto it = associations.find(id);
+            if (it == associations.end())
+                return;
+            uint64_t number;
+            if (sendEpoch == 0) {
+                if (it->second->nextEpoch0Record >= (uint64_t(1) << 48)) {
+                    failAssociation(id, "DTLS plaintext record sequence exhausted");
+                    return;
+                }
+                number = it->second->nextEpoch0Record++;
+            }
+            else if (sendEpoch == 2) {
+                if (it->second->nextEpoch2Record >= (uint64_t(1) << 24)) {
+                    failAssociation(id, "DTLS handshake epoch record limit reached");
+                    return;
+                }
+                number = it->second->nextEpoch2Record++;
+            }
+            else {
+                if (it->second->nextEpoch3Record >= (uint64_t(1) << 24)) {
+                    failAssociation(id, "DTLS application epoch record limit reached");
+                    return;
+                }
+                number = it->second->nextEpoch3Record++;
+            }
+            auto packet = new Packet("DTLS ACK", ack);
+            if (sendEpoch == 0) {
+                auto header = makeShared<DtlsPlaintextHeader>();
+                header->setContentType(26);
+                header->setSequenceNumber(number);
+                header->setLength(packet->getDataLength().get<B>());
+                packet->insertAtFront(header);
+            }
+            else {
+                DtlsRecordProtection::protect(packet, 26);
+                auto header = makeShared<DtlsCiphertextHeader>();
+                header->setEpochBits(sendEpoch & 3);
+                header->setSequenceNumber(number & 0xffff);
+                header->setLength(packet->getDataLength().get<B>());
+                packet->insertAtFront(header);
+                emit(recordOverheadSignal, 22L);
+            }
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+            if (!localAddress.isUnspecified())
+                packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(localAddress);
+            if (reservedCredit) {
+                it->second->reservedBytes -= reservedCredit;
+                it->second->sentBytes += reservedCredit;
+            }
+            emit(packetSentToLowerSignal, packet);
+            udpSocket.sendTo(packet, peer, port);
+        })) {
+            auto it = associations.find(id);
+            if (it != associations.end())
+                it->second->reservedBytes -= reservedCredit;
+            failAssociation(id, "DTLS output processing queue is full");
+            return;
+        }
+    }
+}
+
+void Dtls::acknowledgePrevalidation(PrevalidationAttempt *attempt, uint64_t recordSequence)
+{
+    for (const auto& entry : associations) {
+        auto& association = *entry.second;
+        if (association.serverSide && association.state != HandshakeState::ESTABLISHED &&
+            association.localAddress == attempt->localAddress && association.localPort == attempt->localPort &&
+            association.peerAddress == attempt->peerAddress && association.peerPort == attempt->peerPort) {
+            auto received = attempt->receivedBytes;
+            association.receivedBytes = received > std::numeric_limits<size_t>::max() - association.receivedBytes ?
+                std::numeric_limits<size_t>::max() : association.receivedBytes + received;
+            attempt->receivedBytes = 0;
+            sendAcknowledgements(entry.first, 0, {{0, recordSequence}});
+            return;
+        }
+    }
+    constexpr size_t BYTES = 31; // plaintext header, ACK vector length, and one record number
+    auto credit = attempt->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : attempt->receivedBytes * 3;
+    if (par("udpPayloadLimit").intValue() < (int)BYTES || attempt->sentBytes > credit ||
+        attempt->reservedBytes > credit - attempt->sentBytes || BYTES > credit - attempt->sentBytes - attempt->reservedBytes ||
+        attempt->nextRecord >= (uint64_t(1) << 48))
+        return;
+    auto attemptId = attempt->id;
+    auto number = attempt->nextRecord++;
+    auto peer = attempt->peerAddress;
+    auto port = attempt->peerPort;
+    auto local = attempt->localAddress;
+    attempt->reservedBytes += BYTES;
+    auto findAttempt = [this, attemptId]() -> PrevalidationAttempt * {
+        for (auto& candidate : prevalidationAttempts)
+            if (candidate->id == attemptId)
+                return candidate.get();
+        return nullptr;
+    };
+    if (!enqueueProcessing(outputProcessing.get(), attemptId, BYTES, SIMTIME_ZERO, [this, findAttempt, number, recordSequence, peer, port, local]() {
+        auto current = findAttempt();
+        if (!current)
+            return;
+        auto ack = makeShared<DtlsAck>();
+        ack->setEpochsArraySize(1);
+        ack->setSequenceNumbersArraySize(1);
+        ack->setEpochs(0, 0);
+        ack->setSequenceNumbers(0, recordSequence);
+        ack->setChunkLength(B(18));
+        auto packet = new Packet("DTLS ACK", ack);
+        auto header = makeShared<DtlsPlaintextHeader>();
+        header->setContentType(26);
+        header->setSequenceNumber(number);
+        header->setLength(18);
+        packet->insertAtFront(header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+        if (!local.isUnspecified())
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(local);
+        current->reservedBytes -= BYTES;
+        current->sentBytes += BYTES;
+        emit(packetSentToLowerSignal, packet);
+        udpSocket.sendTo(packet, peer, port);
+    }, [findAttempt]() { return findAttempt() != nullptr; })) {
+        if (auto current = findAttempt())
+            current->reservedBytes -= BYTES;
+        emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+    }
+}
+
+void Dtls::failPrevalidation(PrevalidationAttempt *attempt, uint8_t alertDescription)
+{
+    constexpr size_t BYTES = 15;
+    auto id = attempt->id;
+    for (const auto& entry : associations) {
+        auto& association = *entry.second;
+        if (association.serverSide && association.state != HandshakeState::ESTABLISHED &&
+            association.localAddress == attempt->localAddress && association.localPort == attempt->localPort &&
+            association.peerAddress == attempt->peerAddress && association.peerPort == attempt->peerPort) {
+            auto candidateId = entry.first;
+            auto received = attempt->receivedBytes;
+            association.receivedBytes = received > std::numeric_limits<size_t>::max() - association.receivedBytes ?
+                std::numeric_limits<size_t>::max() : association.receivedBytes + received;
+            removePrevalidation(id);
+            failAssociation(candidateId, "conflicting fragmented ClientHello", alertDescription);
+            return;
+        }
+    }
+    attempt->failing = true;
+    auto hadReassembly = attempt->reassembly.getReservedBytes() != 0;
+    attempt->reassembly.clear();
+    if (hadReassembly) {
+        emitReassemblyBytes();
+        auto current = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+            [id](const auto& entry) { return entry->id == id; });
+        if (current == prevalidationAttempts.end())
+            return;
+        attempt = current->get();
+    }
+    inputProcessing->cancel(id);
+    outputProcessing->cancel(id);
+    auto current = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+        [id](const auto& entry) { return entry->id == id; });
+    if (current == prevalidationAttempts.end())
+        return;
+    attempt = current->get();
+    attempt->reservedBytes = 0;
+    auto credit = attempt->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : attempt->receivedBytes * 3;
+    if (par("udpPayloadLimit").intValue() < (int)BYTES || attempt->sentBytes > credit ||
+        attempt->reservedBytes > credit - attempt->sentBytes || BYTES > credit - attempt->sentBytes - attempt->reservedBytes ||
+        attempt->nextRecord >= (uint64_t(1) << 48)) {
+        removePrevalidation(id);
+        return;
+    }
+    attempt->reservedBytes += BYTES;
+    auto number = attempt->nextRecord++;
+    auto peer = attempt->peerAddress;
+    auto port = attempt->peerPort;
+    auto local = attempt->localAddress;
+    auto findAttempt = [this, id]() -> PrevalidationAttempt * {
+        for (auto& candidate : prevalidationAttempts)
+            if (candidate->id == id)
+                return candidate.get();
+        return nullptr;
+    };
+    if (!enqueueProcessing(outputProcessing.get(), id, BYTES, SIMTIME_ZERO, [this, id, findAttempt, number, peer, port, local, alertDescription]() {
+        auto current = findAttempt();
+        if (!current)
+            return;
+        auto alert = makeShared<DtlsAlert>();
+        alert->setLevel(2);
+        alert->setDescription(alertDescription);
+        auto packet = new Packet("DTLS fatal alert", alert);
+        auto header = makeShared<DtlsPlaintextHeader>();
+        header->setContentType(21);
+        header->setSequenceNumber(number);
+        header->setLength(2);
+        packet->insertAtFront(header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+        if (!local.isUnspecified())
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(local);
+        current->reservedBytes -= BYTES;
+        current->sentBytes += BYTES;
+        emit(packetSentToLowerSignal, packet);
+        udpSocket.sendTo(packet, peer, port);
+        removePrevalidation(id);
+    }, [findAttempt]() { return findAttempt() != nullptr; }))
+        removePrevalidation(id);
+}
+
+void Dtls::handlePlainHandshakeRecord(Packet *body, const L3Address& localAddress, int localPort, const L3Address& peerAddress, int peerPort, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted, uint64_t recordSequence)
+{
+    std::vector<std::unique_ptr<Packet>> fragments;
+    uint8_t type = 0;
+    uint16_t sequence = 0;
+    while (body->getDataLength() > b(0)) {
+        if (body->getDataLength() < B(12)) {
+            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+            return;
+        }
+        auto header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+        auto length = header->getFragmentLength();
+        if (length == 0 || header->getFragmentOffset() > header->getMessageLength() ||
+            length > header->getMessageLength() - header->getFragmentOffset() || body->getDataLength() < B(length) ||
+            (!fragments.empty() && (type != header->getMessageType() || sequence != header->getMessageSequence()))) {
+            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+            return;
+        }
+        if (fragments.empty()) {
+            type = header->getMessageType();
+            sequence = header->getMessageSequence();
+        }
+        auto fragment = std::make_unique<Packet>("DTLS plaintext handshake fragment", body->removeAtFront(B(length)));
+        fragment->insertAtFront(header);
+        fragments.push_back(std::move(fragment));
+    }
+    if (fragments.empty())
+        return;
+    if (fragments.size() == 1) {
+        handlePlainHandshake(fragments.front().get(), localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence);
+        return;
+    }
+    if (type == 1 && (!listener || sequence > 1))
+        return;
+    auto limit = par("maxReassemblyBytes").intValue();
+    if (limit < 0)
+        return;
+    DtlsHandshakeReassembly probe(limit);
+    PrevalidationAttempt *attempt = nullptr;
+    AssociationId associationId = 0;
+    if (type == 1) {
+        for (auto& candidate : prevalidationAttempts)
+            if (candidate->localAddress == localAddress && candidate->localPort == localPort &&
+                candidate->peerAddress == peerAddress && candidate->peerPort == peerPort) {
+                attempt = candidate.get();
+                probe = candidate->reassembly;
+                break;
+            }
+    }
+    else if (type == 2) {
+        for (const auto& entry : associations) {
+            auto& candidate = *entry.second;
+            if (candidate.state == HandshakeState::CLIENT_WAIT_SERVER_HELLO && candidate.peerAddress == peerAddress && candidate.peerPort == peerPort &&
+                (candidate.localAddress.isUnspecified() || candidate.localAddress == localAddress) &&
+                (candidate.localPort < 0 || candidate.localPort == localPort)) {
+                if (sequence != candidate.serverMessageBase && !(candidate.retried && sequence == 0))
+                    return;
+                associationId = entry.first;
+                probe = candidate.reassembly;
+                break;
+            }
+        }
+        if (associationId == 0)
+            return;
+    }
+    else
+        return;
+    size_t lastNeeded = fragments.size() - 1;
+    bool foundComplete = false;
+    for (size_t i = 0; i < fragments.size(); ++i) {
+        const auto& fragment = fragments[i];
+        Packet copy(*fragment);
+        auto header = copy.popAtFront<DtlsHandshakeHeader>(B(12));
+        if (!hasConsistentEncoding(&copy)) {
+            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+            return;
+        }
+        auto result = probe.insert(type, sequence, header->getMessageLength(), header->getFragmentOffset(), copy.peekDataAsBytes()->getBytes());
+        if (result == DtlsHandshakeReassembly::Result::COMPLETE && !foundComplete) {
+            foundComplete = true;
+            lastNeeded = i;
+        }
+        if (result == DtlsHandshakeReassembly::Result::CONFLICT || result == DtlsHandshakeReassembly::Result::LIMIT) {
+            if (attempt) {
+                if (!*creditCounted) {
+                    attempt->receivedBytes = datagramBytes > std::numeric_limits<size_t>::max() - attempt->receivedBytes ?
+                        std::numeric_limits<size_t>::max() : attempt->receivedBytes + datagramBytes;
+                    *creditCounted = true;
+                }
+                if (result == DtlsHandshakeReassembly::Result::CONFLICT)
+                    failPrevalidation(attempt, 47);
+                else
+                    removePrevalidation(attempt->id);
+            }
+            else if (associationId != 0)
+                failAssociation(associationId, "invalid or excessive fragmented ServerHello", result == DtlsHandshakeReassembly::Result::CONFLICT ? 47 : -1);
+            else if (result == DtlsHandshakeReassembly::Result::CONFLICT)
+                sendAlert(localAddress, peerAddress, peerPort, 47, false);
+            emit(recordDroppedSignal, (long)(result == DtlsHandshakeReassembly::Result::LIMIT ? RESOURCE_LIMIT : MALFORMED_RECORD));
+            return;
+        }
+    }
+    auto firstHeader = fragments.front()->peekAtFront<DtlsHandshakeHeader>(B(12));
+    bool recordChargePending = firstHeader->getFragmentOffset() != 0 || firstHeader->getFragmentLength() != firstHeader->getMessageLength();
+    for (size_t i = 0; i <= lastNeeded; ++i) {
+        handlePlainHandshake(fragments[i].get(), localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence, i == lastNeeded, recordChargePending);
+        if (associationId != 0) {
+            auto current = associations.find(associationId);
+            if (current == associations.end() || current->second->state != HandshakeState::CLIENT_WAIT_SERVER_HELLO)
+                break;
+        }
+        else if (type == 1 && i != lastNeeded) {
+            auto current = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(), [&](const auto& candidate) {
+                return candidate->localAddress == localAddress && candidate->localPort == localPort && candidate->peerAddress == peerAddress && candidate->peerPort == peerPort;
+            });
+            if (current == prevalidationAttempts.end())
+                break;
+        }
+    }
+}
+
+void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int localPort, const L3Address& peerAddress, int peerPort, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted, uint64_t recordSequence, bool acknowledgePartial, bool recordChargePending)
 {
     using Parameters = tls::TlsHandshakeParameters;
     if (body->getDataLength() < B(12) || peerAddress.isUnspecified() || peerPort < 0)
         return;
     auto handshake = body->popAtFront<DtlsHandshakeHeader>(B(12));
-    if (handshake->getFragmentOffset() != 0 || handshake->getFragmentLength() != handshake->getMessageLength() ||
-        body->getDataLength() != B(handshake->getMessageLength()))
+    if (handshake->getFragmentOffset() > handshake->getMessageLength() ||
+        handshake->getFragmentLength() > handshake->getMessageLength() - handshake->getFragmentOffset() ||
+        body->getDataLength() != B(handshake->getFragmentLength()) || handshake->getFragmentLength() == 0)
         return;
+    PrevalidationAttempt *attempt = nullptr;
     if (handshake->getMessageType() == 1 && listener && handshake->getMessageSequence() <= 1) {
+        for (auto& candidate : prevalidationAttempts)
+            if (candidate->localAddress == localAddress && candidate->localPort == localPort &&
+                candidate->peerAddress == peerAddress && candidate->peerPort == peerPort) {
+                attempt = candidate.get();
+                break;
+            }
+        if (attempt && attempt->failing)
+            return;
+        bool fragmented = handshake->getFragmentOffset() != 0 || handshake->getFragmentLength() != handshake->getMessageLength();
+        if (!attempt && fragmented) {
+            auto maxHalfOpen = par("maxHalfOpen").intValue();
+            auto limit = par("maxReassemblyBytes").intValue();
+            auto timeout = SimTime(par("handshakeTimeout").doubleValue());
+            if (maxHalfOpen <= 0 || countHalfOpen() >= size_t(maxHalfOpen) || limit < 0 || timeout <= SIMTIME_ZERO || nextAssociationId == 0) {
+                emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+                return;
+            }
+            auto created = std::make_unique<PrevalidationAttempt>(limit);
+            created->id = nextAssociationId++;
+            created->localAddress = localAddress;
+            created->localPort = localPort;
+            created->peerAddress = peerAddress;
+            created->peerPort = peerPort;
+            scheduleAt(simTime() + timeout, created->deadline.get());
+            attempt = created.get();
+            prevalidationAttempts.push_back(std::move(created));
+        }
+        if (attempt && !*creditCounted) {
+            attempt->receivedBytes = datagramBytes > std::numeric_limits<size_t>::max() - attempt->receivedBytes ?
+                std::numeric_limits<size_t>::max() : attempt->receivedBytes + datagramBytes;
+            *creditCounted = true;
+        }
+        if (fragmented || (attempt && attempt->reassembly.hasEntry(handshake->getMessageSequence()))) {
+            if (!hasConsistentEncoding(body))
+                return;
+            auto result = attempt->reassembly.insert(1, handshake->getMessageSequence(), handshake->getMessageLength(),
+                handshake->getFragmentOffset(), body->peekDataAsBytes()->getBytes());
+            auto attemptId = attempt->id;
+            emitReassemblyBytes();
+            auto currentAttempt = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+                [attemptId](const auto& entry) { return entry->id == attemptId; });
+            if (currentAttempt == prevalidationAttempts.end())
+                return;
+            attempt = currentAttempt->get();
+            if ((result == DtlsHandshakeReassembly::Result::INCOMPLETE || result == DtlsHandshakeReassembly::Result::COMPLETE) &&
+                handshake->getMessageSequence() == 1 && attempt->retryFlight) {
+                auto acknowledged = attempt->retryFlight->acknowledgeSent(simTime());
+                if (acknowledged.rtt)
+                    attempt->retryTimeout = std::max(SimTime::fromRaw(1), *acknowledged.rtt * 1.5);
+                if (acknowledged.flightComplete)
+                    cancelEvent(attempt->retryTimer.get());
+            }
+            if (result != DtlsHandshakeReassembly::Result::COMPLETE) {
+                if (result == DtlsHandshakeReassembly::Result::INCOMPLETE && acknowledgePartial)
+                    acknowledgePrevalidation(attempt, recordSequence);
+                else if (result == DtlsHandshakeReassembly::Result::CONFLICT || result == DtlsHandshakeReassembly::Result::LIMIT) {
+                    if (result == DtlsHandshakeReassembly::Result::CONFLICT)
+                        failPrevalidation(attempt, 47);
+                    else
+                        removePrevalidation(attemptId);
+                    emit(recordDroppedSignal, (long)(result == DtlsHandshakeReassembly::Result::LIMIT ? RESOURCE_LIMIT : MALFORMED_RECORD));
+                }
+                return;
+            }
+            auto complete = attempt->reassembly.take(handshake->getMessageSequence());
+            emitReassemblyBytes();
+            currentAttempt = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+                [attemptId](const auto& entry) { return entry->id == attemptId; });
+            if (currentAttempt == prevalidationAttempts.end())
+                return;
+            auto assembled = std::make_shared<std::unique_ptr<Packet>>(new Packet("reassembled DTLS ClientHello", makeShared<BytesChunk>(complete.body)));
+            auto fullHeader = makeShared<DtlsHandshakeHeader>();
+            fullHeader->setMessageType(1);
+            fullHeader->setMessageSequence(handshake->getMessageSequence());
+            fullHeader->setMessageLength(complete.body.size());
+            fullHeader->setFragmentLength(complete.body.size());
+            (*assembled)->insertAtFront(fullHeader);
+            auto eligible = [this, attemptId]() {
+                return std::any_of(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+                    [attemptId](const auto& entry) { return entry->id == attemptId; });
+            };
+            bool duplicateInitial = handshake->getMessageSequence() == 0 &&
+                ((!attempt->initialHello.empty() && attempt->initialHello == complete.body) ||
+                 (!attempt->pendingInitialHello.empty() && attempt->pendingInitialHello == complete.body));
+            if (handshake->getMessageSequence() == 0 && attempt->pendingInitialHello.empty())
+                attempt->pendingInitialHello = complete.body;
+            auto delay = (fragmented || recordChargePending) && !duplicateInitial ? SimTime(par("handshakeInDelay").doubleValue()) : SIMTIME_ZERO;
+            attempt->processingHello = true;
+            if (!enqueueProcessing(inputProcessing.get(), attemptId, complete.body.size() + 12, delay,
+                [this, assembled, localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence, attemptId]() {
+                    auto current = findPrevalidation(attemptId);
+                    if (!current)
+                        return;
+                    current->processingHello = false;
+                    current->pendingInitialHello.clear();
+                    try {
+                        handlePlainHandshake(assembled->get(), localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence);
+                    }
+                    catch (const cRuntimeError&) {
+                        emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                    }
+                }, eligible)) {
+                currentAttempt = std::find_if(prevalidationAttempts.begin(), prevalidationAttempts.end(),
+                    [attemptId](const auto& entry) { return entry->id == attemptId; });
+                if (currentAttempt != prevalidationAttempts.end()) {
+                    removePrevalidation(attemptId);
+                }
+                emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+            }
+            return;
+        }
         auto profile = std::string(par("profile").stringValue());
         if (profile != "psk" && profile != "certificate")
             return;
@@ -679,31 +1388,52 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
                     replacementId = entry.first;
                     continue;
                 }
-                if ((entry.second->state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED ||
-                     entry.second->state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE) && !entry.second->serverFlightQueued) {
+                auto candidateId = entry.first;
+                if (attempt) {
+                    auto credit = attempt->receivedBytes;
+                    entry.second->receivedBytes = credit > std::numeric_limits<size_t>::max() - entry.second->receivedBytes ?
+                        std::numeric_limits<size_t>::max() : entry.second->receivedBytes + credit;
+                    removePrevalidation(attempt->id);
+                    attempt = nullptr;
+                }
+                auto candidate = associations.find(candidateId);
+                if (candidate == associations.end())
+                    return;
+                if (candidate->second->state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED ||
+                    candidate->second->state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE) {
                     if (!*creditCounted) {
-                        entry.second->receivedBytes = datagramBytes > std::numeric_limits<size_t>::max() - entry.second->receivedBytes ?
-                            std::numeric_limits<size_t>::max() : entry.second->receivedBytes + datagramBytes;
+                        candidate->second->receivedBytes = datagramBytes > std::numeric_limits<size_t>::max() - candidate->second->receivedBytes ?
+                            std::numeric_limits<size_t>::max() : candidate->second->receivedBytes + datagramBytes;
                         *creditCounted = true;
                     }
-                    sendServerFlight(entry.first);
+                    if (!candidate->second->serverFlightQueued)
+                        sendServerFlight(candidateId);
+                    else
+                        candidate->second->pumpFlight();
                 }
                 return;
             }
+        auto failHello = [&](uint8_t description) {
+            if (attempt)
+                failPrevalidation(attempt, description);
+            else
+                sendAlert(localAddress, peerAddress, peerPort, description, false);
+        };
         if (!hasConsistentEncoding(body)) {
-            sendAlert(localAddress, peerAddress, peerPort, 50, false);
+            failHello(50);
             return;
         }
+        auto encodedHello = body->peekDataAsBytes()->getBytes();
         Ptr<const DtlsClientHello> hello;
         try {
             hello = body->popAtFront<DtlsClientHello>(body->getDataLength());
         }
         catch (const cRuntimeError&) {
-            sendAlert(localAddress, peerAddress, peerPort, 50, false);
+            failHello(50);
             return;
         }
         if (body->getDataLength() != b(0)) {
-            sendAlert(localAddress, peerAddress, peerPort, 50, false);
+            failHello(50);
             return;
         }
         Parameters::Offer offer;
@@ -711,62 +1441,94 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         auto identity = std::string(par("identity").stringValue());
         auto alert = Association::validateClientHello(hello, certificateProfile, identity, offer, selection);
         if (alert != 0) {
-            sendAlert(localAddress, peerAddress, peerPort, alert, false);
+            failHello(alert);
             return;
         }
         std::vector<uint8_t> cookie;
         if (!findCookie(hello, cookie)) {
-            sendAlert(localAddress, peerAddress, peerPort, 50, false);
+            failHello(50);
             return;
         }
-        auto startedAt = simTime();
+        auto startedAt = attempt ? attempt->deadline->getArrivalTime() - SimTime(par("handshakeTimeout").doubleValue()) : simTime();
+        auto issueRetry = [&](bool repeatedInitial) {
+            if (!attempt) {
+                auto maxHalfOpen = par("maxHalfOpen").intValue();
+                auto limit = par("maxReassemblyBytes").intValue();
+                auto timeout = SimTime(par("handshakeTimeout").doubleValue());
+                if (maxHalfOpen <= 0 || countHalfOpen() >= size_t(maxHalfOpen) || limit < 0 || timeout <= SIMTIME_ZERO || nextAssociationId == 0)
+                    return;
+                auto created = std::make_unique<PrevalidationAttempt>(limit);
+                created->id = nextAssociationId++;
+                created->localAddress = localAddress;
+                created->localPort = localPort;
+                created->peerAddress = peerAddress;
+                created->peerPort = peerPort;
+                created->receivedBytes = *creditCounted ? 0 : datagramBytes;
+                scheduleAt(simTime() + timeout, created->deadline.get());
+                attempt = created.get();
+                prevalidationAttempts.push_back(std::move(created));
+                *creditCounted = true;
+            }
+            auto issued = uint64_t(simTime().raw());
+            auto started = uint64_t((attempt->deadline->getArrivalTime() - SimTime(par("handshakeTimeout").doubleValue())).raw());
+            auto token = makeCookie(issued, started, localAddress, localPort, peerAddress, peerPort, hello);
+            if (repeatedInitial && !attempt->cookie.empty()) {
+                auto originalIssued = readUint64(attempt->cookie, 0);
+                auto originalStart = readUint64(attempt->cookie, 8);
+                if (attempt->initialHello != encodedHello || attempt->cookie != makeCookie(originalIssued, originalStart, localAddress, localPort, peerAddress, peerPort, hello))
+                    return;
+                token = attempt->cookie;
+            }
+            else if (repeatedInitial) {
+                attempt->cookie = token;
+                attempt->initialHello = encodedHello;
+                attempt->requestKeyShare = selection.retryKeyShare;
+            }
+            sendRetry(localAddress, peerAddress, peerPort, token, repeatedInitial ? attempt->requestKeyShare : selection.retryKeyShare,
+                      attempt->receivedBytes, attempt, handshake->getMessageSequence());
+        };
         if (handshake->getMessageSequence() == 0) {
             if (!cookie.empty())
                 return;
             if (par("cookieRequired").boolValue() || selection.retryKeyShare || replacementId != 0) {
-                if (*creditCounted)
-                    return;
-                *creditCounted = true;
-                auto issued = uint64_t(simTime().raw());
-                auto token = makeCookie(issued, localAddress, localPort, peerAddress, peerPort, hello);
-                sendRetry(localAddress, peerAddress, peerPort, token, selection.retryKeyShare, datagramBytes);
+                issueRetry(true);
                 return;
             }
         }
         else {
             auto lifetime = SimTime(par("cookieLifetime").doubleValue()).raw();
             if (cookie.empty()) {
-                if (*creditCounted)
-                    return;
-                *creditCounted = true;
-                auto issued = uint64_t(simTime().raw());
-                auto token = makeCookie(issued, localAddress, localPort, peerAddress, peerPort, hello);
-                sendRetry(localAddress, peerAddress, peerPort, token, selection.retryKeyShare, datagramBytes);
+                issueRetry(false);
                 return;
             }
-            if (cookie.size() < 8 || lifetime <= 0 || selection.retryKeyShare) {
-                sendAlert(localAddress, peerAddress, peerPort, 47, false);
+            if (cookie.size() < 16 || lifetime <= 0 || selection.retryKeyShare) {
+                failHello(47);
                 return;
             }
             auto issued = readUint64(cookie, 0);
+            auto started = readUint64(cookie, 8);
             auto now = uint64_t(simTime().raw());
-            if (issued > now || now - issued > uint64_t(lifetime) ||
-                cookie != makeCookie(issued, localAddress, localPort, peerAddress, peerPort, hello)) {
-                sendAlert(localAddress, peerAddress, peerPort, 47, false);
+            auto handshakeLifetime = SimTime(par("handshakeTimeout").doubleValue()).raw();
+            if (started > issued || issued > now || now - issued > uint64_t(lifetime) || handshakeLifetime <= 0 || now - started >= uint64_t(handshakeLifetime) ||
+                cookie != makeCookie(issued, started, localAddress, localPort, peerAddress, peerPort, hello)) {
+                failHello(47);
                 return;
             }
-            startedAt = SimTime::fromRaw(issued);
+            startedAt = SimTime::fromRaw(started);
         }
         auto maxHalfOpen = par("maxHalfOpen").intValue();
         auto replayWindow = par("replayWindowSize").intValue();
         auto timeout = SimTime(par("handshakeTimeout").doubleValue());
-        auto halfOpen = std::count_if(associations.begin(), associations.end(), [](const auto& entry) { return entry.second->state != HandshakeState::ESTABLISHED; });
-        if (maxHalfOpen <= 0 || halfOpen >= maxHalfOpen || replayWindow <= 0 || replayWindow > 65536 ||
-            timeout <= SIMTIME_ZERO || nextAssociationId == 0) {
+        auto deadline = attempt ? std::min(attempt->deadline->getArrivalTime(), startedAt + timeout) : startedAt + timeout;
+        if (maxHalfOpen <= 0 || countHalfOpen() - (attempt ? 1 : 0) >= size_t(maxHalfOpen) || replayWindow <= 0 || replayWindow > 65536 ||
+            timeout <= SIMTIME_ZERO || deadline <= simTime() || nextAssociationId == 0) {
             emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
             return;
         }
-        auto association = std::make_unique<Association>(*this);
+        auto reassemblyLimit = par("maxReassemblyBytes").intValue();
+        if (reassemblyLimit < 0)
+            throw cRuntimeError("Invalid DTLS reassembly limit");
+        auto association = std::make_unique<Association>(*this, reassemblyLimit);
         association->id = nextAssociationId++;
         association->startedAt = startedAt;
         association->replacementId = replacementId;
@@ -777,17 +1539,26 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         association->localPort = localPort;
         association->certificateProfile = certificateProfile;
         association->clientAuthRequested = certificateProfile && par("clientAuthentication").boolValue();
+        association->serverSide = true;
         association->addressValidated = handshake->getMessageSequence() == 1;
         association->state = association->clientAuthRequested ? HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE : HandshakeState::SERVER_WAIT_CLIENT_FINISHED;
         association->serverMessageBase = handshake->getMessageSequence();
         association->nextPeerMessage = association->serverMessageBase + 1;
         association->receiveEpoch2 = std::make_unique<DtlsRecordState>(replayWindow);
         association->receiveEpoch3 = std::make_unique<DtlsRecordState>(replayWindow);
-        association->receivedBytes = *creditCounted ? 0 : datagramBytes;
+        association->receivedBytes = attempt ? attempt->receivedBytes : (*creditCounted ? 0 : datagramBytes);
         *creditCounted = true;
+        if (attempt) {
+            association->sentBytes = attempt->sentBytes;
+            association->nextEpoch0Record = attempt->nextRecord;
+            removePrevalidation(attempt->id);
+            if (operationalState != OPERATING || listener == nullptr)
+                return;
+            association->callback = listener;
+        }
         association->handshakeDeadline = std::make_unique<cMessage>("dtlsHandshakeDeadline");
         auto id = association->id;
-        scheduleAt(simTime() + timeout, association->handshakeDeadline.get());
+        scheduleAt(deadline, association->handshakeDeadline.get());
         associations.emplace(id, std::move(association));
         listener->accepted(id, localAddress, localPort, peerAddress, peerPort);
         if (associations.find(id) != associations.end())
@@ -800,7 +1571,67 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
                 (association.localAddress.isUnspecified() || association.localAddress == localAddress) &&
                 (association.localPort < 0 || association.localPort == localPort) &&
                 association.state == HandshakeState::CLIENT_WAIT_SERVER_HELLO) {
-                association.processServerHello(handshake->getMessageSequence(), body, localAddress, localPort);
+                if (handshake->getMessageSequence() != association.serverMessageBase &&
+                    !(association.retried && handshake->getMessageSequence() == 0))
+                    return;
+                if (handshake->getFragmentOffset() == 0 && handshake->getFragmentLength() == handshake->getMessageLength() &&
+                    !association.reassembly.hasEntry(handshake->getMessageSequence())) {
+                    auto id = entry.first;
+                    association.processServerHello(handshake->getMessageSequence(), body, localAddress, localPort);
+                    auto current = associations.find(id);
+                    if (current != associations.end() && current->second->state != HandshakeState::CLIENT_WAIT_SERVER_HELLO)
+                        current->second->noteHandshakeRecord(0, recordSequence, false);
+                }
+                else {
+                    if (!hasConsistentEncoding(body))
+                        return;
+                    auto id = entry.first;
+                    auto result = association.reassembly.insert(handshake->getMessageType(), handshake->getMessageSequence(),
+                        handshake->getMessageLength(), handshake->getFragmentOffset(), body->peekDataAsBytes()->getBytes());
+                    emitReassemblyBytes();
+                    auto current = associations.find(id);
+                    if (current == associations.end())
+                        return;
+                    if (result == DtlsHandshakeReassembly::Result::INCOMPLETE &&
+                        handshake->getMessageSequence() == current->second->serverMessageBase)
+                        current->second->acknowledgeFlightImplicitly();
+                    if (result == DtlsHandshakeReassembly::Result::COMPLETE) {
+                        auto message = current->second->reassembly.take(handshake->getMessageSequence());
+                        emitReassemblyBytes();
+                        current = associations.find(id);
+                        if (current == associations.end())
+                            return;
+                        if (!current->second->pendingServerHello.empty()) {
+                            if (current->second->pendingServerHelloSequence == handshake->getMessageSequence() &&
+                                current->second->pendingServerHello == message.body)
+                                sendAcknowledgements(id, 0, {{0, recordSequence}});
+                            return;
+                        }
+                        current->second->pendingServerHello = message.body;
+                        current->second->pendingServerHelloSequence = handshake->getMessageSequence();
+                        auto complete = std::make_shared<std::unique_ptr<Packet>>(new Packet("reassembled DTLS ServerHello", makeShared<BytesChunk>(message.body)));
+                        auto messageSequence = handshake->getMessageSequence();
+                        bool fragmented = handshake->getFragmentOffset() != 0 || handshake->getFragmentLength() != handshake->getMessageLength();
+                        bool duplicateRetry = current->second->retried && messageSequence == 0;
+                        auto delay = (fragmented || recordChargePending) && !duplicateRetry ? SimTime(par("handshakeInDelay").doubleValue()) : SIMTIME_ZERO;
+                        if (!enqueueProcessing(inputProcessing.get(), id, message.body.size() + 12, delay,
+                            [this, id, messageSequence, complete, localAddress, localPort, recordSequence]() {
+                                auto it = associations.find(id);
+                                if (it != associations.end()) {
+                                    it->second->pendingServerHello.clear();
+                                    it->second->processServerHello(messageSequence, complete->get(), localAddress, localPort);
+                                    it = associations.find(id);
+                                    if (it != associations.end() && it->second->state != HandshakeState::CLIENT_WAIT_SERVER_HELLO)
+                                        it->second->noteHandshakeRecord(0, recordSequence, false);
+                                }
+                            }))
+                            failAssociation(id, "DTLS input processing queue is full");
+                    }
+                    else if (result == DtlsHandshakeReassembly::Result::INCOMPLETE && acknowledgePartial)
+                        sendAcknowledgements(id, 0, {{0, recordSequence}});
+                    else if (result == DtlsHandshakeReassembly::Result::CONFLICT || result == DtlsHandshakeReassembly::Result::LIMIT)
+                        failAssociation(id, "invalid or excessive fragmented ServerHello", result == DtlsHandshakeReassembly::Result::CONFLICT ? 47 : -1);
+                }
                 return;
             }
         }
@@ -810,7 +1641,7 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
 void Dtls::handleProtectedHandshake(AssociationId id, uint16_t epoch, uint16_t truncatedSequence, unsigned sequenceBits, Packet *body, size_t recordBytes)
 {
     auto it = associations.find(id);
-    if (it == associations.end() || (epoch == 3 && it->second->state != HandshakeState::ESTABLISHED)) {
+    if (it == associations.end()) {
         emit(recordDroppedSignal, (long)UNKNOWN_EPOCH);
         return;
     }
@@ -841,23 +1672,25 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
 {
     // RFC 9147 Sections 4.2.2 and 4.5.1 select an epoch and check its replay window.
     auto it = associations.find(id);
-    if (it == associations.end() || (epoch == 3 && it->second->state != HandshakeState::ESTABLISHED))
+    if (it == associations.end())
         return;
-    auto replay = epoch == 2 ? it->second->receiveEpoch2.get() : it->second->receiveEpoch3.get();
-    auto sequence = replay->reconstruct(truncatedSequence, sequenceBits);
-    if (!replay->isAcceptable(sequence)) {
-        emit(recordDroppedSignal, (long)REPLAY);
-        return;
-    }
     auto retained = std::make_shared<std::unique_ptr<Packet>>(body->dup());
     auto delay = SimTime(par("protectInDelay").doubleValue());
-    if (!enqueueProcessing(inputProcessing.get(), id, recordBytes, delay, [this, id, epoch, sequence, recordBytes, retained]() {
+    if (!enqueueProcessing(inputProcessing.get(), id, recordBytes, delay, [this, id, epoch, truncatedSequence, sequenceBits, retained]() {
         auto current = associations.find(id);
-        if (current == associations.end() || (epoch == 3 && current->second->state != HandshakeState::ESTABLISHED))
+        if (current == associations.end())
             return;
+        if (epoch == 3 && current->second->state != HandshakeState::ESTABLISHED &&
+            !(current->second->serverSide && current->second->ownFinishedHandedOff)) {
+            emit(recordDroppedSignal, (long)UNKNOWN_EPOCH);
+            return;
+        }
         auto replay = epoch == 2 ? current->second->receiveEpoch2.get() : current->second->receiveEpoch3.get();
-        if (!replay->isAcceptable(sequence))
+        auto sequence = replay->reconstruct(truncatedSequence, sequenceBits);
+        if (!replay->isAcceptable(sequence)) {
+            emit(recordDroppedSignal, (long)REPLAY);
             return;
+        }
         uint8_t contentType;
         if (!DtlsRecordProtection::unprotect(retained->get(), contentType)) {
             emit(recordDroppedSignal, (long)MALFORMED_RECORD);
@@ -877,6 +1710,10 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             return;
         }
         if (epoch == 3 && contentType == 23) {
+            if (current->second->state != HandshakeState::ESTABLISHED) {
+                emit(recordDroppedSignal, (long)UNKNOWN_EPOCH);
+                return;
+            }
             replay->accept(sequence);
             auto callback = current->second->callback;
             auto incoming = retained->release();
@@ -886,7 +1723,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             callback->dataArrived(id, incoming);
             return;
         }
-        if (epoch == 3 && contentType == 26) {
+        if (contentType == 26) {
             if ((*retained)->getDataLength() < B(2))
                 return;
             if (!hasConsistentEncoding(retained->get())) {
@@ -894,43 +1731,34 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
                 return;
             }
             try {
-                (*retained)->popAtFront<DtlsAck>((*retained)->getDataLength());
+                auto ack = (*retained)->popAtFront<DtlsAck>((*retained)->getDataLength());
                 if ((*retained)->getDataLength() != b(0)) {
                     emit(recordDroppedSignal, (long)MALFORMED_RECORD);
                     return;
                 }
+                replay->accept(sequence);
+                current->second->acceptAck(*ack);
             }
             catch (const cRuntimeError&) {
                 emit(recordDroppedSignal, (long)MALFORMED_RECORD);
                 return;
             }
-            replay->accept(sequence);
             return;
         }
         if (epoch != 2 || contentType != 22) {
             emit(recordDroppedSignal, (long)MALFORMED_RECORD);
             return;
         }
-        auto handshakeDelay = SimTime(par("handshakeInDelay").doubleValue());
-        if (!enqueueProcessing(inputProcessing.get(), id, recordBytes, handshakeDelay, [this, id, sequence, retained]() {
-            try {
-                processProtectedHandshake(id, sequence, retained->get());
-            }
-            catch (const cRuntimeError&) {
-                emit(recordDroppedSignal, (long)MALFORMED_RECORD);
-            }
-        }))
-            emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+        try {
+            current->second->receiveHandshakeFragment(sequence, retained->get());
+        }
+        catch (const cRuntimeError&) {
+            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+        }
     }))
         emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
 }
 
-void Dtls::processProtectedHandshake(AssociationId id, uint64_t sequence, Packet *body)
-{
-    auto it = associations.find(id);
-    if (it != associations.end())
-        it->second->processHandshake(sequence, body);
-}
 void Dtls::send(AssociationId id, Packet *packet, ICallback *requester)
 {
     Enter_Method("send");
@@ -976,12 +1804,16 @@ void Dtls::close(AssociationId id)
         return;
     auto association = std::move(it->second);
     auto callback = association->callback;
+    auto hadReassembly = association->getReassemblyBytes() != 0;
     cancelEvent(association->handshakeDeadline.get());
+    association->cancelTimers();
     associations.erase(it);
     if (inputProcessing)
         inputProcessing->cancel(id);
     if (outputProcessing)
         outputProcessing->cancel(id);
+    if (hadReassembly)
+        emitReassemblyBytes();
     for (auto& packet : association->pendingPackets) {
         auto packetId = packet->getId();
         packet.reset();
@@ -1000,14 +1832,29 @@ bool Dtls::requestKeyUpdate(AssociationId, bool)
 
 void Dtls::discardAll(const char *reason, bool notify)
 {
+    bool hadReassembly = false;
+    for (const auto& attempt : prevalidationAttempts)
+        hadReassembly |= attempt->reassembly.getReservedBytes() != 0;
+    for (const auto& entry : associations)
+        hadReassembly |= entry.second->getReassemblyBytes() != 0;
     if (inputProcessing)
         inputProcessing->clear();
     if (outputProcessing)
         outputProcessing->clear();
-    for (const auto& entry : associations)
+    for (const auto& attempt : prevalidationAttempts)
+    {
+        cancelEvent(attempt->deadline.get());
+        cancelEvent(attempt->retryTimer.get());
+    }
+    prevalidationAttempts.clear();
+    for (const auto& entry : associations) {
         cancelEvent(entry.second->handshakeDeadline.get());
+        entry.second->cancelTimers();
+    }
     auto old = std::move(associations);
     associations.clear();
+    if (notify && hadReassembly)
+        emitReassemblyBytes();
     if (notify) {
         for (const auto& entry : old) {
             for (auto& packet : entry.second->pendingPackets) {
@@ -1071,8 +1918,54 @@ void Dtls::parseDatagram(Packet *packet)
                         }
                         auto retained = std::make_shared<std::unique_ptr<Packet>>(body.dup());
                         AssociationId id = 0;
+                        bool attemptOwned = false;
+                        bool createdAttempt = false;
                         auto handshake = body.peekAtFront<DtlsHandshakeHeader>(B(12));
-                        if (handshake->getMessageType() != 1)
+                        bool fragmented = handshake->getFragmentOffset() != 0 || handshake->getFragmentLength() != handshake->getMessageLength();
+                        if (handshake->getMessageType() == 1 && listener && handshake->getMessageSequence() <= 1 &&
+                            handshake->getFragmentLength() != 0 && handshake->getFragmentOffset() <= handshake->getMessageLength() &&
+                            handshake->getFragmentLength() <= handshake->getMessageLength() - handshake->getFragmentOffset() &&
+                            body.getDataLength() >= B(12 + handshake->getFragmentLength()) && !peerAddress.isUnspecified() && peerPort >= 0) {
+                            for (const auto& attempt : prevalidationAttempts)
+                                if (attempt->localAddress == localAddress && attempt->localPort == localPort &&
+                                    attempt->peerAddress == peerAddress && attempt->peerPort == peerPort) {
+                                    id = attempt->id;
+                                    attemptOwned = true;
+                                    break;
+                                }
+                            AssociationId candidateId = 0;
+                            if (!attemptOwned)
+                                for (const auto& entry : associations)
+                                    if (entry.second->serverSide && entry.second->state != HandshakeState::ESTABLISHED &&
+                                        entry.second->localAddress == localAddress && entry.second->localPort == localPort &&
+                                        entry.second->peerAddress == peerAddress && entry.second->peerPort == peerPort) {
+                                        candidateId = entry.first;
+                                        break;
+                                    }
+                            if (!attemptOwned && candidateId != 0 && !fragmented)
+                                id = candidateId;
+                            else if (!attemptOwned) {
+                                auto maxHalfOpen = par("maxHalfOpen").intValue();
+                                auto limit = par("maxReassemblyBytes").intValue();
+                                auto timeout = SimTime(par("handshakeTimeout").doubleValue());
+                                if (maxHalfOpen <= 0 || (candidateId == 0 && countHalfOpen() >= size_t(maxHalfOpen)) ||
+                                    limit < 0 || timeout <= SIMTIME_ZERO || nextAssociationId == 0) {
+                                    emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+                                    continue;
+                                }
+                                auto attempt = std::make_unique<PrevalidationAttempt>(limit);
+                                attempt->id = nextAssociationId++;
+                                attempt->localAddress = localAddress;
+                                attempt->localPort = localPort;
+                                attempt->peerAddress = peerAddress;
+                                attempt->peerPort = peerPort;
+                                id = attempt->id;
+                                scheduleAt(simTime() + timeout, attempt->deadline.get());
+                                prevalidationAttempts.push_back(std::move(attempt));
+                                attemptOwned = createdAttempt = true;
+                            }
+                        }
+                        else if (handshake->getMessageType() != 1)
                             for (const auto& entry : associations)
                                 if (entry.second->peerAddress == peerAddress && entry.second->peerPort == peerPort &&
                                     (entry.second->localAddress.isUnspecified() || entry.second->localAddress == localAddress) &&
@@ -1081,16 +1974,125 @@ void Dtls::parseDatagram(Packet *packet)
                                     id = entry.first;
                                     break;
                                 }
-                        auto delay = SimTime(par("handshakeInDelay").doubleValue());
-                        if (!enqueueProcessing(inputProcessing.get(), id, header->getLength() + 13, delay, [this, retained, localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted]() {
+                        bool duplicate = false;
+                        bool markedInitialHello = false;
+                        bool markedServerHello = false;
+                        if (attemptOwned && handshake->getMessageType() == 1 && handshake->getMessageSequence() == 0) {
+                            auto attempt = findPrevalidation(id);
+                            if (attempt && !fragmented && body.getDataLength() == B(12 + handshake->getFragmentLength())) {
+                                Packet copy(body);
+                                copy.popAtFront<DtlsHandshakeHeader>(B(12));
+                                if (hasConsistentEncoding(&copy)) {
+                                    auto bytes = copy.peekDataAsBytes()->getBytes();
+                                    duplicate = (!attempt->initialHello.empty() && attempt->initialHello == bytes) ||
+                                                (!attempt->pendingInitialHello.empty() && attempt->pendingInitialHello == bytes);
+                                    if (attempt->pendingInitialHello.empty()) {
+                                        attempt->pendingInitialHello = std::move(bytes);
+                                        markedInitialHello = true;
+                                    }
+                                }
+                            }
+                        }
+                        else if (id != 0 && handshake->getMessageType() == 2 && handshake->getMessageSequence() == 0) {
+                            auto association = associations.find(id);
+                            duplicate = association != associations.end() && association->second->retried;
+                        }
+                        if (id != 0 && handshake->getMessageType() == 2 && !fragmented &&
+                            body.getDataLength() == B(12 + handshake->getFragmentLength())) {
+                            auto association = associations.find(id);
+                            if (association != associations.end() && association->second->state == HandshakeState::CLIENT_WAIT_SERVER_HELLO &&
+                                (handshake->getMessageSequence() == association->second->serverMessageBase ||
+                                 (association->second->retried && handshake->getMessageSequence() == 0))) {
+                                Packet copy(body);
+                                copy.popAtFront<DtlsHandshakeHeader>(B(12));
+                                if (hasConsistentEncoding(&copy)) {
+                                    auto bytes = copy.peekDataAsBytes()->getBytes();
+                                    if (association->second->pendingServerHello.empty()) {
+                                        association->second->pendingServerHello = std::move(bytes);
+                                        association->second->pendingServerHelloSequence = handshake->getMessageSequence();
+                                        markedServerHello = true;
+                                    }
+                                    else if (association->second->pendingServerHelloSequence == handshake->getMessageSequence() &&
+                                             association->second->pendingServerHello == bytes)
+                                        duplicate = true;
+                                }
+                            }
+                        }
+                        auto delay = fragmented || duplicate ? SIMTIME_ZERO : SimTime(par("handshakeInDelay").doubleValue());
+                        auto recordSequence = header->getSequenceNumber();
+                        auto eligible = [this, id, attemptOwned]() { return id == 0 || (attemptOwned ? findPrevalidation(id) != nullptr : containsAssociation(id)); };
+                        if (!enqueueProcessing(inputProcessing.get(), id, header->getLength() + 13, delay, [this, retained, localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence, id, attemptOwned, markedInitialHello, markedServerHello]() {
+                            if (markedInitialHello) {
+                                auto current = findPrevalidation(id);
+                                if (current)
+                                    current->pendingInitialHello.clear();
+                            }
+                            if (markedServerHello) {
+                                auto association = associations.find(id);
+                                if (association != associations.end())
+                                    association->second->pendingServerHello.clear();
+                            }
                             try {
-                                handlePlainHandshake(retained->get(), localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted);
+                                handlePlainHandshakeRecord(retained->get(), localAddress, localPort, peerAddress, peerPort, datagramBytes, creditCounted, recordSequence);
                             }
                             catch (const cRuntimeError&) {
                                 emit(recordDroppedSignal, (long)MALFORMED_RECORD);
                             }
-                        }))
+                            if (attemptOwned) {
+                                auto current = findPrevalidation(id);
+                                if (current && !current->failing && !current->processingHello && !current->retryFlight && current->initialHello.empty() && current->reassembly.getEntryCount() == 0)
+                                    removePrevalidation(id);
+                            }
+                        }, eligible)) {
+                            if (createdAttempt)
+                                removePrevalidation(id);
+                            else if (markedInitialHello) {
+                                auto attempt = findPrevalidation(id);
+                                if (attempt)
+                                    attempt->pendingInitialHello.clear();
+                            }
+                            if (markedServerHello) {
+                                auto association = associations.find(id);
+                                if (association != associations.end())
+                                    association->second->pendingServerHello.clear();
+                            }
                             emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+                        }
+                    }
+                    else if (header->getContentType() == 26) {
+                        if (body.getDataLength() < B(2) || !hasConsistentEncoding(&body)) {
+                            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                            continue;
+                        }
+                        auto ack = body.popAtFront<DtlsAck>(body.getDataLength());
+                        if (body.getDataLength() != b(0)) {
+                            emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                            continue;
+                        }
+                        uint64_t retryId = 0;
+                        for (const auto& attempt : prevalidationAttempts)
+                            if (attempt->localAddress == localAddress && attempt->localPort == localPort &&
+                                attempt->peerAddress == peerAddress && attempt->peerPort == peerPort) {
+                                retryId = attempt->id;
+                                break;
+                            }
+                        if (retryId != 0) {
+                            auto attempt = findPrevalidation(retryId);
+                            if (attempt && !*creditCounted) {
+                                attempt->receivedBytes = datagramBytes > std::numeric_limits<size_t>::max() - attempt->receivedBytes ?
+                                    std::numeric_limits<size_t>::max() : attempt->receivedBytes + datagramBytes;
+                                *creditCounted = true;
+                            }
+                            acknowledgeRetry(retryId, *ack);
+                            pumpRetry(retryId);
+                        }
+                        for (const auto& entry : associations)
+                            if (entry.second->peerAddress == peerAddress && entry.second->peerPort == peerPort &&
+                                (entry.second->localAddress.isUnspecified() || entry.second->localAddress == localAddress) &&
+                                (entry.second->localPort < 0 || entry.second->localPort == localPort)) {
+                                entry.second->acceptAck(*ack);
+                                break;
+                            }
                     }
                     else if (header->getContentType() == 21 && body.getDataLength() == B(2)) {
                         auto alert = body.popAtFront<DtlsAlert>(B(2));

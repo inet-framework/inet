@@ -1,0 +1,73 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147SelectiveAck. See the owning reviewer document in this suite
+and plan/pending/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include <map>
+#include <set>
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static std::map<uint64_t, std::pair<uint32_t, uint32_t>> sentRanges;
+static std::set<std::pair<uint32_t, uint32_t>> acknowledgedRanges;
+
+Define_ProtocolTestProgram()
+{
+static uint16_t lostNumber, lostMessage;
+return ProtocolTest("rfc9147_selective_ack")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto ack = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        if (ack) for (size_t i = 0; i < ack->getEpochsArraySize(); i++) {
+            auto range = sentRanges.find(ack->getSequenceNumbers(i));
+            if (ack->getEpochs(i) == 2 && range != sentRanges.end()) acknowledgedRanges.insert(range->second);
+        }
+        return ack != nullptr;
+    }).within(3)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        if (!h || !r || h->getMessageType() != 11 || r->getEpochBits() != 2) return false;
+        auto range = std::make_pair(h->getFragmentOffset(), h->getFragmentLength());
+        sentRanges.emplace(r->getSequenceNumber(), range);
+        return acknowledgedRanges.count(range) != 0;
+    }).within(3)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 11 && h->getFragmentOffset() == 0; })
+        .assertEvent([](const MatchContext& c) { lostNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); lostMessage = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence(); return true; }).within(2))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 11) && findChunk<inet::dtls::DtlsHandshakeHeader>(p)->getFragmentOffset() == 0; }).nth(1).drop().describe("drop first certificate fragment"))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return acknowledgement(c); }).within(2))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 11 && h->getFragmentOffset() == 0; })
+        .assertEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return r && r->getEpochBits() == 2 && r->getSequenceNumber() != lostNumber && findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence() == lostMessage; }).within(2))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3));
+}
+
+%activity:
+EV << "rfc9147_selective_ack compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 4000B
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_selective_ack: PASS

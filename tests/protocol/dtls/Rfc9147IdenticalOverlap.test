@@ -1,0 +1,55 @@
+%description:
+
+DTLS production-path variant IdenticalOverlap: explicit C4 requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint64_t copiedNumber;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_identical_overlap")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).nth(1).duplicate(0.001))
+    .intercept(tap("tap").from("host2").copiesOnly().filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).mutate([](Packet *p) {
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + 32700); }), "identical overlap has fresh record number");
+    }))
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 11 && h->getFragmentOffset() > 0; }).delay(0.01))
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 15) || packetHandshake(p, 20); }).delay(0.02))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(2))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return handshake(c, 11) && r && r->getSequenceNumber() >= 32700; }).assertEvent([](const MatchContext& c) { copiedNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return true; }).within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        if (a) for (size_t i = 0; i < a->getEpochsArraySize(); i++) if (a->getEpochs(i) == 2 && a->getSequenceNumbers(i) == copiedNumber) return true;
+        return false;
+    }).within(0.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "identical overlapping content is retained once within the 4096-byte cap"); }));
+}
+%activity:
+EV << "rfc9147_identical_overlap compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 4000B
+*.host1.app[0].dtls.replayWindowSize = 65536
+*.host1.app[0].dtls.maxReassemblyBytes = 4096B
+%contains: stdout
+PROTOCOLTEST rfc9147_identical_overlap: PASS

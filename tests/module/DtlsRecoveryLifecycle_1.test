@@ -1,0 +1,142 @@
+%description:
+Observe real recovery and pre-validation timers, then stop or crash the owning
+hosts and check that their engine state and scheduled events are released.
+
+%file: RecoveryLifecycleFixture.cc
+#include <iostream>
+#include "inet/transportlayer/dtls/Dtls.h"
+
+namespace DtlsRecoveryLifecycle_1 {
+
+using namespace inet;
+using namespace inet::dtls;
+
+class TestDtls : public Dtls
+{
+  public:
+    size_t pendingState() const { return associations.size() + prevalidationAttempts.size(); }
+    size_t processingBytes() const {
+        return (inputProcessing ? inputProcessing->getOccupiedBytes() : 0) +
+               (outputProcessing ? outputProcessing->getOccupiedBytes() : 0);
+    }
+};
+Define_Module(TestDtls);
+
+class RecoveryLifecycleFixture : public cSimpleModule, public cListener
+{
+  public:
+    RecoveryLifecycleFixture() : cSimpleModule(65536) {}
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        check_and_cast<Packet *>(object)->setBitError(true);
+    }
+
+  protected:
+    bool hasTimer(TestDtls *owner, const char *name) {
+        auto fes = getSimulation()->getFES();
+        for (int i = 0; i < fes->getLength(); ++i) {
+            auto message = dynamic_cast<cMessage *>(fes->get(i));
+            if (message && message->getArrivalModule() == owner && !strcmp(message->getName(), name))
+                return true;
+        }
+        return false;
+    }
+
+    virtual void activity() override {
+        auto retention = check_and_cast<TestDtls *>(getModuleByPath("^.server.app[0].dtls"));
+        auto prevalidation = check_and_cast<TestDtls *>(getModuleByPath("^.server.app[1].dtls"));
+        auto retry = check_and_cast<TestDtls *>(getModuleByPath("^.client.app[2].dtls"));
+        auto delayedAck = check_and_cast<TestDtls *>(getModuleByPath("^.client.app[3].dtls"));
+        prevalidation->subscribe("packetSentToLower", this);
+        wait(1.0001);
+        ASSERT(hasTimer(retention, "dtlsFinalAckRetention"));
+        ASSERT(hasTimer(prevalidation, "dtlsPrevalidationDeadline"));
+        ASSERT(hasTimer(prevalidation, "dtlsRetryRetransmission"));
+        ASSERT(hasTimer(retry, "dtlsRetransmission"));
+        ASSERT(hasTimer(delayedAck, "dtlsDelayedAck"));
+        wait(0.0009);
+        for (auto engine : {retention, prevalidation, retry, delayedAck}) {
+            ASSERT(engine->pendingState() == 0);
+            ASSERT(engine->processingBytes() == 0);
+            ASSERT(!hasTimer(engine, "dtlsFinalAckRetention"));
+            ASSERT(!hasTimer(engine, "dtlsPrevalidationDeadline"));
+            ASSERT(!hasTimer(engine, "dtlsRetryRetransmission"));
+            ASSERT(!hasTimer(engine, "dtlsRetransmission"));
+            ASSERT(!hasTimer(engine, "dtlsDelayedAck"));
+        }
+        wait(2);
+        prevalidation->unsubscribe("packetSentToLower", this);
+        std::cout << "DTLS recovery lifecycle PASS" << std::endl;
+    }
+};
+Define_Module(RecoveryLifecycleFixture);
+}
+
+%file: TestNetwork.ned
+import inet.networks.base.WiredNetworkBase;
+import inet.node.contract.IEthernetNetworkNode;
+import inet.node.ethernet.EthernetLink;
+import inet.common.scenario.ScenarioManager;
+import inet.transportlayer.dtls.Dtls;
+
+simple TestDtls extends Dtls
+{
+    @class(::DtlsRecoveryLifecycle_1::TestDtls);
+}
+simple RecoveryLifecycleFixture
+{
+    @class(::DtlsRecoveryLifecycle_1::RecoveryLifecycleFixture);
+}
+network TestNetwork extends WiredNetworkBase
+{
+    parameters:
+        visualizer.typename = default("");
+    submodules:
+        scenarioManager: ScenarioManager;
+        client: <default("StandardHost")> like IEthernetNetworkNode;
+        server: <default("StandardHost")> like IEthernetNetworkNode;
+        fixture: RecoveryLifecycleFixture;
+    connections:
+        client.ethg++ <--> EthernetLink { datarate = 100Mbps; } <--> server.ethg++;
+}
+
+%file: scenario.xml
+<scenario>
+    <at t="1.00011s"><crash module="client"/><shutdown module="server"/></at>
+</scenario>
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 4s
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.client.hasStatus = true
+*.server.hasStatus = true
+*.client.numApps = 4
+*.server.numApps = 4
+*.client.app[*].typename = "DtlsApp"
+*.server.app[*].typename = "DtlsApp"
+*.client.app[*].dtls.typename = "TestDtls"
+*.server.app[*].dtls.typename = "TestDtls"
+*.server.app[*].server = true
+*.client.app[*].io.destAddress = "server"
+*.client.app[*].source.initialProductionOffset = 100s
+*.client.app[*].source.packetLength = 128B
+*.client.app[*].source.productionInterval = 1s
+*.client.app[0].io.destPort = 4433
+*.client.app[1].io.destPort = 4434
+*.client.app[2].io.destPort = 9999
+*.client.app[3].io.destPort = 4436
+*.server.app[0].dtls.localPort = 4433
+*.server.app[1].dtls.localPort = 4434
+*.server.app[2].dtls.localPort = 4435
+*.server.app[3].dtls.localPort = 4436
+*.server.app[0].dtls.cookieRequired = false
+*.server.app[1].dtls.handshakeOutDelay = 0.1s
+*.server.app[3].dtls.cookieRequired = false
+*.server.app[3].dtls.protectOutDelay = 1s
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%contains: stdout
+DTLS recovery lifecycle PASS

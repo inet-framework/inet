@@ -4,10 +4,425 @@
 #include <algorithm>
 #include <limits>
 
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/transportlayer/dtls/Dtls.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 
 namespace inet::dtls {
+
+DtlsAssociation::DtlsAssociation(Dtls& engine, size_t reassemblyLimit) : engine(engine), reassembly(reassemblyLimit)
+{
+    retransmissionTimer = std::make_unique<cMessage>("dtlsRetransmission");
+    delayedAckTimer = std::make_unique<cMessage>("dtlsDelayedAck");
+    retentionTimer = std::make_unique<cMessage>("dtlsFinalAckRetention");
+}
+
+void DtlsAssociation::cancelTimers()
+{
+    engine.cancelEvent(retransmissionTimer.get());
+    engine.cancelEvent(delayedAckTimer.get());
+    engine.cancelEvent(retentionTimer.get());
+}
+
+bool DtlsAssociation::handleTimer(cMessage *message)
+{
+    // RFC 9147 Section 5.8.2 recommends doubling the retransmission timer up to at least 60 seconds.
+    if (message == retransmissionTimer.get()) {
+        if (flight && !flight->isComplete()) {
+            retransmissionTimeout = std::min(SimTime(60), retransmissionTimeout * 2);
+            flight->requestRetransmission();
+            burstLimit = burstQueued;
+            pumpFlight();
+        }
+        return true;
+    }
+    if (message == delayedAckTimer.get()) {
+        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? 3 : 2);
+        return true;
+    }
+    if (message == retentionTimer.get()) {
+        processedHandshakes.clear();
+        return true;
+    }
+    return false;
+}
+
+void DtlsAssociation::noteHandshakeRecord(uint64_t epoch, uint64_t recordNumber, bool immediate)
+{
+    pendingAcks.emplace(epoch, recordNumber);
+    if (immediate)
+        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? 3 : 2);
+    else if (!delayedAckTimer->isScheduled())
+        engine.scheduleAt(simTime() + std::max(SimTime::fromRaw(1), retransmissionTimeout / 4), delayedAckTimer.get());
+}
+
+void DtlsAssociation::flushAcknowledgements(uint64_t sendEpoch)
+{
+    engine.cancelEvent(delayedAckTimer.get());
+    if (pendingAcks.empty())
+        return;
+    std::vector<std::pair<uint64_t, uint64_t>> records(pendingAcks.begin(), pendingAcks.end());
+    pendingAcks.clear();
+    engine.sendAcknowledgements(id, sendEpoch, records);
+}
+
+void DtlsAssociation::clearAcknowledgements()
+{
+    engine.cancelEvent(delayedAckTimer.get());
+    pendingAcks.clear();
+}
+
+void DtlsAssociation::beginFlight()
+{
+    engine.cancelEvent(retransmissionTimer.get());
+    flight = std::make_shared<DtlsHandshakeFlight>();
+    buildingFlight = true;
+    generationPending = 0;
+    burstQueued = 0;
+    burstLimit = 0;
+}
+
+void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, uint64_t epoch, const Ptr<Chunk>& body, bool establishAfterSend, bool serverFinished)
+{
+    // RFC 9147 Sections 4.4 and 5.5 fragment handshake messages to fit the transport payload.
+    if (!buildingFlight || !flight || !body)
+        throw cRuntimeError("DTLS handshake message has no active flight");
+    auto size = body->getChunkLength().get<B>();
+    auto udpLimit = engine.par("udpPayloadLimit").intValue();
+    int overhead = epoch == 0 ? 25 : 34;
+    if (udpLimit <= overhead || size <= 0 || size > 0xffffff)
+        throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
+    size_t maximum = std::min<size_t>(udpLimit - overhead, 65535 - (epoch == 0 ? 12 : 29));
+    auto currentFlight = flight;
+    std::vector<size_t> indices;
+    if ((size_t)size <= maximum) {
+        body->markImmutable();
+        indices.push_back(currentFlight->add(type, messageSequence, size, 0, epoch, body, establishAfterSend, serverFinished));
+    }
+    else {
+        Packet source("DTLS handshake body", body);
+        auto bytes = source.peekDataAsBytes()->getBytes();
+        for (size_t offset = 0; offset < bytes.size(); offset += maximum) {
+            auto length = std::min(maximum, bytes.size() - offset);
+            std::vector<uint8_t> part(bytes.begin() + offset, bytes.begin() + offset + length);
+            auto chunk = makeShared<BytesChunk>(part);
+            chunk->markImmutable();
+            bool last = offset + length == bytes.size();
+            indices.push_back(currentFlight->add(type, messageSequence, size, offset, epoch, chunk, last && establishAfterSend, last && serverFinished));
+        }
+    }
+    ++generationPending;
+    auto& owner = engine;
+    auto handle = id;
+    auto delay = SimTime(owner.par("handshakeOutDelay").doubleValue());
+    auto eligible = [&owner, handle, currentFlight]() {
+        auto it = owner.associations.find(handle);
+        return it != owner.associations.end() && it->second->flight == currentFlight;
+    };
+    if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, size + 12, delay, [&owner, handle, currentFlight, indices]() {
+        auto it = owner.associations.find(handle);
+        if (it == owner.associations.end() || it->second->flight != currentFlight)
+            return;
+        for (auto index : indices)
+            currentFlight->markReady(index);
+        --it->second->generationPending;
+        if (!it->second->buildingFlight && it->second->generationPending == 0)
+            it->second->pumpFlight();
+    }, eligible))
+        owner.failAssociation(handle, "DTLS output processing queue is full");
+}
+
+void DtlsAssociation::finishFlight()
+{
+    buildingFlight = false;
+    if (generationPending == 0)
+        pumpFlight();
+}
+
+void DtlsAssociation::pumpFlight()
+{
+    // RFC 9147 Section 5.8.3 limits each burst before ACK-driven progress.
+    if (pumpingFlight || buildingFlight || generationPending || !flight || flight->isComplete())
+        return;
+    pumpingFlight = true;
+    auto currentFlight = flight;
+    auto& owner = engine;
+    auto handle = id;
+    for (size_t i = 0; i < currentFlight->size() && burstLimit < 10; ++i) {
+        if (!currentFlight->reserve(i))
+            continue;
+        ++burstLimit;
+        ++burstQueued;
+        owner.transmitFlightFragment(handle, currentFlight, i);
+        if (!owner.containsAssociation(handle))
+            return;
+        if (flight != currentFlight) {
+            pumpingFlight = false;
+            return;
+        }
+    }
+    pumpingFlight = false;
+    if (burstQueued == 0 && !currentFlight->isComplete() && burstLimit != 0 && !retransmissionTimer->isScheduled())
+        owner.scheduleAt(simTime() + retransmissionTimeout, retransmissionTimer.get());
+}
+
+void DtlsAssociation::flightRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index, uint64_t recordNumber)
+{
+    if (flight != sentFlight)
+        return;
+    auto fragment = sentFlight->get(index);
+    bool retransmission = fragment.transmissions != 0;
+    sentFlight->handedOff(index, recordNumber, simTime());
+    if (burstQueued > 0)
+        --burstQueued;
+    if (retransmission)
+        engine.emit(Dtls::handshakeRetransmissionSignal, (long)id);
+    if (!pumpingFlight && burstQueued == 0 && !sentFlight->isComplete() && !retransmissionTimer->isScheduled())
+        engine.scheduleAt(simTime() + retransmissionTimeout, retransmissionTimer.get());
+    auto& owner = engine;
+    auto handle = id;
+    if (!retransmission && fragment.establishAfterSend)
+        owner.establish(handle);
+    else if (!retransmission && fragment.serverFinished)
+        serverFinishedHandedOff();
+}
+
+void DtlsAssociation::flightRecordSkipped(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index, size_t reservedCredit)
+{
+    sentFlight->cancelReservation(index);
+    if (reservedCredit <= reservedBytes)
+        reservedBytes -= reservedCredit;
+    if (flight != sentFlight)
+        return;
+    if (burstQueued > 0)
+        --burstQueued;
+    if (burstLimit > 0)
+        --burstLimit;
+    if (!pumpingFlight)
+        pumpFlight();
+}
+
+void DtlsAssociation::acceptAck(const DtlsAck& ack)
+{
+    if (!flight || ack.getEpochsArraySize() != ack.getSequenceNumbersArraySize())
+        return;
+    bool progress = false;
+    for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
+        auto result = flight->acknowledge(ack.getEpochs(i), ack.getSequenceNumbers(i), simTime());
+        progress |= result.matched;
+        // RFC 9147 Section 5.8.2 recommends 1.5 times an eligible measured RTT.
+        if (result.rtt)
+            retransmissionTimeout = std::max(SimTime::fromRaw(1), *result.rtt * 1.5);
+    }
+    if (!progress)
+        return;
+    engine.cancelEvent(retransmissionTimer.get());
+    if (flight->isComplete()) {
+        if (!serverSide && state == HandshakeState::ESTABLISHED)
+            processedHandshakes.clear();
+    }
+    else {
+        flight->requestRetransmission();
+        burstLimit = burstQueued;
+        pumpFlight();
+    }
+}
+
+void DtlsAssociation::acknowledgeFlightImplicitly()
+{
+    // RFC 9147 Section 7.2 treats a valid response as implicit acknowledgment of the prior flight.
+    if (!flight)
+        return;
+    auto result = flight->acknowledgeSent(simTime());
+    if (result.rtt)
+        retransmissionTimeout = std::max(SimTime::fromRaw(1), *result.rtt * 1.5);
+    if (result.flightComplete)
+        engine.cancelEvent(retransmissionTimer.get());
+}
+
+void DtlsAssociation::receiveHandshakeFragment(uint64_t recordSequence, Packet *body)
+{
+    std::vector<std::unique_ptr<Packet>> fragments;
+    while (body->getDataLength() > b(0)) {
+        if (body->getDataLength() < B(12)) {
+            engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+            return;
+        }
+        auto header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+        auto total = header->getMessageLength();
+        auto offset = header->getFragmentOffset();
+        auto length = header->getFragmentLength();
+        if (length == 0 || offset > total || length > total - offset || body->getDataLength() < B(length)) {
+            engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+            return;
+        }
+        auto fragment = std::make_unique<Packet>("DTLS handshake fragment", body->removeAtFront(B(length)));
+        if (!engine.hasConsistentEncoding(fragment.get())) {
+            engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+            return;
+        }
+        fragment->insertAtFront(header);
+        fragments.push_back(std::move(fragment));
+    }
+    if (fragments.empty())
+        return;
+    auto& owner = engine;
+    auto handle = id;
+    bool immediateAck = false, duplicate = false, implicitResponse = false;
+    for (auto& fragment : fragments) {
+        if (!retainHandshakeFragment(recordSequence, fragment.get(), immediateAck, duplicate, implicitResponse))
+            return;
+    }
+    if (implicitResponse)
+        acknowledgeFlightImplicitly();
+    receiveEpoch2->accept(recordSequence);
+    noteHandshakeRecord(2, recordSequence, immediateAck);
+    if (!owner.containsAssociation(handle))
+        return;
+    if (duplicate && !serverSide && flight && !flight->isComplete()) {
+        owner.cancelEvent(retransmissionTimer.get());
+        flight->requestRetransmission();
+        burstLimit = burstQueued;
+        pumpFlight();
+        if (!owner.containsAssociation(handle))
+            return;
+    }
+    scheduleNextHandshake();
+}
+
+bool DtlsAssociation::retainHandshakeFragment(uint64_t recordSequence, Packet *body, bool& immediateAck, bool& duplicate, bool& implicitResponse)
+{
+    if (body->getDataLength() < B(12)) {
+        engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+        return false;
+    }
+    auto header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+    auto total = header->getMessageLength();
+    auto offset = header->getFragmentOffset();
+    auto length = header->getFragmentLength();
+    auto messageSequence = header->getMessageSequence();
+    if (offset > total || length > total - offset || body->getDataLength() != B(length)) {
+        engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+        return false;
+    }
+    if (state == HandshakeState::ESTABLISHED && messageSequence >= nextPeerMessage)
+        return false;
+    if (length == 0)
+        return false;
+    if (!engine.hasConsistentEncoding(body)) {
+        engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+        return false;
+    }
+    auto bytes = body->peekDataAsBytes()->getBytes();
+    if (messageSequence < nextPeerMessage) {
+        auto old = processedHandshakes.find(messageSequence);
+        if (old == processedHandshakes.end())
+            return false;
+        if (old->second.type != header->getMessageType() || old->second.body.size() != total ||
+            !std::equal(bytes.begin(), bytes.end(), old->second.body.begin() + offset)) {
+            engine.failAssociation(id, "conflicting retransmitted handshake fragment", 47);
+            return false;
+        }
+        immediateAck = true;
+        duplicate = true;
+        return true;
+    }
+    if (processingHandshake && messageSequence == nextPeerMessage) {
+        if (header->getMessageType() != processingHandshakeType || total != processingHandshakeBody.size() ||
+            !std::equal(bytes.begin(), bytes.end(), processingHandshakeBody.begin() + offset)) {
+            engine.failAssociation(id, "conflicting handshake fragment", 47);
+            return false;
+        }
+        immediateAck = true;
+        return true;
+    }
+    bool outOfOrder = messageSequence != nextPeerMessage || offset != reassembly.firstMissing(messageSequence);
+    auto oldBytes = reassembly.getReservedBytes();
+    auto result = reassembly.insert(header->getMessageType(), messageSequence, total, offset, bytes);
+    if (result == DtlsHandshakeReassembly::Result::OUT_OF_RANGE || result == DtlsHandshakeReassembly::Result::EMPTY)
+        return false;
+    if (result == DtlsHandshakeReassembly::Result::CONFLICT) {
+        engine.failAssociation(id, "conflicting handshake fragment", 47);
+        return false;
+    }
+    if (result == DtlsHandshakeReassembly::Result::LIMIT) {
+        auto& owner = engine;
+        auto handle = id;
+        owner.emit(Dtls::recordDroppedSignal, (long)Dtls::RESOURCE_LIMIT);
+        if (owner.containsAssociation(handle))
+            owner.failAssociation(handle, "DTLS handshake reassembly limit reached");
+        return false;
+    }
+    auto responseBase = serverMessageBase + 1;
+    bool clientResponse = clientAuthRequested ?
+        (header->getMessageType() == 11 && messageSequence == responseBase) ||
+        (header->getMessageType() == 15 && messageSequence == responseBase + 1) ||
+        (header->getMessageType() == 20 && messageSequence == responseBase + 2) :
+        header->getMessageType() == 20 && messageSequence == responseBase;
+    if (serverSide && clientResponse &&
+        (state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE || state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY ||
+         state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED))
+        implicitResponse = true;
+    auto handle = id;
+    auto& owner = engine;
+    if (oldBytes != reassembly.getReservedBytes()) {
+        owner.emitReassemblyBytes();
+        if (!owner.containsAssociation(handle))
+            return false;
+    }
+    immediateAck |= outOfOrder;
+    if (result == DtlsHandshakeReassembly::Result::COMPLETE)
+        completeRecordNumbers[messageSequence] = recordSequence;
+    return true;
+}
+
+void DtlsAssociation::scheduleNextHandshake()
+{
+    if (processingHandshake || !reassembly.isComplete(nextPeerMessage))
+        return;
+    auto messageSequence = nextPeerMessage;
+    auto recordSequence = completeRecordNumbers.at(messageSequence);
+    completeRecordNumbers.erase(messageSequence);
+    auto message = reassembly.take(messageSequence);
+    auto& owner = engine;
+    auto handle = id;
+    owner.emitReassemblyBytes();
+    if (!owner.containsAssociation(handle))
+        return;
+    processingHandshake = true;
+    processingHandshakeType = message.type;
+    processingHandshakeBody = message.body;
+    auto processed = std::make_shared<DtlsHandshakeReassembly::Message>(message);
+    auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("reassembled DTLS handshake", makeShared<BytesChunk>(message.body)));
+    auto header = makeShared<DtlsHandshakeHeader>();
+    header->setMessageType(message.type);
+    header->setMessageSequence(messageSequence);
+    header->setMessageLength(message.body.size());
+    header->setFragmentLength(message.body.size());
+    (*packet)->insertAtFront(header);
+    auto delay = SimTime(engine.par("handshakeInDelay").doubleValue());
+    auto bytes = message.body.size() + 12;
+    if (!owner.enqueueProcessing(owner.inputProcessing.get(), handle, bytes, delay, [&owner, handle, messageSequence, recordSequence, processed, packet]() {
+        auto it = owner.associations.find(handle);
+        if (it == owner.associations.end())
+            return;
+        it->second->processingHandshake = false;
+        it->second->processingHandshakeBody.clear();
+        try {
+            it->second->processHandshake(recordSequence, packet->get());
+        }
+        catch (const cRuntimeError&) {
+            owner.failAssociation(handle, "malformed handshake message", 50);
+        }
+        it = owner.associations.find(handle);
+        if (it != owner.associations.end()) {
+            if (it->second->nextPeerMessage > messageSequence)
+                it->second->processedHandshakes[messageSequence] = *processed;
+            it->second->scheduleNextHandshake();
+        }
+    }))
+        owner.failAssociation(handle, "DTLS input processing queue is full");
+}
 
 int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello, bool certificateProfile, const std::string& identity,
                                          tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection)
@@ -112,7 +527,10 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     auto decodeError = Parameters::decodeOffer(hello, offer);
     if (!decodeError.empty())
         throw cRuntimeError("Invalid locally generated ClientHello: %s", decodeError.c_str());
+    beginFlight();
     owner.sendPlainHandshake(handle, 1, retried ? 1 : 0, hello);
+    if (owner.containsAssociation(handle))
+        finishFlight();
 }
 
 void DtlsAssociation::sendServerFlight()
@@ -125,13 +543,20 @@ void DtlsAssociation::sendServerFlight()
     bool clientAuth = clientAuthRequested;
     Ptr<Chunk> certificate;
     Ptr<Chunk> verify;
-    size_t flightBytes = 13 + 12 + 40 + 46 + (useCertificate ? 0 : 6) + (5 + 12 + 2 + 1 + 16) + (5 + 12 + 32 + 1 + 16);
+    auto udpLimit = owner.par("udpPayloadLimit").intValue();
+    auto wireSize = [udpLimit](size_t length, int overhead) {
+        if (udpLimit <= overhead)
+            throw cRuntimeError("DTLS UDP payload limit cannot carry a handshake fragment");
+        size_t maximum = std::min<size_t>(udpLimit - overhead, 65535 - (overhead == 25 ? 12 : 29));
+        return length + ((length + maximum - 1) / maximum) * overhead;
+    };
+    size_t flightBytes = wireSize(40 + 46 + (useCertificate ? 0 : 6), 25) + wireSize(2, 34) + wireSize(32, 34);
     if (useCertificate) {
         certificate = owner.makeCertificate();
         verify = owner.makeCertificateVerify();
-        flightBytes += (5 + 12 + 1 + 16) * 2 + certificate->getChunkLength().get<B>() + verify->getChunkLength().get<B>();
+        flightBytes += wireSize(certificate->getChunkLength().get<B>(), 34) + wireSize(verify->getChunkLength().get<B>(), 34);
         if (clientAuth)
-            flightBytes += 5 + 12 + 11 + 1 + 16;
+            flightBytes += wireSize(11, 34);
     }
     if (!addressValidated) {
         auto credit = receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : receivedBytes * 3;
@@ -157,6 +582,7 @@ void DtlsAssociation::sendServerFlight()
     reservedBytes += flightBytes;
     serverFlightQueued = true;
     auto base = serverMessageBase;
+    beginFlight();
     owner.sendPlainHandshake(handle, 2, base, hello);
     if (!owner.containsAssociation(handle))
         return;
@@ -189,6 +615,8 @@ void DtlsAssociation::sendServerFlight()
     finished->setVerifyDataArraySize(32);
     finished->setChunkLength(B(32));
     owner.sendProtectedHandshake(handle, 20, messageSequence, finished, false, true);
+    if (owner.containsAssociation(handle))
+        finishFlight();
 }
 
 void DtlsAssociation::serverFinishedHandedOff()
@@ -323,6 +751,7 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         retryRequestedShare = requestedShare;
         retryCookie = cookie;
         serverMessageBase = 1;
+        acknowledgeFlightImplicitly();
         owner.sendClientHello(handle, cookie);
         return;
     }
@@ -337,12 +766,11 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     }
     state = HandshakeState::CLIENT_WAIT_SERVER_EXTENSIONS;
     nextPeerMessage = serverMessageBase + 1;
+    acknowledgeFlightImplicitly();
 }
 
 void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
 {
-    if (!receiveEpoch2->isAcceptable(sequence))
-        return;
     if (body->getDataLength() < B(12)) {
         engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
         return;
@@ -392,7 +820,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "unsupported encrypted extension", 110);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         state = certificateProfile ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
     }
@@ -451,7 +878,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "no compatible requested signature algorithm", seen.count(13) ? 40 : 109);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         clientAuthRequested = true;
     }
@@ -461,7 +887,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid peer certificate", alert);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         state = HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE_VERIFY;
     }
@@ -471,7 +896,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid certificate signature", alert);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         state = HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
     }
@@ -481,7 +905,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid peer certificate", alert);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         state = HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY;
     }
@@ -491,7 +914,6 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid certificate signature", alert);
             return;
         }
-        receiveEpoch2->accept(sequence);
         ++nextPeerMessage;
         state = HandshakeState::SERVER_WAIT_CLIENT_FINISHED;
     }
@@ -500,12 +922,14 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid Finished length", 50);
             return;
         }
-        receiveEpoch2->accept(sequence);
+        ++nextPeerMessage;
         state = HandshakeState::CLIENT_WAIT_FINISHED_HANDOFF;
+        clearAcknowledgements();
         auto handle = id;
         auto& owner = engine;
         auto nextMessage = serverMessageBase + 1;
         bool sendClientCertificate = clientAuthRequested;
+        beginFlight();
         if (sendClientCertificate) {
             owner.sendProtectedHandshake(handle, 11, nextMessage++, owner.makeCertificate());
             if (!owner.containsAssociation(handle))
@@ -518,6 +942,8 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         finished->setVerifyDataArraySize(32);
         finished->setChunkLength(B(32));
         owner.sendProtectedHandshake(handle, 20, nextMessage, finished, true);
+        if (owner.containsAssociation(handle))
+            finishFlight();
     }
     else if (state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED && handshake->getMessageType() == 20) {
         if (peerFinishedProcessed)
@@ -526,9 +952,11 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "invalid Finished length", 50);
             return;
         }
-        receiveEpoch2->accept(sequence);
+        ++nextPeerMessage;
         peerFinishedProcessed = true;
+        addressValidated = true;
         peerFinishedRecord = sequence;
+        acknowledgeFlightImplicitly();
         if (ownFinishedHandedOff) {
             auto handle = id;
             auto& owner = engine;

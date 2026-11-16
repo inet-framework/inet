@@ -2,7 +2,7 @@
 
 > **Kind:** reference · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](dtls.md)
 
-This document explains revision 7 of the [DTLS implementation plan](dtls.md), as of 2026-11-16. The components, exchanges and results below are proposed behavior. The protocol has not been implemented or validated at runtime. The detailed plan owns the exact scope, commit boundaries, parameters and test requirements.
+This document explains revision 7 of the [DTLS implementation plan](dtls.md), as of 2026-11-16. Implementation is in progress. The diagrams describe the intended completed behavior, and the [verification report](../../doc/project/evidence/model/dtls/results.md) distinguishes executed foundation checks from unfinished endpoint behavior. The detailed plan owns the exact scope, commit boundaries, parameters and test requirements.
 
 ## What we want to build
 

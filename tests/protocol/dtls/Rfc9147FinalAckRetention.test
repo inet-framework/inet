@@ -1,0 +1,49 @@
+%description:
+
+DTLS production-path variant FinalAckRetention: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_final_ack_retention")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).within(3))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).nth(1).duplicate(239.9, 2))
+    .meanwhile(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").mutate([](Packet *p) {
+        static uint16_t extra = 0;
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + ++extra); }), "late Finished has a fresh record number");
+    }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).notBefore(239.8).within(240))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).notBefore(239.8).within(240))
+    .never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).within(0.05))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "retained final-flight state cannot produce another establishment"); }));
+}
+%activity:
+EV << "rfc9147_final_ack_retention compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 500s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_final_ack_retention: PASS

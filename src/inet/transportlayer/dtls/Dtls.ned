@@ -53,6 +53,8 @@ simple Dtls extends SimpleModule like IDtls
         @signal[associationFailed](type=long);
         @signal[establishmentTime](type=double);
         @signal[recordOverhead](type=long);
+        // Sum of retained incomplete handshake body bytes across this engine.
+        @signal[reassemblyBytes](type=long);
         @signal[handshakeRetransmission](type=long);
         @signal[processingDelay](type=double);
         @statistic[packetSent](source=packetSent; record=count,"sum(packetBytes)"; interpolationmode=none);
@@ -63,6 +65,7 @@ simple Dtls extends SimpleModule like IDtls
         @statistic[handshakeRetransmission](source=handshakeRetransmission; record=count; interpolationmode=none);
         @statistic[establishmentTime](source=establishmentTime; record=vector,mean; unit=s; interpolationmode=none);
         @statistic[recordOverhead](source=recordOverhead; record=vector,mean; unit=B; interpolationmode=none);
+        @statistic[reassemblyBytes](source=reassemblyBytes; record=vector,max; unit=B; interpolationmode=sample-hold);
         @statistic[processingDelay](source=processingDelay; record=vector,mean; unit=s; interpolationmode=none);
     gates:
         input socketIn;

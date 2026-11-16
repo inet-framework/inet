@@ -37,6 +37,9 @@ class ProcessingQueueFixture : public cSimpleModule
         bool synchronous = false;
         ASSERT(output->enqueue(1, 0, SIMTIME_ZERO, [&] { synchronous = true; }));
         ASSERT(synchronous && output->getOccupiedBytes() == 0);
+        bool skipped = false, started = false;
+        ASSERT(output->enqueue(1, 1, 1, [] { throw cRuntimeError("ineligible operation ran"); }, [] { return false; }, [&] { skipped = true; }, [&] { started = true; }));
+        ASSERT(skipped && !started && output->getOccupiedBytes() == 0);
         ASSERT(input->enqueue(1, 2, 2, [&] { ASSERT(simTime() == 2); ++completed; }));
         ASSERT(input->enqueue(2, 1, 1, [&] { throw cRuntimeError("cancelled operation ran"); }));
         ASSERT(!input->enqueue(3, 1, 1, [] {}));

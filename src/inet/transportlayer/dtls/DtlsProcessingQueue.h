@@ -15,6 +15,7 @@ class INET_API DtlsProcessingQueue
   public:
     using AssociationId = uint64_t;
     using Completion = std::function<void()>;
+    using Eligibility = std::function<bool()>;
 
   protected:
     struct Operation {
@@ -22,6 +23,9 @@ class INET_API DtlsProcessingQueue
         size_t bytes;
         simtime_t delay;
         Completion complete;
+        Eligibility eligible;
+        Completion skipped;
+        Completion started;
     };
     cSimpleModule *owner;
     cMessage *timer = nullptr;
@@ -41,7 +45,7 @@ class INET_API DtlsProcessingQueue
 
     // Admission reserves at least one byte, including for an empty datagram.
     // An idle zero-delay operation completes before this method returns.
-    bool enqueue(AssociationId associationId, size_t bytes, simtime_t delay, Completion complete);
+    bool enqueue(AssociationId associationId, size_t bytes, simtime_t delay, Completion complete, Eligibility eligible = {}, Completion skipped = {}, Completion started = {});
     bool isTimer(const cMessage *message) const { return message == timer; }
     void handleTimer();
     void cancel(AssociationId associationId);

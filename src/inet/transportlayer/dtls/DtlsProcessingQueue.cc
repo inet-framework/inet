@@ -19,7 +19,7 @@ DtlsProcessingQueue::~DtlsProcessingQueue()
     delete timer;
 }
 
-bool DtlsProcessingQueue::enqueue(AssociationId associationId, size_t bytes, simtime_t delay, Completion complete)
+bool DtlsProcessingQueue::enqueue(AssociationId associationId, size_t bytes, simtime_t delay, Completion complete, Eligibility eligible, Completion skipped, Completion started)
 {
     bytes = std::max(size_t(1), bytes);
     if (delay < SIMTIME_ZERO || !complete)
@@ -27,7 +27,7 @@ bool DtlsProcessingQueue::enqueue(AssociationId associationId, size_t bytes, sim
     if (bytes > limit - occupied)
         return false;
     occupied += bytes;
-    pending.push_back({associationId, bytes, delay, std::move(complete)});
+    pending.push_back({associationId, bytes, delay, std::move(complete), std::move(eligible), std::move(skipped), std::move(started)});
     pump();
     return true;
 }
@@ -39,16 +39,32 @@ void DtlsProcessingQueue::pump()
     pumping = true;
     try {
         while (!pending.empty() && !active) {
+            if (pending.front().eligible && !pending.front().eligible()) {
+                auto operation = std::move(pending.front());
+                pending.pop_front();
+                occupied -= operation.bytes;
+                if (operation.skipped)
+                    operation.skipped();
+                continue;
+            }
             auto delay = pending.front().delay;
             if (delay > SIMTIME_ZERO) {
+                auto started = pending.front().started;
                 active = true;
                 owner->scheduleAt(simTime() + delay, timer);
+                if (started)
+                    started();
             }
             else {
                 auto operation = std::move(pending.front());
                 pending.pop_front();
                 occupied -= operation.bytes;
-                operation.complete();
+                if (operation.started)
+                    operation.started();
+                if (!operation.eligible || operation.eligible())
+                    operation.complete();
+                else if (operation.skipped)
+                    operation.skipped();
             }
         }
     }
@@ -67,7 +83,10 @@ void DtlsProcessingQueue::handleTimer()
     pending.pop_front();
     occupied -= operation.bytes;
     active = false;
-    operation.complete();
+    if (!operation.eligible || operation.eligible())
+        operation.complete();
+    else if (operation.skipped)
+        operation.skipped();
     pump();
 }
 
