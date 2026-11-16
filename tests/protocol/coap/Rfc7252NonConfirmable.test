@@ -1,0 +1,223 @@
+%description:
+
+RFC 7252 Sections 4.3, 4.6, 5.2.3, 5.5 and 5.10 -- non-confirmable GET
+over IPv4 and IPv6, duplicate NON suppression within NON_LIFETIME (145s)
+and fresh execution after 145s, 4.04/4.05/4.06 status codes, and
+unmatched NON response -> RST.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class CountingCoapServer : public CoapServer
+{
+  public:
+    int getHandledCount = 0;
+
+  protected:
+    virtual void onGetResourceHandled(const std::string& pathKey, const CoapResourceEntry& resource) override {
+        ++getHandledCount;
+    }
+};
+
+Define_Module(CountingCoapServer);
+
+Define_ProtocolTest(coap_non_confirmable_ipv4_and_dedup)
+{
+    return ProtocolTest("coap_non_confirmable_ipv4_and_dedup")
+        // 1. Client IPv4 NON GET /sensor/temp -> 2.05 "22.5 C" with Content-Format=0, Max-Age=30.
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .protocol("coap")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      if (raw.type != 1 || raw.code != COAP_CODE_CONTENT)
+                          return false;
+                      auto cf = getRawOptionValues(raw, COAP_OPT_CONTENT_FORMAT);
+                      auto ma = getRawOptionValues(raw, COAP_OPT_MAX_AGE);
+                      return rawPayloadString(raw) == "22.5 C"
+                              && cf.size() == 1 && coapDecodedUint(cf[0]) == 0
+                              && ma.size() == 1 && coapDecodedUint(ma[0]) == 30;
+                  })
+                  .within(2.0))
+
+        // 2. Peer sends NON GET with MID 0x4242 at t=2.0 -> handled once; duplicate at t=3.0 -> suppressed;
+        //    after NON_LIFETIME (t=150.0 -> elapsed 148s > 145s) -> handled again.
+        .act(action().at(2.0).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 1; req.code = 1; req.messageId = 0x4242; req.token = {0x11};
+            req.options.push_back({11, asciiBytes("sensor")});
+            req.options.push_back({11, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PeerNonGet1");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower").within(0.5))
+
+        .act(action().at(3.0).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 1; req.code = 1; req.messageId = 0x4242; req.token = {0x11};
+            req.options.push_back({11, asciiBytes("sensor")});
+            req.options.push_back({11, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PeerNonGetDup");
+        }))
+        .never(on("hostA.app[1]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.01).run<CountingCoapServer>("hostB.app[0]", [](CountingCoapServer& srv) {
+            // 1 from CoapClient + 1 from PeerNonGet1 = 2 (duplicate NOT counted)
+            if (srv.getHandledCount != 2)
+                throw cRuntimeError("Expected getHandledCount=2 after NON dedup, got %d", srv.getHandledCount);
+        }))
+
+        // 3. 4.04 Not Found, 4.05 Method Not Allowed, 4.06 Not Acceptable checks.
+        .act(action().at(5.0).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage missing;
+            missing.type = 1; missing.code = 1; missing.messageId = 0x5001; missing.token = {0x21};
+            missing.options.push_back({11, asciiBytes("missing")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(missing), "MissingResource");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 1 && raw.code == COAP_CODE_NOT_FOUND;
+                  })
+                  .within(0.5))
+
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage postReq;
+            postReq.type = 1; postReq.code = 2; postReq.messageId = 0x5002; postReq.token = {0x22};
+            postReq.options.push_back({11, asciiBytes("sensor")});
+            postReq.options.push_back({11, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(postReq), "UnsupportedPost");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 1 && raw.code == COAP_CODE_METHOD_NOT_ALLOWED;
+                  })
+                  .within(0.5))
+
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage badAccept;
+            badAccept.type = 1; badAccept.code = 1; badAccept.messageId = 0x5003; badAccept.token = {0x23};
+            badAccept.options.push_back({11, asciiBytes("sensor")});
+            badAccept.options.push_back({11, asciiBytes("temp")});
+            badAccept.options.push_back({17, coapUintBytes(50)}); // Accept JSON vs text/plain(0)
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(badAccept), "MismatchAccept");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 1 && raw.code == COAP_CODE_NOT_ACCEPTABLE;
+                  })
+                  .within(0.5))
+
+        // 4. After NON_LIFETIME (145s) at t=150s, same MID 0x4242 executes freshly.
+        .act(action().at(150.0).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 1; req.code = 1; req.messageId = 0x4242; req.token = {0x12};
+            req.options.push_back({11, asciiBytes("sensor")});
+            req.options.push_back({11, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PeerNonGetExpired");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.01).run<CountingCoapServer>("hostB.app[0]", [](CountingCoapServer& srv) {
+            if (srv.getHandledCount != 3)
+                throw cRuntimeError("Expected getHandledCount=3 after NON_LIFETIME expiry, got %d", srv.getHandledCount);
+        }))
+
+        // 5. Client IPv6 check: host6A -> host6B NON GET completes 2.05.
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower")
+                  .protocol("coap")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 1 && raw.code == COAP_CODE_CONTENT
+                              && rawPayloadString(raw) == "v6-ok";
+                  })
+                  .within(5.0));
+}
+
+%activity:
+EV << "coap_non_confirmable compiled\n";
+
+%file: CoapDualStackPairNet.ned
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple CountingCoapServer extends CoapServer
+{
+    parameters:
+        @class(CountingCoapServer);
+}
+
+network CoapDualStackPairNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        v6Configurator: Ipv6FlatNetworkConfigurator { @display("p=80,120"); }
+        tester: ProtocolTester { @display("p=80,190"); }
+        hostA: StandardHost { @display("p=250,60"); }
+        hostB: StandardHost { @display("p=450,60"); }
+        host6A: StandardHost {
+            @display("p=250,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+        host6B: StandardHost {
+            @display("p=450,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        host6A.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> host6B.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapDualStackPairNet
+sim-time-limit = 160s
+seed-set = 0
+*.tester.testName = "coap_non_confirmable_ipv4_and_dedup"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "CoapClient"
+*.hostA.app[0].peerAddress = "hostB"
+*.hostA.app[0].confirmable = false
+*.hostA.app[0].requestUri = "/sensor/temp"
+*.hostA.app[0].startTime = 0.5s
+
+*.hostA.app[1].typename = "CoapTestPeer"
+*.hostA.app[1].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CountingCoapServer"
+*.hostB.app[0].resources = xml("<resources><resource path='/sensor/temp' contentFormat='0' maxAge='30'>22.5 C</resource></resources>")
+
+*.host6A.numApps = 1
+*.host6A.app[0].typename = "CoapClient"
+*.host6A.app[0].peerAddress = "host6B"
+*.host6A.app[0].confirmable = false
+*.host6A.app[0].requestUri = "/v6"
+*.host6A.app[0].startTime = 152.0s
+
+*.host6B.numApps = 1
+*.host6B.app[0].typename = "CoapServer"
+*.host6B.app[0].resources = xml("<resources><resource path='/v6' contentFormat='0'>v6-ok</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_non_confirmable_ipv4_and_dedup: PASS

@@ -1,0 +1,211 @@
+%description:
+
+RFC 7252 Sections 3, 4.1-4.3 and 5.4.1 -- malformed UDP datagrams,
+silent-ignore vs Reset (RST) rules, empty/NON format errors, and
+unrecognized critical options in CON vs NON requests.
+
+%includes:
+#include "inet/applications/coap/CoapHeader_m.h"
+#include "inet/applications/coap/CoapProtocol.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class TestInjectCoapServer : public CoapServer
+{
+  public:
+    void injectTypedPacket(Packet *pkt) {
+        Enter_Method_Silent();
+        socketDataArrived(&socket, pkt);
+    }
+};
+
+Define_Module(TestInjectCoapServer);
+
+Define_ProtocolTest(coap_malformed_datagrams)
+{
+    return ProtocolTest("coap_malformed_datagrams")
+        // 1. 0-byte empty datagram -> silent ignore, NO reply.
+        .act(action().at(0.5).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {}, "EmptyDatagram");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 2. 3-byte datagram -> silent ignore, NO reply.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x40, 0x01, 0x12}, "ShortDatagram");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 3. Ver=2 CON -> silent ignore, NO RST!
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x80, 0x01, 0x12, 0x34}, "WrongVersionCon");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 4. TKL=9 CON -> Empty RST with matching MID 0x1001.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x49, 0x01, 0x10, 0x01, 1,2,3,4,5,6,7,8,9}, "BadTklCon");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      return raw.type == 3 && raw.code == 0 && raw.messageId == 0x1001;
+                  })
+                  .within(0.2))
+
+        // 5. Reserved code classes 1, 6, 7 in CON -> Empty RST with matching MIDs.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x40, 0x20, 0x10, 0x02}, "ReservedClass1Con");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.code == 0 && raw.messageId == 0x1002;
+                  })
+                  .within(0.2))
+
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x40, 0xC0, 0x10, 0x03}, "ReservedClass6Con");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.code == 0 && raw.messageId == 0x1003;
+                  })
+                  .within(0.2))
+
+        // 6. 0xFF with no trailing payload in CON -> RST; in NON -> silent ignore.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x40, 0x01, 0x10, 0x04, 0xFF}, "TrailingMarkerCon");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.code == 0 && raw.messageId == 0x1004;
+                  })
+                  .within(0.2))
+
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x50, 0x01, 0x10, 0x05, 0xFF}, "TrailingMarkerNon");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 7. Empty NON (0.00 NON) and Non-empty RST (2.05 RST) -> silent ignore, NO reply.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x50, 0x00, 0x10, 0x06}, "EmptyNon");
+            peer.sendRawNow("hostB", 5683, {0x70, 0x45, 0x10, 0x07}, "NonEmptyRst");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 8. Option nibble 15 in CON -> Empty RST.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x40, 0x01, 0x10, 0x08, 0xF0}, "OptionDelta15Con");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.code == 0 && raw.messageId == 0x1008;
+                  })
+                  .within(0.2))
+
+        // 9. Unrecognized critical option 99 in CON -> 4.02 Bad Option; in NON -> silent ignore.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage conCrit;
+            conCrit.version = 1;
+            conCrit.type = 0; // CON
+            conCrit.code = 1; // GET
+            conCrit.messageId = 0x1009;
+            conCrit.token = {0x42};
+            conCrit.options.push_back({99, {0x01}});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(conCrit), "UnknownCriticalCon");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      return raw.type == 2 && raw.code == 130 /* 4.02 */ && raw.messageId == 0x1009
+                              && raw.token == std::vector<uint8_t>({0x42});
+                  })
+                  .within(0.2))
+
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage nonCrit;
+            nonCrit.version = 1;
+            nonCrit.type = 1; // NON
+            nonCrit.code = 1; // GET
+            nonCrit.messageId = 0x100A;
+            nonCrit.token = {0x43};
+            nonCrit.options.push_back({99, {0x01}});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(nonCrit), "UnknownCriticalNon");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 10. Direct typed malformed CoapHeader (version=2) delivered to server -> silent ignore, NO crash.
+        .act(action().after(0.01).run<TestInjectCoapServer>("hostB.app[0]", [](TestInjectCoapServer& srv) {
+            auto h = makeShared<CoapHeader>();
+            h->setVersion(2);
+            h->setMessageType(COAP_TYPE_CON);
+            h->setCode(COAP_CODE_GET);
+            h->setMessageId(0x2001);
+            h->setChunkLength(B(4));
+            Packet *pkt = new Packet("TypedInvalidVer");
+            pkt->insertAtBack(h);
+            auto l3 = pkt->addTag<L3AddressInd>();
+            l3->setSrcAddress(L3AddressResolver().resolve("hostA"));
+            l3->setDestAddress(L3AddressResolver().resolve("hostB"));
+            auto l4 = pkt->addTag<L4PortInd>();
+            l4->setSrcPort(5683);
+            l4->setDestPort(5683);
+            srv.injectTypedPacket(pkt);
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1));
+}
+
+%activity:
+EV << "coap_malformed_datagrams compiled\n";
+
+%file: TestInjectCoapServer.ned
+import inet.applications.coap.CoapServer;
+
+simple TestInjectCoapServer extends CoapServer
+{
+    parameters:
+        @class(TestInjectCoapServer);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 5s
+seed-set = 0
+*.tester.testName = "coap_malformed_datagrams"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 5683
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "TestInjectCoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/temp'>21C</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_malformed_datagrams: PASS

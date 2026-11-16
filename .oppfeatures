@@ -2050,4 +2050,32 @@
         compileFlags = "-DINET_WITH_Z3_SAT_SOLVER"
         linkerFlags = ""
         />
+    <feature
+        id = "Coap"
+        name = "CoAP over UDP"
+        description = "CoAP over UDP (RFC 7252, RFC 6690, RFC 7641, RFC 7959, RFC 9175) client, server, and packet support."
+        initiallyEnabled = "true"
+        requires = "Udp"
+        recommended = "Ipv4"
+        labels = ""
+        nedPackages = "
+                       inet.applications.coap
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_COAP"
+        linkerFlags = ""
+        />
+    <feature
+        id = "CoapTests"
+        name = "CoAP protocol tests"
+        description = "Protocol conformance tests for CoAP over UDP."
+        initiallyEnabled = "false"
+        requires = "Coap Ethernet Ieee8022 Ipv4 Ipv6 Loopback PhysicalLayerWiredCommon ProtocolElement Queueing Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = ""
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
