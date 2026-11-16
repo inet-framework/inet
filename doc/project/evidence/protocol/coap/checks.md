@@ -33,8 +33,12 @@ Step 5 artifact of the standards test workflow. The procedures come from the spe
 | [Request-Tag concurrent Block1 uploads](checks/blockwise.md#request-tag-concurrent-block1-uploads) | `checks/blockwise.md` | RFC9175-RTAG-1 |
 | [Observe notification with Block2 follow-up retrieval](checks/blockwise.md#observe-notification-with-block2-follow-up-retrieval) | `checks/blockwise.md` | RFC7959-OBS-1 |
 | [Observe and Block2 version change supersession and recovery](checks/blockwise.md#observe-and-block2-version-change-supersession-and-recovery) | `checks/blockwise.md` | RFC7959-OBS-1 |
+| [DTLS handshake, coaps:// addressing, and multicast rejection](checks/dtls.md#dtls-handshake-coaps-addressing-and-multicast-rejection) | `checks/dtls.md` | RFC7252-DTLS-1, DTLS-2 |
+| [DTLS session isolation and replacement cleanup](checks/dtls.md#dtls-session-isolation-and-replacement-cleanup) | `checks/dtls.md` | RFC7252-DTLS-3 |
+| [Confirmable recovery, duplicate suppression, and KeyUpdate over DTLS](checks/dtls.md#confirmable-recovery-duplicate-suppression-and-keyupdate-over-dtls) | `checks/dtls.md` | RFC7252-DTLS-3, RFC9175-TOKEN-1 |
+| [Observe and Blockwise lifecycle over DTLS](checks/dtls.md#observe-and-blockwise-lifecycle-over-dtls) | `checks/dtls.md` | RFC7252-DTLS-3, RFC7641-CANCEL-1, RFC7959-B1-1 |
 
-Twenty-five specification checks cover all 41 statements in the five catalogs. Two additional implementation checks (`CoapLifecycle.test` and `CoapStatistics.test`) verify node lifecycle recovery and emitted signal/statistic counts.
+Twenty-nine specification checks cover all 45 statements in the six CoAP-applicable catalogs. Four implementation checks (`CoapLifecycle.test`, `CoapStatistics.test`, `CoapDtlsLifecycle.test`, `CoapDtlsStatistics.test`) verify node lifecycle recovery and emitted signal/statistic counts.
 
 ## Common mockups
 

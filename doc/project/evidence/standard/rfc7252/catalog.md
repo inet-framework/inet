@@ -35,6 +35,9 @@ The family of CoAP documents and the in-scope UDP (`NoSec`) profile are defined 
 | [RFC7252-OPT-1](#rfc7252-opt-1) | Unrecognized critical (odd) options cause `4.02 Bad Option` in requests and `RST` in `CON` responses, while unrecognized elective (even) options are silently ignored. |
 | [RFC7252-COND-1](#rfc7252-cond-1) | `ETag` (`4`), `If-Match` (`1`), `If-None-Match` (`5`), `Content-Format` (`12`), `Accept` (`17`), and `Max-Age` (`14`, default `60s`) govern cache validation, conditional updates (`4.12`), and format negotiation (`4.06`). |
 | [RFC7252-PROXY-1](#rfc7252-proxy-1) | An endpoint that does not support proxying rejects requests carrying `Proxy-Uri` (`35`) or `Proxy-Scheme` (`39`) with `5.05 Proxying Not Supported`. |
+| [RFC7252-DTLS-1](#rfc7252-dtls-1) | The `coaps` URI scheme selects DTLS-secured CoAP with default UDP port `5684`. |
+| [RFC7252-DTLS-2](#rfc7252-dtls-2) | In DTLS mode, CoAP endpoints MUST NOT send multicast messages; only unicast DTLS associations are used. |
+| [RFC7252-DTLS-3](#rfc7252-dtls-3) | Over DTLS, Confirmable reliability, duplicate suppression, and response matching are bound to the active DTLS session and never cross distinct sessions. |
 
 ## Message format and error handling
 
@@ -266,3 +269,32 @@ The family of CoAP documents and the in-scope UDP (`NoSec`) profile are defined 
 
 - Strength: must. Class: wire.
 - Check idea: inject a request containing `Proxy-Uri` (`35`) or `Proxy-Scheme` (`39`) and verify a `5.05 Proxying Not Supported` response.
+
+## DTLS-secured CoAP
+
+### RFC7252-DTLS-1
+
+**The `coaps` URI scheme selects DTLS-secured CoAP with default UDP port `5684`.**
+
+> "The 'coaps' URI scheme is used to identify CoAP resources accessed over DTLS ... The default port is 5684." — §6.2, §9.1, §12.6
+
+- Strength: must. Class: wire plus end-to-end.
+- Check idea: resolve `coaps://` requests to default UDP port `5684`, emit DTLS-protected UDP datagrams rather than cleartext CoAP, and reject mismatched `coap://` URIs in DTLS mode and `coaps://` URIs in `NoSec` UDP mode.
+
+### RFC7252-DTLS-2
+
+**In DTLS mode, CoAP endpoints MUST NOT send multicast messages; only unicast DTLS associations are used.**
+
+> "In DTLS mode, a CoAP endpoint MUST NOT send multicast messages." — §9.1
+
+- Strength: must. Class: end-to-end.
+- Check idea: attempt a CoAP-over-DTLS request to a multicast destination address and verify the endpoint rejects the request without transmitting a multicast DTLS packet.
+
+### RFC7252-DTLS-3
+
+**Over DTLS, Confirmable reliability, duplicate suppression, and response matching are bound to the active DTLS session and never cross distinct sessions.**
+
+> "The following rules are added for matching an Acknowledgement message or Reset message to a Confirmable message, or a Reset message to a Non-confirmable message: The DTLS session MUST be the same ... The following rules are added for matching a response to a request: The DTLS session MUST be the same ..." — §9.1.1, §9.1.2
+
+- Strength: must. Class: wire plus end-to-end.
+- Check idea: drop DTLS application datagrams to verify CoAP `CON` retransmission and duplicate `MID` suppression inside one DTLS session, and replace a DTLS session on the same `(IP, port)` tuple while a separate response or incomplete transfer is pending to verify pending work is cancelled and the replacement session does not suppress the reused `MID` or deliver old responses.

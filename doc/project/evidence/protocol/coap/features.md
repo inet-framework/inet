@@ -16,6 +16,7 @@ Step 4 artifact of the standards test workflow. This document maps the protocol 
 | [COAP-F-OBSERVE](#coap-f-observe) | Resource observation (`Observe` option `6`): registration, 24-bit serial ordering with `128s` rule, notification supersession and retry removal, freshness re-registration, and explicit/RST/error cancellation. |
 | [COAP-F-BLOCKWISE](#coap-f-blockwise) | Block-wise transfers (`Block1` `27`, `Block2` `23`, `Size1` `60`, `Size2` `28`) with atomic `Block1` upload, `Block2` download, `SZX` negotiation, `4.08`/`4.13` error handling, combined `Block1`+`Block2`, and `Request-Tag` (`38`) concurrency isolation. |
 | [COAP-F-OBSERVE-BLOCK2](#coap-f-observe-block2) | Combined `Observe` notifications and `Block2` follow-up retrieval with distinct exchange tokens, notification supersession, and `ETag` version-change recovery. |
+| [COAP-F-DTLS](#coap-f-dtls) | CoAP over DTLS 1.3 (`coaps://`, default UDP port `5684`): unicast session-bound messaging, duplicate suppression, non-reused client Tokens across `KeyUpdate`, and session-close Observe/Blockwise cleanup. |
 
 ## Summary table
 
@@ -29,6 +30,7 @@ Step 4 artifact of the standards test workflow. This document maps the protocol 
 | [COAP-F-OBSERVE](#coap-f-observe) | optional | RFC 7641 §3, §4 | RFC7641-REG-1, REG-2, NOTIFY-1, ORDER-1, SUPER-1, FRESH-1, CANCEL-1 |
 | [COAP-F-BLOCKWISE](#coap-f-blockwise) | optional | RFC 7959 §2, §3, RFC 9175 §3 | RFC7959-OPT-1, B1-1, B2-1, NEG-1, ERR-1, COMB-1, RFC9175-RTAG-1 |
 | [COAP-F-OBSERVE-BLOCK2](#coap-f-observe-block2) | optional | RFC 7959 §2.6, §3.4, RFC 7641 | RFC7959-OBS-1 |
+| [COAP-F-DTLS](#coap-f-dtls) | optional | RFC 7252 §6.2, §9.1, §12.6, RFC 9147, RFC 9175 §4 | RFC7252-DTLS-1, DTLS-2, DTLS-3, RFC9175-TOKEN-1 |
 
 ## COAP-F-ENCODING
 
@@ -101,3 +103,12 @@ Step 4 artifact of the standards test workflow. This document maps the protocol 
 - **Level** — optional (RFC 7959 / RFC 7641 combined profile).
 - **Description** — when an observed resource exceeds the block size, notifications carry the first `Block2` block (`NUM=0, M=1`) with the registration Token, follow-up `GET` requests retrieve `NUM >= 1` using a distinct exchange Token without `Observe`, newer notifications supersede in-progress block assembly, and mid-transfer `ETag` changes trigger jittered re-registration.
 - **Checks** — core: RFC7959-OBS-1.
+
+## COAP-F-DTLS
+
+**CoAP over DTLS 1.3 (`coaps://`, default UDP port `5684`): unicast session-bound messaging, duplicate suppression, non-reused client Tokens across `KeyUpdate`, and session-close Observe/Blockwise cleanup.**
+
+- **Sources** — RFC 7252 §6.2, §9.1, §9.1.1, §9.1.2, §12.6; RFC 9147; RFC 9175 §4.
+- **Level** — optional (DTLS security binding; mandatory within the `coaps://` profile).
+- **Description** — endpoints resolve `coaps://` URIs to default UDP port `5684`, forbid multicast, bind CoAP `CON`/`NON` exchanges, duplicate suppression, Observe relations, and Block1/Block2 assemblies to the active DTLS session (`AssociationId`), wait for DTLS establishment before starting CoAP retransmission timers, issue distinct 8-byte Tokens across `KeyUpdate` rotations, and tear down session-bound state when the DTLS session closes or is replaced.
+- **Checks** — core: RFC7252-DTLS-1, DTLS-2, DTLS-3, RFC9175-TOKEN-1.
