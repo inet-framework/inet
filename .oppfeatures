@@ -218,6 +218,23 @@
         linkerFlags = ""
         />
     <feature
+        id = "Dtls"
+        name = "DTLS 1.3"
+        description = "Datagram transport security simulation model."
+        initiallyEnabled = "true"
+        requires = "Queueing TlsCommon Udp"
+        recommended = ""
+        labels = "transport security"
+        nedPackages = "
+                       inet.applications.dtlsapp
+                       inet.transportlayer.contract.dtls
+                       inet.transportlayer.dtls
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_DTLS"
+        linkerFlags = ""
+        />
+    <feature
         id = "DiffServ"
         name = "DiffServ"
         description = "Components for implementing Differentiated Services."
@@ -1626,6 +1643,21 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_TCP_LWIP"
+        linkerFlags = ""
+        />
+    <feature
+        id = "TlsCommon"
+        name = "TLS handshake content"
+        description = "Reusable TLS handshake message representations."
+        initiallyEnabled = "true"
+        requires = ""
+        recommended = ""
+        labels = "transport security"
+        nedPackages = "
+                       inet.transportlayer.tls
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_TLSCOMMON"
         linkerFlags = ""
         />
     <feature

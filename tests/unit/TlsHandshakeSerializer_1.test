@@ -1,0 +1,120 @@
+%description:
+TLS and DTLS ClientHello body encodings and the DTLS legacy cookie field.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/tls/TlsClientHello_m.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+
+using namespace inet;
+using namespace inet::tls;
+using namespace inet::dtls;
+
+%activity:
+auto tls = makeShared<TlsClientHello>();
+tls->setCipherSuitesArraySize(1);
+tls->setCipherSuites(0, 0x1301);
+tls->setCompressionMethodsArraySize(1);
+tls->setCompressionMethods(0, 0);
+tls->setChunkLength(B(43));
+Packet tlsPacket("tls", tls);
+auto tlsBytes = tlsPacket.peekAtFront<BytesChunk>(B(43));
+ASSERT(tlsBytes->getByte(34) == 0);
+ASSERT(tlsBytes->getByte(35) == 0);
+ASSERT(tlsBytes->getByte(36) == 2);
+auto inconsistentHello = makeShared<TlsClientHello>();
+inconsistentHello->setCipherSuitesArraySize(1);
+inconsistentHello->setCipherSuites(0, 0x1301);
+inconsistentHello->setCompressionMethodsArraySize(1);
+inconsistentHello->setCompressionMethods(0, 0);
+inconsistentHello->setChunkLength(B(44));
+Packet inconsistentHelloPacket("inconsistent native ClientHello", inconsistentHello);
+bool nativeHelloRejected = false;
+try { inconsistentHelloPacket.peekAtFront<BytesChunk>(B(44)); }
+catch (const cRuntimeError&) { nativeHelloRejected = true; }
+// Keep this check active under NDEBUG: release serialization must reject it too.
+if (!nativeHelloRejected)
+    throw cRuntimeError("Native TLS body length mismatch was accepted");
+
+auto dtls = makeShared<DtlsClientHello>();
+dtls->setCipherSuitesArraySize(1);
+dtls->setCipherSuites(0, 0x1301);
+dtls->setCompressionMethodsArraySize(1);
+dtls->setCompressionMethods(0, 0);
+dtls->setLegacyCookieArraySize(1);
+dtls->setLegacyCookie(0, 0x5a);
+dtls->setChunkLength(B(45));
+Packet dtlsPacket("dtls", dtls);
+auto dtlsBytes = dtlsPacket.peekAtFront<BytesChunk>(B(45));
+ASSERT(dtlsBytes->getByte(34) == 0);
+ASSERT(dtlsBytes->getByte(35) == 1);
+ASSERT(dtlsBytes->getByte(36) == 0x5a);
+ASSERT(dtlsBytes->getByte(37) == 0);
+ASSERT(dtlsBytes->getByte(38) == 2);
+Packet decoded("decoded", dtlsBytes);
+auto body = decoded.popAtFront<DtlsClientHello>(B(45));
+ASSERT(body->getLegacyCookieArraySize() == 1);
+ASSERT(body->getLegacyCookie(0) == 0x5a);
+ASSERT(body->getCipherSuites(0) == 0x1301);
+auto envelope = makeShared<DtlsHandshakeHeader>();
+envelope->setMessageType(1);
+envelope->setMessageLength(45);
+envelope->setFragmentLength(45);
+Packet wire("DTLS handshake", dtls);
+wire.insertAtFront(envelope);
+auto wireBytes = wire.peekAtFront<BytesChunk>(B(57));
+ASSERT(wireBytes->getByte(0) == 1);
+ASSERT(wireBytes->getByte(11) == 45);
+ASSERT(wireBytes->getByte(12) == 0xfe); // DTLS ClientHello legacy_version
+ASSERT(wireBytes->getByte(13) == 0xfd);
+// An empty CertificateRequest extensions vector has a two-byte zero length.
+auto request = makeShared<TlsCertificateRequest>();
+request->setChunkLength(B(3));
+Packet requestPacket("request", request);
+auto requestBytes = requestPacket.peekAtFront<BytesChunk>(B(3));
+ASSERT(requestBytes->getByte(0) == 0);
+ASSERT(requestBytes->getByte(1) == 0);
+ASSERT(requestBytes->getByte(2) == 0);
+Packet requestInput("request input", requestBytes);
+auto decodedRequest = requestInput.popAtFront<TlsCertificateRequest>(B(3));
+ASSERT(decodedRequest->getExtensionsArraySize() == 0);
+auto server = makeShared<TlsServerHello>();
+server->setChunkLength(B(40));
+Packet serverPacket("ServerHello", server);
+auto serverBytes = serverPacket.peekAtFront<BytesChunk>(B(40));
+ASSERT(serverBytes->getByte(34) == 0);
+ASSERT(serverBytes->getByte(35) == 0x13 && serverBytes->getByte(36) == 1);
+ASSERT(serverBytes->getByte(37) == 0 && serverBytes->getByte(39) == 0);
+auto certificate = makeShared<TlsCertificate>();
+certificate->setCertificateListArraySize(3);
+certificate->setCertificateList(0, 0x11);
+certificate->setCertificateList(1, 0x22);
+certificate->setCertificateList(2, 0x33);
+certificate->setChunkLength(B(7));
+Packet certificatePacket("Certificate", certificate);
+auto certificateBytes = certificatePacket.peekAtFront<BytesChunk>(B(7));
+ASSERT(certificateBytes->getBytes() == std::vector<uint8_t>({0, 0, 0, 3, 0x11, 0x22, 0x33}));
+Packet certificateInput("Certificate input", certificateBytes);
+ASSERT(certificateInput.popAtFront<TlsCertificate>(B(7))->getCertificateList(2) == 0x33);
+auto signature = makeShared<TlsCertificateVerify>();
+signature->setSignatureScheme(0x0403);
+signature->setSignatureArraySize(1);
+signature->setSignature(0, 0xa5);
+signature->setChunkLength(B(5));
+Packet signaturePacket("CertificateVerify", signature);
+ASSERT(signaturePacket.peekAtFront<BytesChunk>(B(5))->getBytes() == std::vector<uint8_t>({4, 3, 0, 1, 0xa5}));
+auto update = makeShared<TlsKeyUpdate>();
+update->setRequestUpdate(1);
+Packet updatePacket("KeyUpdate", update);
+ASSERT(updatePacket.peekAtFront<BytesChunk>(B(1))->getByte(0) == 1);
+const std::vector<uint8_t> truncatedRequest = {0, 0, 1};
+Packet malformedRequest("truncated extensions", makeShared<BytesChunk>(truncatedRequest));
+bool rejected = false;
+try { malformedRequest.popAtFront<TlsCertificateRequest>(B(3)); }
+catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+EV << "TLS and DTLS ClientHello bodies PASS\n";
+
+%contains: stdout
+TLS and DTLS ClientHello bodies PASS

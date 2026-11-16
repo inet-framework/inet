@@ -1,0 +1,3 @@
+DTLS record foundation
+
+Adds DTLS record parsing and serialization, an abstract record-protection helper, and a UDP-backed application-slot endpoint contract. Cryptographic content uses the same retained-chunk approach as IPsec. This foundation does not establish DTLS associations.

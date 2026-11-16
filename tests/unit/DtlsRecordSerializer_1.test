@@ -1,0 +1,114 @@
+%description:
+DTLS record headers round-trip and malformed handshake fragment rejection.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/EncryptedChunk.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/DtlsRecordProtection.h"
+#include "inet/transportlayer/dtls/DtlsRecordState.h"
+
+using namespace inet;
+using namespace inet::dtls;
+
+%activity:
+auto header = makeShared<DtlsCiphertextHeader>();
+header->setEpochBits(3);
+header->setSequenceNumber(1);
+header->setLength(17);
+Packet packet("typed", header);
+auto bytes = packet.peekAtFront<BytesChunk>(B(5));
+ASSERT(bytes->getByte(0) == 0x2f);
+Packet raw("raw", bytes);
+auto parsed = raw.popAtFront<DtlsCiphertextHeader>(B(5));
+ASSERT(parsed->getEpochBits() == 3);
+ASSERT(parsed->getSequenceNumber() == 1);
+ASSERT(parsed->getLength() == 17);
+auto inconsistentHeader = makeShared<DtlsCiphertextHeader>();
+inconsistentHeader->setChunkLength(B(4));
+Packet inconsistentHeaderPacket("inconsistent native header", inconsistentHeader);
+bool nativeHeaderRejected = false;
+try { inconsistentHeaderPacket.peekAtFront<BytesChunk>(B(4)); }
+catch (const cRuntimeError&) { nativeHeaderRejected = true; }
+// Keep this check active under NDEBUG: release serialization must reject it too.
+if (!nativeHeaderRejected)
+    throw cRuntimeError("Native DTLS header length mismatch was accepted");
+// Independent octet oracle for the plaintext header's 48-bit sequence field.
+auto plaintext = makeShared<DtlsPlaintextHeader>();
+plaintext->setSequenceNumber(0x010203040506ULL);
+plaintext->setLength(2);
+Packet plainPacket("plaintext", plaintext);
+auto plainBytes = plainPacket.peekAtFront<BytesChunk>(B(13));
+ASSERT(plainBytes->getBytes() == std::vector<uint8_t>({22, 0xfe, 0xfd, 0, 0, 1, 2, 3, 4, 5, 6, 0, 2}));
+auto shortHeader = makeShared<DtlsCiphertextHeader>();
+shortHeader->setEpochBits(2);
+shortHeader->setSequenceNumberLength(1);
+shortHeader->setSequenceNumber(0xa5);
+shortHeader->setLengthPresent(false);
+shortHeader->setChunkLength(B(2));
+Packet shortHeaderPacket("short header", shortHeader);
+ASSERT(shortHeaderPacket.peekAtFront<BytesChunk>(B(2))->getBytes() == std::vector<uint8_t>({0x22, 0xa5}));
+auto ack = makeShared<DtlsAck>();
+ack->setEpochsArraySize(1);
+ack->setSequenceNumbersArraySize(1);
+ack->setEpochs(0, 3);
+ack->setSequenceNumbers(0, 7);
+ack->setChunkLength(B(18));
+Packet ackPacket("ACK", ack);
+auto ackBytes = ackPacket.peekAtFront<BytesChunk>(B(18));
+ASSERT(ackBytes->getByte(1) == 16 && ackBytes->getByte(9) == 3 && ackBytes->getByte(17) == 7);
+Packet ackInput("ACK input", ackBytes);
+auto decodedAck = ackInput.popAtFront<DtlsAck>(B(18));
+ASSERT(decodedAck->getEpochs(0) == 3 && decodedAck->getSequenceNumbers(0) == 7);
+DtlsRecordState state(64);
+ASSERT(state.accept(65536));
+ASSERT(state.reconstruct(header->getSequenceNumber(), 16) == 65537);
+ASSERT(state.reconstruct(parsed->getSequenceNumber(), 16) == 65537);
+
+const std::vector<uint8_t> bad = {1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1};
+Packet invalid("invalid", makeShared<BytesChunk>(bad));
+bool rejected = false;
+try {
+    invalid.popAtFront<DtlsHandshakeHeader>(B(12));
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+Packet protectedPacket("protected", makeShared<BytesChunk>(std::vector<uint8_t>{0xaa, 0xbb}));
+protectedPacket.addRegionTag<CreationTimeTag>(B(1), B(1))->setCreationTime(SimTime(123));
+DtlsRecordProtection::protect(&protectedPacket, 23);
+ASSERT(protectedPacket.getDataLength() == B(19));
+ASSERT(protectedPacket.getRegionTag<CreationTimeTag>(B(1), B(1))->getCreationTime() == SimTime(123));
+ASSERT(protectedPacket.findRegionTag<CreationTimeTag>(B(2), B(1)) == nullptr);
+uint8_t contentType = 0;
+ASSERT(DtlsRecordProtection::unprotect(&protectedPacket, contentType));
+ASSERT(contentType == 23);
+ASSERT(protectedPacket.getDataLength() == B(2));
+ASSERT(protectedPacket.peekAtFront<BytesChunk>()->getByte(0) == 0xaa);
+ASSERT(protectedPacket.getRegionTag<CreationTimeTag>(B(1), B(1))->getCreationTime() == SimTime(123));
+Packet shortPacket("short", makeShared<BytesChunk>(std::vector<uint8_t>{0x01}));
+ASSERT(!DtlsRecordProtection::unprotect(&shortPacket, contentType));
+ASSERT(shortPacket.getDataLength() == B(1));
+Packet arbitraryBytes("unprotected bytes", makeShared<BytesChunk>(std::vector<uint8_t>(19, 0)));
+auto originalData = arbitraryBytes.peekData();
+ASSERT(!DtlsRecordProtection::unprotect(&arbitraryBytes, contentType));
+ASSERT(arbitraryBytes.peekData() == originalData);
+auto inconsistentContent = makeShared<BytesChunk>(std::vector<uint8_t>(11, 23));
+inconsistentContent->markImmutable();
+Packet inconsistent("inconsistent retained length", makeShared<EncryptedChunk>(inconsistentContent, B(1)));
+inconsistent.insertAtBack(makeShared<ByteCountChunk>(B(16)));
+ASSERT(!DtlsRecordProtection::unprotect(&inconsistent, contentType));
+ASSERT(inconsistent.getDataLength() == B(17));
+Packet emptyDatagram("empty application datagram");
+DtlsRecordProtection::protect(&emptyDatagram, 23);
+ASSERT(emptyDatagram.getDataLength() == B(17));
+ASSERT(DtlsRecordProtection::unprotect(&emptyDatagram, contentType));
+ASSERT(contentType == 23 && emptyDatagram.getDataLength() == B(0));
+EV << "DTLS record serialization PASS\n";
+
+%contains: stdout
+DTLS record serialization PASS

@@ -1,0 +1,78 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147RecordParsing. See the owning reviewer document in this suite
+and plan/pending/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_record_parsing")
+    .act(action().at(0.2).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        app.sendRaw(rawPlaintext(22, 0, 20));
+    }))
+    .once(on("host1.udp").signal("packetSentToLower").filterPacket("udp.destPort == 4433").within(1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(1).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        auto packet = new Packet("truncated-plaintext-header");
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{22, 0xfe}));
+        app.sendRaw(packet);
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(1).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        app.sendRaw(rawCiphertext(1));
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(2).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        auto packet = new Packet("two-ACKs-and-malformed-tail");
+        appendPlainAck(packet, 0);
+        appendPlainAck(packet, 1);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0xff}));
+        app.sendRaw(packet);
+    }))
+    .nextTimes(2, on("host2.app[0].dtls").signal("recordAccepted").filterValue(0).within(1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(1).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        auto packet = new Packet("valid-next-datagram");
+        appendPlainAck(packet, 2);
+        app.sendRaw(packet);
+    }))
+    .once(on("host2.app[0].dtls").signal("recordAccepted").assertValue(0).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0, "invalid records cannot establish an association");
+        require(app.receivedMarkers.empty(), "invalid records cannot deliver application data");
+    }));
+}
+
+%activity:
+EV << "rfc9147_record_parsing compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].active = false
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_record_parsing: PASS

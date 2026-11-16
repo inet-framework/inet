@@ -1,0 +1,108 @@
+%description:
+Exercise the DTLS engine's initial-down/start, stop, crash and restart paths.
+The fixture schedules work on the engine's input queue; no handshake or
+application delivery is claimed by this test.
+
+%file: DtlsLifecycleFixture.cc
+#include <iostream>
+#include "inet/transportlayer/dtls/Dtls.h"
+
+namespace DtlsEngineLifecycle_1 {
+
+using namespace inet;
+using namespace inet::dtls;
+
+class TestDtls : public Dtls
+{
+  public:
+    bool completed = false;
+    void arm() {
+        Enter_Method("arm");
+        ASSERT(isUp() && inputProcessing);
+        ASSERT(inputProcessing->enqueue(1, 1, 10, [this] { completed = true; }));
+        ASSERT(inputProcessing->getOccupiedBytes() == 1);
+    }
+    bool up() const { return isUp(); }
+    size_t queued() const { return inputProcessing ? inputProcessing->getOccupiedBytes() : 0; }
+};
+Define_Module(TestDtls);
+
+class DtlsLifecycleFixture : public cSimpleModule
+{
+  public:
+    DtlsLifecycleFixture() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override {
+        auto dtls = check_and_cast<TestDtls *>(getModuleByPath("^.host.app[0].dtls"));
+        wait(0.5);
+        ASSERT(!dtls->up());
+        wait(1);
+        ASSERT(dtls->up());
+        dtls->arm();
+        wait(1.5);
+        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        wait(1.5);
+        ASSERT(dtls->up());
+        dtls->arm();
+        wait(1.5);
+        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        wait(1.5);
+        ASSERT(dtls->up() && dtls->queued() == 0);
+        wait(8);
+        ASSERT(!dtls->completed);
+        std::cout << "DTLS engine lifecycle PASS" << std::endl;
+    }
+};
+Define_Module(DtlsLifecycleFixture);
+
+} // namespace DtlsEngineLifecycle_1
+
+%file: TestNetwork.ned
+import inet.applications.dtlsapp.DtlsApp;
+import inet.common.scenario.ScenarioManager;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.dtls.Dtls;
+
+simple TestDtls extends Dtls
+{
+    @class(::DtlsEngineLifecycle_1::TestDtls);
+}
+simple DtlsLifecycleFixture
+{
+    @class(::DtlsEngineLifecycle_1::DtlsLifecycleFixture);
+}
+network TestNetwork
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        host: StandardHost;
+        fixture: DtlsLifecycleFixture;
+    connections allowunconnected:
+}
+
+%file: scenario.xml
+<scenario>
+    <at t="1s"><startup module="host"/></at>
+    <at t="2s"><shutdown module="host"/></at>
+    <at t="4s"><startup module="host"/></at>
+    <at t="5s"><crash module="host"/></at>
+    <at t="7s"><startup module="host"/></at>
+</scenario>
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 16s
+*.host.hasStatus = true
+*.host.status.initialStatus = "DOWN"
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.typename = "TestDtls"
+*.host.app[0].dtls.localPort = 4433
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%contains: stdout
+DTLS engine lifecycle PASS
