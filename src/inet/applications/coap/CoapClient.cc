@@ -401,6 +401,18 @@ void CoapClient::onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& 
             for (size_t j = 0; j < opt.getValueArraySize(); ++j)
                 record.etag[j] = opt.getValue(j);
         }
+        else if (opt.getNumber() == COAP_OPT_LOCATION_PATH) {
+            std::string seg(opt.getValueArraySize(), '\0');
+            for (size_t j = 0; j < opt.getValueArraySize(); ++j)
+                seg[j] = static_cast<char>(opt.getValue(j));
+            record.locationPath.push_back(std::move(seg));
+        }
+        else if (opt.getNumber() == COAP_OPT_LOCATION_QUERY) {
+            std::string seg(opt.getValueArraySize(), '\0');
+            for (size_t j = 0; j < opt.getValueArraySize(); ++j)
+                seg[j] = static_cast<char>(opt.getValue(j));
+            record.locationQuery.push_back(std::move(seg));
+        }
     }
 
     completedResponses.push_back(std::move(record));
