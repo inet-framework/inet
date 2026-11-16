@@ -280,6 +280,30 @@ inline void replaceProtectedFragment(Packet *packet, uint32_t messageLength, uin
     resizeTapEnvelope(packet, delta);
 }
 
+// Keep the real network envelope and modeled tag while forcing receive-side
+// deserialization from raw handshake bytes rather than a retained typed header.
+inline void replaceProtectedHandshakeBytes(Packet *packet, int epochBits, uint16_t recordNumber, const std::vector<uint8_t>& bytes)
+{
+    auto record = findChunk<inet::dtls::DtlsCiphertextHeader>(packet);
+    require(record && findChunk<EncryptedChunk>(packet), "raw handshake fault targets a protected production packet");
+    auto body = makeShared<BytesChunk>(bytes);
+    auto type = makeShared<inet::dtls::DtlsInnerContentType>();
+    type->setContentType(22);
+    body->markImmutable();
+    type->markImmutable();
+    auto inner = makeShared<SequenceChunk>();
+    inner->insertAtBack(body);
+    inner->insertAtBack(type);
+    inner->markImmutable();
+    int length = bytes.size() + 1 + 16;
+    int delta = length - record->getLength();
+    mutateNestedHeader<EncryptedChunk>(packet, [&](auto& h) { h.setChunk(inner); h.setLength(inner->getChunkLength()); });
+    require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(packet, [=](auto& h) { h.setEpochBits(epochBits); h.setSequenceNumber(recordNumber); h.setLength(length); }), "raw handshake retains a unified record header");
+    require(mutateHeader<UdpHeader>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "raw handshake has UDP envelope");
+    require(mutateHeader<Ipv4Header>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "raw handshake has IPv4 envelope");
+    resizeTapEnvelope(packet, delta);
+}
+
 inline void coalesceDuplicateClientHello(Packet *packet)
 {
     auto record = findChunk<inet::dtls::DtlsPlaintextHeader>(packet);

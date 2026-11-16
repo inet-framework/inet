@@ -195,7 +195,14 @@ void DtlsAssociation::receiveKeyUpdate(uint64_t epoch, uint64_t recordSequence, 
 {
     if (body->getDataLength() < B(12))
         return;
-    auto header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+    Ptr<const DtlsHandshakeHeader> header;
+    try {
+        header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+    }
+    catch (const cRuntimeError&) {
+        engine.emit(Dtls::recordDroppedSignal, (long)Dtls::MALFORMED_RECORD);
+        return;
+    }
     if (header->getMessageType() != 24 || header->getMessageLength() != 1 || header->getFragmentOffset() != 0 ||
         header->getFragmentLength() > 1 || body->getDataLength() != B(header->getFragmentLength()))
         return;

@@ -1786,8 +1786,14 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
         DtlsRecordState *replay = nullptr;
         bool mainHandshake = epoch == 2 && association.receiveEpoch2 && association.state != HandshakeState::ESTABLISHED;
         if (epoch == 2 && association.receiveEpoch2 && association.state == HandshakeState::ESTABLISHED && contentType == 22 && (*retained)->getDataLength() >= B(12)) {
-            auto header = (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12));
-            mainHandshake = header->getMessageType() != 24;
+            try {
+                auto header = (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12));
+                mainHandshake = header->getMessageType() != 24;
+            }
+            catch (const cRuntimeError&) {
+                emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                return;
+            }
         }
         if (epoch == 2 && association.receiveEpoch2 && association.state == HandshakeState::ESTABLISHED && contentType == 26 &&
             (association.receiveEpoch & 3) != epoch &&
