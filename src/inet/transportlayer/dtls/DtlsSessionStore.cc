@@ -47,11 +47,12 @@ std::optional<DtlsSessionStore::Entry> DtlsSessionStore::find(const std::vector<
     return {};
 }
 
-std::optional<DtlsSessionStore::Entry> DtlsSessionStore::select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now) const
+std::optional<DtlsSessionStore::Entry> DtlsSessionStore::select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now,
+                                                            const std::vector<uint8_t>& allowedHashes) const
 {
     for (auto it = entries.rbegin(); it != entries.rend(); ++it)
         if (!it->serverSide && it->peerAddress == peer && it->peerPort == port && it->peerIdentity == identity &&
-            it->version == version && it->expiresAt > now)
+            it->version == version && it->expiresAt > now && (allowedHashes.empty() || std::find(allowedHashes.begin(), allowedHashes.end(), it->hashBytes) != allowedHashes.end()))
             return *it;
     return {};
 }

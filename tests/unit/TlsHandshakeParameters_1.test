@@ -79,6 +79,32 @@ earlyWithoutPsk.push_back(0);
 setExtensions(earlyWithoutPsk);
 ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
 EV << "DTLS handshake parameters PASS\n";
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {0x1301, 0x1302, 0x1303};
+offer.groups = {23, 29};
+offer.keyShares = {23, 29};
+offer.signatures = {0x0403, 0x0804};
+for (auto suite : offer.cipherSuites)
+    for (auto group : offer.groups)
+        for (auto signature : offer.signatures) {
+            Parameters::Preferences preferences;
+            preferences.cipherSuites = {suite}; preferences.groups = {group}; preferences.signatures = {signature};
+            ASSERT(Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected, preferences, 32).empty());
+            ASSERT(selected.cipherSuite == suite && selected.group == group && selected.signature == signature && Parameters::wasOffered(offer, selected));
+            ASSERT(Parameters::findCipherSuite(suite)->tagBytes == 16 && Parameters::findCipherSuite(suite)->recordLimit == (uint64_t(1) << 24));
+            ASSERT(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected, preferences, 32).empty() == (suite != 0x1302));
+            ASSERT(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected, preferences, 48).empty() == (suite == 0x1302));
+        }
+ASSERT(Parameters::keyShareBytes(23) == 65 && Parameters::keyShareBytes(29) == 32 && Parameters::keyShareBytes(99) == 0);
+ASSERT(Parameters::findCipherSuite(0x1302)->hashBytes == 48 && !Parameters::findCipherSuite(0xffff));
+auto preferences = Parameters::parsePreferences("TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256", "secp256r1 x25519", "rsa_pss_rsae_sha256");
+ASSERT(preferences.cipherSuites == std::vector<uint16_t>({0x1303, 0x1301}) && preferences.groups.front() == 23 && preferences.signatures.front() == 0x0804);
+for (auto invalid : {"", "unknown", "TLS_AES_128_GCM_SHA256 TLS_AES_128_GCM_SHA256"}) {
+    bool rejected = false;
+    try { Parameters::parsePreferences(invalid, "x25519", "ecdsa_secp256r1_sha256"); }
+    catch (const omnetpp::cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
 
 %contains: stdout
 DTLS handshake parameters PASS

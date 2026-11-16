@@ -127,7 +127,7 @@ void DtlsAssociation::clearAcknowledgements()
 
 bool DtlsAssociation::allocateApplicationRecord(uint64_t& number)
 {
-    if (nextApplicationRecord >= MAX_PROTECTED_RECORDS)
+    if (nextApplicationRecord >= tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->recordLimit)
         return false;
     number = nextApplicationRecord++;
     return true;
@@ -181,7 +181,7 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
     auto& owner = engine;
     auto handle = id;
     owner.scheduleAt(simTime() + timeout, keyUpdate().deadline.get());
-    auto delay = SimTime(owner.par("handshakeOutDelay").doubleValue());
+    auto delay = owner.processingDelay(handle, "handshakeOutDelay");
     if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, 13, delay, [&owner, handle, update]() {
         auto it = owner.associations.find(handle);
         if (it == owner.associations.end() || it->second->keyUpdate().flight != update)
@@ -281,7 +281,7 @@ void DtlsAssociation::receiveKeyUpdate(uint64_t epoch, uint64_t recordSequence, 
     }
     auto& owner = engine;
     auto handle = id;
-    auto delay = SimTime(owner.par("handshakeInDelay").doubleValue());
+    auto delay = owner.processingDelay(handle, "handshakeInDelay");
     bool satisfiesRequest = awaitingPeerUpdate;
     bool previousResponseDue = peerResponseDue;
     if (flag == 1 && sendEpoch < MAX_SEND_EPOCH)
@@ -370,7 +370,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
     ++generationPending;
     auto& owner = engine;
     auto handle = id;
-    auto delay = SimTime(owner.par("handshakeOutDelay").doubleValue());
+    auto delay = owner.processingDelay(handle, "handshakeOutDelay");
     auto eligible = [&owner, handle, currentFlight]() {
         auto it = owner.associations.find(handle);
         return it != owner.associations.end() && it->second->flight == currentFlight;
@@ -725,7 +725,7 @@ void DtlsAssociation::scheduleNextHandshake()
     header->setMessageLength(message.body.size());
     header->setFragmentLength(message.body.size());
     (*packet)->insertAtFront(header);
-    auto delay = SimTime(engine.par("handshakeInDelay").doubleValue());
+    auto delay = engine.processingDelay(id, "handshakeInDelay");
     auto bytes = message.body.size() + 12;
     if (!owner.enqueueProcessing(owner.inputProcessing.get(), handle, bytes, delay, [&owner, handle, messageSequence, recordSequence, processed, packet]() {
         auto it = owner.associations.find(handle);
@@ -751,7 +751,7 @@ void DtlsAssociation::scheduleNextHandshake()
 
 int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello, bool certificateProfile, const std::string& identity,
                                          tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection,
-                                         const DtlsSessionStore *sessions)
+                                         const DtlsSessionStore *sessions, const tls::TlsHandshakeParameters::Preferences& preferences)
 {
     using Parameters = tls::TlsHandshakeParameters;
     if (hello->getLegacyVersion() != 0xfefd || hello->getLegacyCookieArraySize() != 0 ||
@@ -772,20 +772,23 @@ int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello
         for (size_t i = 0; i < offer.pskIdentities.size(); ++i) {
             const auto& bytes = offer.pskIdentities[i];
             auto entry = sessions->find(std::vector<uint8_t>(bytes.begin(), bytes.end()), true, simTime());
-            if (entry && entry->version == Parameters::DTLS_13 && entry->hashBytes == 32 && entry->peerIdentity == identity &&
-                Parameters::select(offer, Parameters::Profile::PSK, bytes, selection).empty()) {
+            if (entry && entry->version == Parameters::DTLS_13 && entry->peerIdentity == identity &&
+                i < offer.binderLengths.size() && offer.binderLengths[i] == entry->hashBytes &&
+                Parameters::select(offer, Parameters::Profile::PSK, bytes, selection, preferences, entry->hashBytes).empty()) {
                 selection.authenticationMode = Parameters::AuthenticationMode::TICKET_PSK;
                 selection.selectedPsk = i;
                 return 0;
             }
         }
     }
-    auto error = Parameters::select(offer, certificateProfile ? Parameters::Profile::CERTIFICATE : Parameters::Profile::PSK, identity, selection);
+    auto error = Parameters::select(offer, certificateProfile ? Parameters::Profile::CERTIFICATE : Parameters::Profile::PSK, identity, selection, preferences, 32);
     if ((!sessions && ((!certificateProfile && offer.pskIdentity != identity) || (certificateProfile && offer.hasPsk))) || !error.empty())
         return error == "no supported DTLS version" ? 70 : 40;
     if (selection.usesPsk()) {
         auto found = std::find(offer.pskIdentities.begin(), offer.pskIdentities.end(), identity);
         selection.selectedPsk = found - offer.pskIdentities.begin();
+        if (selection.selectedPsk >= offer.binderLengths.size() || offer.binderLengths[selection.selectedPsk] != 32)
+            return 47;
     }
     return 0;
 }
@@ -818,22 +821,44 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     if (profile != "psk" && profile != "certificate")
         throw cRuntimeError("Unknown DTLS profile '%s'", profile.c_str());
     auto hello = makeShared<DtlsClientHello>();
+    auto group = retryGroup ? retryGroup : owner.preferences.groups.front();
+    auto shareBytes = Parameters::keyShareBytes(group);
+    bool generateShare = !retried || clientShare.size() != shareBytes;
+    if (generateShare)
+        clientShare.resize(shareBytes);
     for (size_t i = 0; i < 32; ++i) {
         if (!retried) {
             clientRandom[i] = owner.intuniform(0, 255);
-            clientShare[i] = owner.intuniform(0, 255);
         }
+        if (generateShare)
+            clientShare[i] = owner.intuniform(0, 255);
         hello->setRandom(i, clientRandom[i]);
     }
-    hello->setCipherSuitesArraySize(1);
-    hello->setCipherSuites(0, Parameters::AES_128_GCM_SHA256);
+    if (generateShare)
+        for (size_t i = 32; i < shareBytes; ++i)
+            clientShare[i] = owner.intuniform(0, 255);
+    if (group == Parameters::SECP256R1)
+        clientShare[0] = 4;
+    hello->setCipherSuitesArraySize(owner.preferences.cipherSuites.size());
+    for (size_t i = 0; i < owner.preferences.cipherSuites.size(); ++i)
+        hello->setCipherSuites(i, owner.preferences.cipherSuites[i]);
     hello->setCompressionMethodsArraySize(1);
     hello->setCompressionMethods(0, 0);
     std::vector<uint8_t> extensions;
     appendExtension(extensions, 43, {2, 0xfe, 0xfc});
-    appendExtension(extensions, 10, {0, 2, 0, 0x1d});
-    appendExtension(extensions, 13, {0, 2, 4, 3});
-    std::vector<uint8_t> share = {0, 36, 0, 0x1d, 0, 32};
+    auto list = [](const std::vector<uint16_t>& values) {
+        std::vector<uint8_t> bytes;
+        appendUint16(bytes, values.size() * 2);
+        for (auto value : values)
+            appendUint16(bytes, value);
+        return bytes;
+    };
+    appendExtension(extensions, 10, list(owner.preferences.groups));
+    appendExtension(extensions, 13, list(owner.preferences.signatures));
+    std::vector<uint8_t> share;
+    appendUint16(share, shareBytes + 4);
+    appendUint16(share, group);
+    appendUint16(share, shareBytes);
     share.insert(share.end(), clientShare.begin(), clientShare.end());
     if (owner.par("offerInitialKeyShare").boolValue() || retried)
         appendExtension(extensions, 51, share);
@@ -870,10 +895,14 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
             for (int shift = 24; shift >= 0; shift -= 8)
                 psk.push_back(entry.second >> shift);
         }
-        appendUint16(psk, identities.size() * 33);
+        size_t binderBytes = 0;
+        for (size_t i = 0; i < identities.size(); ++i)
+            binderBytes += 1 + (offeredSession && i == 0 ? offeredSession->hashBytes : 32);
+        appendUint16(psk, binderBytes);
         for (size_t i = 0; i < identities.size(); ++i) {
-            psk.push_back(32);
-            psk.insert(psk.end(), 32, 0); // modeled binder, not a MAC
+            auto bytes = offeredSession && i == 0 ? offeredSession->hashBytes : 32;
+            psk.push_back(bytes);
+            psk.insert(psk.end(), bytes, 0); // modeled binder, not a MAC
         }
         appendExtension(extensions, 41, psk);
     }
@@ -882,7 +911,7 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
-    hello->setChunkLength(B(44 + extensions.size()));
+    hello->setChunkLength(B(42 + 2 * owner.preferences.cipherSuites.size() + extensions.size()));
     auto decodeError = Parameters::decodeOffer(hello, offer);
     if (!decodeError.empty())
         throw cRuntimeError("Invalid locally generated ClientHello: %s", decodeError.c_str());
@@ -898,7 +927,7 @@ void DtlsAssociation::sendServerFlight()
         return;
     auto& owner = engine;
     auto handle = id;
-    bool useCertificate = authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
+    bool useCertificate = selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
     bool clientAuth = clientAuthRequested;
     Ptr<Chunk> certificate;
     Ptr<Chunk> verify;
@@ -909,13 +938,15 @@ void DtlsAssociation::sendServerFlight()
         size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
         return length + ((length + maximum - 1) / maximum) * overhead;
     };
-    size_t flightBytes = wireSize(40 + 46 + (useCertificate ? 0 : 6), 25) + wireSize(earlyAccepted ? 6 : 2, 34) + wireSize(32, 34);
+    auto hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
+    auto shareBytes = tls::TlsHandshakeParameters::keyShareBytes(selection.group);
+    size_t flightBytes = wireSize(40 + 14 + shareBytes + (useCertificate ? 0 : 6), 25) + wireSize(earlyAccepted ? 6 : 2, 34) + wireSize(hashBytes, 34);
     if (useCertificate) {
         certificate = owner.makeCertificate();
-        verify = owner.makeCertificateVerify();
+        verify = owner.makeCertificateVerify(selection.signature);
         flightBytes += wireSize(certificate->getChunkLength().get<B>(), 34) + wireSize(verify->getChunkLength().get<B>(), 34);
         if (clientAuth)
-            flightBytes += wireSize(11, 34);
+            flightBytes += wireSize(9 + 2 * owner.preferences.signatures.size(), 34);
     }
     if (!addressValidated) {
         auto credit = receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : receivedBytes * 3;
@@ -924,16 +955,21 @@ void DtlsAssociation::sendServerFlight()
     }
     auto hello = makeShared<tls::TlsServerHello>();
     hello->setLegacyVersion(0xfefd);
+    hello->setCipherSuite(selection.cipherSuite);
     for (size_t i = 0; i < 32; ++i)
         hello->setRandom(i, owner.intuniform(0, 255));
     std::vector<uint8_t> extensions;
     appendExtension(extensions, 43, {0xfe, 0xfc});
-    std::vector<uint8_t> share = {0, 0x1d, 0, 32};
-    for (int i = 0; i < 32; ++i)
+    std::vector<uint8_t> share;
+    appendUint16(share, selection.group);
+    appendUint16(share, shareBytes);
+    for (size_t i = 0; i < shareBytes; ++i)
         share.push_back(owner.intuniform(0, 255));
+    if (selection.group == tls::TlsHandshakeParameters::SECP256R1)
+        share[4] = 4;
     appendExtension(extensions, 51, share);
     if (!useCertificate)
-        appendExtension(extensions, 41, {uint8_t(selectedPsk >> 8), uint8_t(selectedPsk)});
+        appendExtension(extensions, 41, {uint8_t(this->selection.selectedPsk >> 8), uint8_t(this->selection.selectedPsk)});
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
@@ -960,11 +996,16 @@ void DtlsAssociation::sendServerFlight()
         return;
     if (useCertificate && clientAuth) {
         auto request = makeShared<tls::TlsCertificateRequest>();
-        const std::vector<uint8_t> signatureExtension = {0, 13, 0, 4, 0, 2, 4, 3};
+        std::vector<uint8_t> signatureExtension;
+        appendUint16(signatureExtension, 13);
+        appendUint16(signatureExtension, 2 + owner.preferences.signatures.size() * 2);
+        appendUint16(signatureExtension, owner.preferences.signatures.size() * 2);
+        for (auto signature : owner.preferences.signatures)
+            appendUint16(signatureExtension, signature);
         request->setExtensionsArraySize(signatureExtension.size());
         for (size_t i = 0; i < signatureExtension.size(); ++i)
             request->setExtensions(i, signatureExtension[i]);
-        request->setChunkLength(B(11));
+        request->setChunkLength(B(3 + signatureExtension.size()));
         owner.sendProtectedHandshake(handle, 13, messageSequence++, request);
         if (!owner.containsAssociation(handle))
             return;
@@ -978,8 +1019,8 @@ void DtlsAssociation::sendServerFlight()
             return;
     }
     auto finished = makeShared<tls::TlsFinished>();
-    finished->setVerifyDataArraySize(32);
-    finished->setChunkLength(B(32));
+    finished->setVerifyDataArraySize(hashBytes);
+    finished->setChunkLength(B(hashBytes));
     nextLocalMessage = messageSequence + 1;
     owner.sendProtectedHandshake(handle, 20, messageSequence, finished, false, true);
     if (owner.containsAssociation(handle))
@@ -1025,7 +1066,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         return;
     }
     if (hello->getLegacyVersion() != 0xfefd || hello->getCompressionMethod() != 0 || hello->getSessionIdArraySize() != 0 ||
-        hello->getCipherSuite() != Parameters::AES_128_GCM_SHA256) {
+        !Parameters::findCipherSuite(hello->getCipherSuite()) || std::find(offer.cipherSuites.begin(), offer.cipherSuites.end(), hello->getCipherSuite()) == offer.cipherSuites.end() ||
+        (retried && hello->getCipherSuite() != retryCipherSuite)) {
         owner.failAssociation(handle, "invalid or unoffered server selection", 47);
         return;
     }
@@ -1033,6 +1075,7 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     for (size_t i = 0; i < 32; ++i)
         isRetry &= hello->getRandom(i) == HELLO_RETRY_RANDOM[i];
     bool version = false, share = false, psk = false, pskPresent = false, requestedShare = false;
+    uint16_t selectedGroup = 0;
     std::vector<uint8_t> cookie;
     std::set<uint16_t> seen;
     size_t pos = 0;
@@ -1066,7 +1109,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
                     owner.failAssociation(handle, "invalid retry key share length", 50);
                     return;
                 }
-                requestedShare = hello->getExtensions(pos) == 0 && hello->getExtensions(pos + 1) == 0x1d;
+                selectedGroup = (uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1);
+                requestedShare = Parameters::keyShareBytes(selectedGroup) && std::find(offer.groups.begin(), offer.groups.end(), selectedGroup) != offer.groups.end();
                 if (!requestedShare) {
                     owner.failAssociation(handle, "unsupported retry key share", 47);
                     return;
@@ -1077,7 +1121,9 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
                     owner.failAssociation(handle, "malformed server key share", 50);
                     return;
                 }
-                share = length == 36 && hello->getExtensions(pos) == 0 && hello->getExtensions(pos + 1) == 0x1d;
+                selectedGroup = (uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1);
+                share = Parameters::keyShareBytes(selectedGroup) && length == 4 + Parameters::keyShareBytes(selectedGroup) &&
+                    (selectedGroup != Parameters::SECP256R1 || hello->getExtensions(pos + 4) == 4);
             }
         }
         else if (type == 41 && !isRetry) {
@@ -1086,8 +1132,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
                 owner.failAssociation(handle, "invalid selected PSK length", 50);
                 return;
             }
-            selectedPsk = (uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1);
-            psk = selectedPsk < offer.pskIdentities.size();
+            this->selection.selectedPsk = (uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1);
+            psk = this->selection.selectedPsk < offer.pskIdentities.size();
         }
         else if (type == 44 && isRetry) {
             if (length < 3 || ((uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1)) != length - 2) {
@@ -1105,11 +1151,11 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     }
     if (isRetry) {
         if (retried) {
-            if (messageSequence != 0 || !version || psk || requestedShare != retryRequestedShare || cookie != retryCookie)
+            if (messageSequence != 0 || !version || psk || requestedShare != retryRequestedShare || (requestedShare && selectedGroup != retryGroup) || cookie != retryCookie)
                 owner.failAssociation(handle, "second HelloRetryRequest", 10);
             return;
         }
-        bool alreadyShared = std::find(offer.keyShares.begin(), offer.keyShares.end(), Parameters::X25519) != offer.keyShares.end();
+        bool alreadyShared = requestedShare ? std::find(offer.keyShares.begin(), offer.keyShares.end(), selectedGroup) != offer.keyShares.end() : !offer.keyShares.empty();
         if (!version || psk || (cookie.empty() && !requestedShare) || (requestedShare && alreadyShared) ||
             (!requestedShare && !alreadyShared)) {
             owner.failAssociation(handle, "invalid HelloRetryRequest", 47);
@@ -1117,6 +1163,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         }
         retried = true;
         retryRequestedShare = requestedShare;
+        retryGroup = requestedShare ? selectedGroup : 0;
+        retryCipherSuite = hello->getCipherSuite();
         retryCookie = cookie;
         serverMessageBase = 1;
         acknowledgeFlightImplicitly();
@@ -1127,15 +1175,24 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     if (messageSequence != serverMessageBase)
         return;
     Parameters::Selection selection;
+    selection.cipherSuite = hello->getCipherSuite();
+    selection.group = selectedGroup;
+    selection.selectedPsk = this->selection.selectedPsk;
     auto fullCertificate = std::string(owner.par("profile").stringValue()) == "certificate";
     selection.authenticationMode = !pskPresent ? Parameters::AuthenticationMode::CERTIFICATE :
-        offeredSession && selectedPsk == 0 ? Parameters::AuthenticationMode::TICKET_PSK : Parameters::AuthenticationMode::EXTERNAL_PSK;
-    selection.signature = pskPresent ? 0 : Parameters::ECDSA_P256_SHA256;
+        offeredSession && this->selection.selectedPsk == 0 ? Parameters::AuthenticationMode::TICKET_PSK : Parameters::AuthenticationMode::EXTERNAL_PSK;
+    selection.signature = pskPresent ? 0 : owner.preferences.signatures.front(); // CertificateVerify chooses the actual offered scheme later.
+    auto suite = Parameters::findCipherSuite(selection.cipherSuite);
+    auto selectedHash = offeredSession && selection.selectedPsk == 0 ? offeredSession->hashBytes : 32;
     if (!version || !share || (!pskPresent && !fullCertificate) || (pskPresent && !psk) || !Parameters::wasOffered(offer, selection)) {
         owner.failAssociation(handle, "invalid or unoffered server selection", 47);
         return;
     }
-    authenticationMode = selection.authenticationMode;
+    this->selection = selection;
+    if (pskPresent && (suite->hashBytes != selectedHash || selection.selectedPsk >= offer.binderLengths.size() || offer.binderLengths[selection.selectedPsk] != selectedHash)) {
+        owner.failAssociation(handle, "selected PSK has an incompatible hash", 47);
+        return;
+    }
     state = HandshakeState::CLIENT_WAIT_SERVER_EXTENSIONS;
     nextPeerMessage = serverMessageBase + 1;
     acknowledgeFlightImplicitly();
@@ -1188,8 +1245,8 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
                     engine.failAssociation(id, "duplicate encrypted extension", 47);
                     return;
                 }
-                if (type != 42 || length != 0 || !earlyOffered || retried || selectedPsk != 0 ||
-                    authenticationMode != tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) {
+                if (type != 42 || length != 0 || !earlyOffered || retried || this->selection.selectedPsk != 0 || !offeredSession || offeredSession->cipherSuite != selection.cipherSuite ||
+                    selection.authenticationMode != tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) {
                     engine.failAssociation(id, "unoffered or unsupported encrypted extension", 110);
                     return;
                 }
@@ -1198,7 +1255,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             }
         }
         ++nextPeerMessage;
-        state = authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
+        state = selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
         engine.reportEarlyData(id, acceptedEarly);
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE && handshake->getMessageType() == 13 && !clientAuthRequested) {
@@ -1247,8 +1304,13 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
                     engine.failAssociation(id, "invalid signature algorithms vector", 50);
                     return;
                 }
-                for (size_t i = pos + 2; i < pos + length; i += 2)
-                    compatible |= request->getExtensions(i) == 4 && request->getExtensions(i + 1) == 3;
+                for (size_t i = pos + 2; i < pos + length; i += 2) {
+                    auto scheme = (uint16_t(request->getExtensions(i)) << 8) | request->getExtensions(i + 1);
+                    if (!compatible && std::find(engine.preferences.signatures.begin(), engine.preferences.signatures.end(), scheme) != engine.preferences.signatures.end()) {
+                        clientAuthSignature = scheme;
+                        compatible = true;
+                    }
+                }
             }
             pos += length;
         }
@@ -1269,7 +1331,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         state = HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE_VERIFY;
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE_VERIFY && handshake->getMessageType() == 15) {
-        auto alert = engine.checkCertificateVerify(body);
+        auto alert = engine.checkCertificateVerify(body, selection.signature);
         if (alert != 0) {
             engine.failAssociation(id, "invalid certificate signature", alert);
             return;
@@ -1287,7 +1349,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         state = HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY;
     }
     else if (state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY && handshake->getMessageType() == 15) {
-        auto alert = engine.checkCertificateVerify(body);
+        auto alert = engine.checkCertificateVerify(body, clientAuthSignature);
         if (alert != 0) {
             engine.failAssociation(id, "invalid certificate signature", alert);
             return;
@@ -1296,7 +1358,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         state = HandshakeState::SERVER_WAIT_CLIENT_FINISHED;
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_FINISHED && handshake->getMessageType() == 20) {
-        if (body->getDataLength() != B(32)) {
+        if (body->getDataLength() != B(tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes)) {
             engine.failAssociation(id, "invalid Finished length", 50);
             return;
         }
@@ -1312,13 +1374,14 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             owner.sendProtectedHandshake(handle, 11, nextMessage++, owner.makeCertificate());
             if (!owner.containsAssociation(handle))
                 return;
-            owner.sendProtectedHandshake(handle, 15, nextMessage++, owner.makeCertificateVerify());
+            owner.sendProtectedHandshake(handle, 15, nextMessage++, owner.makeCertificateVerify(clientAuthSignature));
             if (!owner.containsAssociation(handle))
                 return;
         }
         auto finished = makeShared<tls::TlsFinished>();
-        finished->setVerifyDataArraySize(32);
-        finished->setChunkLength(B(32));
+        auto hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
+        finished->setVerifyDataArraySize(hashBytes);
+        finished->setChunkLength(B(hashBytes));
         nextLocalMessage = nextMessage + 1;
         owner.sendProtectedHandshake(handle, 20, nextMessage, finished, true);
         if (owner.containsAssociation(handle))
@@ -1327,7 +1390,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
     else if (state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED && handshake->getMessageType() == 20) {
         if (peerFinishedProcessed)
             return;
-        if (body->getDataLength() != B(32)) {
+        if (body->getDataLength() != B(tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes)) {
             engine.failAssociation(id, "invalid Finished length", 50);
             return;
         }

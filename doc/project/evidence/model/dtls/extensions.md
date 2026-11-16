@@ -32,7 +32,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C2 | EXCHANGE | DtlsPostHandshakeExchange_1 and three module controls; five production KeyUpdate controls | DONE: fresh debug build, 4 module PASS, 5 protocol PASS |
 | C3 | TICKET | Eight production ticket cases, session lifecycle module, five serializer/store/selection/reassembly units | DONE: fresh debug build; 8 ticket protocol, 5 unit, 5 module PASS; 7 existing protocol controls PASS before the final timeout-only adjustment |
 | C4 | EARLY, ADMISSION | Eleven explicit early-data protocol cases; store/offer units; engine lifecycle outcomes | DONE: fresh debug build; 24 combined protocol, 4 unit, 6 module PASS |
-| C5 | PROFILE | Rfc9147AlgorithmProfiles; handshake/record units | NOT_STARTED |
+| C5 | PROFILE | Eight profile/retry/hash/cost cases; extended negotiation/serializer/store units | DONE: fresh debug build; 37 combined protocol, 6 unit, 6 module PASS |
 | C6 | CID | Rfc9147ConnectionId; record units | NOT_STARTED |
 | C7 | CID-REQUEST, EXCHANGE | Rfc9147ConnectionIdUpdate | NOT_STARTED |
 | C8 | HEARTBEAT | Rfc9147Heartbeat; serializer units | NOT_STARTED |
@@ -93,3 +93,20 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(EngineLifecyc
 Artifacts are `c4-build-debug.log` and `c4-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. The protocol run uses declared checksums/FCS, seed 0 and finite limits; helper/module cases retain their specified fixtures. Scoped architecture/naming, source protection, document seals and release-note format checks pass. The existing global interface-gate failures remain unresolved. Release-mode execution, exact-parent runtime comparison, fingerprint comparison and alternate-suite early compatibility remain unrun. Stored expectations have not changed.
 
 The final helper run passes four units, and the final module run passes six cases against the same fresh library. The engine lifecycle case observes exactly one negative early outcome on each stopped/crashed pending attempt. Module fixture compiler warnings about pre-existing overloaded virtual methods remain warnings, with no executed-case failures.
+
+### C5 focused evidence
+
+A fresh debug library includes the finite catalog, ordered preferences, negotiated selection and sizes, independent initial-client signature selection, hash-filtered ticket cache, same-hash resumption, original-suite early admission and per-suite processing costs. Pre-negotiation ClientHello/HRR and detached-alert work use base costs; early protection uses its saved ticket suite. The [profile reviewer document](../../../../../tests/protocol/dtls/algorithm-profiles.md) states the finite encodings, observations and limits.
+
+The final combined protocol run executes **37 cases, all PASS** with exit zero: eight new profile/retry/hash/cost cases plus 29 previous early-data/ticket/handshake/size/retry/cost controls. Every production fixture pins seed 0, declared checksums/FCS and a finite simulation limit. Exact selectors:
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(Algorithm.*|Sha384.*|EarlyData.*|Resumption.*|PskResumption|Handshake|PskHandshake|ClientAuthentication|KeyUpdate|SharedPortClose|CookieKeyShareRetry|UnsupportedSuite|UnofferedSelection|FullDuplexCosts|KeyUpdateInputCost)\.test$' --log-file audit/dtls-extensions/c5-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(TlsHandshakeParameters|TlsHandshakeSerializer|DtlsRecordSerializer|DtlsTicketSelection|DtlsSessionStore|TlsNewSessionTicket)_1\.test$' --log-file audit/dtls-extensions/c5-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c5-final-module-runner.log
+```
+
+Raw artifacts are `c5-build-debug.log` and `c5-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Scoped DTLS/TLS architecture/naming, source protection, document seals, release-note formatting and DTLS documentation links pass. The global link checker reports missing IEEE standards files in unchanged Wi-Fi evidence; the existing global interface gate also remains failing. These are not passing publication gates. Release execution, exact-parent comparison and baseline comparisons remain unrun; no stored expectation changed.
+
+The final helper run passes all six selected units and the final module run passes all six controls against the final debug library, after the retry-selection check was added. Both runners exit zero with nonzero selection.

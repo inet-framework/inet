@@ -26,9 +26,11 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     enum DropReason { MALFORMED_RECORD = 1, UNKNOWN_EPOCH = 2, REPLAY = 3, RESOURCE_LIMIT = 4 };
     using Association = DtlsAssociation;
     using HandshakeState = DtlsAssociation::HandshakeState;
+    tls::TlsHandshakeParameters::Preferences preferences;
 
     struct PrevalidationAttempt {
         uint64_t id = 0;
+        tls::TlsHandshakeParameters::Selection selection;
         L3Address localAddress;
         int localPort;
         L3Address peerAddress;
@@ -108,9 +110,9 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, uint16_t truncatedSequence, unsigned sequenceBits, Packet *body, size_t recordBytes);
     void sendServerFlight(AssociationId id);
     Ptr<Chunk> makeCertificate() const;
-    Ptr<Chunk> makeCertificateVerify() const;
+    Ptr<Chunk> makeCertificateVerify(uint16_t scheme) const;
     int checkCertificate(Packet *body) const;
-    int checkCertificateVerify(Packet *body) const;
+    int checkCertificateVerify(Packet *body, uint16_t& selectedScheme) const;
     void sendFinalAck(AssociationId id, uint64_t sequence);
     void sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std::vector<std::pair<uint64_t, uint64_t>>& records);
     void sendApplication(AssociationId id, Packet *packet, std::optional<simtime_t> sampledDelay = {}, bool paid = false);
@@ -130,6 +132,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     bool containsAssociation(AssociationId id) const { return associations.find(id) != associations.end(); }
     static bool hasConsistentEncoding(const Packet *packet);
     void reportEarlyData(AssociationId id, bool accepted);
+    simtime_t processingDelay(AssociationId id, const char *operation);
 
   public:
     ~Dtls() override;

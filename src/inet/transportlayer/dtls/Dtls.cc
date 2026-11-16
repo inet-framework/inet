@@ -65,8 +65,27 @@ bool Dtls::hasConsistentEncoding(const Packet *packet)
     }
 }
 
+simtime_t Dtls::processingDelay(AssociationId id, const char *operation)
+{
+    auto it = associations.find(id);
+    bool earlyProtection = it != associations.end() && it->second->earlyOffered && std::string(operation) == "protectOutDelay";
+    if (it == associations.end() || (it->second->state == HandshakeState::CLIENT_WAIT_SERVER_HELLO && !earlyProtection))
+        return SimTime(par(operation).doubleValue());
+    auto code = it->second->state == HandshakeState::CLIENT_WAIT_SERVER_HELLO ? it->second->offeredSession->cipherSuite : it->second->selection.cipherSuite;
+    auto suite = tls::TlsHandshakeParameters::findCipherSuite(code);
+    std::string name(suite->parameterPrefix);
+    name += char(operation[0] - 'a' + 'A');
+    name += operation + 1;
+    return SimTime(par(name.c_str()).doubleValue());
+}
+
 void Dtls::handleStartOperation(LifecycleOperation *)
 {
+    preferences = tls::TlsHandshakeParameters::parsePreferences(par("cipherSuites"), par("keyExchangeGroups"), par("signatureSchemes"));
+    if (std::string(par("profile").stringValue()) == "psk" && std::none_of(preferences.cipherSuites.begin(), preferences.cipherSuites.end(), [](auto code) {
+        return tls::TlsHandshakeParameters::findCipherSuite(code)->hashBytes == 32;
+    }))
+        throw cRuntimeError("The configured external PSK requires a SHA-256 cipher suite");
     auto sessionLimit = par("maxSessions").intValue();
     auto lifetime = par("ticketLifetime").doubleValue();
     if (par("resumptionEnabled").boolValue() && (sessionLimit <= 0 || !std::isfinite(lifetime) || lifetime < 1 || lifetime > 604800 || lifetime != uint32_t(lifetime)))
@@ -164,7 +183,7 @@ bool Dtls::isResumed(AssociationId id) const
 {
     auto it = associations.find(id);
     return it != associations.end() && it->second->state == HandshakeState::ESTABLISHED &&
-        it->second->authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK;
+        it->second->selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK;
 }
 
 IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession)
@@ -199,11 +218,17 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
             association->replacementId = entry.first;
             break;
         }
-    association->authenticationMode = std::string(par("profile").stringValue()) == "certificate" ? tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE : tls::TlsHandshakeParameters::AuthenticationMode::EXTERNAL_PSK;
-    if ((options.resumeSession || options.offerEarlyData) && par("resumptionEnabled").boolValue())
-        association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime());
+    association->selection.authenticationMode = std::string(par("profile").stringValue()) == "certificate" ? tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE : tls::TlsHandshakeParameters::AuthenticationMode::EXTERNAL_PSK;
+    if ((options.resumeSession || options.offerEarlyData) && par("resumptionEnabled").boolValue()) {
+        std::vector<uint8_t> hashes;
+        for (auto suite : preferences.cipherSuites)
+            hashes.push_back(tls::TlsHandshakeParameters::findCipherSuite(suite)->hashBytes);
+        association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime(), hashes);
+    }
     association->earlyRequested = options.offerEarlyData;
     association->earlyOffered = options.offerEarlyData && par("earlyDataEnabled").boolValue() && association->offeredSession && association->offeredSession->earlyDataBytes != 0;
+    if (association->earlyOffered && std::find(preferences.cipherSuites.begin(), preferences.cipherSuites.end(), association->offeredSession->cipherSuite) == preferences.cipherSuites.end())
+        association->earlyOffered = false;
     auto replayWindow = par("replayWindowSize").intValue();
     if (replayWindow <= 0 || replayWindow > 65536)
         throw cRuntimeError("Invalid DTLS replay window size");
@@ -496,12 +521,13 @@ void Dtls::sendRetry(const L3Address& localAddress, const L3Address& peerAddress
     }
     auto hello = makeShared<tls::TlsServerHello>();
     hello->setLegacyVersion(0xfefd);
+    hello->setCipherSuite(attempt->selection.cipherSuite);
     for (size_t i = 0; i < 32; ++i)
         hello->setRandom(i, Association::HELLO_RETRY_RANDOM[i]);
     std::vector<uint8_t> extensions;
     appendExtension(extensions, 43, {0xfe, 0xfc});
     if (requestKeyShare)
-        appendExtension(extensions, 51, {0, 0x1d});
+        appendExtension(extensions, 51, {uint8_t(attempt->selection.group >> 8), uint8_t(attempt->selection.group)});
     std::vector<uint8_t> cookieExtension;
     appendUint16(cookieExtension, cookie.size());
     cookieExtension.insert(cookieExtension.end(), cookie.begin(), cookie.end());
@@ -790,7 +816,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
                 current->second->flightRecordHandedOff(flight, index, recordNumber);
         }
     };
-    auto delay = fragment.epoch == 0 ? SIMTIME_ZERO : SimTime(par("protectOutDelay").doubleValue());
+    auto delay = fragment.epoch == 0 ? SIMTIME_ZERO : processingDelay(id, "protectOutDelay");
     if (!enqueueProcessing(outputProcessing.get(), id, bytes, delay, complete, eligible, skipped))
         failAssociation(id, "DTLS output processing queue is full");
 }
@@ -909,7 +935,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         return;
     }
     auto retained = std::make_shared<std::unique_ptr<Packet>>(packet);
-    auto delay = paid ? SIMTIME_ZERO : (sampledDelay ? *sampledDelay : SimTime(par("protectOutDelay").doubleValue()));
+    auto delay = paid ? SIMTIME_ZERO : (sampledDelay ? *sampledDelay : processingDelay(id, "protectOutDelay"));
     auto started = std::make_shared<bool>(false);
     it->second->processingPacketIds.insert(packetId);
     auto eligible = [this, id, started]() {
@@ -990,13 +1016,13 @@ Ptr<Chunk> Dtls::makeCertificate() const
     return certificate;
 }
 
-Ptr<Chunk> Dtls::makeCertificateVerify() const
+Ptr<Chunk> Dtls::makeCertificateVerify(uint16_t scheme) const
 {
-    auto bytes = par("signatureBytes").intValue();
+    auto bytes = scheme == tls::TlsHandshakeParameters::RSA_PSS_RSAE_SHA256 ? 256 : par("signatureBytes").intValue();
     if (bytes <= 0 || bytes > 65535)
         throw cRuntimeError("Invalid modeled DTLS signature size");
     auto verify = makeShared<tls::TlsCertificateVerify>();
-    verify->setSignatureScheme(tls::TlsHandshakeParameters::ECDSA_P256_SHA256);
+    verify->setSignatureScheme(scheme);
     verify->setSignatureArraySize(bytes);
     verify->setChunkLength(B(bytes + 4));
     return verify;
@@ -1033,7 +1059,7 @@ int Dtls::checkCertificate(Packet *body) const
     return 0;
 }
 
-int Dtls::checkCertificateVerify(Packet *body) const
+int Dtls::checkCertificateVerify(Packet *body, uint16_t& selectedScheme) const
 {
     Ptr<const tls::TlsCertificateVerify> verify;
     try {
@@ -1044,7 +1070,12 @@ int Dtls::checkCertificateVerify(Packet *body) const
     }
     if (body->getDataLength() != b(0) || verify->getSignatureArraySize() == 0)
         return 50;
-    return verify->getSignatureScheme() == tls::TlsHandshakeParameters::ECDSA_P256_SHA256 ? 0 : 47;
+    auto scheme = verify->getSignatureScheme();
+    if (std::find(preferences.signatures.begin(), preferences.signatures.end(), scheme) == preferences.signatures.end() ||
+        (scheme == tls::TlsHandshakeParameters::RSA_PSS_RSAE_SHA256 && verify->getSignatureArraySize() != 256))
+        return 47;
+    selectedScheme = scheme;
+    return 0;
 }
 
 void Dtls::sendServerFlight(AssociationId id)
@@ -1088,7 +1119,7 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
         auto peer = current->second->peerAddress;
         auto port = current->second->peerPort;
         auto localAddress = current->second->localAddress;
-        auto delay = sendEpoch == 0 ? SIMTIME_ZERO : SimTime(par("protectOutDelay").doubleValue());
+        auto delay = sendEpoch == 0 ? SIMTIME_ZERO : processingDelay(id, "protectOutDelay");
         size_t bytes = overhead + 2 + 16 * count;
         size_t reservedCredit = current->second->serverSide && !current->second->addressValidated ? bytes : 0;
         if (reservedCredit) {
@@ -1611,7 +1642,7 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         Parameters::Selection selection;
         auto identity = std::string(par("identity").stringValue());
         auto alert = Association::validateClientHello(hello, certificateProfile, identity, offer, selection,
-            par("resumptionEnabled").boolValue() ? &sessions : nullptr);
+            par("resumptionEnabled").boolValue() ? &sessions : nullptr, preferences);
         if (alert != 0) {
             failHello(alert);
             return;
@@ -1642,6 +1673,7 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
                 *creditCounted = true;
             }
             auto issued = uint64_t(simTime().raw());
+            attempt->selection = selection;
             auto started = uint64_t((attempt->deadline->getArrivalTime() - SimTime(par("handshakeTimeout").doubleValue())).raw());
             auto token = makeCookie(issued, started, localAddress, localPort, peerAddress, peerPort, hello);
             if (repeatedInitial && !attempt->cookie.empty()) {
@@ -1669,6 +1701,11 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         }
         else {
             auto lifetime = SimTime(par("cookieLifetime").doubleValue()).raw();
+            if (attempt && attempt->retryFlight && (selection.cipherSuite != attempt->selection.cipherSuite ||
+                (attempt->requestKeyShare && (selection.group != attempt->selection.group || offer.keyShares.size() != 1 || offer.keyShares.front() != attempt->selection.group)))) {
+                failHello(47);
+                return;
+            }
             if (cookie.empty()) {
                 issueRetry(false);
                 return;
@@ -1709,14 +1746,14 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         association->peerPort = peerPort;
         association->localAddress = localAddress;
         association->localPort = localPort;
-        association->authenticationMode = selection.authenticationMode;
-        association->selectedPsk = selection.selectedPsk;
+        association->selection = selection;
         if (selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK) {
             const auto& identityBytes = offer.pskIdentities.at(selection.selectedPsk);
             association->offeredSession = sessions.find(std::vector<uint8_t>(identityBytes.begin(), identityBytes.end()), true, simTime());
         }
         if (offer.hasEarlyData && selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK && selection.selectedPsk == 0 &&
-            handshake->getMessageSequence() == 0 && par("earlyDataEnabled").boolValue() && association->offeredSession) {
+            handshake->getMessageSequence() == 0 && par("earlyDataEnabled").boolValue() && association->offeredSession &&
+            association->offeredSession->cipherSuite == selection.cipherSuite) {
             std::vector<uint8_t> random;
             for (size_t i = 0; i < 32; ++i)
                 random.push_back(hello->getRandom(i));
@@ -1863,7 +1900,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
     if (it == associations.end())
         return;
     auto retained = std::make_shared<std::unique_ptr<Packet>>(body->dup());
-    auto delay = SimTime(par("protectInDelay").doubleValue());
+    auto delay = processingDelay(id, "protectInDelay");
     if (!inputProcessing->enqueueContinuation(id, recordBytes, delay, [this, id, epoch, truncatedSequence, sequenceBits, retained]() {
         auto current = associations.find(id);
         if (current == associations.end())
@@ -2112,7 +2149,7 @@ void Dtls::beginClose(AssociationId id)
         return;
     }
     scheduleAt(simTime() + timeout, it->second->closeDeadline.get());
-    auto delay = SimTime(par("protectOutDelay").doubleValue());
+    auto delay = processingDelay(id, "protectOutDelay");
     if (!enqueueProcessing(outputProcessing.get(), id, 24, delay, [this, id]() {
         auto current = associations.find(id);
         if (current == associations.end() || !current->second->closing)

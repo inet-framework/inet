@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <set>
+#include <sstream>
 
 namespace inet::tls {
 
@@ -14,24 +15,91 @@ static bool contains(const std::vector<T>& values, T value)
 
 std::string TlsHandshakeParameters::select(const Offer& offer, Profile profile, const std::string& identity, Selection& selection)
 {
+    return select(offer, profile, identity, selection, Preferences{}, 32);
+}
+
+const TlsHandshakeParameters::CipherSuite *TlsHandshakeParameters::findCipherSuite(uint16_t code)
+{
+    // Conservative modeled limits, deliberately below RFC 9147's GCM bound.
+    static const CipherSuite suites[] = {
+        {AES_128_GCM_SHA256, "TLS_AES_128_GCM_SHA256", "aes128Gcm", 32, 16, uint64_t(1) << 24, uint64_t(1) << 23},
+        {AES_256_GCM_SHA384, "TLS_AES_256_GCM_SHA384", "aes256Gcm", 48, 16, uint64_t(1) << 24, uint64_t(1) << 23},
+        {CHACHA20_POLY1305_SHA256, "TLS_CHACHA20_POLY1305_SHA256", "chacha20", 32, 16, uint64_t(1) << 24, uint64_t(1) << 23}
+    };
+    for (const auto& suite : suites)
+        if (suite.code == code)
+            return &suite;
+    return nullptr;
+}
+
+size_t TlsHandshakeParameters::keyShareBytes(uint16_t group)
+{
+    return group == X25519 ? 32 : group == SECP256R1 ? 65 : 0;
+}
+
+TlsHandshakeParameters::Preferences TlsHandshakeParameters::parsePreferences(const char *suiteNames, const char *groupNames, const char *signatureNames)
+{
+    auto parse = [](const char *names, const std::vector<std::pair<std::string, uint16_t>>& values) {
+        std::vector<uint16_t> result;
+        std::istringstream input(names);
+        for (std::string name; input >> name;) {
+            auto it = std::find_if(values.begin(), values.end(), [&](const auto& value) { return value.first == name; });
+            if (it == values.end() || contains(result, it->second))
+                throw cRuntimeError("Unknown or duplicate TLS preference '%s'", name.c_str());
+            result.push_back(it->second);
+        }
+        if (result.empty())
+            throw cRuntimeError("A TLS preference list is empty");
+        return result;
+    };
+    Preferences preferences;
+    preferences.cipherSuites = parse(suiteNames, {{"TLS_AES_128_GCM_SHA256", AES_128_GCM_SHA256}, {"TLS_AES_256_GCM_SHA384", AES_256_GCM_SHA384}, {"TLS_CHACHA20_POLY1305_SHA256", CHACHA20_POLY1305_SHA256}});
+    preferences.groups = parse(groupNames, {{"x25519", X25519}, {"secp256r1", SECP256R1}});
+    preferences.signatures = parse(signatureNames, {{"ecdsa_secp256r1_sha256", ECDSA_P256_SHA256}, {"rsa_pss_rsae_sha256", RSA_PSS_RSAE_SHA256}});
+    return preferences;
+}
+
+std::string TlsHandshakeParameters::select(const Offer& offer, Profile profile, const std::string& identity, Selection& selection,
+                                           const Preferences& preferences, uint8_t pskHashBytes)
+{
     // RFC 9846 Sections 4.2.1 and 4.3: select only offered parameters; this model supports one profile per server.
     if (!contains(offer.versions, DTLS_13))
         return "no supported DTLS version";
-    if (!contains(offer.cipherSuites, AES_128_GCM_SHA256))
+    Selection result;
+    result.cipherSuite = 0;
+    for (auto code : preferences.cipherSuites) {
+        auto suite = findCipherSuite(code);
+        if (suite && contains(offer.cipherSuites, code) && (profile != Profile::PSK || suite->hashBytes == pskHashBytes)) {
+            result.cipherSuite = code;
+            break;
+        }
+    }
+    if (result.cipherSuite == 0)
         return "no supported cipher suite";
-    if (!contains(offer.groups, X25519))
+    result.group = 0;
+    for (auto group : preferences.groups)
+        if (keyShareBytes(group) && contains(offer.groups, group)) {
+            result.group = group;
+            break;
+        }
+    if (result.group == 0)
         return "no supported key exchange group";
     if (profile == Profile::PSK) {
         bool identityOffered = offer.pskIdentity == identity || contains(offer.pskIdentities, identity);
         if (!offer.hasPsk || !identityOffered || !contains(offer.pskModes, PSK_DHE_KE))
             return "no compatible external PSK";
     }
-    else if (!contains(offer.signatures, ECDSA_P256_SHA256))
-        return "no supported signature scheme";
-    Selection result;
+    else {
+        for (auto signature : preferences.signatures)
+            if ((signature == ECDSA_P256_SHA256 || signature == RSA_PSS_RSAE_SHA256) && contains(offer.signatures, signature)) {
+                result.signature = signature;
+                break;
+            }
+        if (result.signature == 0)
+            return "no supported signature scheme";
+    }
     result.authenticationMode = profile == Profile::PSK ? AuthenticationMode::EXTERNAL_PSK : AuthenticationMode::CERTIFICATE;
-    result.signature = result.usesPsk() ? 0 : ECDSA_P256_SHA256;
-    result.retryKeyShare = !contains(offer.keyShares, X25519);
+    result.retryKeyShare = !contains(offer.keyShares, result.group);
     selection = result;
     return {};
 }
@@ -104,8 +172,10 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
                 uint16_t group, shareLength;
                 if (!read16(pos, end, group) || !read16(pos, end, shareLength) || shareLength == 0 || shareLength > end - pos || !groups.insert(group).second)
                     return "invalid key_share";
-                if (group == X25519 && shareLength != 32)
-                    return "invalid X25519 key_share length";
+                if (keyShareBytes(group) && shareLength != keyShareBytes(group))
+                    return "invalid supported key_share length";
+                if (group == SECP256R1 && bytes[pos] != 4)
+                    return "secp256r1 key_share is not uncompressed";
                 result.keyShares.push_back(group);
                 pos += shareLength;
             }
@@ -147,6 +217,7 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
                 auto n = bytes[pos++];
                 if (n < 32 || n > end - pos)
                     return "invalid PSK binder";
+                result.binderLengths.push_back(n);
                 pos += n;
                 ++binders;
             }
@@ -165,7 +236,8 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
 
 bool TlsHandshakeParameters::wasOffered(const Offer& offer, const Selection& selection)
 {
-    if (selection.version != DTLS_13 || selection.cipherSuite != AES_128_GCM_SHA256 || selection.group != X25519 ||
+    auto suite = findCipherSuite(selection.cipherSuite);
+    if (selection.version != DTLS_13 || !suite || !keyShareBytes(selection.group) ||
         !contains(offer.versions, selection.version) || !contains(offer.cipherSuites, selection.cipherSuite) ||
         !contains(offer.groups, selection.group))
         return false;
@@ -173,7 +245,7 @@ bool TlsHandshakeParameters::wasOffered(const Offer& offer, const Selection& sel
         return false;
     if (selection.usesPsk())
         return offer.hasPsk && contains(offer.pskModes, PSK_DHE_KE) && selection.signature == 0;
-    return selection.signature == ECDSA_P256_SHA256 && contains(offer.signatures, selection.signature);
+    return (selection.signature == ECDSA_P256_SHA256 || selection.signature == RSA_PSS_RSAE_SHA256) && contains(offer.signatures, selection.signature);
 }
 
 } // namespace inet::tls

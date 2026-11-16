@@ -10,6 +10,7 @@ DTLS record headers round-trip and malformed handshake fragment rejection.
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 #include "inet/transportlayer/dtls/DtlsRecordProtection.h"
 #include "inet/transportlayer/dtls/DtlsRecordState.h"
+#include "inet/transportlayer/tls/TlsHandshakeParameters.h"
 
 using namespace inet;
 using namespace inet::dtls;
@@ -142,6 +143,19 @@ auto excessiveOriginal = excessiveRecord.peekData();
 ASSERT(!DtlsRecordProtection::unprotect(&excessiveRecord, contentType));
 ASSERT(excessiveRecord.peekData() == excessiveOriginal);
 EV << "DTLS record serialization PASS\n";
+for (uint16_t code : {0x1301, 0x1302, 0x1303}) {
+    auto suite = tls::TlsHandshakeParameters::findCipherSuite(code);
+    ASSERT(suite && suite->tagBytes == DtlsRecordProtection::TAG_BYTES);
+    Packet boundary("profile boundary", makeShared<BytesChunk>(std::vector<uint8_t>(1178, 0x55)));
+    DtlsRecordProtection::protect(&boundary, 23);
+    auto header = makeShared<DtlsCiphertextHeader>();
+    header->setLength(boundary.getDataLength().get<B>());
+    boundary.insertAtFront(header);
+    ASSERT(boundary.getByteLength() == 1200);
+    boundary.popAtFront<DtlsCiphertextHeader>(B(5));
+    ASSERT(DtlsRecordProtection::unprotect(&boundary, contentType) && contentType == 23);
+    ASSERT(boundary.getByteLength() == 1178 && boundary.peekDataAsBytes()->getByte(1177) == 0x55);
+}
 
 %contains: stdout
 DTLS record serialization PASS

@@ -76,9 +76,8 @@ class INET_API DtlsAssociation
     int localPort = -1;
     HandshakeState state = HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     tls::TlsHandshakeParameters::Offer offer;
-    tls::TlsHandshakeParameters::AuthenticationMode authenticationMode = tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
+    tls::TlsHandshakeParameters::Selection selection;
     std::optional<DtlsSessionStore::Entry> offeredSession;
-    uint16_t selectedPsk = 0;
     bool earlyRequested = false;
     bool earlyOffered = false;
     bool earlyAccepted = false;
@@ -120,11 +119,14 @@ class INET_API DtlsAssociation
     bool serverSide = false;
     bool retried = false;
     bool retryRequestedShare = false;
+    uint16_t retryGroup = 0;
+    uint16_t retryCipherSuite = 0;
+    uint16_t clientAuthSignature = tls::TlsHandshakeParameters::ECDSA_P256_SHA256;
     std::vector<uint8_t> retryCookie;
     std::vector<uint8_t> pendingServerHello;
     uint16_t pendingServerHelloSequence = 0;
     std::array<uint8_t, 32> clientRandom{};
-    std::array<uint8_t, 32> clientShare{};
+    std::vector<uint8_t> clientShare;
     uint16_t serverMessageBase = 0;
     uint16_t nextPeerMessage = 0;
     bool processingHandshake = false;
@@ -149,7 +151,8 @@ class INET_API DtlsAssociation
     void scheduleNextHandshake();
     static int validateClientHello(const Ptr<const DtlsClientHello>& hello, bool certificateProfile, const std::string& identity,
                                    tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection,
-                                   const DtlsSessionStore *sessions = nullptr);
+                                   const DtlsSessionStore *sessions = nullptr,
+                                   const tls::TlsHandshakeParameters::Preferences& preferences = tls::TlsHandshakeParameters::Preferences{});
     void processServerHello(uint16_t messageSequence, Packet *body, const L3Address& localAddress, int localPort);
     void sendServerFlight();
     void sendClientHello(const std::vector<uint8_t>& cookie);

@@ -1,0 +1,3 @@
+Additional modeled DTLS 1.3 algorithm profiles
+
+DTLS now supports ordered preferences for AES-256-GCM/SHA-384 and ChaCha20-Poly1305/SHA-256 suites, secp256r1 key exchange and fixed-size modeled RSA-PSS signatures. Selected profiles control represented handshake lengths, ticket hash compatibility and optional per-suite processing delays. Same-hash ticket resumption can change suites, while early admission requires the saved suite. Existing defaults retain the original profile. Cryptographic content remains abstract; the feature does not establish real-world interoperability or performance.

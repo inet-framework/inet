@@ -45,6 +45,8 @@ void DtlsAssociation::issueTicket()
     entry.peerAddress = peerAddress;
     entry.peerPort = peerPort;
     entry.peerIdentity = owner.par("identity").stdstringValue();
+    entry.cipherSuite = selection.cipherSuite;
+    entry.hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
     entry.issuedAt = simTime();
     entry.expiresAt = simTime() + SimTime(owner.par("ticketLifetime").doubleValue());
     entry.ageAdd = (uint32_t(owner.intuniform(0, 65535)) << 16) | owner.intuniform(0, 65535);
@@ -95,7 +97,7 @@ void DtlsAssociation::issueTicket()
     owner.scheduleAt(simTime() + SimTime(owner.par("handshakeTimeout").doubleValue()), exchange->deadline.get());
     postHandshakeExchanges.emplace(4, std::move(exchange));
     auto handle = id;
-    auto delay = SimTime(owner.par("handshakeOutDelay").doubleValue());
+    auto delay = owner.processingDelay(handle, "handshakeOutDelay");
     if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, size + 12, delay, [&owner, handle, flight]() {
         auto it = owner.associations.find(handle);
         if (it == owner.associations.end() || !it->second->findPostHandshakeExchange(flight))
@@ -190,7 +192,7 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
     if (result == DtlsHandshakeReassembly::Result::COMPLETE) {
         auto bytes = reassembly.take(sequence).body;
         auto message = std::make_shared<Packet>("DTLS reassembled ticket", makeShared<BytesChunk>(bytes));
-        auto delay = SimTime(owner.par("handshakeInDelay").doubleValue());
+        auto delay = owner.processingDelay(handle, "handshakeInDelay");
         if (!owner.inputProcessing->enqueueContinuation(handle, bytes.size() + 12, delay, [&owner, handle, message, sequence]() {
             auto it = owner.associations.find(handle);
             if (it == owner.associations.end() || it->second->nextPeerMessage != sequence)
@@ -227,6 +229,8 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
                     entry.peerAddress = it->second->peerAddress;
                     entry.peerPort = it->second->peerPort;
                     entry.peerIdentity = owner.par("identity").stdstringValue();
+                    entry.cipherSuite = it->second->selection.cipherSuite;
+                    entry.hashBytes = tls::TlsHandshakeParameters::findCipherSuite(entry.cipherSuite)->hashBytes;
                     entry.issuedAt = simTime();
                     entry.expiresAt = simTime() + SimTime(std::min<uint32_t>(604800, ticket->getTicketLifetime()));
                     entry.ageAdd = ticket->getTicketAgeAdd();

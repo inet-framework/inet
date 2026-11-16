@@ -70,6 +70,14 @@ ASSERT(!store.consumeEarly({5}, random, 8, 1)); // evicted identity is unknown
 ASSERT(store.consumeEarly({6}, random, 8, 1));
 store.clear();
 ASSERT(!store.consumeEarly({6}, random, 9, 1));
+store.configure(2);
+a.ticket = {7}; a.hashBytes = 32;
+ASSERT(store.insert(a, 0));
+a.ticket = {8}; a.hashBytes = 48;
+ASSERT(store.insert(a, 0));
+ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {32})->ticket == std::vector<uint8_t>{7});
+ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0, {48})->ticket == std::vector<uint8_t>{8});
+ASSERT(!store.select(L3Address(), 4433, "peer", 0xfefc, 0, {64}));
 EV << "DTLS session store PASS\n";
 
 %contains: stdout

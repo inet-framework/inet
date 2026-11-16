@@ -57,7 +57,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
         retained->reset();
         callback->sendError(id, packetId, "DTLS early sending ended before output handoff");
     };
-    auto delay = SimTime(par("protectOutDelay").doubleValue());
+    auto delay = processingDelay(id, "protectOutDelay");
     if (!enqueueProcessing(outputProcessing.get(), id, size + 22, delay, [this, id, packetId, retained]() {
         auto current = associations.find(id);
         if (current == associations.end())

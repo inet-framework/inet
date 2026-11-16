@@ -43,7 +43,8 @@ class INET_API DtlsSessionStore
     bool insert(const Entry& entry, simtime_t now);
     bool consumeEarly(const std::vector<uint8_t>& ticket, const std::vector<uint8_t>& clientRandom, uint64_t associationId, simtime_t now);
     [[nodiscard]] std::optional<Entry> find(const std::vector<uint8_t>& ticket, bool serverSide, simtime_t now) const;
-    [[nodiscard]] std::optional<Entry> select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now) const;
+    [[nodiscard]] std::optional<Entry> select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now,
+                                            const std::vector<uint8_t>& allowedHashes = {}) const;
 };
 
 } // namespace inet::dtls
