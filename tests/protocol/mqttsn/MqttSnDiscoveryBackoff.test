@@ -1,0 +1,41 @@
+%description:
+Without a gateway, production discovery observes response windows and exponential
+wait capped at searchRetryMax. Five searches occur at exact deterministic times.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnDiscoveryBackoff")
+        .meanwhile(exactlyTimes(5, on("sensor.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::SEARCHGW;
+        }).within(1.29)))
+        .meanwhile(exactlyTimes(5, on("sensor.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::SEARCHGW &&
+                std::set<simtime_t>({SimTime(.1),SimTime(.3),SimTime(.6),SimTime(.9),SimTime(1.2)}).count(c.event.time) == 1;
+        }).within(1.29)));
+}
+
+%activity:
+EV << "Discovery backoff fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 1.3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = ""
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].searchDelay = 0s
+*.sensor.app[0].searchResponseTimeout = 100ms
+*.sensor.app[0].searchRetryMax = 200ms
+*.sensor.app[0].keepAlive = 0s
+
+%contains: stdout
+PROTOCOLTEST MqttSnDiscoveryBackoff: PASS
