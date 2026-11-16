@@ -1,0 +1,370 @@
+%description:
+
+CoAP-over-DTLS lifecycle recovery (C5): ModuleStopOperation during delayed DTLS
+handshake aborts the pending request cleanly without emitting CoAP wire packets;
+ModuleStopOperation during active CON GET, Block1 PUT, and established Observe
+(with protectOutDelay = 0.2s) emits requestAborted once per unfinished request
+and onObserveTerminated once for Observe, sends DTLS close_notify, cleans up
+server observers/incomingBlock1, and restarts with a fresh AssociationId;
+server ModuleCrashOperation suppresses close_notify, resets XML resources, and
+clears duplicate history before restart.
+
+%includes:
+#include <vector>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "../coap/CoapChecks.h"
+#include "CoapDtlsTestPeer.h"
+#include "CoapDtlsTestPeer.cc"
+#include "../dtls/DtlsTestUtils.h"
+#include "ProtocolTester.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+using inet::protocoltest::dtls::findChunk;
+
+class LifeDtlsClient : public CoapClient
+{
+  public:
+    std::vector<uint64_t> abortedIds;
+    std::vector<uint64_t> failedIds;
+    std::vector<uint64_t> terminatedRelIds;
+    std::vector<CoapClientObserveNotification> obsNotes;
+
+    uint64_t reqGet(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {});
+    }
+    uint64_t reqPut(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_PUT, true, uri, body);
+    }
+    uint64_t subObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true);
+    }
+    uint64_t getCurrentSessionId() const {
+#ifdef INET_WITH_DTLS
+        return dtlsSessions.empty() ? 0 : dtlsSessions.begin()->first;
+#else
+        return 0;
+#endif
+    }
+
+  protected:
+    virtual void onRequestAborted(uint64_t requestId) override {
+        abortedIds.push_back(requestId);
+        CoapClient::onRequestAborted(requestId);
+    }
+    virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode) override {
+        failedIds.push_back(requestId);
+        CoapClient::onRequestFailed(requestId, reason, coapCode);
+    }
+    virtual void onObserveNotification(const CoapClientObserveNotification& notif) override {
+        obsNotes.push_back(notif);
+        CoapClient::onObserveNotification(notif);
+    }
+    virtual void onObserveTerminated(uint64_t relationId, uint8_t code, const char *reason) override {
+        terminatedRelIds.push_back(relationId);
+        CoapClient::onObserveTerminated(relationId, code, reason);
+    }
+};
+
+Define_Module(LifeDtlsClient);
+
+class LifeDtlsServer : public CoapServer
+{
+  public:
+    void setDelayedResponse(double sec) { responseDelay = sec; }
+    size_t getObserverCount() const { return observers.size(); }
+    size_t getIncomingBlock1Count() const { return incomingBlock1.size(); }
+};
+
+Define_Module(LifeDtlsServer);
+
+static int app1TxCoap = 0;
+static int app0CloseNotifySent = 0;
+static int srvCloseNotifySent = 0;
+static uint64_t preStopSessionId = 0;
+
+Define_ProtocolTestProgram()
+{
+    app1TxCoap = 0;
+    app0CloseNotifySent = 0;
+    srvCloseNotifySent = 0;
+    preStopSessionId = 0;
+
+    return ProtocolTest("coap_dtls_lifecycle")
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[1].coap").signal("packetSentToLower").filterEvent([](const MatchContext&) {
+                ++app1TxCoap;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& ctx) {
+                auto a = findChunk<inet::dtls::DtlsAlert>(ctx.event.packet);
+                if (a != nullptr && a->getDescription() == 0)
+                    ++app0CloseNotifySent;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& ctx) {
+                auto a = findChunk<inet::dtls::DtlsAlert>(ctx.event.packet);
+                if (a != nullptr && a->getDescription() == 0)
+                    ++srvCloseNotifySent;
+                return true;
+            }).within(15.0)))
+
+        // Phase 1: Stop host1 during delayed handshake on host1.app[1] (handshakeOutDelay = 2s on host2.app[1]).
+        .act(action().at(0.1).run<LifeDtlsClient>("host1.app[1].coap", [](LifeDtlsClient& cli) {
+            if (cli.reqGet("host2", 5686, "coaps://host2:5686/sensors/temp") == 0)
+                throw cRuntimeError("Failed to start request on app[1]");
+        }))
+        .act(action().at(0.2).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host1 = lc.getSystemModule()->getSubmodule("host1");
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(host1, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().after(0.3).run<LifeDtlsClient>("host1.app[1].coap", [](LifeDtlsClient& cli) {
+            if (cli.abortedIds.size() != 1 || cli.getFailedCount() != 0 || app1TxCoap != 0)
+                throw cRuntimeError("Expected 1 abort, 0 failed, 0 CoAP tx on handshake stop, got abort=%zu fail=%d tx=%d",
+                        cli.abortedIds.size(), cli.getFailedCount(), app1TxCoap);
+        }).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host1 = lc.getSystemModule()->getSubmodule("host1");
+            LifecycleOperation::StringMap params;
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(host1, params);
+            lc.initiateOperation(startOp);
+        }))
+
+        // Phase 2: Stop host1 during established Observe + active CON GET + Block1 PUT (protectOutDelay = 0.2s).
+        .act(action().after(0.1).run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            if (cli.subObs("host2", 5684, "coaps://host2:5684/sensors/temp") == 0)
+                throw cRuntimeError("Failed to subscribe Observe on app[0]");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(3.0))
+        .act(action().run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            preStopSessionId = cli.getCurrentSessionId();
+            if (preStopSessionId == 0)
+                throw cRuntimeError("Expected active DTLS session ID on app[0]");
+        }).run<LifeDtlsServer>("host2.app[0].coap", [](LifeDtlsServer& srv) {
+            // Enable delayed separate response so CON GET & Block1 PUT remain active in flight!
+            srv.setDelayedResponse(1.5);
+        }))
+        .act(action().run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            if (cli.reqGet("host2", 5684, "coaps://host2:5684/other") == 0)
+                throw cRuntimeError("Failed CON GET before stop");
+            if (cli.reqPut("host2", 5684, "coaps://host2:5684/upload", std::vector<uint8_t>(96, 'Q')) == 0)
+                throw cRuntimeError("Failed Block1 PUT before stop");
+        }))
+        // Allow CON GET & Block1 block-0 to reach server, then stop host1.
+        .act(action().after(0.1).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host1 = lc.getSystemModule()->getSubmodule("host1");
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(host1, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().after(0.7).run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            if (cli.abortedIds.size() != 2 || cli.getFailedCount() != 0)
+                throw cRuntimeError("Expected 2 requestAborted (CON + Block1) and 0 failed, got abort=%zu fail=%d",
+                        cli.abortedIds.size(), cli.getFailedCount());
+            if (cli.terminatedRelIds.size() != 1)
+                throw cRuntimeError("Expected 1 onObserveTerminated, got %zu", cli.terminatedRelIds.size());
+            if (app0CloseNotifySent == 0)
+                throw cRuntimeError("Expected DTLS close_notify from stopping CoapDtlsClient despite protectOutDelay");
+        }).run<LifeDtlsServer>("host2.app[0].coap", [](LifeDtlsServer& srv) {
+            if (srv.getObserverCount() != 0 || srv.getIncomingBlock1Count() != 0)
+                throw cRuntimeError("Expected server observers (=%zu) and incomingBlock1 (=%zu) cleaned on peer close_notify",
+                        srv.getObserverCount(), srv.getIncomingBlock1Count());
+            srv.setDelayedResponse(0.0);
+        }))
+
+        // Restart host1 and verify fresh AssociationId + completed GET.
+        .act(action().run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host1 = lc.getSystemModule()->getSubmodule("host1");
+            LifecycleOperation::StringMap params;
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(host1, params);
+            lc.initiateOperation(startOp);
+        }))
+        .act(action().after(0.05).run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            if (cli.reqGet("host2", 5684, "coaps://host2:5684/sensors/temp") == 0)
+                throw cRuntimeError("Post-restart GET failed to submit");
+        }))
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(4.0))
+        .act(action().run<LifeDtlsClient>("host1.app[0].coap", [](LifeDtlsClient& cli) {
+            if (cli.getCurrentSessionId() <= preStopSessionId)
+                throw cRuntimeError("Expected fresh post-restart AssociationId > %llu", (unsigned long long)preStopSessionId);
+        }))
+
+        // Phase 3: Mutate /sensors/temp with known MID via CoapDtlsTestPeer, then CRASH & restart host2.
+        .act(action().run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            if (peer.openSession("host2", 5684) == 0)
+                throw cRuntimeError("Failed to open test peer session");
+        }))
+        .once(on("host1.app[2].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            uint64_t sid = peer.getEstablishedIds().back();
+            RawCoapMessage put;
+            put.type = COAP_TYPE_CON; put.code = COAP_CODE_PUT; put.messageId = 0x7777; put.token = {0x99};
+            put.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            put.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            put.payload = asciiBytes("99C");
+            peer.sendBytes(sid, encodeRawCoap(put), "MutateBeforeCrash");
+        }))
+        .once(on("host1.app[2].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            srvCloseNotifySent = 0;
+            peer.clearReceived();
+        }).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host2 = lc.getSystemModule()->getSubmodule("host2");
+            LifecycleOperation::StringMap params;
+            auto *crashOp = new ModuleCrashOperation();
+            crashOp->initialize(host2, params);
+            lc.initiateOperation(crashOp);
+        }))
+        .act(action().after(0.1).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            if (srvCloseNotifySent != 0)
+                throw cRuntimeError("Server crash emitted %d close_notify alerts (expected 0)", srvCloseNotifySent);
+            auto *host2 = lc.getSystemModule()->getSubmodule("host2");
+            LifecycleOperation::StringMap params;
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(host2, params);
+            lc.initiateOperation(startOp);
+        }))
+        // Open fresh session on host1.app[2].peer, replay same MID 0x7777 for GET /sensors/temp -> reset to "20C"!
+        .act(action().after(0.05).run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            if (peer.openSession("host2", 5684) == 0)
+                throw cRuntimeError("Failed to open post-crash session");
+        }))
+        .once(on("host1.app[2].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            uint64_t sid = peer.getEstablishedIds().back();
+            RawCoapMessage get;
+            get.type = COAP_TYPE_CON; get.code = COAP_CODE_GET; get.messageId = 0x7777; get.token = {0x9A};
+            get.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            get.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendBytes(sid, encodeRawCoap(get), "GetAfterCrashSameMid");
+        }))
+        .once(on("host1.app[2].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[2].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage rsp;
+            if (!decodeRawCoap(peer.getReceived().back().bytes, rsp)
+                    || rsp.code != COAP_CODE_CONTENT || rawPayloadString(rsp) != "20C")
+                throw cRuntimeError("Post-crash server expected reset '20C' & non-suppressed MID, got code=%u body=%s",
+                        rsp.code, rawPayloadString(rsp).c_str());
+        }));
+}
+
+%activity:
+EV << "coap_dtls_lifecycle compiled\n";
+
+%file: LifeTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple LifeDtlsClient extends CoapClient
+{
+    parameters:
+        @class(LifeDtlsClient);
+}
+
+simple LifeDtlsServer extends CoapServer
+{
+    parameters:
+        @class(LifeDtlsServer);
+}
+
+module LifeDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: LifeDtlsClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+module LifeDtlsServerApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        dtls: <default("Dtls")> like IDtls {
+            localPort = default(5684);
+        }
+        coap: LifeDtlsServer {
+            dtlsModule = "^.dtls";
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 25s
+seed-set = 0
+**.hasStatus = true
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 3
+*.host1.app[0].typename = "LifeDtlsClientApp"
+*.host1.app[0].coap.numRequests = 0
+*.host1.app[0].coap.preferredBlockSize = 32B
+*.host1.app[0].coap.stopOperationExtraTime = 0s
+*.host1.app[0].dtls.protectOutDelay = 0.2s
+*.host1.app[0].dtls.closeTimeout = 0.5s
+
+*.host1.app[1].typename = "LifeDtlsClientApp"
+*.host1.app[1].coap.numRequests = 0
+*.host1.app[1].coap.peerPort = 5686
+*.host1.app[1].coap.stopOperationExtraTime = 0s
+*.host1.app[1].dtls.closeTimeout = 0.2s
+
+*.host1.app[2].typename = "inet.protocoltest.coapdtls.CoapDtlsTestApp"
+*.host1.app[2].server = false
+*.host1.app[2].dtls.closeTimeout = 0s
+
+*.host2.numApps = 2
+*.host2.app[0].typename = "LifeDtlsServerApp"
+*.host2.app[0].coap.preferredBlockSize = 32B
+*.host2.app[0].coap.stopOperationExtraTime = 0s
+*.host2.app[0].dtls.closeTimeout = 0.2s
+*.host2.app[0].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET,PUT' obs='true'>20C</resource><resource path='/other' contentFormat='0' methods='GET'>other</resource><resource path='/upload' contentFormat='0' methods='GET,PUT'>old</resource></resources>")
+
+*.host2.app[1].typename = "inet.applications.coapdtls.CoapDtlsServer"
+*.host2.app[1].dtls.localPort = 5686
+*.host2.app[1].dtls.handshakeOutDelay = 2s
+*.host2.app[1].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET'>slow</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_lifecycle: PASS
