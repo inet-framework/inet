@@ -40,6 +40,8 @@ struct INET_API CoapClientResponseRecord
     int32_t contentFormat = -1;
     int64_t maxAge = -1;
     std::vector<uint8_t> etag;
+    std::vector<std::string> locationPath;
+    std::vector<std::string> locationQuery;
     std::vector<uint8_t> payload;
     simtime_t latency = SIMTIME_ZERO;
 };

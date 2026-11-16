@@ -169,7 +169,49 @@ Define_ProtocolTest(coap_duplicate_suppression)
         .act(action().after(0.05).run<DupTestClient>("hostA.app[2]", [](DupTestClient& cli) {
             if (cli.deliveredCount != 1)
                 throw cRuntimeError("Expected client deliveredCount=1 across duplicate separate CON responses, got %d", cli.deliveredCount);
-        }));
+        }))
+
+        // Scenario 5 (t=252.0s): Real CON POST mutation + duplicate CON POST retry -> exactly 1 append!
+        .act(action().at(252.0).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage postReq;
+            postReq.type = 0; postReq.code = COAP_CODE_POST; postReq.messageId = 0x3301; postReq.token = {0x41};
+            postReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("append")});
+            postReq.payload = asciiBytes("+one");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(postReq), "ConPost1");
+            peer.scheduleRawSend(simTime() + 0.2, "hostB", 5683, encodeRawCoap(postReq), "ConPost1Dup");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .capture("postReplyHex", [](const PacketEvent& ev) {
+                      auto chunk = ev.packet->peekDataAsBytes();
+                      return cValue(bytesToHexString(chunk->getBytes()).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_CHANGED && raw.messageId == 0x3301
+                              && raw.payload == asciiBytes("init+one");
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto chunk = ctx.event.packet->peekDataAsBytes();
+                      return bytesToHexString(chunk->getBytes()) == ctx.get("postReplyHex").stringValue();
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage getReq;
+            getReq.type = 0; getReq.code = COAP_CODE_GET; getReq.messageId = 0x3302; getReq.token = {0x42};
+            getReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("append")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(getReq), "GetAfterPostDup");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x3302
+                              && raw.payload == asciiBytes("init+one");
+                  })
+                  .within(0.5));
 }
 
 %activity:
@@ -212,7 +254,7 @@ seed-set = 0
 *.hostB.numApps = 2
 *.hostB.app[0].typename = "DupCountCoapServer"
 *.hostB.app[0].localPort = 5683
-*.hostB.app[0].resources = xml("<resources><resource path='/val' contentFormat='0'>dup-body</resource></resources>")
+*.hostB.app[0].resources = xml("<resources><resource path='/val' contentFormat='0'>dup-body</resource><resource path='/append' methods='GET,POST' contentFormat='0'>init</resource></resources>")
 *.hostB.app[1].typename = "CoapTestPeer"
 *.hostB.app[1].localPort = 5684
 

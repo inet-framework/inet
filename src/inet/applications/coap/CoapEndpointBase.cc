@@ -815,14 +815,18 @@ void CoapEndpointBase::expirePendingRequests(simtime_t now)
 bool CoapEndpointBase::isRecognizedRequestOption(uint16_t optionNumber) const
 {
     switch (optionNumber) {
+        case COAP_OPT_IF_MATCH:
         case COAP_OPT_URI_HOST:
+        case COAP_OPT_ETAG:
+        case COAP_OPT_IF_NONE_MATCH:
         case COAP_OPT_URI_PORT:
         case COAP_OPT_URI_PATH:
-        case COAP_OPT_URI_QUERY:
         case COAP_OPT_CONTENT_FORMAT:
-        case COAP_OPT_ACCEPT:
         case COAP_OPT_MAX_AGE:
-        case COAP_OPT_ETAG:
+        case COAP_OPT_URI_QUERY:
+        case COAP_OPT_ACCEPT:
+        case COAP_OPT_PROXY_URI:
+        case COAP_OPT_PROXY_SCHEME:
             return true;
         default:
             return false;
