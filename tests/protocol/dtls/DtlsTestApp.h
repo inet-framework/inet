@@ -111,6 +111,14 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
         return id;
     }
     void reopenPeer() { scheduleCommand([this]() { connectPeer(); }); }
+    void resumePeer()
+    {
+        scheduleCommand([this]() {
+            handles.push_back(engine->open(L3AddressResolver().resolve(par("peerAddress")), par("peerPort"), this, true));
+        });
+    }
+    bool isResumed() const { return engine->isResumed(lastHandle()); }
+    void listenPeer() { scheduleCommand([this]() { engine->listen(this); }); }
     void openPeer(const char *address, int port = 4433)
     {
         std::string peer(address);

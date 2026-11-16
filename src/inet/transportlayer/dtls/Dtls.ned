@@ -19,6 +19,10 @@ simple Dtls extends SimpleModule like IDtls
         bool cookieRequired = default(true);
         bool offerInitialKeyShare = default(true);
         bool clientAuthentication = default(false);
+        bool resumptionEnabled = default(false); // cache/issue modeled stateful tickets
+        int maxSessions = default(64); // aggregate client/server ticket entries per engine
+        double ticketLifetime @unit(s) = default(3600s); // integral seconds, 1..604800
+        @signal[sessionResumed](type=long);
         string profile = default("psk");
         string identity = default("inet");
         int certificateBytes @unit(B) = default(512B);

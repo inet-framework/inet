@@ -19,7 +19,7 @@ void DtlsSocketIo::handleStartOperation(LifecycleOperation *operation)
         const char *address = par("destAddress");
         if (!*address)
             throw cRuntimeError("A DTLS client requires destAddress");
-        clientId = socket.open(L3AddressResolver().resolve(address), par("destPort"));
+        clientId = socket.open(L3AddressResolver().resolve(address), par("destPort"), par("resumeSession"));
         if (clientId == 0)
             EV_WARN << "DTLS association was not admitted" << endl;
     }

@@ -30,7 +30,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | --- | --- | --- | --- |
 | C1 | All selected obligations and exclusions | Primary-source/errata reconciliation, profile table, links | DONE, documentation only, commit 4756b0cfeb |
 | C2 | EXCHANGE | DtlsPostHandshakeExchange_1 and three module controls; five production KeyUpdate controls | DONE: fresh debug build, 4 module PASS, 5 protocol PASS |
-| C3 | TICKET | Rfc9147Resumption; serializer/store units | NOT_STARTED |
+| C3 | TICKET | Eight production ticket cases, session lifecycle module, five serializer/store/selection/reassembly units | DONE: fresh debug build; 8 ticket protocol, 5 unit, 5 module PASS; 7 existing protocol controls PASS before the final timeout-only adjustment |
 | C4 | EARLY, ADMISSION | Rfc9147EarlyData; store units | NOT_STARTED |
 | C5 | PROFILE | Rfc9147AlgorithmProfiles; handshake/record units | NOT_STARTED |
 | C6 | CID | Rfc9147ConnectionId; record units | NOT_STARTED |
@@ -61,3 +61,20 @@ opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '
 Four module cases and five protocol cases passed. Logs, including `build-debug.log`, `module-console.log` and `protocol-console.log`, are under `audit/dtls-extensions/c2/`; generated cases are in the standard test work directories. Scoped DTLS architecture and naming checks pass. Seal-index and C1 commit checks pass. Existing overloaded-virtual compiler warnings occur in test support; they are not test failures.
 
 No exact-parent runtime comparison, release build or baseline comparison has completed. Controls are source-grounded preservation checks rather than measured parent failures. Raw standards/errata retrieval artifacts are under `audit/dtls-extensions/standards/`; ignored audit directories are local supporting evidence rather than repository-relative documentation links.
+
+### C3 focused evidence
+
+Working directory and debug mode match C2. A fresh debug build followed the final ticket timeout/admission correction. The seven ticket cases, five units and five modules below all pass with nonzero selection and exit zero. Ticket production fixtures pin seed 0 and declared checksums/FCS; module controls retain their own fixtures. The reviewer document is [resumption.md](../../../../../tests/protocol/dtls/resumption.md).
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(PskResumption|Resumption.*)\.test$' --log-file audit/dtls-extensions/c3-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(DtlsSessionStore|DtlsTicketSelection|TlsNewSessionTicket|TlsHandshakeParameters|DtlsHandshakeReassembly)_1\.test$' --log-file audit/dtls-extensions/c3-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(SessionLifecycle|PostHandshakeExchange|RecoveryLifecycle|RestartLifecycle|SenderState)_1\.test$' --log-file audit/dtls-extensions/c3-final-module-runner.log
+```
+
+Before the final correction, seven existing protocol controls also passed: `Rfc9147(Handshake|PskHandshake|ClientAuthentication|KeyUpdate|SimultaneousUpdates|UpdatePeerIsolation|SharedPortClose)\.test$`. Their run additionally included the new issuer-isolation case, giving eight executed cases. The final adjustment changes the newly enabled ticket's failure path; the seven ticket cases and module controls above were rerun afterward. Raw logs are `c3-controls-{runner,console}.log`, `c3-final-{protocol,unit,module}-{runner,console}.log` and `c3-build-debug.log` under `audit/dtls-extensions/`.
+
+One additional ticket case, `Rfc9147ResumptionReceiveDeadline.test`, passes using the same protocol command with its exact filename selector. Logs are `c3-receive-deadline-{runner,console}.log`. It starts one second of logical ticket input service against a 0.5 s receive deadline and verifies that the later continuation cannot create a resumable row. Together the two runs execute eight new ticket cases.
+
+Scoped DTLS/TLS/application architecture checks and DTLS/TLS naming checks pass. The global interface gate fails on 16 classes in unchanged files; `IDtls` is not reported. This remains a repository-wide gate failure, not a passing final gate. No source seal is modified. Release-mode behavior, exact-parent runtime comparison, fingerprints, general queued-admission fault injection and alternate-hash production negotiation remain unrun; the latter belongs to C5. No skill package scripts exist in this checkout, so the supplied skill-source packaging commands cannot run here.

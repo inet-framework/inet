@@ -5,6 +5,15 @@
 
 namespace inet::dtls {
 
+void DtlsHandshakeReassembly::discard(uint16_t sequence)
+{
+    auto it = entries.find(sequence);
+    if (it != entries.end()) {
+        reservedBytes -= it->second.totalLength;
+        entries.erase(it);
+    }
+}
+
 DtlsHandshakeReassembly::Result DtlsHandshakeReassembly::insert(uint8_t type, uint16_t sequence, uint32_t totalLength, uint32_t offset, const std::vector<uint8_t>& fragment)
 {
     // RFC 9147 Section 5.5 permits overlapping fragments; the reservation cap is a model resource policy.

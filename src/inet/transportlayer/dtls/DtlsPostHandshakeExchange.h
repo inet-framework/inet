@@ -3,6 +3,7 @@
 #define INET_DTLSPOSTHANDSHAKEEXCHANGE_H
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
@@ -21,6 +22,7 @@ class INET_API DtlsPostHandshakeExchange
     std::unique_ptr<cMessage> deadline;
     // RFC 9147 Section 5.8.2: initial retry interval in seconds.
     simtime_t timeout = 1;
+    std::optional<uint16_t> receivingSequence;
 
     DtlsPostHandshakeExchange(cSimpleModule& owner, const std::string& name);
     ~DtlsPostHandshakeExchange();

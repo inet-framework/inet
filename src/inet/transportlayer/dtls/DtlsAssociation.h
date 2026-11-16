@@ -15,6 +15,7 @@
 #include "inet/transportlayer/dtls/DtlsHandshakeReassembly.h"
 #include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
 #include "inet/transportlayer/dtls/DtlsPostHandshakeExchange.h"
+#include "inet/transportlayer/dtls/DtlsSessionStore.h"
 #include "inet/transportlayer/tls/TlsHandshakeParameters.h"
 
 namespace inet::dtls {
@@ -75,6 +76,16 @@ class INET_API DtlsAssociation
     int localPort = -1;
     HandshakeState state = HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     tls::TlsHandshakeParameters::Offer offer;
+    tls::TlsHandshakeParameters::AuthenticationMode authenticationMode = tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
+    std::optional<DtlsSessionStore::Entry> offeredSession;
+    uint16_t selectedPsk = 0;
+    std::map<uint64_t, uint64_t> retainedSendCounters;
+    DtlsPostHandshakeExchange *findPostHandshakeExchange(const std::shared_ptr<DtlsHandshakeFlight>& value);
+    void issueTicket();
+    void pumpTicket();
+    void ticketRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& value, size_t index, uint64_t number);
+    void receiveTicket(uint64_t epoch, uint64_t number, Packet *body);
+    bool allocateRecord(uint64_t epoch, uint64_t& number);
     std::unique_ptr<DtlsRecordState> receiveEpoch2;
     std::unique_ptr<DtlsRecordState> receiveEpoch3;
     std::unique_ptr<DtlsRecordState> previousReceiveEpoch;
@@ -93,7 +104,6 @@ class INET_API DtlsAssociation
     size_t sentBytes = 0;
     size_t reservedBytes = 0;
     bool serverFlightQueued = false;
-    bool certificateProfile = false;
     bool clientAuthRequested = false;
     bool ownFinishedHandedOff = false;
     bool peerFinishedProcessed = false;
@@ -130,7 +140,8 @@ class INET_API DtlsAssociation
     bool retainHandshakeFragment(uint64_t recordSequence, Packet *body, bool& immediateAck, bool& duplicate, bool& implicitResponse);
     void scheduleNextHandshake();
     static int validateClientHello(const Ptr<const DtlsClientHello>& hello, bool certificateProfile, const std::string& identity,
-                                   tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection);
+                                   tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection,
+                                   const DtlsSessionStore *sessions = nullptr);
     void processServerHello(uint16_t messageSequence, Packet *body, const L3Address& localAddress, int localPort);
     void sendServerFlight();
     void sendClientHello(const std::vector<uint8_t>& cookie);

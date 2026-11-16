@@ -64,3 +64,12 @@ class TlsKeyUpdate extends FieldsChunk
     chunkLength = B(1);
     uint8_t requestUpdate = 0;
 }
+
+class TlsNewSessionTicket extends FieldsChunk
+{
+    uint32_t ticketLifetime = 0; // seconds from issuance
+    uint32_t ticketAgeAdd = 0;
+    uint8_t ticketNonce[];
+    uint8_t ticket[];
+    uint8_t extensions[];
+}

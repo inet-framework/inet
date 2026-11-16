@@ -37,6 +37,10 @@ class INET_API IDtls
     virtual void listen(ICallback *callback) = 0;
     // Returns zero when admission fails synchronously; valid handles are nonzero.
     virtual AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback) = 0;
+    // Best-effort ticket resumption; absence or refusal permits the ordinary configured handshake.
+    virtual AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession) = 0;
+    // False for an invalid/unestablished handle or a handshake without a selected ticket.
+    virtual bool isResumed(AssociationId id) const = 0;
     // Ownership is transferred to the engine, including on rejection.
     virtual void send(AssociationId id, Packet *packet, ICallback *requester) = 0;
     virtual void close(AssociationId id) = 0;

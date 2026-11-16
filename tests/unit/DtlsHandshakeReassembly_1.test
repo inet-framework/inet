@@ -45,6 +45,11 @@ ASSERT(sequences.take(1).body == std::vector<uint8_t>({3, 4, 5, 6}));
 ASSERT(sequences.getEntryCount() == 1);
 ASSERT(sequences.hasEntry(0) && !sequences.hasEntry(1));
 ASSERT(!sequences.isComplete(0));
+ASSERT(sequences.insert(4, 2, 4, 0, {7}) == Result::INCOMPLETE);
+sequences.discard(0);
+ASSERT(!sequences.hasEntry(0) && sequences.hasEntry(2));
+ASSERT(sequences.getEntryCount() == 1 && sequences.getReservedBytes() == 4);
+sequences.discard(0); // an already released sequence is harmless
 EV << "DTLS handshake reassembly PASS\n";
 
 %contains: stdout

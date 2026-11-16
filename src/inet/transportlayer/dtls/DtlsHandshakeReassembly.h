@@ -41,6 +41,7 @@ class INET_API DtlsHandshakeReassembly
     [[nodiscard]] bool hasEntry(uint16_t sequence) const { return entries.find(sequence) != entries.end(); }
     [[nodiscard]] size_t firstMissing(uint16_t sequence) const;
     Message take(uint16_t sequence);
+    void discard(uint16_t sequence);
     void clear();
     [[nodiscard]] size_t getReservedBytes() const { return reservedBytes; }
     [[nodiscard]] size_t getEntryCount() const { return entries.size(); }

@@ -22,6 +22,8 @@ class INET_API DtlsSocket
     void setCallback(IDtls::ICallback *value) { callback = value; }
     void listen() { checkEngine(); engine->listen(callback); }
     AssociationId open(const L3Address& peerAddress, int peerPort) { checkEngine(); return engine->open(peerAddress, peerPort, callback); }
+    AssociationId open(const L3Address& peerAddress, int peerPort, bool resumeSession) { checkEngine(); return engine->open(peerAddress, peerPort, callback, resumeSession); }
+    bool isResumed(AssociationId id) const { checkEngine(); return engine->isResumed(id); }
     void send(AssociationId id, Packet *packet) { checkEngine(); engine->send(id, packet, callback); }
     void close(AssociationId id) { checkEngine(); engine->close(id); }
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate = false) { checkEngine(); return engine->requestKeyUpdate(id, requestPeerUpdate); }

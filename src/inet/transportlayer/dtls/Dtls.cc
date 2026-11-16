@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <cmath>
 #include <limits>
 
 #include "inet/common/Protocol.h"
@@ -66,6 +67,11 @@ bool Dtls::hasConsistentEncoding(const Packet *packet)
 
 void Dtls::handleStartOperation(LifecycleOperation *)
 {
+    auto sessionLimit = par("maxSessions").intValue();
+    auto lifetime = par("ticketLifetime").doubleValue();
+    if (par("resumptionEnabled").boolValue() && (sessionLimit <= 0 || !std::isfinite(lifetime) || lifetime < 1 || lifetime > 604800 || lifetime != uint32_t(lifetime)))
+        throw cRuntimeError("Invalid DTLS session capacity or integral ticket lifetime");
+    sessions.configure(par("resumptionEnabled").boolValue() ? sessionLimit : 0);
     auto processingBytes = par("maxProcessingBytes").intValue();
     if (processingBytes <= 0)
         throw cRuntimeError("maxProcessingBytes must be positive");
@@ -82,6 +88,7 @@ void Dtls::handleStartOperation(LifecycleOperation *)
 
 void Dtls::handleStopOperation(LifecycleOperation *)
 {
+    sessions.clear();
     listener = nullptr;
     if (inputProcessing)
         inputProcessing->clear();
@@ -113,6 +120,7 @@ void Dtls::handleStopOperation(LifecycleOperation *)
 
 void Dtls::handleCrashOperation(LifecycleOperation *)
 {
+    sessions.clear();
     listener = nullptr;
     discardAll("node crashed", true);
     udpSocket.destroy();
@@ -146,6 +154,18 @@ void Dtls::listen(ICallback *callback)
 
 IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICallback *callback)
 {
+    return open(peerAddress, peerPort, callback, false);
+}
+
+bool Dtls::isResumed(AssociationId id) const
+{
+    auto it = associations.find(id);
+    return it != associations.end() && it->second->state == HandshakeState::ESTABLISHED &&
+        it->second->authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK;
+}
+
+IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession)
+{
     Enter_Method("open");
     if (operationalState != OPERATING)
         return 0;
@@ -171,7 +191,9 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
             association->replacementId = entry.first;
             break;
         }
-    association->certificateProfile = std::string(par("profile").stringValue()) == "certificate";
+    association->authenticationMode = std::string(par("profile").stringValue()) == "certificate" ? tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE : tls::TlsHandshakeParameters::AuthenticationMode::EXTERNAL_PSK;
+    if (resumeSession && par("resumptionEnabled").boolValue())
+        association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime());
     auto replayWindow = par("replayWindowSize").intValue();
     if (replayWindow <= 0 || replayWindow > 65536)
         throw cRuntimeError("Invalid DTLS replay window size");
@@ -652,13 +674,13 @@ void Dtls::sendProtectedHandshake(AssociationId id, uint8_t messageType, uint16_
 void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHandshakeFlight>& flight, size_t index)
 {
     auto it = associations.find(id);
-    if (it == associations.end() || (it->second->flight != flight && it->second->keyUpdate().flight != flight))
+    if (it == associations.end() || (it->second->flight != flight && !it->second->findPostHandshakeExchange(flight)))
         return;
-    bool isUpdate = it->second->keyUpdate().flight == flight;
+    bool isPostHandshake = it->second->findPostHandshakeExchange(flight) != nullptr;
     auto fragment = flight->get(index);
     size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 34);
-    size_t reservedCredit = it->second->serverSide && !isUpdate ? bytes : 0;
-    if (it->second->serverSide && !isUpdate && fragment.transmissions != 0) {
+    size_t reservedCredit = it->second->serverSide && !isPostHandshake ? bytes : 0;
+    if (it->second->serverSide && !isPostHandshake && fragment.transmissions != 0) {
         if (!it->second->addressValidated) {
             auto received = it->second->receivedBytes;
             auto credit = received > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : received * 3;
@@ -675,7 +697,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     auto eligible = [this, id, flight, index]() {
         auto current = associations.find(id);
         return current != associations.end() && !current->second->closing &&
-               (current->second->flight == flight || current->second->keyUpdate().flight == flight) &&
+               (current->second->flight == flight || current->second->findPostHandshakeExchange(flight)) &&
                flight->get(index).queued && !flight->get(index).acknowledged;
     };
     auto skipped = [this, id, flight, index, reservedCredit]() {
@@ -683,13 +705,15 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         if (current != associations.end()) {
             if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordSkipped(flight, index);
+            else if (current->second->findPostHandshakeExchange(flight))
+                flight->cancelReservation(index);
             else
                 current->second->flightRecordSkipped(flight, index, reservedCredit);
         }
     };
     auto complete = [this, id, flight, index, reservedCredit]() {
         auto current = associations.find(id);
-        if (current == associations.end() || (current->second->flight != flight && current->second->keyUpdate().flight != flight))
+        if (current == associations.end() || (current->second->flight != flight && !current->second->findPostHandshakeExchange(flight)))
             return;
         auto fragment = flight->get(index);
         uint64_t recordNumber;
@@ -706,7 +730,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
             }
             recordNumber = current->second->nextEpoch2Record++;
         }
-        else if (fragment.epoch != current->second->sendEpoch || !current->second->allocateApplicationRecord(recordNumber)) {
+        else if (!current->second->allocateRecord(fragment.epoch, recordNumber)) {
             failAssociation(id, "DTLS application epoch record limit reached");
             return;
         }
@@ -748,6 +772,8 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         if (current != associations.end()) {
             if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordHandedOff(flight, index, recordNumber);
+            else if (current->second->findPostHandshakeExchange(flight))
+                current->second->ticketRecordHandedOff(flight, index, recordNumber);
             else if (current->second->flight == flight)
                 current->second->flightRecordHandedOff(flight, index, recordNumber);
         }
@@ -796,6 +822,14 @@ void Dtls::establish(AssociationId id)
     emit(establishmentTimeSignal, elapsed.dbl());
     emit(associationEstablishedSignal, (long)id);
     callback->established(id);
+    it = associations.find(id);
+    if (it != associations.end()) {
+        if (isResumed(id))
+            emit(registerSignal("sessionResumed"), (long)id);
+        it = associations.find(id);
+        if (it != associations.end())
+            it->second->issueTicket();
+    }
     resumeApplications(id);
 }
 
@@ -1564,7 +1598,8 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         Parameters::Offer offer;
         Parameters::Selection selection;
         auto identity = std::string(par("identity").stringValue());
-        auto alert = Association::validateClientHello(hello, certificateProfile, identity, offer, selection);
+        auto alert = Association::validateClientHello(hello, certificateProfile, identity, offer, selection,
+            par("resumptionEnabled").boolValue() ? &sessions : nullptr);
         if (alert != 0) {
             failHello(alert);
             return;
@@ -1662,8 +1697,13 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
         association->peerPort = peerPort;
         association->localAddress = localAddress;
         association->localPort = localPort;
-        association->certificateProfile = certificateProfile;
-        association->clientAuthRequested = certificateProfile && par("clientAuthentication").boolValue();
+        association->authenticationMode = selection.authenticationMode;
+        association->selectedPsk = selection.selectedPsk;
+        if (selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK) {
+            const auto& identityBytes = offer.pskIdentities.at(selection.selectedPsk);
+            association->offeredSession = sessions.find(std::vector<uint8_t>(identityBytes.begin(), identityBytes.end()), true, simTime());
+        }
+        association->clientAuthRequested = !selection.usesPsk() && par("clientAuthentication").boolValue();
         association->serverSide = true;
         association->addressValidated = handshake->getMessageSequence() == 1;
         association->state = association->clientAuthRequested ? HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE : HandshakeState::SERVER_WAIT_CLIENT_FINISHED;
@@ -1816,7 +1856,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
         if (epoch == 2 && association.receiveEpoch2 && association.state == HandshakeState::ESTABLISHED && contentType == 22 && (*retained)->getDataLength() >= B(12)) {
             try {
                 auto header = (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12));
-                mainHandshake = header->getMessageType() != 24;
+                mainHandshake = header->getMessageType() != 24 && header->getMessageType() != 4;
             }
             catch (const cRuntimeError&) {
                 emit(recordDroppedSignal, (long)MALFORMED_RECORD);
@@ -1849,8 +1889,8 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             emit(recordDroppedSignal, (long)REPLAY);
             return;
         }
-        auto retirePrevious = [&association, logicalEpoch]() {
-            if (logicalEpoch == association.receiveEpoch)
+        auto retirePrevious = [this, &association, logicalEpoch]() {
+            if (logicalEpoch == association.receiveEpoch && !par("resumptionEnabled").boolValue())
                 association.previousReceiveEpoch.reset();
         };
         if (contentType == 21 && (*retained)->getDataLength() == B(2)) {
@@ -1907,7 +1947,15 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             return;
         }
         if (logicalEpoch >= 3 && contentType == 22 && current->second->state == HandshakeState::ESTABLISHED) {
-            current->second->receiveKeyUpdate(logicalEpoch, sequence, retained->get());
+            try {
+                if ((*retained)->getDataLength() >= B(12) && (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12))->getMessageType() == 4)
+                    current->second->receiveTicket(logicalEpoch, sequence, retained->get());
+                else
+                    current->second->receiveKeyUpdate(logicalEpoch, sequence, retained->get());
+            }
+            catch (const cRuntimeError&) {
+                emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+            }
             return;
         }
         if (logicalEpoch != 2 || contentType != 22) {

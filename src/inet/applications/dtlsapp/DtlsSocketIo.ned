@@ -11,6 +11,7 @@ simple DtlsSocketIo extends SimpleModule
         @display("i=block/socket");
         string dtlsModule = default("^.dtls");
         bool server = default(false);
+        bool resumeSession = default(false); // best-effort use of a cached ticket on open
         string destAddress = default("");
         int destPort = default(-1);
         @lifecycleSupport();

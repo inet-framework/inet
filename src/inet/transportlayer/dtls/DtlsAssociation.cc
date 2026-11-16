@@ -32,6 +32,36 @@ void DtlsAssociation::cancelTimers()
 
 bool DtlsAssociation::handleTimer(cMessage *message)
 {
+    auto ticket = postHandshakeExchanges.find(4);
+    if (ticket != postHandshakeExchanges.end()) {
+        auto& exchange = *ticket->second;
+        if (message == exchange.retransmissionTimer.get()) {
+            exchange.timeout = std::min(SimTime(60), exchange.timeout * 2);
+            if (exchange.flight) {
+                exchange.flight->requestRetransmission();
+                pumpTicket();
+            }
+            return true;
+        }
+        if (message == exchange.deadline.get()) {
+            if (exchange.flight) {
+                // Abandoning an unsent/unacknowledged handshake sequence would
+                // prevent subsequent ordered post-handshake messages from progressing.
+                engine.failAssociation(id, "DTLS session ticket timeout");
+                return true;
+            }
+            exchange.cancelTimers();
+            exchange.flight.reset();
+            if (exchange.receivingSequence) {
+                reassembly.discard(*exchange.receivingSequence);
+                if (*exchange.receivingSequence == nextPeerMessage)
+                    ++nextPeerMessage; // local ticket admission expired; ordinary data remains usable
+                exchange.receivingSequence.reset();
+            }
+            retainedSendCounters.clear();
+            return true;
+        }
+    }
     // RFC 9147 Section 5.8.2 recommends doubling the retransmission timer up to at least 60 seconds.
     if (message == keyUpdate().retransmissionTimer.get()) {
         keyUpdate().timeout = std::min(SimTime(60), keyUpdate().timeout * 2);
@@ -115,6 +145,11 @@ bool DtlsAssociation::advanceSendEpoch()
 {
     if (sendEpoch >= MAX_SEND_EPOCH)
         return false;
+    for (const auto& entry : postHandshakeExchanges)
+        if (entry.first != 24 && entry.second->flight && !entry.second->flight->isComplete())
+            for (size_t i = 0; i < entry.second->flight->size(); ++i)
+                if (entry.second->flight->get(i).epoch == sendEpoch)
+                    retainedSendCounters.emplace(sendEpoch, nextApplicationRecord);
     ++sendEpoch;
     nextApplicationRecord = 0;
     return true;
@@ -467,6 +502,31 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
             }
         }
     }
+    auto ticket = postHandshakeExchanges.find(4);
+    if (ticket != postHandshakeExchanges.end() && ticket->second->flight) {
+        auto& exchange = *ticket->second;
+        bool progress = false;
+        for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
+            auto result = exchange.flight->acknowledge(ack.getEpochs(i), ack.getSequenceNumbers(i), simTime());
+            progress |= result.matched;
+            if (result.rtt)
+                exchange.timeout = std::max(SimTime::fromRaw(1), *result.rtt * 1.5);
+        }
+        if (progress) {
+            owner.cancelEvent(exchange.retransmissionTimer.get());
+            if (exchange.flight->isComplete()) {
+                owner.cancelEvent(exchange.deadline.get());
+                exchange.flight.reset();
+                retainedSendCounters.clear();
+            }
+            else {
+                exchange.flight->requestRetransmission();
+                pumpTicket();
+                if (!owner.containsAssociation(handle))
+                    return;
+            }
+        }
+    }
     if (!flight)
         return;
     bool progress = false;
@@ -690,7 +750,8 @@ void DtlsAssociation::scheduleNextHandshake()
 }
 
 int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello, bool certificateProfile, const std::string& identity,
-                                         tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection)
+                                         tls::TlsHandshakeParameters::Offer& offer, tls::TlsHandshakeParameters::Selection& selection,
+                                         const DtlsSessionStore *sessions)
 {
     using Parameters = tls::TlsHandshakeParameters;
     if (hello->getLegacyVersion() != 0xfefd || hello->getLegacyCookieArraySize() != 0 ||
@@ -707,9 +768,25 @@ int DtlsAssociation::validateClientHello(const Ptr<const DtlsClientHello>& hello
     for (auto group : offer.keyShares)
         if (std::find(offer.groups.begin(), offer.groups.end(), group) == offer.groups.end())
             return 47;
+    if (sessions) {
+        for (size_t i = 0; i < offer.pskIdentities.size(); ++i) {
+            const auto& bytes = offer.pskIdentities[i];
+            auto entry = sessions->find(std::vector<uint8_t>(bytes.begin(), bytes.end()), true, simTime());
+            if (entry && entry->version == Parameters::DTLS_13 && entry->hashBytes == 32 && entry->peerIdentity == identity &&
+                Parameters::select(offer, Parameters::Profile::PSK, bytes, selection).empty()) {
+                selection.authenticationMode = Parameters::AuthenticationMode::TICKET_PSK;
+                selection.selectedPsk = i;
+                return 0;
+            }
+        }
+    }
     auto error = Parameters::select(offer, certificateProfile ? Parameters::Profile::CERTIFICATE : Parameters::Profile::PSK, identity, selection);
-    if ((!certificateProfile && offer.pskIdentity != identity) || (certificateProfile && offer.hasPsk) || !error.empty())
+    if ((!sessions && ((!certificateProfile && offer.pskIdentity != identity) || (certificateProfile && offer.hasPsk))) || !error.empty())
         return error == "no supported DTLS version" ? 70 : 40;
+    if (selection.usesPsk()) {
+        auto found = std::find(offer.pskIdentities.begin(), offer.pskIdentities.end(), identity);
+        selection.selectedPsk = found - offer.pskIdentities.begin();
+    }
     return 0;
 }
 
@@ -768,19 +845,34 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
         cookieExtension.insert(cookieExtension.end(), cookie.begin(), cookie.end());
         appendExtension(extensions, 44, cookieExtension);
     }
-    if (profile == "psk") {
+    if (profile == "psk" || offeredSession) {
         appendExtension(extensions, 45, {1, Parameters::PSK_DHE_KE});
         std::string identity = owner.par("identity").stringValue();
         if (identity.empty() || identity.size() > 65526)
             throw cRuntimeError("DTLS PSK identity has an invalid length");
         std::vector<uint8_t> psk;
-        appendUint16(psk, identity.size() + 6);
-        appendUint16(psk, identity.size());
-        psk.insert(psk.end(), identity.begin(), identity.end());
-        psk.insert(psk.end(), 4, 0);
-        appendUint16(psk, 33);
-        psk.push_back(32);
-        psk.insert(psk.end(), 32, 0); // modeled binder, not a MAC
+        std::vector<std::pair<std::vector<uint8_t>, uint32_t>> identities;
+        if (offeredSession) {
+            auto age = uint32_t((simTime() - offeredSession->issuedAt).dbl() * 1000) + offeredSession->ageAdd;
+            identities.push_back({offeredSession->ticket, age});
+        }
+        if (profile == "psk")
+            identities.push_back({std::vector<uint8_t>(identity.begin(), identity.end()), 0});
+        size_t identityBytes = 0;
+        for (const auto& entry : identities)
+            identityBytes += entry.first.size() + 6;
+        appendUint16(psk, identityBytes);
+        for (const auto& entry : identities) {
+            appendUint16(psk, entry.first.size());
+            psk.insert(psk.end(), entry.first.begin(), entry.first.end());
+            for (int shift = 24; shift >= 0; shift -= 8)
+                psk.push_back(entry.second >> shift);
+        }
+        appendUint16(psk, identities.size() * 33);
+        for (size_t i = 0; i < identities.size(); ++i) {
+            psk.push_back(32);
+            psk.insert(psk.end(), 32, 0); // modeled binder, not a MAC
+        }
         appendExtension(extensions, 41, psk);
     }
     if (extensions.size() > 0xffff)
@@ -804,7 +896,7 @@ void DtlsAssociation::sendServerFlight()
         return;
     auto& owner = engine;
     auto handle = id;
-    bool useCertificate = certificateProfile;
+    bool useCertificate = authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
     bool clientAuth = clientAuthRequested;
     Ptr<Chunk> certificate;
     Ptr<Chunk> verify;
@@ -839,7 +931,7 @@ void DtlsAssociation::sendServerFlight()
         share.push_back(owner.intuniform(0, 255));
     appendExtension(extensions, 51, share);
     if (!useCertificate)
-        appendExtension(extensions, 41, {0, 0});
+        appendExtension(extensions, 41, {uint8_t(selectedPsk >> 8), uint8_t(selectedPsk)});
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
@@ -985,7 +1077,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
                 owner.failAssociation(handle, "invalid selected PSK length", 50);
                 return;
             }
-            psk = hello->getExtensions(pos) == 0 && hello->getExtensions(pos + 1) == 0;
+            selectedPsk = (uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1);
+            psk = selectedPsk < offer.pskIdentities.size();
         }
         else if (type == 44 && isRetry) {
             if (length < 3 || ((uint16_t(hello->getExtensions(pos)) << 8) | hello->getExtensions(pos + 1)) != length - 2) {
@@ -1024,12 +1117,15 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
     if (messageSequence != serverMessageBase)
         return;
     Parameters::Selection selection;
-    selection.usePsk = !certificateProfile;
-    selection.signature = certificateProfile ? Parameters::ECDSA_P256_SHA256 : 0;
-    if (!version || !share || pskPresent != selection.usePsk || (pskPresent && !psk) || !Parameters::wasOffered(offer, selection)) {
+    auto fullCertificate = std::string(owner.par("profile").stringValue()) == "certificate";
+    selection.authenticationMode = !pskPresent ? Parameters::AuthenticationMode::CERTIFICATE :
+        offeredSession && selectedPsk == 0 ? Parameters::AuthenticationMode::TICKET_PSK : Parameters::AuthenticationMode::EXTERNAL_PSK;
+    selection.signature = pskPresent ? 0 : Parameters::ECDSA_P256_SHA256;
+    if (!version || !share || (!pskPresent && !fullCertificate) || (pskPresent && !psk) || !Parameters::wasOffered(offer, selection)) {
         owner.failAssociation(handle, "invalid or unoffered server selection", 47);
         return;
     }
+    authenticationMode = selection.authenticationMode;
     state = HandshakeState::CLIENT_WAIT_SERVER_EXTENSIONS;
     nextPeerMessage = serverMessageBase + 1;
     acknowledgeFlightImplicitly();
@@ -1087,7 +1183,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             return;
         }
         ++nextPeerMessage;
-        state = certificateProfile ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
+        state = authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE && handshake->getMessageType() == 13 && !clientAuthRequested) {
         Ptr<const tls::TlsCertificateRequest> request;

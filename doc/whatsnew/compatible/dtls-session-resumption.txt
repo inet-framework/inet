@@ -1,0 +1,3 @@
+DTLS 1.3 modeled session tickets
+
+The DTLS engine can issue bounded, expiring session tickets and explicitly resume a later association using PSK-DHE. Ticket recovery is independent of KeyUpdate, and unknown or expired tickets permit ordinary full authentication. Enable resumptionEnabled and request ticket use through DtlsSocket or DtlsSocketIo.resumeSession. Defaults preserve the existing full-handshake behavior. Tickets use stateful simulation identities rather than encrypted real-world credentials.

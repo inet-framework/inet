@@ -13,6 +13,7 @@ Register_Serializer(TlsCertificate, TlsHandshakeSerializer);
 Register_Serializer(TlsCertificateVerify, TlsHandshakeSerializer);
 Register_Serializer(TlsFinished, TlsHandshakeSerializer);
 Register_Serializer(TlsKeyUpdate, TlsHandshakeSerializer);
+Register_Serializer(TlsNewSessionTicket, TlsHandshakeSerializer);
 
 static void requireBytes(MemoryInputStream& stream, size_t size)
 {
@@ -157,6 +158,15 @@ void TlsHandshakeSerializer::serializeFields(MemoryOutputStream& s, const Ptr<co
         for (size_t i = 0; i < body->getVerifyDataArraySize(); ++i)
             s.writeUint8(body->getVerifyData(i));
     }
+    else if (auto body = dynamicPtrCast<const TlsNewSessionTicket>(chunk)) {
+        if (body->getTicketArraySize() == 0)
+            throw cRuntimeError("TLS session ticket is empty");
+        s.writeUint32Be(body->getTicketLifetime());
+        s.writeUint32Be(body->getTicketAgeAdd());
+        writeVector(s, body->getTicketNonceArraySize(), 1, [&](size_t i) { return body->getTicketNonce(i); });
+        writeVector(s, body->getTicketArraySize(), 2, [&](size_t i) { return body->getTicket(i); });
+        writeVector(s, body->getExtensionsArraySize(), 2, [&](size_t i) { return body->getExtensions(i); });
+    }
     else if (auto body = dynamicPtrCast<const TlsKeyUpdate>(chunk))
         s.writeUint8(body->getRequestUpdate());
     else
@@ -172,6 +182,18 @@ const Ptr<Chunk> TlsHandshakeSerializer::deserializeFields(MemoryInputStream& s,
         readClientPrefix(s, h);
         readClientSuffix(s, h);
         return h;
+    }
+    if (typeInfo == typeid(TlsNewSessionTicket)) {
+        requireBytes(s, 8);
+        auto body = makeShared<TlsNewSessionTicket>();
+        body->setTicketLifetime(s.readUint32Be());
+        body->setTicketAgeAdd(s.readUint32Be());
+        readVector(s, 1, [&](size_t n) { body->setTicketNonceArraySize(n); }, [&](size_t i, uint8_t v) { body->setTicketNonce(i, v); });
+        readVector(s, 2, [&](size_t n) { body->setTicketArraySize(n); }, [&](size_t i, uint8_t v) { body->setTicket(i, v); });
+        readVector(s, 2, [&](size_t n) { body->setExtensionsArraySize(n); }, [&](size_t i, uint8_t v) { body->setExtensions(i, v); });
+        if (body->getTicketArraySize() == 0)
+            throw cRuntimeError("TLS session ticket is empty");
+        return body;
     }
     if (typeInfo == typeid(TlsEncryptedExtensions)) {
         auto body = makeShared<TlsEncryptedExtensions>();

@@ -60,6 +60,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     std::map<AssociationId, std::unique_ptr<Association>> associations;
     std::vector<std::unique_ptr<PrevalidationAttempt>> prevalidationAttempts;
     AssociationId nextAssociationId = 1;
+    DtlsSessionStore sessions;
+    uint64_t nextTicketSerial = 1;
     std::unique_ptr<DtlsProcessingQueue> inputProcessing;
     std::unique_ptr<DtlsProcessingQueue> outputProcessing;
 
@@ -132,6 +134,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     ~Dtls() override;
     void listen(ICallback *callback) override;
     AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback) override;
+    AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession) override;
+    bool isResumed(AssociationId id) const override;
     void send(AssociationId id, Packet *packet, ICallback *requester) override;
     void close(AssociationId id) override;
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate) override;

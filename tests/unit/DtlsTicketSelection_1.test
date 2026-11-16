@@ -1,0 +1,61 @@
+%description:
+Only server tickets with the configured peer identity and supported hash may
+select ticket authentication. Unknown or incompatible tickets use the ordinary
+certificate selection while preserving the offered key-share retry requirement.
+%includes:
+#include "inet/transportlayer/dtls/DtlsAssociation.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+using namespace inet;
+using namespace inet::dtls;
+class TicketSelectionFixture : public DtlsAssociation
+{
+  public:
+    using DtlsAssociation::validateClientHello;
+};
+%activity:
+using Parameters = tls::TlsHandshakeParameters;
+auto hello = makeShared<DtlsClientHello>();
+hello->setCipherSuitesArraySize(1);
+hello->setCipherSuites(0, 0x1301);
+hello->setCompressionMethodsArraySize(1);
+hello->setCompressionMethods(0, 0);
+std::vector<uint8_t> extensions = {
+    0,43,0,3,2,0xfe,0xfc,
+    0,10,0,4,0,2,0,29,
+    0,13,0,4,0,2,4,3,
+    0,51,0,2,0,0,
+    0,45,0,2,1,1,
+    0,41,0,44,0,7,0,1,'T',0,0,0,0,0,33,32
+};
+extensions.insert(extensions.end(), 32, 0);
+hello->setExtensionsArraySize(extensions.size());
+for (size_t i = 0; i < extensions.size(); ++i) hello->setExtensions(i, extensions[i]);
+DtlsSessionStore store;
+store.configure(2);
+DtlsSessionStore::Entry entry;
+entry.ticket = {'T'};
+entry.serverSide = true;
+entry.peerIdentity = "peer";
+entry.expiresAt = 100;
+ASSERT(store.insert(entry, 0));
+Parameters::Offer offer;
+Parameters::Selection selection;
+ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK && selection.selectedPsk == 0 && selection.retryKeyShare);
+store.clear();
+entry.hashBytes = 48;
+ASSERT(store.insert(entry, 0));
+ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+store.clear();
+entry.hashBytes = 32;
+entry.peerIdentity = "other";
+ASSERT(store.insert(entry, 0));
+ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+store.clear();
+ASSERT(TicketSelectionFixture::validateClientHello(hello, true, "peer", offer, selection, &store) == 0);
+ASSERT(selection.authenticationMode == Parameters::AuthenticationMode::CERTIFICATE);
+EV << "DTLS ticket selection PASS\n";
+%contains: stdout
+DTLS ticket selection PASS

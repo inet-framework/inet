@@ -29,8 +29,8 @@ std::string TlsHandshakeParameters::select(const Offer& offer, Profile profile, 
     else if (!contains(offer.signatures, ECDSA_P256_SHA256))
         return "no supported signature scheme";
     Selection result;
-    result.usePsk = profile == Profile::PSK;
-    result.signature = result.usePsk ? 0 : ECDSA_P256_SHA256;
+    result.authenticationMode = profile == Profile::PSK ? AuthenticationMode::EXTERNAL_PSK : AuthenticationMode::CERTIFICATE;
+    result.signature = result.usesPsk() ? 0 : ECDSA_P256_SHA256;
     result.retryKeyShare = !contains(offer.keyShares, X25519);
     selection = result;
     return {};
@@ -164,7 +164,7 @@ bool TlsHandshakeParameters::wasOffered(const Offer& offer, const Selection& sel
         return false;
     if (selection.retryKeyShare ? contains(offer.keyShares, selection.group) : !contains(offer.keyShares, selection.group))
         return false;
-    if (selection.usePsk)
+    if (selection.usesPsk())
         return offer.hasPsk && contains(offer.pskModes, PSK_DHE_KE) && selection.signature == 0;
     return selection.signature == ECDSA_P256_SHA256 && contains(offer.signatures, selection.signature);
 }

@@ -22,6 +22,7 @@ class INET_API TlsHandshakeParameters
     static constexpr uint8_t PSK_DHE_KE = 1;
 
     enum class Profile { PSK, CERTIFICATE };
+    enum class AuthenticationMode { CERTIFICATE = 0, EXTERNAL_PSK = 1, TICKET_PSK = 2 };
     struct Offer {
         std::vector<uint16_t> versions;
         std::vector<uint16_t> cipherSuites;
@@ -42,7 +43,9 @@ class INET_API TlsHandshakeParameters
         uint16_t cipherSuite = AES_128_GCM_SHA256;
         uint16_t group = X25519;
         uint16_t signature = 0;
-        bool usePsk = false;
+        uint16_t selectedPsk = 0;
+        AuthenticationMode authenticationMode = AuthenticationMode::CERTIFICATE;
+        [[nodiscard]] bool usesPsk() const { return authenticationMode != AuthenticationMode::CERTIFICATE; }
         bool retryKeyShare = false;
     };
 

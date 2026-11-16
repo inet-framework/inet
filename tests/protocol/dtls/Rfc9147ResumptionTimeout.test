@@ -1,0 +1,48 @@
+%description:
+Lose every ticket for one peer of a shared server. Expiry of that ticket's
+recovery deadline fails only its owning association; another peer still delivers
+an application datagram. See resumption.md for the finite failure policy.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_resumption_timeout")
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.destPort == 4434").filterPacket([](const Packet *p) { return findChunk<inet::tls::TlsNewSessionTicket>(p) != nullptr; }).drop())
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(2))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.errorCount == 1 && app.lastError == "DTLS session ticket timeout", "unacknowledged ticket fails its association without a handshake sequence hole");
+    }).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.sendMarker(45); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>{45} && app.errorCount == 1, "ticket deadline preserves unrelated association and processor progress");
+    }));
+}
+%activity:
+EV << "ticket timeout compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[1].localPort = 4436
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host2.app[*].dtls.handshakeTimeout = 0.5s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_resumption_timeout: PASS

@@ -1,0 +1,52 @@
+%description:
+DTLS session storage shares a bounded capacity between client and server roles,
+expires at the boundary, preserves original expiry on duplicate delivery, and
+selects only a compatible peer context.
+
+%includes:
+#include "inet/transportlayer/dtls/DtlsSessionStore.h"
+using namespace inet;
+using namespace inet::dtls;
+
+%activity:
+DtlsSessionStore store;
+DtlsSessionStore::Entry a;
+a.ticket = {1};
+a.peerIdentity = "peer";
+a.peerPort = 4433;
+a.issuedAt = 0;
+a.expiresAt = 10;
+ASSERT(!store.insert(a, 0));
+store.configure(2);
+ASSERT(store.insert(a, 0));
+auto duplicate = a;
+duplicate.expiresAt = 100;
+ASSERT(!store.insert(duplicate, 1));
+ASSERT(store.find({1}, false, 9)->expiresAt == SimTime(10));
+ASSERT(!store.find({1}, true, 0));
+ASSERT(!store.find({1}, false, 10));
+ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 9));
+ASSERT(!store.select(L3Address(), 4434, "peer", 0xfefc, 9));
+ASSERT(!store.select(L3Address(), 4433, "other", 0xfefc, 9));
+ASSERT(!store.select(L3Address(), 4433, "peer", 0xfefd, 9));
+auto b = a;
+b.ticket = {2};
+b.serverSide = true;
+ASSERT(store.insert(b, 0));
+auto c = a;
+c.ticket = {3};
+ASSERT(store.insert(c, 0));
+ASSERT(store.size() == 2);
+ASSERT(!store.find({1}, false, 0));
+ASSERT(store.find({2}, true, 0));
+ASSERT(store.select(L3Address(), 4433, "peer", 0xfefc, 0)->ticket == c.ticket);
+c.ticket = {4};
+c.expiresAt = 20;
+ASSERT(store.insert(c, 10));
+ASSERT(store.size() == 1); // expired entries release both roles' capacity
+store.clear();
+ASSERT(store.size() == 0 && !store.find({4}, false, 10));
+EV << "DTLS session store PASS\n";
+
+%contains: stdout
+DTLS session store PASS
