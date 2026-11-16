@@ -15,8 +15,11 @@ void DtlsProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *,
     context.typeColumn << "DTLS";
     if (auto header = dynamicPtrCast<const DtlsPlaintextHeader>(chunk))
         context.infoColumn << "epoch=" << header->getEpoch() << " sequence=" << header->getSequenceNumber() << " type=" << (int)header->getContentType();
-    else if (auto header = dynamicPtrCast<const DtlsCiphertextHeader>(chunk))
+    else if (auto header = dynamicPtrCast<const DtlsCiphertextHeader>(chunk)) {
         context.infoColumn << "epoch bits=" << (int)header->getEpochBits() << " truncated sequence=" << header->getSequenceNumber();
+        if (header->getConnectionIdArraySize())
+            context.infoColumn << " CID bytes=" << header->getConnectionIdArraySize();
+    }
     else
         context.infoColumn << chunk;
 }

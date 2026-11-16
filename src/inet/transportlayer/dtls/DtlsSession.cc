@@ -74,7 +74,7 @@ void DtlsAssociation::issueTicket()
     auto flight = std::make_shared<DtlsHandshakeFlight>();
     exchange->flight = flight;
     auto size = body->getChunkLength().get<B>();
-    auto maximum = std::min<int64_t>(owner.par("udpPayloadLimit").intValue() - 34, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
+    auto maximum = std::min<int64_t>(owner.par("udpPayloadLimit").intValue() - int64_t(12 + recordOverhead()), DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
     if (maximum <= 0)
         return;
     auto sequence = nextLocalMessage;

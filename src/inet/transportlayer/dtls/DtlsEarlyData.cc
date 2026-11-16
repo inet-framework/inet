@@ -33,7 +33,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
     if (operationalState != OPERATING || it == associations.end() || it->second->callback != requester || it->second->serverSide ||
         !it->second->earlyOffered || it->second->retried || it->second->closing || it->second->state == HandshakeState::ESTABLISHED ||
         (it->second->earlyStatusReported && !it->second->earlyAccepted) || bytes.get<b>() % 8 != 0 ||
-        bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(22) > B(par("udpPayloadLimit").intValue()) ||
+        bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue()) ||
         uint64_t(bytes.get<B>()) > it->second->offeredSession->earlyDataBytes - it->second->earlySentBytes) {
         retained->reset();
         requester->sendError(id, packetId, "DTLS early send is unavailable or exceeds its allowance");
@@ -42,23 +42,26 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
     auto size = bytes.get<B>();
     it->second->earlySentBytes += size;
     it->second->processingPacketIds.insert(packetId);
-    auto eligible = [this, id]() {
+    auto overhead = it->second->recordOverhead();
+    auto eligible = [this, id, overhead]() {
         auto current = associations.find(id);
         return current != associations.end() && !current->second->closing && !current->second->retried &&
+            current->second->recordOverhead() == overhead &&
             current->second->state != HandshakeState::ESTABLISHED &&
             (!current->second->earlyStatusReported || current->second->earlyAccepted);
     };
-    auto skipped = [this, id, packetId, retained]() {
+    auto skipped = [this, id, packetId, retained, overhead]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return; // teardown already reports tracked application operations
         current->second->processingPacketIds.erase(packetId);
         auto callback = current->second->callback;
+        auto changedHeader = current->second->recordOverhead() != overhead;
         retained->reset();
-        callback->sendError(id, packetId, "DTLS early sending ended before output handoff");
+        callback->sendError(id, packetId, changedHeader ? "DTLS early header budget changed before output handoff" : "DTLS early sending ended before output handoff");
     };
     auto delay = processingDelay(id, "protectOutDelay");
-    if (!enqueueProcessing(outputProcessing.get(), id, size + 22, delay, [this, id, packetId, retained]() {
+    if (!enqueueProcessing(outputProcessing.get(), id, size + overhead, delay, [this, id, packetId, retained]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return;
@@ -70,10 +73,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
         current->second->processingPacketIds.erase(packetId);
         auto packet = retained->get();
         DtlsRecordProtection::protect(packet, 23);
-        auto header = makeShared<DtlsCiphertextHeader>();
-        header->setEpochBits(1);
-        header->setSequenceNumber(number & 0xffff);
-        header->setLength(packet->getDataLength().get<B>());
+        auto header = current->second->makeRecordHeader(1, number, packet->getDataLength().get<B>());
         packet->insertAtFront(header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!current->second->localAddress.isUnspecified())
@@ -81,7 +81,7 @@ void Dtls::sendEarly(AssociationId id, Packet *packet, ICallback *requester)
         auto peer = current->second->peerAddress;
         auto port = current->second->peerPort;
         auto outgoing = retained->release();
-        emit(recordOverheadSignal, 22L);
+        emit(recordOverheadSignal, (long)current->second->recordOverhead());
         emit(packetSentSignal, outgoing);
         emit(packetSentToLowerSignal, outgoing);
         udpSocket.sendTo(outgoing, peer, port);

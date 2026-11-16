@@ -29,6 +29,7 @@ class DtlsCiphertextHeader extends FieldsChunk
     uint8_t sequenceNumberLength = 2;
     bool lengthPresent = true;
     uint16_t length = 0;
+    uint8_t connectionId[];
 }
 
 // RFC 9147 section 5.2: the message sequence is distinct from record sequence.

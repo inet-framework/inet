@@ -2,6 +2,7 @@
 #include "inet/transportlayer/dtls/DtlsProtocolDissector.h"
 
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/dtls/Dtls.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
@@ -24,8 +25,15 @@ void DtlsProtocolDissector::dissect(Packet *packet, const Protocol *, ICallback&
                 callback.visitChunk(header, &dtlsProtocol);
                 bodyLength = B(header->getLength());
             }
-            else if ((first & 0xe0) == 0x20 && !(first & 0x10)) {
-                auto size = B(1 + ((first & 8) ? 2 : 1) + ((first & 4) ? 2 : 0));
+            else if ((first & 0xe0) == 0x20) {
+                auto size = B(1 + ((first & 0x10) ? 8 : 0) + ((first & 8) ? 2 : 1) + ((first & 4) ? 2 : 0));
+                auto front = packet->peekData();
+                if (auto sequence = dynamicPtrCast<const SequenceChunk>(front))
+                    front = sequence->getChunks().front();
+                // Retained outgoing headers also describe a peer's different
+                // CID length. Raw incoming bytes use the local eight-byte profile.
+                if (auto native = dynamicPtrCast<const DtlsCiphertextHeader>(front))
+                    size = B(native->getChunkLength());
                 if (packet->getDataLength() < size)
                     throw cRuntimeError("Truncated DTLS unified header");
                 auto header = packet->popAtFront<DtlsCiphertextHeader>(size);

@@ -345,7 +345,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
         throw cRuntimeError("DTLS handshake message has no active flight");
     auto size = body->getChunkLength().get<B>();
     auto udpLimit = engine.par("udpPayloadLimit").intValue();
-    int overhead = epoch == 0 ? 25 : 34;
+    int overhead = epoch == 0 ? 25 : 12 + recordOverhead();
     if (udpLimit <= overhead || size <= 0 || size > 0xffffff)
         throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
     size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
@@ -872,6 +872,11 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     }
     if (earlyOffered && !retried)
         appendExtension(extensions, 42, {});
+    if (cidOffered) {
+        std::vector<uint8_t> cid = {uint8_t(localCid.size())};
+        cid.insert(cid.end(), localCid.begin(), localCid.end());
+        appendExtension(extensions, 54, cid);
+    }
     if (profile == "psk" || offeredSession) {
         appendExtension(extensions, 45, {1, Parameters::PSK_DHE_KE});
         std::string identity = owner.par("identity").stringValue();
@@ -940,13 +945,14 @@ void DtlsAssociation::sendServerFlight()
     };
     auto hashBytes = tls::TlsHandshakeParameters::findCipherSuite(selection.cipherSuite)->hashBytes;
     auto shareBytes = tls::TlsHandshakeParameters::keyShareBytes(selection.group);
-    size_t flightBytes = wireSize(40 + 14 + shareBytes + (useCertificate ? 0 : 6), 25) + wireSize(earlyAccepted ? 6 : 2, 34) + wireSize(hashBytes, 34);
+    int protectedOverhead = 12 + recordOverhead();
+    size_t flightBytes = wireSize(40 + 14 + shareBytes + (useCertificate ? 0 : 6) + (cidNegotiated ? 5 + localCid.size() : 0), 25) + wireSize(earlyAccepted ? 6 : 2, protectedOverhead) + wireSize(hashBytes, protectedOverhead);
     if (useCertificate) {
         certificate = owner.makeCertificate();
         verify = owner.makeCertificateVerify(selection.signature);
-        flightBytes += wireSize(certificate->getChunkLength().get<B>(), 34) + wireSize(verify->getChunkLength().get<B>(), 34);
+        flightBytes += wireSize(certificate->getChunkLength().get<B>(), protectedOverhead) + wireSize(verify->getChunkLength().get<B>(), protectedOverhead);
         if (clientAuth)
-            flightBytes += wireSize(9 + 2 * owner.preferences.signatures.size(), 34);
+            flightBytes += wireSize(9 + 2 * owner.preferences.signatures.size(), protectedOverhead);
     }
     if (!addressValidated) {
         auto credit = receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : receivedBytes * 3;
@@ -970,6 +976,11 @@ void DtlsAssociation::sendServerFlight()
     appendExtension(extensions, 51, share);
     if (!useCertificate)
         appendExtension(extensions, 41, {uint8_t(this->selection.selectedPsk >> 8), uint8_t(this->selection.selectedPsk)});
+    if (cidNegotiated) {
+        std::vector<uint8_t> cid = {uint8_t(localCid.size())};
+        cid.insert(cid.end(), localCid.begin(), localCid.end());
+        appendExtension(extensions, 54, cid);
+    }
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
@@ -1076,6 +1087,8 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         isRetry &= hello->getRandom(i) == HELLO_RETRY_RANDOM[i];
     bool version = false, share = false, psk = false, pskPresent = false, requestedShare = false;
     uint16_t selectedGroup = 0;
+    bool connectionIdPresent = false;
+    std::vector<uint8_t> connectionId;
     std::vector<uint8_t> cookie;
     std::set<uint16_t> seen;
     size_t pos = 0;
@@ -1125,6 +1138,19 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
                 share = Parameters::keyShareBytes(selectedGroup) && length == 4 + Parameters::keyShareBytes(selectedGroup) &&
                     (selectedGroup != Parameters::SECP256R1 || hello->getExtensions(pos + 4) == 4);
             }
+        }
+        else if (type == 54 && !isRetry) {
+            if (!cidOffered) {
+                owner.failAssociation(handle, "unoffered connection ID", 110);
+                return;
+            }
+            if (length == 0 || hello->getExtensions(pos) != length - 1) {
+                owner.failAssociation(handle, "malformed connection ID", 50);
+                return;
+            }
+            connectionIdPresent = true;
+            for (size_t i = pos + 1; i < pos + length; ++i)
+                connectionId.push_back(hello->getExtensions(i));
         }
         else if (type == 41 && !isRetry) {
             pskPresent = true;
@@ -1189,6 +1215,10 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         return;
     }
     this->selection = selection;
+    cidNegotiated = connectionIdPresent;
+    peerCid = std::move(connectionId);
+    if (!cidNegotiated)
+        owner.removeConnectionIds(handle);
     if (pskPresent && (suite->hashBytes != selectedHash || selection.selectedPsk >= offer.binderLengths.size() || offer.binderLengths[selection.selectedPsk] != selectedHash)) {
         owner.failAssociation(handle, "selected PSK has an incompatible hash", 47);
         return;

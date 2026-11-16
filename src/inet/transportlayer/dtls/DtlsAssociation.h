@@ -23,6 +23,7 @@ namespace inet::dtls {
 class Dtls;
 class DtlsClientHello;
 class DtlsAck;
+class DtlsCiphertextHeader;
 
 /** Per-peer handshake, record and application state owned by one DTLS engine. */
 class INET_API DtlsAssociation
@@ -77,6 +78,12 @@ class INET_API DtlsAssociation
     HandshakeState state = HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     tls::TlsHandshakeParameters::Offer offer;
     tls::TlsHandshakeParameters::Selection selection;
+    bool cidOffered = false;
+    bool cidNegotiated = false;
+    std::vector<uint8_t> localCid;
+    std::vector<uint8_t> peerCid;
+    size_t recordOverhead() const { return 22 + (cidNegotiated ? peerCid.size() : 0); }
+    Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length) const;
     std::optional<DtlsSessionStore::Entry> offeredSession;
     bool earlyRequested = false;
     bool earlyOffered = false;

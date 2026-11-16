@@ -111,6 +111,7 @@ void Dtls::handleStartOperation(LifecycleOperation *)
 void Dtls::handleStopOperation(LifecycleOperation *)
 {
     sessions.clear();
+    cidIndex.clear();
     listener = nullptr;
     if (inputProcessing)
         inputProcessing->clear();
@@ -209,6 +210,7 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
         throw cRuntimeError("Invalid DTLS reassembly limit");
     auto association = std::make_unique<Association>(*this, reassemblyLimit);
     association->id = nextAssociationId++;
+    association->cidOffered = par("connectionIdEnabled").boolValue();
     association->startedAt = simTime();
     association->callback = callback;
     association->peerAddress = peerAddress;
@@ -234,6 +236,11 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
         throw cRuntimeError("Invalid DTLS replay window size");
     association->receiveEpoch2 = std::make_unique<DtlsRecordState>(replayWindow);
     association->receiveEpoch3 = std::make_unique<DtlsRecordState>(replayWindow);
+    if (association->cidOffered && par("receiveConnectionId").boolValue()) {
+        association->localCid = allocateConnectionId(association->id);
+        if (association->localCid.empty())
+            return 0;
+    }
     association->handshakeDeadline = std::make_unique<cMessage>("dtlsHandshakeDeadline");
     auto id = association->id;
     scheduleAt(simTime() + timeout, association->handshakeDeadline.get());
@@ -247,6 +254,7 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
             cancelEvent(it->second->handshakeDeadline.get());
             it->second->cancelTimers();
             associations.erase(it);
+            removeConnectionIds(id);
         }
         throw;
     }
@@ -340,7 +348,8 @@ void Dtls::removePrevalidation(uint64_t id)
         emitReassemblyBytes();
 }
 
-void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence, uint64_t epoch)
+void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence, uint64_t epoch,
+                     const std::vector<uint8_t>& cid)
 {
     auto alert = makeShared<DtlsAlert>();
     alert->setLevel(2);
@@ -352,6 +361,10 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
         header->setEpochBits(epoch & 3);
         header->setSequenceNumber(sequence & 0xffff);
         header->setLength((*packet)->getDataLength().get<B>());
+        header->setConnectionIdArraySize(cid.size());
+        for (size_t i = 0; i < cid.size(); ++i)
+            header->setConnectionId(i, cid[i]);
+        header->setChunkLength(B(5 + cid.size()));
         (*packet)->insertAtFront(header);
     }
     else {
@@ -364,10 +377,11 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
     if (!localAddress.isUnspecified())
         (*packet)->addTagIfAbsent<L3AddressReq>()->setSrcAddress(localAddress);
     auto delay = encrypted ? SimTime(par("protectOutDelay").doubleValue()) : SIMTIME_ZERO;
-    if (!enqueueProcessing(outputProcessing.get(), 0, (*packet)->getByteLength(), delay, [this, peerAddress, peerPort, packet, encrypted]() {
+    auto overhead = 22 + cid.size();
+    if (!enqueueProcessing(outputProcessing.get(), 0, (*packet)->getByteLength(), delay, [this, peerAddress, peerPort, packet, encrypted, overhead]() {
         auto outgoing = packet->release();
         if (encrypted)
-            emit(recordOverheadSignal, 22L);
+            emit(recordOverheadSignal, (long)overhead);
         emit(packetSentToLowerSignal, outgoing);
         udpSocket.sendTo(outgoing, peerAddress, peerPort);
     }))
@@ -381,6 +395,7 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
         return;
     auto association = std::move(it->second);
     associations.erase(it);
+    removeConnectionIds(id);
     auto hadReassembly = association->getReassemblyBytes() != 0;
     association->cancelTimers();
     cancelEvent(association->handshakeDeadline.get());
@@ -392,7 +407,7 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
         emitReassemblyBytes();
     if (alertDescription >= 0) {
         bool encrypted = association->state != HandshakeState::CLIENT_WAIT_SERVER_HELLO;
-        size_t alertBytes = encrypted ? 24 : 15;
+        size_t alertBytes = encrypted ? 2 + association->recordOverhead() : 15;
         auto credit = association->receivedBytes > std::numeric_limits<size_t>::max() / 3 ? std::numeric_limits<size_t>::max() : association->receivedBytes * 3;
         bool permitted = !association->serverSide || association->addressValidated ||
             (association->sentBytes <= credit && alertBytes <= credit - association->sentBytes);
@@ -402,7 +417,8 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
         if (encrypted && epoch == 2 && available)
             number = association->nextEpoch2Record++;
         if (permitted && available)
-            sendAlert(association->localAddress, association->peerAddress, association->peerPort, alertDescription, encrypted, number, epoch);
+            sendAlert(association->localAddress, association->peerAddress, association->peerPort, alertDescription, encrypted, number, epoch,
+                      association->cidNegotiated ? association->peerCid : std::vector<uint8_t>{});
     }
     auto callback = association->callback;
     if (association->earlyRequested && !association->earlyStatusReported)
@@ -716,7 +732,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         return;
     bool isPostHandshake = it->second->findPostHandshakeExchange(flight) != nullptr;
     auto fragment = flight->get(index);
-    size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 34);
+    size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 12 + it->second->recordOverhead());
     size_t reservedCredit = it->second->serverSide && !isPostHandshake ? bytes : 0;
     if (it->second->serverSide && !isPostHandshake && fragment.transmissions != 0) {
         if (!it->second->addressValidated) {
@@ -788,12 +804,9 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         }
         else {
             DtlsRecordProtection::protect(packet, 22);
-            auto header = makeShared<DtlsCiphertextHeader>();
-            header->setEpochBits(fragment.epoch & 3);
-            header->setSequenceNumber(recordNumber & 0xffff);
-            header->setLength(packet->getDataLength().get<B>());
+            auto header = current->second->makeRecordHeader(fragment.epoch, recordNumber, packet->getDataLength().get<B>());
             packet->insertAtFront(header);
-            emit(recordOverheadSignal, 22L);
+            emit(recordOverheadSignal, (long)current->second->recordOverhead());
         }
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!current->second->localAddress.isUnspecified())
@@ -915,7 +928,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto callback = it->second->callback;
     auto packetId = packet->getId();
     auto bytes = packet->getDataLength();
-    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(22) > B(par("udpPayloadLimit").intValue()) ||
+    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue()) ||
         it->second->closing) {
         delete packet;
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
@@ -957,7 +970,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             !current->second->requestUpdate(false) && containsAssociation(id))
             failAssociation(id, "DTLS automatic KeyUpdate could not start");
     };
-    if (!enqueueProcessing(outputProcessing.get(), id, size_t(bytes.get<B>()) + 22, delay, [this, id, packetId, retained, delay]() {
+    if (!enqueueProcessing(outputProcessing.get(), id, size_t(bytes.get<B>()) + it->second->recordOverhead(), delay, [this, id, packetId, retained, delay]() {
         auto current = associations.find(id);
         if (current != associations.end()) {
             if (current->second->keyUpdate().flight || current->second->peerResponseDue) {
@@ -974,10 +987,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             current->second->processingPacketIds.erase(packetId);
             auto packet = retained->get();
             DtlsRecordProtection::protect(packet, 23);
-            auto header = makeShared<DtlsCiphertextHeader>();
-            header->setEpochBits(current->second->sendEpoch & 3);
-            header->setSequenceNumber(number & 0xffff);
-            header->setLength(packet->getDataLength().get<B>());
+            auto header = current->second->makeRecordHeader(current->second->sendEpoch, number, packet->getDataLength().get<B>());
             packet->insertAtFront(header);
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
             if (!current->second->localAddress.isUnspecified())
@@ -985,7 +995,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
             auto peer = current->second->peerAddress;
             auto port = current->second->peerPort;
             auto outgoing = retained->release();
-            emit(recordOverheadSignal, 22L);
+            emit(recordOverheadSignal, (long)current->second->recordOverhead());
             emit(packetSentSignal, outgoing);
             emit(packetSentToLowerSignal, outgoing);
             udpSocket.sendTo(outgoing, peer, port);
@@ -1097,7 +1107,10 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
 {
     // RFC 9147 Sections 7 and 7.1 identify acknowledged records by epoch and sequence number.
     auto udpLimit = par("udpPayloadLimit").intValue();
-    int overhead = sendEpoch == 0 ? 13 : 22;
+    auto association = associations.find(id);
+    if (association == associations.end())
+        return;
+    int overhead = sendEpoch == 0 ? 13 : association->second->recordOverhead();
     if (udpLimit < overhead + 18) {
         failAssociation(id, "DTLS UDP payload limit cannot carry an ACK");
         return;
@@ -1165,12 +1178,9 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
             }
             else {
                 DtlsRecordProtection::protect(packet, 26);
-                auto header = makeShared<DtlsCiphertextHeader>();
-                header->setEpochBits(actualEpoch & 3);
-                header->setSequenceNumber(number & 0xffff);
-                header->setLength(packet->getDataLength().get<B>());
+                auto header = it->second->makeRecordHeader(actualEpoch, number, packet->getDataLength().get<B>());
                 packet->insertAtFront(header);
-                emit(recordOverheadSignal, 22L);
+                emit(recordOverheadSignal, (long)it->second->recordOverhead());
             }
             packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
             if (!localAddress.isUnspecified())
@@ -1780,6 +1790,18 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
             association->callback = listener;
         }
         association->handshakeDeadline = std::make_unique<cMessage>("dtlsHandshakeDeadline");
+        association->cidOffered = offer.hasConnectionId && par("connectionIdEnabled").boolValue();
+        association->cidNegotiated = association->cidOffered;
+        if (association->cidNegotiated) {
+            association->peerCid = offer.connectionId;
+            if (par("receiveConnectionId").boolValue()) {
+                association->localCid = allocateConnectionId(association->id);
+                if (association->localCid.empty()) {
+                    emit(recordDroppedSignal, (long)RESOURCE_LIMIT);
+                    return;
+                }
+            }
+        }
         auto id = association->id;
         scheduleAt(deadline, association->handshakeDeadline.get());
         associations.emplace(id, std::move(association));
@@ -2150,7 +2172,7 @@ void Dtls::beginClose(AssociationId id)
     }
     scheduleAt(simTime() + timeout, it->second->closeDeadline.get());
     auto delay = processingDelay(id, "protectOutDelay");
-    if (!enqueueProcessing(outputProcessing.get(), id, 24, delay, [this, id]() {
+    if (!enqueueProcessing(outputProcessing.get(), id, 2 + it->second->recordOverhead(), delay, [this, id]() {
         auto current = associations.find(id);
         if (current == associations.end() || !current->second->closing)
             return;
@@ -2164,10 +2186,7 @@ void Dtls::beginClose(AssociationId id)
         alert->setDescription(0);
         auto packet = new Packet("DTLS close_notify", alert);
         DtlsRecordProtection::protect(packet, 21);
-        auto header = makeShared<DtlsCiphertextHeader>();
-        header->setEpochBits(current->second->sendEpoch & 3);
-        header->setSequenceNumber(number & 0xffff);
-        header->setLength(packet->getDataLength().get<B>());
+        auto header = current->second->makeRecordHeader(current->second->sendEpoch, number, packet->getDataLength().get<B>());
         packet->insertAtFront(header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!current->second->localAddress.isUnspecified())
@@ -2192,6 +2211,7 @@ void Dtls::finishClose(AssociationId id, bool forced)
     cancelEvent(association->handshakeDeadline.get());
     association->cancelTimers();
     associations.erase(it);
+    removeConnectionIds(id);
     if (inputProcessing)
         inputProcessing->cancel(id);
     if (outputProcessing)
@@ -2246,6 +2266,7 @@ void Dtls::discardAll(const char *reason, bool notify)
     }
     auto old = std::move(associations);
     associations.clear();
+    cidIndex.clear();
     if (notify && hadReassembly)
         emitReassemblyBytes();
     if (notify) {
@@ -2293,6 +2314,7 @@ void Dtls::parseDatagram(Packet *packet)
     int peerPort = portTag ? portTag->getSrcPort() : -1;
     size_t datagramBytes = packet->getByteLength();
     auto creditCounted = std::make_shared<bool>(false);
+    AssociationId datagramAssociation = 0;
     while (packet->getDataLength() > b(0)) {
         try {
             auto first = packet->peekAtFront<BytesChunk>(B(1))->getByte(0);
@@ -2520,8 +2542,8 @@ void Dtls::parseDatagram(Packet *packet)
                     }
                 }
             }
-            else if ((first & 0xe0) == 0x20 && !(first & 0x10)) {
-                size_t headerLength = 1 + ((first & 8) ? 2 : 1) + ((first & 4) ? 2 : 0);
+            else if ((first & 0xe0) == 0x20) {
+                size_t headerLength = 1 + ((first & 0x10) ? 8 : 0) + ((first & 8) ? 2 : 1) + ((first & 4) ? 2 : 0);
                 if (packet->getDataLength() < B(headerLength)) {
                     emit(recordDroppedSignal, (long)MALFORMED_RECORD);
                     return;
@@ -2539,7 +2561,25 @@ void Dtls::parseDatagram(Packet *packet)
                     continue;
                 }
                 auto match = associations.end();
-                for (auto it = associations.begin(); it != associations.end(); ++it) {
+                if (first & 0x10) {
+                    std::vector<uint8_t> cid;
+                    for (size_t i = 0; i < header->getConnectionIdArraySize(); ++i)
+                        cid.push_back(header->getConnectionId(i));
+                    auto indexed = cidIndex.find(cid);
+                    if (indexed != cidIndex.end())
+                        match = associations.find(indexed->second);
+                    if (match == associations.end() || !match->second->cidNegotiated || match->second->localCid.empty()) {
+                        emit(recordDroppedSignal, (long)UNKNOWN_CID);
+                        return;
+                    }
+                    if (match->second->peerAddress != peerAddress || match->second->peerPort != peerPort ||
+                        (!match->second->localAddress.isUnspecified() && match->second->localAddress != localAddress) ||
+                        (match->second->localPort >= 0 && match->second->localPort != localPort)) {
+                        emit(recordDroppedSignal, (long)UNSUPPORTED_PATH);
+                        return;
+                    }
+                }
+                else for (auto it = associations.begin(); it != associations.end(); ++it) {
                     if (it->second->peerAddress == peerAddress && it->second->peerPort == peerPort &&
                         (it->second->localAddress.isUnspecified() || it->second->localAddress == localAddress) &&
                         (it->second->localPort < 0 || it->second->localPort == localPort)) {
@@ -2549,6 +2589,19 @@ void Dtls::parseDatagram(Packet *packet)
                             (header->getEpochBits() == 3 && it->second->state == HandshakeState::ESTABLISHED))
                             break;
                     }
+                }
+                if (match != associations.end()) {
+                    // Epoch 1 may precede the current ServerHello and therefore its CID negotiation.
+                    bool unnegotiatedEarly = header->getEpochBits() == 1 && match->second->receiveEarly && !match->second->peerFinishedProcessed;
+                    if (!(first & 0x10) && !unnegotiatedEarly && match->second->cidNegotiated && !match->second->localCid.empty()) {
+                        emit(recordDroppedSignal, (long)UNKNOWN_CID);
+                        return;
+                    }
+                    if (datagramAssociation != 0 && datagramAssociation != match->first) {
+                        emit(recordDroppedSignal, (long)MALFORMED_RECORD);
+                        return;
+                    }
+                    datagramAssociation = match->first;
                 }
                 if (length > b(0)) {
                     auto bodyOffset = packet->getFrontOffset();

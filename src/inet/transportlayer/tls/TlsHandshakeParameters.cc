@@ -190,6 +190,12 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
             while (pos < end)
                 result.pskModes.push_back(bytes[pos++]);
         }
+        else if (type == 54) {
+            if (length == 0 || bytes[pos] != length - 1)
+                return "invalid connection_id extension";
+            result.hasConnectionId = true;
+            result.connectionId.assign(bytes.begin() + pos + 1, bytes.begin() + end);
+        }
         else if (type == 42) {
             if (length != 0)
                 return "invalid early_data offer";

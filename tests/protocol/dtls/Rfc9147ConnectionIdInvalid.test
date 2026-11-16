@@ -1,0 +1,87 @@
+%description:
+Two clients share a CID-enabled server. Unknown, another peer's colliding CID,
+missing CID and inconsistent header encoding must not deliver or consume replay
+state. Both valid associations subsequently deliver through the shared engine.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<uint8_t> otherCid;
+static std::map<int, uint16_t> rejectedNumbers;
+return ProtocolTest("rfc9147_connection_id_invalid")
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.destPort == 4436").filterPacket([](const Packet *p) {
+        auto h = findChunk<inet::tls::TlsServerHello>(p); return h && hasHelloExtension(*h, 54);
+    }).nth(1).mutate([](Packet *p) {
+        auto h = findChunk<inet::tls::TlsServerHello>(p);
+        for (size_t i = 0; i + 4 <= h->getExtensionsArraySize();) {
+            unsigned type = (h->getExtensions(i) << 8) | h->getExtensions(i + 1);
+            unsigned size = (h->getExtensions(i + 2) << 8) | h->getExtensions(i + 3);
+            if (type == 54) for (size_t j = i + 5; j < i + 4 + size; ++j) otherCid.push_back(h->getExtensions(j));
+            i += 4 + size;
+        }
+    }))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(otherCid.size() == 8, "capture the second client's actual server receive CID"); app.sendMarker(61);
+    }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { rejectedNumbers[64] = h.getSequenceNumber(); h.setConnectionId(0, h.getConnectionId(0) ^ 0x80); }), "unknown CID targets a real record");
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(6).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(62); }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { rejectedNumbers[65] = h.getSequenceNumber(); for (size_t i = 0; i < 8; ++i) h.setConnectionId(i, otherCid[i]); }), "colliding CID targets a real record");
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(5).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(63); }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { rejectedNumbers[67] = h.getSequenceNumber(); h.setConnectionIdArraySize(0); h.setChunkLength(B(5)); }), "remove the negotiated CID");
+        mutateHeader<UdpHeader>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() - B(8)); });
+        mutateHeader<Ipv4Header>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() - B(8)); });
+        resizeTapEnvelope(p, -8);
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(6).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(66); }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { rejectedNumbers[68] = h.getSequenceNumber(); h.setConnectionIdArraySize(7); }); // inconsistent native length
+    }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(1).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(64); app.sendMarker(67); app.sendMarker(68); })
+        .run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.sendMarker(65); }))
+    .meanwhile(tap("tap").from("host1").filterPacket(packetApplication).mutate([](Packet *p) {
+        auto marker = findChunk<BytesChunk>(p)->getByte(0);
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [=](auto& h) { h.setSequenceNumber(rejectedNumbers.at(marker)); });
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers.size() == 4 && std::set<int>(app.receivedMarkers.begin(), app.receivedMarkers.end()) == std::set<int>({64,65,67,68}) && app.errorCount == 0, "reusing every rejected number proves both peers retain unpoisoned replay windows");
+    }));
+}
+%activity:
+EV << "invalid CID input compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[1].localPort = 4436
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_connection_id_invalid: PASS

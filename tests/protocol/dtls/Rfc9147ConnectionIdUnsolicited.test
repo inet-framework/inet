@@ -1,0 +1,55 @@
+%description:
+An unsolicited connection_id in the real plaintext ServerHello elicits
+unsupported_extension (110); the client must not establish or retain its handle.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_connection_id_unsolicited")
+    .intercept(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 2); }).nth(1).mutate([](Packet *p) {
+        mutateNestedHeader<inet::tls::TlsServerHello>(p, [](auto& h) {
+            size_t before = h.getExtensionsArraySize();
+            const std::vector<uint8_t> extension = {0,54,0,9,8,0,0,0,0,0,0,0,1};
+            h.setExtensionsArraySize(before + extension.size());
+            for (size_t i = 0; i < extension.size(); ++i) h.setExtensions(before + i, extension[i]);
+            h.setChunkLength(h.getChunkLength() + B(13));
+        });
+        mutateHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setMessageLength(h.getMessageLength() + 13); h.setFragmentLength(h.getFragmentLength() + 13); });
+        mutateHeader<inet::dtls::DtlsPlaintextHeader>(p, [](auto& h) { h.setLength(h.getLength() + 13); });
+        mutateHeader<UdpHeader>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(13)); });
+        mutateHeader<Ipv4Header>(p, [](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(13)); });
+        resizeTapEnvelope(p, 13);
+    }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto alert = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return alert && alert->getDescription() == 110;
+    }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0 && app.errorCount == 1, "an unoffered CID cannot establish an association");
+    }));
+}
+%activity:
+EV << "unsolicited CID compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host2.app[*].dtls.cookieRequired = false
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_connection_id_unsolicited: PASS

@@ -10,10 +10,24 @@ DTLS record headers round-trip and malformed handshake fragment rejection.
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 #include "inet/transportlayer/dtls/DtlsRecordProtection.h"
 #include "inet/transportlayer/dtls/DtlsRecordState.h"
+#include "inet/transportlayer/dtls/DtlsProtocolDissector.h"
 #include "inet/transportlayer/tls/TlsHandshakeParameters.h"
 
 using namespace inet;
 using namespace inet::dtls;
+class CidDissectionObserver : public ProtocolDissector::ICallback {
+  public:
+    bool incorrect = false;
+    int headers = 0;
+    size_t cidLength = 0;
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override { incorrect = true; }
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *) override {
+        if (auto header = dynamicPtrCast<const DtlsCiphertextHeader>(chunk)) { ++headers; cidLength = header->getConnectionIdArraySize(); }
+    }
+    void dissectPacket(Packet *, const Protocol *) override { throw cRuntimeError("Unexpected nested CID dissection"); }
+};
 
 %activity:
 auto header = makeShared<DtlsCiphertextHeader>();
@@ -143,6 +157,49 @@ auto excessiveOriginal = excessiveRecord.peekData();
 ASSERT(!DtlsRecordProtection::unprotect(&excessiveRecord, contentType));
 ASSERT(excessiveRecord.peekData() == excessiveOriginal);
 EV << "DTLS record serialization PASS\n";
+auto cidHeader = makeShared<DtlsCiphertextHeader>();
+cidHeader->setEpochBits(2);
+cidHeader->setSequenceNumber(0x1234);
+cidHeader->setLength(3);
+cidHeader->setConnectionIdArraySize(8);
+for (size_t i = 0; i < 8; ++i) cidHeader->setConnectionId(i, i);
+cidHeader->setChunkLength(B(13));
+Packet cidPacket("CID header", cidHeader);
+auto cidBytes = cidPacket.peekDataAsBytes()->getBytes();
+ASSERT(cidBytes == std::vector<uint8_t>({0x3e,0,1,2,3,4,5,6,7,0x12,0x34,0,3}));
+Packet cidInput("CID input", makeShared<BytesChunk>(cidBytes));
+auto decodedCid = cidInput.popAtFront<DtlsCiphertextHeader>(B(13));
+ASSERT(decodedCid->getConnectionIdArraySize() == 8 && decodedCid->getConnectionId(7) == 7 && decodedCid->getSequenceNumber() == 0x1234);
+for (size_t size = 0; size < cidBytes.size(); ++size) {
+    Packet shortCid("short CID", makeShared<BytesChunk>(std::vector<uint8_t>(cidBytes.begin(), cidBytes.begin() + size)));
+    bool rejected = false;
+    try { shortCid.popAtFront<DtlsCiphertextHeader>(B(size)); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+auto peerCidHeader = makeShared<DtlsCiphertextHeader>();
+peerCidHeader->setConnectionIdArraySize(3);
+peerCidHeader->setConnectionId(0, 0xa1); peerCidHeader->setConnectionId(1, 0xa2); peerCidHeader->setConnectionId(2, 0xa3);
+peerCidHeader->setChunkLength(B(8));
+Packet peerCidPacket("other peer CID length", peerCidHeader);
+ASSERT(peerCidPacket.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0x3c,0xa1,0xa2,0xa3,0,0,0,0}));
+CidDissectionObserver nativeObserver;
+DtlsProtocolDissector().dissect(&peerCidPacket, nullptr, nativeObserver);
+ASSERT(!nativeObserver.incorrect && nativeObserver.headers == 1 && nativeObserver.cidLength == 3);
+auto rawCidRecord = cidBytes;
+rawCidRecord.insert(rawCidRecord.end(), {1,2,3});
+Packet rawCidPacket("raw CID framing", makeShared<BytesChunk>(rawCidRecord));
+CidDissectionObserver rawObserver;
+DtlsProtocolDissector().dissect(&rawCidPacket, nullptr, rawObserver);
+ASSERT(!rawObserver.incorrect && rawObserver.headers == 1 && rawObserver.cidLength == 8);
+auto excessiveCidHeader = makeShared<DtlsCiphertextHeader>();
+excessiveCidHeader->setConnectionIdArraySize(256);
+excessiveCidHeader->setChunkLength(B(261));
+Packet excessiveCid("excessive CID", excessiveCidHeader);
+bool excessiveCidRejected = false;
+try { excessiveCid.peekDataAsBytes(); }
+catch (const cRuntimeError&) { excessiveCidRejected = true; }
+ASSERT(excessiveCidRejected);
 for (uint16_t code : {0x1301, 0x1302, 0x1303}) {
     auto suite = tls::TlsHandshakeParameters::findCipherSuite(code);
     ASSERT(suite && suite->tagBytes == DtlsRecordProtection::TAG_BYTES);

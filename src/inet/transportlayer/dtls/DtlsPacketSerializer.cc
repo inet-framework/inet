@@ -38,7 +38,11 @@ void DtlsPacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<cons
         auto sequenceLength = h->getSequenceNumberLength();
         if (h->getEpochBits() > 3 || (sequenceLength != 1 && sequenceLength != 2) || (sequenceLength == 1 && h->getSequenceNumber() > 255))
             throw cRuntimeError("Invalid DTLS unified header fields");
-        s.writeUint8(0x20 | (sequenceLength == 2 ? 0x08 : 0) | (h->getLengthPresent() ? 0x04 : 0) | h->getEpochBits());
+        if (h->getConnectionIdArraySize() > 255)
+            throw cRuntimeError("DTLS connection ID exceeds 255 bytes");
+        s.writeUint8(0x20 | (h->getConnectionIdArraySize() ? 0x10 : 0) | (sequenceLength == 2 ? 0x08 : 0) | (h->getLengthPresent() ? 0x04 : 0) | h->getEpochBits());
+        for (size_t i = 0; i < h->getConnectionIdArraySize(); ++i)
+            s.writeUint8(h->getConnectionId(i));
         if (sequenceLength == 2)
             s.writeUint16Be(h->getSequenceNumber());
         else
@@ -101,12 +105,20 @@ const Ptr<Chunk> DtlsPacketSerializer::deserializeFields(MemoryInputStream& s, c
     if (typeInfo == typeid(DtlsCiphertextHeader)) {
         requireBytes(s, 1);
         auto first = s.readUint8();
-        if ((first & 0xe0) != 0x20 || (first & 0x10) != 0)
+        if ((first & 0xe0) != 0x20)
             throw cRuntimeError("Unsupported DTLS unified header");
         auto h = makeShared<DtlsCiphertextHeader>();
         h->setEpochBits(first & 3);
         h->setSequenceNumberLength((first & 8) ? 2 : 1);
         h->setLengthPresent(first & 4);
+        // This model's receive endpoints allocate fixed eight-byte CIDs.
+        // CID length is negotiated out of band and is not a record field.
+        if (first & 0x10) {
+            requireBytes(s, 8);
+            h->setConnectionIdArraySize(8);
+            for (size_t i = 0; i < 8; ++i)
+                h->setConnectionId(i, s.readUint8());
+        }
         requireBytes(s, h->getSequenceNumberLength() + (h->getLengthPresent() ? 2 : 0));
         h->setSequenceNumber(h->getSequenceNumberLength() == 2 ? s.readUint16Be() : s.readUint8());
         if (h->getLengthPresent())

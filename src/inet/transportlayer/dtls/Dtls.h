@@ -23,7 +23,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     friend class DtlsAssociation;
   protected:
     using ICallback = IDtls::ICallback;
-    enum DropReason { MALFORMED_RECORD = 1, UNKNOWN_EPOCH = 2, REPLAY = 3, RESOURCE_LIMIT = 4 };
+    enum DropReason { MALFORMED_RECORD = 1, UNKNOWN_EPOCH = 2, REPLAY = 3, RESOURCE_LIMIT = 4, UNSUPPORTED_PATH = 5, UNKNOWN_CID = 6 };
     using Association = DtlsAssociation;
     using HandshakeState = DtlsAssociation::HandshakeState;
     tls::TlsHandshakeParameters::Preferences preferences;
@@ -64,6 +64,10 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     AssociationId nextAssociationId = 1;
     DtlsSessionStore sessions;
     uint64_t nextTicketSerial = 1;
+    uint64_t nextConnectionId = 1;
+    std::map<std::vector<uint8_t>, AssociationId> cidIndex;
+    std::vector<uint8_t> allocateConnectionId(AssociationId id);
+    void removeConnectionIds(AssociationId id);
     std::unique_ptr<DtlsProcessingQueue> inputProcessing;
     std::unique_ptr<DtlsProcessingQueue> outputProcessing;
 
@@ -125,7 +129,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void finishClose(AssociationId id, bool forced);
     void beginClose(AssociationId id);
     void resumeApplications(AssociationId id);
-    void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2);
+    void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2,
+                   const std::vector<uint8_t>& cid = {});
     bool enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,
                            DtlsProcessingQueue::Eligibility eligible = {}, DtlsProcessingQueue::Completion skipped = {},
                            DtlsProcessingQueue::Completion started = {}, bool recordDelay = true);
