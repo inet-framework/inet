@@ -1,0 +1,235 @@
+%description:
+The separate error decisions of the header and the data with the IEEE 802.11
+radio, without a MAC, so that no backoff or retry changes the timing. The far
+sender sends one PSDU of 1500 bytes to the receiver at a high SNIR. The near
+sender starts to transmit during the last part of the data, during the header,
+or not at all. At the end of the reception, a listener prints the decision of
+the header, the data, and the whole signal, and the packet-level bit error of
+the received frame. At the end of the run, it prints the number of random draws
+of the receiver, which uses its own random number generator.
+
+With late interference, the header is successful, because the SNIR of its own
+time is high, and the data fails the SNIR threshold:
+
+Run 0: ERP-OFDM at 54 Mbps, NIST.
+Run 1: HT at 65 Mbps, NIST.
+Run 2: HR/DSSS at 11 Mbps, NIST.
+Run 3: ERP-OFDM at 54 Mbps, Yans.
+Run 4: ERP-OFDM at 54 Mbps, the BER table model.
+Run 5: ERP-OFDM at 54 Mbps, NIST, with the dimensional analog model.
+
+Run 6, ERP-OFDM without interference: all decisions are successful.
+Run 7, ERP-OFDM with interference from the header on: the header fails, and the
+data is not decided.
+
+%file: test.cc
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+
+namespace PartErrorDecisions_Ieee80211Radio_1 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Hands one PSDU of three chunks to the radio at the given time.
+class TestSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(par("startTime"), new cMessage("start")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto packet = new Packet(getParentModule()->getName());
+        for (int i = 0; i < 3; i++)
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(par("chunkLength").intValue()), i + 1));
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        send(packet, "out");
+        delete msg;
+    }
+};
+
+Define_Module(TestSource);
+
+// Deletes the received packets, and prints the decisions of the parts of each reception of the radio.
+class DecisionPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    using cListener::finish;
+
+    virtual void initialize() override { getModuleByPath("^.radio")->subscribe(receptionEndedSignal, this); }
+    virtual void handleMessage(cMessage *msg) override { delete msg; }
+
+    const char *getResult(const IReception *reception, IRadioSignal::SignalPart part)
+    {
+        auto radio = reception->getReceiverRadio();
+        auto medium = radio->getMedium();
+        auto transmission = reception->getTransmission();
+        auto decision = medium->getReceptionDecision(radio, medium->getListening(radio, transmission), transmission, part);
+        return decision->isReceptionSuccessful() ? "successful" : "not successful";
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto reception = check_and_cast<const IReception *>(object);
+        auto packet = check_and_cast<Packet *>(details);
+        std::cout << par("label").stdstringValue() << ": " << reception->getTransmission()->getPacket()->getName() << ": header " << getResult(reception, IRadioSignal::SIGNAL_PART_HEADER)
+                  << ", data " << getResult(reception, IRadioSignal::SIGNAL_PART_DATA) << ", whole " << getResult(reception, IRadioSignal::SIGNAL_PART_WHOLE)
+                  << ", " << (packet->hasBitError() ? "bit error" : "no bit error") << std::endl;
+    }
+
+    virtual void finish() override
+    {
+        std::cout << par("label").stdstringValue() << ": receiver draws " << getModuleByPath("^.radio.receiver")->getRNG(0)->getNumbersDrawn() << std::endl;
+    }
+};
+
+Define_Module(DecisionPrinter);
+
+} // namespace PartErrorDecisions_Ieee80211Radio_1
+
+%file: test.ned
+
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+
+simple TestSource
+{
+    @class(TestSource);
+    double startTime @unit(s);
+    int chunkLength @unit(B);
+    gates:
+        output out;
+}
+
+simple DecisionPrinter
+{
+    @class(DecisionPrinter);
+    string label;
+    gates:
+        input in;
+}
+
+module SenderNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: <> like IRadio;
+        source: TestSource;
+    connections allowunconnected:
+        source.out --> radio.upperLayerIn;
+}
+
+module ReceiverNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: <> like IRadio;
+        printer: DecisionPrinter;
+    connections allowunconnected:
+        radio.upperLayerOut --> printer.in;
+}
+
+network Test
+{
+    submodules:
+        radioMedium: <> like IRadioMedium;
+        far: SenderNode;
+        near: SenderNode;
+        receiver: ReceiverNode;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 10ms
+ned-path = .;../../../../src
+num-rngs = 2
+*.receiver.radio.receiver.rng-0 = 1
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.far.mobility.initialX = 480m
+*.near.mobility.initialX = 502m
+*.receiver.mobility.initialX = 500m
+
+# the variants of the runs
+*.radioMedium.typename = ${medium="Ieee80211ScalarRadioMedium", "Ieee80211ScalarRadioMedium", "Ieee80211ScalarRadioMedium", "Ieee80211ScalarRadioMedium", "Ieee80211ScalarRadioMedium", "Ieee80211DimensionalRadioMedium", "Ieee80211ScalarRadioMedium", "Ieee80211ScalarRadioMedium" ! run}
+**.radio.typename = ${radio="Ieee80211ScalarRadio", "Ieee80211ScalarRadio", "Ieee80211ScalarRadio", "Ieee80211ScalarRadio", "Ieee80211ScalarRadio", "Ieee80211DimensionalRadio", "Ieee80211ScalarRadio", "Ieee80211ScalarRadio" ! run}
+**.radio.opMode = ${opMode="g(mixed)", "n(mixed-2.4Ghz)", "b", "g(mixed)", "g(mixed)", "g(mixed)", "g(mixed)", "g(mixed)" ! run}
+**.radio.transmitter.bitrate = ${bitrate=54Mbps, 65Mbps, 11Mbps, 54Mbps, 54Mbps, 54Mbps, 54Mbps, 54Mbps ! run}
+**.radio.receiver.errorModel.typename = ${model="Ieee80211NistErrorModel", "Ieee80211NistErrorModel", "Ieee80211NistErrorModel", "Ieee80211YansErrorModel", "Ieee80211BerTableErrorModel", "Ieee80211NistErrorModel", "Ieee80211NistErrorModel", "Ieee80211NistErrorModel" ! run}
+*.near.source.startTime = ${interference=185us, 190us, 1000us, 185us, 185us, 185us, 1s, 17us ! run}
+**.radio.receiver.errorModel.berTableFile = "../../../statistical/files/per_table_80211g_Trivellato.dat"
+**.radio.receiver.errorModel.opMode = "g(mixed)"
+*.receiver.printer.label = "run ${run=0..7}"
+
+*.radioMedium.backgroundNoise.power = -110dBm
+**.radio.antenna.mobilityModule = "^.^.mobility"
+**.radio.bandName = "2.4 GHz"
+**.radio.channelNumber = 0
+**.radio.transmitter.power = 100mW
+*.far.radio.initialRadioMode = "transmitter"
+*.near.radio.initialRadioMode = "transmitter"
+*.receiver.radio.initialRadioMode = "receiver"
+*.far.source.startTime = 0s
+**.source.chunkLength = 500B
+
+%extraargs: -r 0..7
+
+%contains: stdout
+run 0: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 0: receiver draws 0
+%contains: stdout
+run 1: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 1: receiver draws 0
+%contains: stdout
+run 2: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 2: receiver draws 0
+%contains: stdout
+run 3: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 3: receiver draws 0
+%contains: stdout
+run 4: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 4: receiver draws 0
+%contains: stdout
+run 5: far: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 5: receiver draws 0
+%contains: stdout
+run 6: far: header successful, data successful, whole successful, no bit error
+%contains: stdout
+run 6: receiver draws 0
+%contains: stdout
+run 7: far: header not successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 7: receiver draws 0
+
+%not-contains: stdout
+it doesn't own
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

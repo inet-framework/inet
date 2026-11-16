@@ -23,8 +23,10 @@ class INET_API ApskErrorModel : public ErrorModelBase
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    using ErrorModelBase::computePacketErrorRate;
 
     virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override;
 
     virtual double computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
 };
