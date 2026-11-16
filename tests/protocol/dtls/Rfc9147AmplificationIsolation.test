@@ -1,0 +1,56 @@
+%description:
+
+DTLS production-path variant AmplificationIsolation: explicit C3 bounded-resource requirement.
+A certificate offer padded at the tap supplies ample credit to the selected later peer.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_amplification_isolation")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").fromNth(2).drop())
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4436").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { padCertificateOffer(p, 500); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host1.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0, "first peer remains credit-blocked"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+            require(app.establishedCount == 1, "credit-blocked peer does not occupy shared output processor");
+            require(app.establishedHandles.size() == 1, "only padded peer establishes");
+            bool correlated = false;
+            for (const auto& endpoint : app.acceptedEndpoints)
+                correlated |= endpoint.id == app.establishedHandles.front() && endpoint.peerPort == 4436;
+            require(correlated, "establishment callback belongs to the sendable peer");
+        }));
+}
+%activity:
+EV << "rfc9147_amplification_isolation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.cookieRequired = false
+*.host2.app[0].dtls.certificateBytes = 1000B
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 0.3s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_amplification_isolation: PASS

@@ -1,0 +1,54 @@
+%description:
+
+Two identical ClientHello records share one real UDP datagram. Its full received
+byte count must supply amplification credit only once. The certificate flight is
+larger than three times actual input, but smaller than doubled credit would permit.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static long inputBytes = 0, outputBytes = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_coalesced_amplification")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate(coalesceDuplicateClientHello))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { outputBytes += c.event.packet->getByteLength(); return outputBytes > 3 * inputBytes; }).within(2)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); })
+        .assertEvent([](const MatchContext& c) {
+            inputBytes = 2 * c.event.packet->getByteLength();
+            // SH111 + EE36 + Certificate743 + CertificateVerify102 + Finished66.
+            return 3 * inputBytes < 1058 && 1058 < 6 * inputBytes;
+        }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == inputBytes; }).within(0.1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").drop())
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1.2))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && outputBytes <= 3 * inputBytes, "coalesced records cannot spend one datagram's bytes twice"); }));
+}
+%activity:
+EV << "rfc9147_coalesced_amplification compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host*.app[0].dtls.cookieRequired = false
+*.host2.app[0].dtls.certificateBytes = 700B
+*.host2.app[0].dtls.handshakeTimeout = 1s
+%contains: stdout
+PROTOCOLTEST rfc9147_coalesced_amplification: PASS

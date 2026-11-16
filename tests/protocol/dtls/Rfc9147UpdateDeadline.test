@@ -1,0 +1,44 @@
+%description:
+
+DTLS production-path variant UpdateDeadline: explicit queue/epoch/teardown requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_update_deadline")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433 && udp.destPort == 4434").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).drop())
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(92); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).notBefore(0.49).within(0.51))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1 && app.establishedCount == 1, "update deadline releases held app send with one error"); }))
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1.2)))
+    .never(on("host1.app[0].dtls").signal("handshakeRetransmission").within(1.2));
+}
+%activity:
+EV << "rfc9147_update_deadline compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host1.app[0].dtls.handshakeTimeout = 0.5s
+%contains: stdout
+PROTOCOLTEST rfc9147_update_deadline: PASS

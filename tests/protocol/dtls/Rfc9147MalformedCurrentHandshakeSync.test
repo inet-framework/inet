@@ -1,0 +1,78 @@
+%description:
+
+Raw malformed protected handshake bytes reach the production current epoch-three path
+after a real PSK exchange. Input protection costs zero.
+Require silent malformed-record disposition, uncommitted replay state and valid later delivery.
+
+%includes:
+#include <cmath>
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static const std::vector<uint8_t> malformedBytes = {20, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+static bool malformedReceived = false, malformedDropped = false;
+static unsigned inputSamples = 0;
+static simtime_t malformedReceivedAt;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_malformed_current_handshake_sync")
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).nth(1).mutate([](Packet *p) { replaceProtectedHandshakeBytes(p, 3, 100, malformedBytes); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1); }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) {
+        if (malformedReceived && !malformedDropped && std::abs(c.event.value - 0.001) < 1e-9) ++inputSamples;
+        return false;
+    }).within(1)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto header = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        return header && header->getEpochBits() == 3 && header->getSequenceNumber() == 100 && findChunk<BytesChunk>(c.event.packet);
+    }).assertEvent([](const MatchContext& c) {
+        auto bytes = findChunk<BytesChunk>(c.event.packet);
+        malformedReceived = true;
+        malformedReceivedAt = simTime();
+        return bytes && bytes->getBytes() == malformedBytes && !findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+    }).describe("actual UDP input retains the exact malformed raw handshake bytes").within(0.2))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(1).assertEvent([](const MatchContext&) {
+        malformedDropped = true;
+        require(malformedReceived && inputSamples == 0, "malformed record receives exactly the configured input service");
+        require(simTime() - malformedReceivedAt >= SimTime(0), "malformed disposition follows paid input service");
+        return true;
+    }).within(0.05))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(malformedReceived && malformedDropped && app.establishedCount == 1, "malformed input reaches an established production association");
+        require(app.receivedMarkers == std::vector<int>{2}, "valid application data delivers once after malformed record without replay poisoning");
+        require(app.errorCount == 0 && app.closedCount == 0, "malformed record does not fail or close the association");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && app.errorCount == 0 && app.closedCount == 0 && app.sendErrorCount == 0, "peer remains usable without a fatal response");
+    }));
+}
+
+%activity:
+EV << "rfc9147_malformed_current_handshake_sync compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host2.app[0].dtls.protectInDelay = 0s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST rfc9147_malformed_current_handshake_sync: PASS

@@ -1,0 +1,65 @@
+%description:
+
+Production application records with two-byte payloads are changed into equal-size
+protected alerts on the real wire sequence. Description dispatch ignores the
+legacy level: user_canceled with level2 is ignored, normal data then delivers,
+and handshake_failure with level1 terminates only the association.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool alertRecord(const MatchContext& c)
+{
+    auto type = findChunk<inet::dtls::DtlsInnerContentType>(c.event.packet);
+    return type && type->getContentType() == 21;
+}
+static void replaceWithAlert(Packet *packet, int level, int description)
+{
+    mutateNestedHeader<BytesChunk>(packet, [=](auto& bytes) {
+        require(bytes.getBytes().size() == 2, "alert fault targets the two-byte production payload");
+        bytes.setBytes({(uint8_t)level, (uint8_t)description});
+    });
+    mutateNestedHeader<inet::dtls::DtlsInnerContentType>(packet, [](auto& type) { type.setContentType(21); });
+}
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_alert_disposition")
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 2); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { replaceWithAlert(p, 2, 90); }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent(alertRecord).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.closedCount == 0 && app.receivedMarkers.empty(), "user_canceled is ignored without app delivery or termination"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(3, 2); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { replaceWithAlert(p, 1, 40); }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent(alertRecord).within(1))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 1 && app.receivedMarkers == std::vector<int>{2}, "fatal alert terminates once without becoming application data"); app.sendMarker(4); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(0.1));
+}
+%activity:
+EV << "rfc9147_alert_disposition compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+%contains: stdout
+PROTOCOLTEST rfc9147_alert_disposition: PASS

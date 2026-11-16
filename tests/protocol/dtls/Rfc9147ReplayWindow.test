@@ -1,0 +1,56 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147ReplayWindow. See the owning reviewer document in this suite
+and plan/done/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_replay_window")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).nth(1).duplicate(0.001, 2))
+    .meanwhile(tap("tap").copiesOnly().nth(2).delay(0.3))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        for (int marker = 10; marker < 80; marker++) app.sendMarker(marker, 1);
+    }))
+    .act(action().after(0.5).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        std::vector<int> expected{1};
+        for (int marker = 10; marker < 80; ++marker) expected.push_back(marker);
+        require(app.receivedMarkers == expected, "every distinct valid record arrives in order, with neither in-window duplicate nor old replay delivered");
+    }));
+}
+
+%activity:
+EV << "rfc9147_replay_window compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_replay_window: PASS

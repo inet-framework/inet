@@ -1,0 +1,93 @@
+%description:
+ACKs identify actually handed-off records and acknowledge their retained ranges.
+Reserved-only records cannot complete a flight; retransmission suppresses RTT samples.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
+
+using namespace inet;
+using namespace inet::dtls;
+
+%activity:
+auto bytes = makeShared<BytesChunk>(std::vector<uint8_t>{1, 2});
+bytes->markImmutable();
+DtlsHandshakeFlight flight;
+auto mutableBytes = makeShared<BytesChunk>(std::vector<uint8_t>{9});
+bool mutableRejected = false;
+try { flight.add(11, 1, 1, 0, 2, mutableBytes); }
+catch (const cRuntimeError&) { mutableRejected = true; }
+ASSERT(mutableRejected && flight.size() == 0);
+auto bits = makeShared<BitCountChunk>(b(1));
+bits->markImmutable();
+bool unalignedRejected = false;
+try { flight.add(11, 1, 1, 0, 2, bits); }
+catch (const cRuntimeError&) { unalignedRejected = true; }
+ASSERT(unalignedRejected && flight.size() == 0);
+bool overlongRejected = false;
+try { flight.add(11, 1, 0x1000000, 0, 2, bytes); }
+catch (const cRuntimeError&) { overlongRejected = true; }
+ASSERT(overlongRejected && flight.size() == 0);
+auto first = flight.add(11, 2, 4, 0, 2, bytes);
+auto second = flight.add(11, 2, 4, 2, 2, bytes);
+ASSERT(!flight.reserve(first));
+flight.markReady(first);
+flight.markReady(second);
+ASSERT(flight.reserve(first) && flight.reserve(second));
+ASSERT(!flight.acknowledge(2, 10, SimTime(1)).matched);
+ASSERT(!flight.isComplete());
+flight.handedOff(first, 10, SimTime(0.25));
+flight.handedOff(second, 11, SimTime(0.5));
+ASSERT(!flight.acknowledge(3, 10, SimTime(0.75)).matched);
+auto firstAck = flight.acknowledge(2, 10, SimTime(0.75));
+ASSERT(firstAck.matched && !firstAck.flightComplete);
+ASSERT(!firstAck.rtt);
+ASSERT(flight.get(first).acknowledged && !flight.get(second).acknowledged);
+ASSERT(!flight.acknowledge(2, 10, SimTime(1)).matched);
+flight.requestRetransmission();
+ASSERT(!flight.reserve(first) && flight.reserve(second));
+flight.cancelReservation(second);
+ASSERT(flight.reserve(second));
+flight.handedOff(second, 12, SimTime(1));
+auto lateOriginalAck = flight.acknowledge(2, 11, SimTime(1.5));
+ASSERT(lateOriginalAck.matched && lateOriginalAck.flightComplete);
+ASSERT(!lateOriginalAck.rtt);
+ASSERT(!flight.acknowledge(2, 12, SimTime(1.75)).matched);
+ASSERT(flight.isComplete());
+DtlsHandshakeFlight empty;
+ASSERT(empty.size() == 0 && !empty.isComplete());
+ASSERT(!empty.acknowledge(2, 10, SimTime(2)).matched);
+
+DtlsHandshakeFlight partial;
+first = partial.add(11, 3, 4, 0, 2, bytes);
+second = partial.add(11, 3, 4, 2, 2, bytes);
+partial.markReady(first);
+partial.markReady(second);
+ASSERT(partial.reserve(first) && partial.reserve(second));
+partial.handedOff(first, 20, SimTime(2));
+auto implicitAck = partial.acknowledgeSent(SimTime(2.25));
+ASSERT(implicitAck.matched && !implicitAck.flightComplete);
+ASSERT(!implicitAck.rtt);
+ASSERT(!partial.get(second).acknowledged);
+partial.cancelReservation(second);
+ASSERT(partial.reserve(second));
+ASSERT(!partial.acknowledge(2, 21, SimTime(2.5)).matched);
+
+DtlsHandshakeFlight eligible;
+first = eligible.add(11, 4, 4, 0, 2, bytes);
+second = eligible.add(11, 4, 4, 2, 2, bytes);
+eligible.markReady(first);
+eligible.markReady(second);
+ASSERT(eligible.reserve(first) && eligible.reserve(second));
+eligible.handedOff(first, 30, SimTime(3));
+eligible.handedOff(second, 31, SimTime(3.25));
+ASSERT(!eligible.acknowledge(2, 31, SimTime(3.5)).rtt);
+auto completeMessage = eligible.acknowledge(2, 30, SimTime(3.75));
+ASSERT(completeMessage.matched && completeMessage.flightComplete);
+ASSERT(completeMessage.rtt && *completeMessage.rtt == SimTime(0.5));
+ASSERT(!eligible.acknowledge(2, 30, SimTime(4)).rtt);
+EV << "DTLS handshake flight PASS\n";
+
+%contains: stdout
+DTLS handshake flight PASS

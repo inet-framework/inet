@@ -1,0 +1,55 @@
+%description:
+
+Lose the first client Finished and request KeyUpdate immediately at its local
+establishment callback. The server discards the premature epoch3 update, while
+the independent final-flight recovery completes before eventual update progress.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t finishedNumber, prematureUpdateNumber;
+static bool serverEstablished = false;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_finished_update_overlap")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).nth(1).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].driver").signal("controlStateChanged").filterEvent([](const MatchContext& c) { if (c.event.value == DtlsTestDriver::ESTABLISHED) serverEstablished = true; return false; }).within(4)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (serverEstablished) return false; auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet); if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i) if (a->getEpochs(i) == 3 && a->getSequenceNumbers(i) == prematureUpdateNumber) return true; return false; }).within(4)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) { finishedNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return protectedRecord(c, 2); }).within(1))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).assertEvent([](const MatchContext& c) { prematureUpdateNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return !serverEstablished && protectedRecord(c, 3); }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) { return protectedRecord(c, 2) && findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() != finishedNumber; }).within(1.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return packetAckForEpoch(c.event.packet, 3); }).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(7); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return protectedRecord(c, 0); }).within(0.1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.receivedMarkers == std::vector<int>{7} && app.errorCount == 0, "independent Finished recovery precedes successful update and data delivery"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.updateResults == std::vector<bool>{true} && app.errorCount == 0, "local establishment can admit an update without replacing final-flight recovery"); }));
+}
+%activity:
+EV << "rfc9147_finished_update_overlap compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_finished_update_overlap: PASS

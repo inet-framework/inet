@@ -1,0 +1,52 @@
+%description:
+
+DTLS production-path variant UpdatePeerIsolation: explicit concurrent-update requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_update_peer_isolation")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433 && udp.destPort == 4434").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).within(2).drop())
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(84); })
+        .run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.sendMarker(85); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>{85}, "held app data on updating peer does not block unrelated input");
+        app.sendMarker(86, 32, app.receivedHandles.back());
+    }))
+    .once(on("host1.app[1].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{86}, "unrelated output bypasses ineligible app data"); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").notBefore(1.8).within(5))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({85, 84}), "original updating peer resumes once ACK can pass"); }));
+}
+%activity:
+EV << "rfc9147_update_peer_isolation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host1.app[1].localPort = 4436
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_update_peer_isolation: PASS

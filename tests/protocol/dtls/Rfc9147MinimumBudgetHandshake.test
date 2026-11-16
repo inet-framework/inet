@@ -1,0 +1,52 @@
+%description:
+
+A 40-byte UDP budget fragments the ClientHello into more than ten records.
+Actual plaintext fragment ACKs must allow the unvalidated attempt to progress.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static unsigned initialFragments = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_minimum_budget_handshake")
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() > 40; }).within(30)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() > 40; }).within(30)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        if (h && h->getMessageType() == 1 && h->getMessageSequence() == 0) { ++initialFragments; require(h->getFragmentLength() < h->getMessageLength(), "minimum budget fragments the real ClientHello"); }
+        return false;
+    }).within(30)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto r = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+        return r && r->getEpoch() == 0 && acknowledgement(c);
+    }).within(3))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).within(10))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(20))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(initialFragments > 10 && app.establishedCount == 1 && app.errorCount == 0, "fragment ACKs permit a complete minimum-budget handshake"); }));
+}
+%activity:
+EV << "rfc9147_minimum_budget_handshake compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 40s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.udpPayloadLimit = 40B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_minimum_budget_handshake: PASS

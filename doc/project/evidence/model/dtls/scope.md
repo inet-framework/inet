@@ -1,0 +1,13 @@
+# DTLS simulation profile and limits
+
+> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../../../plan/done/dtls.md), [standards.md](../../protocol/dtls/standards.md)
+
+The authorized implementation uses UDP through an application-slot compound module, a replaceable IDtls engine, per-peer association state and reusable TLS body types. It does not modify the sealed packet subsystem or the host's standard transport composition. Immutable EncryptedChunk payloads, tag expansion and directional processing queues follow IPsec's abstract cryptography approach. No actual authentication, key derivation, signature or AEAD operation is performed.
+
+Matching transmitted identity labels represent authentication success. Replay-window checks are meaningful inside the selected truncated-number reconstruction range; far-delayed aliases or records from overlapping old associations cannot be cryptographically distinguished. Unified header types contain only transmitted partial numbers, not hidden receiver-visible full counters. Computed UDP checksums/FCS, real ciphertext export and packet-data fingerprints are excluded; use declared checksums/FCS.
+
+An application read epoch can share its two transmitted epoch bits with retained handshake epoch 2. An ACK's listed epochs identify acknowledged records, not the epoch that carried that ACK. For an ambiguous ACK, select a matching current/previous application read epoch before falling back to handshake epoch 2. Retained main-handshake content is recognized separately by its message identity. Otherwise identical old/new ACK records cannot be authenticated apart in this abstraction; successful reconstruction does not establish cryptographic origin.
+
+The initial suite is TLS_AES_128_GCM_SHA256 with X25519 and either external PSK with psk_dhe_ke or modeled ECDSA certificate authentication. DTLS 1.2, CID/migration, ticket/resumption, early data and post-handshake certificate authentication remain excluded. Cookie validation binds the token to peer addressing, ClientHello random, issue time and original attempt start time without a real MAC. The start time preserves the original handshake deadline across retry and fragmentation; it does not refresh when the token is issued. Default cookie use and pre-validation byte accounting remain protocol behavior, not security proofs.
+
+The 2026-11-16 request authorizes executing the whole plan, validating it, pushing the final series and creating an upstream PR. No authorization extends to unrelated local edits or rewriting unrelated recorded baselines. C1's source reconciliation includes RFC 9846's applicable TLS clarifications; RFC 9853's CID-specific path-validation extension remains excluded with CID.

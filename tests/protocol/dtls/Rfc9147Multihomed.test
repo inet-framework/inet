@@ -1,0 +1,51 @@
+%description:
+
+One client quartet reaches one wildcard-bound server over its two local addresses.
+Establishment and accepted endpoint metadata prove reply source identity and isolation.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_multihomed")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.openPeer("host2%eth1"); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.acceptedEndpoints.size() == 2, "wildcard listener accepts both local endpoint identities");
+        require(app.acceptedEndpoints[0].localAddress != app.acceptedEndpoints[1].localAddress, "accepted handles retain distinct server addresses");
+        require(app.acceptedEndpoints[0].peerAddress == app.acceptedEndpoints[1].peerAddress, "same client source address exercises the local-address key component");
+        require(app.acceptedEndpoints[0].id != app.acceptedEndpoints[1].id, "local endpoint participates in association identity");
+        for (const auto& endpoint : app.acceptedEndpoints)
+            require(endpoint.localPort == 4433 && endpoint.peerPort == 4434, "callback preserves local and peer ports");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 2, "both reply source identities reach one client UDP socket"); }));
+}
+%activity:
+EV << "rfc9147_multihomed compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.dtls.DtlsMultihomedNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.host1.numApps = 1
+*.host2.numApps = 1
+*.host3.numApps = 0
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].peerAddress = "host2%eth0"
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='host2' names='eth1' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='host3' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/><route hosts='host1' destination='10.0.1.2' netmask='255.255.255.255' gateway='10.0.0.2' interface='eth0'/></config>")
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_multihomed: PASS

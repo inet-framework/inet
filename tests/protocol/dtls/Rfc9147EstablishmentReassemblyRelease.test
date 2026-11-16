@@ -1,0 +1,58 @@
+%description:
+
+Retain a partial future handshake message before Finished. Establishment must
+release that incomplete message while preserving the final-flight ACK responder.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint64_t firstFinishedNumber = 65535;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_establishment_reassembly_release")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (handshake(c, 20) && firstFinishedNumber == 65535) firstFinishedNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return false; }).within(2)))
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).nth(1).duplicate(0.001))
+    .intercept(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).mutate([](Packet *p) {
+        replaceProtectedFragment(p, 100, 0, {1});
+        mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setMessageSequence(h.getMessageSequence() + 20); });
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + 100); });
+    }))
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).delay(0.02))
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { auto a = findChunk<inet::dtls::DtlsAck>(p); if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i) if (a->getEpochs(i) == 2 && a->getSequenceNumbers(i) == firstFinishedNumber) return true; return false; }).nth(1).drop())
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageSequence() >= 20; }).within(1))
+    .once(on("host2.app[0].dtls").signal("reassemblyBytes").filterValue(100).within(0.1))
+    .unordered({
+        on("host2.app[0].dtls").signal("reassemblyBytes").filterValue(0).within(0.1),
+        on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1)
+    })
+    .once(on("host1.app[0].dtls").signal("handshakeRetransmission").within(1.1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return packetAckForEpoch(c.event.packet, 2); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "released future reassembly retains final-flight recovery without duplicate callbacks"); }));
+}
+%activity:
+EV << "rfc9147_establishment_reassembly_release compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.clientAuthentication = true
+*.host2.app[0].dtls.replayWindowSize = 65536
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_establishment_reassembly_release: PASS

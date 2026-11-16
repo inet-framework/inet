@@ -1,0 +1,54 @@
+%description:
+
+DTLS production-path variant CookieKeyShareRetry: explicit C3 profile requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_cookie_key_share_retry")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); })
+        .assertEvent([](const MatchContext& c) {
+            auto h = findChunk<inet::dtls::DtlsClientHello>(c.event.packet);
+            if (!h) return false;
+            for (size_t i = 0; i + 4 <= h->getExtensionsArraySize();) {
+                int type = (h->getExtensions(i) << 8) | h->getExtensions(i + 1);
+                size_t length = (h->getExtensions(i + 2) << 8) | h->getExtensions(i + 3);
+                if (type == 51) return length == 2 && h->getExtensions(i + 4) == 0 && h->getExtensions(i + 5) == 0;
+                i += 4 + length;
+            }
+            return false;
+        }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); })
+        .assertEvent([](const MatchContext& c) { auto h = findChunk<inet::tls::TlsServerHello>(c.event.packet); return h && hasHelloExtension(*h, 44) && hasHelloExtension(*h, 51); }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); })
+        .assertEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsClientHello>(c.event.packet); return h && h->getLegacyCookieArraySize() == 0 && hasHelloExtension(*h, 44) && hasHelloExtension(*h, 51); }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "combined retry completes once"); }));
+}
+%activity:
+EV << "rfc9147_cookie_key_share_retry compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host1.app[0].dtls.offerInitialKeyShare = false
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cookie_key_share_retry: PASS

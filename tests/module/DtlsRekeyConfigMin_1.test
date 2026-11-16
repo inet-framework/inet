@@ -1,0 +1,25 @@
+%description:
+Accept the minimum supported rekey threshold at engine initialization.
+
+%file: TestNetwork.ned
+import inet.node.inet.StandardHost;
+network TestNetwork
+{
+    submodules:
+        host: StandardHost;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0.01s
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.rekeyAfterRecords = 1
+
+%contains: stdout
+End.

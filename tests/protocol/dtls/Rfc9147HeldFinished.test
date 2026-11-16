@@ -1,0 +1,54 @@
+%description:
+
+DTLS production-path variant HeldFinished: implements an explicit plan requirement.
+UDP-backed production engine; seed 0; positive stimulus and outcome assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t earlyRecord;
+
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_held_finished")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).within(3))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).delay(0.05))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(31); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { earlyRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return true; }).within(0.02))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).duplicate(0.07))
+    .never(on("host2.app[0].driver").signal("packetSentToUpper").within(0.02))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers.empty(), "pre-Finished data is discarded rather than flushed from a buffer"); }))
+    .never(on("host2.app[0].driver").signal("packetSentToUpper").within(0.01))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() == earlyRecord; }).within(0.05))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.01))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(32); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({31, 32}), "early discard does not commit replay state; late copy and subsequent valid datagram each deliver once"); }));
+}
+%activity:
+EV << "rfc9147_held_finished compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_held_finished: PASS

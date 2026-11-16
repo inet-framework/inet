@@ -1,0 +1,42 @@
+%description:
+
+DTLS production-path variant ShortSequenceWrap: explicit timing/reconstruction requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_short_sequence_wrap")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).mutate([](Packet *p) { changeUnifiedHeader(p, 1, true); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { for (int i = 0; i < 260; i++) app.sendMarker(i % 251, 1); }))
+    .act(action().after(0.2).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers.size() == 260, "one 8-bit low-field wrap preserves every distinct sequential record");
+        for (int i = 0; i < 260; i++) require(app.receivedMarkers[i] == i % 251, "markers retain boundaries across reconstruction wrap");
+    }));
+}
+%activity:
+EV << "rfc9147_short_sequence_wrap compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+
+%contains: stdout
+PROTOCOLTEST rfc9147_short_sequence_wrap: PASS

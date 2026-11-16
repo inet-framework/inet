@@ -1,0 +1,47 @@
+%description:
+
+DTLS production-path variant ReservedAck: explicit recovery/ACK-accounting requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_reserved_ack")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetAck).nth(1).mutate([](Packet *p) {
+        mutateNestedHeader<inet::dtls::DtlsAck>(p, [](auto& ack) {
+            require(ack.getEpochsArraySize() > 0, "real partial ACK contains a record");
+            for (size_t i = 0; i < ack.getEpochsArraySize(); i++) { ack.setEpochs(i, 2); ack.setSequenceNumbers(i, 0); }
+        });
+    }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent(acknowledgement).within(0.5))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 8); }).notBefore(0.6).within(1.5))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(5));
+}
+%activity:
+EV << "rfc9147_reserved_ack compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.cookieRequired = false
+*.host2.app[0].dtls.protectOutDelay = 1.2s
+%contains: stdout
+PROTOCOLTEST rfc9147_reserved_ack: PASS

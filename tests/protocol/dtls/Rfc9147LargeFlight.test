@@ -1,0 +1,68 @@
+%description:
+
+DTLS production-path variant LargeFlight: explicit C4 requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool trackingFlight = false;
+static int burstRecords = 0;
+static simtime_t retryHandoff, firstFlightInput, expectedAckDelay;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_large_flight")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        if (h && h->getMessageType() == 1 && h->getMessageSequence() == 1 && h->getFragmentOffset() + h->getFragmentLength() == h->getMessageLength()) { retryHandoff = c.event.time; return true; }
+        return false;
+    }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto hello = findChunk<inet::tls::TlsServerHello>(c.event.packet);
+        if (handshake(c, 2) && hello && !hasHelloExtension(*hello, 44)) {
+            firstFlightInput = c.event.time;
+            expectedAckDelay = 0.375 * (c.event.time - retryHandoff); // quarter of 1.5 times the implicit-ACK RTT
+            return true;
+        }
+        return false;
+    }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (acknowledgement(c)) burstRecords = 0; return acknowledgement(c); }).within(4)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        auto hello = findChunk<inet::tls::TlsServerHello>(c.event.packet);
+        if (h && h->getMessageType() == 2 && hello && !hasHelloExtension(*hello, 44)) { trackingFlight = true; burstRecords = 0; }
+        return trackingFlight && h && ++burstRecords > 10;
+    }).within(4)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() > 1200; }).within(4)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::tls::TlsServerHello>(c.event.packet); return handshake(c, 2) && h && !hasHelloExtension(*h, 44); }).within(1))
+    .nextTimes(9, on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet) != nullptr; }).within(0.02))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).assertEvent([](const MatchContext& c) { auto error = c.event.time - firstFlightInput - expectedAckDelay; return error >= SimTime(-0.000001) && error <= SimTime(0.000001); }).within(0.4))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent(acknowledgement).within(0.01))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(0.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(4));
+}
+%activity:
+EV << "rfc9147_large_flight compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 20000B
+%contains: stdout
+PROTOCOLTEST rfc9147_large_flight: PASS

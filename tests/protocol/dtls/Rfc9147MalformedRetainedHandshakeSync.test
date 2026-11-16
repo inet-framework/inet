@@ -1,0 +1,98 @@
+%description:
+
+Raw malformed protected handshake bytes reach the production retained epoch-two path
+after a real PSK exchange. Input protection costs zero.
+Require silent malformed-record disposition, uncommitted replay state and valid later delivery.
+
+%includes:
+#include <cmath>
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static const std::vector<uint8_t> malformedBytes = {20, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+static bool malformedReceived = false, malformedDropped = false, validCopyReceived = false;
+static unsigned inputSamples = 0, copies = 0;
+static simtime_t malformedReceivedAt;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_malformed_retained_handshake_sync")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).nth(1).duplicate(0.05, 2))
+    .intercept(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).mutate([](Packet *p) {
+        if (++copies == 1) replaceProtectedHandshakeBytes(p, 2, 100, malformedBytes);
+        else require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(100); }), "valid Finished copy reuses rejected record number");
+    }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        if (h && h->getEpochBits() == 2 && h->getSequenceNumber() == 100 && handshake(c, 20)) validCopyReceived = true;
+        return false;
+    }).within(1)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto ack = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        if (ack && !validCopyReceived) for (size_t i = 0; i < ack->getEpochsArraySize(); ++i)
+            if (ack->getEpochs(i) == 2 && ack->getSequenceNumbers(i) == 100) return true;
+        return false;
+    }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) {
+        if (malformedReceived && !malformedDropped && std::abs(c.event.value - 0.001) < 1e-9) ++inputSamples;
+        return false;
+    }).within(1)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto header = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        return header && header->getEpochBits() == 2 && header->getSequenceNumber() == 100 && findChunk<BytesChunk>(c.event.packet);
+    }).assertEvent([](const MatchContext& c) {
+        auto bytes = findChunk<BytesChunk>(c.event.packet);
+        malformedReceived = true;
+        malformedReceivedAt = simTime();
+        return bytes && bytes->getBytes() == malformedBytes && !findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+    }).describe("actual UDP input retains the exact malformed raw handshake bytes").within(0.2))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(1).assertEvent([](const MatchContext&) {
+        malformedDropped = true;
+        require(malformedReceived && inputSamples == 0, "malformed record receives exactly the configured input service");
+        require(simTime() - malformedReceivedAt >= SimTime(0), "malformed disposition follows paid input service");
+        return true;
+    }).within(0.05))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto ack = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        if (ack) for (size_t i = 0; i < ack->getEpochsArraySize(); ++i)
+            if (ack->getEpochs(i) == 2 && ack->getSequenceNumbers(i) == 100) return true;
+        return false;
+    }).assertEvent([](const MatchContext&) { return validCopyReceived && copies == 2; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().after(0.02).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(malformedReceived && malformedDropped && app.establishedCount == 1, "malformed input reaches an established production association");
+        require(app.receivedMarkers == std::vector<int>{2}, "valid application data delivers once after malformed record without replay poisoning");
+        require(app.errorCount == 0 && app.closedCount == 0, "malformed record does not fail or close the association");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && app.errorCount == 0 && app.closedCount == 0 && app.sendErrorCount == 0, "peer remains usable without a fatal response");
+    }));
+}
+
+%activity:
+EV << "rfc9147_malformed_retained_handshake_sync compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host2.app[0].dtls.protectInDelay = 0s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST rfc9147_malformed_retained_handshake_sync: PASS

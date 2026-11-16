@@ -1,0 +1,49 @@
+%description:
+
+During client authentication, retain an in-range Finished fragment while earlier
+Certificate and CertificateVerify are missing. That valid later response must
+implicitly acknowledge the preceding server flight without premature establishment.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint64_t laterNumber;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_later_response_implicit_ack")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return packetAck(p) || (h && (h->getMessageType() == 11 || h->getMessageType() == 15 || (h->getMessageType() == 20 && h->getFragmentOffset() == 0))); }).within(0.3).drop())
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 20 && h->getFragmentOffset() > 0 && h->getFragmentLength() < h->getMessageLength(); }).assertEvent([](const MatchContext& c) { laterNumber = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return true; }).within(1))
+    .meanwhile(never(on("host2.app[0].dtls").signal("handshakeRetransmission").within(0.05)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet); if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i) if (a->getEpochs(i) == 2 && a->getSequenceNumbers(i) == laterNumber) return true; return false; }).within(0.02))
+    .never(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.05))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "later fragment acknowledges the preceding flight while missing earlier messages still require recovery"); }));
+}
+%activity:
+EV << "rfc9147_later_response_implicit_ack compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.clientAuthentication = true
+*.host1.app[0].dtls.udpPayloadLimit = 64B
+*.host1.app[0].dtls.certificateBytes = 32B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_later_response_implicit_ack: PASS

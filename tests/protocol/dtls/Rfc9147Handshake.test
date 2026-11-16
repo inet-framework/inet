@@ -1,0 +1,66 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147Handshake. See the owning reviewer document in this suite
+and plan/done/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+static long offered = 0, serverBytes = 0;
+return ProtocolTest("rfc9147_handshake")
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { serverBytes += c.event.packet->getByteLength(); return serverBytes > 3 * offered; }).within(0.5)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); })
+        .assertEvent([](const MatchContext& c) { offered = c.event.packet->getByteLength(); return findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet)->getEpoch() == 0; }).within(1))
+    .act(action().after(0.001).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(99); }))
+    .once(on("host2.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).assertEvent([](const MatchContext& c) { return protectedRecord(c, 2); }).within(2))
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) { return protectedRecord(c, 2); }).within(1))
+    .unordered({
+        on("host2.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2),
+        on("host2.app[1].dtls").signal("packetSentToLower").filterEvent(acknowledgement).assertEvent([](const MatchContext& c) { return protectedRecord(c, 3); }).within(1)
+    })
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && app.sendErrorCount == 0, "PSK client establishes once and admits queued send");
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1, "PSK server establishes once");
+    }).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1, "certificate client establishes once");
+    }));
+}
+
+%activity:
+EV << "rfc9147_handshake compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 2
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.cookieRequired = false
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.peerPort = 4435
+*.host2.app[1].localPort = 4435
+*.host*.app[1].dtls.profile = "certificate"
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_handshake: PASS
