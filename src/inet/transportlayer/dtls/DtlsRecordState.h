@@ -26,8 +26,8 @@ class INET_API DtlsRecordState
     [[nodiscard]] bool isAcceptable(uint64_t sequenceNumber) const;
     // The caller invokes this only after all modeled deprotection checks pass.
     bool accept(uint64_t sequenceNumber);
+    // Distinguishes an untouched window from one that accepted record zero.
     [[nodiscard]] bool hasRecords() const { return initialized; }
-    [[nodiscard]] uint64_t getHighest() const { return highest; }
 };
 
 } // namespace inet::dtls

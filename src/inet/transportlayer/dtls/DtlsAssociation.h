@@ -157,11 +157,12 @@ class INET_API DtlsAssociation
     bool advanceSendEpoch();
     bool handleTimer(cMessage *message);
     void cancelTimers();
+    // Retained-message count for derived association diagnostics.
+    [[nodiscard]] size_t getReassemblyEntryCount() const { return reassembly.getEntryCount(); }
 
   public:
     explicit DtlsAssociation(Dtls& engine, size_t reassemblyLimit);
     [[nodiscard]] size_t getReassemblyBytes() const { return reassembly.getReservedBytes(); }
-    [[nodiscard]] size_t getReassemblyEntryCount() const { return reassembly.getEntryCount(); }
 };
 
 } // namespace inet::dtls

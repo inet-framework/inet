@@ -54,6 +54,7 @@ class INET_API DtlsProcessingQueue
     void cancel(AssociationId associationId);
     void cancelExcept(const std::set<AssociationId>& retainedIds);
     void clear();
+    // Capacity reserved by active and pending work, including minimum charges.
     [[nodiscard]] size_t getOccupiedBytes() const { return occupied; }
 };
 
