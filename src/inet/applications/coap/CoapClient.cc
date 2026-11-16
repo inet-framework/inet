@@ -251,6 +251,8 @@ void CoapClient::onEndpointStop()
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
+    pendingObserveBlock2SubRequests.clear();
+    ignoredObserveBlock2SubRequests.clear();
     for (auto& kv : queuedBlockTransfers) {
         for (auto& queued : kv.second)
             onRequestAborted(queued.transferId);
@@ -267,6 +269,8 @@ void CoapClient::onEndpointCrash()
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
+    pendingObserveBlock2SubRequests.clear();
+    ignoredObserveBlock2SubRequests.clear();
     for (auto& kv : queuedBlockTransfers) {
         for (auto& queued : kv.second)
             onRequestAborted(queued.transferId);
@@ -281,7 +285,7 @@ simtime_t CoapClient::getNextSubclassDeadline() const
     simtime_t earliest = SIMTIME_ZERO;
     for (const auto& kv : observationsByPeerToken) {
         const auto& obs = kv.second;
-        if (obs.established && obs.hasFreshnessTimer && obs.reregisterAt > SIMTIME_ZERO) {
+        if (obs.hasFreshnessTimer && obs.reregisterAt > SIMTIME_ZERO) {
             if (earliest == SIMTIME_ZERO || obs.reregisterAt < earliest)
                 earliest = obs.reregisterAt;
         }
@@ -294,7 +298,7 @@ void CoapClient::onSubclassTimer(simtime_t now)
     std::vector<CoapObserverKey> dueKeys;
     for (const auto& kv : observationsByPeerToken) {
         const auto& obs = kv.second;
-        if (obs.established && obs.hasFreshnessTimer && obs.reregisterAt <= now)
+        if (obs.hasFreshnessTimer && obs.reregisterAt <= now)
             dueKeys.push_back(kv.first);
     }
 
@@ -845,6 +849,7 @@ bool CoapClient::unsubscribeObserve(uint64_t consumerId, bool sendExplicitCancel
     if (!obs.consumerIds.empty())
         return true;
 
+    cancelInFlightObserveBlock2(obs);
     CoapClientObservation removed = std::move(obs);
     observationsByCacheKey.erase(removed.cacheKey);
     observationsByPeerToken.erase(obsIt);
@@ -878,6 +883,388 @@ void CoapClient::scheduleObserveFreshnessTimer(CoapClientObservation& obs)
     obs.hasFreshnessTimer = true;
     obs.reregisterAt = simTime() + SimTime(static_cast<int64_t>(obs.maxAgeSeconds), SIMTIME_S) + SimTime(jitterSec);
     rescheduleDeadlineTimer();
+}
+
+void CoapClient::scheduleObserveBlock2Reregister(CoapClientObservation& obs)
+{
+    double jitterSec = 5.0 + getRNG(rngStream)->doubleRand() * 10.0;
+    obs.hasFreshnessTimer = true;
+    obs.reregisterAt = simTime() + SimTime(jitterSec);
+    rescheduleDeadlineTimer();
+}
+
+void CoapClient::cancelInFlightObserveBlock2(CoapClientObservation& obs)
+{
+    if (obs.block2ActiveSubRequestId != 0) {
+        pendingObserveBlock2SubRequests.erase(obs.block2ActiveSubRequestId);
+        ignoredObserveBlock2SubRequests.insert(obs.block2ActiveSubRequestId);
+        obs.block2ActiveSubRequestId = 0;
+    }
+    obs.block2InProgress = false;
+    obs.block2ExpectedOffset = 0;
+    obs.block2Buffer.clear();
+    obs.block2PendingEtag.clear();
+}
+
+bool CoapClient::sendNextObserveBlock2Request(CoapClientObservation& obs)
+{
+    CoapParsedUri parsedUri = parseCoapUri(obs.uriStr);
+    std::vector<CoapOption> stepOptions;
+    for (const auto& opt : obs.templateExtraOptions) {
+        uint16_t num = opt.getNumber();
+        if (num == COAP_OPT_OBSERVE || num == COAP_OPT_BLOCK2 || num == COAP_OPT_SIZE2
+                || num == COAP_OPT_ETAG || num == COAP_OPT_IF_MATCH || num == COAP_OPT_IF_NONE_MATCH) {
+            continue;
+        }
+        stepOptions.push_back(opt);
+    }
+
+    uint32_t bs = 1U << (obs.block2Szx + 4U);
+    uint32_t nextNum = static_cast<uint32_t>(obs.block2ExpectedOffset / bs);
+    CoapOption b2Opt;
+    b2Opt.setNumber(COAP_OPT_BLOCK2);
+    std::vector<uint8_t> b2Val = encodeCoapUintValue(blockwise::encodeCoapBlockValue({nextNum, false, obs.block2Szx}));
+    b2Opt.setValueArraySize(b2Val.size());
+    for (size_t i = 0; i < b2Val.size(); ++i)
+        b2Opt.setValue(i, b2Val[i]);
+    stepOptions.push_back(b2Opt);
+
+    std::vector<uint8_t> emptyBody;
+    uint64_t subReqId = submitWireExchange(obs.key.peer, /*peerMulticast=*/false, COAP_CODE_GET,
+            obs.confirmable, parsedUri, emptyBody, -1, obs.cacheKey.acceptFormat, stepOptions, nullptr);
+    if (subReqId == 0)
+        return false;
+
+    obs.block2ActiveSubRequestId = subReqId;
+    pendingObserveBlock2SubRequests[subReqId] = obs.key;
+    return true;
+}
+
+bool CoapClient::handleObservePayloadResponse(CoapClientObservation& obs, const Ptr<const CoapHeader>& responseHeader,
+        const std::vector<uint8_t>& payload, uint32_t observeVal, bool fromRegistration, uint64_t originRequestId)
+{
+    bool hasBlock2 = false;
+    blockwise::CoapBlockOption b2;
+    uint32_t maxAge = 60;
+    int32_t cf = obs.contentFormat;
+    std::vector<std::vector<uint8_t>> etags;
+
+    for (size_t i = 0; i < responseHeader->getOptionsArraySize(); ++i) {
+        const auto& opt = responseHeader->getOptions(i);
+        uint16_t num = opt.getNumber();
+        uint32_t v = 0;
+        if (num == COAP_OPT_BLOCK2) {
+            if (hasBlock2 || blockwise::decodeCoapBlockOption(opt, b2) != blockwise::CoapBlockDecodeStatus::OK) {
+                cancelInFlightObserveBlock2(obs);
+                if (obs.established)
+                    scheduleObserveBlock2Reregister(obs);
+                return true;
+            }
+            hasBlock2 = true;
+        }
+        else if (num == COAP_OPT_MAX_AGE && decodeCoapUintValue(opt, v, 4)) {
+            maxAge = v;
+        }
+        else if (num == COAP_OPT_CONTENT_FORMAT && decodeCoapUintValue(opt, v, 2)) {
+            cf = static_cast<int32_t>(v);
+        }
+        else if (num == COAP_OPT_ETAG) {
+            std::vector<uint8_t> val(opt.getValueArraySize());
+            for (size_t j = 0; j < val.size(); ++j)
+                val[j] = opt.getValue(j);
+            etags.push_back(std::move(val));
+        }
+    }
+
+    if (responseHeader->getCode() == COAP_CODE_VALID || !hasBlock2 || !b2.more) {
+        if (obs.block2InProgress && obs.block2FromRegistration && obs.block2OriginRequestId != 0
+                && !fromRegistration) {
+            fromRegistration = true;
+            originRequestId = obs.block2OriginRequestId;
+        }
+        cancelInFlightObserveBlock2(obs);
+        obs.block2FromRegistration = false;
+        obs.block2OriginRequestId = 0;
+        bool wasEstablished = obs.established;
+        acceptObserveUpdate(obs, responseHeader, payload, observeVal);
+        if (!wasEstablished)
+            emit(activeObservationsSignal, static_cast<long>(observationsByPeerToken.size()));
+        if (fromRegistration && originRequestId != 0) {
+            simtime_t latency = SIMTIME_ZERO;
+            auto startIt = activeRequestStarts.find(originRequestId);
+            if (startIt != activeRequestStarts.end()) {
+                latency = simTime() - startIt->second;
+                activeRequestStarts.erase(startIt);
+            }
+            emit(requestCompletedSignal, 1L);
+            emit(requestLatencySignal, latency);
+        }
+        return true;
+    }
+
+    if (b2.num != 0 || etags.empty() || payload.size() != b2.blockSize()
+            || payload.size() > static_cast<size_t>(maxIncomingBlockSize)) {
+        cancelInFlightObserveBlock2(obs);
+        if (payload.size() > static_cast<size_t>(maxIncomingBlockSize))
+            emit(capacityRejectedSignal, 1L);
+        scheduleObserveBlock2Reregister(obs);
+        return true;
+    }
+
+    bool carriedFromRegistration = obs.block2InProgress && obs.block2FromRegistration && obs.block2OriginRequestId != 0 && !fromRegistration;
+    uint64_t carriedOriginId = carriedFromRegistration ? obs.block2OriginRequestId : originRequestId;
+    bool effectiveFromReg = fromRegistration || carriedFromRegistration;
+
+    cancelInFlightObserveBlock2(obs);
+
+    uint8_t prefSzx = 6;
+    blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+
+    obs.lastObserveValue = observeVal & 0xFFFFFFU;
+    obs.lastReceivedTime = simTime();
+    obs.complete = false;
+    obs.block2InProgress = true;
+    obs.block2FromRegistration = effectiveFromReg;
+    obs.block2OriginRequestId = carriedOriginId;
+    obs.block2PendingObserveVal = obs.lastObserveValue;
+    obs.block2PendingReceivedAt = obs.lastReceivedTime;
+    obs.block2PendingCode = responseHeader->getCode();
+    obs.block2PendingContentFormat = cf;
+    obs.block2PendingMaxAge = maxAge;
+    obs.block2PendingEtag = etags[0];
+    obs.block2Szx = std::min(b2.szx, prefSzx);
+    obs.block2ExpectedOffset = payload.size();
+    obs.block2Buffer = payload;
+
+    if (!sendNextObserveBlock2Request(obs)) {
+        uint64_t abortOriginId = obs.block2FromRegistration ? obs.block2OriginRequestId : 0;
+        obs.block2FromRegistration = false;
+        obs.block2OriginRequestId = 0;
+        cancelInFlightObserveBlock2(obs);
+        if (abortOriginId != 0)
+            activeRequestStarts.erase(abortOriginId);
+        scheduleObserveBlock2Reregister(obs);
+    }
+    return false;
+}
+
+void CoapClient::handleObserveBlock2Response(uint64_t subRequestId, const CoapPeerEndpoint& peer,
+        const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload)
+{
+    auto mapIt = pendingObserveBlock2SubRequests.find(subRequestId);
+    if (mapIt == pendingObserveBlock2SubRequests.end())
+        return;
+    CoapObserverKey key = mapIt->second;
+    pendingObserveBlock2SubRequests.erase(mapIt);
+
+    auto obsIt = observationsByPeerToken.find(key);
+    if (obsIt == observationsByPeerToken.end())
+        return;
+    CoapClientObservation& obs = obsIt->second;
+    if (!obs.block2InProgress || obs.block2ActiveSubRequestId != subRequestId)
+        return;
+
+    obs.block2ActiveSubRequestId = 0;
+    uint8_t code = responseHeader->getCode();
+    if (code >= 128) {
+        bool fromReg = obs.block2FromRegistration;
+        uint64_t originId = obs.block2OriginRequestId;
+        cancelInFlightObserveBlock2(obs);
+        obs.block2FromRegistration = false;
+        obs.block2OriginRequestId = 0;
+        if (fromReg && originId != 0) {
+            activeRequestStarts.erase(originId);
+            ++failedCount;
+            emit(requestFailedSignal, 1L);
+        }
+        terminateObservation(key, code, "Observe Block2 follow-up returned error");
+        return;
+    }
+
+    bool hasBlock2 = false;
+    blockwise::CoapBlockOption b2;
+    int32_t cf = obs.block2PendingContentFormat;
+    uint32_t maxAge = obs.block2PendingMaxAge;
+    bool hasMaxAge = false;
+    std::vector<std::vector<uint8_t>> etags;
+
+    for (size_t i = 0; i < responseHeader->getOptionsArraySize(); ++i) {
+        const auto& opt = responseHeader->getOptions(i);
+        uint16_t num = opt.getNumber();
+        uint32_t v = 0;
+        if (num == COAP_OPT_BLOCK2) {
+            if (hasBlock2 || blockwise::decodeCoapBlockOption(opt, b2) != blockwise::CoapBlockDecodeStatus::OK) {
+                hasBlock2 = false;
+                break;
+            }
+            hasBlock2 = true;
+        }
+        else if (num == COAP_OPT_CONTENT_FORMAT && decodeCoapUintValue(opt, v, 2)) {
+            cf = static_cast<int32_t>(v);
+        }
+        else if (num == COAP_OPT_MAX_AGE && decodeCoapUintValue(opt, v, 4)) {
+            maxAge = v;
+            hasMaxAge = true;
+        }
+        else if (num == COAP_OPT_ETAG) {
+            std::vector<uint8_t> val(opt.getValueArraySize());
+            for (size_t j = 0; j < val.size(); ++j)
+                val[j] = opt.getValue(j);
+            etags.push_back(std::move(val));
+        }
+    }
+
+    bool validShape = hasBlock2 && b2.byteOffset() == obs.block2ExpectedOffset
+            && (!b2.more || payload.size() == b2.blockSize());
+    bool etagMatches = !etags.empty() && etags[0] == obs.block2PendingEtag;
+
+    if (!validShape || !etagMatches) {
+        bool fromReg = obs.block2FromRegistration;
+        uint64_t originId = obs.block2OriginRequestId;
+        cancelInFlightObserveBlock2(obs);
+        obs.block2FromRegistration = false;
+        obs.block2OriginRequestId = 0;
+        obs.complete = false;
+        if (fromReg && originId != 0) {
+            activeRequestStarts.erase(originId);
+            ++failedCount;
+            emit(requestFailedSignal, 1L);
+        }
+        scheduleObserveBlock2Reregister(obs);
+        return;
+    }
+
+    if (obs.block2Buffer.size() + payload.size() > static_cast<size_t>(maxIncomingBlockSize)) {
+        emit(capacityRejectedSignal, 1L);
+        bool fromReg = obs.block2FromRegistration;
+        uint64_t originId = obs.block2OriginRequestId;
+        cancelInFlightObserveBlock2(obs);
+        obs.block2FromRegistration = false;
+        obs.block2OriginRequestId = 0;
+        if (fromReg && originId != 0) {
+            activeRequestStarts.erase(originId);
+            ++failedCount;
+            emit(requestFailedSignal, 1L);
+        }
+        terminateObservation(key, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, "Assembled Observe Block2 payload exceeds limit");
+        return;
+    }
+
+    obs.block2Buffer.insert(obs.block2Buffer.end(), payload.begin(), payload.end());
+    obs.block2ExpectedOffset += payload.size();
+    obs.block2Szx = std::min(obs.block2Szx, b2.szx);
+    obs.block2PendingContentFormat = cf;
+    if (hasMaxAge)
+        obs.block2PendingMaxAge = maxAge;
+
+    if (b2.more) {
+        if (!sendNextObserveBlock2Request(obs)) {
+            bool fromReg = obs.block2FromRegistration;
+            uint64_t originId = obs.block2OriginRequestId;
+            cancelInFlightObserveBlock2(obs);
+            obs.block2FromRegistration = false;
+            obs.block2OriginRequestId = 0;
+            if (fromReg && originId != 0) {
+                activeRequestStarts.erase(originId);
+                ++failedCount;
+                emit(requestFailedSignal, 1L);
+            }
+            scheduleObserveBlock2Reregister(obs);
+        }
+        return;
+    }
+
+    bool wasEstablished = obs.established;
+    bool fromReg = obs.block2FromRegistration;
+    uint64_t originId = obs.block2OriginRequestId;
+    std::vector<uint8_t> assembled = std::move(obs.block2Buffer);
+    std::vector<uint8_t> finalEtag = obs.block2PendingEtag;
+    uint32_t finalObsVal = obs.block2PendingObserveVal;
+    simtime_t finalRecvAt = obs.block2PendingReceivedAt;
+    uint8_t finalCode = obs.block2PendingCode;
+    int32_t finalCf = obs.block2PendingContentFormat;
+    uint32_t finalMaxAge = obs.block2PendingMaxAge;
+
+    obs.block2InProgress = false;
+    obs.block2FromRegistration = false;
+    obs.block2OriginRequestId = 0;
+    obs.block2ActiveSubRequestId = 0;
+    obs.block2ExpectedOffset = 0;
+    obs.block2Buffer.clear();
+    obs.block2PendingEtag.clear();
+
+    obs.established = true;
+    obs.complete = true;
+    obs.lastResponseCode = finalCode;
+    obs.lastObserveValue = finalObsVal;
+    obs.lastReceivedTime = finalRecvAt;
+    obs.maxAgeSeconds = finalMaxAge;
+    obs.contentFormat = finalCf;
+    obs.etag = std::move(finalEtag);
+    obs.payload = std::move(assembled);
+
+    scheduleObserveFreshnessTimer(obs);
+
+    CoapClientObserveNotification notif;
+    notif.relationId = obs.relationId;
+    notif.code = finalCode;
+    notif.observeValue = finalObsVal;
+    notif.contentFormat = obs.contentFormat;
+    notif.etag = obs.etag;
+    notif.payload = obs.payload;
+    notif.receivedAt = simTime();
+    receivedNotifications.push_back(notif);
+    emit(notificationReceivedSignal, 1L);
+    onObserveNotification(notif);
+
+    if (!wasEstablished)
+        emit(activeObservationsSignal, static_cast<long>(observationsByPeerToken.size()));
+
+    if (fromReg && originId != 0) {
+        simtime_t latency = SIMTIME_ZERO;
+        auto startIt = activeRequestStarts.find(originId);
+        if (startIt != activeRequestStarts.end()) {
+            latency = simTime() - startIt->second;
+            activeRequestStarts.erase(startIt);
+        }
+        emit(requestCompletedSignal, 1L);
+        emit(requestLatencySignal, latency);
+    }
+}
+
+void CoapClient::handleObserveBlock2FailureOrAbort(uint64_t subRequestId, bool aborted, const char *reason, uint8_t coapCode)
+{
+    auto mapIt = pendingObserveBlock2SubRequests.find(subRequestId);
+    if (mapIt == pendingObserveBlock2SubRequests.end())
+        return;
+    CoapObserverKey key = mapIt->second;
+    pendingObserveBlock2SubRequests.erase(mapIt);
+
+    auto obsIt = observationsByPeerToken.find(key);
+    if (obsIt == observationsByPeerToken.end())
+        return;
+    CoapClientObservation& obs = obsIt->second;
+    if (!obs.block2InProgress || obs.block2ActiveSubRequestId != subRequestId)
+        return;
+
+    bool fromReg = obs.block2FromRegistration;
+    uint64_t originId = obs.block2OriginRequestId;
+    cancelInFlightObserveBlock2(obs);
+    obs.block2FromRegistration = false;
+    obs.block2OriginRequestId = 0;
+
+    if (fromReg && originId != 0) {
+        activeRequestStarts.erase(originId);
+        if (aborted) {
+            ++abortedCount;
+            emit(requestAbortedSignal, 1L);
+        }
+        else {
+            ++failedCount;
+            emit(requestFailedSignal, 1L);
+        }
+    }
+    terminateObservation(key, coapCode, reason);
 }
 
 void CoapClient::acceptObserveUpdate(CoapClientObservation& obs, const Ptr<const CoapHeader>& responseHeader,
@@ -934,6 +1321,7 @@ void CoapClient::terminateObservation(const CoapObserverKey& key, uint8_t code, 
     if (obsIt == observationsByPeerToken.end())
         return;
 
+    cancelInFlightObserveBlock2(obsIt->second);
     CoapClientObservation removed = std::move(obsIt->second);
     observationsByCacheKey.erase(removed.cacheKey);
     observationsByPeerToken.erase(obsIt);
@@ -989,10 +1377,11 @@ bool CoapClient::handleUnsolicitedResponse(const CoapPeerEndpoint& peer, bool de
     }
 
     CoapClientObservation& obs = obsIt->second;
-    if (obs.established && !observe::isObserveOrderNewer(obs.lastObserveValue, obs.lastReceivedTime, obsVal, simTime()))
+    if ((obs.established || obs.block2InProgress)
+            && !observe::isObserveOrderNewer(obs.lastObserveValue, obs.lastReceivedTime, obsVal, simTime()))
         return true;
 
-    acceptObserveUpdate(obs, header, payload, obsVal);
+    handleObservePayloadResponse(obs, header, payload, obsVal, /*fromRegistration=*/false, /*originRequestId=*/0);
     return true;
 }
 
@@ -1032,6 +1421,14 @@ void CoapClient::completeLogicalTransfer(uint64_t transferId, const CoapPeerEndp
 void CoapClient::dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpoint& peer,
         const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload)
 {
+    if (ignoredObserveBlock2SubRequests.erase(requestId) > 0)
+        return;
+
+    if (pendingObserveBlock2SubRequests.find(requestId) != pendingObserveBlock2SubRequests.end()) {
+        handleObserveBlock2Response(requestId, peer, responseHeader, payload);
+        return;
+    }
+
     auto mapIt = subRequestToTransfer.find(requestId);
     if (mapIt == subRequestToTransfer.end()) {
         onRequestCompleted(requestId, peer, responseHeader, payload);
@@ -1217,6 +1614,14 @@ void CoapClient::dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpo
 
 void CoapClient::dispatchRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode)
 {
+    if (ignoredObserveBlock2SubRequests.erase(requestId) > 0)
+        return;
+
+    if (pendingObserveBlock2SubRequests.find(requestId) != pendingObserveBlock2SubRequests.end()) {
+        handleObserveBlock2FailureOrAbort(requestId, false, reason, coapCode);
+        return;
+    }
+
     auto mapIt = subRequestToTransfer.find(requestId);
     if (mapIt == subRequestToTransfer.end()) {
         onRequestFailed(requestId, reason, coapCode);
@@ -1229,6 +1634,14 @@ void CoapClient::dispatchRequestFailed(uint64_t requestId, const char *reason, u
 
 void CoapClient::dispatchRequestAborted(uint64_t requestId)
 {
+    if (ignoredObserveBlock2SubRequests.erase(requestId) > 0)
+        return;
+
+    if (pendingObserveBlock2SubRequests.find(requestId) != pendingObserveBlock2SubRequests.end()) {
+        handleObserveBlock2FailureOrAbort(requestId, true, "Observe Block2 request aborted", 0);
+        return;
+    }
+
     auto mapIt = subRequestToTransfer.find(requestId);
     if (mapIt == subRequestToTransfer.end()) {
         onRequestAborted(requestId);
@@ -1252,9 +1665,13 @@ void CoapClient::onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& 
         const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload)
 {
     simtime_t latency = SIMTIME_ZERO;
+    simtime_t startedAt = simTime();
+    bool hasStart = false;
     auto startIt = activeRequestStarts.find(requestId);
     if (startIt != activeRequestStarts.end()) {
-        latency = simTime() - startIt->second;
+        startedAt = startIt->second;
+        latency = simTime() - startedAt;
+        hasStart = true;
         activeRequestStarts.erase(startIt);
     }
 
@@ -1284,15 +1701,19 @@ void CoapClient::onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& 
             uint8_t code = responseHeader->getCode();
             if (code < 128 && hasObs) {
                 bool wasEstablished = obs.established;
-                if (!wasEstablished || observe::isObserveOrderNewer(obs.lastObserveValue, obs.lastReceivedTime, obsVal, simTime()))
-                    acceptObserveUpdate(obs, responseHeader, payload, obsVal);
-                if (!wasEstablished)
-                    emit(activeObservationsSignal, static_cast<long>(observationsByPeerToken.size()));
+                if ((!wasEstablished && !obs.block2InProgress)
+                        || observe::isObserveOrderNewer(obs.lastObserveValue, obs.lastReceivedTime, obsVal, simTime())) {
+                    if (hasStart)
+                        activeRequestStarts[requestId] = startedAt;
+                    handleObservePayloadResponse(obs, responseHeader, payload, obsVal,
+                            /*fromRegistration=*/true, /*originRequestId=*/requestId);
+                    return;
+                }
                 emit(requestCompletedSignal, 1L);
                 emit(requestLatencySignal, latency);
                 return;
             }
-            if (obs.established) {
+            if (obs.established || obs.block2InProgress) {
                 terminateObservation(key, code, hasObs ? "Observe re-registration failed" : "Server dropped Observe on refresh");
                 return;
             }

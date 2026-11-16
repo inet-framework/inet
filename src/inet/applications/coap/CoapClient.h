@@ -96,6 +96,8 @@ class INET_API CoapClient : public CoapEndpointBase
     std::map<CoapClientObserveCacheKey, CoapObserverKey> observationsByCacheKey;
     std::map<uint64_t, CoapObserverKey> pendingObserveRegistrations;
     std::map<uint64_t, CoapObserverKey> observeConsumerToRelation;
+    std::map<uint64_t, CoapObserverKey> pendingObserveBlock2SubRequests;
+    std::set<uint64_t> ignoredObserveBlock2SubRequests;
     std::vector<CoapClientObserveNotification> receivedNotifications;
 
     // RFC 7959 Blockwise & RFC 9175 Request-Tag state
@@ -162,6 +164,14 @@ class INET_API CoapClient : public CoapEndpointBase
     static CoapClientObserveCacheKey buildObserveCacheKey(const CoapPeerEndpoint& peer,
             const CoapParsedUri& parsedUri, int reqAccept, const std::vector<CoapOption>& extraOptions);
     void scheduleObserveFreshnessTimer(CoapClientObservation& obs);
+    void scheduleObserveBlock2Reregister(CoapClientObservation& obs);
+    void cancelInFlightObserveBlock2(CoapClientObservation& obs);
+    bool sendNextObserveBlock2Request(CoapClientObservation& obs);
+    bool handleObservePayloadResponse(CoapClientObservation& obs, const Ptr<const CoapHeader>& responseHeader,
+            const std::vector<uint8_t>& payload, uint32_t observeVal, bool fromRegistration, uint64_t originRequestId);
+    void handleObserveBlock2Response(uint64_t subRequestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload);
+    void handleObserveBlock2FailureOrAbort(uint64_t subRequestId, bool aborted, const char *reason, uint8_t coapCode);
     void acceptObserveUpdate(CoapClientObservation& obs, const Ptr<const CoapHeader>& responseHeader,
             const std::vector<uint8_t>& payload, uint32_t observeVal);
     void terminateObservation(const CoapObserverKey& key, uint8_t code, const char *reason);

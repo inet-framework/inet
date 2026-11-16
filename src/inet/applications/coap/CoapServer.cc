@@ -605,11 +605,30 @@ void CoapServer::pumpObserverNotifications(simtime_t now)
         if (ready.hasMaxAge)
             addCoapOptionUint(hdr, COAP_OPT_MAX_AGE, ready.maxAge);
 
+        std::vector<uint8_t> outboundPayload = std::move(ready.payload);
+        if (ready.includeObserve && !ready.terminal) {
+            uint8_t prefSzx = 6;
+            blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+            uint8_t outSzx = (obs.block2Szx >= 0) ? std::min(static_cast<uint8_t>(obs.block2Szx), prefSzx) : prefSzx;
+            uint32_t outBlockSize = 1U << (outSzx + 4U);
+            if (obs.block2Szx >= 0 || outboundPayload.size() > outBlockSize) {
+                size_t sliceLen = std::min<size_t>(outboundPayload.size(), outBlockSize);
+                bool more = (sliceLen < outboundPayload.size());
+                blockwise::CoapBlockOption notifB2;
+                notifB2.num = 0;
+                notifB2.more = more;
+                notifB2.szx = outSzx;
+                addCoapOptionUint(hdr, COAP_OPT_BLOCK2, blockwise::encodeCoapBlockValue(notifB2));
+                addCoapOptionUint(hdr, COAP_OPT_SIZE2, static_cast<uint32_t>(outboundPayload.size()));
+                outboundPayload.resize(sliceLen);
+            }
+        }
+
         uint64_t outboundId = 0;
         bool queued = submitOutboundMessage(obs.key.peer, /*peerIsMulticast=*/false, /*confirmable=*/true,
                 /*isRequest=*/false, /*requestId=*/0, obs.key.token,
                 ready.terminal ? "CoapTerminalNotification" : "CoapNotification",
-                hdr, ready.payload, /*refreshObserveOnRetry=*/ready.includeObserve, &outboundId);
+                hdr, outboundPayload, /*refreshObserveOnRetry=*/ready.includeObserve, &outboundId);
         if (!queued) {
             removeObserverAndEmit(obsIt);
             continue;
@@ -1054,6 +1073,7 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
                 rel.pathSegments = entry.pathSegments;
                 rel.negotiatedContentFormat = entry.contentFormat;
                 rel.acceptFormat = hasAccept ? static_cast<int32_t>(requestedAccept) : -1;
+                rel.block2Szx = hasBlock2 ? static_cast<int32_t>(b2Opt.szx) : -1;
                 rel.hasPendingNotification = false;
                 includeObserve = true;
                 if (!alreadyPresent)
