@@ -1,0 +1,92 @@
+# MQTT-SN implementation and verification ledger
+
+> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [feature inventory](../../protocol/mqttsn/features.md), [implementation plan](../../../../../plan/pending/mqtt-sn.md)
+
+Work was authorized by the user's “Execute the plan” instruction on 2026-11-16. The starting tree is `73e8f28a285acc2305a8a963c3c6ecb95e59fc12`; the existing `AGENTS.md` modification is outside the change. Source protection, protocol ownership, packet/socket contracts and the plan's C1 contract were checked before the first write. Product code belongs under `applications/mqttsn`, with dependencies toward existing MQTT, socket and packet contracts; no protected packet-core edit is required.
+
+The supported profile is MQTT-SN v1.2 over UDP (one message per datagram, maximum 65507 bytes), IPv4 unicast/local broadcast discovery and configured IPv6 unicast. Per-client broker connections terminate QoS independently; shared gateway publications carry connectionless traffic and Wills. Native sensor-link transport, forwarding encapsulation, IPv6 discovery, durable state, encryption, aggregation and full section 4.1 gateway transparency are excluded. The plan defines remaining policy choices and memory-loss limits.
+
+| Step | Implementation | Direct verification |
+| --- | --- | --- |
+| C1: requirements/profile | Requirement catalog, feature inventory and this ledger written. | Source/plan inspection; no runtime claim. |
+| C2: wire format | Packet schema, full codec, protocol identity, dissector/printer and 34 filler vectors. | Dedicated codec/filler module and real UDP wire case pass. Broader serializer suite has a compilation setup failure below. |
+| C3: connection | Per-sensor MQTT TCP admission, refusal mapping, bounded setup, connection-scoped framing and endpoint replacement. | IPv4/IPv6, every MQTT refusal code, unavailable setup, duplicate CONNECT, changed UDP port and partial CONNACK cases pass. |
+| C4: topics/routing | Distinct normal/predefined/short representations, wildcard routing, registration gates, subscription replay and retained semantics. | Both production directions, retained deletion, topic isolation, subscription retries/results, registration loss/refusal and full topic-table handler checks pass. |
+| C5: QoS −1/1 | Shared connection, independent hop ids, duplicate/retry flags, congestion waits and QoS 0 feedback. | Connectionless delivery, both QoS 1 senders, congestion and six zero-id feedback/namespace/repair cases pass. |
+| C6: QoS 2/recovery | Retained sender phases, Method B receiver suppression, clean/persistent reset, broker-session restoration queue. | Both senders and receivers, duplicate/id reuse, error PUBACK, clean discard/persistent resume, broker session loss and restoration identifier pressure pass. |
+| C7: Will/liveness/sleep | Will matrix/updates, independently live upstreams, active/sleep supervision, suspended downlink exchanges and poll drains. | Negotiation/update retries, shared outage/queued Will, 60/61s boundaries, sleep/poll loss, late acknowledgements, multi-payload drain and expiry pass. |
+| C8: discovery/failures/lifecycle | Candidate/suppression/expiry/backoff, live gateway failover, socket/event cleanup and retained restart state. | Discovery/backoff/relayed address/expiry, UDP-only partition with old gateway alive, malformed/stale/wrong-peer traffic, both endpoint lifecycle cases and three stop terminal paths pass. |
+| C9: examples/docs/integration | Eight wired/wireless configurations, user-guide chapter, release note, feature dependencies and seven protocol reviewer documents. | Fixed-seed examples/counts, user-guide build and feature matrix pass; existing MQTT regression passes. Mechanical gate limitations are recorded below. |
+
+The result is an integrated, uncommitted working-tree patch. C1–C9 describe ownership and proposed commit boundaries; no intermediate stage trees, parent-versus-feature executions or nine-commit series have been constructed. No baselines have changed, and nothing has been published. The existing `AGENTS.md` edit is preserved.
+
+The final handwritten MQTT-SN source manifest is `/tmp/inet-mqttsn-source-manifest.txt`, SHA-256 `ab73035a284c05b2a3df08de75d28851535180c0cc6ec851709c3cb5fdaeb5b8` (sorted `sha256sum` entries for package files excluding generated `_m.*`). This identifies the uncommitted source beyond the starting Git revision.
+
+## Implementation corrections found by direct checks
+
+The initial architecture/ownership contract remained inside `applications/mqttsn`, existing MQTT/socket/packet contracts, new fixtures and documentation. No broker or packet-core refactor was needed. Runtime investigation corrected discovery's missing output-interface tag, kept TTL 1 confined to discovery, avoided gateway takeover reconnect loops, retained persistent downlink phases across setup, and restored accepted subscriptions before flushing new MQTT work under identifier pressure.
+
+The final self-audit added per-session latest-QoS-0 representation context indexed by TopicId. Both endpoints now handle zero-id congestion/invalid-topic PUBACK without an ACK transaction, and a predefined-topic error cannot erase an equal-number normal binding. The plan and user guide record the remaining ambiguity after reuse of the same peer/TopicId with a different representation. This map clears with session exchanges and stores no payload/retry template. A malformed Will topic no longer cancels its setup timer before validation. Persistent first connections receive the configured predefined table.
+
+Shutdown tests found two separate terminal-path defects: timeout failed to finish the active lifecycle operation, and old DISCONNECT transactions could survive restart. Acknowledgement, retry exhaustion and timeout now remove only the shutdown exchange, retain eligible persistent data phases, close/destroy the socket and complete the operation. Gateway callbacks reschedule the shared reconnect timer after closure; no per-sensor autonomous reconnection is introduced.
+
+A fresh accepted subscription invalidates the older UNSUBSCRIBE reply cache. `MqttSnUnsubscribeReuse` reuses the completed unsubscribe id/filter after a new subscription and requires another actual unsubscribe, followed by a closed no-delivery window. The focused replay/subscription rerun passes 9/9 (`/tmp/inet-mqttsn-replay-verified.out`, `.log`).
+
+## Executed checks
+
+All commands below run from `/home/miguel/workspace/inet-mqtt-sn`, after `source .envrc >/dev/null`, unless otherwise stated. Protocol fixtures use `seed-set = 0`; their checked-in `.test` files pin finite limits and parameters. There are no expected-failure markers. The runner's two setup/summary tasks are not counted as tests.
+
+| Check | Command / selection | Outcome | Raw artifacts |
+| --- | --- | --- | --- |
+| Final debug build | `make MODE=debug -j8` | PASS, exit 0 | `/tmp/inet-mqttsn-final-gateway-build.log` |
+| Final release build | `make MODE=release -j6` | PASS, exit 0 | `/tmp/inet-mqttsn-final-gateway-release.log` |
+| MQTT-SN production protocol suite | `opp_run_protocol_tests --load . -p inet -m debug --no-build -w mqttsn -l INFO -L INFO --log-file /tmp/inet-mqttsn-protocol-verdict.log` | PASS: 79/79, exit 0 | `/tmp/inet-mqttsn-protocol-verdict.out`, `.log` |
+| MQTT-SN module suite | `opp_run_module_tests --load . -p inet -m debug --no-build -f 'mqttsn_' -l INFO -L INFO --log-file /tmp/inet-mqttsn-module-verdict.log` | PASS: 9/9, exit 0 | `/tmp/inet-mqttsn-module-verdict.out`, `.log` |
+| Release protocol sample | `opp_run_protocol_tests --load . -p inet -m release --no-build -w mqttsn -f '(WireFormat\|Connect\|RoutingQos2\|.*QosZero.*)\.test$' -l INFO -L INFO --log-file /tmp/inet-mqttsn-release-verified.log` (remove the Markdown table escapes before use) | PASS: 10/10, exit 0; before the final stop-only cleanup | `/tmp/inet-mqttsn-release-verified.out`, `.log` |
+| Release shutdown paths | `opp_run_module_tests --load . -p inet -m release --no-build -f 'mqttsn_stop_' -l INFO -L INFO --log-file /tmp/inet-mqttsn-stop-release.log` | PASS: 3/3, exit 0; before final subscription replay cleanup | `/tmp/inet-mqttsn-stop-release.out`, `.log` |
+| Existing MQTT integration | `opp_run_protocol_tests --load . -p inet -m debug --no-build -w '^(tests/protocol/)?mqtt(sn)?$' -l INFO -L INFO --log-file /tmp/inet-mqttsn-protocol-final.log` | PASS: 53/53 at that stage: all 24 existing MQTT plus the then-existing 29 MQTT-SN cases, exit 0 | `/tmp/inet-mqttsn-protocol-final.out`, `.log` |
+
+The existing MQTT sources were unchanged throughout. Subsequent changes were confined to MQTT-SN source/tests and documentation. The final protocol selection includes every `.test` in `tests/protocol/mqttsn/`. The module selection is `mqttsn_serializer`, `mqttsn_topic_capacity`, `mqttsn_gateway_capacity`, `mqttsn_restoration_capacity`, `mqttsn_lifecycle`, `mqttsn_gateway_lifecycle`, `mqttsn_stop_ack`, `mqttsn_stop_retry`, and `mqttsn_stop_timeout`. `mqttsn_serializer` executes all 34 filler variants through the registered packet serializer as well as direct golden bytes and malformed/length boundaries. Capacity fixtures are explicitly handler/helper evidence; lifecycle and protocol fixtures exercise real modules/sockets.
+
+Earlier failures are not counted as passes. Initial source/fixture corrections and reruns are retained in `/tmp/inet-mqttsn-protocol-pass1.*`, `protocol-corrections.*`, `boundaries.*`, `discovery-backoff.*`, `count-check.*`, `plan-boundaries.*`, `modules-complete.*` and `modules-verified.*` with the `inet-mqttsn-` prefix. An accidental concurrent debug/release protocol invocation removed shared generated work files (`/tmp/inet-mqttsn-protocol-all.*`); it was a setup failure and was replaced by sequential runs. The count fixtures were corrected because `assertEvent` selects one occurrence; count guards now use filters and separate total counts where required. The stop failures led to the terminal-path fixes above.
+
+## Examples and documentation
+
+From an initialized INET shell, each example ran from `examples/mqttsn` with `inet --debug -u Cmdenv -c CONFIG -r 0 --cmdenv-express-mode=true`. Every run finished at 8s with seed 0 and exit 0. Logs are `/tmp/inet-mqttsn-example-CONFIG.log`; Qos1Loss was rerun with express mode false and app detail logging as `/tmp/inet-mqttsn-example-Qos1Loss-final.log`. Its first measurement establishes registration before the BER=1 burst at 1.15–1.35s; the later PUBLISH is retried with flags 160 (QoS 1 + DUP), TopicId 1 and MsgId 4.
+
+| Configuration | Observer messages / bytes | Sensor messages / bytes |
+| --- | ---: | ---: |
+| General | 2 / 8 | 1 / 1 |
+| Qos1 | 2 / 8 | 1 / 1 |
+| Qos2 | 1 / 4 | 1 / 1 |
+| Qos1Loss | 2 / 8 | 1 / 1 |
+| SleepingSensor | 0 / 0 | 1 / 1 |
+| Connectionless | 2 / 8 | 0 / 0 |
+| Discovery | 2 / 8 | 1 / 1 |
+| Wireless | 2 / 8 | 1 / 1 |
+
+These values were read from each run's `results/CONFIG-#0.sca` application `deliveredMessages:count` and `deliveredBytes:sum`. Exact bytes are asserted in the protocol fixtures; example counts alone are not payload correctness evidence. [Example instructions](../../../../../examples/mqttsn/README.md) state the intended payloads and behavior.
+
+The user guide builds with `source /tmp/inet-mqtt-doc-venv/bin/activate` followed by `PYTHONPATH=/tmp/inet-mqtt-doc-builder/extensions ENGINE=none doc/src/build --only users-guide --media /tmp/inet-mqtt-doc-cache/src/media --cache /tmp/inet-mqttsn-doc-cache --out /tmp/inet-mqttsn-doc-site`. Exit 0; raw log `/tmp/inet-mqttsn-doc-verified.log`, output `/tmp/inet-mqttsn-doc-site/docs/dev/users-guide/ch-mqtt-sn.html`. Two existing warnings refer to the omitted migration/developer guides; there are no MQTT-SN chapter warnings. An initial build failed fetching media, and another lacked `omnetpp_media`; the successful run explicitly uses the available local media and extension sources. Mermaid rendering remains unverified.
+
+## Feature combinations
+
+`opp_featuretool` generated the feature state; package declarations and dependencies remain in `.oppfeatures`. This matrix ran before the final QoS 0/stop fixes, which introduce no new feature dependency. It establishes the declared composition at that point; it is not a claim of rebuilding every matrix entry after each local state-machine correction.
+
+| Profile | Preparation and check | Outcome / artifacts |
+| --- | --- | --- |
+| MQTT on, MQTT-SN off | `opp_featuretool disable -f MqttSn`, `make makefiles`, debug build, then `MqttConnect.test` in the existing MQTT suite | PASS build and 1/1 runtime; `/tmp/inet-mqttsn-featureoff-build.log`, `featureoff-runtime.out`, `.log` |
+| Only MQTT-SN and required neighbors | `opp_featuretool disable -f all`, `opp_featuretool enable -r MqttSn`, `make makefiles`, debug build | PASS; `/tmp/inet-mqttsn-minimal-build.log`. Examples/tests and IPv4/TCP implementations are disabled in this compile-only profile. |
+| Full examples/tests restored | `opp_featuretool enable -r MqttSnExamples MqttSnTests`, compare generated state with saved full profile, `make makefiles`, debug/release builds | PASS; state comparison `/tmp/inet-mqttsn-feature-restore.diff` is empty. Final builds and executions use this restored profile. |
+
+## Mechanical checks and limits
+
+Scoped architecture and naming, source-seal check for `src/inet/applications/mqttsn`, document seal/index check, release-note format and `git diff --check` pass. Raw logs are `/tmp/inet-mqttsn-scoped-architecture.log`, `scoped-naming.log`, `source-seals-final.log`, `document-seals-final.log` and `release-note-check.log`, all with the `inet-mqttsn-` prefix.
+
+Repository-wide architecture, naming and interface checks exit 1 on unchanged files, including `common/socket/SocketMap.cc`, `common/IInterfaceRegistrationListener.h`, `routing/ospf_common` and `common/IPrintableObject.h`. They report no MQTT-SN paths. See `/tmp/inet-mqttsn-architecture-all.log`, `naming-all.log` and `interfaces.log` with the same prefix. These results do not make the repository-wide gates green. The C++ tidy gate exits 2 because `clang-tidy` is absent (`/tmp/inet-mqttsn-cpp.log`).
+
+The broad `serializer_chunk_roundtrip.test` selection and serializer support build have compilation setup failures because their unconditional includes reference generated headers of disabled protocols (CsmaCaMac, DHCP, GPTP and IEEE 802.1AE). Raw logs are `/tmp/inet-mqttsn-serializer.out`, `.log` and `serializer-support.log`. The dedicated MQTT-SN codec/filler module passes; the broader suite is **NOT_VALIDATED**, not waived or labeled passing.
+
+The skill-suite validator, packaging script and tests named in local `AGENTS.md` do not exist in this INET checkout. They remain unavailable rather than substituted from another repository. No skill package changes. Series/PR gates and publication are NOT_RUN because no commit series or PR was created. Fingerprint, statistical and chart baselines were neither run nor modified. There is no external MQTT-SN implementation comparison or hardware/energy result.
+
+These tests establish their selected production paths and helper invariants, not complete MQTT-SN conformance under every possible malformed message, timer race, memory failure or workload. The profile exclusions above and zero-id correlation limit remain part of the model contract.
