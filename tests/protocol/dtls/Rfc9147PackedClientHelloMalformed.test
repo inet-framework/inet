@@ -1,0 +1,43 @@
+%description:
+
+Truncate the second ClientHello fragment envelope in one plaintext record.
+No ACK may credit the malformed record; a fresh valid retransmission recovers.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint64_t malformedNumber = 65535;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_packed_client_hello_malformed")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { malformedNumber = findChunk<inet::dtls::DtlsPlaintextHeader>(p)->getSequenceNumber(); packClientHello(p, false, true); }))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet); if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i) if (a->getEpochs(i) == 0 && a->getSequenceNumbers(i) == malformedNumber) return true; return false; }).within(3)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).assertEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h->getFragmentLength() < h->getMessageLength(); }).within(1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(1).within(0.1))
+    .once(on("host1.app[0].dtls").signal("handshakeRetransmission").within(1.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2));
+}
+%activity:
+EV << "rfc9147_packed_client_hello_malformed compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_packed_client_hello_malformed: PASS

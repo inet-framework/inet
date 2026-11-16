@@ -1,0 +1,42 @@
+%description:
+
+One extra byte follows an otherwise valid self-delimiting ClientHello body. The
+handshake, record, UDP, IPv4 and Ethernet envelope lengths all include that byte.
+The production receiver must reject the unconsumed body tail with decode_error.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_trailing_client_hello")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate(appendClientHelloTail))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 50; }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.acceptedEndpoints.empty(), "body tail cannot create or establish a full association"); }));
+}
+%activity:
+EV << "rfc9147_trailing_client_hello compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+%contains: stdout
+PROTOCOLTEST rfc9147_trailing_client_hello: PASS

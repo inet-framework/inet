@@ -1,0 +1,86 @@
+%description:
+
+Typed tap predicates combine with expressions before occurrence counting. Interleaved
+100-byte and 200-byte UDP datagrams share a destination. An extra 200-byte datagram
+uses another destination port and must also pass. Only the second matching 200-byte
+datagram is dropped; all four 100-byte datagrams and the other two 200-byte datagrams
+must arrive. This proves nonmatching typed packets do not advance nth(2).
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/applications/base/ApplicationPacket_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Ptr<const UdpHeader> udpHeader(const Ptr<const Chunk>& chunk)
+{
+    if (auto udp = dynamicPtrCast<const UdpHeader>(chunk))
+        return udp;
+    if (auto sequence = dynamicPtrCast<const SequenceChunk>(chunk))
+        for (const auto& child : sequence->getChunks())
+            if (auto udp = udpHeader(child))
+                return udp;
+    return nullptr;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("typed_tap_predicate")
+        .intercept(tap("tap").from("host1").filterPacket("udp.destPort == 5000")
+            .filterPacket([](const Packet *packet) {
+                auto udp = udpHeader(packet->peekData());
+                return udp && udp->getTotalLengthField() == B(208);
+            }).nth(2).drop())
+        .meanwhile(exactlyTimes(4, on("host2.udp").signal("packetSentToUpper")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 100; }).within(0.5)))
+        .meanwhile(exactlyTimes(1, on("host2.udp").signal("packetSentToUpper")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->getTag<L4PortInd>()->getDestPort() == 5001; }).within(0.5)))
+        .meanwhile(never(on("host2.udp").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+            return c.event.packet->getByteLength() == 200 && c.event.packet->getTag<L4PortInd>()->getDestPort() == 5000
+                && c.event.packet->peekAtFront<ApplicationPacket>()->getSequenceNumber() == 1;
+        }).within(0.5)))
+        .exactlyTimes(2, on("host2.udp").signal("packetSentToUpper")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 200 && c.event.packet->getTag<L4PortInd>()->getDestPort() == 5000; }).within(0.5));
+}
+
+%activity:
+EV << "typed_tap_predicate compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+sim-time-limit = 1s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.host1.numApps = 3
+*.host1.app[*].typename = "UdpBasicApp"
+*.host1.app[*].destAddresses = "host2"
+*.host1.app[0..1].destPort = 5000
+*.host1.app[*].sendInterval = 0.02s
+*.host1.app[0].localPort = 4000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].startTime = 0.2s
+*.host1.app[0].stopTime = 0.27s
+*.host1.app[1].localPort = 4001
+*.host1.app[1].messageLength = 200B
+*.host1.app[1].startTime = 0.21s
+*.host1.app[1].stopTime = 0.26s
+*.host1.app[2].localPort = 4002
+*.host1.app[2].destPort = 5001
+*.host1.app[2].messageLength = 200B
+*.host1.app[2].startTime = 0.215s
+*.host1.app[2].stopTime = 0.216s
+*.host2.numApps = 2
+*.host2.app[*].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+*.host2.app[1].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST typed_tap_predicate: PASS

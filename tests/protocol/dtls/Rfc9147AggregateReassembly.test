@@ -1,0 +1,52 @@
+%description:
+
+Two peers retain incomplete ClientHellos concurrently. The engine's observable
+retained bytes must include both owners and release each owner's reservation.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static long oneReservation = 0;
+static unsigned fragmentsReceived = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_aggregate_reassembly")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { sliceClientHello(p, false, 0); }))
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4436").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { sliceClientHello(p, false, 0); }))
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).drop())
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4436").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); if (h && h->getMessageType() == 1 && h->getFragmentLength() < h->getMessageLength()) ++fragmentsReceived; return false; }).within(1)))
+    .once(on("host2.app[0].dtls").signal("reassemblyBytes").filterEvent([](const MatchContext& c) { return c.event.value > 0; }).assertEvent([](const MatchContext& c) { oneReservation = c.event.value; return oneReservation > 0; }).within(1))
+    .once(on("host2.app[0].dtls").signal("reassemblyBytes").filterEvent([](const MatchContext& c) { return c.event.value == 2 * oneReservation; }).within(0.2))
+    .once(on("host2.app[0].dtls").signal("reassemblyBytes").filterEvent([](const MatchContext& c) { return c.event.value == oneReservation; }).notBefore(0.3).within(0.5))
+    .once(on("host2.app[0].dtls").signal("reassemblyBytes").filterValue(0).within(0.2))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(fragmentsReceived == 2 && app.establishedCount == 0, "both real fragments were retained then individually expired"); }));
+}
+%activity:
+EV << "rfc9147_aggregate_reassembly compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 3s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 0.3s
+*.host2.app[0].dtls.handshakeTimeout = 0.5s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_aggregate_reassembly: PASS

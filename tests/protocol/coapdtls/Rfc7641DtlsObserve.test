@@ -1,0 +1,254 @@
+%description:
+
+RFC 7641 + DTLS 1.3 -- CoAP Observe registration, CON notifications across
+server mutations and DTLS KeyUpdate (rekeyAfterRecords = 2), notification
+supersession when an ACK to an earlier CON notification is dropped on the wire,
+and clean Observe teardown via onDtlsSessionClosed on both client (onObserveTerminated)
+and server (activeObservers == 0, no further notifications after session close).
+
+%includes:
+#include <vector>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "../coap/CoapChecks.h"
+#include "../dtls/DtlsTestUtils.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+using inet::protocoltest::dtls::findChunk;
+
+class ObsDtlsClient : public CoapClient
+{
+  public:
+    uint64_t consumerId = 0;
+    std::vector<uint64_t> terminatedIds;
+    std::vector<CoapClientObserveNotification> notifications;
+
+    uint64_t subObs(const std::string& host, int port, const std::string& uri) {
+        consumerId = subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true);
+        return consumerId;
+    }
+
+    void closeDtlsAssociation() {
+#ifdef INET_WITH_DTLS
+        if (!dtlsSessions.empty()) {
+            auto id = dtlsSessions.begin()->first;
+            dtlsSocket.close(id);
+        }
+#endif
+    }
+
+    size_t getClientObsCount() const { return observationsByPeerToken.size(); }
+
+  protected:
+    virtual void onObserveNotification(const CoapClientObserveNotification& notif) override {
+        notifications.push_back(notif);
+        CoapClient::onObserveNotification(notif);
+    }
+
+    virtual void onObserveTerminated(uint64_t relationId, uint8_t code, const char *reason) override {
+        terminatedIds.push_back(relationId);
+        CoapClient::onObserveTerminated(relationId, code, reason);
+    }
+};
+
+Define_Module(ObsDtlsClient);
+
+class ObsDtlsServer : public CoapServer
+{
+  public:
+    size_t getObserverCount() const { return observers.size(); }
+    bool setTemp(const std::string& val) {
+        return updateResourceValue("/sensors/temp", asciiBytes(val), 0);
+    }
+};
+
+Define_Module(ObsDtlsServer);
+
+static int clientNotifSignals = 0;
+static int serverNotifSent = 0;
+static int dropAckPhase = 0;
+
+Define_ProtocolTestProgram()
+{
+    clientNotifSignals = 0;
+    serverNotifSent = 0;
+    dropAckPhase = 0;
+
+    return ProtocolTest("coap_dtls_observe")
+        // Drop the Empty ACK (CoapAck) for the notification triggered while dropAckPhase == 1.
+        .intercept(tap("tap").from("host1").filterPacket([](const Packet *p) {
+            return dropAckPhase == 1
+                    && findChunk<inet::dtls::DtlsCiphertextHeader>(p) != nullptr
+                    && std::string(p->getName()) == "CoapAck";
+        }).nth(1).drop())
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].coap").signal("notificationReceived").filterEvent([](const MatchContext&) {
+                ++clientNotifSignals;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host2.app[0].coap").signal("notificationSent").filterEvent([](const MatchContext&) {
+                ++serverNotifSent;
+                return true;
+            }).within(15.0)))
+
+        // Step 1: Subscribe to /sensors/temp over DTLS and await initial 2.05 Observe content.
+        .act(action().at(0.2).run<ObsDtlsClient>("host1.app[0].coap", [](ObsDtlsClient& cli) {
+            if (cli.subObs("host2", 5684, "coaps://host2:5684/sensors/temp") == 0)
+                throw cRuntimeError("Failed to subscribe Observe over DTLS");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(3.0))
+        .act(action().run<ObsDtlsClient>("host1.app[0].coap", [](ObsDtlsClient& cli) {
+            if (cli.notifications.size() != 1 || std::string(cli.notifications[0].payload.begin(), cli.notifications[0].payload.end()) != "20C")
+                throw cRuntimeError("Expected initial Observe notification '20C'");
+        }))
+
+        // Step 2: Multiple resource updates crossing KeyUpdate (rekeyAfterRecords = 2).
+        .act(action().run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            srv.setTemp("21C");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(2.0))
+        .act(action().run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            srv.setTemp("22C");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(2.0))
+        .act(action().run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            srv.setTemp("23C");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(2.0))
+
+        // Step 3: Supersession test -- drop client's CoapAck for "24C", then supersede with "25C" before retry timeout!
+        .act(action().run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            dropAckPhase = 1;
+            srv.setTemp("24C");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(2.0))
+        .act(action().after(0.05).run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            dropAckPhase = 0;
+            srv.setTemp("25C");
+        }))
+        .once(on("host1.app[0].coap").signal("notificationReceived").within(2.0))
+        .act(action().after(0.8).run<ObsDtlsClient>("host1.app[0].coap", [](ObsDtlsClient& cli) {
+            if (cli.notifications.size() < 6)
+                throw cRuntimeError("Expected >= 6 Observe notifications, got %zu", cli.notifications.size());
+            const auto& last = cli.notifications.back().payload;
+            if (std::string(last.begin(), last.end()) != "25C")
+                throw cRuntimeError("Expected superseded latest notification '25C', got '%s'",
+                        std::string(last.begin(), last.end()).c_str());
+        }))
+
+        // Step 4: Close DTLS association -> both client and server tear down Observe state cleanly!
+        .act(action().run<ObsDtlsClient>("host1.app[0].coap", [](ObsDtlsClient& cli) {
+            cli.closeDtlsAssociation();
+        }))
+        .once(on("host2.app[0].coap").signal("activeObservers").filterValue(0).within(3.0))
+        .act(action().after(0.2).run<ObsDtlsClient>("host1.app[0].coap", [](ObsDtlsClient& cli) {
+            if (cli.terminatedIds.size() != 1 || cli.getClientObsCount() != 0)
+                throw cRuntimeError("Expected 1 terminated client Observe and 0 active, got term=%zu active=%zu",
+                        cli.terminatedIds.size(), cli.getClientObsCount());
+        }).run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            if (srv.getObserverCount() != 0)
+                throw cRuntimeError("Expected 0 server observers after DTLS close");
+            int beforeMut = serverNotifSent;
+            srv.setTemp("26C");
+            if (serverNotifSent != beforeMut)
+                throw cRuntimeError("Server emitted notifications after DTLS session closed");
+        }))
+        .act(action().after(0.5).run<ObsDtlsServer>("host2.app[0].coap", [](ObsDtlsServer& srv) {
+            if (srv.getObserverCount() != 0)
+                throw cRuntimeError("Observer unexpectedly reappeared");
+        }));
+}
+
+%activity:
+EV << "coap_dtls_observe compiled\n";
+
+%file: ObsTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple ObsDtlsClient extends CoapClient
+{
+    parameters:
+        @class(ObsDtlsClient);
+}
+
+simple ObsDtlsServer extends CoapServer
+{
+    parameters:
+        @class(ObsDtlsServer);
+}
+
+module ObsDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: ObsDtlsClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+module ObsDtlsServerApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        dtls: <default("Dtls")> like IDtls {
+            localPort = default(5684);
+        }
+        coap: ObsDtlsServer {
+            dtlsModule = "^.dtls";
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host*.app[*].dtls.rekeyAfterRecords = 2
+*.host*.app[*].dtls.closeTimeout = 0.3s
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "ObsDtlsClientApp"
+*.host1.app[0].coap.numRequests = 0
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "ObsDtlsServerApp"
+*.host2.app[0].coap.ackTimeout = 0.5s
+*.host2.app[0].coap.ackRandomFactor = 1.0
+*.host2.app[0].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET,PUT' obs='true'>20C</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_observe: PASS

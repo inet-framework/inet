@@ -1,0 +1,282 @@
+%description:
+
+CoAP-over-DTLS statistics and signal accounting (C5): verifies requestStarted,
+requestCompleted, requestFailed, requestAborted, requestLatency, retransmission,
+duplicateReceived, activeObservations, activeObservers, associationEstablished,
+and recordOverhead across handshake establishment, cached Observe hit (0 DTLS
+records / 0 latency samples), dropped-ACK retry, DTLS sendError/timeout failure,
+and graceful stop abort.
+
+%includes:
+#include <map>
+#include <string>
+#include <vector>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "../coap/CoapChecks.h"
+#include "../dtls/DtlsTestUtils.h"
+#include "ProtocolTester.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+using inet::protocoltest::dtls::findChunk;
+
+class DtlsCoapSignalTap : public cListener
+{
+  public:
+    std::map<std::string, long> counts;
+    std::vector<simtime_t> latencies;
+    std::vector<long> overheads;
+    long lastObs = -1;
+    long lastSrvObs = -1;
+
+    void attach(cModule *mod, const std::vector<const char *>& names) {
+        for (const char *n : names)
+            mod->subscribe(n, this);
+    }
+    long count(const std::string& n) const {
+        auto it = counts.find(n);
+        return it == counts.end() ? 0 : it->second;
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t id, long v, cObject *) override {
+        const char *n = cComponent::getSignalName(id);
+        counts[n] += 1;
+        if (std::strcmp(n, "activeObservations") == 0)
+            lastObs = v;
+        else if (std::strcmp(n, "activeObservers") == 0)
+            lastSrvObs = v;
+        else if (std::strcmp(n, "recordOverhead") == 0)
+            overheads.push_back(v);
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t id, cObject *, cObject *) override {
+        counts[cComponent::getSignalName(id)] += 1;
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t id, const SimTime& t, cObject *) override {
+        const char *n = cComponent::getSignalName(id);
+        counts[n] += 1;
+        if (std::strcmp(n, "requestLatency") == 0)
+            latencies.push_back(t);
+    }
+};
+
+class StatDtlsClient : public CoapClient
+{
+  public:
+    uint64_t getReq(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {});
+    }
+    uint64_t putReq(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_PUT, true, uri, body);
+    }
+    uint64_t subObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true);
+    }
+};
+
+Define_Module(StatDtlsClient);
+
+class StatDtlsServer : public CoapServer
+{
+  public:
+    void setDelay(double sec) { responseDelay = sec; }
+};
+
+Define_Module(StatDtlsServer);
+
+static DtlsCoapSignalTap cliTap;
+static DtlsCoapSignalTap dtlsTap;
+static DtlsCoapSignalTap srvTap;
+static bool dropNextAck = false;
+static long preCacheDtlsTx = 0;
+static size_t preCacheLatencies = 0;
+
+Define_ProtocolTestProgram()
+{
+    cliTap = DtlsCoapSignalTap();
+    dtlsTap = DtlsCoapSignalTap();
+    srvTap = DtlsCoapSignalTap();
+    dropNextAck = false;
+    preCacheDtlsTx = 0;
+    preCacheLatencies = 0;
+
+    return ProtocolTest("coap_dtls_statistics")
+        .intercept(tap("tap").from("host2").filterPacket([](const Packet *p) {
+            return dropNextAck
+                    && findChunk<inet::dtls::DtlsCiphertextHeader>(p) != nullptr
+                    && std::string(p->getName()) == "CoapResponse";
+        }).nth(1).drop())
+        .act(action().at(0.05).run<ProtocolTester>("protocolTester", [](ProtocolTester& pt) {
+            auto *net = pt.getSystemModule();
+            auto *cliCoap = net->getSubmodule("host1")->getSubmodule("app", 0)->getSubmodule("coap");
+            auto *cliDtls = net->getSubmodule("host1")->getSubmodule("app", 0)->getSubmodule("dtls");
+            auto *srvCoap = net->getSubmodule("host2")->getSubmodule("app", 0)->getSubmodule("coap");
+            cliTap.attach(cliCoap, {"requestStarted", "requestCompleted", "requestFailed", "requestAborted", "requestLatency", "retransmission", "activeObservations"});
+            dtlsTap.attach(cliDtls, {"associationEstablished", "recordOverhead", "packetSentToLower"});
+            srvTap.attach(srvCoap, {"duplicateReceived", "activeObservers"});
+        }))
+
+        // 1. Handshake setup + initial Observe subscription -> associationEstablished=1, recordOverhead>0, activeObservations=1, activeObservers=1.
+        .act(action().at(0.1).run<StatDtlsClient>("host1.app[0].coap", [](StatDtlsClient& cli) {
+            if (cli.subObs("host2", 5684, "coaps://host2:5684/sensors/temp") == 0)
+                throw cRuntimeError("Failed Observe subscription");
+        }))
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(3.0))
+        .act(action().after(0.05).run<StatDtlsClient>("host1.app[0].coap", [](StatDtlsClient& cli) {
+            if (dtlsTap.count("associationEstablished") != 1 || dtlsTap.overheads.empty() || dtlsTap.overheads.back() <= 0)
+                throw cRuntimeError("Expected 1 DTLS associationEstablished and positive recordOverhead");
+            if (cliTap.lastObs != 1 || srvTap.lastSrvObs != 1)
+                throw cRuntimeError("Expected activeObservations=1 & activeObservers=1, got %ld / %ld", cliTap.lastObs, srvTap.lastSrvObs);
+
+            // 2. Cached Observe hit: 0 DTLS records transmitted, 0 new requestLatency samples.
+            preCacheDtlsTx = dtlsTap.count("packetSentToLower");
+            preCacheLatencies = cliTap.latencies.size();
+            long preCompleted = cliTap.count("requestCompleted");
+            if (cli.getReq("host2", 5684, "coaps://host2:5684/sensors/temp") == 0)
+                throw cRuntimeError("Cached Observe GET returned 0");
+            if (dtlsTap.count("packetSentToLower") != preCacheDtlsTx
+                    || cliTap.latencies.size() != preCacheLatencies
+                    || cliTap.count("requestCompleted") != preCompleted + 1)
+                throw cRuntimeError("Cached Observe hit transmitted DTLS records or emitted latency unexpectedly");
+
+            // 3. Dropped-ACK retry: retransmission=1, duplicateReceived=1, requestLatency+=1.
+            dropNextAck = true;
+            if (cli.putReq("host2", 5684, "coaps://host2:5684/items/stat", asciiBytes("v2")) == 0)
+                throw cRuntimeError("PUT failed");
+        }))
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(4.0))
+        .act(action().after(0.05).run<StatDtlsClient>("host1.app[0].coap", [](StatDtlsClient& cli) {
+            if (cliTap.count("retransmission") != 1 || srvTap.count("duplicateReceived") != 1)
+                throw cRuntimeError("Expected 1 retransmission & 1 duplicateReceived, got %ld / %ld",
+                        cliTap.count("retransmission"), srvTap.count("duplicateReceived"));
+            if (cliTap.latencies.size() != preCacheLatencies + 1)
+                throw cRuntimeError("Expected 1 additional latency sample for PUT");
+
+            // 4. DTLS sendError oversize failure (1024B Block1 chunk > 900B udpPayloadLimit) -> requestFailed=1,
+            // and delayed GET aborted on host1 stop -> requestAborted=1.
+            cli.putReq("host2", 5684, "coaps://host2:5684/items/stat", std::vector<uint8_t>(1180, 'O'));
+        }))
+        .once(on("host1.app[0].coap").signal("requestFailed").within(2.0))
+        .act(action().run<StatDtlsServer>("host2.app[0].coap", [](StatDtlsServer& srv) {
+            srv.setDelay(2.0);
+        }).run<StatDtlsClient>("host1.app[0].coap", [](StatDtlsClient& cli) {
+            cli.getReq("host2", 5684, "coaps://host2:5684/other");
+        }))
+        .act(action().after(0.05).run<ProtocolTester>("protocolTester", [](ProtocolTester& lc) {
+            auto *host1 = lc.getSystemModule()->getSubmodule("host1");
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(host1, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().after(0.3).run<ProtocolTester>("protocolTester", [](ProtocolTester&) {
+            if (cliTap.count("requestStarted") != 5
+                    || cliTap.count("requestCompleted") != 3
+                    || cliTap.count("requestFailed") != 1
+                    || cliTap.count("requestAborted") != 1)
+                throw cRuntimeError("Unexpected CoAP stat counts: started=%ld completed=%ld failed=%ld aborted=%ld",
+                        cliTap.count("requestStarted"), cliTap.count("requestCompleted"),
+                        cliTap.count("requestFailed"), cliTap.count("requestAborted"));
+            if (cliTap.lastObs != 0 || srvTap.lastSrvObs != 0)
+                throw cRuntimeError("Expected activeObservations=0 & activeObservers=0 after stop, got %ld / %ld",
+                        cliTap.lastObs, srvTap.lastSrvObs);
+        }));
+}
+
+%activity:
+EV << "coap_dtls_statistics compiled\n";
+
+%file: StatTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple StatDtlsClient extends CoapClient
+{
+    parameters:
+        @class(StatDtlsClient);
+}
+
+simple StatDtlsServer extends CoapServer
+{
+    parameters:
+        @class(StatDtlsServer);
+}
+
+module StatDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: StatDtlsClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+module StatDtlsServerApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        dtls: <default("Dtls")> like IDtls {
+            localPort = default(5684);
+        }
+        coap: StatDtlsServer {
+            dtlsModule = "^.dtls";
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.hasStatus = true
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "StatDtlsClientApp"
+*.host1.app[0].coap.numRequests = 0
+*.host1.app[0].coap.preferredBlockSize = 1024B
+*.host1.app[0].coap.ackTimeout = 0.5s
+*.host1.app[0].coap.ackRandomFactor = 1.0
+*.host1.app[0].coap.stopOperationExtraTime = 0s
+*.host1.app[0].dtls.closeTimeout = 0.2s
+*.host1.app[0].dtls.udpPayloadLimit = 900B
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "StatDtlsServerApp"
+*.host2.app[0].coap.preferredBlockSize = 1024B
+*.host2.app[0].coap.stopOperationExtraTime = 0s
+*.host2.app[0].dtls.closeTimeout = 0.2s
+*.host2.app[0].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET' obs='true' maxAge='60'>20C</resource><resource path='/items/stat' contentFormat='0' methods='GET,PUT'>v1</resource><resource path='/other' contentFormat='0' methods='GET'>other</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_statistics: PASS

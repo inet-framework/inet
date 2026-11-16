@@ -1,0 +1,51 @@
+%description:
+
+A fragmented ClientHello enters a one-second input operation. Its attempt expires
+after 0.4 seconds. Another peer must use the released processor before that stale
+operation's original completion, with a zero-cost sample for its own input.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static unsigned fragments = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_prevalidation_processing_expiry")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); if (h && h->getMessageType() == 1 && h->getFragmentLength() < h->getMessageLength()) ++fragments; return false; }).within(0.6)))
+    .once(on("host2.app[0].dtls").signal("processingDelay").filterValue(1).within(0.6))
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(0.6))
+    .once(on("host1.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(fragments > 10 && app.establishedCount == 1 && simTime() < SimTime(1.1), "expiry frees the active input operation before its stale completion"); }));
+}
+%activity:
+EV << "rfc9147_prevalidation_processing_expiry compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 3s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.udpPayloadLimit = 40B
+*.host1.app[0].dtls.handshakeTimeout = 0.5s
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 0.7s
+*.host2.app[0].dtls.handshakeInDelay = simTime() < 0.5s ? 1s : 0s
+*.host2.app[0].dtls.handshakeTimeout = 0.4s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_prevalidation_processing_expiry: PASS

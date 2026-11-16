@@ -1,0 +1,151 @@
+%description:
+
+RFC 7641 Section 3.3.1 -- Notification freshness (Max-Age + uniform [5s, 15s])
+re-registration using original token and request options across multiple RNG seeds,
+fresh-notification reset of pending refresh timer, and stale non-reuse by normal GET.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class FreshTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, 0);
+    }
+
+    uint64_t plainGet(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {}, -1, 0);
+    }
+
+  protected:
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+class CountingFreshServer : public CoapServer
+{
+  public:
+    int getHandledCount = 0;
+
+  protected:
+    virtual void onGetResourceHandled(const std::string& pathKey, const CoapResourceEntry& resource) override {
+        ++getHandledCount;
+    }
+};
+
+Define_Module(FreshTestClient);
+Define_Module(CountingFreshServer);
+
+Define_ProtocolTest(coap_observe_freshness)
+{
+    return ProtocolTest("coap_observe_freshness")
+        // 1. Register at t=1.0s on resource with Max-Age=10s -> re-registration must NOT fire before t=16.0s (1 + 10 + 5),
+        //    and MUST fire in [16.0s, 26.05s] with Observe=0 and SAME registration token!
+        .act(action().at(1.0).run<FreshTestClient>("hostA.app[0]", [](FreshTestClient& cli) {
+            cli.startObs("hostB", 5683, "/sensors/fresh");
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .capture("regTokenHex", [](const PacketEvent& ev) {
+                      RawCoapMessage req;
+                      if (!extractRawCoapFromAppEvent(ev, req))
+                          return cValue("");
+                      return cValue(bytesToHexString(req.token).c_str());
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().at(15.9).run<CountingFreshServer>("hostB.app[0]", [](CountingFreshServer& srv) {
+            if (srv.getHandledCount != 1)
+                throw cRuntimeError("Expected no re-registration before Max-Age+5s (count=%d)", srv.getHandledCount);
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage req;
+                      if (!extractRawCoapFromAppEvent(ctx.event, req))
+                          return false;
+                      auto obs = getRawOptionValues(req, COAP_OPT_OBSERVE);
+                      auto acc = getRawOptionValues(req, COAP_OPT_ACCEPT);
+                      return req.code == COAP_CODE_GET && obs.size() == 1 && coapDecodedUint(obs[0]) == 0
+                              && acc.size() == 1 && coapDecodedUint(acc[0]) == 0
+                              && bytesToHexString(req.token) == ctx.get("regTokenHex").stringValue()
+                              && ctx.event.time >= SimTime(16, SIMTIME_S)
+                              && ctx.event.time <= SimTime(27, SIMTIME_S);
+                  }).within(12.0))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+
+        // 2. Push fresh notification at t=32.0s (well before Max-Age+5s of re-registration at ~[21..26]+10s):
+        //    this cancels old timer and pushes next expiry to t=42.0 + [5..15]s -> check stale non-reuse at t=42.5s!
+        .act(action().at(32.0).run<CountingFreshServer>("hostB.app[0]", [](CountingFreshServer& srv) {
+            srv.updateResourceValue("/sensors/fresh", {'f', 'r', 'e', 's', 'h', '2'});
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        // At t=42.5s (age = 10.5s > Max-Age=10s, before refresh [47s..57s]): plain GET MUST hit the server wire!
+        .act(action().at(42.5).run<FreshTestClient>("hostA.app[0]", [](FreshTestClient& cli) {
+            cli.plainGet("hostB", 5683, "/sensors/fresh");
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage req;
+                      return extractRawCoapFromAppEvent(ctx.event, req)
+                              && req.code == COAP_CODE_GET
+                              && getRawOptionValues(req, COAP_OPT_OBSERVE).empty();
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5));
+}
+
+%activity:
+EV << "coap_observe_freshness compiled\n";
+
+%file: FreshTestModules.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+
+simple FreshTestClient extends CoapClient
+{
+    parameters:
+        @class(FreshTestClient);
+}
+
+simple CountingFreshServer extends CoapServer
+{
+    parameters:
+        @class(CountingFreshServer);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 65s
+seed-set = ${seed=0, 1, 2}
+*.tester.testName = "coap_observe_freshness"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "FreshTestClient"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CountingFreshServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/fresh' methods='GET,PUT' contentFormat='0' maxAge='10' obs='true'>fresh1</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_freshness: PASS
+
+%not-contains: stdout
+FAIL

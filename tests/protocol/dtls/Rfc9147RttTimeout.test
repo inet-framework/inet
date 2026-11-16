@@ -1,0 +1,90 @@
+%description:
+
+A partial certificate flight supplies a non-retransmitted RTT sample. The next
+partial flight loses a fragment and ACKs are briefly suppressed, so its retry
+must use 1.5 times that eligible measured RTT rather than the initial one second.
+
+%includes:
+#include <cmath>
+#include <map>
+#include <set>
+#include <tuple>
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static std::map<uint64_t, simtime_t> handed;
+static simtime_t expectedTimeout, lastHandoff;
+static uint32_t lostOffset;
+static bool eligibleMessageRetransmitted = false;
+static std::set<std::tuple<uint16_t, uint8_t, uint32_t, uint32_t>> originalRanges;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_rtt_timeout")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        if (r && r->getEpochBits() == 2 && h) {
+            // EncryptedExtensions is a complete, single-fragment logical message.
+            // A partial Certificate ACK is not independently RTT-eligible.
+            if (h->getMessageType() == 8 && h->getFragmentOffset() == 0 && h->getFragmentLength() == h->getMessageLength()) {
+                if (handed.empty()) handed.emplace(r->getSequenceNumber(), c.event.time);
+                else eligibleMessageRetransmitted = true;
+            }
+            // A retry is signalled after packetSentToLower. Preserve the prior
+            // original burst's handoff rather than overwriting it with the retry.
+            auto range = std::make_tuple(h->getMessageSequence(), h->getMessageType(), h->getFragmentOffset(), h->getFragmentLength());
+            if (originalRanges.insert(range).second) lastHandoff = c.event.time;
+        }
+        return true;
+    }).within(4)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        if (a && !eligibleMessageRetransmitted) for (size_t i = 0; i < a->getEpochsArraySize(); i++)
+            if (a->getEpochs(i) == 2 && handed.count(a->getSequenceNumbers(i))) return true;
+        return false;
+    }).assertEvent([](const MatchContext& c) {
+        auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+        for (size_t i = 0; i < a->getEpochsArraySize(); i++)
+            if (a->getEpochs(i) == 2 && handed.count(a->getSequenceNumbers(i))) {
+                expectedTimeout = 1.5 * (c.event.time - handed.at(a->getSequenceNumbers(i)));
+                return expectedTimeout > SIMTIME_ZERO && expectedTimeout < SimTime(0.8);
+            }
+        return false;
+    }).within(2))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetAck).within(0.5).drop())
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 11 && h->getFragmentOffset() >= 10000;
+    }).assertEvent([](const MatchContext& c) { lostOffset = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getFragmentOffset(); return true; }).within(0.1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 11 && h->getFragmentOffset() == lostOffset;
+    }).nth(1).drop())
+    .once(on("host2.app[0].dtls").signal("handshakeRetransmission").assertEvent([](const MatchContext& c) {
+        return std::abs((c.event.time - lastHandoff - expectedTimeout).dbl()) <= 0.001;
+    }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3));
+}
+%activity:
+EV << "rfc9147_rtt_timeout compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 20000B
+%contains: stdout
+PROTOCOLTEST rfc9147_rtt_timeout: PASS

@@ -1,0 +1,211 @@
+%description:
+
+RFC 7959 Section 2.6 -- Observe + Block2 version change supersession and
+recovery: a newer Observe notification arriving mid-retrieval aborts the older
+partial assembly and switches to the newer notification, whereas an inconsistent
+ETag on a follow-up Block2 block without supersession aborts the partial
+assembly and triggers [5s, 15s] jittered GET Observe=0 re-registration.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+namespace {
+
+std::vector<uint8_t> makeBody(char ch, size_t len)
+{
+    return std::vector<uint8_t>(len, static_cast<uint8_t>(ch));
+}
+
+} // namespace
+
+class VersionChangeServer : public CoapServer
+{
+  public:
+    bool delayNextNum1 = false;
+    bool silentMutateNextNum1 = false;
+    std::vector<uint8_t> silentPayload;
+
+  protected:
+    virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
+            const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override {
+        bool isNum1Get = false;
+        if (header->getCode() == COAP_CODE_GET) {
+            for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
+                const auto& opt = header->getOptions(i);
+                if (opt.getNumber() == COAP_OPT_BLOCK2) {
+                    uint32_t bv = 0;
+                    for (size_t j = 0; j < opt.getValueArraySize(); ++j)
+                        bv = (bv << 8) | opt.getValue(j);
+                    if (opt.getValueArraySize() <= 3 && (bv >> 4) == 1U)
+                        isNum1Get = true;
+                }
+            }
+        }
+
+        if (isNum1Get && silentMutateNextNum1) {
+            silentMutateNextNum1 = false;
+            auto it = resources.find("sensors/history");
+            if (it != resources.end()) {
+                it->second.payload = silentPayload;
+                it->second.etag = allocateNextEtag();
+            }
+        }
+
+        if (isNum1Get && delayNextNum1) {
+            delayNextNum1 = false;
+            simtime_t savedDelay = responseDelay;
+            responseDelay = 0.25;
+            CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+            responseDelay = savedDelay;
+            return;
+        }
+
+        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+    }
+};
+
+Define_Module(VersionChangeServer);
+
+class VersionChangeClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+    std::vector<std::pair<simtime_t, RawCoapMessage>> observeGets;
+    std::vector<uint8_t> regToken;
+
+    uint64_t startObserve(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, 0);
+    }
+
+  protected:
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        RawCoapMessage raw;
+        if (decodeRawCoap(extractAppCoapWireBytes(packet), raw)
+                && raw.code == COAP_CODE_GET && !getRawOptionValues(raw, COAP_OPT_OBSERVE).empty()) {
+            if (regToken.empty())
+                regToken = raw.token;
+            observeGets.emplace_back(simTime(), raw);
+        }
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+Define_Module(VersionChangeClient);
+
+Define_ProtocolTest(coap_observe_version_change)
+{
+    return ProtocolTest("coap_observe_version_change")
+        // Initial single-block registration
+        .act(action().at(1.0).run<VersionChangeClient>("hostA.app[0]", [](VersionChangeClient& cli) {
+            cli.startObserve("hostB", 5683, "/sensors/history");
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(0.5))
+
+        // Phase 1: V1 (150B '1') sends Block2(0, M=1); server delays V1's NUM=1 by 250ms, then at t=2.05 sends V2 (150B '2').
+        .act(action().at(2.0).run<VersionChangeServer>("hostB.app[0]", [](VersionChangeServer& srv) {
+            srv.delayNextNum1 = true;
+            srv.updateResourceValue("/sensors/history", makeBody('1', 150));
+        }))
+        .act(action().at(2.05).run<VersionChangeServer>("hostB.app[0]", [](VersionChangeServer& srv) {
+            srv.updateResourceValue("/sensors/history", makeBody('2', 150));
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        // Allow time for delayed V1 NUM=1 at t~2.25s to arrive and be safely ignored
+        .act(action().after(0.4).run<VersionChangeClient>("hostA.app[0]", [](VersionChangeClient& cli) {
+            if (cli.notes.size() != 2 || cli.notes[1].payload != makeBody('2', 150))
+                throw cRuntimeError("Expected newer V2 to supersede V1 without delivering V1 (notes=%zu)", cli.notes.size());
+        }))
+
+        // Phase 2: V3 (150B '3') starts at t=3.0; right before NUM=1 is answered, mutate silently to V4 (150B '4').
+        // Client hits ETag mismatch at t~3.001, aborts V3, and re-registers GET Observe=0 in [5s, 15s] jitter ([8.0, 18.0]).
+        .act(action().at(3.0).run<VersionChangeServer>("hostB.app[0]", [](VersionChangeServer& srv) {
+            srv.silentMutateNextNum1 = true;
+            srv.silentPayload = makeBody('4', 150);
+            srv.updateResourceValue("/sensors/history", makeBody('3', 150));
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(17.0))
+        .act(action().after(0.02).run<VersionChangeClient>("hostA.app[0]", [](VersionChangeClient& cli) {
+            if (cli.notes.size() != 3 || cli.notes[2].payload != makeBody('4', 150))
+                throw cRuntimeError("Expected recovery of complete V4 representation (notes=%zu)", cli.notes.size());
+            if (cli.observeGets.size() != 2)
+                throw cRuntimeError("Expected exactly 2 Observe=0 GETs (initial + jittered re-registration), got %zu",
+                        cli.observeGets.size());
+            simtime_t reregTime = cli.observeGets[1].first;
+            const RawCoapMessage& reregReq = cli.observeGets[1].second;
+            if (reregTime < 8.0 || reregTime > 18.05)
+                throw cRuntimeError("Re-registration time %s outside [8.0s, 18.0s] jitter window", reregTime.str().c_str());
+            auto obsVals = getRawOptionValues(reregReq, COAP_OPT_OBSERVE);
+            if (reregReq.token != cli.regToken || obsVals.size() != 1 || coapDecodedUint(obsVals[0]) != 0U)
+                throw cRuntimeError("Re-registration request did not preserve T_obs or Observe=0");
+        }));
+}
+
+%activity:
+EV << "coap_observe_version_change compiled\n";
+
+%file: CoapObsVersionNet.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple VersionChangeServer extends CoapServer
+{
+    parameters:
+        @class(VersionChangeServer);
+}
+
+simple VersionChangeClient extends CoapClient
+{
+    parameters:
+        @class(VersionChangeClient);
+}
+
+network CoapObsVersionNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        tester: ProtocolTester { @display("p=80,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapObsVersionNet
+sim-time-limit = 22s
+seed-set = 1
+*.tester.testName = "coap_observe_version_change"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "VersionChangeClient"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 64B
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "VersionChangeServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 64B
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/history' methods='GET,PUT' contentFormat='0' obs='true' maxAge='60'>init-state</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_version_change: PASS

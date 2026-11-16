@@ -1,0 +1,62 @@
+%description:
+
+DTLS production-path variant ProcessingQueueLimit: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t firstAdmittedRecord;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_processing_queue_limit")
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return h && h->getEpochBits() == 3 && !applicationRecord(c); }).within(1)))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        app.sendMarker(1, 1179);
+    }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(0.01))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2, 1178); app.sendMarker(3, 1178); }))
+    .unordered({
+        on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(0.01),
+        on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { firstAdmittedRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return c.event.packet->getByteLength() == 1200; }).within(0.05)
+    })
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.05))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.sendErrorCount == 2 && app.errorCount == 0, "over-capacity and occupied-capacity sends are rejected locally");
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>{2}, "processing overflow preserves the exactly admitted record and association");
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(4, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() == firstAdmittedRecord + 1; }).within(0.05))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.05))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({2, 4}), "queue rejection consumes no sender record number and later admitted data remains usable"); }));
+}
+%activity:
+EV << "rfc9147_processing_queue_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[0].dtls.maxProcessingBytes = 1200B
+*.host*.app[0].dtls.udpPayloadLimit = 1201B
+*.host1.app[0].dtls.protectOutDelay = 10ms
+%contains: stdout
+PROTOCOLTEST rfc9147_processing_queue_limit: PASS

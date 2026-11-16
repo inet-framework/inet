@@ -1,0 +1,60 @@
+%description:
+
+A large UDP budget separates TLS record limits from the usual datagram budget.
+Deliver 16384 bytes, reject 16385 locally, then inject ciphertext length 16641:
+the receiver must discard it without replay commit and still deliver valid data.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t invalidFuture;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_record_size_limits")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 16384); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 16406; }).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 16384; }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2, 16385); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1 && app.errorCount == 0, "the plaintext content ceiling rejects one excess byte locally"); app.sendMarker(3, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        auto payload = makeShared<BytesChunk>(std::vector<uint8_t>(16624, 99)); payload->markImmutable();
+        auto type = makeShared<inet::dtls::DtlsInnerContentType>(); type->setContentType(23); type->markImmutable();
+        auto inner = makeShared<SequenceChunk>(); inner->insertAtBack(payload); inner->insertAtBack(type); inner->markImmutable();
+        replaceProtectedInner(p, inner);
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { invalidFuture = h.getSequenceNumber() + 1; h.setSequenceNumber(invalidFuture); });
+    }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return r && r->getLength() == 16641; }).within(1))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsAlert>(c.event.packet) != nullptr; }).within(0.1)))
+    .once(on("host2.app[0].dtls").signal("recordDropped").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(4, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() == invalidFuture; }).within(0.1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.receivedMarkers == std::vector<int>({1, 4}), "oversized record is discarded without delivery or poisoning the subsequent valid record number"); }));
+}
+%activity:
+EV << "rfc9147_record_size_limits compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.udpPayloadLimit = 20000B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_record_size_limits: PASS

@@ -1,0 +1,43 @@
+%description:
+
+A delayed epoch-zero fatal alert reaches an already protected association's tuple.
+It cannot tear down established state; later production application delivery progresses.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_obsolete_plain_alert")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 14434").filterPacket([](const Packet *p) { return findChunk<inet::dtls::DtlsAlert>(p) != nullptr; }).mutate([](Packet *p) { require(mutateHeader<UdpHeader>(p, [](auto& h) { h.setSrcPort(4434); }), "alert uses the established peer source port"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendRaw(rawFatalAlert(40)); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsAlert>(c.event.packet) != nullptr; }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.closedCount == 0, "obsolete plaintext alert cannot fail protected state"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(91); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{91}, "established tuple remains usable"); }));
+}
+%activity:
+EV << "rfc9147_obsolete_plain_alert compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+%contains: stdout
+PROTOCOLTEST rfc9147_obsolete_plain_alert: PASS

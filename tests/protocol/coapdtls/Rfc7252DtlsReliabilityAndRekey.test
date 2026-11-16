@@ -1,0 +1,327 @@
+%description:
+
+RFC 7252 Sections 4.2, 4.3, 4.8 and RFC 9175 Section 4.2 -- CoAP-over-DTLS
+confirmable retry and exponential backoff across dropped DTLS application
+records, duplicate suppression replaying cached ACK in a new DTLS record,
+malformed CoAP CON/NON and Empty CON ping inside valid DTLS records,
+sendConfirmablePing() session resolution, and 5 sequential CON GETs across
+DTLS 1.3 KeyUpdate epoch transitions (rekeyAfterRecords = 2 -> epochBits 3,0,1)
+with 5 distinct 8-byte tokens.
+
+%includes:
+#include <set>
+#include <vector>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "../coap/CoapChecks.h"
+#include "CoapDtlsTestPeer.h"
+#include "CoapDtlsTestPeer.cc"
+#include "../dtls/DtlsTestUtils.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+using inet::protocoltest::dtls::findChunk;
+
+class RelTestServer : public CoapServer
+{
+  protected:
+    int nonDupPutRequests = 0;
+
+    virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
+            const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override
+    {
+        if (header->getCode() == COAP_CODE_PUT)
+            ++nonDupPutRequests;
+        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+    }
+
+  public:
+    int getNonDupPutCount() const { return nonDupPutRequests; }
+};
+
+Define_Module(RelTestServer);
+
+class RelTestClient : public CoapClient
+{
+  public:
+    uint64_t pingExchangeId = 0;
+    uint64_t failedPingExchangeId = 0;
+    std::string pingFailureReason;
+
+    bool triggerPing(const std::string& host, int port) {
+        CoapPeerEndpoint peer{L3AddressResolver().resolve(host.c_str()), port, 0};
+        return sendConfirmablePing(peer, pingExchangeId);
+    }
+
+  protected:
+    virtual void onOutboundExchangeFailed(uint64_t exchangeId, const CoapPeerEndpoint& peer,
+            uint16_t messageId, const char *reason) override
+    {
+        failedPingExchangeId = exchangeId;
+        pingFailureReason = reason != nullptr ? reason : "";
+        CoapClient::onOutboundExchangeFailed(exchangeId, peer, messageId, reason);
+    }
+};
+
+Define_Module(RelTestClient);
+
+static int p1Retx = 0;
+static int p1Dup = 0;
+static int p1Malformed = 0;
+static std::vector<int> rekeyEpochs;
+static std::set<std::vector<uint8_t>> rekeyTokens;
+static int rekeyCompleted = 0;
+
+Define_ProtocolTestProgram()
+{
+    p1Retx = 0;
+    p1Dup = 0;
+    p1Malformed = 0;
+    rekeyEpochs.clear();
+    rekeyTokens.clear();
+    rekeyCompleted = 0;
+
+    return ProtocolTest("coap_dtls_reliability_and_rekey")
+        .intercept(tap("tap").from("host1").filterPacket("udp.destPort == 5684")
+            .filterPacket([](const Packet *p) {
+                return findChunk<inet::dtls::DtlsCiphertextHeader>(p) != nullptr
+                        && std::string(p->getName()) == "CoapRequest";
+            }).nth(1).drop())
+        .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 5684")
+            .filterPacket([](const Packet *p) {
+                return findChunk<inet::dtls::DtlsCiphertextHeader>(p) != nullptr
+                        && std::string(p->getName()) == "CoapResponse";
+            }).nth(1).drop())
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].coap").signal("retransmission").filterEvent([](const MatchContext&) {
+                ++p1Retx;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host2.app[0].coap").signal("duplicateReceived").filterEvent([](const MatchContext&) {
+                ++p1Dup;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host2.app[0].coap").signal("malformedReceived").filterEvent([](const MatchContext&) {
+                ++p1Malformed;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[3].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& ctx) {
+                auto rec = findChunk<inet::dtls::DtlsCiphertextHeader>(ctx.event.packet);
+                if (rec != nullptr && rec->getEpochBits() != 2 && std::string(ctx.event.packet->getName()) == "CoapRequest") {
+                    rekeyEpochs.push_back(rec->getEpochBits());
+                }
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[3].coap").signal("packetSentToLower").filterEvent([](const MatchContext& ctx) {
+                RawCoapMessage raw;
+                if (extractRawCoapFromAppEvent(ctx.event, raw))
+                    rekeyTokens.insert(raw.token);
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[3].coap").signal("requestCompleted").filterEvent([](const MatchContext&) {
+                ++rekeyCompleted;
+                return true;
+            }).within(15.0)))
+
+        // Phase 1: CON PUT survives dropped 1st request + dropped 1st ACK, executes once on server, receives cached ACK.
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(5.0))
+        .act(action().run<CoapClient>("host1.app[0].coap", [](CoapClient& cli) {
+            if (p1Retx != 2)
+                throw cRuntimeError("Expected 2 CoAP CON retransmissions (dropped request + dropped ACK), got %d", p1Retx);
+            if (cli.getCompletedResponses().size() != 1 || cli.getCompletedResponses()[0].code != COAP_CODE_CHANGED)
+                throw cRuntimeError("Expected 2.04 Changed from cached ACK replay");
+        }).run<RelTestServer>("host2.app[0].coap", [](RelTestServer& srv) {
+            if (p1Dup != 1 || srv.getNonDupPutCount() != 1)
+                throw cRuntimeError("Expected duplicateReceived==1 and single PUT execution, got dup=%d puts=%d",
+                        p1Dup, srv.getNonDupPutCount());
+        }))
+
+        // Phase 2: CoapDtlsTestPeer sends malformed CON (TKL=9) -> RST, malformed NON -> silent, Empty CON -> RST;
+        // plus RelTestClient calls sendConfirmablePing() -> RST via DTLS.
+        .act(action().run<CoapDtlsTestPeer>("host1.app[1].peer", [](CoapDtlsTestPeer& peer) {
+            if (peer.openSession("host2", 5684) == 0)
+                throw cRuntimeError("Failed to open CoapDtlsTestPeer session");
+        }))
+        .once(on("host1.app[1].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[1].peer", [](CoapDtlsTestPeer& peer) {
+            uint64_t sid = peer.getEstablishedIds().back();
+            // Malformed CON: Ver=1, Type=CON(0), TKL=9 -> header=0x49, code=0x01, MID=0x1234
+            peer.sendBytes(sid, {0x49, 0x01, 0x12, 0x34}, "MalformedCon");
+            // Malformed NON: Ver=1, Type=NON(1), TKL=9 -> header=0x59, code=0x01, MID=0x1235
+            peer.sendBytes(sid, {0x59, 0x01, 0x12, 0x35}, "MalformedNon");
+            // Empty CON Ping: Ver=1, Type=CON(0), TKL=0 -> header=0x40, code=0x00, MID=0x1236
+            peer.sendBytes(sid, {0x40, 0x00, 0x12, 0x36}, "EmptyConPing");
+        }).run<RelTestClient>("host1.app[2].coap", [](RelTestClient& cli) {
+            if (!cli.triggerPing("host2", 5684) || cli.pingExchangeId == 0)
+                throw cRuntimeError("sendConfirmablePing() failed to open/enqueue over DTLS");
+        }))
+        // Wait for 2 RSTs at host1.app[1].peer and RST at host1.app[2].coap.
+        .once(on("host1.app[1].peer").signal("packetReceivedFromLower").within(2.0))
+        .once(on("host1.app[1].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().after(0.2).run<CoapDtlsTestPeer>("host1.app[1].peer", [](CoapDtlsTestPeer& peer) {
+            if (p1Malformed != 2)
+                throw cRuntimeError("Expected 2 malformed datagrams counted on server, got %d", p1Malformed);
+            const auto& recs = peer.getReceived();
+            if (recs.size() != 2)
+                throw cRuntimeError("Expected exactly 2 RSTs (for malformed CON and Empty CON, silent malformed NON), got %zu", recs.size());
+            std::set<uint16_t> rstMids;
+            for (const auto& rec : recs) {
+                RawCoapMessage m;
+                if (!decodeRawCoap(rec.bytes, m) || m.type != COAP_TYPE_RST || m.code != COAP_CODE_EMPTY)
+                    throw cRuntimeError("Expected Empty RST inside DTLS");
+                rstMids.insert(m.messageId);
+            }
+            if (rstMids != std::set<uint16_t>{0x1234, 0x1236})
+                throw cRuntimeError("Unexpected RST MIDs");
+        }).run<RelTestClient>("host1.app[2].coap", [](RelTestClient& cli) {
+            if (cli.failedPingExchangeId != cli.pingExchangeId || cli.pingFailureReason.find("reset") == std::string::npos)
+                throw cRuntimeError("sendConfirmablePing() did not observe peer RST reset");
+        }))
+
+        // Phase 3: Wait for all 5 sequential CON GETs on app[3] across KeyUpdate (rekeyAfterRecords = 2 -> epochs 3,4,5).
+        .once(on("host1.app[3].coap").signal("requestCompleted")
+            .filterEvent([](const MatchContext&) { return rekeyCompleted >= 5; }).within(10.0))
+        .act(action().run<CoapClient>("host1.app[3].coap", [](CoapClient& cli) {
+            if (cli.getCompletedResponses().size() != 5 || cli.getFailedCount() != 0)
+                throw cRuntimeError("Expected 5 completed responses and 0 failures across KeyUpdate, got %zu / %d",
+                        cli.getCompletedResponses().size(), cli.getFailedCount());
+            if (rekeyTokens.size() != 5)
+                throw cRuntimeError("Expected 5 distinct 8-byte CoAP tokens across KeyUpdate, got %zu", rekeyTokens.size());
+            for (const auto& tok : rekeyTokens) {
+                if (tok.size() != 8)
+                    throw cRuntimeError("Expected 8-byte token, got %zu bytes", tok.size());
+            }
+            // epochBits is lower 2 bits of epoch: epoch 3->3, 4->0, 5->1.
+            bool has3 = false, has0 = false, has1 = false;
+            for (int eb : rekeyEpochs) {
+                if (eb == 3) has3 = true;
+                else if (eb == 0 && has3) has0 = true;
+                else if (eb == 1 && has0) has1 = true;
+            }
+            if (!has3 || !has0 || !has1)
+                throw cRuntimeError("Expected DTLS epochBits progression 3 -> 0 -> 1 across 5 requests (count=%zu)", rekeyEpochs.size());
+        }));
+}
+
+%activity:
+EV << "coap_dtls_reliability_and_rekey compiled\n";
+
+%file: RelTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple RelTestServer extends CoapServer
+{
+    parameters:
+        @class(RelTestServer);
+}
+
+simple RelTestClient extends CoapClient
+{
+    parameters:
+        @class(RelTestClient);
+}
+
+module RelDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: RelTestClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+module RelDtlsServerApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        dtls: <default("Dtls")> like IDtls {
+            localPort = default(5684);
+        }
+        coap: RelTestServer {
+            dtlsModule = "^.dtls";
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 4
+*.host1.app[0].typename = "inet.applications.coapdtls.CoapDtlsClient"
+*.host1.app[0].coap.peerAddress = "host2"
+*.host1.app[0].coap.requestUri = "coaps://host2:5684/items/log"
+*.host1.app[0].coap.requestMethod = "PUT"
+*.host1.app[0].coap.requestBody = "+1"
+*.host1.app[0].coap.confirmable = true
+*.host1.app[0].coap.ackTimeout = 0.5s
+*.host1.app[0].coap.ackRandomFactor = 1.0
+*.host1.app[0].coap.maxRetransmit = 3
+*.host1.app[0].coap.startTime = 0.2s
+*.host1.app[0].coap.numRequests = 1
+
+*.host1.app[1].typename = "inet.protocoltest.coapdtls.CoapDtlsTestApp"
+*.host1.app[1].server = false
+
+*.host1.app[2].typename = "RelDtlsClientApp"
+*.host1.app[2].coap.numRequests = 0
+
+*.host1.app[3].typename = "inet.applications.coapdtls.CoapDtlsClient"
+*.host1.app[3].dtls.rekeyAfterRecords = 2
+*.host1.app[3].coap.peerAddress = "host2"
+*.host1.app[3].coap.peerPort = 5686
+*.host1.app[3].coap.requestUri = "coaps://host2:5686/sensors/temp"
+*.host1.app[3].coap.requestMethod = "GET"
+*.host1.app[3].coap.confirmable = true
+*.host1.app[3].coap.startTime = 2.5s
+*.host1.app[3].coap.sendInterval = 0.2s
+*.host1.app[3].coap.numRequests = 5
+
+*.host2.numApps = 2
+*.host2.app[0].typename = "RelDtlsServerApp"
+*.host2.app[0].coap.resources = xml("<resources><resource path='/items/log' contentFormat='0' methods='GET,PUT'>init</resource></resources>")
+
+*.host2.app[1].typename = "inet.applications.coapdtls.CoapDtlsServer"
+*.host2.app[1].dtls.localPort = 5686
+*.host2.app[1].dtls.rekeyAfterRecords = 2
+*.host2.app[1].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET'>ok</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_reliability_and_rekey: PASS

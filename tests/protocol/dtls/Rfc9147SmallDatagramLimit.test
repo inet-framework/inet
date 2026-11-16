@@ -1,0 +1,43 @@
+%description:
+
+A nondefault 256-byte UDP budget admits exactly 234 application bytes plus the
+22-byte modeled record overhead; one additional byte is rejected locally.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_small_datagram_limit")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 234); app.sendMarker(2, 235); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 256; }).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 234; }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1, "budget-plus-one application send reports one local failure"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{1}, "only exact-budget datagram is delivered"); }));
+}
+%activity:
+EV << "rfc9147_small_datagram_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.cookieRequired = false
+*.host*.app[0].dtls.udpPayloadLimit = 256B
+%contains: stdout
+PROTOCOLTEST rfc9147_small_datagram_limit: PASS

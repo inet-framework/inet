@@ -1,0 +1,55 @@
+%description:
+
+DTLS 1.3 production-path check: Rfc9147Close. See the owning reviewer document in this suite
+and plan/done/dtls.md for requirements, setup, expected result and limitations.
+The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_close")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.closePeer(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 0; }).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return findChunk<inet::dtls::DtlsAlert>(p) != nullptr; }).nth(1).drop().describe("lose close_notify"))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.closedCount == 1, "local close completes without a peer alert");
+        app.sendMarker(8);
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.sendErrorCount == 1, "closed handle rejects a new application send");
+    }))
+    .never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsAlert>(c.event.packet) != nullptr; }).within(1.2));
+}
+
+%activity:
+EV << "rfc9147_close compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.protectOutDelay = 2ms
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_close: PASS

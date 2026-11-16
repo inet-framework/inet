@@ -1,0 +1,158 @@
+%description:
+Use real peers to stop during application protection, observe graceful alert
+handoff, restart, crash without an alert, and establish again on the same node.
+
+%file: RestartLifecycleFixture.cc
+#include <iostream>
+#include "inet/common/packet/Packet.h"
+#include "inet/transportlayer/dtls/Dtls.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/DtlsRecordProtection.h"
+
+namespace DtlsRestartLifecycle_1 {
+using namespace inet;
+using namespace inet::dtls;
+
+class RestartLifecycleFixture : public cSimpleModule, public cListener
+{
+    Dtls *client = nullptr;
+    int establishments = 0;
+    int closes = 0;
+    int applications = 0;
+    IDtls::AssociationId currentHandle = 0;
+    simtime_t firstCloseHandoff;
+    simtime_t secondCloseHandoff;
+
+  public:
+    RestartLifecycleFixture() : cSimpleModule(65536) {}
+    void receiveSignal(cComponent *, simsignal_t signal, long value, cObject *) override {
+        if (signal == cComponent::registerSignal("associationEstablished")) {
+            ++establishments;
+            currentHandle = value;
+        }
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto original = check_and_cast<Packet *>(object);
+        Packet packet(*original);
+        if (packet.getDataLength() < B(5))
+            return;
+        try {
+            packet.popAtFront<DtlsCiphertextHeader>(B(5));
+            uint8_t type;
+            if (!DtlsRecordProtection::unprotect(&packet, type))
+                return;
+            if (type == 23)
+                ++applications;
+            else if (type == 21 && packet.getDataLength() == B(2) && packet.popAtFront<DtlsAlert>(B(2))->getDescription() == 0) {
+                ++closes;
+                if (closes == 1)
+                    firstCloseHandoff = simTime();
+                else if (closes == 2)
+                    secondCloseHandoff = simTime();
+            }
+        }
+        catch (const cRuntimeError&) {}
+    }
+
+  protected:
+    void activity() override {
+        client = check_and_cast<Dtls *>(getModuleByPath("^.client.app[0].dtls"));
+        client->subscribe("associationEstablished", this);
+        client->subscribe("packetSentToLower", this);
+        wait(1.4);
+        ASSERT(establishments == 1 && closes == 0 && applications == 0);
+        wait(0.3);
+        ASSERT(closes == 0 && applications == 0);
+        wait(1.1);
+        ASSERT(closes == 1 && applications == 0 && firstCloseHandoff == SimTime(2.6));
+        wait(2);
+        ASSERT(establishments == 2 && closes == 1);
+        wait(0.4);
+        ASSERT(closes == 1);
+        wait(2.2);
+        ASSERT(establishments == 3 && closes == 1);
+        wait(0.15);
+        ASSERT(currentHandle != 0);
+        client->close(currentHandle);
+        wait(0.15);
+        ASSERT(closes == 1);
+        wait(1.1);
+        ASSERT(closes == 2 && secondCloseHandoff == SimTime(8.55));
+        wait(1.6);
+        ASSERT(establishments == 4 && closes == 2);
+        wait(3);
+        ASSERT(establishments == 4 && closes == 2);
+        client->unsubscribe("packetSentToLower", this);
+        client->unsubscribe("associationEstablished", this);
+        std::cout << "DTLS restart lifecycle PASS" << std::endl;
+    }
+};
+Define_Module(RestartLifecycleFixture);
+}
+
+%file: TestNetwork.ned
+import inet.networks.base.WiredNetworkBase;
+import inet.node.contract.IEthernetNetworkNode;
+import inet.node.ethernet.EthernetLink;
+import inet.common.scenario.ScenarioManager;
+
+simple RestartLifecycleFixture
+{
+    @class(::DtlsRestartLifecycle_1::RestartLifecycleFixture);
+}
+network TestNetwork extends WiredNetworkBase
+{
+    parameters:
+        visualizer.typename = default("");
+    submodules:
+        scenarioManager: ScenarioManager;
+        client: <default("StandardHost")> like IEthernetNetworkNode;
+        server: <default("StandardHost")> like IEthernetNetworkNode;
+        fixture: RestartLifecycleFixture;
+    connections:
+        client.ethg++ <--> EthernetLink { datarate = 100Mbps; } <--> server.ethg++;
+}
+
+%file: scenario.xml
+<scenario>
+    <at t="1.6s"><shutdown module="client"/></at>
+    <at t="3.5s"><startup module="client"/></at>
+    <at t="5s"><crash module="client"/></at>
+    <at t="6s"><startup module="client"/></at>
+    <at t="7.6s"><shutdown module="client"/></at>
+    <at t="10s"><startup module="client"/></at>
+</scenario>
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 14s
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.client.hasStatus = true
+*.server.hasStatus = true
+*.client.numApps = 1
+*.server.numApps = 1
+*.client.app[0].typename = "DtlsApp"
+*.server.app[0].typename = "DtlsApp"
+*.server.app[0].server = true
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 4433
+*.client.app[0].source.initialProductionOffset = 1.5s
+*.client.app[0].source.productionInterval = 100s
+*.client.app[0].source.packetLength = 128B
+*.client.app[0].dtls.protectOutDelay = (simTime() >= 1s && simTime() < 3s) || (simTime() >= 7s && simTime() < 9s) ? 1s : 0s
+*.client.app[0].dtls.handshakeTimeout = 3s
+*.server.app[0].dtls.localPort = 4433
+*.server.app[0].dtls.cookieRequired = false
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%contains: stdout
+failed: association closing
+
+%contains: stdout
+DTLS restart lifecycle PASS
+
+%not-contains: stdout
+DTLS closure forced

@@ -1,0 +1,146 @@
+%description:
+Exercise the DTLS engine's initial-down/start, stop, crash and restart paths.
+The fixture schedules work on the engine's input queue; no handshake or
+application delivery is claimed by this test.
+
+%file: DtlsLifecycleFixture.cc
+#include <iostream>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/transportlayer/dtls/Dtls.h"
+
+namespace DtlsEngineLifecycle_1 {
+
+using namespace inet;
+using namespace inet::dtls;
+
+class TestDtls : public Dtls
+{
+  public:
+    bool completed = false;
+    void arm() {
+        Enter_Method("arm");
+        ASSERT(isUp() && inputProcessing);
+        ASSERT(inputProcessing->enqueue(1, 1, 10, [this] { completed = true; }));
+        ASSERT(inputProcessing->getOccupiedBytes() == 1);
+    }
+    bool up() const { return isUp(); }
+    size_t queued() const { return inputProcessing ? inputProcessing->getOccupiedBytes() : 0; }
+};
+Define_Module(TestDtls);
+
+class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, public cListener
+{
+    TestDtls *dtls = nullptr;
+    L3Address peer = L3Address(Ipv4Address("192.0.2.1"));
+    int sendErrors = 0;
+    int errors = 0;
+    int closedCount = 0;
+    int rejectedReconnects = 0;
+    int sentPackets = 0;
+
+  public:
+    DtlsLifecycleFixture() : cSimpleModule(65536) {}
+    virtual void accepted(IDtls::AssociationId, const L3Address&, int, const L3Address&, int) override { throw cRuntimeError("unexpected accept"); }
+    virtual void established(IDtls::AssociationId) override { throw cRuntimeError("unexpected establishment"); }
+    virtual void dataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected data"); }
+    virtual void sendError(IDtls::AssociationId, long, const char *) override { ++sendErrors; }
+    virtual void error(IDtls::AssociationId, const char *) override {
+        ++errors;
+        if (dtls->open(peer, 4433, this) == 0)
+            ++rejectedReconnects;
+        dtls->listen(this);
+    }
+    virtual void closed(IDtls::AssociationId) override { ++closedCount; }
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { ++sentPackets; }
+
+    void openAndQueue() {
+        auto id = dtls->open(peer, 4433, this);
+        ASSERT(id != 0);
+        auto packet = new Packet("queued data", makeShared<BytesChunk>(std::vector<uint8_t>{42}));
+        dtls->send(id, packet, this);
+    }
+
+  protected:
+    virtual void activity() override {
+        dtls = check_and_cast<TestDtls *>(getModuleByPath("^.host.app[0].dtls"));
+        dtls->subscribe("packetSentToLower", this);
+        wait(0.5);
+        ASSERT(!dtls->up());
+        ASSERT(dtls->open(peer, 4433, this) == 0);
+        wait(1);
+        ASSERT(dtls->up());
+        dtls->arm();
+        openAndQueue();
+        wait(1.5);
+        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        ASSERT(sendErrors == 1 && errors == 1 && closedCount == 1 && rejectedReconnects == 1 && sentPackets == 0);
+        wait(1.5);
+        ASSERT(dtls->up());
+        dtls->arm();
+        openAndQueue();
+        wait(1.5);
+        ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
+        ASSERT(sendErrors == 2 && errors == 2 && closedCount == 2 && rejectedReconnects == 2 && sentPackets == 0);
+        wait(1.5);
+        ASSERT(dtls->up() && dtls->queued() == 0);
+        wait(8);
+        ASSERT(!dtls->completed && sentPackets == 0 && sendErrors == 2 && errors == 2 && closedCount == 2);
+        dtls->unsubscribe("packetSentToLower", this);
+        std::cout << "DTLS engine lifecycle PASS" << std::endl;
+    }
+};
+Define_Module(DtlsLifecycleFixture);
+
+} // namespace DtlsEngineLifecycle_1
+
+%file: TestNetwork.ned
+import inet.applications.dtlsapp.DtlsApp;
+import inet.common.scenario.ScenarioManager;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.dtls.Dtls;
+
+simple TestDtls extends Dtls
+{
+    @class(::DtlsEngineLifecycle_1::TestDtls);
+}
+simple DtlsLifecycleFixture
+{
+    @class(::DtlsEngineLifecycle_1::DtlsLifecycleFixture);
+}
+network TestNetwork
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        host: StandardHost;
+        fixture: DtlsLifecycleFixture;
+    connections allowunconnected:
+}
+
+%file: scenario.xml
+<scenario>
+    <at t="1s"><startup module="host"/></at>
+    <at t="2s"><shutdown module="host"/></at>
+    <at t="4s"><startup module="host"/></at>
+    <at t="5s"><crash module="host"/></at>
+    <at t="7s"><startup module="host"/></at>
+</scenario>
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 16s
+*.host.hasStatus = true
+*.host.status.initialStatus = "DOWN"
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.typename = "TestDtls"
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.handshakeOutDelay = 10s
+*.host.app[0].dtls.handshakeTimeout = 10s
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%contains: stdout
+DTLS engine lifecycle PASS

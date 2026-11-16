@@ -1,0 +1,480 @@
+%description:
+
+RFC 7252 Sections 5.4.1, 5.10, 6.4 -- URI segment splitting before percent-decoding
+(%2F preservation), Uri-Host/Uri-Port/Uri-Query, Accept (4.06), ETag validation
+(2.03/2.05), If-Match / If-None-Match (4.12), critical vs elective options on requests
+and responses (4.02 / RST / ignore), Proxy-Uri / Proxy-Scheme (5.05), and client
+Location-Path / Location-Query decoding.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+namespace {
+
+std::vector<uint8_t> hexToBytes(const std::string& hex)
+{
+    std::vector<uint8_t> out;
+    for (size_t i = 0; i + 1 < hex.size(); i += 2)
+        out.push_back(static_cast<uint8_t>(std::stoul(hex.substr(i, 2), nullptr, 16)));
+    return out;
+}
+
+} // namespace
+
+class OptionsTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientResponseRecord> completed;
+    std::vector<std::string> failureReasons;
+
+    uint64_t sendReq(const std::string& host, int port, uint8_t method, bool con, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, method, con, uri, {});
+    }
+
+  protected:
+    virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) override {
+        CoapClient::onRequestCompleted(requestId, peer, responseHeader, payload);
+        completed.push_back(getCompletedResponses().back());
+    }
+
+    virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) override {
+        CoapClient::onRequestFailed(requestId, reason, coapCode);
+        failureReasons.emplace_back(reason != nullptr ? reason : "");
+    }
+};
+
+Define_Module(OptionsTestClient);
+
+Define_ProtocolTest(coap_options_and_conditions)
+{
+    return ProtocolTest("coap_options_and_conditions")
+        // 1. URI %2F inside segment: CoapClient -> CoapServer /items/a%2Fb must NOT match 3-segment /items/a/b -> 4.04,
+        //    and wire to port 5684 carries Uri-Host, Uri-Port, 2 Uri-Path segments ("items", "a/b"), Uri-Query ("q=x y").
+        .act(action().at(1.0).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            cli.sendReq("hostB", 5683, COAP_CODE_GET, true, "coap://hostB:5683/items/a%2Fb?q=x%20y");
+            cli.sendReq("hostB", 5684, COAP_CODE_POST, true, "coap://sensor.example:5699/items/a%2Fb?k=v%2F1");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto hosts = getRawOptionStrings(raw, COAP_OPT_URI_HOST);
+                      auto ports = getRawOptionValues(raw, COAP_OPT_URI_PORT);
+                      auto paths = getRawOptionStrings(raw, COAP_OPT_URI_PATH);
+                      auto queries = getRawOptionStrings(raw, COAP_OPT_URI_QUERY);
+                      bool okWire = hosts.size() == 1 && hosts[0] == "sensor.example"
+                              && ports.size() == 1 && coapDecodedUint(ports[0]) == 5699
+                              && paths.size() == 2 && paths[0] == "items" && paths[1] == "a/b"
+                              && queries.size() == 1 && queries[0] == "k=v/1";
+                      if (!okWire)
+                          return false;
+
+                      // Reply 2.01 Created with Location-Path and Location-Query for client decoding check!
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage resp;
+                      resp.type = 2; resp.code = COAP_CODE_CREATED; resp.messageId = raw.messageId; resp.token = raw.token;
+                      resp.options.push_back({COAP_OPT_LOCATION_PATH, asciiBytes("orders")});
+                      resp.options.push_back({COAP_OPT_LOCATION_PATH, asciiBytes("42")});
+                      resp.options.push_back({COAP_OPT_LOCATION_QUERY, asciiBytes("verbose=1")});
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(resp), "Reply201Loc");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower").within(0.5))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            if (cli.completed.size() != 2)
+                throw cRuntimeError("Expected 2 completed client requests, got %zu", cli.completed.size());
+            if (cli.completed[0].code != COAP_CODE_NOT_FOUND)
+                throw cRuntimeError("Expected 4.04 for /items/a%%2Fb against /items/a/b, got %u", cli.completed[0].code);
+            if (cli.completed[1].code != COAP_CODE_CREATED
+                    || cli.completed[1].locationPath != std::vector<std::string>({"orders", "42"})
+                    || cli.completed[1].locationQuery != std::vector<std::string>({"verbose=1"}))
+                throw cRuntimeError("Location-Path / Location-Query decoding mismatch on client");
+        }))
+
+        // 2. Accept negotiation (ct=0 -> 2.05, ct=50 -> 4.06), ETag 2.03 Valid & stale 2.05, If-Match / If-None-Match -> 4.12
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage gOk;
+            gOk.type = 0; gOk.code = COAP_CODE_GET; gOk.messageId = 0x2001; gOk.token = {0x11};
+            gOk.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            gOk.options.push_back({COAP_OPT_ACCEPT, coapUintBytes(0)});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(gOk), "GetAcceptOk");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .capture("etag1", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ev, raw))
+                          return cValue("");
+                      auto et = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return cValue(et.empty() ? "" : bytesToHexString(et[0]).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x2001
+                              && rawPayloadString(raw) == "v1";
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage gBadAccept;
+            gBadAccept.type = 0; gBadAccept.code = COAP_CODE_GET; gBadAccept.messageId = 0x2002; gBadAccept.token = {0x12};
+            gBadAccept.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            gBadAccept.options.push_back({COAP_OPT_ACCEPT, coapUintBytes(50)});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(gBadAccept), "GetAccept406");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_NOT_ACCEPTABLE && raw.messageId == 0x2002;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            // Revalidate with matching ETag -> 2.03 Valid, empty payload
+        }))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            // Look up current ETag via hostA Peer action below using matchContext? No: actions cannot read CaptureStore.
+            // Instead GET cond in a capture-aware assertion by reading server or sending from assertion!
+        }))
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            // Wait: read server ETag isn't needed if we send from previous capture OR fetch /cond into CoapServer directly?
+            // Let's keep wire-driven: send a dummy trigger or send inside next assertEvent? Wait: action runs without MatchContext,
+            // so we can read `ctx.get("etag1")` inside assertEvent? Let's test empty If-Match, wrong If-Match, and If-None-Match first,
+            // and capture-based exact ETag / If-Match via a tiny Peer helper response trigger or CoapTestPeer stored byte!
+            RawCoapMessage pWrong;
+            pWrong.type = 0; pWrong.code = COAP_CODE_PUT; pWrong.messageId = 0x2003; pWrong.token = {0x13};
+            pWrong.options.push_back({COAP_OPT_IF_MATCH, hexToBytes("deadbeefdeadbeef")});
+            pWrong.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            pWrong.payload = asciiBytes("wrong");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(pWrong), "PutWrongIfMatch");
+
+            RawCoapMessage pNone;
+            pNone.type = 0; pNone.code = COAP_CODE_PUT; pNone.messageId = 0x2004; pNone.token = {0x14};
+            pNone.options.push_back({COAP_OPT_IF_NONE_MATCH, {}});
+            pNone.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            pNone.payload = asciiBytes("wrong2");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(pNone), "PutIfNoneMatchExisting");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_PRECONDITION_FAILED && raw.messageId == 0x2003;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw)
+                              || raw.code != COAP_CODE_PRECONDITION_FAILED || raw.messageId != 0x2004)
+                          return false;
+                      // Trigger ETag 2.03 check using captured etag1 right from here!
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+                      RawCoapMessage gValid;
+                      gValid.type = 0; gValid.code = COAP_CODE_GET; gValid.messageId = 0x2005; gValid.token = {0x15};
+                      gValid.options.push_back({COAP_OPT_ETAG, hexToBytes(ctx.get("etag1").stringValue())});
+                      gValid.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+                      peer->sendRawNow("hostB", 5683, encodeRawCoap(gValid), "GetEtagValid");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw)
+                              || raw.code != COAP_CODE_VALID || raw.messageId != 0x2005
+                              || !raw.payload.empty())
+                          return false;
+                      // Send PUT with matching If-Match=etag1 -> 2.04 Changed -> payload="v2"
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+                      RawCoapMessage pOk;
+                      pOk.type = 0; pOk.code = COAP_CODE_PUT; pOk.messageId = 0x2006; pOk.token = {0x16};
+                      pOk.options.push_back({COAP_OPT_IF_MATCH, hexToBytes(ctx.get("etag1").stringValue())});
+                      pOk.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+                      pOk.payload = asciiBytes("v2");
+                      peer->sendRawNow("hostB", 5683, encodeRawCoap(pOk), "PutMatchIfMatch");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw)
+                              || raw.code != COAP_CODE_CHANGED || raw.messageId != 0x2006)
+                          return false;
+                      // Now GET with stale etag1 -> 2.05 Content payload="v2"!
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+                      RawCoapMessage gStale;
+                      gStale.type = 0; gStale.code = COAP_CODE_GET; gStale.messageId = 0x2007; gStale.token = {0x17};
+                      gStale.options.push_back({COAP_OPT_ETAG, hexToBytes(ctx.get("etag1").stringValue())});
+                      gStale.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+                      peer->sendRawNow("hostB", 5683, encodeRawCoap(gStale), "GetStaleEtag");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x2007
+                              && rawPayloadString(raw) == "v2";
+                  })
+                  .within(0.5))
+
+        // 3. Empty If-Match on existing -> 2.04; empty If-Match on absent creatable -> 4.12; If-None-Match on absent creatable -> 2.01
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage p1;
+            p1.type = 0; p1.code = COAP_CODE_PUT; p1.messageId = 0x2008; p1.token = {0x18};
+            p1.options.push_back({COAP_OPT_IF_MATCH, {}});
+            p1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            p1.payload = asciiBytes("v3");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p1), "PutEmptyIfMatchExisting");
+
+            RawCoapMessage p2;
+            p2.type = 0; p2.code = COAP_CODE_PUT; p2.messageId = 0x2009; p2.token = {0x19};
+            p2.options.push_back({COAP_OPT_IF_MATCH, {}});
+            p2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("fresh")});
+            p2.payload = asciiBytes("x");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p2), "PutEmptyIfMatchAbsent");
+
+            RawCoapMessage p3;
+            p3.type = 0; p3.code = COAP_CODE_PUT; p3.messageId = 0x200A; p3.token = {0x1A};
+            p3.options.push_back({COAP_OPT_IF_NONE_MATCH, {}});
+            p3.options.push_back({COAP_OPT_URI_PATH, asciiBytes("fresh")});
+            p3.payload = asciiBytes("created");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p3), "PutIfNoneMatchAbsent");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_CHANGED && raw.messageId == 0x2008;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_PRECONDITION_FAILED && raw.messageId == 0x2009;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_CREATED && raw.messageId == 0x200A;
+                  }).within(0.5))
+
+        // 4. Unknown elective (100) vs unknown critical (101) in requests & Proxy-Uri (35) / Proxy-Scheme (39) -> 5.05
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage rElec;
+            rElec.type = 0; rElec.code = COAP_CODE_GET; rElec.messageId = 0x200B; rElec.token = {0x1B};
+            rElec.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            rElec.options.push_back({100, asciiBytes("ok")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(rElec), "ReqUnknownElective");
+
+            RawCoapMessage rCritNon;
+            rCritNon.type = 1; rCritNon.code = COAP_CODE_GET; rCritNon.messageId = 0x200C; rCritNon.token = {0x1C};
+            rCritNon.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            rCritNon.options.push_back({101, asciiBytes("no")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(rCritNon), "ReqUnknownCritNon");
+
+            RawCoapMessage rCritCon;
+            rCritCon.type = 0; rCritCon.code = COAP_CODE_GET; rCritCon.messageId = 0x200D; rCritCon.token = {0x1D};
+            rCritCon.options.push_back({COAP_OPT_URI_PATH, asciiBytes("cond")});
+            rCritCon.options.push_back({101, asciiBytes("no")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(rCritCon), "ReqUnknownCritCon");
+
+            RawCoapMessage rProxy1;
+            rProxy1.type = 0; rProxy1.code = COAP_CODE_GET; rProxy1.messageId = 0x200E; rProxy1.token = {0x1E};
+            rProxy1.options.push_back({COAP_OPT_PROXY_URI, asciiBytes("http://example.com/")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(rProxy1), "ReqProxyUri");
+
+            RawCoapMessage rProxy2;
+            rProxy2.type = 0; rProxy2.code = COAP_CODE_GET; rProxy2.messageId = 0x200F; rProxy2.token = {0x1F};
+            rProxy2.options.push_back({COAP_OPT_PROXY_SCHEME, asciiBytes("http")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(rProxy2), "ReqProxyScheme");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x200B;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_BAD_OPTION && raw.messageId == 0x200D;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_PROXYING_NOT_SUPPORTED && raw.messageId == 0x200E;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_PROXYING_NOT_SUPPORTED && raw.messageId == 0x200F;
+                  }).within(0.5))
+
+        // 5a. Unknown critical response option in Piggybacked ACK -> ignored at app layer (no RST, no completion)
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            cli.sendReq("hostB", 5684, COAP_CODE_GET, true, "/crit-ack");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      RawCoapMessage badAck;
+                      badAck.type = 2; badAck.code = COAP_CODE_CONTENT; badAck.messageId = req.messageId; badAck.token = req.token;
+                      badAck.options.push_back({101, asciiBytes("crit")});
+                      badAck.payload = asciiBytes("bad1");
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(badAck), "BadAckCrit");
+                      return true;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            if (cli.completed.size() != 2 || cli.failureReasons.size() != 1)
+                throw cRuntimeError("Expected badAck not delivered and counted as failed (completed=%zu failed=%zu)",
+                        cli.completed.size(), cli.failureReasons.size());
+        }))
+
+        // 5b. Unknown critical response option in NON -> silently ignored; subsequent separate CON with unknown elective (100) accepted & ACKed
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            cli.sendReq("hostB", 5684, COAP_CODE_GET, true, "/crit-non-then-elec");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+
+                      RawCoapMessage eack;
+                      eack.type = 2; eack.code = COAP_CODE_EMPTY; eack.messageId = req.messageId;
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(eack), "EmptyAck5b");
+
+                      RawCoapMessage badNon;
+                      badNon.type = 1; badNon.code = COAP_CODE_CONTENT; badNon.messageId = 0x5501; badNon.token = req.token;
+                      badNon.options.push_back({101, asciiBytes("crit")});
+                      badNon.payload = asciiBytes("bad2");
+                      peer->scheduleRawSend(simTime() + 0.03, last.srcAddr.str(), last.srcPort, encodeRawCoap(badNon), "BadNonCrit");
+
+                      RawCoapMessage okCon;
+                      okCon.type = 0; okCon.code = COAP_CODE_CONTENT; okCon.messageId = 0x5503; okCon.token = req.token;
+                      okCon.options.push_back({100, asciiBytes("elec")});
+                      okCon.payload = asciiBytes("good-elec");
+                      peer->scheduleRawSend(simTime() + 0.08, last.srcAddr.str(), last.srcPort, encodeRawCoap(okCon), "OkConElec");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 2 && raw.messageId == 0x5503;
+                  })
+                  .within(0.5))
+
+        // 5c. Unknown critical response option in CON -> rejected with RST
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            cli.sendReq("hostB", 5684, COAP_CODE_GET, true, "/crit-con");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+
+                      RawCoapMessage eack;
+                      eack.type = 2; eack.code = COAP_CODE_EMPTY; eack.messageId = req.messageId;
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(eack), "EmptyAck5c");
+
+                      RawCoapMessage badCon;
+                      badCon.type = 0; badCon.code = COAP_CODE_CONTENT; badCon.messageId = 0x5502; badCon.token = req.token;
+                      badCon.options.push_back({101, asciiBytes("crit")});
+                      badCon.payload = asciiBytes("bad3");
+                      peer->scheduleRawSend(simTime() + 0.03, last.srcAddr.str(), last.srcPort, encodeRawCoap(badCon), "BadConCrit");
+                      return true;
+                  })
+                  .within(0.5))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.messageId == 0x5502;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<OptionsTestClient>("hostA.app[1]", [](OptionsTestClient& cli) {
+            if (cli.completed.size() != 3 || cli.failureReasons.size() != 2)
+                throw cRuntimeError("Expected 3 completed and 2 failed responses total, got completed=%zu failed=%zu",
+                        cli.completed.size(), cli.failureReasons.size());
+            if (std::string(cli.completed[2].payload.begin(), cli.completed[2].payload.end()) != "good-elec")
+                throw cRuntimeError("Expected elective option CON response payload 'good-elec'");
+        }));
+}
+
+%activity:
+EV << "coap_options_and_conditions compiled\n";
+
+%file: CoapOptionsNet.ned
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple OptionsTestClient extends inet.applications.coap.CoapClient
+{
+    parameters:
+        @class(OptionsTestClient);
+}
+
+network CoapOptionsNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        tester: ProtocolTester { @display("p=80,120"); }
+        hostA: StandardHost { @display("p=250,80"); }
+        hostB: StandardHost { @display("p=450,80"); }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapOptionsNet
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_options_and_conditions"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[1].typename = "OptionsTestClient"
+*.hostA.app[1].localPort = 16001
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/items/a/b' methods='GET' contentFormat='0'>three-segments</resource><resource path='/cond' methods='GET,PUT' contentFormat='0'>v1</resource><resource path='/fresh' methods='GET,PUT' exists='false' creatable='true'/></resources>")
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+%contains: stdout
+PROTOCOLTEST coap_options_and_conditions: PASS

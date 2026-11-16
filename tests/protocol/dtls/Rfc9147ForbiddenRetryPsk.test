@@ -1,0 +1,51 @@
+%description:
+
+DTLS production-path variant ForbiddenRetryPsk: a represented malformed handshake reaches
+the real receiver before the test requires its standard-defined fatal alert.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_forbidden_retry_psk")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 2); }).nth(1).mutate([](Packet *p) { mutateNestedHeader<inet::tls::TlsServerHello>(p, [](auto& h) {
+            bool found = false;
+            for (size_t i = 0; i + 4 <= h.getExtensionsArraySize();) {
+                int type = (h.getExtensions(i) << 8) | h.getExtensions(i + 1);
+                size_t length = (h.getExtensions(i + 2) << 8) | h.getExtensions(i + 3);
+                if (type == 51) { h.setExtensions(i + 1, 41); found = true; break; }
+                i += 4 + length;
+            }
+            require(found, "retry key_share is replaced by forbidden pre_shared_key");
+        }); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); }).within(2))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 110; }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.receivedMarkers.empty(), "malformed handshake cannot establish or deliver application data"); }));
+}
+%activity:
+EV << "rfc9147_forbidden_retry_psk compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host1.app[0].dtls.offerInitialKeyShare = false
+%contains: stdout
+PROTOCOLTEST rfc9147_forbidden_retry_psk: PASS

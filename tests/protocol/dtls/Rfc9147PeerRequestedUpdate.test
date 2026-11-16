@@ -1,0 +1,59 @@
+%description:
+
+DTLS production-path variant PeerRequestedUpdate: explicit concurrent-update requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t original;
+static bool dropAcks = true;
+static bool originalAcked = false;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_peer_requested_update")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); })
+        .assertEvent([](const MatchContext& c) { original = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence(); return true; }).within(1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return dropAcks && packetAckForEpoch(p, 3); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (packetAckForEpoch(c.event.packet, 3)) originalAcked = true; return packetAckForEpoch(c.event.packet, 3); }).within(3)))
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return !originalAcked && h && h->getMessageType() == 24 && h->getMessageSequence() != original; }).within(3)))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(83); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return handshake(c, 24) && h && h->getRequestUpdate() == 1; }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return handshake(c, 24) && h && h->getRequestUpdate() == 1; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver&) { dropAcks = false; }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+        auto b = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet);
+        return h && b && h->getMessageType() == 24 && h->getMessageSequence() != original && b->getRequestUpdate() == 0;
+    }).within(3))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{83} && app.updateResults == std::vector<bool>{true}, "admitted peer-requested update response precedes resumed app data"); }))
+    .never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(1.2));
+}
+%activity:
+EV << "rfc9147_peer_requested_update compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_peer_requested_update: PASS

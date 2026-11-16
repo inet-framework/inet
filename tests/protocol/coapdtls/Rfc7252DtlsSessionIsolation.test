@@ -1,0 +1,221 @@
+%description:
+
+RFC 7252 Sections 9.1.1 and 9.1.2 -- CoAP-over-DTLS session isolation and
+transport failure teardown: (1) same-tuple DTLS session replacement purges
+pending separate responses and deduplication tombstones from the prior session,
+preventing cross-session leakage or false duplicate suppression for identical
+MIDs; (2) DTLS handshake timeout and oversized payload sendError each fail
+active requests once and drain pendingRequests to 0.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "../coap/CoapChecks.h"
+#include "CoapDtlsTestPeer.h"
+#include "CoapDtlsTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class IsolationCoapClient : public CoapClient
+{
+  public:
+    uint64_t submitTestReq(const L3Address& addr, int port, uint8_t method, bool con,
+            const std::string& uri, const std::vector<uint8_t>& body)
+    {
+        return submitCoapRequest(addr, port, method, con, uri, body);
+    }
+    size_t getPendingRequestCount() const { return pendingRequests.size(); }
+};
+
+Define_Module(IsolationCoapClient);
+
+static uint64_t s1 = 0;
+static uint64_t s2 = 0;
+static int timeoutFailCount = 0;
+static int oversizeFailCount = 0;
+
+Define_ProtocolTestProgram()
+{
+    s1 = 0;
+    s2 = 0;
+    timeoutFailCount = 0;
+    oversizeFailCount = 0;
+
+    return ProtocolTest("coap_dtls_session_isolation")
+        // Drop blackholed port 5685 traffic for handshake timeout subtest.
+        .intercept(tap("tap").from("host1").filterPacket("udp.destPort == 5685").drop())
+        // Phase 1: CoapDtlsTestPeer opens session 1, sends CON GET MID=42, waits for Empty ACK, replaces session.
+        .act(action().at(0.2).run<CoapDtlsTestPeer>("host1.app[0].peer", [](CoapDtlsTestPeer& peer) {
+            s1 = peer.openSession("host2", 5684);
+            if (s1 == 0)
+                throw cRuntimeError("Failed to open DTLS session 1");
+        }))
+        .once(on("host1.app[0].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[0].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = COAP_TYPE_CON;
+            req.code = COAP_CODE_GET;
+            req.messageId = 42;
+            req.token = {0x11, 0x22};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendBytes(s1, encodeRawCoap(req), "Session1Get");
+        }))
+        // Expect Empty ACK (due to host2 responseDelay = 1s) on session 1, then replace same tuple with session 2.
+        .once(on("host1.app[0].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[0].peer", [](CoapDtlsTestPeer& peer) {
+            const auto& recs = peer.getReceived();
+            if (recs.size() != 1 || recs[0].sessionId != s1)
+                throw cRuntimeError("Expected 1 Empty ACK on session 1");
+            RawCoapMessage ack;
+            if (!decodeRawCoap(recs[0].bytes, ack) || ack.type != COAP_TYPE_ACK || ack.code != COAP_CODE_EMPTY || ack.messageId != 42)
+                throw cRuntimeError("Expected Empty ACK for MID 42 on session 1");
+            peer.clearReceived();
+            s2 = peer.openSession("host2", 5684);
+            if (s2 == 0 || s2 == s1)
+                throw cRuntimeError("Expected new session ID s2 != s1");
+        }))
+        // Wait for session 2 establishment AND wait > 1s past server's 1s separate response timer to verify no cross-session leakage.
+        .once(on("host1.app[0].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().after(1.3).run<CoapDtlsTestPeer>("host1.app[0].peer", [](CoapDtlsTestPeer& peer) {
+            if (!peer.getReceived().empty())
+                throw cRuntimeError("Session 1 separate response leaked onto replacement session 2");
+            // Reuse exact same MID=42 on session 2: must NOT be suppressed as a duplicate!
+            RawCoapMessage req2;
+            req2.type = COAP_TYPE_CON;
+            req2.code = COAP_CODE_GET;
+            req2.messageId = 42;
+            req2.token = {0x33, 0x44};
+            req2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            req2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendBytes(s2, encodeRawCoap(req2), "Session2GetSameMid");
+        }))
+        // Receive Empty ACK then separate 2.05 response on session 2.
+        .once(on("host1.app[0].peer").signal("packetReceivedFromLower").within(2.0))
+        .once(on("host1.app[0].peer").signal("packetReceivedFromLower").within(3.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[0].peer", [](CoapDtlsTestPeer& peer) {
+            bool sawContent = false;
+            for (const auto& rec : peer.getReceived()) {
+                if (rec.sessionId != s2)
+                    throw cRuntimeError("Expected all session-2 packets on s2");
+                RawCoapMessage m;
+                if (decodeRawCoap(rec.bytes, m) && m.code == COAP_CODE_CONTENT) {
+                    sawContent = true;
+                    if (m.token != std::vector<uint8_t>({0x33, 0x44}) || rawPayloadString(m) != "isolated-v2")
+                        throw cRuntimeError("Unexpected session 2 content response");
+                }
+            }
+            if (!sawContent)
+                throw cRuntimeError("MID=42 on replacement session 2 did not receive 2.05 Content");
+        }))
+        // Phase 2: Handshake timeout fails pending request once and drains pendingRequests; oversize payload fails via sendError once.
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[1].coap").signal("requestFailed").filterEvent([](const MatchContext&) {
+                ++timeoutFailCount;
+                return true;
+            }).within(5.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[2].coap").signal("requestFailed").filterEvent([](const MatchContext&) {
+                ++oversizeFailCount;
+                return true;
+            }).within(5.0)))
+        .act(action().run<IsolationCoapClient>("host1.app[1].coap", [](IsolationCoapClient& cli) {
+            uint64_t id = cli.submitTestReq(L3AddressResolver().resolve("host2"), 5685,
+                    COAP_CODE_GET, true, "coaps://host2:5685/sensors/temp", {});
+            if (id == 0)
+                throw cRuntimeError("Failed to initiate blackholed request");
+        }).run<IsolationCoapClient>("host1.app[2].coap", [](IsolationCoapClient& cli) {
+            std::vector<uint8_t> bigPayload(600, 'X'); // < preferredBlockSize(1024), > udpPayloadLimit(500)
+            uint64_t id = cli.submitTestReq(L3AddressResolver().resolve("host2"), 5684,
+                    COAP_CODE_POST, true, "coaps://host2:5684/sensors/temp", bigPayload);
+            if (id == 0)
+                throw cRuntimeError("Failed to initiate oversize request");
+        }))
+        .unordered({
+            on("host1.app[1].coap").signal("requestFailed").within(4.0),
+            on("host1.app[2].coap").signal("requestFailed").within(4.0)
+        })
+        .act(action().after(0.2).run<IsolationCoapClient>("host1.app[1].coap", [](IsolationCoapClient& cli) {
+            if (timeoutFailCount != 1 || cli.getFailedCount() != 1 || cli.getPendingRequestCount() != 0)
+                throw cRuntimeError("Expected 1 timeout failure and 0 pending, got signal=%d count=%d pending=%zu",
+                        timeoutFailCount, cli.getFailedCount(), cli.getPendingRequestCount());
+        }).run<IsolationCoapClient>("host1.app[2].coap", [](IsolationCoapClient& cli) {
+            if (oversizeFailCount != 1 || cli.getFailedCount() != 1 || cli.getPendingRequestCount() != 0)
+                throw cRuntimeError("Expected 1 oversize sendError failure and 0 pending, got signal=%d count=%d pending=%zu",
+                        oversizeFailCount, cli.getFailedCount(), cli.getPendingRequestCount());
+        }));
+}
+
+%activity:
+EV << "coap_dtls_session_isolation compiled\n";
+
+%file: IsolationTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple IsolationCoapClient extends CoapClient
+{
+    parameters:
+        @class(IsolationCoapClient);
+}
+
+module IsolationDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: IsolationCoapClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 3
+*.host1.app[0].typename = "inet.protocoltest.coapdtls.CoapDtlsTestApp"
+*.host1.app[0].server = false
+*.host1.app[0].dtls.closeTimeout = 0s
+
+*.host1.app[1].typename = "IsolationDtlsClientApp"
+*.host1.app[1].coap.numRequests = 0
+*.host1.app[1].coap.peerPort = 5685
+*.host1.app[1].dtls.handshakeTimeout = 1s
+
+*.host1.app[2].typename = "IsolationDtlsClientApp"
+*.host1.app[2].coap.numRequests = 0
+*.host1.app[2].coap.preferredBlockSize = 1024B
+*.host1.app[2].dtls.udpPayloadLimit = 500B
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "inet.applications.coapdtls.CoapDtlsServer"
+*.host2.app[0].dtls.closeTimeout = 0s
+*.host2.app[0].coap.responseDelay = 1s
+*.host2.app[0].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET,POST'>isolated-v2</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_session_isolation: PASS

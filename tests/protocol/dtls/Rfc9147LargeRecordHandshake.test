@@ -1,0 +1,54 @@
+%description:
+
+A 20000-byte UDP budget must still respect record-layer plaintext ceilings.
+Fragment a large certificate at 16372 body bytes plus its 12-byte envelope, retain
+its full logical size, reassemble and complete the real handshake once.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool exceedsRecordBound(const MatchContext& c)
+{
+    auto plain = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+    auto encrypted = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+    auto ack = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+    return (plain && (plain->getLength() > 16384 || c.event.packet->getByteLength() > 16397)) ||
+           (encrypted && (encrypted->getLength() > 16401 || c.event.packet->getByteLength() > 16406)) ||
+           (ack && ack->getEpochsArraySize() > 1023);
+}
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_large_record_handshake")
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(exceedsRecordBound).within(3)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(exceedsRecordBound).within(3)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 11 && h->getFragmentOffset() == 0; }).assertEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h->getMessageLength() > 16372 && h->getFragmentLength() == 16372; }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "large logical certificate reassembles while every record respects its content limit"); }));
+}
+%activity:
+EV << "rfc9147_large_record_handshake compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.udpPayloadLimit = 20000B
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 20000B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_large_record_handshake: PASS

@@ -360,11 +360,20 @@ selectors must hold, and a rule has exactly one action.
 | Selector | The frame |
 | --- | --- |
 | `.filterPacket(expr)` | matches a PacketFilter expression; the expression can name `{captures}` |
+| `.filterPacket(predicate)` | matches `bool(const Packet *)`; typed C++ inspection combines with the expression using AND, before `.nth` / `.fromNth` count matches |
 | `.minBytes(n)` | has at least `n` bytes |
 | `.from(node)` / `.to(node)` | comes from the node / goes to the node. On a `PacketTap`, the node behind a side; on the radio medium, the node of the transmitter / of the receiver radio |
 | `.copiesOnly()` | is a copy that a `duplicate(...)` rule made |
 | `.nth(k)` / `.fromNth(k)` | is the k-th frame that the rule selects / the k-th and each one after it |
 | `.within(d)` | comes less than `d` after the start of the rule; then the rule ends |
+
+Use the C++ predicate when the production packet retains typed nested chunks that the
+generic dissector does not expose as fields. It receives the complete tapped frame for
+read-only inspection. Set both overloads to require the expression and predicate together;
+nonmatching packets do not advance occurrence counting. This supports selecting a particular
+handshake fragment even when earlier UDP datagrams remain queued on the same link. Selecting
+the next UDP datagram after a sender-side observation is insufficient in that situation.
+[TypedTapPredicate.test](../udp/TypedTapPredicate.test) exercises both selectors and `.nth(2)`.
 
 | Action | On a `PacketTap` | On the radio medium |
 | --- | --- | --- |

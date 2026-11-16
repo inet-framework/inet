@@ -1,0 +1,120 @@
+%description:
+
+RFC 7252 Section 9.1 -- CoAP over DTLS 1.3 over IPv6 using certificate
+profile and mutual client authentication (clientAuthentication = true):
+CON GET and CON PUT requests succeed end-to-end across StandardHost6 nodes.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "../coap/CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class Ipv6TestCoapClient : public CoapClient
+{
+  public:
+    uint64_t submitTestReq(const L3Address& addr, int port, uint8_t method, bool con,
+            const std::string& uri, const std::vector<uint8_t>& body)
+    {
+        return submitCoapRequest(addr, port, method, con, uri, body);
+    }
+};
+
+Define_Module(Ipv6TestCoapClient);
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("coap_dtls_ipv6_certificate")
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(12.0))
+        .act(action().run<CoapClient>("host1.app[0].coap", [](CoapClient& cli) {
+            if (cli.getCompletedResponses().size() != 1)
+                throw cRuntimeError("Expected 1 IPv6 DTLS GET response, got %zu", cli.getCompletedResponses().size());
+            const auto& r = cli.getCompletedResponses()[0];
+            if (r.code != COAP_CODE_CONTENT || std::string(r.payload.begin(), r.payload.end()) != "v6-init")
+                throw cRuntimeError("Unexpected IPv6 GET response code=%u", r.code);
+        }).run<Ipv6TestCoapClient>("host1.app[1].coap", [](Ipv6TestCoapClient& cli) {
+            L3Address serverAddr = L3AddressResolver().resolve("host2");
+            uint64_t id = cli.submitTestReq(serverAddr, 5684, COAP_CODE_PUT, true,
+                    "coaps://host2:5684/config/mode", asciiBytes("v6-updated"));
+            if (id == 0)
+                throw cRuntimeError("Failed to submit IPv6 certificate PUT request");
+        }))
+        .once(on("host1.app[1].coap").signal("requestCompleted").within(10.0))
+        .act(action().run<Ipv6TestCoapClient>("host1.app[1].coap", [](Ipv6TestCoapClient& cli) {
+            if (cli.getCompletedResponses().size() != 1 || cli.getCompletedResponses()[0].code != COAP_CODE_CHANGED)
+                throw cRuntimeError("Expected 2.04 Changed on IPv6 certificate PUT");
+        }));
+}
+
+%activity:
+EV << "coap_dtls_ipv6_certificate compiled\n";
+
+%file: Ipv6CertTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple Ipv6TestCoapClient extends CoapClient
+{
+    parameters:
+        @class(Ipv6TestCoapClient);
+}
+
+module Ipv6TestDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: Ipv6TestCoapClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.linkDelay = 1ms
+*.host*.typename = "StandardHost6"
+*.configurator.typename = "Ipv6FlatNetworkConfigurator"
+
+*.host*.app[*].dtls.profile = "certificate"
+*.host2.app[0].dtls.clientAuthentication = true
+
+*.host1.numApps = 2
+*.host1.app[0].typename = "inet.applications.coapdtls.CoapDtlsClient"
+*.host1.app[0].coap.peerAddress = "host2"
+*.host1.app[0].coap.requestUri = "coaps://host2:5684/config/mode"
+*.host1.app[0].coap.requestMethod = "GET"
+*.host1.app[0].coap.startTime = 5s
+*.host1.app[0].coap.numRequests = 1
+
+*.host1.app[1].typename = "Ipv6TestDtlsClientApp"
+*.host1.app[1].coap.numRequests = 0
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "inet.applications.coapdtls.CoapDtlsServer"
+*.host2.app[0].coap.resources = xml("<resources><resource path='/config/mode' contentFormat='0' methods='GET,PUT'>v6-init</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_ipv6_certificate: PASS

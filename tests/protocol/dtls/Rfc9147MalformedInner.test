@@ -1,0 +1,53 @@
+%description:
+
+DTLS production-path variant MalformedInner: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_malformed_inner")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(17); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).nth(1).duplicate(0.02))
+    .meanwhile(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).mutate([](Packet *p) {
+        require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + 5); }), "invalid record uses a future unused number");
+        mutateNestedHeader<inet::dtls::DtlsInnerContentType>(p, [](auto& h) { h.setContentType(255); });
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.05))
+    .once(on("host2.app[0].dtls").signal("recordDropped").within(0.05))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        for (int marker = 20; marker < 25; marker++) app.sendMarker(marker);
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>({17, 20, 21, 22, 23, 24}), "invalid future record does not commit replay state before valid traffic reaches that number");
+    }));
+}
+%activity:
+EV << "rfc9147_malformed_inner compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_malformed_inner: PASS

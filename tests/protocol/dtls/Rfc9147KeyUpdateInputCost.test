@@ -1,0 +1,57 @@
+%description:
+
+A new logical KeyUpdate pays handshake input cost once. Fresh-numbered copies
+arrive while that cost is pending and after processing; both are acknowledged
+without another charge or receive-epoch advance.
+
+%includes:
+#include <cmath>
+#include <set>
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static unsigned handshakeSamples = 0, copies = 0, receivedCopies = 0;
+static std::set<uint64_t> copiedNumbers, acknowledgedNumbers;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_key_update_input_cost")
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 24); }).nth(1).duplicate(0.02, 2))
+    .meanwhile(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 24); }).mutate([](Packet *p) { mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { auto number = h.getSequenceNumber() + 200 + ++copies; copiedNumbers.insert(number); h.setSequenceNumber(number); }); }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 0.03) < 1e-9) ++handshakeSamples; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); if (r && handshake(c, 24) && copiedNumbers.count(r->getSequenceNumber())) ++receivedCopies; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet); if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i) if (a->getEpochs(i) == 3) acknowledgedNumbers.insert(a->getSequenceNumbers(i)); return false; }).within(3)))
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(false); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return packetAckForEpoch(c.event.packet, 3); }).within(0.1))
+    .act(action().after(0.08).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver&) {
+        require(handshakeSamples == 1 && copies == 2 && receivedCopies == 2, "pending and processed duplicates incur no second logical handshake cost");
+        for (auto number : copiedNumbers) require(acknowledgedNumbers.count(number), "each fresh-numbered logical duplicate is acknowledged");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(5); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return protectedRecord(c, 0); }).within(0.1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{5} && app.errorCount == 0, "duplicates produce one epoch transition and preserve new-epoch delivery"); }));
+}
+%activity:
+EV << "rfc9147_key_update_input_cost compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host2.app[0].dtls.handshakeInDelay = simTime() < 1s ? 0.05s : 0.03s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_key_update_input_cost: PASS

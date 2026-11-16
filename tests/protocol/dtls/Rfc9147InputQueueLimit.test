@@ -1,0 +1,46 @@
+%description:
+
+DTLS production-path variant InputQueueLimit: explicit queue/epoch/teardown requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_input_queue_limit")
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1, 1178); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 1200; }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").assertValue(4).within(0.05))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2, 1177); app.sendMarker(3, 1177); }))
+    .unordered({
+        on("host2.app[0].dtls").signal("recordDropped").assertValue(4).within(0.01),
+        on("host2.app[0].driver").signal("packetSentToUpper").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 1177; }).within(0.05)
+    })
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{2} && app.errorCount == 0, "input overflow drops oversized/new records and preserves exact-capacity admitted work plus association"); }));
+}
+%activity:
+EV << "rfc9147_input_queue_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host2.app[0].dtls.maxProcessingBytes = 1199B
+*.host2.app[0].dtls.protectInDelay = 10ms
+%contains: stdout
+PROTOCOLTEST rfc9147_input_queue_limit: PASS

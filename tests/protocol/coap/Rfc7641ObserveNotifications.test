@@ -1,0 +1,220 @@
+%description:
+
+RFC 7641 Sections 4.2, 4.4, 4.5 -- Resource-driven unsolicited CON notifications
+with 1ms clock ticks, same-tick & in-flight coalescing, Observe retry header refresh
+while retaining MID/token/body/ETag, and dual-stack IPv4/IPv6 notification delivery.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class NotifyTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+    int dropNextNotifs = 0;
+    uint16_t droppedMid = 0;
+    uint32_t droppedObs = 0;
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, 0);
+    }
+
+  protected:
+    virtual void socketDataArrived(UdpSocket *arrivedSocket, Packet *packet) override {
+        if (dropNextNotifs > 0) {
+            RawCoapMessage raw;
+            if (decodeRawCoap(extractAppCoapWireBytes(packet), raw) && raw.type == 0) {
+                --dropNextNotifs;
+                droppedMid = raw.messageId;
+                auto obs = getRawOptionValues(raw, COAP_OPT_OBSERVE);
+                droppedObs = obs.empty() ? 0 : coapDecodedUint(obs[0]);
+                delete packet;
+                return;
+            }
+        }
+        CoapClient::socketDataArrived(arrivedSocket, packet);
+    }
+
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+Define_Module(NotifyTestClient);
+
+Define_ProtocolTest(coap_observe_notifications)
+{
+    return ProtocolTest("coap_observe_notifications")
+        // 1. Register both IPv4 client (hostA) and IPv6 client (host6A) after IPv6 DAD completes at t=3.0s
+        .act(action().at(3.0).run<NotifyTestClient>("hostA.app[0]", [](NotifyTestClient& cli) {
+            cli.startObs("hostB", 5683, "/sensors/temp");
+        }))
+        .act(action().at(3.0).run<NotifyTestClient>("host6A.app[0]", [](NotifyTestClient& cli) {
+            cli.startObs("host6B", 5683, "/sensors/temp");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower").within(0.5))
+
+        // 2. Mutation -> both IPv4 and IPv6 receive CON 2.05 notification with strictly greater Observe ticks
+        .act(action().at(3.2).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'2', '1', 'C'});
+        }))
+        .act(action().at(3.2).run<CoapServer>("host6B.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'2', '1', 'C'});
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 0 && raw.code == COAP_CODE_CONTENT && rawPayloadString(raw) == "21C";
+                  }).within(0.5))
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 0 && raw.code == COAP_CODE_CONTENT && rawPayloadString(raw) == "21C";
+                  }).within(0.5))
+
+        // 3. Same-tick coalescing: prime tick 3500 with s0, then update twice within the same ms -> emitted once at tick 3501 with s2!
+        .act(action().at(3.5000).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'s', '0'});
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && rawPayloadString(raw) == "s0";
+                  }).within(0.5))
+        .act(action().at(3.5002).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'s', '1'});
+            srv.updateResourceValue("/sensors/temp", {'s', '2'});
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && ctx.event.time >= SimTime(3501, SIMTIME_MS)
+                              && rawPayloadString(raw) == "s2";
+                  }).within(0.5))
+
+        // 4. Retry header refresh & in-flight coalescing on drop:
+        //    Drop the initial CON notification "inf1", trigger "que2" then "que3" while retransmitting;
+        //    retry of "inf1" MUST keep same MID/token/body/ETag while incrementing COAP_OPT_OBSERVE,
+        //    and AFTER its ACK arrives, ONLY newest "que3" is transmitted!
+        .act(action().at(3.95).run<NotifyTestClient>("hostA.app[0]", [](NotifyTestClient& cli) {
+            cli.dropNextNotifs = 1;
+        }))
+        .act(action().at(4.0).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'i', 'n', 'f', '1'});
+        }))
+        .act(action().at(4.5).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/temp", {'q', 'u', 'e', '2'});
+            srv.updateResourceValue("/sensors/temp", {'q', 'u', 'e', '3'});
+        }))
+        // Expect retry of "inf1" with SAME MID and LARGER Observe value in [2s..3s] after t=4.0s
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto *cli = check_and_cast<NotifyTestClient *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+                      auto obs = getRawOptionValues(raw, COAP_OPT_OBSERVE);
+                      return raw.type == 0 && raw.code == COAP_CODE_CONTENT
+                              && raw.messageId == cli->droppedMid
+                              && !obs.empty() && coapDecodedUint(obs[0]) > cli->droppedObs
+                              && rawPayloadString(raw) == "inf1";
+                  }).within(4.0))
+        // Immediately followed by newest coalesced "que3" (never "que2")!
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 0 && raw.code == COAP_CODE_CONTENT
+                              && rawPayloadString(raw) == "que3";
+                  }).within(1.0))
+        .act(action().after(0.05).run<NotifyTestClient>("hostA.app[0]", [](NotifyTestClient& cli) {
+            for (const auto& n : cli.notes) {
+                std::string s(n.payload.begin(), n.payload.end());
+                if (s == "s1" || s == "que2")
+                    throw cRuntimeError("Coalesced intermediate state '%s' should not have been transmitted", s.c_str());
+            }
+        }));
+}
+
+%activity:
+EV << "coap_observe_notifications compiled\n";
+
+%file: CoapObsDualNet.ned
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple NotifyTestClient extends inet.applications.coap.CoapClient
+{
+    parameters:
+        @class(NotifyTestClient);
+}
+
+network CoapObsDualNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        v6Configurator: Ipv6FlatNetworkConfigurator { @display("p=80,120"); }
+        tester: ProtocolTester { @display("p=80,190"); }
+        hostA: StandardHost { @display("p=250,60"); }
+        hostB: StandardHost { @display("p=450,60"); }
+        host6A: StandardHost {
+            @display("p=250,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+        host6B: StandardHost {
+            @display("p=450,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        host6A.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> host6B.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapObsDualNet
+sim-time-limit = 15s
+seed-set = 0
+*.tester.testName = "coap_observe_notifications"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "NotifyTestClient"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/temp' methods='GET,PUT' contentFormat='0' obs='true' maxAge='60'>20C</resource></resources>")
+
+*.host6A.numApps = 1
+*.host6A.app[0].typename = "NotifyTestClient"
+*.host6A.app[0].localPort = 16000
+
+*.host6B.numApps = 1
+*.host6B.app[0].typename = "CoapServer"
+*.host6B.app[0].localPort = 5683
+*.host6B.app[0].resources = xml("<resources><resource path='/sensors/temp' methods='GET,PUT' contentFormat='0' obs='true' maxAge='60'>20C</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_notifications: PASS
