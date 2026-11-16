@@ -2,9 +2,10 @@ name: "Check: baseline attribution"
 
 # The attribution run of the baseline changes of a pull request (TR-BASELINE-ATTRIBUTION and
 # TR-BASELINE-PARENT in doc/project/rule/testing.md), through check-baseline-attribution.sh. For each
-# commit that moves a baseline pin over a result, the job runs the moved tests at the parent with the
-# old pins, at the commit with the new pins, and with the reduction of a forward or reverse
-# attribution. A pull request that moves no pin over a result needs no run, and the check passes.
+# commit that moves a baseline pin over a result or changes fingerprint values, the job runs the moved
+# tests at the parent with its expectations, at the commit with its expectations, and with the
+# reduction of a forward or reverse attribution. A pull request with no such commit needs no run,
+# and the check passes.
 #
 # The job builds and runs content of the pull request, so it runs on pull_request, with a read-only
 # token. It runs the tool from a copy, because the runs check out other commits in the work tree.
@@ -45,7 +46,7 @@ jobs:
           "$RUNNER_TEMP/enforcement/check-baseline-attribution.sh" plan "$range" | tee "$RUNNER_TEMP/plan.txt"
           if grep -q "No run is necessary" "$RUNNER_TEMP/plan.txt"; then
             echo "runs=false" >> "$GITHUB_OUTPUT"
-            echo "No commit of the pull request moves a baseline pin over a result; no run is necessary." >> "$GITHUB_STEP_SUMMARY"
+            echo "No commit of the pull request moves a baseline pin over a result or a fingerprint value; no run is necessary." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "runs=true" >> "$GITHUB_OUTPUT"
           fi
@@ -102,12 +103,14 @@ jobs:
           echo 'exec opp_checkout_test_baselines --load "$GITHUB_WORKSPACE/inet" -p inet' > "$RUNNER_TEMP/checkout.sh"
           echo 'exec opp_run_statistical_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/statistical.sh"
           echo 'exec opp_run_chart_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/chart.sh"
+          echo 'exec opp_run_fingerprint_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/fingerprint.sh"
 
           cd $GITHUB_WORKSPACE/inet
           set +e
           "$RUNNER_TEMP/enforcement/check-baseline-attribution.sh" run "$RANGE" --log-folder "$RUNNER_TEMP/attribution" \
             --build "bash $RUNNER_TEMP/build.sh" --checkout "bash $RUNNER_TEMP/checkout.sh" \
-            --statistical "bash $RUNNER_TEMP/statistical.sh" --chart "bash $RUNNER_TEMP/chart.sh" | tee "$RUNNER_TEMP/attribution.txt"
+            --statistical "bash $RUNNER_TEMP/statistical.sh" --chart "bash $RUNNER_TEMP/chart.sh" \
+            --fingerprint "bash $RUNNER_TEMP/fingerprint.sh" | tee "$RUNNER_TEMP/attribution.txt"
           status=${PIPESTATUS[0]}
           set -e
           { echo "## Attribution runs"; echo; echo '```'; cat "$RUNNER_TEMP/attribution.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
