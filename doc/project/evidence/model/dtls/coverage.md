@@ -17,5 +17,6 @@ The selected behavioral profile and exclusions are in [scope.md](scope.md). Exec
 | Key updates | The 18 cases in [key-updates.md](../../../../../tests/protocol/dtls/key-updates.md) | PASS on the isolated update boundary |
 | Graceful closure | The 7 cases in [closure-and-lifecycle.md](../../../../../tests/protocol/dtls/closure-and-lifecycle.md) | PASS for local completion, forced closure, alert disposition, shared peers and delivery boundaries |
 | Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue, DtlsRecoveryLifecycle, DtlsRestartLifecycle, sender/configuration cases | PASS for processing/recovery ownership, close preservation, crash and repeated restart |
+| Asynchronous raw-header rejection | Four cases in [malformed-handshake-records.md](../../../../../tests/protocol/dtls/malformed-handshake-records.md) | PASS after the narrow decode correction; both queued variants fail on the preserved parent while zero-cost controls pass |
 
 No achieved standards-test depth is claimed until the selected cases have executed and their observations have been examined. Cryptographic validation, protected-packet byte export, CID/migration and the omitted optional handshake modes are not supported claims.

@@ -1,6 +1,6 @@
 # Updating association protection epochs
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for `dtls: add: update association protection epochs`. Eighteen wire cases cover update recovery, directional epoch state, input/output ordering and bounded sender state.
 

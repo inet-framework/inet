@@ -1,6 +1,6 @@
 # Protected application datagrams
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for C5, `dtls: add: deliver protected datagrams with epoch and replay checks`. The protection model follows INET IPsec: an EncryptedChunk retains represented content and a separate modeled 16-byte tag contributes size. No real encryption, MAC verification or cryptographic interoperability is claimed.
 

@@ -1,6 +1,6 @@
 # Selecting a precise packet for fault injection
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md), [AUTHORING.md](../lib/AUTHORING.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md), [AUTHORING.md](../lib/AUTHORING.md)
 
 This document covers the generic interception preparation needed by C4 of the DTLS plan. [TypedTapPredicate.test](TypedTapPredicate.test) checks test-framework selection, not a new UDP requirement. Nested DTLS handshake messages require typed inspection that the existing expression-only interception API cannot express. Selecting the next UDP datagram after a sender callback is insufficient: earlier records may still be queued on the link.
 

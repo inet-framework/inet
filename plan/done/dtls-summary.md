@@ -1,12 +1,12 @@
-# The DTLS implementation plan, explained
+# The DTLS model, explained
 
-> **Kind:** reference · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](dtls.md)
+> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](dtls.md)
 
-This document explains revision 7 of the [DTLS implementation plan](dtls.md), as of 2026-11-16. Implementation is in progress. The diagrams describe the intended completed behavior, and the [verification report](../../doc/project/evidence/model/dtls/results.md) distinguishes executed foundation checks from unfinished endpoint behavior. The detailed plan owns the exact scope, commit boundaries, parameters and test requirements.
+This document explains the implemented [DTLS plan](dtls.md), as of 2026-11-16. The diagrams describe the model's behavior. The [verification report](../../doc/project/evidence/model/dtls/results.md) records executed checks and their limits. The detailed plan owns the scope, commit boundaries, parameters and test requirements.
 
-## What we want to build
+## What the model provides
 
-The goal is a DTLS 1.3 simulation model for applications that send UDP datagrams. It will let a study measure how much connection setup costs, how packet loss delays the handshake, how large handshake messages affect traffic, and how processing costs affect latency.
+The DTLS 1.3 simulation model serves applications that send UDP datagrams. A study can measure how much connection setup costs, how packet loss delays the handshake, how large handshake messages affect traffic, and how processing costs affect latency.
 
 An application first establishes an **association**: the state shared by a client and server for one DTLS conversation. Once setup succeeds, it can exchange application datagrams. DTLS recovers lost handshake messages, but application traffic retains UDP semantics: a lost application datagram stays lost, and later datagrams need not wait for it.
 
@@ -16,7 +16,7 @@ DTLS 1.2 compatibility, session resumption, early application data before the ha
 
 ## The cryptography follows INET IPsec
 
-The model will represent cryptographic overhead and processing time using the same approach as INET IPsec. It will wrap immutable packet content in `EncryptedChunk`, account for the extra bytes, and unwrap the retained content at the receiver. It will not run encryption, compute authentication tags, generate signatures or validate certificate chains.
+The model represents cryptographic overhead and processing time using the same approach as INET IPsec. It wraps immutable packet content in `EncryptedChunk`, accounts for the extra bytes, and unwraps the retained content at the receiver. It does not run encryption, compute authentication tags, generate signatures or validate certificate chains.
 
 This distinction determines what the results mean. The model can answer “How many extra bytes and milliseconds does this exchange add?” It cannot answer “Can an attacker forge this packet?” Certificate, signature, binder and Finished contents are placeholders, and authentication success is modeled from compatible profiles and identities. A Finished message represents completion of the handshake's authentication step; its cryptographic proof is not computed.
 
@@ -24,7 +24,7 @@ Protected packets also have no real ciphertext byte representation. Supported co
 
 ## Where it fits in an INET host
 
-The proposed model uses the existing application slot and UDP stack. There is no need to add a DTLS submodule to every host or modify the node dispatcher.
+The model uses the existing application slot and UDP stack. There is no need to add a DTLS submodule to every host or modify the node dispatcher.
 
 ```mermaid
 flowchart LR
@@ -69,13 +69,13 @@ flowchart TB
     Future -.-> TCP["TCP stream integration: deferred"]
 ```
 
-The common package supplies handshake bodies, extension encodings and profile-selection helpers. DTLS owns the record format, cookie handling, message sequence, fragments, acknowledgements and retransmission timers. It will not start with a generic shared TLS/DTLS state machine.
+The common package supplies handshake bodies, extension encodings and profile-selection helpers. DTLS owns the record format, cookie handling, message sequence, fragments, acknowledgements and retransmission timers. There is no shared TLS/DTLS endpoint state machine.
 
 Even the shared content needs a small DTLS adaptation: its ClientHello body has an extra legacy cookie field. A distinct `DtlsClientHello` type and serializer preserve the correct layout while reusing common fields. This prevents a shared type from silently acquiring the wrong byte encoding.
 
 ## What connection setup looks like
 
-This example shows the planned certificate handshake with the default cookie exchange. A cookie makes the client demonstrate that it can receive packets at its claimed address before the server sends a larger response. The token models this check; it does not provide real cryptographic protection against forgery.
+This example shows the certificate handshake with the default cookie exchange. A cookie makes the client demonstrate that it can receive packets at its claimed address before the server sends a larger response. The token models this check; it does not provide real cryptographic protection against forgery.
 
 ```mermaid
 sequenceDiagram
@@ -135,8 +135,8 @@ Each engine has separate incoming and outgoing processing queues. They can make 
 flowchart LR
     Send["Eligible outgoing work"] --> Out["Output processing queue"]
     Out --> Handoff["Handoff to UDP"]
-    Input["UDP input"] --> Check["Header and epoch checks"]
-    Check --> In["Input processing queue"]
+    Input["UDP input"] --> Check["Header framing"]
+    Check --> In["Input queue. Epoch checks, record and handshake work"]
     In --> Deliver["Handshake progress or application delivery"]
 ```
 
@@ -176,7 +176,7 @@ Only one outgoing update can await acknowledgement per association. A peer-reque
 
 ## Closure and restart
 
-| Trigger | Intended result |
+| Trigger | Result |
 | --- | --- |
 | Close one association | Stop new sends on that handle, hand close_notify to UDP when possible, then release the association and report closure. Other peers keep their shared socket. |
 | Module stop | Shut down associations and close the engine's UDP socket, with a deadline limiting processing waits. |
@@ -196,11 +196,11 @@ The [ordered commit series](dtls.md#ordered-implementation-commits) builds one c
 | C3: Establish associations | Negotiation, cookies, normal Finished/ACK handling and independent server peers. | Small, unfragmented handshake fixtures, rejection cases and peer-isolation tests. Output-credit handling already belongs here. |
 | C4: Recover handshakes | Fragmentation, reassembly, selective ACKs, retries and backoff. | Controlled loss, reordering, overlapping fragments, timer boundaries and delayed-processing cases. |
 | C5: Exchange application data | Protected datagrams, size accounting and the supported replay-window behavior. | Delivery/boundary assertions, intentional losses, replay cases and overhead/queue checks over IPv4 and IPv6. |
-| C6: Finish connection management | Manual/automatic key updates, graceful closure, stop, crash and restart. | Lost update ACKs, duplicate updates, closure deadlines and lifecycle tests on the production path. |
+| C6: Finish connection management | Manual/automatic key updates, graceful closure, stop, crash and restart. Queue continuations precede updates; a separate receive-error correction contains asynchronous header decoding; atomic cancellation precedes shutdown. | Lost update ACKs, duplicate updates, raw malformed-header delivery at zero/positive processing cost, closure deadlines and lifecycle tests. Each queue mechanism has a direct module check before its first production consumer. |
 | C7: Demonstrate and document | Runnable examples, user documentation and recorded coverage for the supported profile. | Focused DTLS tests, ordinary UDP compatibility checks, both build modes and builds with DTLS disabled. |
 
-Completion means the selected behavior has direct evidence, the examples run, and the model's limits remain explicit. A trajectory fingerprint can help catch later changes, but it cannot establish protocol correctness. No implementation tests have been run as part of preparing the plan or this summary.
+The protocol suite has 129 cases, alongside six units and eight module fixtures. The four raw-header regressions require malformed records to be discarded regardless of processing cost, followed by valid delivery without replay-state damage. The six examples cover PSK, certificates, fragmentation, seeded loss, processing cost and IPv6. Their scalar baselines detect future trajectory changes; they do not establish protocol correctness. The verification report distinguishes exact executed revisions, build modes, parent comparisons and baseline evidence.
 
 ## About the diagrams
 
-All six diagrams describe the planned model and are embedded as Mermaid source for a Markdown viewer with Mermaid support. Their sequences have been checked against the plan. Local diagram rendering has not been verified.
+All six diagrams describe the implemented model and are embedded as Mermaid source for a Markdown viewer with Mermaid support. Their sequences have been checked against the source and plan. Local diagram rendering has not been verified.

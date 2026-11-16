@@ -1,7 +1,7 @@
 %description:
 
 DTLS 1.3 production-path check: Rfc9147KeyUpdate. See the owning reviewer document in this suite
-and plan/pending/dtls.md for requirements, setup, expected result and limitations.
+and plan/done/dtls.md for requirements, setup, expected result and limitations.
 The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults.
 
 %includes:

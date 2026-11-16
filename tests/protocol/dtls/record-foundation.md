@@ -1,6 +1,6 @@
 # DTLS record framing and the first production entry point
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for C2, `dtls: add: record types and the UDP-backed engine contract`. Its protocol case is [Rfc9147RecordParsing.test](Rfc9147RecordParsing.test). The implementation adds the UDP-backed `Dtls` engine and its record parser; the parent has no DTLS module, so its absence is a setup gap, not an observed protocol failure. RFC 9147 sections 4, 4.1, 4.3 and 4.5.2 define the record boundaries and invalid-record behavior tested here.
 

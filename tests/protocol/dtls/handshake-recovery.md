@@ -1,6 +1,6 @@
 # Recovering handshakes over lossy UDP
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for C4, `dtls: recover fragmented handshakes over lossy UDP`. C3 establishes loss-free exchanges; this stage retains logical handshake ranges, handles ACKs and fragments, and cancels recovery state at the appropriate deadline. Every case uses the real engine and UDP/Ethernet path with seed 0.
 

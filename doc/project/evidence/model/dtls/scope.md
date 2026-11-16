@@ -1,6 +1,6 @@
 # DTLS simulation profile and limits
 
-> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../../../plan/pending/dtls.md), [standards.md](../../protocol/dtls/standards.md)
+> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../../../plan/done/dtls.md), [standards.md](../../protocol/dtls/standards.md)
 
 The authorized implementation uses UDP through an application-slot compound module, a replaceable IDtls engine, per-peer association state and reusable TLS body types. It does not modify the sealed packet subsystem or the host's standard transport composition. Immutable EncryptedChunk payloads, tag expansion and directional processing queues follow IPsec's abstract cryptography approach. No actual authentication, key derivation, signature or AEAD operation is performed.
 

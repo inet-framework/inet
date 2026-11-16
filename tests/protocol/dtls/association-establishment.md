@@ -1,6 +1,6 @@
 # Establishing DTLS associations
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for C3, `dtls: add: establish modeled client and server associations`. All cases below drive the production UDP-backed engine. They use modeled profile compatibility, without cryptographic certificate, signature, binder or Finished verification.
 

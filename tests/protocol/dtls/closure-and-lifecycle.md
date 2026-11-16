@@ -1,6 +1,6 @@
 # Closing associations and lifecycle cleanup
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/pending/dtls.md)
+> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [dtls.md](../../../plan/done/dtls.md)
 
 This is the reviewer document for `dtls: add: close associations without disrupting other peers`. Seven wire cases cover graceful and forced closure, alert-description dispatch, shared-socket peer isolation and lifecycle cancellation.
 
