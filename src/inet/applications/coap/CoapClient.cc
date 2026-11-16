@@ -247,36 +247,56 @@ void CoapClient::onEndpointStart()
 void CoapClient::onEndpointStop()
 {
     cancelEvent(sendTimer);
+    std::vector<CoapObserverKey> obsKeys;
+    obsKeys.reserve(observationsByPeerToken.size());
+    for (const auto& kv : observationsByPeerToken)
+        obsKeys.push_back(kv.first);
+    for (const auto& key : obsKeys)
+        terminateObservation(key, 0, "Endpoint stopped");
     observationsByPeerToken.clear();
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
     pendingObserveBlock2SubRequests.clear();
     ignoredObserveBlock2SubRequests.clear();
-    for (auto& kv : queuedBlockTransfers) {
+    subRequestToTransfer.clear();
+    activeBlockTransfers.clear();
+    auto queuedSnapshot = std::move(queuedBlockTransfers);
+    queuedBlockTransfers.clear();
+    for (auto& kv : queuedSnapshot) {
         for (auto& queued : kv.second)
             onRequestAborted(queued.transferId);
     }
-    queuedBlockTransfers.clear();
     activeKeyToTransfer.clear();
+    localCacheHitRequests.clear();
     emit(activeObservationsSignal, 0L);
 }
 
 void CoapClient::onEndpointCrash()
 {
     cancelEvent(sendTimer);
+    std::vector<CoapObserverKey> obsKeys;
+    obsKeys.reserve(observationsByPeerToken.size());
+    for (const auto& kv : observationsByPeerToken)
+        obsKeys.push_back(kv.first);
+    for (const auto& key : obsKeys)
+        terminateObservation(key, 0, "Endpoint crashed");
     observationsByPeerToken.clear();
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
     pendingObserveBlock2SubRequests.clear();
     ignoredObserveBlock2SubRequests.clear();
-    for (auto& kv : queuedBlockTransfers) {
+    subRequestToTransfer.clear();
+    activeBlockTransfers.clear();
+    auto queuedSnapshot = std::move(queuedBlockTransfers);
+    queuedBlockTransfers.clear();
+    for (auto& kv : queuedSnapshot) {
         for (auto& queued : kv.second)
             onRequestAborted(queued.transferId);
     }
-    queuedBlockTransfers.clear();
     activeKeyToTransfer.clear();
+    localCacheHitRequests.clear();
     emit(activeObservationsSignal, 0L);
 }
 
@@ -581,6 +601,9 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
         int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions,
         const std::vector<uint8_t> *explicitToken, bool bypassObserveReuse)
 {
+    if (operationalState != State::OPERATING)
+        return 0;
+
     CoapParsedUri parsedUri = parseCoapUri(uriStr);
     CoapPeerEndpoint peer{destAddr, destPort};
     bool peerMulticast = destAddr.isMulticast();
@@ -646,6 +669,7 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
                         emit(requestStartedSignal, 1L);
                         uint64_t syntheticId = nextRequestId++;
                         activeRequestStarts[syntheticId] = now;
+                        localCacheHitRequests.insert(syntheticId);
                         auto synthHdr = makeShared<CoapHeader>();
                         synthHdr->setVersion(1);
                         synthHdr->setMessageType(isConfirmable ? COAP_TYPE_ACK : COAP_TYPE_NON);
@@ -762,6 +786,9 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
 uint64_t CoapClient::subscribeObserve(const L3Address& destAddr, int destPort, const std::string& uriStr,
         bool isConfirmable, int reqAccept, const std::vector<CoapOption>& extraOptions)
 {
+    if (operationalState != State::OPERATING)
+        return 0;
+
     CoapParsedUri parsedUri = parseCoapUri(uriStr);
     CoapPeerEndpoint peer{destAddr, destPort};
     std::vector<CoapOption> filteredTemplate;
@@ -1766,7 +1793,8 @@ void CoapClient::onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& 
 
     completedResponses.push_back(std::move(record));
     emit(requestCompletedSignal, 1L);
-    emit(requestLatencySignal, latency);
+    if (localCacheHitRequests.erase(requestId) == 0)
+        emit(requestLatencySignal, latency);
 }
 
 void CoapClient::onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode)

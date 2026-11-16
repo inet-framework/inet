@@ -146,9 +146,7 @@ void CoapEndpointBase::bindSocket()
 
 void CoapEndpointBase::clearTransientState(bool clearDuplicates)
 {
-    for (const auto& kv : pendingRequests)
-        dispatchRequestAborted(kv.second.requestId);
-
+    auto pendingSnapshot = std::move(pendingRequests);
     pendingRequests.clear();
     outboundMidToToken.clear();
     activeExchanges.clear();
@@ -160,6 +158,9 @@ void CoapEndpointBase::clearTransientState(bool clearDuplicates)
         nonDuplicateOrder.clear();
         duplicateEntries.clear();
     }
+
+    for (const auto& kv : pendingSnapshot)
+        dispatchRequestAborted(kv.second.requestId);
 }
 
 void CoapEndpointBase::handleMessageWhenUp(cMessage *msg)
@@ -193,17 +194,19 @@ void CoapEndpointBase::handleStartOperation(LifecycleOperation *operation)
 void CoapEndpointBase::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
-    onEndpointStop();
     clearTransientState(false);
-    socket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    onEndpointStop();
+    if (socket.isOpen()) {
+        socket.close();
+        delayActiveOperationFinish(par("stopOperationTimeout"));
+    }
 }
 
 void CoapEndpointBase::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
-    onEndpointCrash();
     clearTransientState(true);
+    onEndpointCrash();
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
     else
