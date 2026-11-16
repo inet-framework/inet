@@ -108,6 +108,7 @@ void addFillers_routing(std::vector<ChunkFiller>& fillers);
 void addFillers_mrp(std::vector<ChunkFiller>& fillers);
 void addFillers_gptp(std::vector<ChunkFiller>& fillers);
 void addFillers_mqtt(std::vector<ChunkFiller>& fillers);
+void addFillers_mqttsn(std::vector<ChunkFiller>& fillers);
 
 } // namespace inet
 

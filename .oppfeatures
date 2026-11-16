@@ -1095,6 +1095,23 @@
         compileFlags = "-DINET_WITH_MQTT"
         />
     <feature
+        id = "MqttSn"
+        name = "MQTT-SN 1.2"
+        description = "MQTT-SN clients and per-client gateways over UDP."
+        initiallyEnabled = "true"
+        requires = "Mqtt Udp"
+        nedPackages = "inet.applications.mqttsn"
+        compileFlags = "-DINET_WITH_MQTTSN"
+        />
+    <feature
+        id = "MqttSnTests"
+        name = "MQTT-SN tests"
+        description = "MQTT-SN codec, protocol and lifecycle fixtures."
+        initiallyEnabled = "true"
+        requires = "MqttSn MqttTests"
+        nedPackages = "inet.tests.mqttsn"
+        />
+    <feature
         id = "MqttExamples"
         name = "MQTT examples"
         description = "Wired publish/subscribe, QoS, retained value and reconnect examples."
