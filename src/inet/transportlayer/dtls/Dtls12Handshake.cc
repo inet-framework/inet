@@ -68,12 +68,24 @@ void DtlsAssociation::initializeDtls12(bool server, uint16_t helloSequence)
     state = server ? HandshakeState::SERVER_WAIT_CLIENT_FINISHED : HandshakeState::CLIENT_WAIT_SERVER_HELLO;
     if (server)
         legacyHandshake->phase = clientAuthRequested ? LegacyHandshake::Phase::SERVER_WAIT_CLIENT_CERTIFICATE : LegacyHandshake::Phase::SERVER_WAIT_CLIENT_KEY_EXCHANGE;
-    cidNegotiated = cidOffered = false;
-    localCid.clear();
+    cidOffered = engine.par("connectionIdEnabled").boolValue() && (!server || offer.hasConnectionId);
+    cidNegotiated = server && cidOffered;
+    if (server || !cidOffered)
+        localCid.clear();
     peerCid.clear();
     sparePeerCids.clear();
-    engine.removeConnectionIds(id);
-    heartbeatNegotiated = peerAllowsHeartbeat = false;
+    if (!cidOffered)
+        engine.removeConnectionIds(id);
+    if (server && cidNegotiated) {
+        peerCid = offer.connectionId;
+        if (engine.par("receiveConnectionId").boolValue()) {
+            localCid = engine.allocateConnectionId(id);
+            if (localCid.empty())
+                throw cRuntimeError("DTLS 1.2 receive CID allocation exhausted");
+        }
+    }
+    heartbeatNegotiated = server && engine.par("heartbeatEnabled").boolValue() && offer.heartbeatMode != 0;
+    peerAllowsHeartbeat = heartbeatNegotiated && offer.heartbeatMode == 1;
     pendingAcks.clear();
     engine.cancelEvent(delayedAckTimer.get());
     if (offeredSession && offeredSession->version != DTLS_12)
@@ -102,6 +114,13 @@ void DtlsAssociation::sendClientHello12(const std::vector<uint8_t>& cookie)
     hello->setCompressionMethods(0, 0);
     std::vector<uint8_t> extensions;
     appendClientSession12(hello, extensions);
+    if (owner.par("heartbeatEnabled").boolValue())
+        extension12(extensions, 15, {uint8_t(owner.par("heartbeatAcceptRequests").boolValue() ? 1 : 2)});
+    if (cidOffered) {
+        std::vector<uint8_t> cid = {uint8_t(localCid.size())};
+        cid.insert(cid.end(), localCid.begin(), localCid.end());
+        extension12(extensions, 54, cid);
+    }
     if (!selection.usesPsk()) {
         extension12(extensions, 10, {0,2,0,23});
         extension12(extensions, 13, {0,2,4,3});
@@ -236,23 +255,24 @@ void DtlsAssociation::sendFinalFlight12()
     if (owner.containsAssociation(handle)) finishFlight();
 }
 
-void DtlsAssociation::protectRecord(Packet *packet, uint8_t type, uint64_t epoch, uint64_t number)
+void DtlsAssociation::protectRecord(Packet *packet, uint8_t type, uint64_t epoch, uint64_t number, const std::vector<uint8_t> *cidOverride)
 {
+    const auto& cid = cidOverride ? *cidOverride : peerCid;
     if (isDtls12() || epoch == 0) {
         if (epoch > 65535)
             throw cRuntimeError("DTLS 1.2 epoch exceeds its record field");
-        if (isDtls12() && epoch != 0)
-            Dtls12RecordProtection::protect(packet, uint16_t(epoch), number);
-        auto header = makeShared<DtlsPlaintextHeader>();
-        header->setContentType(type);
-        header->setEpoch(epoch);
-        header->setSequenceNumber(number);
-        header->setLength(packet->getDataLength().get<B>());
-        packet->insertAtFront(header);
+        bool withCid = isDtls12() && epoch != 0 && cidNegotiated && !cid.empty();
+        if (isDtls12() && epoch != 0) {
+            if (withCid)
+                Dtls12RecordProtection::protectCid(packet, uint16_t(epoch), number, type);
+            else
+                Dtls12RecordProtection::protect(packet, uint16_t(epoch), number);
+        }
+        packet->insertAtFront(makeRecordHeader12(type, epoch, number, packet->getDataLength().get<B>(), withCid ? cid : std::vector<uint8_t>{}));
     }
     else {
         DtlsRecordProtection::protect(packet,type);
-        packet->insertAtFront(makeRecordHeader(epoch,number,packet->getDataLength().get<B>()));
+        packet->insertAtFront(makeRecordHeader(epoch,number,packet->getDataLength().get<B>(),&cid));
     }
 }
 

@@ -1,0 +1,50 @@
+%description:
+Selected legacy CID wire/admission boundary through real UDP endpoints.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish12("cid_inner_limit12")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize()==16383,"query reserves the real-type octet within the 16 KiB inner bound"); app.sendMarker(171,16383); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength()==16429; }).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength()==16383; }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(172,16384); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount==1 && app.errorCount==0,"one extra content byte refuses before protection"); app.sendMarker(173); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers==std::vector<int>({171,173}),"large reassembled and later small datagrams deliver once"); }));
+}
+%activity:
+EV << "legacy CID boundary compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.udpPayloadLimit = 20000B
+%contains: stdout
+PROTOCOLTEST cid_inner_limit12: PASS

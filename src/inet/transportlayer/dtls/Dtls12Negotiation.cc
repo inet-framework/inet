@@ -102,6 +102,8 @@ bool Dtls::handleClientHello12(PrevalidationAttempt *attempt, const Ptr<const Dt
     if (!attempt || listener==nullptr || operationalState!=OPERATING)
         return true;
     if (hello->getCompressionMethodsArraySize()!=1 || hello->getCompressionMethods(0)!=0) { fail(47); return true; }
+    if (par("connectionIdEnabled").boolValue() && offer.hasConnectionId && !offer.connectionId.empty() &&
+        initialPayloadBudget() <= int64_t(50 + offer.connectionId.size())) { fail(47); return true; }
     std::vector<uint8_t> cookie;
     for (size_t i=0; i<hello->getLegacyCookieArraySize(); ++i) cookie.push_back(hello->getLegacyCookie(i));
     std::vector<AssociationId> replaced;

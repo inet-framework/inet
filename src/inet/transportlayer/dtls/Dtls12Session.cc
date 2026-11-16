@@ -117,6 +117,12 @@ void DtlsAssociation::fillServerSessionHello12(const Ptr<tls::TlsServerHello>& h
     std::vector<uint8_t> extensions;
     if (legacyHandshake->ticketExpected)
         extensions = {0, 35, 0, 0};
+    if (heartbeatNegotiated)
+        extensions.insert(extensions.end(), {0, 15, 0, 1, uint8_t(engine.par("heartbeatAcceptRequests").boolValue() ? 1 : 2)});
+    if (cidNegotiated) {
+        extensions.insert(extensions.end(), {0, 54, 0, uint8_t(1 + localCid.size()), uint8_t(localCid.size())});
+        extensions.insert(extensions.end(), localCid.begin(), localCid.end());
+    }
     hello->setExtensionsPresent(!extensions.empty());
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
@@ -128,6 +134,24 @@ bool DtlsAssociation::processSessionHello12(const Ptr<const tls::TlsServerHello>
 {
     auto extensions = extensions12(hello);
     for (const auto& extension : extensions) {
+        if (extension.first == 15 && engine.par("heartbeatEnabled").boolValue()) {
+            if (extension.second.size() != 1 || (extension.second[0] != 1 && extension.second[0] != 2))
+                throw cRuntimeError("Invalid DTLS 1.2 server heartbeat extension");
+            heartbeatNegotiated = true;
+            peerAllowsHeartbeat = extension.second[0] == 1;
+            continue;
+        }
+        if (extension.first == 54 && cidOffered) {
+            if (extension.second.empty() || extension.second[0] != extension.second.size() - 1)
+                throw cRuntimeError("Invalid DTLS 1.2 server CID extension");
+            peerCid.assign(extension.second.begin() + 1, extension.second.end());
+            cidNegotiated = true;
+            if (engine.initialPayloadBudget() <= int64_t(12 + recordOverhead())) {
+                engine.failAssociation(id, "DTLS 1.2 peer CID cannot fit protected handshake fragments", 47);
+                return false;
+            }
+            continue;
+        }
         if (extension.first != 35 || !engine.par("resumptionEnabled").boolValue() || !engine.par("dtls12SessionTicketsEnabled").boolValue()) {
             engine.failAssociation(id, "Unsupported DTLS 1.2 ServerHello extension", 110);
             return false;

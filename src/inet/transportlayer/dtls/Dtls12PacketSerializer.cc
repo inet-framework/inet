@@ -3,6 +3,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/Dtls12CidHeader_m.h"
 
 namespace inet::dtls {
 
@@ -17,6 +18,7 @@ Register_Serializer(Dtls12ServerHelloDone, Dtls12PacketSerializer);
 Register_Serializer(Dtls12ChangeCipherSpec, Dtls12PacketSerializer);
 Register_Serializer(Dtls12ExplicitNonce, Dtls12PacketSerializer);
 Register_Serializer(Dtls12NewSessionTicket, Dtls12PacketSerializer);
+Register_Serializer(Dtls12CidHeader, Dtls12PacketSerializer);
 
 static void requireBytes(MemoryInputStream& stream, size_t bytes)
 {
@@ -53,7 +55,19 @@ static void readVector(MemoryInputStream& stream, unsigned width, Resize resize,
 void Dtls12PacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<const Chunk>& chunk) const
 {
     auto start = s.getLength();
-    if (auto h = dynamicPtrCast<const Dtls12HelloVerifyRequest>(chunk)) {
+    if (auto h = dynamicPtrCast<const Dtls12CidHeader>(chunk)) {
+        if (h->getContentType() != 25 || h->getLegacyVersion() != 0xfefd || h->getEpoch() == 0 ||
+            h->getSequenceNumber() >= (uint64_t(1) << 48) || h->getConnectionIdArraySize() == 0 || h->getConnectionIdArraySize() > 255)
+            throw cRuntimeError("Invalid DTLS 1.2 CID header");
+        s.writeUint8(25);
+        s.writeUint16Be(h->getLegacyVersion());
+        s.writeUint16Be(h->getEpoch());
+        s.writeUint48Be(h->getSequenceNumber());
+        for (size_t i = 0; i < h->getConnectionIdArraySize(); ++i)
+            s.writeUint8(h->getConnectionId(i));
+        s.writeUint16Be(h->getLength());
+    }
+    else if (auto h = dynamicPtrCast<const Dtls12HelloVerifyRequest>(chunk)) {
         s.writeUint16Be(h->getServerVersion());
         writeVector(s, h->getCookieArraySize(), 1, [&](size_t i) { return h->getCookie(i); });
     }
@@ -111,7 +125,24 @@ void Dtls12PacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<co
 const Ptr<Chunk> Dtls12PacketSerializer::deserializeFields(MemoryInputStream& s, const std::type_info& typeInfo) const
 {
     Ptr<Chunk> result;
-    if (typeInfo == typeid(Dtls12NewSessionTicket)) {
+    if (typeInfo == typeid(Dtls12CidHeader)) {
+        auto bytes = s.getRemainingLength().get<B>();
+        if (bytes < 14 || bytes > 268)
+            throw cRuntimeError("Invalid DTLS 1.2 CID header size");
+        auto h = makeShared<Dtls12CidHeader>();
+        h->setContentType(s.readUint8());
+        h->setLegacyVersion(s.readUint16Be());
+        h->setEpoch(s.readUint16Be());
+        h->setSequenceNumber(s.readUint48Be());
+        h->setConnectionIdArraySize(bytes - 13);
+        for (size_t i = 0; i < size_t(bytes - 13); ++i)
+            h->setConnectionId(i, s.readUint8());
+        h->setLength(s.readUint16Be());
+        if (h->getContentType() != 25 || h->getLegacyVersion() != 0xfefd || h->getEpoch() == 0)
+            throw cRuntimeError("Invalid DTLS 1.2 CID header fields");
+        result = h;
+    }
+    else if (typeInfo == typeid(Dtls12NewSessionTicket)) {
         requireBytes(s, 4);
         auto h = makeShared<Dtls12NewSessionTicket>();
         h->setTicketLifetime(s.readUint32Be());

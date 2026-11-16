@@ -6,6 +6,7 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/transportlayer/dtls/Dtls.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/Dtls12CidHeader_m.h"
 
 namespace inet::dtls {
 
@@ -18,10 +19,23 @@ void DtlsProtocolDissector::dissect(Packet *packet, const Protocol *, ICallback&
         try {
             auto first = packet->peekAtFront<BytesChunk>(B(1))->getByte(0);
             b bodyLength;
-            if (first == 20 || first == 21 || first == 22 || first == 23 || first == 26) {
+            if (first == 20 || first == 21 || first == 22 || first == 23 || first == 24 || first == 26) {
                 if (packet->getDataLength() < B(13))
                     throw cRuntimeError("Truncated DTLS plaintext header");
                 auto header = packet->popAtFront<DtlsPlaintextHeader>(B(13));
+                callback.visitChunk(header, &dtlsProtocol);
+                bodyLength = B(header->getLength());
+            }
+            else if (first == 25) {
+                auto size = B(21);
+                auto front = packet->peekData();
+                if (auto sequence = dynamicPtrCast<const SequenceChunk>(front))
+                    front = sequence->getChunks().front();
+                if (auto native = dynamicPtrCast<const Dtls12CidHeader>(front))
+                    size = B(native->getChunkLength());
+                if (packet->getDataLength() < size)
+                    throw cRuntimeError("Truncated DTLS 1.2 CID header");
+                auto header = packet->popAtFront<Dtls12CidHeader>(size);
                 callback.visitChunk(header, &dtlsProtocol);
                 bodyLength = B(header->getLength());
             }

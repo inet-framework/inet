@@ -9,6 +9,9 @@
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
 #include "inet/transportlayer/dtls/DtlsRecordProtection.h"
+#include "inet/transportlayer/dtls/Dtls12CidHeader_m.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/Dtls12RecordProtection.h"
 
 namespace inet::dtls {
 
@@ -35,14 +38,14 @@ size_t Dtls::getMaximumDatagramSize(AssociationId id) const
     if (it == associations.end() || it->second->state != HandshakeState::ESTABLISHED || it->second->closing || it->second->isPathUnavailable())
         return 0;
     auto budget = it->second->udpPayloadBudget() - int64_t(it->second->recordOverhead());
-    return budget <= 0 ? 0 : std::min<size_t>(budget, DtlsRecordProtection::MAX_CONTENT_BYTES);
+    return budget <= 0 ? 0 : std::min<size_t>(budget, it->second->maximumRecordContent());
 }
 
 bool DtlsAssociation::prepareFlight(const std::shared_ptr<DtlsHandshakeFlight>& value)
 {
     if (!pathMtu || !value)
         return true;
-    auto maximum = std::min<int64_t>(udpPayloadBudget() - int64_t(12 + recordOverhead()), DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
+    auto maximum = std::min<int64_t>(udpPayloadBudget() - int64_t(12 + recordOverhead()), maximumRecordContent() - 12);
     if (maximum <= 0) {
         engine.failAssociation(id, "DTLS path budget cannot carry the negotiated handshake record");
         return false;
@@ -239,8 +242,10 @@ void DtlsAssociation::handlePacketTooBig(const Packet *quote, int mtu)
         ports->getSrcPort() != probe->path.localPort || ports->getDestPort() != probe->path.peerPort)
         return;
     auto consumed = quote->getFrontOffset().get<B>();
-    auto headerBytes = 5 + probe->lastHandoff->cid.size();
-    if (consumed < 28 || consumed >= mtu || quote->getDataLength() < B(headerBytes + 11) || quote->getDataLength() > B(probe->udpBytes))
+    auto headerBytes = (isDtls12() ? 13 : 5) + probe->lastHandoff->cid.size();
+    auto nonceBytes = isDtls12() ? 8 : 0;
+    auto innerBytes = isDtls12() && probe->lastHandoff->cid.empty() ? 0 : 1;
+    if (consumed < 28 || consumed >= mtu || quote->getDataLength() < B(headerBytes + nonceBytes + 11) || quote->getDataLength() > B(probe->udpBytes))
         return;
     auto hint = size_t(mtu - consumed);
     if (hint >= probe->udpBytes)
@@ -248,14 +253,35 @@ void DtlsAssociation::handlePacketTooBig(const Packet *quote, int mtu)
     try {
         std::unique_ptr<Packet> copy(quote->dup());
         const auto& sent = *probe->lastHandoff;
-        auto header = copy->popAtFront<DtlsCiphertextHeader>(B(5 + sent.cid.size()));
-        if (header->getEpochBits() != (sent.epoch & 3) || header->getSequenceNumberLength() != 2 || !header->getLengthPresent() ||
-            header->getSequenceNumber() != (sent.number & 0xffff) || header->getConnectionIdArraySize() != sent.cid.size() ||
-            header->getLength() + header->getChunkLength().get<B>() != probe->udpBytes)
-            return;
-        for (size_t i = 0; i < sent.cid.size(); ++i)
-            if (header->getConnectionId(i) != sent.cid[i])
+        if (isDtls12()) {
+            if (!sent.cid.empty()) {
+                auto header = copy->popAtFront<Dtls12CidHeader>(B(headerBytes));
+                if (header->getEpoch() != sent.epoch || header->getSequenceNumber() != sent.number ||
+                    header->getLength() + headerBytes != probe->udpBytes || header->getConnectionIdArraySize() != sent.cid.size())
+                    return;
+                for (size_t i = 0; i < sent.cid.size(); ++i)
+                    if (header->getConnectionId(i) != sent.cid[i])
+                        return;
+            }
+            else {
+                auto header = copy->popAtFront<DtlsPlaintextHeader>(B(13));
+                if (header->getContentType() != 24 || header->getLegacyVersion() != DTLS_12 || header->getEpoch() != sent.epoch ||
+                    header->getSequenceNumber() != sent.number || header->getLength() + 13 != probe->udpBytes)
+                    return;
+            }
+            if (copy->popAtFront<Dtls12ExplicitNonce>(B(8))->getValue() != Dtls12RecordProtection::explicitNonce(sent.epoch,sent.number))
                 return;
+        }
+        else {
+            auto header = copy->popAtFront<DtlsCiphertextHeader>(B(headerBytes));
+            if (header->getEpochBits() != (sent.epoch & 3) || header->getSequenceNumberLength() != 2 || !header->getLengthPresent() ||
+                header->getSequenceNumber() != (sent.number & 0xffff) || header->getConnectionIdArraySize() != sent.cid.size() ||
+                header->getLength() + header->getChunkLength().get<B>() != probe->udpBytes)
+                return;
+            for (size_t i = 0; i < sent.cid.size(); ++i)
+                if (header->getConnectionId(i) != sent.cid[i])
+                    return;
+        }
         // Only read the quoted native prefix: type, payload length and the eight-byte token.
         // Raw ciphertext cannot supply this modeled correlation metadata and is ignored.
         Ptr<const Chunk> prefix = copy->peekDataAt(b(0), B(11));
@@ -265,8 +291,8 @@ void DtlsAssociation::handlePacketTooBig(const Packet *quote, int mtu)
             prefix = slice->getChunk();
         }
         auto encrypted = dynamicPtrCast<const EncryptedChunk>(prefix);
-        auto expectedBody = probe->udpBytes - headerBytes - DtlsRecordProtection::TAG_BYTES - 1;
-        if (!encrypted || !encrypted->getChunk() || encrypted->getChunkLength() != B(expectedBody + 1))
+        auto expectedBody = probe->udpBytes - headerBytes - nonceBytes - DtlsRecordProtection::TAG_BYTES - innerBytes;
+        if (!encrypted || !encrypted->getChunk() || encrypted->getChunkLength() != B(expectedBody + innerBytes))
             return;
         Packet retained("quoted DTLS probe metadata", encrypted->getChunk());
         auto heartbeat = retained.peekAtFront<DtlsHeartbeat>(B(expectedBody));

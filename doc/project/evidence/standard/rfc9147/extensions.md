@@ -91,6 +91,8 @@ The selected model retransmits requests with a one-second initial interval, doub
 
 [RFC 9146 §§3–6](https://www.rfc-editor.org/rfc/rfc9146.html#section-3): static 1.2 CID uses content type 25 and its own inner plaintext/accounting. It does not acquire 1.3 CID-update messages.
 
+The CID precedes the record length and has no length octet in that record. Each endpoint chooses its receive length; it must still send other peer-chosen lengths. Nonempty negotiated directions require the CID record form once protection starts. The complete inner plaintext, including real type and padding, is at most 2^14 bytes under §5. A resumed handshake negotiates fresh CIDs.
+
 ## Errata disposition
 
 RFC Editor searches for RFCs 9147, 8446, 9846, 9146, 6347, 5246, 5077, 5487, 5289, 8422, 6520 and 8899 were retrieved on 2026-11-16. Raw pages and a machine-readable index are retained locally in `audit/dtls-extensions/standards/`. A reported erratum is not silently promoted to a normative requirement.

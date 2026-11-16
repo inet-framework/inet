@@ -5,6 +5,7 @@
 #include <set>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -217,6 +218,14 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     void update(bool requestPeer = false)
     {
         scheduleCommand([this, requestPeer]() { updateResults.push_back(engine->requestKeyUpdate(lastHandle(), requestPeer)); });
+    }
+    void sendTaggedMarker(int marker, int bytes = 32)
+    {
+        scheduleCommand([this, marker, bytes]() {
+            auto packet = new Packet("dtls-test-tagged-data", makeShared<BytesChunk>(std::vector<uint8_t>(bytes, marker)));
+            packet->addRegionTag<CreationTimeTag>(B(1), B(2))->setCreationTime(SimTime(123));
+            engine->send(lastHandle(), packet, this);
+        });
     }
     void requestCids(int count)
     {

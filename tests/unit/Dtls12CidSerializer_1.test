@@ -1,0 +1,39 @@
+%description:
+The RFC 9146 header has independent full-number/CID-before-length octets.
+Outgoing CIDs support peer-chosen sizes while a receiver supplies its known size.
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/dtls/Dtls12CidHeader_m.h"
+using namespace inet;
+using namespace inet::dtls;
+static bool rejects(const std::vector<uint8_t>& bytes) {
+    try { Packet p("bad",makeShared<BytesChunk>(bytes)); p.popAtFront<Dtls12CidHeader>(B(bytes.size())); return false; }
+    catch (const cRuntimeError&) { return true; }
+}
+%activity:
+for (size_t count : {size_t(1),size_t(3),size_t(8),size_t(255)}) {
+    auto h=makeShared<Dtls12CidHeader>();
+    h->setSequenceNumber(0x010203040506ULL); h->setLength(25); h->setConnectionIdArraySize(count);
+    std::vector<uint8_t> expected={25,0xfe,0xfd,0,1,1,2,3,4,5,6};
+    for (size_t i=0;i<count;++i) { h->setConnectionId(i,uint8_t(0xa0+i)); expected.push_back(uint8_t(0xa0+i)); }
+    expected.insert(expected.end(),{0,25}); h->setChunkLength(B(13+count));
+    Packet typed("typed",h); ASSERT(typed.peekDataAsBytes()->getBytes()==expected);
+    Packet raw("raw",makeShared<BytesChunk>(expected)); auto parsed=raw.popAtFront<Dtls12CidHeader>(B(expected.size()));
+    ASSERT(parsed->getConnectionIdArraySize()==count && parsed->getSequenceNumber()==0x010203040506ULL && parsed->getLength()==25);
+}
+ASSERT(rejects(std::vector<uint8_t>(13,0)));
+ASSERT(rejects(std::vector<uint8_t>(269,0)));
+std::vector<uint8_t> invalid={24,0xfe,0xfd,0,1,0,0,0,0,0,0,0xaa,0,0};
+ASSERT(rejects(invalid)); invalid[0]=25; invalid[4]=0; ASSERT(rejects(invalid));
+invalid[4]=1; invalid[2]=0xfc; ASSERT(rejects(invalid));
+for (int variant=0;variant<3;++variant) {
+    auto h=makeShared<Dtls12CidHeader>(); h->setConnectionIdArraySize(variant==0?0:variant==1?256:1);
+    h->setChunkLength(B(13+h->getConnectionIdArraySize()));
+    if (variant==2) h->setSequenceNumber(uint64_t(1)<<48);
+    bool failed=false; try { Packet p("invalid typed",h); p.peekDataAsBytes(); } catch (const cRuntimeError&) { failed=true; }
+    ASSERT(failed);
+}
+EV << "legacy CID header PASS\n";
+%contains: stdout
+legacy CID header PASS

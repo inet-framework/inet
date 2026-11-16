@@ -1,0 +1,49 @@
+%description:
+An unseen older record from the old path delivers without reverting the confirmed path.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool active = false;
+static int probes = 0;
+return establish12("legacy_migration_old_record")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetApplication(p) && findChunk<BytesChunk>(p)->getByte(0) == 0; }).nth(1).delay(0.5))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return active && (!packetApplication(p) || findChunk<BytesChunk>(p)->getByte(0) != 0); }).mutate([](Packet *p) { mutateHeader<UdpHeader>(p, [](auto& h) { h.setSrcPort(5534); }); }))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.destPort == 5534").mutate([](Packet *p) { if (packetHeartbeat(p, 1)) ++probes; mutateHeader<UdpHeader>(p, [](auto& h) { h.setDestPort(4434); }); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(0); }))
+    .act(action().after(0.02).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { active = true; app.sendMarker(1); }))
+    .once(on("host2.app[0].driver").signal("pathChanged").within(1))
+    .never(on("host2.app[0].driver").signal("pathChanged").within(0.6))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(probes == 1 && app.receivedMarkers == std::vector<int>({1,0}) && app.confirmedPaths.size() == 1 && app.confirmedPaths[0].peerPort == 5534 && app.errorCount == 0, "unseen old-path data may deliver within replay window but cannot revert the confirmed address"); }));
+}
+%activity:
+EV << "migration freshness compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_migration_old_record: PASS

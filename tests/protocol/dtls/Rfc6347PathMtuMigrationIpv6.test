@@ -1,0 +1,76 @@
+%description:
+A validated routed interface move resets both confirmed budgets to base while
+preserving the handle. Oversized queued output is rejected on the new path,
+which discovers a conservative lower budget independently with suppressed PTB:
+the IPv6 model broadcasts explicitly interface-selected unicast output.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static uint64_t handle = 0;
+return ProtocolTest("legacy_pmtu_migration_ipv6")
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1406).within(5))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { handle = app.lastHandle();  }))
+    .act(action().run<NetworkInterface>("router.eth[2]", [](NetworkInterface& nic) { nic.setMtu(1280); }).run<NetworkInterface>("router.eth[1]", [](NetworkInterface& nic) { nic.setMtu(1280); }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        auto node = getContainingNode(&app);
+        auto table = L3AddressResolver().getIpv6RoutingTableOf(node);
+        auto interface = L3AddressResolver().interfaceTableOf(node)->findInterfaceByName("eth1");
+        for (int i = 0; i < table->getNumRoutes(); ++i)
+            if (table->getRoute(i)->getDestPrefix() == Ipv6Address("2001:db8:3::2")) { table->getRoute(i)->setInterface(interface); table->getRoute(i)->setNextHop(Ipv6Address("2001:db8:2::2")); }
+        app.migrateAddress(L3AddressResolver().resolve("host1%eth1")); app.sendMarker(180, 1400); app.sendMarker(181, 400);
+    }))
+    .unordered({on("host1.app[0].driver").signal("pathChanged").within(10), on("host2.app[0].driver").signal("pathChanged").within(10), on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::SEND_ERROR).within(10), on("host2.app[0].driver").signal("packetSentToUpper").within(10), on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1106).within(10), on("host2.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1106).within(10), on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(10), on("host2.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_TIMED_OUT).within(10)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.lastHandle() == handle && app.establishedCount == 1 && app.errorCount == 0 && app.sendErrorCount == 1 && app.migrationResults == std::vector<bool>{true}, "validated move preserves the handle and explicitly rejects the queued oversized datagram");
+        require(std::count(app.maximumDatagramSizes.begin(), app.maximumDatagramSizes.end(), 466) >= 2 && app.maximumDatagramSize() == 1106, "new path resets to base and confirms 1152 UDP bytes without PTB feedback");
+    }))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{181} && app.maximumDatagramSize() == 1106, "only fitting data delivers on the new routed path"); app.sendMarker(182, 1090); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "migration discovery compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.protectOutDelay = 100ms
+network = inet.protocoltest.dtls.DtlsPathMtuNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 14s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.host*.hasIpv4 = false
+*.host*.hasIpv6 = true
+*.router.hasIpv4 = false
+*.router.hasIpv6 = true
+*.host*.ipv6.configurator.networkConfiguratorModule = "^.^.^.configurator"
+*.router.ipv6.configurator.networkConfiguratorModule = "^.^.^.configurator"
+*.router.eth[2].mac.mtu = 2000B
+*.router.eth[*].mac.mtu = 2000B
+*.host*.eth[*].mac.mtu = 2000B
+*.configurator.typename = "Ipv6NetworkConfigurator"
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth0' address='2001:db8:1::2' dupAddrDetectTransmits='0'/><interface hosts='host1' names='eth1' address='2001:db8:2::1' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth1' address='2001:db8:2::2' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth2' address='2001:db8:3::1' dupAddrDetectTransmits='0'/><interface hosts='host2' names='eth0' address='2001:db8:3::2' dupAddrDetectTransmits='0'/><route hosts='host1' destination='2001:db8:3::2/128' gateway='2001:db8:1::2' interface='eth0'/></config>")
+*.host*.app[*].dtls.udpPayloadLimit = 1452B
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.migrationEnabled = true
+%contains: stdout
+PROTOCOLTEST legacy_pmtu_migration_ipv6: PASS

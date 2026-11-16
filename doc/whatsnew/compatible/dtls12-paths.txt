@@ -1,0 +1,6 @@
+DTLS 1.2 connection IDs and path discovery
+
+The opt-in DTLS 1.2 profiles now support RFC 9146 static connection IDs,
+heartbeat, validated migration and path MTU discovery through the existing
+association engine. Record budgets include the explicit nonce and encrypted
+inner content type. Cryptographic operations remain simulation abstractions.

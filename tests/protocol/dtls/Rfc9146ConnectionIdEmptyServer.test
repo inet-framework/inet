@@ -1,0 +1,49 @@
+%description:
+Selected legacy CID wire/admission boundary through real UDP endpoints.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+auto wire=[](const MatchContext& c, bool expected) { auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); auto cid=findChunk<inet::dtls::Dtls12CidHeader>(c.event.packet); require((h || cid) && !findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet),"legacy record format"); if (cid || h->getEpoch()!=0) require(bool(cid)==expected,"each direction uses its peer-selected CID form"); return false; };
+return establish12("cid_empty_server")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([wire](const MatchContext& c) { return wire(c,false); }).within(4)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([wire](const MatchContext& c) { return wire(c,true); }).within(4)))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize()==1163,"client direction accounts for the negotiated form"); app.sendMarker(170,1163); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize()==1154 && app.receivedMarkers==std::vector<int>{170},"server direction uses its actual overhead"); app.sendMarker(171,1154); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "legacy CID boundary compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host2.app[*].dtls.receiveConnectionId = false
+%contains: stdout
+PROTOCOLTEST cid_empty_server: PASS

@@ -403,7 +403,7 @@ void DtlsAssociation::appendHandshake(uint8_t type, uint16_t messageSequence, ui
     int overhead = epoch == 0 ? 25 : 12 + recordOverhead();
     if (udpLimit <= overhead || size < 0 || (!isDtls12() && size == 0) || size > 0xffffff)
         throw cRuntimeError("DTLS handshake message or UDP payload limit is invalid");
-    size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
+    size_t maximum = std::min<size_t>(udpLimit - overhead, (epoch == 0 ? 16384 : maximumRecordContent()) - 12);
     auto currentFlight = flight;
     std::vector<size_t> indices;
     if ((size_t)size <= maximum) {

@@ -40,11 +40,11 @@ bool DtlsAssociation::startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose)
         nextApplicationRecord >= (purpose != ProbePurpose::DIAGNOSTIC ? MAX_PROTECTED_RECORDS : uint64_t(engine.par("rekeyAfterRecords").intValue())))
         return false;
     auto path = purpose == ProbePurpose::PATH_VALIDATION ? candidatePath->path : currentPath();
-    auto overhead = 22 + (cidNegotiated ? cidForPath(path).size() : 0);
-    auto minimum = std::max<size_t>(overhead, 22 + localCid.size()) + 27;
+    auto overhead = recordOverheadForCid(cidForPath(path));
+    auto minimum = std::max<size_t>(overhead, isDtls12() ? recordOverheadForCid(localCid) : 22 + localCid.size()) + 27;
     if (udpBytes == 0)
         udpBytes = minimum;
-    if (udpBytes < minimum || udpBytes > uint64_t(engine.par("udpPayloadLimit").intValue()) || udpBytes - overhead > 16384)
+    if (udpBytes < minimum || udpBytes > uint64_t(engine.par("udpPayloadLimit").intValue()) || udpBytes - overhead > maximumRecordContent())
         return false;
     probe = std::make_unique<HeartbeatProbe>();
     probe->purpose = purpose;
@@ -81,7 +81,7 @@ void DtlsAssociation::pumpHeartbeatProbe()
             probe->payload.push_back(token >> shift);
         probe->lastHandoff.reset();
     }
-    auto overhead = 22 + (cidNegotiated ? cidForPath(probe->path).size() : 0);
+    auto overhead = recordOverheadForCid(cidForPath(probe->path));
     if (probe->udpBytes < overhead + 27) {
         finishHeartbeatProbe(IDtls::PROBE_OUTPUT_REFUSED);
         return;
@@ -123,7 +123,7 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
 {
     auto& owner = engine;
     auto handle = id;
-    auto overhead = 22 + (cidNegotiated ? cidForPath(path).size() : 0);
+    auto overhead = recordOverheadForCid(cidForPath(path));
     auto bytes = body->getChunkLength().get<B>() + overhead;
     if (closing || bytes > (request ? owner.par("udpPayloadLimit").intValue() : udpPayloadBudget()) || (replyLimit != 0 && bytes > replyLimit))
         return false;
@@ -132,7 +132,7 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
     auto eligible = [&owner, handle, payload, request, overhead, path]() {
         auto it = owner.associations.find(handle);
         if (it == owner.associations.end() || it->second->closing || it->second->authenticationActive() ||
-            22 + (it->second->cidNegotiated ? it->second->cidForPath(path).size() : 0) != overhead)
+            it->second->recordOverheadForCid(it->second->cidForPath(path)) != overhead)
             return false;
         auto& association = *it->second;
         if (request)
@@ -161,16 +161,15 @@ bool DtlsAssociation::sendHeartbeat(const Ptr<DtlsHeartbeat>& body, bool request
             return;
         }
         auto packet = new Packet(request ? "DTLS heartbeat request" : "DTLS heartbeat response", body);
-        DtlsRecordProtection::protect(packet, 24);
         auto cid = it->second->cidForPath(path);
         auto epoch = it->second->sendEpoch;
-        packet->insertAtFront(it->second->makeRecordHeader(epoch, number, packet->getDataLength().get<B>(), &cid));
+        it->second->protectRecord(packet,24,epoch,number,&cid);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
         if (!path.localAddress.isUnspecified())
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(path.localAddress);
         if (path.interfaceId >= 0)
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(path.interfaceId);
-        owner.emit(Dtls::recordOverheadSignal, long(22 + (it->second->cidNegotiated ? cid.size() : 0)));
+        owner.emit(Dtls::recordOverheadSignal, long(it->second->recordOverheadForCid(cid)));
         owner.emit(Dtls::packetSentToLowerSignal, packet);
         owner.sendUdp(packet, path.peerAddress, path.peerPort);
         it = owner.associations.find(handle);

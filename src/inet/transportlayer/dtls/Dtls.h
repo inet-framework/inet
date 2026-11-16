@@ -106,7 +106,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void socketClosed(UdpSocket *socket) override;
     void discardAll(const char *reason, bool notify);
     void parseDatagram(Packet *packet);
-    bool receiveRecord12(Packet *packet, const DtlsPath& path, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted);
+    bool receiveRecord12(Packet *packet, const DtlsPath& path, size_t datagramBytes, const std::shared_ptr<bool>& creditCounted, AssociationId& datagramAssociation);
     bool handleClientHello12(PrevalidationAttempt *attempt, const Ptr<const DtlsClientHello>& hello, uint16_t sequence, const std::vector<uint8_t>& encoded);
     bool isProcessedHello12(const DtlsPath& path, uint16_t sequence, const std::vector<uint8_t>& encoded) const;
     void sendRetry12(PrevalidationAttempt *attempt, const Ptr<const DtlsClientHello>& hello, const std::vector<uint8_t>& encoded);

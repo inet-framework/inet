@@ -89,7 +89,8 @@ class INET_API DtlsAssociation
     void refuseRenegotiation12();
     void applyChangeCipherSpec12();
     void retransmitFlight12();
-    void protectRecord(Packet *packet, uint8_t type, uint64_t epoch, uint64_t number);
+    void protectRecord(Packet *packet, uint8_t type, uint64_t epoch, uint64_t number, const std::vector<uint8_t> *cidOverride = nullptr);
+    static Ptr<Chunk> makeRecordHeader12(uint8_t type, uint16_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t>& cid = {});
     bool writeCipherActive12() const;
     DtlsHandshakeReassembly reassembly;
     std::shared_ptr<DtlsHandshakeFlight> flight;
@@ -228,7 +229,9 @@ class INET_API DtlsAssociation
     void applyConnectionIdMessage(uint8_t type, uint16_t sequence);
     void finishConnectionIdUpdate();
     void serveConnectionIdRequest(uint8_t count);
-    size_t recordOverhead() const { return isDtls12() ? 37 : 22 + (cidNegotiated ? peerCid.size() : 0); }
+    size_t recordOverheadForCid(const std::vector<uint8_t>& cid) const { return isDtls12() ? 37 + (cidNegotiated && !cid.empty() ? 1 + cid.size() : 0) : 22 + (cidNegotiated ? cid.size() : 0); }
+    size_t recordOverhead() const { return recordOverheadForCid(peerCid); }
+    size_t maximumRecordContent() const { return isDtls12() && cidNegotiated && !peerCid.empty() ? 16383 : 16384; }
     Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride = nullptr) const;
     std::optional<DtlsSessionStore::Entry> offeredSession;
     bool earlyRequested = false;

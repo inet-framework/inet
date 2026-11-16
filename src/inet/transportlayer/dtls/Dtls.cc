@@ -408,11 +408,11 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
     alert->setDescription(description);
     auto packet = std::make_shared<std::unique_ptr<Packet>>(new Packet("DTLS fatal alert", alert));
     if (encrypted && legacy) {
-        Dtls12RecordProtection::protect(packet->get(),uint16_t(epoch),sequence);
-        auto header = makeShared<DtlsPlaintextHeader>();
-        header->setContentType(21); header->setEpoch(epoch); header->setSequenceNumber(sequence);
-        header->setLength((*packet)->getDataLength().get<B>());
-        (*packet)->insertAtFront(header);
+        if (cid.empty())
+            Dtls12RecordProtection::protect(packet->get(),uint16_t(epoch),sequence);
+        else
+            Dtls12RecordProtection::protectCid(packet->get(),uint16_t(epoch),sequence,21);
+        (*packet)->insertAtFront(Association::makeRecordHeader12(21,epoch,sequence,(*packet)->getDataLength().get<B>(),cid));
     }
     else if (encrypted) {
         DtlsRecordProtection::protect(packet->get(), 21);
@@ -439,7 +439,7 @@ void Dtls::sendAlert(const L3Address& localAddress, const L3Address& peerAddress
     if (interfaceId >= 0)
         (*packet)->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     auto delay = encrypted ? SimTime(par("protectOutDelay").doubleValue()) : SIMTIME_ZERO;
-    auto overhead = legacy ? 37 : 22 + cid.size();
+    auto overhead = legacy ? (encrypted ? 37 + (cid.empty() ? 0 : 1 + cid.size()) : 13) : 22 + cid.size();
     if (!enqueueProcessing(outputProcessing.get(), 0, (*packet)->getByteLength(), delay, [this, peerAddress, peerPort, packet, encrypted, overhead]() {
         auto outgoing = packet->release();
         if (encrypted)
@@ -1053,7 +1053,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto callback = it->second->callback;
     auto packetId = packet->getId();
     auto bytes = packet->getDataLength();
-    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget()) ||
+    if (bytes.get<b>() % 8 != 0 || bytes > B(it->second->maximumRecordContent()) || bytes + B(it->second->recordOverhead()) > B(it->second->udpPayloadBudget()) ||
         it->second->closing) {
         delete packet;
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
@@ -2626,7 +2626,7 @@ void Dtls::parseDatagram(Packet *packet)
             auto first = packet->peekAtFront<BytesChunk>(B(1))->getByte(0);
             DtlsPath path{localAddress,localPort,peerAddress,peerPort,-1};
             if (auto interface=packet->findTag<InterfaceInd>()) path.interfaceId=interface->getInterfaceId();
-            if (receiveRecord12(packet,path,datagramBytes,creditCounted))
+            if (receiveRecord12(packet,path,datagramBytes,creditCounted,datagramAssociation))
                 continue;
             if (first == 21 || first == 22 || first == 26) {
                 if (packet->getDataLength() < B(13)) {

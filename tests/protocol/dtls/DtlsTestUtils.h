@@ -8,6 +8,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/dtls/Dtls12CidHeader_m.h"
 #include "inet/transportlayer/tls/TlsClientHello_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -51,7 +52,8 @@ inline bool protectedRecord(const MatchContext& context, int epochBits)
 inline bool applicationRecord(const MatchContext& context)
 {
     auto type = findChunk<inet::dtls::DtlsInnerContentType>(context.event.packet);
-    return type && type->getContentType() == 23;
+    auto legacy = findChunk<inet::dtls::DtlsPlaintextHeader>(context.event.packet);
+    return type ? type->getContentType() == 23 : legacy && legacy->getContentType() == 23;
 }
 
 inline bool acknowledgement(const MatchContext& context)
@@ -68,7 +70,8 @@ inline bool packetHandshake(const Packet *packet, int type)
 inline bool packetApplication(const Packet *packet)
 {
     auto h = findChunk<inet::dtls::DtlsInnerContentType>(packet);
-    return h && h->getContentType() == 23;
+    auto legacy = findChunk<inet::dtls::DtlsPlaintextHeader>(packet);
+    return h ? h->getContentType() == 23 : legacy && legacy->getContentType() == 23;
 }
 
 inline bool packetAck(const Packet *packet) { return findChunk<inet::dtls::DtlsAck>(packet) != nullptr; }
@@ -192,6 +195,22 @@ inline void editClientHello(Packet *packet, std::function<void(inet::dtls::DtlsC
     resizeTapEnvelope(packet, delta);
 }
 
+inline void editServerHello(Packet *packet, std::function<void(inet::tls::TlsServerHello&)> edit)
+{
+    int delta = 0;
+    mutateNestedHeader<inet::tls::TlsServerHello>(packet, [&](auto& hello) {
+        auto before = hello.getChunkLength();
+        edit(hello);
+        hello.setChunkLength(B(38 + hello.getSessionIdArraySize() + (hello.getExtensionsPresent() ? 2 + hello.getExtensionsArraySize() : 0)));
+        delta = (hello.getChunkLength() - before).template get<B>();
+    });
+    mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(packet, [=](auto& h) { h.setMessageLength(h.getMessageLength() + delta); h.setFragmentLength(h.getFragmentLength() + delta); });
+    require(mutateHeader<inet::dtls::DtlsPlaintextHeader>(packet, [=](auto& h) { h.setLength(h.getLength() + delta); }), "ServerHello is plaintext");
+    require(mutateHeader<UdpHeader>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "ServerHello has UDP envelope");
+    require(mutateHeader<Ipv4Header>(packet, [=](auto& h) { h.setTotalLengthField(h.getTotalLengthField() + B(delta)); }), "ServerHello has IPv4 envelope");
+    resizeTapEnvelope(packet, delta);
+}
+
 template<typename Hello>
 inline bool hasHelloExtension(const Hello& hello, int type)
 {
@@ -207,7 +226,8 @@ inline bool hasHelloExtension(const Hello& hello, int type)
     return false;
 }
 
-inline void editHelloExtension(inet::dtls::DtlsClientHello& hello, int type, std::vector<uint8_t> replacement, bool remove = false)
+template<typename Hello>
+inline void editHelloExtension(Hello& hello, int type, std::vector<uint8_t> replacement, bool remove = false)
 {
     std::vector<uint8_t> result;
     bool found = false;
@@ -466,6 +486,14 @@ inline ProtocolTest establish(const char *name)
         .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
             require(app.establishedCount == 1, "client establishes exactly once");
         }));
+}
+
+inline ProtocolTest establish12(const char *name)
+{
+    return ProtocolTest(name).unordered({
+        on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3),
+        on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3)
+    });
 }
 
 } // namespace inet::protocoltest::dtls

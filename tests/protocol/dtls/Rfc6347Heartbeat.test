@@ -1,0 +1,72 @@
+%description:
+Protected heartbeat negotiation, correlated payload echo and bounded response.
+The wrapper exposes the production internal probe; costs use the real queues.
+%includes:
+#include <cmath>
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static simtime_t started;
+static std::vector<uint8_t> token;
+static bool requestSeen = false, responseSeen = false;
+return establish12("legacy_heartbeat")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (heartbeat(c, 1)) {
+            auto h = findChunk<inet::dtls::DtlsHeartbeat>(c.event.packet);
+            require(c.event.packet->getByteLength() == 1200 && h->getPaddingArraySize() == 1152 && c.event.time == started + SimTime(0.005), "probe occupies its chosen UDP size after output cost");
+            for (size_t i = 0; i < h->getPayloadArraySize(); ++i) token.push_back(h->getPayload(i));
+            requestSeen = true;
+        }
+        return false;
+    }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (heartbeat(c, 2)) {
+            auto h = findChunk<inet::dtls::DtlsHeartbeat>(c.event.packet);
+            require(c.event.packet->getByteLength() == 64 && h->getPaddingArraySize() == 16 && h->getPayloadArraySize() == token.size(), "response echoes payload with minimum padding");
+            for (size_t i = 0; i < token.size(); ++i) require(h->getPayload(i) == token[i], "response matches the actual probe token");
+            responseSeen = true;
+        }
+        return false;
+    }).within(1)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { started = simTime(); dtls.probePeer(1200); dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).assertEvent([](const MatchContext& c) {
+        // Four 1 ms half-links and twice the Ethernet serialization in each direction.
+        auto expected = 0.016 + 0.004 + 2.0 * (1200 + 64 + 2 * 54) * 8 / 100000000;
+        return std::abs((c.event.time - started).dbl() - expected) < 1e-9;
+    }).within(0.1))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>({true,false}) && requestSeen && responseSeen, "one shared slot and one correlated completion"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(24); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{24} && app.errorCount == 0, "heartbeat frames do not become application data"); }));
+}
+%activity:
+EV << "heartbeat compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = false
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_heartbeat: PASS

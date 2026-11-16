@@ -18,6 +18,8 @@ class INET_API Dtls12RecordProtection
     static void protect(Packet *packet, uint16_t epoch, uint64_t sequence);
     // Failed unprotection leaves the packet unchanged. No cryptographic check occurs.
     static bool unprotect(Packet *packet, uint16_t epoch, uint64_t sequence);
+    static void protectCid(Packet *packet, uint16_t epoch, uint64_t sequence, uint8_t contentType);
+    static bool unprotectCid(Packet *packet, uint16_t epoch, uint64_t sequence, uint8_t& contentType);
 };
 
 } // namespace inet::dtls

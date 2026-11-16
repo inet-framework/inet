@@ -1,0 +1,64 @@
+%description:
+Legacy CID payloads include nonce and encrypted real type, preserve region tags,
+handle empty content and keep failed input unchanged at the inner-plaintext bound.
+%file: Fixture.cc
+#include <iostream>
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/dtls/Dtls12RecordProtection.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/DtlsRecordProtection.h"
+namespace Dtls12CidProtection_1 {
+using namespace inet;
+using namespace inet::dtls;
+static void check(bool value) { if (!value) throw cRuntimeError("legacy CID protection invariant failed"); }
+class Fixture : public cSimpleModule {
+  protected:
+    void initialize() override {
+        Packet p("content",makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3}));
+        p.addRegionTag<CreationTimeTag>(B(1),B(1))->setCreationTime(SimTime(123));
+        Dtls12RecordProtection::protectCid(&p,1,9,23);
+        check(p.getDataLength()==B(28));
+        check(p.getRegionTag<CreationTimeTag>(B(9),B(1))->getCreationTime()==SimTime(123));
+        auto before=p.peekData(); uint8_t type=99;
+        check(!Dtls12RecordProtection::unprotectCid(&p,1,8,type) && p.peekData()==before && type==99);
+        check(Dtls12RecordProtection::unprotectCid(&p,1,9,type) && type==23);
+        check(p.peekDataAsBytes()->getBytes()==std::vector<uint8_t>({1,2,3}));
+        check(p.getRegionTag<CreationTimeTag>(B(1),B(1))->getCreationTime()==SimTime(123));
+        Packet empty("empty"); Dtls12RecordProtection::protectCid(&empty,1,10,23);
+        check(empty.getDataLength()==B(25)); check(Dtls12RecordProtection::unprotectCid(&empty,1,10,type) && empty.getDataLength()==B(0));
+        Packet maximum("maximum",makeShared<ByteCountChunk>(B(16383)));
+        Dtls12RecordProtection::protectCid(&maximum,1,11,23); check(maximum.getDataLength()==B(16408));
+        check(Dtls12RecordProtection::unprotectCid(&maximum,1,11,type) && maximum.getDataLength()==B(16383));
+        Packet excessive("excessive",makeShared<ByteCountChunk>(B(16384)));
+        bool failed=false; try { Dtls12RecordProtection::protectCid(&excessive,1,12,23); } catch (const cRuntimeError&) { failed=true; }
+        check(failed && excessive.getDataLength()==B(16384));
+        DtlsRecordProtection::protect(&excessive,23);
+        auto nonce=makeShared<Dtls12ExplicitNonce>(); nonce->setValue((uint64_t(1)<<48)|12); excessive.insertAtFront(nonce);
+        before=excessive.peekData(); check(!Dtls12RecordProtection::unprotectCid(&excessive,1,12,type) && excessive.peekData()==before);
+        Packet forbidden("forbidden"); DtlsRecordProtection::protect(&forbidden,26);
+        nonce=makeShared<Dtls12ExplicitNonce>(); nonce->setValue((uint64_t(1)<<48)|13); forbidden.insertAtFront(nonce);
+        before=forbidden.peekData(); check(!Dtls12RecordProtection::unprotectCid(&forbidden,1,13,type) && forbidden.peekData()==before);
+        std::cout << "legacy CID protection PASS\n";
+    }
+};
+Define_Module(Fixture);
+}
+%file: TestNetwork.ned
+simple Fixture {
+    parameters:
+        @class(::Dtls12CidProtection_1::Fixture);
+}
+network TestNetwork {
+    submodules:
+        fixture: Fixture;
+}
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1s
+seed-set = 0
+%contains: stdout
+legacy CID protection PASS
