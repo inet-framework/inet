@@ -72,6 +72,8 @@ INET_API bool decodeCoapUintValue(const CoapOption& option, uint32_t& value, siz
 INET_API void addCoapOption(const Ptr<CoapHeader>& header, uint16_t number, const std::vector<uint8_t>& value);
 INET_API void addCoapOptionString(const Ptr<CoapHeader>& header, uint16_t number, const std::string& value);
 INET_API void addCoapOptionUint(const Ptr<CoapHeader>& header, uint16_t number, uint32_t value);
+INET_API void removeCoapOptions(const Ptr<CoapHeader>& header, uint16_t number);
+INET_API void setCoapOptionUint(const Ptr<CoapHeader>& header, uint16_t number, uint32_t value);
 
 INET_API B computeCoapHeaderLength(const CoapHeader& header);
 INET_API void finalizeCoapHeader(const Ptr<CoapHeader>& header, bool hasPayload);

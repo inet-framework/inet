@@ -91,6 +91,7 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
         bool peerIsMulticast = false;
         bool confirmable = false;
         bool isRequest = false;
+        bool refreshObserveOnRetry = false;
         uint64_t requestId = 0;
         std::vector<uint8_t> token;
         std::string packetName;
@@ -100,12 +101,16 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
 
     struct CoapOutboundExchange {
         uint64_t exchangeId = 0;
+        uint64_t outboundId = 0;
         CoapPeerEndpoint peer;
         uint16_t messageId = 0;
         bool isRequest = false;
+        bool refreshObserveOnRetry = false;
         uint64_t requestId = 0;
         std::vector<uint8_t> token;
         std::string packetName;
+        Ptr<CoapHeader> header;
+        std::vector<uint8_t> payload;
         std::vector<uint8_t> wireBytes;
         simtime_t initialTimeout = SIMTIME_ZERO;
         simtime_t currentTimeout = SIMTIME_ZERO;
@@ -227,7 +232,8 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     void sendEmptyMessageAndCacheDuplicate(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer);
     bool submitOutboundMessage(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
             bool isRequest, uint64_t requestId, const std::vector<uint8_t>& token, const char *packetName,
-            const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload);
+            const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload,
+            bool refreshObserveOnRetry = false, uint64_t *outboundIdOut = nullptr);
     bool sendConfirmablePing(const CoapPeerEndpoint& peer, uint64_t& exchangeIdOut);
     void pumpOutboundQueue(simtime_t now);
     void processConfirmableRetransmissions(simtime_t now);
@@ -252,11 +258,15 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
 
     virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload);
+    virtual bool handleUnsolicitedResponse(const CoapPeerEndpoint& peer, bool destIsMulticast,
+            const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) { return false; }
     virtual void handleMatchedResponse(const CoapPendingRequest& request, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload);
     virtual void handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t messageId);
     virtual void handleReset(const CoapPeerEndpoint& peer, uint16_t messageId);
     virtual void onOutboundExchangeFailed(uint64_t exchangeId, const CoapPeerEndpoint& peer, uint16_t messageId, const char *reason) {}
+    virtual void onOutboundItemAcknowledged(uint64_t outboundId) {}
+    virtual void onOutboundItemFailed(uint64_t outboundId, const char *reason) {}
     virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) {}
     virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) {}

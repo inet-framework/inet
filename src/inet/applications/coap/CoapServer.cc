@@ -20,6 +20,8 @@ namespace coap {
 Define_Module(CoapServer);
 
 simsignal_t CoapServer::requestHandledSignal = cComponent::registerSignal("requestHandled");
+simsignal_t CoapServer::activeObserversSignal = cComponent::registerSignal("activeObservers");
+simsignal_t CoapServer::notificationSentSignal = cComponent::registerSignal("notificationSent");
 
 namespace {
 
@@ -409,6 +411,13 @@ simtime_t CoapServer::getNextSubclassDeadline() const
         if (earliest == SIMTIME_ZERO || sep.dueAt < earliest)
             earliest = sep.dueAt;
     }
+    for (const auto& kv : observers) {
+        const auto& obs = kv.second;
+        if (obs.hasPendingNotification && !obs.inFlight && obs.pending.earliestSendTime > SIMTIME_ZERO) {
+            if (earliest == SIMTIME_ZERO || obs.pending.earliestSendTime < earliest)
+                earliest = obs.pending.earliestSendTime;
+        }
+    }
     return earliest;
 }
 
@@ -418,6 +427,17 @@ void CoapServer::onSubclassTimer(simtime_t now)
         if (it->dueAt <= now) {
             CoapPendingSeparateResponse ready = std::move(*it);
             it = pendingSeparateResponses.erase(it);
+            if (ready.refreshObserveTick && ready.header != nullptr) {
+                uint64_t tick = observe::currentObserveTick(now);
+                auto obsIt = observers.find(ready.observeKey);
+                if (obsIt != observers.end()) {
+                    if (obsIt->second.lastSentValid && tick <= obsIt->second.lastSentTick)
+                        tick = obsIt->second.lastSentTick + 1;
+                    obsIt->second.lastSentValid = true;
+                    obsIt->second.lastSentTick = tick;
+                }
+                setCoapOptionUint(ready.header, COAP_OPT_OBSERVE, observe::toWireObserveValue(tick));
+            }
             submitOutboundMessage(ready.peer, /*peerIsMulticast=*/false, ready.confirmable,
                     /*isRequest=*/false, /*requestId=*/0, ready.token, "CoapSeparateResponse",
                     ready.header, ready.payload);
@@ -426,22 +446,216 @@ void CoapServer::onSubclassTimer(simtime_t now)
             ++it;
         }
     }
+
+    pumpObserverNotifications(now);
 }
 
 void CoapServer::onEndpointStop()
 {
     pendingSeparateResponses.clear();
+    observers.clear();
+    emit(activeObserversSignal, 0L);
 }
 
 void CoapServer::onEndpointCrash()
 {
     pendingSeparateResponses.clear();
+    observers.clear();
+    emit(activeObserversSignal, 0L);
     loadXmlResources(par("resources").xmlValue());
+}
+
+void CoapServer::removeObserverAndEmit(std::map<CoapObserverKey, CoapServerObserverRelation>::iterator it)
+{
+    if (it == observers.end())
+        return;
+    observers.erase(it);
+    emit(activeObserversSignal, static_cast<long>(observers.size()));
+}
+
+void CoapServer::notifyObserversResourceMutated(const std::string& pathKey, const CoapResourceEntry& resource)
+{
+    for (auto& kv : observers) {
+        auto& obs = kv.second;
+        if (obs.resourcePath != pathKey)
+            continue;
+
+        CoapPendingNotification notif;
+        bool formatIncompatible = (resource.contentFormat != obs.negotiatedContentFormat)
+                || (obs.acceptFormat >= 0 && resource.contentFormat != obs.acceptFormat);
+        if (formatIncompatible) {
+            notif.responseCode = COAP_CODE_NOT_ACCEPTABLE;
+            notif.includeObserve = false;
+            notif.terminal = true;
+            notif.contentFormat = -1;
+            notif.hasMaxAge = false;
+        }
+        else {
+            notif.responseCode = COAP_CODE_CONTENT;
+            notif.payload = resource.payload;
+            notif.etag = resource.etag;
+            notif.contentFormat = resource.contentFormat;
+            notif.maxAge = resource.maxAge;
+            notif.hasMaxAge = resource.explicitMaxAge || resource.maxAge != 60U;
+            notif.includeObserve = true;
+            notif.terminal = false;
+        }
+        obs.pending = std::move(notif);
+        obs.hasPendingNotification = true;
+    }
+
+    pumpObserverNotifications(simTime());
+}
+
+void CoapServer::notifyObserversResourceDeleted(const std::string& pathKey)
+{
+    for (auto& kv : observers) {
+        auto& obs = kv.second;
+        if (obs.resourcePath != pathKey)
+            continue;
+
+        CoapPendingNotification notif;
+        notif.responseCode = COAP_CODE_NOT_FOUND;
+        notif.includeObserve = false;
+        notif.terminal = true;
+        notif.contentFormat = -1;
+        notif.hasMaxAge = false;
+        obs.pending = std::move(notif);
+        obs.hasPendingNotification = true;
+    }
+
+    pumpObserverNotifications(simTime());
+}
+
+void CoapServer::pumpObserverNotifications(simtime_t now)
+{
+    std::vector<CoapObserverKey> keys;
+    keys.reserve(observers.size());
+    for (const auto& kv : observers)
+        keys.push_back(kv.first);
+
+    for (const auto& key : keys) {
+        auto obsIt = observers.find(key);
+        if (obsIt == observers.end())
+            continue;
+        CoapServerObserverRelation& obs = obsIt->second;
+        if (!obs.hasPendingNotification || obs.inFlight)
+            continue;
+
+        if (obs.lastSentValid && obs.pending.includeObserve) {
+            uint64_t nowTick = observe::currentObserveTick(now);
+            if (nowTick <= obs.lastSentTick) {
+                obs.pending.earliestSendTime = SimTime(obs.lastSentTick + 1, SIMTIME_MS);
+                continue;
+            }
+        }
+
+        CoapPendingNotification ready = std::move(obs.pending);
+        obs.hasPendingNotification = false;
+
+        auto hdr = makeShared<CoapHeader>();
+        hdr->setVersion(1);
+        hdr->setMessageType(COAP_TYPE_CON);
+        hdr->setCode(ready.responseCode);
+        hdr->setTokenArraySize(obs.key.token.size());
+        for (size_t i = 0; i < obs.key.token.size(); ++i)
+            hdr->setToken(i, obs.key.token[i]);
+
+        if (ready.includeObserve) {
+            uint64_t tick = observe::currentObserveTick(now);
+            obs.lastSentValid = true;
+            obs.lastSentTick = tick;
+            addCoapOptionUint(hdr, COAP_OPT_OBSERVE, observe::toWireObserveValue(tick));
+        }
+        if (!ready.etag.empty())
+            addCoapOption(hdr, COAP_OPT_ETAG, ready.etag);
+        if (ready.contentFormat >= 0)
+            addCoapOptionUint(hdr, COAP_OPT_CONTENT_FORMAT, static_cast<uint32_t>(ready.contentFormat));
+        if (ready.hasMaxAge)
+            addCoapOptionUint(hdr, COAP_OPT_MAX_AGE, ready.maxAge);
+
+        uint64_t outboundId = 0;
+        bool queued = submitOutboundMessage(obs.key.peer, /*peerIsMulticast=*/false, /*confirmable=*/true,
+                /*isRequest=*/false, /*requestId=*/0, obs.key.token,
+                ready.terminal ? "CoapTerminalNotification" : "CoapNotification",
+                hdr, ready.payload, /*refreshObserveOnRetry=*/ready.includeObserve, &outboundId);
+        if (!queued) {
+            removeObserverAndEmit(obsIt);
+            continue;
+        }
+
+        emit(notificationSentSignal, 1L);
+        if (ready.terminal) {
+            removeObserverAndEmit(obsIt);
+        }
+        else {
+            obs.inFlight = true;
+            obs.inFlightOutboundId = outboundId;
+        }
+    }
+
+    rescheduleDeadlineTimer();
+}
+
+void CoapServer::onOutboundItemAcknowledged(uint64_t outboundId)
+{
+    bool matched = false;
+    for (auto& kv : observers) {
+        if (kv.second.inFlight && kv.second.inFlightOutboundId == outboundId) {
+            kv.second.inFlight = false;
+            kv.second.inFlightOutboundId = 0;
+            matched = true;
+            break;
+        }
+    }
+    if (matched)
+        pumpObserverNotifications(simTime());
+}
+
+void CoapServer::onOutboundItemFailed(uint64_t outboundId, const char *reason)
+{
+    for (auto it = observers.begin(); it != observers.end(); ++it) {
+        if (it->second.inFlight && it->second.inFlightOutboundId == outboundId) {
+            removeObserverAndEmit(it);
+            return;
+        }
+    }
+}
+
+bool CoapServer::updateResourceValue(const std::string& path, const std::vector<uint8_t>& newPayload, int32_t newContentFormat)
+{
+    std::string pathKey = normalizeResourcePath(path);
+    auto it = resources.find(pathKey);
+    if (it == resources.end() || !it->second.exists)
+        return false;
+
+    CoapResourceEntry& entry = it->second;
+    entry.payload = newPayload;
+    if (newContentFormat != -2)
+        entry.contentFormat = newContentFormat;
+    entry.etag = allocateNextEtag();
+    notifyObserversResourceMutated(pathKey, entry);
+    return true;
+}
+
+bool CoapServer::deleteResourceValue(const std::string& path)
+{
+    std::string pathKey = normalizeResourcePath(path);
+    auto it = resources.find(pathKey);
+    if (it == resources.end() || !it->second.exists)
+        return false;
+
+    CoapResourceEntry& entry = it->second;
+    entry.payload.clear();
+    entry.exists = false;
+    entry.etag = allocateNextEtag();
+    notifyObserversResourceDeleted(pathKey);
+    return true;
 }
 
 void CoapServer::sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
         const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
-        const std::vector<uint8_t>& payload)
+        const std::vector<uint8_t>& payload, simtime_t minDelay, bool refreshObserveTick, const CoapObserverKey *observeKey)
 {
     responseHeader->setVersion(1);
     responseHeader->setCode(responseCode);
@@ -453,18 +667,22 @@ void CoapServer::sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWa
         responseHeader->setToken(i, b);
     }
 
-    if (responseDelay > SIMTIME_ZERO) {
+    simtime_t delay = std::max(responseDelay, minDelay);
+    if (delay > SIMTIME_ZERO) {
         if (requestWasConfirmable)
             sendEmptyMessageAndCacheDuplicate(COAP_TYPE_ACK, requestMid, peer);
 
         responseHeader->setMessageType(requestWasConfirmable ? COAP_TYPE_CON : COAP_TYPE_NON);
         CoapPendingSeparateResponse sep;
-        sep.dueAt = simTime() + responseDelay;
+        sep.dueAt = simTime() + delay;
         sep.peer = peer;
         sep.confirmable = requestWasConfirmable;
         sep.token = std::move(tokenVec);
         sep.header = responseHeader;
         sep.payload = payload;
+        sep.refreshObserveTick = refreshObserveTick;
+        if (observeKey != nullptr)
+            sep.observeKey = *observeKey;
         pendingSeparateResponses.push_back(std::move(sep));
         rescheduleDeadlineTimer();
         return;
@@ -499,6 +717,8 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
     uint32_t requestedAccept = 0;
     bool hasContentFormat = false;
     uint32_t reqContentFormat = 0;
+    bool hasObserve = false;
+    uint32_t observeVal = 0;
     bool hasIfNoneMatch = false;
     std::vector<std::vector<uint8_t>> ifMatchValues;
     std::vector<std::vector<uint8_t>> reqEtags;
@@ -513,6 +733,14 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
             auto respHeader = makeShared<CoapHeader>();
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_PROXYING_NOT_SUPPORTED, respHeader, emptyPayload);
             return;
+        }
+        else if (optNum == COAP_OPT_OBSERVE) {
+            if (hasObserve || !decodeCoapUintValue(opt, observeVal, 3)) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            hasObserve = true;
         }
         else if (optNum == COAP_OPT_ACCEPT) {
             if (hasAccept || !decodeCoapUintValue(opt, requestedAccept, 2)) {
@@ -634,6 +862,59 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
             return;
         }
 
+        bool includeObserve = false;
+        simtime_t minObserveDelay = SIMTIME_ZERO;
+        CoapObserverKey obsKey;
+        obsKey.peer = peer;
+        obsKey.token.resize(header->getTokenArraySize());
+        for (size_t i = 0; i < obsKey.token.size(); ++i)
+            obsKey.token[i] = header->getToken(i);
+
+        if (hasObserve && observeVal == 0U && entry.observable) {
+            auto obsIt = observers.find(obsKey);
+            bool alreadyPresent = (obsIt != observers.end());
+            if (alreadyPresent || static_cast<int>(observers.size()) < maxObservers) {
+                CoapServerObserverRelation& rel = observers[obsKey];
+                rel.key = obsKey;
+                rel.resourcePath = pathKey;
+                rel.pathSegments = entry.pathSegments;
+                rel.negotiatedContentFormat = entry.contentFormat;
+                rel.acceptFormat = hasAccept ? static_cast<int32_t>(requestedAccept) : -1;
+                rel.hasPendingNotification = false;
+                includeObserve = true;
+                if (!alreadyPresent)
+                    emit(activeObserversSignal, static_cast<long>(observers.size()));
+
+                simtime_t now = simTime();
+                uint64_t nowTick = observe::currentObserveTick(now);
+                if (rel.lastSentValid && nowTick <= rel.lastSentTick && responseDelay == SIMTIME_ZERO) {
+                    minObserveDelay = SimTime(rel.lastSentTick + 1, SIMTIME_MS) - now;
+                }
+            }
+        }
+        else if (hasObserve && observeVal == 1U) {
+            auto obsIt = observers.find(obsKey);
+            if (obsIt != observers.end())
+                removeObserverAndEmit(obsIt);
+        }
+
+        auto attachInitialObserve = [&](const Ptr<CoapHeader>& respHeader, bool& delayedObserveRefresh) {
+            if (!includeObserve)
+                return;
+            if (responseDelay > SIMTIME_ZERO || minObserveDelay > SIMTIME_ZERO) {
+                addCoapOptionUint(respHeader, COAP_OPT_OBSERVE, 0U);
+                delayedObserveRefresh = true;
+                return;
+            }
+            uint64_t tick = observe::currentObserveTick(simTime());
+            auto obsIt = observers.find(obsKey);
+            if (obsIt != observers.end()) {
+                obsIt->second.lastSentValid = true;
+                obsIt->second.lastSentTick = tick;
+            }
+            addCoapOptionUint(respHeader, COAP_OPT_OBSERVE, observe::toWireObserveValue(tick));
+        };
+
         bool etagMatched = false;
         for (const auto& candidate : reqEtags) {
             if (!entry.etag.empty() && candidate == entry.etag) {
@@ -643,16 +924,21 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         }
         if (etagMatched) {
             auto respHeader = makeShared<CoapHeader>();
+            bool delayedObs = false;
+            attachInitialObserve(respHeader, delayedObs);
             addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
             if (entry.explicitMaxAge || entry.maxAge != 60U)
                 addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, entry.maxAge);
-            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_VALID, respHeader, emptyPayload);
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_VALID, respHeader, emptyPayload,
+                    minObserveDelay, delayedObs, delayedObs ? &obsKey : nullptr);
             return;
         }
 
         onGetResourceHandled(pathKey, entry);
 
         auto respHeader = makeShared<CoapHeader>();
+        bool delayedObs = false;
+        attachInitialObserve(respHeader, delayedObs);
         if (!entry.etag.empty())
             addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
         if (entry.contentFormat >= 0)
@@ -660,7 +946,8 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         if (entry.explicitMaxAge || entry.maxAge != 60U)
             addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, entry.maxAge);
 
-        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader, entry.payload);
+        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader, entry.payload,
+                minObserveDelay, delayedObs, delayedObs ? &obsKey : nullptr);
         return;
     }
 
@@ -693,6 +980,7 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
             entry.contentFormat = -1;
         entry.etag = allocateNextEtag();
 
+        notifyObserversResourceMutated(pathKey, entry);
 
         auto respHeader = makeShared<CoapHeader>();
         addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
@@ -730,6 +1018,7 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         entry.payload.insert(entry.payload.end(), payload.begin(), payload.end());
         entry.etag = allocateNextEtag();
 
+        notifyObserversResourceMutated(pathKey, entry);
 
         auto respHeader = makeShared<CoapHeader>();
         addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
@@ -758,6 +1047,7 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
                 entry.payload.clear();
                 entry.exists = false;
                 entry.etag = allocateNextEtag();
+                notifyObserversResourceDeleted(pathKey);
             }
         }
         else if (!checkPreconditions(false, {}, ifMatchValues, hasIfNoneMatch)) {

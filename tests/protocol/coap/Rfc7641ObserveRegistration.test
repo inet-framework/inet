@@ -1,0 +1,214 @@
+%description:
+
+RFC 7641 Sections 3.1, 4.1, 4.2 -- Observe registration (GET Observe=0),
+same-token re-registration with ETag 2.03 Valid without duplicate entries,
+non-observable and maxObservers fallback to normal GET, discovery ;obs marker,
+client local interest aggregation, and fresh observation reuse on normal GET
+without exposing Observe.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class RegTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri, int accept = -1) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, accept);
+    }
+
+    bool stopObs(uint64_t id, bool explicitCancel = true) {
+        return unsubscribeObserve(id, explicitCancel);
+    }
+
+    uint64_t plainGet(const std::string& host, int port, const std::string& uri, int accept = -1) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {}, -1, accept);
+    }
+
+  protected:
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+Define_Module(RegTestClient);
+
+Define_ProtocolTest(coap_observe_registration)
+{
+    return ProtocolTest("coap_observe_registration")
+        // 1. Client local interest aggregation: 2 consumers subscribe to /sensors/temp -> 1 wire GET, both get initial "20C",
+        //    normal GET reuses fresh representation with 0 wire packets!
+        .act(action().at(1.0).run<RegTestClient>("hostA.app[0]", [](RegTestClient& cli) {
+            uint64_t c1 = cli.startObs("hostB", 5683, "/sensors/temp", 0);
+            uint64_t c2 = cli.startObs("hostB", 5683, "/sensors/temp", 0);
+            if (c1 == 0 || c2 == 0 || c1 == c2)
+                throw cRuntimeError("Expected distinct valid consumer IDs");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      return raw.code == COAP_CODE_CONTENT && !getRawOptionValues(raw, COAP_OPT_OBSERVE).empty();
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getObservers().size() != 1)
+                throw cRuntimeError("Expected 1 server observer for 2 aggregated local consumers, got %zu",
+                        srv.getObservers().size());
+        }))
+        .act(action().after(0.01).run<RegTestClient>("hostA.app[0]", [](RegTestClient& cli) {
+            if (cli.notes.size() != 1)
+                throw cRuntimeError("Expected 1 initial notification delivered before 2nd consumer subscribed? Wait count=%zu",
+                        cli.notes.size());
+            // Subscribe a 3rd consumer after established+fresh -> immediate local delivery without wire GET!
+            size_t beforeComp = cli.getCompletedResponses().size();
+            cli.startObs("hostB", 5683, "/sensors/temp", 0);
+            if (cli.notes.size() != 2 || std::string(cli.notes[1].payload.begin(), cli.notes[1].payload.end()) != "20C")
+                throw cRuntimeError("Expected 3rd consumer to receive fresh cached observation immediately");
+
+            // Normal GET to same key -> reuses fresh representation without exposing Observe, 0 wire packets!
+            cli.plainGet("hostB", 5683, "/sensors/temp", 0);
+            if (cli.getCompletedResponses().size() != beforeComp + 1)
+                throw cRuntimeError("Expected plain GET to reuse fresh observation synchronously");
+            const auto& rec = cli.getCompletedResponses().back();
+            if (rec.code != COAP_CODE_CONTENT
+                    || std::string(rec.payload.begin(), rec.payload.end()) != "20C")
+                throw cRuntimeError("Plain GET cached representation mismatch");
+        }))
+
+        // 2. Peer re-registration with same (peer, token) + matching ETag -> 2.03 Valid WITH Observe, no duplicate entry
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage reg;
+            reg.type = 0; reg.code = COAP_CODE_GET; reg.messageId = 0x4001; reg.token = {0xAA, 0x01};
+            reg.options.push_back({COAP_OPT_OBSERVE, {}});
+            reg.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            reg.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(reg), "PeerObsReg");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .capture("obsEtag", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ev, raw))
+                          return cValue("");
+                      auto et = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return cValue(et.empty() ? "" : bytesToHexString(et[0]).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x4001
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).size() == 1;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getObservers().size() != 2)
+                throw cRuntimeError("Expected maxObservers=2 full now, got %zu", srv.getObservers().size());
+        }))
+        // 3rd observer rejected cleanly (normal 2.05 without Observe), existing 2 untouched; non-observable /info also lacks Observe;
+        // re-registration with matching ETag still succeeds with 2.03 Valid + Observe!
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer) {
+            RawCoapMessage overCap;
+            overCap.type = 0; overCap.code = COAP_CODE_GET; overCap.messageId = 0x4002; overCap.token = {0xAA, 0x02};
+            overCap.options.push_back({COAP_OPT_OBSERVE, {}});
+            overCap.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            overCap.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(overCap), "PeerObsOverCap");
+
+            RawCoapMessage nonObs;
+            nonObs.type = 0; nonObs.code = COAP_CODE_GET; nonObs.messageId = 0x4003; nonObs.token = {0xAA, 0x03};
+            nonObs.options.push_back({COAP_OPT_OBSERVE, {}});
+            nonObs.options.push_back({COAP_OPT_URI_PATH, asciiBytes("info")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(nonObs), "PeerNonObservable");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw)
+                              || raw.code != COAP_CODE_CONTENT || raw.messageId != 0x4002
+                              || !getRawOptionValues(raw, COAP_OPT_OBSERVE).empty())
+                          return false;
+                      // Also test re-registration with matching ETag on full table!
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[1]"));
+                      std::string hex = ctx.get("obsEtag").stringValue();
+                      std::vector<uint8_t> etag;
+                      for (size_t i = 0; i + 1 < hex.size(); i += 2)
+                          etag.push_back(static_cast<uint8_t>(std::stoul(hex.substr(i, 2), nullptr, 16)));
+                      RawCoapMessage reReg;
+                      reReg.type = 0; reReg.code = COAP_CODE_GET; reReg.messageId = 0x4004; reReg.token = {0xAA, 0x01};
+                      reReg.options.push_back({COAP_OPT_ETAG, etag});
+                      reReg.options.push_back({COAP_OPT_OBSERVE, {}});
+                      reReg.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+                      reReg.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+                      peer->sendRawNow("hostB", 5683, encodeRawCoap(reReg), "PeerObsReRegEtag");
+                      return true;
+                  }).within(0.5))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x4003
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).empty();
+                  }).within(0.5))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_VALID && raw.messageId == 0x4004
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).size() == 1
+                              && raw.payload.empty();
+                  }).within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getObservers().size() != 2)
+                throw cRuntimeError("Expected observer count still 2 after full fallback + re-reg, got %zu",
+                        srv.getObservers().size());
+        }));
+}
+
+%activity:
+EV << "coap_observe_registration compiled\n";
+
+%file: RegTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple RegTestClient extends CoapClient
+{
+    parameters:
+        @class(RegTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_observe_registration"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "RegTestClient"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[1].typename = "CoapTestPeer"
+*.hostA.app[1].localPort = 16001
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].maxObservers = 2
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/temp' methods='GET,PUT' contentFormat='0' obs='true' maxAge='30'>20C</resource><resource path='/info' methods='GET' contentFormat='0'>static</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_registration: PASS

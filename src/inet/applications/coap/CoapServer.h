@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "inet/applications/coap/CoapEndpointBase.h"
+#include "inet/applications/coap/CoapObservation.h"
 
 namespace inet {
 namespace coap {
@@ -53,6 +54,8 @@ struct INET_API CoapPendingSeparateResponse
     std::vector<uint8_t> token;
     Ptr<CoapHeader> header;
     std::vector<uint8_t> payload;
+    bool refreshObserveTick = false;
+    CoapObserverKey observeKey;
 };
 
 /**
@@ -67,8 +70,11 @@ class INET_API CoapServer : public CoapEndpointBase
     bool etagExhausted = false;
     std::map<std::string, CoapResourceEntry> resources;
     std::deque<CoapPendingSeparateResponse> pendingSeparateResponses;
+    std::map<CoapObserverKey, CoapServerObserverRelation> observers;
 
     static simsignal_t requestHandledSignal;
+    static simsignal_t activeObserversSignal;
+    static simsignal_t notificationSentSignal;
 
   protected:
     virtual void parseAndValidateParameters() override;
@@ -87,18 +93,29 @@ class INET_API CoapServer : public CoapEndpointBase
 
     virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override;
+    virtual void onOutboundItemAcknowledged(uint64_t outboundId) override;
+    virtual void onOutboundItemFailed(uint64_t outboundId, const char *reason) override;
     /** Invoked when a resource representation is served by a GET request; derived servers can override to update dynamic sensor readings or count accesses. */
     virtual void onGetResourceHandled(const std::string& pathKey, const CoapResourceEntry& resource) {}
 
+    void notifyObserversResourceMutated(const std::string& pathKey, const CoapResourceEntry& resource);
+    void notifyObserversResourceDeleted(const std::string& pathKey);
+    void pumpObserverNotifications(simtime_t now);
+    void removeObserverAndEmit(std::map<CoapObserverKey, CoapServerObserverRelation>::iterator it);
+
     void sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
             const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
-            const std::vector<uint8_t>& payload);
+            const std::vector<uint8_t>& payload, simtime_t minDelay = SIMTIME_ZERO,
+            bool refreshObserveTick = false, const CoapObserverKey *observeKey = nullptr);
 
   public:
     CoapServer() = default;
     virtual ~CoapServer() = default;
 
+    bool updateResourceValue(const std::string& path, const std::vector<uint8_t>& newPayload, int32_t newContentFormat = -2);
+    bool deleteResourceValue(const std::string& path);
     const std::map<std::string, CoapResourceEntry>& getResources() const { return resources; }
+    const std::map<CoapObserverKey, CoapServerObserverRelation>& getObservers() const { return observers; }
 };
 
 } // namespace coap

@@ -142,6 +142,26 @@ void addCoapOptionUint(const Ptr<CoapHeader>& header, uint16_t number, uint32_t 
     addCoapOption(header, number, encodeCoapUintValue(value));
 }
 
+void removeCoapOptions(const Ptr<CoapHeader>& header, uint16_t number)
+{
+    std::vector<CoapOption> kept;
+    kept.reserve(header->getOptionsArraySize());
+    for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
+        const auto& opt = header->getOptions(i);
+        if (opt.getNumber() != number)
+            kept.push_back(opt);
+    }
+    header->setOptionsArraySize(kept.size());
+    for (size_t i = 0; i < kept.size(); ++i)
+        header->setOptions(i, kept[i]);
+}
+
+void setCoapOptionUint(const Ptr<CoapHeader>& header, uint16_t number, uint32_t value)
+{
+    removeCoapOptions(header, number);
+    addCoapOptionUint(header, number, value);
+}
+
 B computeCoapHeaderLength(const CoapHeader& header)
 {
     size_t total = 4 + header.getTokenArraySize();
