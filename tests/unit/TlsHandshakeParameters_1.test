@@ -1,0 +1,76 @@
+%description:
+Selected DTLS 1.3 handshake offer compatibility and retry-key-share selection.
+
+%includes:
+#include "inet/transportlayer/tls/TlsHandshakeParameters.h"
+
+using namespace inet::tls;
+
+%activity:
+using Parameters = TlsHandshakeParameters;
+Parameters::Offer offer;
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {Parameters::AES_128_GCM_SHA256};
+offer.groups = {Parameters::X25519};
+offer.keyShares = {Parameters::X25519};
+offer.hasSupportedGroups = true;
+offer.hasKeyShare = true;
+offer.signatures = {Parameters::ECDSA_P256_SHA256};
+offer.pskModes = {Parameters::PSK_DHE_KE};
+offer.hasPsk = true;
+offer.pskIdentity = "peer";
+Parameters::Selection selected;
+ASSERT(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected).empty());
+ASSERT(selected.usePsk && !selected.retryKeyShare && selected.signature == 0);
+ASSERT(Parameters::wasOffered(offer, selected));
+ASSERT(!Parameters::select(offer, Parameters::Profile::PSK, "other", selected).empty());
+offer.keyShares.clear();
+ASSERT(Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+ASSERT(!selected.usePsk && selected.retryKeyShare && selected.signature == Parameters::ECDSA_P256_SHA256);
+ASSERT(Parameters::wasOffered(offer, selected));
+selected.retryKeyShare = false;
+ASSERT(!Parameters::wasOffered(offer, selected));
+offer.versions = {0xfefd};
+ASSERT(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {0xffff};
+ASSERT(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.cipherSuites = {Parameters::AES_128_GCM_SHA256};
+offer.groups.clear();
+ASSERT(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.groups = {Parameters::X25519};
+offer.signatures.clear();
+ASSERT(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+auto hello = inet::makeShared<TlsClientHello>();
+hello->setCipherSuitesArraySize(1);
+hello->setCipherSuites(0, Parameters::AES_128_GCM_SHA256);
+const std::vector<uint8_t> extensions = {
+    0, 43, 0, 3, 2, 0xfe, 0xfc,
+    0, 10, 0, 4, 0, 2, 0, 29,
+    0, 13, 0, 4, 0, 2, 4, 3,
+    0, 51, 0, 2, 0, 0
+};
+auto setExtensions = [&](const std::vector<uint8_t>& bytes) {
+    hello->setExtensionsArraySize(bytes.size());
+    for (size_t i = 0; i < bytes.size(); ++i)
+        hello->setExtensions(i, bytes[i]);
+};
+setExtensions(extensions);
+Parameters::Offer decoded;
+ASSERT(Parameters::decodeOffer(hello, decoded).empty());
+ASSERT(decoded.hasSupportedGroups && decoded.hasKeyShare && decoded.keyShares.empty());
+ASSERT(decoded.versions == std::vector<uint16_t>({Parameters::DTLS_13}));
+ASSERT(Parameters::select(decoded, Parameters::Profile::CERTIFICATE, "", selected).empty());
+ASSERT(selected.retryKeyShare);
+auto duplicate = extensions;
+duplicate.insert(duplicate.end(), extensions.begin(), extensions.begin() + 7);
+setExtensions(duplicate);
+ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
+// Refusal must leave the caller's previously decoded offer intact.
+ASSERT(decoded.versions == std::vector<uint16_t>({Parameters::DTLS_13}));
+setExtensions({0, 43, 0, 3, 2, 0xfe});
+ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
+EV << "DTLS handshake parameters PASS\n";
+
+%contains: stdout
+DTLS handshake parameters PASS
