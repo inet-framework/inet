@@ -1,6 +1,6 @@
 # Explanations of baseline changes
 
-**Status:** in progress. Written 2026-11-16 from `master` at `b61fa3c136`. The user settled E1 to E8 and approved the plan on 2026-11-16.
+**Status:** implemented. Written 2026-11-16 from `master` at `b61fa3c136`. The user settled E1 to E8 and approved the plan on 2026-11-16. Steps X1 to X9 are on the branch `topic/baseline-change-explanations` since 2026-11-16. The branch is not landed; the landing waits for the approval of the user.
 
 ## Goal
 
@@ -108,20 +108,43 @@ The expected outputs of module tests (E4, F4).
 
 ## Steps
 
-Each entry is one future commit, on the branch `topic/baseline-change-explanations` in the worktree `inet-baseline-change-explanations`. The gate comes before the rules, because the rule documents link to the gate.
+Each entry is one commit, on the branch `topic/baseline-change-explanations` in the worktree `inet-baseline-change-explanations`. The gate comes before the rules, because the rule documents link to the gate.
 
-| Id | Proposed subject | Depends on | Verification |
+| Id | Subject | Depends on | Verification |
 | --- | --- | --- | --- |
 | X1 | plan: add: explanations of baseline changes | none | — |
 | X2 | doc: change: a reason for each category of a statistical or chart baseline change | X1 | `baseline_summary.py`: categories, size classes, renames, the list, the reasons; `check_baselines.py` checks the reasons; `baseline-candidates.py` writes the list with empty reasons. Unit tests, and the list of each of the 25 `statistics` commits of F8. |
-| X3 | doc: add: a reason for each category of a fingerprint change | X2 | The categories of the fingerprint store; the check of the steps that change it; the obligation `fingerprint`. Unit tests, and the lists of the 15 commits of F6. |
-| X4 | doc: add: the smallest fragment of a fingerprint change | X3 | The size limits, the steps with no limit, and the reduction in the message: it applies, and its lines count. Unit tests; the 15 commits give one failure (`f874a26bd9`). |
-| X4b | doc: add: the attribution run of a fingerprint change | X4 | `check-baseline-attribution.sh` also runs the moved fingerprint runs: at the parent against the old store, at the commit against the new store, and with the reduction. Unit tests with fake commands; one real reduction of a fingerprint commit of F6 in a copy of the CI job. |
-| X5 | doc: add: the pull request summarizes the baseline changes of each step | X3 | The check of the description; `check_pull_request.py` passes the description. Unit tests, and the description of PR #1452 as data. |
-| X6 | doc: change: rules for the explanation of each baseline change | X2 to X5, X4b | The rule documents of the table above. `check-seals.sh` and `check-links.sh` pass. |
-| X7 | doc: change: procedure and template for the explanations of baseline changes | X6 | The guides, the README and the template. `check-links.sh` passes. |
-| X8 | plan: change: record the results | X7 | — |
+| X3 | doc: change: a reason for each category of a fingerprint baseline change | X2 | The categories of the fingerprint store; the check of the steps that change it; the obligation `fingerprint`. Unit tests, and the lists of the 15 commits of F6. |
+| X4 | doc: change: the code that moves fingerprint values is small | X3 | The size limits, the steps with no limit, and the reduction in the message: it applies, and its lines count. Unit tests; the 15 commits give one failure (`f874a26bd9`). |
+| X4b | doc: change: the attribution run proves the cause of fingerprint changes | X4 | `check-baseline-attribution.sh` also runs the moved fingerprint runs: at the parent against the old store, at the commit against the new store, and with the reduction. Unit tests with fake commands; one real reduction of a fingerprint commit of F6 in a copy of the CI job. |
+| X5 | doc: change: the description of a pull request summarizes its baseline changes | X3 | The check of the description; `check_pull_request.py` passes the description. Unit tests, and the description of PR #1452 as data. |
+| X6 | doc: change: rules for the reasons, the small cause and the summary of baseline changes | X2 to X5, X4b | The rule documents of the table above. `check-seals.sh` and `check-links.sh` pass. |
+| X7 | doc: change: the guides use the list, the small cause and the section of baseline changes | X6 | The guides, the README and the template. `check-links.sh` passes. |
+| X8 | plan: change: record the results of the explanations of baseline changes | X7 | — |
 | X9 | plan: location: move the plan to done | X8 | Two commits, as `PR-SPLIT-MOVE` asks. |
+
+## Progress
+
+- [x] X1 to X8, on 2026-11-16. Each commit passes all tests of `doc/project/enforcement/` in a clean export of that commit: 450 tests at X3, 491 at X4, 514 at X4b, 532 at X5.
+- [x] X9: the move of the plan to `plan/done/`, in a commit of its own.
+
+## Results
+
+Facts and decisions of the implementation:
+
+- **The list of a staged store.** The guide needs a command that prints the list before the commit. `fingerprint_moves.py --list <old store> <new store>` prints it, with an empty reason on each line. Without `--list`, the output of the command line stays the same.
+- **The prose checks of the commit gate.** A reduction patch in a message is code, and a long list is not the summary of a body. `check-commits.sh` reads the body without the patch for `PR-MSG-WRAP`, `PR-MSG-SUMMARY` and `PR-MSG-FACTS`, and counts the words of the body without the list.
+- **The template.** The template of a pull request shows the section "Baseline changes" inside its comment, so that no placeholder stays in a description. The gate ignores HTML comments when it looks for the section.
+- **A tree with no store.** A reduction run writes the store of the other commit; when the tree has no folder for the store, the run makes the folder and removes it after the run. A test found the defect.
+- **The count of a fingerprint run.** The filter of a fingerprint run selects the configurations of the changed runs, so it can select more runs than changed. The run fails only when it selects fewer tests than the changed runs.
+
+Checks on real data:
+
+- The fingerprint categories are correct on `7bb0f06cc1` (only added runs), `83a0db68c2` (the conversion of the CSV files) and `4c3c881815` (two patterns). Earlier commits fail with "no list", and `f874a26bd9` fails the size limit with 296 source lines.
+- The pilot on `7beeb0dc88` (TcpWestwood, 3 source lines, 7 runs) in the copy of the CI job: the reverse reduction passes the parent, the commit and the reduction runs; a false reduction that changes only a comment fails in its reduction run. The gate passes both, because it cannot see a false reduction; the run can.
+- The description of #1452 fails without the section; with a section that names its commit, the check passes.
+- A mutation check: 6 changes of the new gate code (the patch comparison, the missing section, the missing summary, the renames, the other fields, the reading of the reduction) each fail the tests.
+- `check-pull-request.sh` over the series gives no violation and no note. `check-seals.sh` passes. `check-links.sh` finds 19 broken links that were there before: standard documents outside the checkout, and a generated header.
 
 ## The open pull requests
 
