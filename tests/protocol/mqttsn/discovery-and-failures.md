@@ -16,6 +16,30 @@ The three mqttsn_stop module cases separately acknowledge shutdown, exhaust DISC
 
 Tests use fixed seed 0, static Ethernet addressing and finite windows. Short discovery/retry timers exercise policy, not default timing realism. The fixtures establish their selected failure paths, not every malformed message and simultaneous lifecycle interleaving.
 
+## Rediscovering a recovered gateway
+
+`MqttSnGatewayRediscovery.test` checks the selected recovery policy derived from MQTT-SN v1.2 section 6.1. The production sensor initially learns gateway id 1 from an advertisement. The scripted UDP gateway receives CONNECT three times but withholds CONNACK, exhausting the original request and two retries. After the sensor starts a new discovery round, the peer sends two GWINFO messages for the same id. The sensor must send a new CONNECT and become active. The peer later sends DISCONNECT and announces that same gateway again; a second accepted connection must follow.
+
+Before the correction, the candidate remains in the attempted-gateway set. GWINFO cancels the discovery response timer without clearing that set, so the client skips the responding gateway and the script times out waiting for CONNECT. The correction clears attempts when the client starts another discovery round, after it has tried the remaining candidates. It does not add a timer or change the unanswered-search backoff. The test requires exactly five CONNECT transmissions, two active-state transitions and script completion, all within 2.5 seconds. It uses seed 0, retryInterval 100ms, retryCount 2, a 100ms search response window and a 200ms backoff cap.
+
+```mermaid
+sequenceDiagram
+    participant S as Production sensor
+    participant G as Scripted gateway id 1
+    G->>S: ADVERTISE
+    S->>G: CONNECT and two retries
+    Note over S,G: No CONNACK. Client exhausts this candidate round
+    S->>G: SEARCHGW
+    G->>S: GWINFO twice, same id
+    S->>G: Fresh CONNECT
+    G->>S: CONNACK accepted
+    G->>S: DISCONNECT, then GWINFO with the same id
+    S->>G: Fresh CONNECT
+    G->>S: CONNACK accepted
+```
+
+The fixture uses unicast announcements and the real client/UDP path. The scripted socket does not consume broadcast SEARCHGW; the diagram shows the sensor's search action, not a script receive assertion. Existing Discovery and DiscoveryBackoff cases cover broadcast discovery and no-response timing, while GatewayFailover checks preference for an alternative gateway. This regression does not establish a production gateway's recovery or all announcement/timeout orderings. The identical fixture is compatible with the pre-correction implementation and fails there at runtime. Commands and observed outcomes are recorded in the coverage ledger; Mermaid rendering remains unverified.
+
 ```mermaid
 flowchart LR
     S[Sensor] <-->|UDP partitioned at 1s| G1[Gateway 1 stays alive]

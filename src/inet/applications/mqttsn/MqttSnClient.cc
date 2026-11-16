@@ -154,8 +154,11 @@ void MqttSnClient::connectGateway()
             break;
         }
         if (gateway.isUnspecified()) {
-            if (searchAt < SIMTIME_ZERO && searchResponseAt < SIMTIME_ZERO)
+            if (searchAt < SIMTIME_ZERO && searchResponseAt < SIMTIME_ZERO) {
+                // Attempts belong to one candidate round. Fresh discovery may find a recovered gateway.
+                attemptedGateways.clear();
                 searchAt = simTime() + uniform(0, par("searchDelay").doubleValue());
+            }
             reconnectAt = SimTime::getMaxTime();
             return;
         }
