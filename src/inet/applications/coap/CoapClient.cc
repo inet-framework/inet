@@ -119,7 +119,7 @@ std::string CoapClient::percentDecodeUriComponent(const std::string& input)
     return result;
 }
 
-CoapParsedUri CoapClient::parseCoapUri(const std::string& uriStr)
+CoapParsedUri CoapClient::parseCoapUri(const std::string& uriStr, bool dtlsMode)
 {
     CoapParsedUri parsed;
     if (uriStr.empty())
@@ -129,7 +129,8 @@ CoapParsedUri CoapClient::parseCoapUri(const std::string& uriStr)
     size_t schemeSep = rest.find("://");
     if (schemeSep != std::string::npos) {
         std::string scheme = rest.substr(0, schemeSep);
-        if (!equalsIgnoreCase(scheme, "coap"))
+        bool schemeOk = dtlsMode ? equalsIgnoreCase(scheme, "coaps") : equalsIgnoreCase(scheme, "coap");
+        if (!schemeOk)
             throw cRuntimeError("Unsupported CoAP URI scheme '%s'", scheme.c_str());
         parsed.hasAuthority = true;
         rest = rest.substr(schemeSep + 3);
@@ -228,7 +229,7 @@ void CoapClient::parseAndValidateParameters()
         throw cRuntimeError("CoapClient stopTime must be >= startTime");
 
     // Eagerly validate configured URI syntax at startup.
-    parseCoapUri(requestUri);
+    parseEndpointUri(requestUri);
 
     if (sendTimer == nullptr)
         sendTimer = new cMessage("coapClientSendTimer");
@@ -481,7 +482,7 @@ uint64_t CoapClient::submitWireExchange(const CoapPeerEndpoint& peer, bool peerM
 
 bool CoapClient::sendNextTransferStep(blockwise::CoapClientBlockTransfer& transfer)
 {
-    CoapParsedUri parsedUri = parseCoapUri(transfer.uriStr);
+    CoapParsedUri parsedUri = parseEndpointUri(transfer.uriStr);
     std::vector<CoapOption> stepOptions;
     bool hasExplicitBlock1 = false;
     bool hasExplicitBlock2 = false;
@@ -604,11 +605,20 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
     if (operationalState != State::OPERATING)
         return 0;
 
-    CoapParsedUri parsedUri = parseCoapUri(uriStr);
-    CoapPeerEndpoint peer{destAddr, destPort};
+    CoapParsedUri parsedUri = parseEndpointUri(uriStr);
     bool peerMulticast = destAddr.isMulticast();
+    if (peerMulticast && isDtlsMode())
+        throw cRuntimeError("CoAP over DTLS does not support multicast destination addresses");
     if (peerMulticast && isConfirmable)
         throw cRuntimeError("Confirmable CoAP requests must not target multicast address");
+
+    CoapPeerEndpoint peer{destAddr, destPort, 0};
+    if (isDtlsMode() && !resolveDtlsPeerSession(destAddr, destPort, peer)) {
+        emit(requestStartedSignal, 1L);
+        ++failedCount;
+        emit(requestFailedSignal, 1L);
+        return 0;
+    }
 
     bool hasExplicitBlock1 = false;
     bool hasExplicitBlock2 = false;
@@ -701,7 +711,8 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
             emit(requestFailedSignal, 1L);
             return 0;
         }
-        activeRequestStarts[subReqId] = simTime();
+        if (hasPendingRequest(subReqId))
+            activeRequestStarts[subReqId] = simTime();
         return subReqId;
     }
 
@@ -789,8 +800,16 @@ uint64_t CoapClient::subscribeObserve(const L3Address& destAddr, int destPort, c
     if (operationalState != State::OPERATING)
         return 0;
 
-    CoapParsedUri parsedUri = parseCoapUri(uriStr);
-    CoapPeerEndpoint peer{destAddr, destPort};
+    CoapParsedUri parsedUri = parseEndpointUri(uriStr);
+    if (isDtlsMode() && destAddr.isMulticast())
+        throw cRuntimeError("CoAP over DTLS does not support multicast destination addresses");
+    CoapPeerEndpoint peer{destAddr, destPort, 0};
+    if (isDtlsMode() && !resolveDtlsPeerSession(destAddr, destPort, peer)) {
+        emit(requestStartedSignal, 1L);
+        ++failedCount;
+        emit(requestFailedSignal, 1L);
+        return 0;
+    }
     std::vector<CoapOption> filteredTemplate;
     for (const auto& opt : extraOptions) {
         if (opt.getNumber() != COAP_OPT_OBSERVE && opt.getNumber() != COAP_OPT_ETAG)
@@ -935,7 +954,7 @@ void CoapClient::cancelInFlightObserveBlock2(CoapClientObservation& obs)
 
 bool CoapClient::sendNextObserveBlock2Request(CoapClientObservation& obs)
 {
-    CoapParsedUri parsedUri = parseCoapUri(obs.uriStr);
+    CoapParsedUri parsedUri = parseEndpointUri(obs.uriStr);
     std::vector<CoapOption> stepOptions;
     for (const auto& opt : obs.templateExtraOptions) {
         uint16_t num = opt.getNumber();

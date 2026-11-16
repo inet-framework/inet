@@ -185,8 +185,9 @@ class INET_API CoapClient : public CoapEndpointBase
             bool isConfirmable = true, int reqAccept = -1, const std::vector<CoapOption>& extraOptions = {});
     bool unsubscribeObserve(uint64_t consumerId, bool sendExplicitCancel = true);
 
+    CoapParsedUri parseEndpointUri(const std::string& uriStr) const { return parseCoapUri(uriStr, isDtlsMode()); }
     static uint8_t parseMethodName(const std::string& methodName);
-    static CoapParsedUri parseCoapUri(const std::string& uriStr);
+    static CoapParsedUri parseCoapUri(const std::string& uriStr, bool dtlsMode = false);
     static std::string percentDecodeUriComponent(const std::string& input);
 
     const std::vector<CoapClientResponseRecord>& getCompletedResponses() const { return completedResponses; }

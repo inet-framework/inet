@@ -15,6 +15,7 @@ namespace inet {
 namespace coap {
 
 const uint16_t COAP_UDP_PORT = 5683;
+const uint16_t COAP_DTLS_PORT = 5684;
 
 /**
  * Returns the feature-local Protocol descriptor for CoAP over UDP.

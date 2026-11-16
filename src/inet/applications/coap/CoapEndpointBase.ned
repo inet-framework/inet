@@ -17,6 +17,7 @@ simple CoapEndpointBase like IApp
     parameters:
         @class(CoapEndpointBase);
         string interfaceTableModule = default("");
+        string dtlsModule = default("");
         string localAddress = default("");
         int localPort = default(-1);
         int timeToLive = default(-1);

@@ -1,0 +1,205 @@
+%description:
+
+RFC 7252 Sections 6.2 and 9.1 -- CoAP over DTLS 1.3 (coaps://, UDP port 5684)
+PSK handshake with HelloRetryRequest cookie and 3s server handshakeOutDelay
+gating CoAP CON retransmissions (ackTimeout = 2s -> 0 retransmissions while
+handshake completes), encrypted wire transport tagged dtlsProtocol rather than
+cleartext coap, CON GET + NON POST exchanges, and scheme / multicast rejection.
+
+%includes:
+#include <cstring>
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapProtocol.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "../coap/CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class ExchangeTestCoapClient : public CoapClient
+{
+  public:
+    int txCount = 0;
+    int retxCount = 0;
+
+    uint64_t submitTestReq(const L3Address& addr, int port, uint8_t method, bool con,
+            const std::string& uri, const std::vector<uint8_t>& body)
+    {
+        return submitCoapRequest(addr, port, method, con, uri, body);
+    }
+
+  protected:
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        ++txCount;
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+    virtual void onDeadlineTimer() override {
+        CoapClient::onDeadlineTimer();
+    }
+    virtual void handleMessageWhenUp(cMessage *msg) override {
+        CoapClient::handleMessageWhenUp(msg);
+    }
+};
+
+Define_Module(ExchangeTestCoapClient);
+
+static int countWire5684 = 0;
+static int countRetxDuringHandshake = 0;
+
+Define_ProtocolTestProgram()
+{
+    countWire5684 = 0;
+    countRetxDuringHandshake = 0;
+
+    return ProtocolTest("coap_dtls_handshake_and_exchange")
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].coap").signal("retransmission").filterEvent([](const MatchContext&) {
+                ++countRetxDuringHandshake;
+                return true;
+            }).within(20.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].dtls").signal("packetSentToLower").assertEvent([](const MatchContext& ctx) {
+                const auto& ptag = ctx.event.packet->findTag<PacketProtocolTag>();
+                if (ptag == nullptr || ptag->getProtocol() == nullptr || std::strcmp(ptag->getProtocol()->getName(), "dtls") != 0)
+                    throw cRuntimeError("Expected dtls outer protocol tag on DTLS port 5684 wire packet");
+                if (ProtocolGroup::getUdpProtocolGroup()->findProtocol(5684) != nullptr)
+                    throw cRuntimeError("UDP protocol group must not register port 5684 as cleartext CoAP");
+                ++countWire5684;
+                return true;
+            }).within(20.0)))
+        // app[0] sends configured CON GET coaps://host2:5684/sensors/temp at t = 0.5s (server handshakeOutDelay = 3s, ackTimeout = 2s).
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(16.0))
+        // app[1] issues programmatic NON POST coaps://host2:5684/actuators/led after app[0] completes, plus rejection checks.
+        .act(action().run<CoapClient>("host1.app[0].coap", [](CoapClient& cli) {
+            if (countRetxDuringHandshake != 0)
+                throw cRuntimeError("CoAP CON retransmitted %d times before/during 3s DTLS handshake", countRetxDuringHandshake);
+            if (countWire5684 == 0)
+                throw cRuntimeError("Expected dtls-tagged packets on host1.app[0].dtls");
+            if (cli.getCompletedResponses().size() != 1)
+                throw cRuntimeError("Expected 1 completed response on app[0], got %zu", cli.getCompletedResponses().size());
+            const auto& r = cli.getCompletedResponses()[0];
+            if (r.code != COAP_CODE_CONTENT || std::string(r.payload.begin(), r.payload.end()) != "21.5C")
+                throw cRuntimeError("Unexpected CON GET response code=%u body=%s",
+                        r.code, std::string(r.payload.begin(), r.payload.end()).c_str());
+        }).run<ExchangeTestCoapClient>("host1.app[1].coap", [](ExchangeTestCoapClient& cli) {
+            L3Address serverAddr = L3AddressResolver().resolve("host2");
+            bool threw = false;
+            try {
+                cli.submitTestReq(serverAddr, 5684, COAP_CODE_GET, true, "coap://host2:5684/sensors/temp", {});
+            }
+            catch (const cRuntimeError&) {
+                threw = true;
+            }
+            if (!threw)
+                throw cRuntimeError("Expected DTLS client to reject coap:// URI");
+
+            threw = false;
+            try {
+                cli.submitTestReq(L3Address("224.0.1.187"), 5684, COAP_CODE_GET, false, "coaps://224.0.1.187:5684/sensors/temp", {});
+            }
+            catch (const cRuntimeError&) {
+                threw = true;
+            }
+            if (!threw)
+                throw cRuntimeError("Expected DTLS client to reject multicast destination");
+
+            uint64_t reqId = cli.submitTestReq(serverAddr, 5684, COAP_CODE_POST, false,
+                    "coaps://host2:5684/actuators/led", asciiBytes("on"));
+            if (reqId == 0)
+                throw cRuntimeError("Failed to submit NON POST over DTLS");
+        }).run<ExchangeTestCoapClient>("host1.app[2]", [](ExchangeTestCoapClient& udpCli) {
+            L3Address serverAddr = L3AddressResolver().resolve("host2");
+            bool threw = false;
+            try {
+                udpCli.submitTestReq(serverAddr, 5683, COAP_CODE_GET, true, "coaps://host2:5683/sensors/temp", {});
+            }
+            catch (const cRuntimeError&) {
+                threw = true;
+            }
+            if (!threw)
+                throw cRuntimeError("Expected UDP client to reject coaps:// URI");
+        }))
+        .once(on("host1.app[1].coap").signal("requestCompleted").within(16.0))
+        .act(action().run<ExchangeTestCoapClient>("host1.app[1].coap", [](ExchangeTestCoapClient& cli) {
+            if (cli.getCompletedResponses().size() != 1 || cli.getCompletedResponses()[0].code != COAP_CODE_CHANGED)
+                throw cRuntimeError("Expected 2.04 Changed for NON POST over DTLS");
+            if (countRetxDuringHandshake != 0)
+                throw cRuntimeError("Unexpected retransmission during handshake: %d", countRetxDuringHandshake);
+        }));
+}
+
+%activity:
+EV << "coap_dtls_handshake_and_exchange compiled\n";
+
+%file: TestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple ExchangeTestCoapClient extends CoapClient
+{
+    parameters:
+        @class(ExchangeTestCoapClient);
+}
+
+module ExchangeTestDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: ExchangeTestCoapClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 35s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 3
+*.host1.app[0].typename = "inet.applications.coapdtls.CoapDtlsClient"
+*.host1.app[0].coap.peerAddress = "host2"
+*.host1.app[0].coap.requestUri = "coaps://host2:5684/sensors/temp"
+*.host1.app[0].coap.requestMethod = "GET"
+*.host1.app[0].coap.confirmable = true
+*.host1.app[0].coap.ackTimeout = 2s
+*.host1.app[0].coap.startTime = 0.5s
+*.host1.app[0].coap.numRequests = 1
+
+*.host1.app[1].typename = "ExchangeTestDtlsClientApp"
+*.host1.app[1].coap.numRequests = 0
+
+*.host1.app[2].typename = "ExchangeTestCoapClient"
+*.host1.app[2].numRequests = 0
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "inet.applications.coapdtls.CoapDtlsServer"
+*.host2.app[0].dtls.cookieRequired = true
+*.host2.app[0].dtls.handshakeOutDelay = 3s
+*.host2.app[0].coap.resources = xml("<resources><resource path='/sensors/temp' contentFormat='0' methods='GET'>21.5C</resource><resource path='/actuators/led' contentFormat='0' methods='GET,POST,PUT'>off</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_handshake_and_exchange: PASS

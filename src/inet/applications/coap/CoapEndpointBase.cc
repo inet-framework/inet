@@ -38,6 +38,10 @@ CoapEndpointBase::~CoapEndpointBase()
 {
     cancelAndDelete(deadlineTimer);
     deadlineTimer = nullptr;
+#ifdef INET_WITH_DTLS
+    cancelAndDelete(dtlsSendErrorTimer);
+    dtlsSendErrorTimer = nullptr;
+#endif
 }
 
 void CoapEndpointBase::initialize(int stage)
@@ -49,11 +53,16 @@ void CoapEndpointBase::initialize(int stage)
         initializeCountersOnce();
         if (deadlineTimer == nullptr)
             deadlineTimer = new cMessage("deadlineTimer");
+#ifdef INET_WITH_DTLS
+        if (dtlsSendErrorTimer == nullptr)
+            dtlsSendErrorTimer = new cMessage("dtlsSendErrorTimer");
+#endif
     }
 }
 
 void CoapEndpointBase::parseAndValidateParameters()
 {
+    dtlsModulePath = par("dtlsModule").stdstringValue();
     localPort = par("localPort");
     timeToLive = par("timeToLive");
     dscp = par("dscp");
@@ -127,6 +136,18 @@ void CoapEndpointBase::initializeCountersOnce()
 
 void CoapEndpointBase::bindSocket()
 {
+    if (isDtlsMode()) {
+#ifdef INET_WITH_DTLS
+        auto *engine = getModuleFromPar<dtls::IDtls>(par("dtlsModule"), this);
+        dtlsSocket.setEngine(engine);
+        dtlsSocket.setCallback(this);
+        dtlsBound = true;
+        return;
+#else
+        throw cRuntimeError("CoapEndpointBase dtlsModule='%s' requires the Dtls feature", dtlsModulePath.c_str());
+#endif
+    }
+
     const char *localAddrStr = par("localAddress");
     localAddress = (localAddrStr != nullptr && localAddrStr[0] != '\0')
             ? L3AddressResolver().resolve(localAddrStr)
@@ -152,6 +173,9 @@ void CoapEndpointBase::clearTransientState(bool clearDuplicates)
     activeExchanges.clear();
     peerCongestion.clear();
     outboundQueue.clear();
+#ifdef INET_WITH_DTLS
+    dtlsInFlightPackets.clear();
+#endif
 
     if (clearDuplicates) {
         conDuplicateOrder.clear();
@@ -168,6 +192,11 @@ void CoapEndpointBase::handleMessageWhenUp(cMessage *msg)
     if (msg == deadlineTimer) {
         onDeadlineTimer();
     }
+#ifdef INET_WITH_DTLS
+    else if (msg == dtlsSendErrorTimer) {
+        processPendingDtlsSendErrors();
+    }
+#endif
     else if (msg->isSelfMessage()) {
         handleSubclassSelfMessage(msg);
     }
@@ -194,8 +223,32 @@ void CoapEndpointBase::handleStartOperation(LifecycleOperation *operation)
 void CoapEndpointBase::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
+#ifdef INET_WITH_DTLS
+    cancelEvent(dtlsSendErrorTimer);
+    pendingDtlsSendErrors.clear();
+#endif
     clearTransientState(false);
     onEndpointStop();
+#ifdef INET_WITH_DTLS
+    if (isDtlsMode()) {
+        std::vector<dtls::IDtls::AssociationId> sessionIds;
+        sessionIds.reserve(dtlsSessions.size());
+        for (const auto& kv : dtlsSessions)
+            sessionIds.push_back(kv.first);
+        dtlsSessions.clear();
+        activeClientDtlsByAddrPort.clear();
+        dtlsInFlightPackets.clear();
+        conDuplicateOrder.clear();
+        nonDuplicateOrder.clear();
+        duplicateEntries.clear();
+        if (dtlsBound) {
+            for (auto id : sessionIds)
+                dtlsSocket.close(id);
+            dtlsBound = false;
+        }
+        return;
+    }
+#endif
     if (socket.isOpen()) {
         socket.close();
         delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -205,8 +258,21 @@ void CoapEndpointBase::handleStopOperation(LifecycleOperation *operation)
 void CoapEndpointBase::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
+#ifdef INET_WITH_DTLS
+    cancelEvent(dtlsSendErrorTimer);
+    pendingDtlsSendErrors.clear();
+#endif
     clearTransientState(true);
     onEndpointCrash();
+#ifdef INET_WITH_DTLS
+    if (isDtlsMode()) {
+        dtlsSessions.clear();
+        activeClientDtlsByAddrPort.clear();
+        dtlsInFlightPackets.clear();
+        dtlsBound = false;
+        return;
+    }
+#endif
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
     else
@@ -429,7 +495,52 @@ void CoapEndpointBase::sendCoapPacket(Packet *packet, const L3Address& destAddr,
     socket.sendTo(packet, destAddr, destPort);
 }
 
+void CoapEndpointBase::sendCoapPacketToPeer(const CoapPeerEndpoint& peer, Packet *packet,
+        uint64_t outboundId, uint64_t requestId, const std::vector<uint8_t>& token,
+        uint16_t messageId, bool isConfirmable, bool isRequest)
+{
+#ifdef INET_WITH_DTLS
+    if (peer.sessionId != 0) {
+        if (!dtlsBound || dtlsSessions.find(peer.sessionId) == dtlsSessions.end()) {
+            delete packet;
+            return;
+        }
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getCoapProtocol());
+        emit(packetSentSignal, packet);
+        emit(packetSentToLowerSignal, packet);
+        // Remove CoAP PacketProtocolTag so Dtls::sendApplication tags the outer record as dtlsProtocol.
+        packet->removeTagIfPresent<PacketProtocolTag>();
+        if (outboundId != 0 || requestId != 0) {
+            CoapDtlsInFlightPacket info;
+            info.sessionId = peer.sessionId;
+            info.peer = peer;
+            info.outboundId = outboundId;
+            info.requestId = requestId;
+            info.token = token;
+            info.messageId = messageId;
+            info.isConfirmable = isConfirmable;
+            info.isRequest = isRequest;
+            dtlsInFlightPackets[packet->getId()] = std::move(info);
+        }
+        struct ScopedFlagReset {
+            bool& flag;
+            ~ScopedFlagReset() { flag = false; }
+        };
+        insideDtlsSend = true;
+        ScopedFlagReset resetFlag{insideDtlsSend};
+        dtlsSocket.send(peer.sessionId, packet);
+        return;
+    }
+#endif
+    sendCoapPacket(packet, peer.address, peer.port);
+}
+
 void CoapEndpointBase::sendEmptyMessage(CoapMessageType type, uint16_t messageId, const L3Address& destAddr, int destPort)
+{
+    sendEmptyMessageToPeer(type, messageId, CoapPeerEndpoint{destAddr, destPort, 0});
+}
+
+void CoapEndpointBase::sendEmptyMessageToPeer(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer)
 {
     auto header = makeShared<CoapHeader>();
     header->setVersion(1);
@@ -440,7 +551,7 @@ void CoapEndpointBase::sendEmptyMessage(CoapMessageType type, uint16_t messageId
             : (type == COAP_TYPE_ACK ? "CoapAck" : "CoapEmpty");
     std::vector<uint8_t> emptyPayload;
     Packet *packet = buildCoapPacket(pktName, header, emptyPayload);
-    sendCoapPacket(packet, destAddr, destPort);
+    sendCoapPacketToPeer(peer, packet);
 }
 
 void CoapEndpointBase::sendEmptyMessageAndCacheDuplicate(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer)
@@ -455,7 +566,7 @@ void CoapEndpointBase::sendEmptyMessageAndCacheDuplicate(CoapMessageType type, u
     std::vector<uint8_t> emptyPayload;
     Packet *packet = buildCoapPacket(pktName, header, emptyPayload);
     cacheDuplicateResponse(peer, messageId, packet);
-    sendCoapPacket(packet, peer.address, peer.port);
+    sendCoapPacketToPeer(peer, packet);
 }
 
 void CoapEndpointBase::markPeerReachable(const CoapPeerEndpoint& peer)
@@ -486,7 +597,7 @@ bool CoapEndpointBase::submitOutboundMessage(const CoapPeerEndpoint& peer, bool 
             }
         }
         Packet *packet = buildCoapPacket(packetName, header, payload);
-        sendCoapPacket(packet, peer.address, peer.port);
+        sendCoapPacketToPeer(peer, packet);
         rescheduleDeadlineTimer();
         if (outboundIdOut != nullptr)
             *outboundIdOut = 0;
@@ -546,6 +657,16 @@ void CoapEndpointBase::pumpOutboundQueue(simtime_t now)
             ++idx;
             continue;
         }
+#ifdef INET_WITH_DTLS
+        if (item.peer.sessionId != 0) {
+            auto sessIt = dtlsSessions.find(item.peer.sessionId);
+            if (sessIt == dtlsSessions.end() || !sessIt->second.established) {
+                blockedPeers.insert(item.peer);
+                ++idx;
+                continue;
+            }
+        }
+#endif
 
         auto& peerState = peerCongestion[item.peer];
         if (peerState.inProbingBackoff && peerState.probingEarliestAt > now) {
@@ -617,7 +738,8 @@ void CoapEndpointBase::pumpOutboundQueue(simtime_t now)
             peerState.activeConfirmables += 1;
         }
 
-        sendCoapPacket(pkt, dispatched.peer.address, dispatched.peer.port);
+        sendCoapPacketToPeer(dispatched.peer, pkt, dispatched.outboundId, dispatched.requestId,
+                dispatched.token, mid, dispatched.confirmable, dispatched.isRequest);
     }
 }
 
@@ -656,11 +778,13 @@ void CoapEndpointBase::processConfirmableRetransmissions(simtime_t now)
                 retry->insertAtBack(makeShared<BytesChunk>(ex.wireBytes));
             }
             emit(retransmissionSignal, 1L);
-            sendCoapPacket(retry, ex.peer.address, ex.peer.port);
+            sendCoapPacketToPeer(ex.peer, retry, ex.outboundId, ex.requestId,
+                    ex.token, ex.messageId, true, ex.isRequest);
         }
         else {
             CoapOutboundExchange timedOut = std::move(it->second);
             activeExchanges.erase(it);
+            eraseDtlsInFlight(timedOut.outboundId, timedOut.isRequest ? timedOut.requestId : 0);
 
             auto& peerState = peerCongestion[timedOut.peer];
             peerState.activeConfirmables = std::max(0, peerState.activeConfirmables - 1);
@@ -720,7 +844,7 @@ bool CoapEndpointBase::checkAndHandleDuplicate(const CoapPeerEndpoint& peer, uin
     if (type == COAP_TYPE_CON && it->second.hasCachedResponse && !it->second.cachedWireBytes.empty()) {
         Packet *replay = new Packet("CoapCachedAck");
         replay->insertAtBack(makeShared<BytesChunk>(it->second.cachedWireBytes));
-        sendCoapPacket(replay, peer.address, peer.port);
+        sendCoapPacketToPeer(peer, replay);
     }
     return true;
 }
@@ -792,12 +916,22 @@ bool CoapEndpointBase::registerPendingRequest(const CoapPeerEndpoint& peer, bool
     return true;
 }
 
+bool CoapEndpointBase::hasPendingRequest(uint64_t requestId) const
+{
+    for (const auto& kv : pendingRequests) {
+        if (kv.second.requestId == requestId)
+            return true;
+    }
+    return false;
+}
+
 void CoapEndpointBase::removePendingRequest(const std::vector<uint8_t>& token)
 {
     auto it = pendingRequests.find(token);
     if (it == pendingRequests.end())
         return;
 
+    eraseDtlsInFlight(0, it->second.requestId);
     for (uint16_t mid : it->second.sentMids)
         outboundMidToToken.erase(std::make_pair(it->second.peer, mid));
 
@@ -815,6 +949,7 @@ void CoapEndpointBase::cancelConfirmableExchangesForRequest(uint64_t requestId)
             auto peerIt = peerCongestion.find(it->first.first);
             if (peerIt != peerCongestion.end())
                 peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+            eraseDtlsInFlight(it->second.outboundId, requestId);
             it = activeExchanges.erase(it);
             releasedAny = true;
         }
@@ -921,10 +1056,14 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
         return;
     }
 
-    CoapPeerEndpoint peer{l3Ind->getSrcAddress(), l4Ind->getSrcPort()};
+    CoapPeerEndpoint peer{l3Ind->getSrcAddress(), l4Ind->getSrcPort(), 0};
     L3Address localDest = l3Ind->getDestAddress();
     bool destIsMulticast = !localDest.isUnspecified() && localDest.isMulticast();
+    processInboundCoapPacket(peer, destIsMulticast, packet);
+}
 
+void CoapEndpointBase::processInboundCoapPacket(const CoapPeerEndpoint& peer, bool destIsMulticast, Packet *packet)
+{
     if (packet->hasBitError()) {
         emit(malformedReceivedSignal, 1L);
         delete packet;
@@ -936,7 +1075,7 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
     if (!parseInboundDatagram(packet, header, payload)) {
         emit(malformedReceivedSignal, 1L);
         if (header != nullptr && header->getVersion() == 1 && header->getMessageType() == COAP_TYPE_CON && !destIsMulticast)
-            sendEmptyMessage(COAP_TYPE_RST, header->getMessageId(), peer.address, peer.port);
+            sendEmptyMessageToPeer(COAP_TYPE_RST, header->getMessageId(), peer);
         delete packet;
         return;
     }
@@ -993,7 +1132,7 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
                 std::vector<uint8_t> emptyPayload;
                 Packet *errPkt = buildCoapPacket("CoapBadOption", errHeader, emptyPayload);
                 cacheDuplicateResponse(peer, mid, errPkt);
-                sendCoapPacket(errPkt, peer.address, peer.port);
+                sendCoapPacketToPeer(peer, errPkt);
             }
             delete packet;
             return;
@@ -1027,7 +1166,9 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
         if (peerIt != peerCongestion.end())
             peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
         uint64_t obId = exIt->second.outboundId;
+        uint64_t reqIdForInFlight = exIt->second.isRequest ? exIt->second.requestId : 0;
         activeExchanges.erase(exIt);
+        eraseDtlsInFlight(obId, reqIdForInFlight);
         onOutboundItemAcknowledged(obId);
         pumpOutboundQueue(simTime());
 
@@ -1102,7 +1243,7 @@ void CoapEndpointBase::handleInboundRequest(const CoapPeerEndpoint& peer, bool d
         std::vector<uint8_t> emptyPayload;
         Packet *respPkt = buildCoapPacket("CoapMethodNotAllowed", respHeader, emptyPayload);
         cacheDuplicateResponse(peer, header->getMessageId(), respPkt);
-        sendCoapPacket(respPkt, peer.address, peer.port);
+        sendCoapPacketToPeer(peer, respPkt);
     }
 }
 
@@ -1124,7 +1265,9 @@ void CoapEndpointBase::handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t mes
     if (peerIt != peerCongestion.end())
         peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
     uint64_t obId = exIt->second.outboundId;
+    uint64_t reqId = exIt->second.isRequest ? exIt->second.requestId : 0;
     activeExchanges.erase(exIt);
+    eraseDtlsInFlight(obId, reqId);
     onOutboundItemAcknowledged(obId);
     pumpOutboundQueue(simTime());
     rescheduleDeadlineTimer();
@@ -1136,6 +1279,7 @@ void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messag
     if (exIt != activeExchanges.end()) {
         CoapOutboundExchange ex = std::move(exIt->second);
         activeExchanges.erase(exIt);
+        eraseDtlsInFlight(ex.outboundId, ex.isRequest ? ex.requestId : 0);
 
         markPeerReachable(peer);
         auto peerIt = peerCongestion.find(peer);
@@ -1173,6 +1317,308 @@ void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messag
     removePendingRequest(token);
     dispatchRequestFailed(reqId, "CoAP exchange reset by peer");
 }
+
+void CoapEndpointBase::eraseDtlsInFlight(uint64_t outboundId, uint64_t requestId)
+{
+#ifdef INET_WITH_DTLS
+    if (dtlsInFlightPackets.empty())
+        return;
+    for (auto it = dtlsInFlightPackets.begin(); it != dtlsInFlightPackets.end();) {
+        bool matchOutbound = (outboundId != 0 && it->second.outboundId == outboundId);
+        bool matchRequest = (requestId != 0 && it->second.requestId == requestId);
+        if (matchOutbound || matchRequest)
+            it = dtlsInFlightPackets.erase(it);
+        else
+            ++it;
+    }
+#endif
+}
+
+bool CoapEndpointBase::resolveDtlsPeerSession(const L3Address& destAddr, int destPort, CoapPeerEndpoint& peerOut)
+{
+    if (!isDtlsMode()) {
+        peerOut = CoapPeerEndpoint{destAddr, destPort, 0};
+        return true;
+    }
+#ifdef INET_WITH_DTLS
+    if (!dtlsBound || destAddr.isUnspecified() || destAddr.isMulticast() || destPort <= 0 || destPort > 65535)
+        return false;
+
+    auto key = std::make_pair(destAddr, destPort);
+    auto activeIt = activeClientDtlsByAddrPort.find(key);
+    if (activeIt != activeClientDtlsByAddrPort.end()) {
+        auto sessIt = dtlsSessions.find(activeIt->second);
+        if (sessIt != dtlsSessions.end() && !sessIt->second.closing) {
+            peerOut = sessIt->second.peer;
+            return true;
+        }
+        activeClientDtlsByAddrPort.erase(activeIt);
+    }
+
+    dtls::IDtls::AssociationId id = dtlsSocket.open(destAddr, destPort);
+    if (id == 0)
+        return false;
+
+    CoapDtlsSession session;
+    session.id = id;
+    session.peer = CoapPeerEndpoint{destAddr, destPort, id};
+    session.outgoing = true;
+    session.established = false;
+    session.closing = false;
+    dtlsSessions[id] = session;
+    activeClientDtlsByAddrPort[key] = id;
+    peerOut = session.peer;
+    return true;
+#else
+    return false;
+#endif
+}
+
+void CoapEndpointBase::listenOnDtls()
+{
+#ifdef INET_WITH_DTLS
+    if (isDtlsMode() && dtlsBound)
+        dtlsSocket.listen();
+#endif
+}
+
+void CoapEndpointBase::onDtlsSessionTerminated(uint64_t sessionId, const char *reason)
+{
+#ifdef INET_WITH_DTLS
+    auto sessIt = dtlsSessions.find(sessionId);
+    if (sessIt == dtlsSessions.end())
+        return;
+
+    CoapDtlsSession session = std::move(sessIt->second);
+    dtlsSessions.erase(sessIt);
+
+    if (session.outgoing) {
+        auto key = std::make_pair(session.peer.address, session.peer.port);
+        auto mapIt = activeClientDtlsByAddrPort.find(key);
+        if (mapIt != activeClientDtlsByAddrPort.end() && mapIt->second == sessionId)
+            activeClientDtlsByAddrPort.erase(mapIt);
+    }
+
+    for (auto it = dtlsInFlightPackets.begin(); it != dtlsInFlightPackets.end();) {
+        if (it->second.sessionId == sessionId)
+            it = dtlsInFlightPackets.erase(it);
+        else
+            ++it;
+    }
+
+    for (auto it = duplicateEntries.begin(); it != duplicateEntries.end();) {
+        if (it->first.peer.sessionId == sessionId)
+            it = duplicateEntries.erase(it);
+        else
+            ++it;
+    }
+
+    if (operationalState != State::OPERATING)
+        return;
+
+    const char *effectiveReason = (reason != nullptr && reason[0] != '\0') ? reason : "DTLS session terminated";
+    onDtlsSessionClosing(sessionId, effectiveReason);
+
+    std::vector<uint64_t> droppedOutboundIds;
+    for (auto it = outboundQueue.begin(); it != outboundQueue.end();) {
+        if (it->peer.sessionId == sessionId) {
+            if (!it->isRequest && it->outboundId != 0)
+                droppedOutboundIds.push_back(it->outboundId);
+            it = outboundQueue.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+    for (uint64_t obId : droppedOutboundIds)
+        onOutboundItemFailed(obId, effectiveReason);
+
+    std::vector<std::pair<CoapPeerEndpoint, uint16_t>> exchangeKeys;
+    for (const auto& kv : activeExchanges) {
+        if (kv.first.first.sessionId == sessionId)
+            exchangeKeys.push_back(kv.first);
+    }
+    for (const auto& key : exchangeKeys) {
+        auto exIt = activeExchanges.find(key);
+        if (exIt == activeExchanges.end())
+            continue;
+        CoapOutboundExchange ex = std::move(exIt->second);
+        activeExchanges.erase(exIt);
+        auto peerIt = peerCongestion.find(ex.peer);
+        if (peerIt != peerCongestion.end())
+            peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+        if (!ex.isRequest) {
+            if (ex.outboundId != 0)
+                onOutboundItemFailed(ex.outboundId, effectiveReason);
+            onOutboundExchangeFailed(ex.exchangeId, ex.peer, ex.messageId, effectiveReason);
+        }
+    }
+
+    for (auto it = outboundMidToToken.begin(); it != outboundMidToToken.end();) {
+        if (it->first.first.sessionId == sessionId)
+            it = outboundMidToToken.erase(it);
+        else
+            ++it;
+    }
+
+    std::vector<std::pair<uint64_t, std::vector<uint8_t>>> failedRequests;
+    for (const auto& kv : pendingRequests) {
+        if (kv.second.peer.sessionId == sessionId)
+            failedRequests.emplace_back(kv.second.requestId, kv.first);
+    }
+    for (const auto& item : failedRequests) {
+        removePendingRequest(item.second);
+        dispatchRequestFailed(item.first, effectiveReason);
+    }
+
+    for (auto it = peerCongestion.begin(); it != peerCongestion.end();) {
+        if (it->first.sessionId == sessionId)
+            it = peerCongestion.erase(it);
+        else
+            ++it;
+    }
+
+    onDtlsSessionClosed(sessionId, effectiveReason);
+    rescheduleDeadlineTimer();
+#endif
+}
+
+#ifdef INET_WITH_DTLS
+void CoapEndpointBase::accepted(dtls::IDtls::AssociationId id, const L3Address& localAddress, int localPort,
+        const L3Address& peerAddress, int peerPort)
+{
+    Enter_Method("accepted");
+    if (operationalState != State::OPERATING || !isDtlsMode())
+        return;
+
+    CoapDtlsSession session;
+    session.id = id;
+    session.peer = CoapPeerEndpoint{peerAddress, peerPort, id};
+    session.outgoing = false;
+    session.established = false;
+    session.closing = false;
+    dtlsSessions[id] = session;
+}
+
+void CoapEndpointBase::established(dtls::IDtls::AssociationId id)
+{
+    Enter_Method("established");
+    auto it = dtlsSessions.find(id);
+    if (it != dtlsSessions.end()) {
+        it->second.established = true;
+        if (operationalState == State::OPERATING) {
+            pumpOutboundQueue(simTime());
+            rescheduleDeadlineTimer();
+        }
+    }
+}
+
+void CoapEndpointBase::dataArrived(dtls::IDtls::AssociationId id, Packet *packet)
+{
+    Enter_Method("dataArrived");
+    take(packet);
+    if (operationalState != State::OPERATING || !isDtlsMode()) {
+        delete packet;
+        return;
+    }
+
+    auto sessIt = dtlsSessions.find(id);
+    if (sessIt == dtlsSessions.end()) {
+        delete packet;
+        return;
+    }
+
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getCoapProtocol());
+    emit(packetReceivedSignal, packet);
+    emit(packetReceivedFromLowerSignal, packet);
+
+    processInboundCoapPacket(sessIt->second.peer, false, packet);
+}
+
+void CoapEndpointBase::sendError(dtls::IDtls::AssociationId id, long packetId, const char *reason)
+{
+    Enter_Method("sendError");
+    if (insideDtlsSend && dtlsSendErrorTimer != nullptr) {
+        pendingDtlsSendErrors.push_back({id, packetId, reason != nullptr ? reason : ""});
+        if (!dtlsSendErrorTimer->isScheduled())
+            scheduleAt(simTime(), dtlsSendErrorTimer);
+        return;
+    }
+    handleDtlsSendError(id, packetId, reason);
+}
+
+void CoapEndpointBase::processPendingDtlsSendErrors()
+{
+    if (pendingDtlsSendErrors.empty())
+        return;
+    auto errors = std::move(pendingDtlsSendErrors);
+    pendingDtlsSendErrors.clear();
+    for (const auto& entry : errors)
+        handleDtlsSendError(entry.id, entry.packetId, entry.reason.c_str());
+}
+
+void CoapEndpointBase::handleDtlsSendError(dtls::IDtls::AssociationId id, long packetId, const char *reason)
+{
+    auto it = dtlsInFlightPackets.find(packetId);
+    if (it == dtlsInFlightPackets.end())
+        return;
+
+    CoapDtlsInFlightPacket info = std::move(it->second);
+    dtlsInFlightPackets.erase(it);
+
+    if (operationalState != State::OPERATING)
+        return;
+
+    const char *effectiveReason = (reason != nullptr && reason[0] != '\0') ? reason : "DTLS send error";
+    if (info.isConfirmable) {
+        auto exIt = activeExchanges.find(std::make_pair(info.peer, info.messageId));
+        if (exIt != activeExchanges.end() && exIt->second.outboundId == info.outboundId) {
+            CoapOutboundExchange ex = std::move(exIt->second);
+            activeExchanges.erase(exIt);
+            auto peerIt = peerCongestion.find(info.peer);
+            if (peerIt != peerCongestion.end())
+                peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+            if (ex.outboundId != 0)
+                onOutboundItemFailed(ex.outboundId, effectiveReason);
+            if (ex.isRequest) {
+                bool stillPending = (pendingRequests.find(ex.token) != pendingRequests.end());
+                removePendingRequest(ex.token);
+                if (stillPending)
+                    dispatchRequestFailed(ex.requestId, effectiveReason);
+            }
+            else {
+                onOutboundExchangeFailed(ex.exchangeId, ex.peer, ex.messageId, effectiveReason);
+            }
+        }
+    }
+    else {
+        if (info.outboundId != 0)
+            onOutboundItemFailed(info.outboundId, effectiveReason);
+        if (info.isRequest) {
+            auto reqIt = pendingRequests.find(info.token);
+            if (reqIt != pendingRequests.end() && reqIt->second.requestId == info.requestId) {
+                removePendingRequest(info.token);
+                dispatchRequestFailed(info.requestId, effectiveReason);
+            }
+        }
+    }
+
+    pumpOutboundQueue(simTime());
+    rescheduleDeadlineTimer();
+}
+
+void CoapEndpointBase::error(dtls::IDtls::AssociationId id, const char *reason)
+{
+    Enter_Method("error");
+    onDtlsSessionTerminated(id, reason);
+}
+
+void CoapEndpointBase::closed(dtls::IDtls::AssociationId id)
+{
+    Enter_Method("closed");
+    onDtlsSessionTerminated(id, "DTLS session closed");
+}
+#endif
 
 } // namespace coap
 } // namespace inet

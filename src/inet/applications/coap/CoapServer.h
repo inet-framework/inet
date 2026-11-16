@@ -83,8 +83,10 @@ class INET_API CoapServer : public CoapEndpointBase
     virtual void parseAndValidateParameters() override;
     virtual simtime_t getNextSubclassDeadline() const override;
     virtual void onSubclassTimer(simtime_t now) override;
+    virtual void onEndpointStart() override;
     virtual void onEndpointStop() override;
     virtual void onEndpointCrash() override;
+    virtual void onDtlsSessionClosed(uint64_t sessionId, const char *reason) override;
     /** Parses initial XML resource configuration and populates initial entries using monotonic ETag revisions. */
     virtual void loadXmlResources(cXMLElement *root);
     std::vector<uint8_t> allocateNextEtag();

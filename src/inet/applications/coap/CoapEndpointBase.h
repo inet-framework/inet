@@ -18,20 +18,25 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#ifdef INET_WITH_DTLS
+#include "inet/transportlayer/contract/dtls/DtlsSocket.h"
+#endif
 
 namespace inet {
 namespace coap {
 
 /**
- * Comparable remote UDP transport endpoint key for CoAP exchanges.
+ * Comparable remote transport endpoint key for CoAP exchanges.
+ * sessionId is 0 for UDP (NoSec) and IDtls::AssociationId for DTLS.
  */
 struct INET_API CoapPeerEndpoint
 {
     L3Address address;
     int port = -1;
+    uint64_t sessionId = 0;
 
     bool operator==(const CoapPeerEndpoint& other) const {
-        return port == other.port && address == other.address;
+        return sessionId == other.sessionId && port == other.port && address == other.address;
     }
 
     bool operator!=(const CoapPeerEndpoint& other) const {
@@ -39,6 +44,8 @@ struct INET_API CoapPeerEndpoint
     }
 
     bool operator<(const CoapPeerEndpoint& other) const {
+        if (sessionId != other.sessionId)
+            return sessionId < other.sessionId;
         if (port != other.port)
             return port < other.port;
         return address < other.address;
@@ -46,11 +53,14 @@ struct INET_API CoapPeerEndpoint
 };
 
 /**
- * Base module for CoAP over UDP endpoints (RFC 7252).
- * Handles UDP socket binding, raw/typed datagram validation, token & MID
+ * Base module for CoAP over UDP and CoAP over DTLS endpoints (RFC 7252).
+ * Handles UDP/DTLS transport binding, raw/typed datagram validation, token & MID
  * allocation, duplicate suppression, request-response matching, and lifecycle.
  */
 class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICallback
+#ifdef INET_WITH_DTLS
+    , public dtls::IDtls::ICallback
+#endif
 {
   protected:
     struct CoapDuplicateKey {
@@ -155,6 +165,39 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
 
     // Socket & single reusable endpoint deadline timer
     UdpSocket socket;
+    std::string dtlsModulePath;
+#ifdef INET_WITH_DTLS
+    struct CoapDtlsSession {
+        dtls::IDtls::AssociationId id = 0;
+        CoapPeerEndpoint peer;
+        bool outgoing = false;
+        bool established = false;
+        bool closing = false;
+    };
+    struct CoapDtlsInFlightPacket {
+        dtls::IDtls::AssociationId sessionId = 0;
+        CoapPeerEndpoint peer;
+        uint64_t outboundId = 0;
+        uint64_t requestId = 0;
+        std::vector<uint8_t> token;
+        uint16_t messageId = 0;
+        bool isConfirmable = false;
+        bool isRequest = false;
+    };
+    struct CoapDtlsPendingSendError {
+        dtls::IDtls::AssociationId id = 0;
+        long packetId = 0;
+        std::string reason;
+    };
+    dtls::DtlsSocket dtlsSocket;
+    bool dtlsBound = false;
+    bool insideDtlsSend = false;
+    std::map<dtls::IDtls::AssociationId, CoapDtlsSession> dtlsSessions;
+    std::map<std::pair<L3Address, int>, dtls::IDtls::AssociationId> activeClientDtlsByAddrPort;
+    std::map<long, CoapDtlsInFlightPacket> dtlsInFlightPackets;
+    std::vector<CoapDtlsPendingSendError> pendingDtlsSendErrors;
+    cMessage *dtlsSendErrorTimer = nullptr;
+#endif
     cMessage *deadlineTimer = nullptr;
 
     // Cryptographic / uniqueness counters surviving crash & restart
@@ -201,6 +244,30 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override;
 
+#ifdef INET_WITH_DTLS
+    using cSimpleModule::error;
+    // IDtls::ICallback
+    virtual void accepted(dtls::IDtls::AssociationId id, const L3Address& localAddress, int localPort, const L3Address& peerAddress, int peerPort) override;
+    virtual void established(dtls::IDtls::AssociationId id) override;
+    virtual void dataArrived(dtls::IDtls::AssociationId id, Packet *packet) override;
+    virtual void sendError(dtls::IDtls::AssociationId id, long packetId, const char *reason) override;
+    void error(dtls::IDtls::AssociationId id, const char *reason) override;
+    void closed(dtls::IDtls::AssociationId id) override;
+    void handleDtlsSendError(dtls::IDtls::AssociationId id, long packetId, const char *reason);
+    void processPendingDtlsSendErrors();
+#endif
+
+    // Transport helpers & session teardown hooks
+    bool isDtlsMode() const { return !dtlsModulePath.empty(); }
+    bool resolveDtlsPeerSession(const L3Address& destAddr, int destPort, CoapPeerEndpoint& peerOut);
+    void listenOnDtls();
+    void onDtlsSessionTerminated(uint64_t sessionId, const char *reason);
+    void eraseDtlsInFlight(uint64_t outboundId, uint64_t requestId);
+    /** Invoked on DTLS session close/failure before pending requests fail (allows draining queued transfers). */
+    virtual void onDtlsSessionClosing(uint64_t sessionId, const char *reason) {}
+    /** Invoked on DTLS session close/failure after pending requests fail (allows terminating observations and server state). */
+    virtual void onDtlsSessionClosed(uint64_t sessionId, const char *reason) {}
+
     // Initialization & socket setup
     virtual void parseAndValidateParameters();
     virtual void initializeCountersOnce();
@@ -228,8 +295,14 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     Packet *buildCoapPacket(const char *name, const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload) const;
     bool parseInboundDatagram(Packet *packet, Ptr<CoapHeader>& headerOut, std::vector<uint8_t>& payloadOut) const;
     virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort);
+    void sendCoapPacketToPeer(const CoapPeerEndpoint& peer, Packet *packet,
+            uint64_t outboundId = 0, uint64_t requestId = 0,
+            const std::vector<uint8_t>& token = {}, uint16_t messageId = 0,
+            bool isConfirmable = false, bool isRequest = false);
     void sendEmptyMessage(CoapMessageType type, uint16_t messageId, const L3Address& destAddr, int destPort);
+    void sendEmptyMessageToPeer(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer);
     void sendEmptyMessageAndCacheDuplicate(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer);
+    void processInboundCoapPacket(const CoapPeerEndpoint& peer, bool destIsMulticast, Packet *packet);
     bool submitOutboundMessage(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
             bool isRequest, uint64_t requestId, const std::vector<uint8_t>& token, const char *packetName,
             const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload,
@@ -248,6 +321,7 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     // Request-response matching & virtual handlers
     bool registerPendingRequest(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
             uint8_t requestCode, const std::vector<uint8_t>& token, uint64_t& requestIdOut);
+    bool hasPendingRequest(uint64_t requestId) const;
     void removePendingRequest(const std::vector<uint8_t>& token);
     void expirePendingRequests(simtime_t now);
     void cancelConfirmableExchangesForRequest(uint64_t requestId);

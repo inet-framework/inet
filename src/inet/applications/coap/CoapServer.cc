@@ -477,6 +477,11 @@ void CoapServer::onSubclassTimer(simtime_t now)
     pumpObserverNotifications(now);
 }
 
+void CoapServer::onEndpointStart()
+{
+    listenOnDtls();
+}
+
 void CoapServer::onEndpointStop()
 {
     pendingSeparateResponses.clear();
@@ -494,6 +499,15 @@ void CoapServer::onEndpointCrash()
     retainedBlock2.clear();
     emit(activeObserversSignal, 0L);
     loadXmlResources(par("resources").xmlValue());
+}
+
+void CoapServer::onDtlsSessionClosed(uint64_t sessionId, const char *reason)
+{
+    pendingSeparateResponses.erase(
+            std::remove_if(pendingSeparateResponses.begin(), pendingSeparateResponses.end(),
+                    [sessionId](const CoapPendingSeparateResponse& item) { return item.peer.sessionId == sessionId; }),
+            pendingSeparateResponses.end());
+    rescheduleDeadlineTimer();
 }
 
 void CoapServer::removeObserverAndEmit(std::map<CoapObserverKey, CoapServerObserverRelation>::iterator it)
@@ -743,7 +757,7 @@ void CoapServer::sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWa
         responseHeader->setMessageId(requestMid);
         Packet *packet = buildCoapPacket("CoapResponse", responseHeader, payload);
         cacheDuplicateResponse(peer, requestMid, packet);
-        sendCoapPacket(packet, peer.address, peer.port);
+        sendCoapPacketToPeer(peer, packet);
     }
     else {
         responseHeader->setMessageType(COAP_TYPE_NON);

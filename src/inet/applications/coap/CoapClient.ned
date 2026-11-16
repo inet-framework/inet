@@ -15,7 +15,7 @@ simple CoapClient extends CoapEndpointBase
     parameters:
         @class(CoapClient);
         string peerAddress = default("");
-        int peerPort = default(5683);
+        int peerPort = default(dtlsModule != "" ? 5684 : 5683);
         string requestUri = default("/");
         string requestMethod @enum("GET","POST","PUT","DELETE") = default("GET");
         bool confirmable = default(true);
