@@ -47,6 +47,6 @@ The review corrections removed an unused receive-time field and an unnecessarily
 | AR-QUAL-TRACEABILITY | N/A — no existing fingerprint, statistical or expected-result baseline is changed. |
 | AR-QUAL-DISPLAY | PASS — client uses the transmit/receive icon and broker uses dispatch. |
 
-Residual limits are the declared in-memory persistence boundary, the TCP handoff approximation for client keepalive, unavailable Mermaid rendering, the unrelated full serializer support-library failure, and inherited global gate findings. There is no new exception-ledger or seal change. Publication evidence applies to the integrated implementation; earlier stage snapshots are not represented as individually rerun builds after the fixture backports.
+Residual limits are the declared in-memory persistence boundary, the TCP handoff approximation for client keepalive, unavailable Mermaid rendering and inherited global gate findings. The follow-up enabled the serializer suite's dependencies, corrected the missing MQTT filler object in its tracked Makefile, and added three radiotap filler variants. The full-profile suite passes all 296 cases, including all 15 MQTT variants, with zero failures or crashes and no unexpected field/class coverage gaps. There is no new exception-ledger or seal change. Publication evidence applies to the integrated implementation; earlier stage snapshots are not represented as individually rerun builds after the fixture backports.
 
 REVIEW: 29 PASS, 5 N/A, 0 FLAG, 0 QUESTION.

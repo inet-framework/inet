@@ -2,7 +2,7 @@
 
 > **Kind:** design · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [protocol anatomy](../../doc/project/design/protocol-anatomy.md), [architecture](../../doc/project/rule/architecture.md), [testing](../../doc/project/rule/testing.md)
 
-Execution of C1–C7 and the C6b verification increment is complete. The [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) records the passing integrated checks, exact commands and remaining infrastructure limitations. This plan remains under `pending` until the change lands upstream.
+Execution of C1–C7 and the C6b verification increment is complete. The [coverage ledger](../../doc/project/evidence/model/mqtt/coverage.md) records the passing integrated checks, exact commands and remaining verification limits. This plan remains under `pending` until the change lands upstream.
 
 ## Intended result and scope
 
@@ -207,7 +207,7 @@ C6: Mqtt(FailureHandling|Lifecycle)[.]test$
 C7 final pass: Mqtt.*[.]test$
 ```
 
-C1 additionally runs `opp_run_module_tests --load . -p inet -m debug -f 'mqtt_framing[.]test$'`; C6 uses the same runner with `-f 'mqtt_lifecycle[.]test$'`. C3 supplements production exhaustion/recovery with `mqtt_sessions.test` for retry order across identifier wrap. For C1 serializer coverage, run the available generic `opp_run_opp_tests` from `tests/serializer/` with `--load ../.. -p inet -m debug -f 'serializer_chunk_roundtrip[.]test$'`. This uses the existing serializer support library and newly registered fillers; there is no dedicated serializer runner in this environment. During execution, this support library failed in unrelated gPTP code because it assumes the Clock feature. The focused `tests/module/mqtt_serializer.test` therefore runs the same generic round-trip engine with only the MQTT fillers and explicit skips for other protocols. Record that focused result separately from the blocked full serializer suite. Build prerequisites include a fresh debug INET library, generated MSG code, protocol support library and suite-local fixture code. Exact discovery counts, commands and results belong in the coverage ledger.
+C1 additionally runs `opp_run_module_tests --load . -p inet -m debug -f 'mqtt_framing[.]test$'`; C6 uses the same runner with `-f 'mqtt_lifecycle[.]test$'`. C3 supplements production exhaustion/recovery with `mqtt_sessions.test` for retry order across identifier wrap. For C1 serializer coverage, run the available generic `opp_run_opp_tests` from `tests/serializer/` with `--load ../.. -p inet -m debug -f 'serializer_chunk_roundtrip[.]test$'`. This uses the existing serializer support library and newly registered fillers; there is no dedicated serializer runner in this environment. The full-profile follow-up enables its dependencies, includes the MQTT filler object in the tracked test Makefile and adds the missing radiotap filler variants. All 296 cases pass, including every MQTT variant, with zero failures or crashes. The focused `tests/module/mqtt_serializer.test` also runs the same generic round-trip engine with only the MQTT fillers and explicit skips for other protocols, retaining coverage in the smaller feature profile. Record that focused result separately from the full suite's aggregate verdict. Build prerequisites include a fresh debug INET library, generated MSG code, protocol support library and suite-local fixture code. Exact discovery counts, commands and results belong in the coverage ledger.
 
 C7 runs the existing TCP controls separately from the MQTT suite filter:
 
