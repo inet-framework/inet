@@ -77,6 +77,7 @@ struct INET_API CoapServerObserverRelation
     std::vector<std::string> pathSegments;
     int32_t negotiatedContentFormat = -1;
     int32_t acceptFormat = -1;
+    int32_t block2Szx = -1;
     bool inFlight = false;
     uint64_t inFlightOutboundId = 0;
     bool lastSentValid = false;
@@ -128,6 +129,21 @@ struct INET_API CoapClientObservation
     int32_t contentFormat = -1;
     std::vector<uint8_t> etag;
     std::vector<uint8_t> payload;
+
+    // In-flight RFC 7959 Block2 retrieval for a multi-block initial response or notification
+    bool block2InProgress = false;
+    bool block2FromRegistration = false;
+    uint64_t block2OriginRequestId = 0;
+    uint64_t block2ActiveSubRequestId = 0;
+    uint32_t block2PendingObserveVal = 0;
+    simtime_t block2PendingReceivedAt = SIMTIME_ZERO;
+    uint8_t block2PendingCode = COAP_CODE_CONTENT;
+    int32_t block2PendingContentFormat = -1;
+    uint32_t block2PendingMaxAge = 60;
+    std::vector<uint8_t> block2PendingEtag;
+    uint8_t block2Szx = 6;
+    uint64_t block2ExpectedOffset = 0;
+    std::vector<uint8_t> block2Buffer;
 
     std::set<uint64_t> consumerIds;
 };
