@@ -4,6 +4,7 @@
 
 #include <deque>
 #include <functional>
+#include <set>
 
 #include "inet/common/INETDefs.h"
 
@@ -51,6 +52,7 @@ class INET_API DtlsProcessingQueue
     bool isTimer(const cMessage *message) const { return message == timer; }
     void handleTimer();
     void cancel(AssociationId associationId);
+    void cancelExcept(const std::set<AssociationId>& retainedIds);
     void clear();
     [[nodiscard]] size_t getOccupiedBytes() const { return occupied; }
 };

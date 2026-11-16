@@ -35,7 +35,7 @@ class ProcessingQueueFixture : public cSimpleModule
   protected:
     virtual void initialize() override {
         input = std::make_unique<DtlsProcessingQueue>(this, "input", 3);
-        output = std::make_unique<DtlsProcessingQueue>(this, "output", 3);
+        output = std::make_unique<DtlsProcessingQueue>(this, "output", 4);
         bool synchronous = false;
         ASSERT(output->enqueue(1, 0, SIMTIME_ZERO, [&] { synchronous = true; }));
         ASSERT(synchronous && output->getOccupiedBytes() == 0);
@@ -68,7 +68,11 @@ class ProcessingQueueFixture : public cSimpleModule
             output->handleTimer();
         else {
             ASSERT(message == finishTimer);
-            output->cancel(5);
+            bool kept = false;
+            ASSERT(output->enqueue(11, 1, SIMTIME_ZERO, [] { throw cRuntimeError("batch-cancelled operation ran"); }));
+            ASSERT(output->enqueue(10, 1, SIMTIME_ZERO, [&] { kept = true; }));
+            output->cancelExcept({6, 10});
+            ASSERT(kept);
             ASSERT(completed == 4);
             ASSERT(continuationOrder == std::vector<int>({1, 2}));
             ASSERT(input->getOccupiedBytes() == 0 && output->getOccupiedBytes() == 0);

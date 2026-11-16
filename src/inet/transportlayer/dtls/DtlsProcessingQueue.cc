@@ -120,6 +120,23 @@ void DtlsProcessingQueue::cancel(AssociationId associationId)
     pump();
 }
 
+void DtlsProcessingQueue::cancelExcept(const std::set<AssociationId>& retainedIds)
+{
+    if (active && !retainedIds.count(pending.front().associationId)) {
+        owner->cancelEvent(timer);
+        active = false;
+    }
+    for (auto it = pending.begin(); it != pending.end(); ) {
+        if (!retainedIds.count(it->associationId)) {
+            occupied -= it->bytes;
+            it = pending.erase(it);
+        }
+        else
+            ++it;
+    }
+    pump();
+}
+
 void DtlsProcessingQueue::clear()
 {
     if (active)
