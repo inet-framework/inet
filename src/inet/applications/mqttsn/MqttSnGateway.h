@@ -14,7 +14,11 @@ namespace inet::mqttsn {
 class INET_API MqttSnGateway : public ApplicationBase, public UdpSocket::ICallback, public TcpSocket::ICallback
 {
   protected:
-    enum Phase { DISCONNECTED, WILL_TOPIC, WILL_MESSAGE, CONNECTING, ACTIVE, ASLEEP, AWAKE, LOST };
+    // Stable sessionStateChanged signal values.
+    enum Phase {
+        DISCONNECTED = 0, WILL_TOPIC = 1, WILL_MESSAGE = 2, CONNECTING = 3,
+        ACTIVE = 4, ASLEEP = 5, AWAKE = 6, LOST = 7
+    };
     struct Peer : MqttSnSession {
         L3Address address;
         int port = 0;

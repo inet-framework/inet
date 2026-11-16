@@ -11,7 +11,8 @@ namespace inet::mqttsn {
 class INET_API MqttSnClient : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
-    enum Phase { DISCONNECTED, CONNECTING, ACTIVE, ASLEEP, AWAKE, CLOSING };
+    // Stable sessionStateChanged signal values.
+    enum Phase { DISCONNECTED = 0, CONNECTING = 1, ACTIVE = 2, ASLEEP = 3, AWAKE = 4, CLOSING = 5 };
     struct Candidate { L3Address address; simtime_t expiry; };
     UdpSocket socket;
     MqttSnSession session;
