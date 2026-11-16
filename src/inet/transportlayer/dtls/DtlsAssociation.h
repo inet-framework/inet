@@ -4,6 +4,7 @@
 
 #include <array>
 #include <deque>
+#include <map>
 #include <memory>
 #include <optional>
 #include <set>
@@ -13,6 +14,7 @@
 #include "inet/transportlayer/dtls/DtlsRecordState.h"
 #include "inet/transportlayer/dtls/DtlsHandshakeReassembly.h"
 #include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
+#include "inet/transportlayer/dtls/DtlsPostHandshakeExchange.h"
 #include "inet/transportlayer/tls/TlsHandshakeParameters.h"
 
 namespace inet::dtls {
@@ -48,12 +50,10 @@ class INET_API DtlsAssociation
     std::unique_ptr<cMessage> retransmissionTimer;
     std::unique_ptr<cMessage> delayedAckTimer;
     std::unique_ptr<cMessage> retentionTimer;
-    std::unique_ptr<cMessage> updateRetransmissionTimer;
-    std::unique_ptr<cMessage> updateDeadline;
     std::unique_ptr<cMessage> closeDeadline;
-    std::shared_ptr<DtlsHandshakeFlight> updateFlight;
-    // RFC 9147 Section 5.8.2 recommends an initial one-second retransmission timer.
-    simtime_t updateTimeout = 1;
+    // RFC 9147 Section 5.8.4: independent recovery owners, keyed by handshake type.
+    std::map<uint8_t, std::unique_ptr<DtlsPostHandshakeExchange>> postHandshakeExchanges;
+    DtlsPostHandshakeExchange& keyUpdate() { return *postHandshakeExchanges.at(24); }
     bool updateRequested = false;
     bool awaitingPeerUpdate = false;
     bool peerResponseDue = false;

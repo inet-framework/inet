@@ -28,8 +28,8 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 
 | Stage | Obligations | Direct evidence | State |
 | --- | --- | --- | --- |
-| C1 | All selected obligations and exclusions | Primary-source/errata reconciliation, profile table, links | Documentation prepared; no runtime change |
-| C2 | EXCHANGE | DtlsPostHandshakeExchange_1 module test; existing KeyUpdate, SimultaneousUpdates, UpdatePeerIsolation controls | NOT_STARTED |
+| C1 | All selected obligations and exclusions | Primary-source/errata reconciliation, profile table, links | DONE, documentation only, commit 4756b0cfeb |
+| C2 | EXCHANGE | DtlsPostHandshakeExchange_1 and three module controls; five production KeyUpdate controls | DONE: fresh debug build, 4 module PASS, 5 protocol PASS |
 | C3 | TICKET | Rfc9147Resumption; serializer/store units | NOT_STARTED |
 | C4 | EARLY, ADMISSION | Rfc9147EarlyData; store units | NOT_STARTED |
 | C5 | PROFILE | Rfc9147AlgorithmProfiles; handshake/record units | NOT_STARTED |
@@ -48,4 +48,16 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 
 ## Validation
 
-Initial debug build is in progress. No new simulation, unit/module case, parent comparison, release build or baseline comparison has completed. Raw standards/errata retrieval artifacts are under `audit/dtls-extensions/standards/`; that ignored directory is local supporting evidence rather than a repository-relative documentation link.
+### C2 focused evidence
+
+Working directory: `/home/miguel/workspace/inet-dtls-extensions`. Debug library freshly rebuilt after adding the helper and refreshing Makefiles. All commands exited zero; the new module pins seed 0, and existing controls retain their own deterministic fixtures. Code and tests match the C2 implementation boundary. Documentation-only additions to this record do not change the tested library.
+
+```sh
+make -j8 MODE=debug
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(PostHandshakeExchange|RecoveryLifecycle|RestartLifecycle|SenderState)_1\.test$' --log-file audit/dtls-extensions/c2/module-runner.log
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(KeyUpdate|SimultaneousUpdates|UpdatePeerIsolation|UpdateRequestGuard|PeerRequestActiveProtection)\.test$' --log-file audit/dtls-extensions/c2/protocol-runner.log
+```
+
+Four module cases and five protocol cases passed. Logs, including `build-debug.log`, `module-console.log` and `protocol-console.log`, are under `audit/dtls-extensions/c2/`; generated cases are in the standard test work directories. Scoped DTLS architecture and naming checks pass. Seal-index and C1 commit checks pass. Existing overloaded-virtual compiler warnings occur in test support; they are not test failures.
+
+No exact-parent runtime comparison, release build or baseline comparison has completed. Controls are source-grounded preservation checks rather than measured parent failures. Raw standards/errata retrieval artifacts are under `audit/dtls-extensions/standards/`; ignored audit directories are local supporting evidence rather than repository-relative documentation links.

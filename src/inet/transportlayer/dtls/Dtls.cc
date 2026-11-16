@@ -652,9 +652,9 @@ void Dtls::sendProtectedHandshake(AssociationId id, uint8_t messageType, uint16_
 void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHandshakeFlight>& flight, size_t index)
 {
     auto it = associations.find(id);
-    if (it == associations.end() || (it->second->flight != flight && it->second->updateFlight != flight))
+    if (it == associations.end() || (it->second->flight != flight && it->second->keyUpdate().flight != flight))
         return;
-    bool isUpdate = it->second->updateFlight == flight;
+    bool isUpdate = it->second->keyUpdate().flight == flight;
     auto fragment = flight->get(index);
     size_t bytes = fragment.data->getChunkLength().get<B>() + (fragment.epoch == 0 ? 25 : 34);
     size_t reservedCredit = it->second->serverSide && !isUpdate ? bytes : 0;
@@ -675,13 +675,13 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     auto eligible = [this, id, flight, index]() {
         auto current = associations.find(id);
         return current != associations.end() && !current->second->closing &&
-               (current->second->flight == flight || current->second->updateFlight == flight) &&
+               (current->second->flight == flight || current->second->keyUpdate().flight == flight) &&
                flight->get(index).queued && !flight->get(index).acknowledged;
     };
     auto skipped = [this, id, flight, index, reservedCredit]() {
         auto current = associations.find(id);
         if (current != associations.end()) {
-            if (current->second->updateFlight == flight)
+            if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordSkipped(flight, index);
             else
                 current->second->flightRecordSkipped(flight, index, reservedCredit);
@@ -689,7 +689,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     };
     auto complete = [this, id, flight, index, reservedCredit]() {
         auto current = associations.find(id);
-        if (current == associations.end() || (current->second->flight != flight && current->second->updateFlight != flight))
+        if (current == associations.end() || (current->second->flight != flight && current->second->keyUpdate().flight != flight))
             return;
         auto fragment = flight->get(index);
         uint64_t recordNumber;
@@ -746,7 +746,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         udpSocket.sendTo(packet, peer, port);
         current = associations.find(id);
         if (current != associations.end()) {
-            if (current->second->updateFlight == flight)
+            if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordHandedOff(flight, index, recordNumber);
             else if (current->second->flight == flight)
                 current->second->flightRecordHandedOff(flight, index, recordNumber);
@@ -823,7 +823,7 @@ void Dtls::resumeApplications(AssociationId id)
     while (true) {
         auto it = associations.find(id);
         if (it == associations.end() || it->second->closing || it->second->state != HandshakeState::ESTABLISHED ||
-            it->second->updateFlight || it->second->peerResponseDue || it->second->pendingPackets.empty())
+            it->second->keyUpdate().flight || it->second->peerResponseDue || it->second->pendingPackets.empty())
             return;
         auto pending = std::move(it->second->pendingPackets.front());
         it->second->pendingPackets.pop_front();
@@ -849,7 +849,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
         return;
     }
-    if (it->second->updateFlight || it->second->peerResponseDue) {
+    if (it->second->keyUpdate().flight || it->second->peerResponseDue) {
         holdApplication(id, std::unique_ptr<Packet>(packet), sampledDelay, paid);
         return;
     }
@@ -858,7 +858,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         if (!holdApplication(id, std::unique_ptr<Packet>(packet), sampledDelay, paid))
             return;
         auto current = associations.find(id);
-        if (current != associations.end() && !current->second->updateFlight && !current->second->requestUpdate(false) && containsAssociation(id))
+        if (current != associations.end() && !current->second->keyUpdate().flight && !current->second->requestUpdate(false) && containsAssociation(id))
             failAssociation(id, "DTLS automatic KeyUpdate could not start");
         return;
     }
@@ -870,7 +870,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         auto current = associations.find(id);
         if (current == associations.end() || current->second->closing)
             return false;
-        return *started || (!current->second->updateFlight && !current->second->peerResponseDue &&
+        return *started || (!current->second->keyUpdate().flight && !current->second->peerResponseDue &&
                (current->second->nextApplicationRecord < uint64_t(par("rekeyAfterRecords").intValue()) || current->second->sendEpoch >= Association::MAX_SEND_EPOCH));
     };
     auto skipped = [this, id, packetId, retained, delay, paid]() {
@@ -881,14 +881,14 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
         if (!holdApplication(id, std::move(*retained), delay, paid))
             return;
         current = associations.find(id);
-        if (current != associations.end() && !current->second->updateFlight && !current->second->peerResponseDue &&
+        if (current != associations.end() && !current->second->keyUpdate().flight && !current->second->peerResponseDue &&
             !current->second->requestUpdate(false) && containsAssociation(id))
             failAssociation(id, "DTLS automatic KeyUpdate could not start");
     };
     if (!enqueueProcessing(outputProcessing.get(), id, size_t(bytes.get<B>()) + 22, delay, [this, id, packetId, retained, delay]() {
         auto current = associations.find(id);
         if (current != associations.end()) {
-            if (current->second->updateFlight || current->second->peerResponseDue) {
+            if (current->second->keyUpdate().flight || current->second->peerResponseDue) {
                 current->second->processingPacketIds.erase(packetId);
                 holdApplication(id, std::move(*retained), delay, true);
                 return;

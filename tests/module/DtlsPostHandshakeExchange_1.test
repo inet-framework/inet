@@ -1,0 +1,109 @@
+%description:
+Two association-owned post-handshake recovery values have independent flights,
+retry intervals and deadlines. Cancelling/destroying one leaves the other live.
+
+%file: TestNetwork.ned
+simple ExchangeFixture
+{
+    @class(ExchangeFixture);
+}
+network TestNetwork
+{
+    submodules:
+        fixture: ExchangeFixture;
+}
+
+%file: ExchangeFixture.cc
+#include <iostream>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/dtls/DtlsPostHandshakeExchange.h"
+
+namespace DtlsPostHandshakeExchange_1 {
+using namespace inet;
+using namespace inet::dtls;
+
+class ExchangeFixture : public cSimpleModule
+{
+    std::unique_ptr<DtlsPostHandshakeExchange> first;
+    std::unique_ptr<DtlsPostHandshakeExchange> second;
+    cMessage *cancelFirst = nullptr;
+    cMessage *destroySecond = nullptr;
+    cMessage *finish = nullptr;
+    bool retried = false;
+
+  protected:
+    void initialize() override {
+        first = std::make_unique<DtlsPostHandshakeExchange>(*this, "First");
+        second = std::make_unique<DtlsPostHandshakeExchange>(*this, "Second");
+        auto bytes = makeShared<BytesChunk>(std::vector<uint8_t>{0});
+        bytes->markImmutable();
+        for (auto exchange : {first.get(), second.get()}) {
+            exchange->flight = std::make_shared<DtlsHandshakeFlight>();
+            exchange->flight->add(24, 1, 1, 0, 3, bytes);
+            exchange->flight->markReady(0);
+            ASSERT(exchange->flight->reserve(0));
+        }
+        first->flight->handedOff(0, 7, simTime());
+        second->flight->handedOff(0, 8, simTime());
+        ASSERT(first->flight->acknowledge(3, 7, simTime()).flightComplete);
+        ASSERT(!second->flight->acknowledge(3, 7, simTime()).matched);
+        ASSERT(!second->flight->isComplete());
+        scheduleAt(1, first->retransmissionTimer.get());
+        scheduleAt(3, first->deadline.get());
+        scheduleAt(2, second->retransmissionTimer.get());
+        scheduleAt(4, second->deadline.get());
+        cancelFirst = new cMessage("cancelFirst");
+        destroySecond = new cMessage("destroySecond");
+        finish = new cMessage("finish");
+        scheduleAt(0.5, cancelFirst);
+        scheduleAt(2.5, destroySecond);
+        scheduleAt(5, finish);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message == cancelFirst) {
+            first->cancelTimers();
+            ASSERT(!first->retransmissionTimer->isScheduled() && !first->deadline->isScheduled());
+            ASSERT(second->retransmissionTimer->getArrivalTime() == 2);
+            ASSERT(second->deadline->getArrivalTime() == 4);
+            first.reset();
+        }
+        else if (second && message == second->retransmissionTimer.get()) {
+            ASSERT(simTime() == 2 && !first);
+            second->timeout *= 2;
+            second->flight->requestRetransmission();
+            ASSERT(second->timeout == 2 && second->flight->reserve(0));
+            ASSERT(second->deadline->getArrivalTime() == 4);
+            retried = true;
+        }
+        else if (message == destroySecond) {
+            ASSERT(retried && second->deadline->isScheduled());
+            second.reset();
+        }
+        else if (message == finish) {
+            ASSERT(retried && !first && !second);
+            std::cout << "DTLS independent post-handshake recovery PASS" << std::endl;
+        }
+        else
+            throw cRuntimeError("Cancelled exchange timer was delivered");
+    }
+  public:
+    ~ExchangeFixture() override {
+        first.reset();
+        second.reset();
+        cancelAndDelete(cancelFirst);
+        cancelAndDelete(destroySecond);
+        cancelAndDelete(finish);
+    }
+};
+Define_Module(ExchangeFixture);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 6s
+seed-set = 0
+
+%contains: stdout
+DTLS independent post-handshake recovery PASS
