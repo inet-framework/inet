@@ -632,6 +632,21 @@ bool CoapEndpointBase::submitOutboundMessage(const CoapPeerEndpoint& peer, bool 
 
 bool CoapEndpointBase::sendConfirmablePing(const CoapPeerEndpoint& peer, uint64_t& exchangeIdOut)
 {
+    CoapPeerEndpoint resolvedPeer = peer;
+    if (isDtlsMode()) {
+        if (resolvedPeer.sessionId == 0) {
+            if (!resolveDtlsPeerSession(peer.address, peer.port, resolvedPeer))
+                return false;
+        }
+#ifdef INET_WITH_DTLS
+        else {
+            auto it = dtlsSessions.find(resolvedPeer.sessionId);
+            if (it == dtlsSessions.end() || it->second.closing)
+                return false;
+        }
+#endif
+    }
+
     auto header = makeShared<CoapHeader>();
     header->setVersion(1);
     header->setMessageType(COAP_TYPE_CON);
@@ -639,7 +654,7 @@ bool CoapEndpointBase::sendConfirmablePing(const CoapPeerEndpoint& peer, uint64_
     std::vector<uint8_t> emptyToken;
     std::vector<uint8_t> emptyPayload;
     uint64_t expectedExchange = nextExchangeId;
-    if (!submitOutboundMessage(peer, false, true, false, 0, emptyToken, "CoapPing", header, emptyPayload))
+    if (!submitOutboundMessage(resolvedPeer, false, true, false, 0, emptyToken, "CoapPing", header, emptyPayload))
         return false;
     exchangeIdOut = expectedExchange;
     return true;
