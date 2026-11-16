@@ -4,7 +4,7 @@
 
 MQTT-SN sensor clients now exchange messages over UDP with a gateway connected to the existing MQTT broker over TCP. Simulations can study publish/subscribe messaging over unreliable datagrams, including retries, sleeping sensors and gateway failure.
 
-This summary explains the implementation of revision 5 of the [plan](mqtt-sn.md). Debug and release builds pass, along with all 79 MQTT-SN protocol tests and nine module tests. Ten release-mode protocol checks and three release-mode shutdown checks also pass; the [ledger](../../doc/project/evidence/model/mqttsn/coverage.md) records their exact scope and source timing. The existing 24 MQTT protocol tests passed in the integrated regression run. Eight wired/wireless example configurations run with the expected delivery counts, and the user guide builds. The ledger distinguishes those results from broader checks that remain blocked or report existing findings. The work is an uncommitted integrated patch, not a validated nine-commit series. Diagram rendering remains unverified.
+This summary explains the implementation of revision 5 of the [plan](mqtt-sn.md). Debug and release builds pass, along with all 79 MQTT-SN protocol tests and nine module tests. Ten release-mode protocol checks and three release-mode shutdown checks also pass; the [ledger](../../doc/project/evidence/model/mqttsn/coverage.md) records their exact scope and source timing. The existing 24 MQTT protocol tests passed in the integrated regression run. Eight wired/wireless example configurations run with the expected delivery counts, and the user guide builds. Six publication commits separate the profile, wire contract, session records, client, gateway and examples/documentation; each source increment was built and tested with later endpoint files absent. The ledger distinguishes those results from broader checks that remain blocked or report existing findings. PR creation is canceled at the user's request. Diagram rendering remains unverified.
 
 ## What the model connects
 
@@ -190,7 +190,7 @@ One complete MQTT-SN message occupies one UDP datagram. The receiver checks it b
 
 ## The nine implementation steps
 
-The implementation covers these nine areas. Each protocol area has focused tests and a reviewer document explaining the scenarios, exchanges and limits. The labels retain the plan's proposed commit boundaries; separate historical commits have not been constructed or tested.
+The implementation covers these nine capability areas. Each protocol area has focused tests and a reviewer document explaining the scenarios, exchanges and limits. The six publication commits group them by wire contract, retained records and endpoint ownership; their partial source trees were built and tested in order.
 
 | Commit | What it adds | Main evidence to write |
 | --- | --- | --- |

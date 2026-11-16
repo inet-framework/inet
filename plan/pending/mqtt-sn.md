@@ -10,7 +10,7 @@ Publication preparation on 2026-11-16 maps the integrated C1–C9 implementation
 
 | Commit | Purpose and dependencies | Files and verification |
 | --- | --- | --- |
-| P1: `plan: add: define the MQTT-SN model and review sequence` | Record the v1.2 profile, requirement inventory and this publication map. No dependency beyond the existing MQTT branch. | Plan/summary and three evidence inventories. Document checks only, no protocol behavior introduced. |
+| P1: `doc: add: define the MQTT-SN model and review sequence` | Record the v1.2 profile, requirement inventory and this publication map. No dependency beyond the existing MQTT branch. | Plan/summary and three evidence inventories. Document checks only, no protocol behavior introduced. |
 | P2: `mqttsn: add: encode and inspect protocol datagrams` | Supply the wire contract required by both endpoints. Depends on P1 and existing MQTT helpers. | Packet, codec, inspection, feature declarations, serializer fillers, wire test and codec module. Build debug/release and run those direct tests. Parent lacks these types, so fixture incompatibility is a missing capability, not an observed runtime failure. |
 | P3: `mqttsn: add: retain per-peer exchange and topic state` | Prepare records and identifier allocation for both endpoints. Depends on P2. | Session records, topic-capacity helper and test network/scripted peer. Build both modes and test allocation/wire invariants. This introduces no endpoint behavior and needs no additional protocol reviewer document. |
 | P4: `mqttsn: add: implement the sensor client state machine` | Add the complete client over the wire/session contracts, independent of a production gateway. Depends on P3. | Client C++/NED, scripted-gateway cases, three shutdown modules and client reviewer document. Build debug/release and run all client-only tests plus prior wire checks. Parent lacks the client module. |
@@ -213,7 +213,7 @@ This commit introduces configuration and documentation using already-tested prot
 
 ## Execution record and completion gates
 
-Planning itself did not run simulations. Following the user's implementation instruction, the integrated implementation and tests were written and executed; current results and remaining verification limits are in the [coverage ledger](../../doc/project/evidence/model/mqttsn/coverage.md) and [human summary](mqtt-sn-summary.md). The C1–C9 labels remain the proposed commit decomposition: no separate historical stage snapshots or commits have been constructed or validated. Protocol-test discovery automatically recognizes the new suite, per the existing [authoring guide](../../tests/protocol/lib/AUTHORING.md#10-running-tests).
+Planning itself did not run simulations. Following the user's implementation instruction, the implementation and tests were written and executed. The publication map P1–P6 above replaces the original C1–C9 commit decomposition; each source increment was built and tested with later endpoint files absent. Current results and remaining verification limits are in the [coverage ledger](../../doc/project/evidence/model/mqttsn/coverage.md) and [human summary](mqtt-sn-summary.md). The C1–C9 labels describe capability areas. Protocol-test discovery automatically recognizes the new suite, per the existing [authoring guide](../../tests/protocol/lib/AUTHORING.md#10-running-tests).
 
 After each implementation commit, build fresh debug artifacts and run the directly related new cases plus earlier MQTT-SN cases affected by its contracts. Proposed suite commands, from this checkout root, are:
 

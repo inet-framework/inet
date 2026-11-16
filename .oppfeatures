@@ -1104,6 +1104,14 @@
         compileFlags = "-DINET_WITH_MQTTSN"
         />
     <feature
+        id = "MqttSnExamples"
+        name = "MQTT-SN examples"
+        description = "Wired/wireless UDP sensor bridging, delivery QoS, discovery and sleeping."
+        initiallyEnabled = "true"
+        requires = "MqttSn MqttExamples Ieee80211 Mobility"
+        nedPackages = "inet.examples.mqttsn"
+        />
+    <feature
         id = "MqttSnTests"
         name = "MQTT-SN tests"
         description = "MQTT-SN codec, protocol and lifecycle fixtures."

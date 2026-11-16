@@ -22,7 +22,7 @@ sequenceDiagram
     S->>G: DISCONNECT with sleep duration
     G-->>S: DISCONNECT acknowledgement
     B->>G: PUBLISH while sensor asleep
-    Note over G: Buffer; suspend sensor retransmissions
+    Note over G: Buffer and suspend sensor retransmissions
     S->>G: PINGREQ with ClientId
     G->>S: Queued publication and QoS exchange
     G-->>S: PINGRESP after drain
