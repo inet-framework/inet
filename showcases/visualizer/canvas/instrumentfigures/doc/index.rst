@@ -138,8 +138,9 @@ Further details:
    divided by 1 million to get the values in Mbps.
 -  The ``perThermometer`` figure displays the packet error rate estimate
    as computed by the client's radio. The ticks go from 0 to 1, in
-   increments 0.2. It is driven by the ``packetErrorRate`` signal of the
-   client's radio.
+   increments 0.2. It is driven by the ``packetErrorRate`` result filter,
+   which takes the packet error rate from the packets that the client's
+   radio sends up (its ``packetSentToUpper`` signal).
 -  There are two ``plot`` figures in the network. The ``perPlot`` figure
    displays the packet error rate in the client's radio over time. The
    time window is set to three seconds, so data from the entire
