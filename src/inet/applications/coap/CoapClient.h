@@ -85,6 +85,7 @@ class INET_API CoapClient : public CoapEndpointBase
     int numRequestsSent = 0;
 
     std::map<uint64_t, simtime_t> activeRequestStarts;
+    std::set<uint64_t> localCacheHitRequests;
     std::vector<CoapClientResponseRecord> completedResponses;
     int failedCount = 0;
     int abortedCount = 0;
