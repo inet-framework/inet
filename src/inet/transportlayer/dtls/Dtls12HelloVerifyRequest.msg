@@ -64,3 +64,9 @@ class Dtls12ExplicitNonce extends FieldsChunk
     chunkLength = B(8);
     uint64_t value = 0;
 }
+
+class Dtls12NewSessionTicket extends FieldsChunk
+{
+    uint32_t ticketLifetime = 0;
+    uint8_t ticket[];
+}

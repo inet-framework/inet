@@ -16,6 +16,7 @@ Register_Serializer(Dtls12CertificateRequest, Dtls12PacketSerializer);
 Register_Serializer(Dtls12ServerHelloDone, Dtls12PacketSerializer);
 Register_Serializer(Dtls12ChangeCipherSpec, Dtls12PacketSerializer);
 Register_Serializer(Dtls12ExplicitNonce, Dtls12PacketSerializer);
+Register_Serializer(Dtls12NewSessionTicket, Dtls12PacketSerializer);
 
 static void requireBytes(MemoryInputStream& stream, size_t bytes)
 {
@@ -95,6 +96,10 @@ void Dtls12PacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<co
             throw cRuntimeError("Invalid DTLS 1.2 ChangeCipherSpec");
         s.writeUint8(h->getValue());
     }
+    else if (auto h = dynamicPtrCast<const Dtls12NewSessionTicket>(chunk)) {
+        s.writeUint32Be(h->getTicketLifetime());
+        writeVector(s, h->getTicketArraySize(), 2, [&](size_t i) { return h->getTicket(i); });
+    }
     else if (auto h = dynamicPtrCast<const Dtls12ExplicitNonce>(chunk))
         s.writeUint64Be(h->getValue());
     else
@@ -106,7 +111,14 @@ void Dtls12PacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<co
 const Ptr<Chunk> Dtls12PacketSerializer::deserializeFields(MemoryInputStream& s, const std::type_info& typeInfo) const
 {
     Ptr<Chunk> result;
-    if (typeInfo == typeid(Dtls12HelloVerifyRequest)) {
+    if (typeInfo == typeid(Dtls12NewSessionTicket)) {
+        requireBytes(s, 4);
+        auto h = makeShared<Dtls12NewSessionTicket>();
+        h->setTicketLifetime(s.readUint32Be());
+        readVector(s, 2, [&](size_t n) { h->setTicketArraySize(n); }, [&](size_t i, uint8_t v) { h->setTicket(i, v); });
+        result = h;
+    }
+    else if (typeInfo == typeid(Dtls12HelloVerifyRequest)) {
         requireBytes(s, 2);
         auto h = makeShared<Dtls12HelloVerifyRequest>();
         h->setServerVersion(s.readUint16Be());

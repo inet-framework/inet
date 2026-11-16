@@ -1,0 +1,82 @@
+%description:
+The abbreviated client retains its final response beyond its 120-second handshake deadline.
+A waiting server with a 300-second deadline supplies the genuine late retry.
+%includes:
+#include <set>
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool resuming=false;
+static std::set<uint64_t> finals;
+static int done=0,exchanges=0,certificates=0,ccs=0;
+static std::set<std::vector<uint8_t>> tickets;
+auto wire=[](const MatchContext& c) {
+    auto header=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+    require(header && !findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet),"resumption uses legacy records");
+    if (header->getContentType()==20) ++ccs;
+    if (handshake(c,14)) ++done;
+    if (handshake(c,16)) ++exchanges;
+    if (handshake(c,11)) ++certificates;
+    if (auto h=findChunk<inet::dtls::Dtls12NewSessionTicket>(c.event.packet)) {
+        std::vector<uint8_t> bytes; for (size_t i=0;i<h->getTicketArraySize();++i) bytes.push_back(h->getTicket(i));
+        require(bytes.size()==16 && header->getEpoch()==0,"legacy ticket precedes cipher change"); tickets.insert(bytes);
+    }
+    return false;
+};
+return ProtocolTest("resumption_final_retention12")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return resuming && simTime()<SimTime(121) && packetHandshake(p,20); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (resuming && handshake(c,20)) finals.insert(findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet)->getSequenceNumber()); return false; }).within(195)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(wire).within(195)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(wire).within(195)))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(!app.isResumed(),"first handshake is full"); app.closePeer(); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { resuming=true; app.resumePeer(); }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(190),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(190)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount==2 && app.errorCount==0 && app.isResumed() && app.maximumDatagramSize()==1163,"client has a resumed legacy handle");
+        require(simTime()>SimTime(120) && simTime()<SimTime(240) && finals.size()>=2,"late genuine server retransmission recovers retained client response");
+        require(done==1 && exchanges==1 && certificates==0 && ccs>=4 && tickets.size()==2,"abbreviated exchange omits full-handshake messages and renews tickets");
+        require(app.peerAuthentication().certificateAuthenticated==false,"saved server authentication is restored"); app.sendMarker(160,16);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount==2 && app.errorCount==0 && app.isResumed() && app.receivedMarkers==std::vector<int>{160} && app.peerAuthentication().certificateAuthenticated==false,"server resumes with saved client authentication"); app.sendMarker(161,16); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "legacy resumption compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 200s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].dtls.handshakeTimeout = 120s
+*.host2.app[*].dtls.handshakeTimeout = 300s
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host*.app[*].dtls.dtls12SessionTicketsEnabled = true
+%contains: stdout
+PROTOCOLTEST resumption_final_retention12: PASS

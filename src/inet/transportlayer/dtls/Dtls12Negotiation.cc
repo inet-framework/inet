@@ -159,6 +159,7 @@ bool Dtls::handleClientHello12(PrevalidationAttempt *attempt, const Ptr<const Dt
     association->offer=offer;
     for (size_t i=0; i<32; ++i) association->clientRandom[i]=hello->getRandom(i);
     association->initializeDtls12(true,sequence);
+    association->prepareServerSession12(hello);
     association->addressValidated=validated;
     association->receivedBytes=attempt->receivedBytes;
     association->sentBytes=attempt->sentBytes;

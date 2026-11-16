@@ -55,11 +55,14 @@ class INET_API DtlsAssociation
     struct LegacyHandshake {
         enum class Phase { CLIENT_WAIT_SERVER_HELLO, CLIENT_WAIT_SERVER_CERTIFICATE,
             CLIENT_WAIT_SERVER_KEY_EXCHANGE, CLIENT_WAIT_REQUEST_OR_DONE, CLIENT_WAIT_SERVER_DONE,
-            CLIENT_WAIT_SERVER_CCS, CLIENT_WAIT_SERVER_FINISHED, SERVER_WAIT_CLIENT_CERTIFICATE,
+            CLIENT_WAIT_SERVER_TICKET, CLIENT_WAIT_SERVER_CCS, CLIENT_WAIT_SERVER_FINISHED, SERVER_WAIT_CLIENT_CERTIFICATE,
             SERVER_WAIT_CLIENT_KEY_EXCHANGE, SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY,
             SERVER_WAIT_CLIENT_CCS, SERVER_WAIT_CLIENT_FINISHED, COMPLETE };
         Phase phase = Phase::CLIENT_WAIT_SERVER_HELLO;
         bool pendingCcs = false;
+        bool ticketExpected = false;
+        std::vector<uint8_t> sessionId;
+        std::optional<DtlsSessionStore::Entry> pendingSession;
     };
     std::unique_ptr<LegacyHandshake> legacyHandshake;
     bool isDtls12() const { return selection.version == DTLS_12; }
@@ -67,7 +70,16 @@ class INET_API DtlsAssociation
     void sendClientHello12(const std::vector<uint8_t>& cookie = {});
     void sendServerFlight12();
     void sendClientFlight12();
-    void sendServerFinished12();
+    void sendFinalFlight12();
+    void appendClientSession12(const Ptr<DtlsClientHello>& hello, std::vector<uint8_t>& extensions);
+    void prepareServerSession12(const Ptr<const DtlsClientHello>& hello);
+    void fillServerSessionHello12(const Ptr<tls::TlsServerHello>& hello);
+    bool processSessionHello12(const Ptr<const tls::TlsServerHello>& hello);
+    void appendSessionTicket12();
+    void receiveSessionTicket12(Packet *body);
+    void cacheSession12();
+    void invalidateSessions12();
+    std::vector<uint8_t> offeredSessionId12() const;
     void appendChangeCipherSpec12();
     void receiveHandshake12(Packet *body, uint64_t epoch);
     void receiveHandshakeFragment12(Packet *body, uint64_t epoch);

@@ -1,0 +1,49 @@
+%description:
+Legacy session IDs and opaque tickets share capacity but remain version-specific.
+Empty identities do not match and legacy rows never authorize early data.
+%includes:
+#include "inet/transportlayer/dtls/DtlsSessionStore.h"
+using namespace inet;
+using namespace inet::dtls;
+%activity:
+DtlsSessionStore store;
+store.configure(4);
+DtlsSessionStore::Entry id;
+id.version=0xfefd; id.cipherSuite=0x00a8; id.sessionId={1,2};
+id.serverSide=true; id.peerIdentity="peer"; id.peerPort=4433; id.expiresAt=10;
+ASSERT(store.insert(id,0));
+ASSERT(!store.find({},true,0));
+ASSERT(!store.findSessionId({},true,0));
+ASSERT(store.findSessionId({1,2},true,0)->version==0xfefd);
+ASSERT(!store.findSessionId({1,2},false,0));
+ASSERT(!store.insert(id,1));
+auto ticket=id; ticket.sessionId.clear(); ticket.ticket={3,4}; ticket.earlyDataBytes=64;
+ASSERT(store.insert(ticket,0));
+ASSERT(!store.find({3,4},true,0));
+ASSERT(store.find({3,4},true,0,0xfefd));
+ASSERT(!store.consumeEarly({3,4},{7},1,0));
+auto modern=ticket; modern.version=0xfefc; modern.cipherSuite=0x1301;
+ASSERT(store.insert(modern,0));
+ASSERT(store.find({3,4},true,0)->version==0xfefc);
+ASSERT(store.consumeEarly({3,4},{7},1,0));
+store.remove(ticket);
+ASSERT(!store.find({3,4},true,0,0xfefd));
+ASSERT(store.find({3,4},true,0));
+ASSERT(!store.findSessionId({1,2},true,10));
+id.serverSide=false;
+ASSERT(store.insert(id,1));
+ASSERT(store.select(L3Address(),4433,"peer",0xfefd,1)->sessionId==std::vector<uint8_t>({1,2}));
+ASSERT(!store.select(L3Address(),4433,"peer",0xfefc,1));
+auto invalid=id; invalid.sessionId.resize(33);
+ASSERT(!store.insert(invalid,1));
+invalid=id; invalid.version=0xfefc;
+ASSERT(!store.insert(invalid,1));
+store.configure(1);
+ASSERT(store.insert(id,1));
+id.sessionId={9}; ASSERT(store.insert(id,2));
+ASSERT(!store.findSessionId({1,2},false,2));
+ASSERT(store.findSessionId({9},false,2));
+store.remove(id); ASSERT(store.size()==0);
+EV << "legacy session store PASS\n";
+%contains: stdout
+legacy session store PASS

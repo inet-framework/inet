@@ -1,0 +1,3 @@
+DTLS 1.2 session resumption
+
+Extend opt-in resumption to DTLS 1.2 session IDs and modeled opaque tickets, including abbreviated handshakes, renewal, expiry and version-separated cache lookup. The abbreviated client's final response remains available for 240 seconds independently of its handshake deadline. Legacy sessions preserve modeled authentication but cannot authorize DTLS 1.3 early data. The ticket preference is effective only when resumption is enabled; cryptographic ticket protection remains abstract.

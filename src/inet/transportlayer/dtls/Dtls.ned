@@ -42,6 +42,7 @@ simple Dtls extends SimpleModule like IDtls
         @signal[probeResult](type=long); // IDtls::ProbeResult
         @signal[pathChanged](type=long); // Association handle; callback carries the confirmed endpoints
         bool resumptionEnabled = default(false); // cache/issue modeled stateful tickets
+        bool dtls12SessionTicketsEnabled = default(true); // With resumptionEnabled, use legacy tickets; false selects session IDs only
         bool earlyDataEnabled = default(false); // Requires resumptionEnabled; explicit application admission only
         int earlyDataBytes @unit(B) = default(4096B); // Allowance in newly issued tickets when enabled
         int maxSessions = default(64); // aggregate client/server ticket entries per engine

@@ -16,6 +16,7 @@ class INET_API DtlsSessionStore
   public:
     struct Entry {
         std::vector<uint8_t> ticket;
+        std::vector<uint8_t> sessionId;
         bool serverSide = false;
         L3Address peerAddress;
         int peerPort = -1;
@@ -44,7 +45,9 @@ class INET_API DtlsSessionStore
     [[nodiscard]] size_t size() const { return entries.size(); }
     bool insert(const Entry& entry, simtime_t now);
     bool consumeEarly(const std::vector<uint8_t>& ticket, const std::vector<uint8_t>& clientRandom, uint64_t associationId, simtime_t now);
-    [[nodiscard]] std::optional<Entry> find(const std::vector<uint8_t>& ticket, bool serverSide, simtime_t now) const;
+    [[nodiscard]] std::optional<Entry> find(const std::vector<uint8_t>& ticket, bool serverSide, simtime_t now, uint16_t version = 0xfefc) const;
+    [[nodiscard]] std::optional<Entry> findSessionId(const std::vector<uint8_t>& sessionId, bool serverSide, simtime_t now) const;
+    void remove(const Entry& entry);
     [[nodiscard]] std::optional<Entry> select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now,
                                             const std::vector<uint8_t>& allowedHashes = {}) const;
 };

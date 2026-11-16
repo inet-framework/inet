@@ -268,10 +268,19 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
         std::vector<uint8_t> hashes;
         for (auto suite : preferences.cipherSuites)
             hashes.push_back(tls::TlsHandshakeParameters::findCipherSuite(suite)->hashBytes);
-        association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime(), hashes);
+        if (allowDtls13)
+            association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime(), hashes);
+        if (!association->offeredSession && allowDtls12) {
+            association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), Association::DTLS_12, simTime());
+            auto suite = par("profile").stdstringValue() == "certificate" ? Association::ECDHE_ECDSA_AES_128_GCM_SHA256 : Association::PSK_AES_128_GCM_SHA256;
+            if (association->offeredSession && (association->offeredSession->cipherSuite != suite ||
+                (!par("dtls12SessionTicketsEnabled").boolValue() && association->offeredSession->sessionId.empty())))
+                association->offeredSession.reset();
+        }
     }
     association->earlyRequested = options.offerEarlyData;
-    association->earlyOffered = options.offerEarlyData && par("earlyDataEnabled").boolValue() && association->offeredSession && association->offeredSession->earlyDataBytes != 0;
+    association->earlyOffered = options.offerEarlyData && par("earlyDataEnabled").boolValue() && association->offeredSession &&
+        association->offeredSession->version == tls::TlsHandshakeParameters::DTLS_13 && association->offeredSession->earlyDataBytes != 0;
     if (association->earlyOffered && std::find(preferences.cipherSuites.begin(), preferences.cipherSuites.end(), association->offeredSession->cipherSuite) == preferences.cipherSuites.end())
         association->earlyOffered = false;
     auto replayWindow = par("replayWindowSize").intValue();
@@ -451,6 +460,8 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
     removeConnectionIds(id);
     auto hadReassembly = association->getReassemblyBytes() != 0;
     association->cancelTimers();
+    if (association->isDtls12())
+        association->invalidateSessions12();
     cancelEvent(association->handshakeDeadline.get());
     if (inputProcessing)
         inputProcessing->cancel(id);
@@ -954,6 +965,8 @@ void Dtls::establish(AssociationId id)
     }
     it->second->state = HandshakeState::ESTABLISHED;
     if (it->second->isDtls12())
+        it->second->cacheSession12();
+    if (it->second->isDtls12())
         cancelEvent(it->second->retransmissionTimer.get());
     auto elapsed = simTime() - it->second->startedAt;
     cancelEvent(it->second->handshakeDeadline.get());
@@ -966,8 +979,10 @@ void Dtls::establish(AssociationId id)
         if (it == associations.end())
             return;
     }
-    // RFC 9147 Section 5.8.1 retains the server's final response for at least twice the default MSL (240 seconds).
-    if (it->second->serverSide)
+    // RFC 9147 Section 5.8.1 and RFC 6347 Section 4.2.4 retain the final response for twice the default MSL.
+    bool finalSender = it->second->isDtls12() ?
+        it->second->serverSide != (it->second->selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) : it->second->serverSide;
+    if (finalSender)
         scheduleAt(simTime() + SimTime(240), it->second->retentionTimer.get());
     if (replacesEstablished) {
         close(oldId);

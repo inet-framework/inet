@@ -76,7 +76,8 @@ void DtlsAssociation::initializeDtls12(bool server, uint16_t helloSequence)
     heartbeatNegotiated = peerAllowsHeartbeat = false;
     pendingAcks.clear();
     engine.cancelEvent(delayedAckTimer.get());
-    offeredSession.reset();
+    if (offeredSession && offeredSession->version != DTLS_12)
+        offeredSession.reset();
     earlyOffered = false;
     if (earlyRequested)
         engine.reportEarlyData(id, false);
@@ -100,6 +101,7 @@ void DtlsAssociation::sendClientHello12(const std::vector<uint8_t>& cookie)
     hello->setCompressionMethodsArraySize(1);
     hello->setCompressionMethods(0, 0);
     std::vector<uint8_t> extensions;
+    appendClientSession12(hello, extensions);
     if (!selection.usesPsk()) {
         extension12(extensions, 10, {0,2,0,23});
         extension12(extensions, 13, {0,2,4,3});
@@ -108,7 +110,7 @@ void DtlsAssociation::sendClientHello12(const std::vector<uint8_t>& cookie)
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
-    hello->setChunkLength(B(44 + cookie.size() + extensions.size()));
+    hello->setChunkLength(B(44 + cookie.size() + hello->getSessionIdArraySize() + extensions.size()));
     auto error = tls::TlsHandshakeParameters::decodeOffer(hello, offer);
     if (!error.empty())
         throw cRuntimeError("Invalid DTLS 1.2 ClientHello: %s", error.c_str());
@@ -134,11 +136,19 @@ void DtlsAssociation::sendServerFlight12()
         for (size_t i = 0; i < 8; ++i)
             hello->setRandom(24+i, sentinel[i]);
     }
-    hello->setChunkLength(B(38));
+    fillServerSessionHello12(hello);
     beginFlight();
     serverFlightQueued = true;
     appendHandshake(2, nextLocalMessage++, 0, hello, false, false);
     if (!owner.containsAssociation(handle)) return;
+    if (selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) {
+        appendSessionTicket12();
+        if (!owner.containsAssociation(handle)) return;
+        appendChangeCipherSpec12();
+        appendHandshake(20, nextLocalMessage++, 1, finished12(), false, false);
+        if (owner.containsAssociation(handle)) finishFlight();
+        return;
+    }
     if (!selection.usesPsk()) {
         appendHandshake(11, nextLocalMessage++, 0, certificate12(owner), false, false);
         if (!owner.containsAssociation(handle)) return;
@@ -208,15 +218,19 @@ void DtlsAssociation::sendClientFlight12()
     appendChangeCipherSpec12();
     appendHandshake(20, nextLocalMessage++, 1, finished12(), false, false);
     if (!owner.containsAssociation(handle)) return;
-    legacyHandshake->phase = LegacyHandshake::Phase::CLIENT_WAIT_SERVER_CCS;
+    legacyHandshake->phase = legacyHandshake->ticketExpected ? LegacyHandshake::Phase::CLIENT_WAIT_SERVER_TICKET : LegacyHandshake::Phase::CLIENT_WAIT_SERVER_CCS;
     finishFlight();
 }
 
-void DtlsAssociation::sendServerFinished12()
+void DtlsAssociation::sendFinalFlight12()
 {
     auto& owner = engine;
     auto handle = id;
     beginFlight();
+    if (serverSide) {
+        appendSessionTicket12();
+        if (!owner.containsAssociation(handle)) return;
+    }
     appendChangeCipherSpec12();
     appendHandshake(20, nextLocalMessage++, 1, finished12(), true, false);
     if (owner.containsAssociation(handle)) finishFlight();
@@ -441,7 +455,6 @@ void DtlsAssociation::processHandshake12(uint8_t type, uint16_t sequence, const 
         if (hello->getLegacyVersion() != DTLS_12 || hello->getCompressionMethod() != 0 ||
             hello->getCipherSuite() != selection.cipherSuite ||
             std::find(offer.cipherSuites.begin(),offer.cipherSuites.end(),hello->getCipherSuite()) == offer.cipherSuites.end()) { fail(47); return; }
-        if (hello->getExtensionsArraySize()!=0) { fail(110); return; }
         if (owner.allowDtls13) {
             static const uint8_t sentinel[] = {'D','O','W','N','G','R','D',1};
             bool downgrade = true;
@@ -450,6 +463,7 @@ void DtlsAssociation::processHandshake12(uint8_t type, uint16_t sequence, const 
         }
         state = HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
         legacyHandshake->phase = selection.usesPsk() ? Phase::CLIENT_WAIT_SERVER_KEY_EXCHANGE : Phase::CLIENT_WAIT_SERVER_CERTIFICATE;
+        if (!processSessionHello12(hello)) return;
         engine.cancelEvent(retransmissionTimer.get());
         if (flight) flight->acknowledgeSent(simTime());
         return;
@@ -515,13 +529,19 @@ void DtlsAssociation::processHandshake12(uint8_t type, uint16_t sequence, const 
         applyChangeCipherSpec12();
         return;
     }
+    if (phase == Phase::CLIENT_WAIT_SERVER_TICKET) {
+        if (type != 4) { fail(10); return; }
+        receiveSessionTicket12(&body);
+        return;
+    }
     if (phase == Phase::CLIENT_WAIT_SERVER_FINISHED || phase == Phase::SERVER_WAIT_CLIENT_FINISHED) {
         if (type != 20 || bytes.size() != 12) { fail(10); return; }
         peerFinishedProcessed = true;
         legacyHandshake->phase = Phase::COMPLETE;
         owner.cancelEvent(retransmissionTimer.get());
-        if (serverSide)
-            sendServerFinished12();
+        bool abbreviated = selection.authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK;
+        if (serverSide != abbreviated)
+            sendFinalFlight12();
         else {
             flight.reset();
             owner.establish(handle);

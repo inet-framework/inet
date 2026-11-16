@@ -27,6 +27,14 @@ template<typename T> bool rejects(const std::vector<uint8_t>& bytes) {
     catch (const cRuntimeError&) { return true; }
 }
 %activity:
+auto ticket = makeShared<Dtls12NewSessionTicket>();
+ticket->setTicketLifetime(0x01020304);
+ticket->setTicketArraySize(3); ticket->setTicket(0,0xaa); ticket->setTicket(1,0xbb); ticket->setTicket(2,0xcc);
+oracle(ticket, {1,2,3,4,0,3,0xaa,0xbb,0xcc});
+oracle(makeShared<Dtls12NewSessionTicket>(), {0,0,0,0,0,0});
+ASSERT(rejects<Dtls12NewSessionTicket>({0,0,1}));
+ASSERT(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,2,0xaa}));
+ASSERT(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,0,0xaa}));
 auto hvr = makeShared<Dtls12HelloVerifyRequest>();
 hvr->setCookieArraySize(3);
 for (size_t i=0; i<3; ++i) hvr->setCookie(i, 0xa0+i);

@@ -1,0 +1,78 @@
+%description:
+The client retains tickets while the issuing server stops and crashes. Both
+reconnects must fall back to full authentication. Ticket serials do not reset
+across server restart. See resumption.md for the production fixture and limits.
+%includes:
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static std::set<std::vector<uint8_t>> issuedTickets;
+static bool newTicket(const MatchContext& c)
+{
+    auto ticket = findChunk<inet::dtls::Dtls12NewSessionTicket>(c.event.packet);
+    std::vector<uint8_t> bytes;
+    for (size_t i = 0; i < ticket->getTicketArraySize(); ++i) bytes.push_back(ticket->getTicket(i));
+    return issuedTickets.insert(bytes).second;
+}
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("resumption_lifecycle12")
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 4); }).assertEvent(newTicket).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.closePeer(); }))
+    .act(action().after(2.4).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.listenPeer(); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.resumePeer(); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 4); }).assertEvent(newTicket).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 2 && !app.isResumed(), "server stop erased its table while client offered a cached ticket"); app.closePeer();
+    }))
+    .act(action().after(2.4).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.listenPeer(); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.resumePeer(); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 4); }).assertEvent(newTicket).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 3 && !app.isResumed() && issuedTickets.size() == 3, "crash erases server state and preserves ticket serial non-reuse");
+    }));
+}
+%activity:
+EV << "server lifecycle compiled\n";
+%file: TicketRestartNetwork.ned
+import inet.protocoltest.TapPairNetwork;
+import inet.common.scenario.ScenarioManager;
+network TicketRestartNetwork extends TapPairNetwork
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+}
+%file: scenario.xml
+<scenario>
+    <at t="1s"><shutdown module="host2"/></at>
+    <at t="2.5s"><startup module="host2"/></at>
+    <at t="4s"><crash module="host2"/></at>
+    <at t="5s"><startup module="host2"/></at>
+</scenario>
+%inifile: omnetpp.ini
+[General]
+network = TicketRestartNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host2.hasStatus = true
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host*.app[*].dtls.versions = "1.2"
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.scenarioManager.script = xmldoc("scenario.xml")
+%contains: stdout
+PROTOCOLTEST resumption_lifecycle12: PASS

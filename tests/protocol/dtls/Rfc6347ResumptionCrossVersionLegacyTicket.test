@@ -1,0 +1,73 @@
+%description:
+One dual-version server stores both versions.
+A genuine modern resume offer carrying its legacy ticket must fall back to certificates.
+%includes:
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<uint8_t> otherTicket;
+return ProtocolTest("resumption_cross_legacyticket12")
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return findChunk<inet::dtls::Dtls12NewSessionTicket>(c.event.packet)!=nullptr; })
+        .assertEvent([](const MatchContext& c) {
+            auto ticket = findChunk<inet::dtls::Dtls12NewSessionTicket>(c.event.packet);
+            for (size_t i = 0; i < ticket->getTicketArraySize(); ++i) otherTicket.push_back(ticket->getTicket(i));
+            return otherTicket.size() == 16;
+        }).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.closePeer(); }))
+    .act(action().after(2.1).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.resumePeer(); }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4436").filterPacket([](const Packet *p) { return findChunk<inet::dtls::DtlsClientHello>(p) != nullptr; }).mutate([](Packet *p) {
+        editClientHello(p, [](auto& hello) {
+            for (size_t i = 0; i + 4 <= hello.getExtensionsArraySize();) {
+                unsigned type = (hello.getExtensions(i) << 8) | hello.getExtensions(i + 1);
+                unsigned size = (hello.getExtensions(i + 2) << 8) | hello.getExtensions(i + 3);
+                if (type == 41) {
+                    require(size >= 20, "second client offers its ticket");
+                    for (size_t j = 0; j < otherTicket.size(); ++j) hello.setExtensions(i + 8 + j, otherTicket[j]);
+                }
+                i += 4 + size;
+            }
+        });
+    }))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 2 && !app.isResumed(), "the same issuer cannot resume a session from another version");
+        app.sendMarker(44);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount==3 && !app.isResumed() && app.receivedMarkers == std::vector<int>{44}, "second issuer retains its own full authentication and delivery");
+    }));
+}
+%activity:
+EV << "issuer isolation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[1].localPort = 4436
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host1.app[0].dtls.versions = "1.2"
+*.host1.app[1].dtls.versions = "1.3"
+*.host2.app[*].dtls.versions = "1.3 1.2"
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST resumption_cross_legacyticket12: PASS

@@ -901,6 +901,7 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     std::string profile = owner.par("profile").stringValue();
     if (profile != "psk" && profile != "certificate")
         throw cRuntimeError("Unknown DTLS profile '%s'", profile.c_str());
+    auto ticketSession = offeredSession && offeredSession->version == Parameters::DTLS_13 ? &*offeredSession : nullptr;
     auto hello = makeShared<DtlsClientHello>();
     auto group = retryGroup ? retryGroup : owner.preferences.groups.front();
     auto shareBytes = Parameters::keyShareBytes(group);
@@ -928,6 +929,8 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     hello->setCompressionMethodsArraySize(1);
     hello->setCompressionMethods(0, 0);
     std::vector<uint8_t> extensions;
+    if (owner.allowDtls12)
+        appendClientSession12(hello, extensions);
     appendExtension(extensions, 43, owner.allowDtls12 ? std::vector<uint8_t>{4,0xfe,0xfc,0xfe,0xfd} : std::vector<uint8_t>{2,0xfe,0xfc});
     auto list = [](const std::vector<uint16_t>& values) {
         std::vector<uint8_t> bytes;
@@ -970,16 +973,16 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
         cid.insert(cid.end(), localCid.begin(), localCid.end());
         appendExtension(extensions, 54, cid);
     }
-    if (profile == "psk" || offeredSession) {
+    if (profile == "psk" || ticketSession) {
         appendExtension(extensions, 45, {1, Parameters::PSK_DHE_KE});
         std::string identity = owner.par("identity").stringValue();
         if (identity.empty() || identity.size() > 65526)
             throw cRuntimeError("DTLS PSK identity has an invalid length");
         std::vector<uint8_t> psk;
         std::vector<std::pair<std::vector<uint8_t>, uint32_t>> identities;
-        if (offeredSession) {
-            auto age = uint32_t((simTime() - offeredSession->issuedAt).dbl() * 1000) + offeredSession->ageAdd;
-            identities.push_back({offeredSession->ticket, age});
+        if (ticketSession) {
+            auto age = uint32_t((simTime() - ticketSession->issuedAt).dbl() * 1000) + ticketSession->ageAdd;
+            identities.push_back({ticketSession->ticket, age});
         }
         if (profile == "psk")
             identities.push_back({std::vector<uint8_t>(identity.begin(), identity.end()), 0});
@@ -995,10 +998,10 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
         }
         size_t binderBytes = 0;
         for (size_t i = 0; i < identities.size(); ++i)
-            binderBytes += 1 + (offeredSession && i == 0 ? offeredSession->hashBytes : 32);
+            binderBytes += 1 + (ticketSession && i == 0 ? ticketSession->hashBytes : 32);
         appendUint16(psk, binderBytes);
         for (size_t i = 0; i < identities.size(); ++i) {
-            auto bytes = offeredSession && i == 0 ? offeredSession->hashBytes : 32;
+            auto bytes = ticketSession && i == 0 ? ticketSession->hashBytes : 32;
             psk.push_back(bytes);
             psk.insert(psk.end(), bytes, 0); // modeled binder, not a MAC
         }
@@ -1009,7 +1012,7 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
     hello->setExtensionsArraySize(extensions.size());
     for (size_t i = 0; i < extensions.size(); ++i)
         hello->setExtensions(i, extensions[i]);
-    hello->setChunkLength(B(42 + 2 * hello->getCipherSuitesArraySize() + extensions.size()));
+    hello->setChunkLength(B(42 + 2 * hello->getCipherSuitesArraySize() + hello->getSessionIdArraySize() + extensions.size()));
     auto decodeError = Parameters::decodeOffer(hello, offer);
     if (!decodeError.empty())
         throw cRuntimeError("Invalid locally generated ClientHello: %s", decodeError.c_str());
