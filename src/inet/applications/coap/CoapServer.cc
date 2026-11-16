@@ -7,6 +7,7 @@
 #include "inet/applications/coap/CoapServer.h"
 
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <limits>
@@ -418,11 +419,37 @@ simtime_t CoapServer::getNextSubclassDeadline() const
                 earliest = obs.pending.earliestSendTime;
         }
     }
+    for (const auto& kv : incomingBlock1) {
+        if (earliest == SIMTIME_ZERO || kv.second.expiresAt < earliest)
+            earliest = kv.second.expiresAt;
+    }
+    for (const auto& kv : retainedBlock2) {
+        if (earliest == SIMTIME_ZERO || kv.second.expiresAt < earliest)
+            earliest = kv.second.expiresAt;
+    }
     return earliest;
+}
+
+void CoapServer::purgeExpiredBlockContexts(simtime_t now)
+{
+    for (auto it = incomingBlock1.begin(); it != incomingBlock1.end();) {
+        if (it->second.expiresAt <= now)
+            it = incomingBlock1.erase(it);
+        else
+            ++it;
+    }
+    for (auto it = retainedBlock2.begin(); it != retainedBlock2.end();) {
+        if (it->second.expiresAt <= now)
+            it = retainedBlock2.erase(it);
+        else
+            ++it;
+    }
 }
 
 void CoapServer::onSubclassTimer(simtime_t now)
 {
+    purgeExpiredBlockContexts(now);
+
     for (auto it = pendingSeparateResponses.begin(); it != pendingSeparateResponses.end();) {
         if (it->dueAt <= now) {
             CoapPendingSeparateResponse ready = std::move(*it);
@@ -454,6 +481,8 @@ void CoapServer::onEndpointStop()
 {
     pendingSeparateResponses.clear();
     observers.clear();
+    incomingBlock1.clear();
+    retainedBlock2.clear();
     emit(activeObserversSignal, 0L);
 }
 
@@ -461,6 +490,8 @@ void CoapServer::onEndpointCrash()
 {
     pendingSeparateResponses.clear();
     observers.clear();
+    incomingBlock1.clear();
+    retainedBlock2.clear();
     emit(activeObserversSignal, 0L);
     loadXmlResources(par("resources").xmlValue());
 }
@@ -703,10 +734,56 @@ void CoapServer::sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWa
     }
 }
 
+void CoapServer::sendBlockwiseResponse(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
+        const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
+        const std::vector<uint8_t>& fullPayload, bool hasBlock2, const blockwise::CoapBlockOption& reqBlock2,
+        simtime_t minDelay, bool refreshObserveTick, const CoapObserverKey *observeKey)
+{
+    uint8_t prefSzx = 6;
+    blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+    uint8_t outSzx = hasBlock2 ? std::min(reqBlock2.szx, prefSzx) : prefSzx;
+    uint32_t outBlockSize = 1U << (outSzx + 4U);
+    uint32_t reqNum = hasBlock2 ? reqBlock2.num : 0U;
+
+    if (!hasBlock2 && fullPayload.size() <= outBlockSize) {
+        sendResponsePacket(peer, requestWasConfirmable, requestMid, requestHeader, responseCode,
+                responseHeader, fullPayload, minDelay, refreshObserveTick, observeKey);
+        return;
+    }
+
+    uint64_t offset = static_cast<uint64_t>(reqNum) * outBlockSize;
+    if ((fullPayload.empty() && reqNum > 0) || (!fullPayload.empty() && offset >= fullPayload.size())) {
+        std::vector<uint8_t> emptyPayload;
+        auto errHeader = makeShared<CoapHeader>();
+        sendResponsePacket(peer, requestWasConfirmable, requestMid, requestHeader, COAP_CODE_BAD_REQUEST,
+                errHeader, emptyPayload);
+        return;
+    }
+
+    size_t startOff = static_cast<size_t>(offset);
+    size_t endOff = std::min<size_t>(fullPayload.size(), startOff + outBlockSize);
+    bool more = (endOff < fullPayload.size());
+    std::vector<uint8_t> slice(fullPayload.begin() + startOff, fullPayload.begin() + endOff);
+
+    blockwise::CoapBlockOption respB2;
+    respB2.num = reqNum;
+    respB2.more = more;
+    respB2.szx = outSzx;
+    addCoapOptionUint(responseHeader, COAP_OPT_BLOCK2, blockwise::encodeCoapBlockValue(respB2));
+    if (reqNum == 0)
+        addCoapOptionUint(responseHeader, COAP_OPT_SIZE2, static_cast<uint32_t>(fullPayload.size()));
+
+    sendResponsePacket(peer, requestWasConfirmable, requestMid, requestHeader, responseCode,
+            responseHeader, slice, minDelay, refreshObserveTick, observeKey);
+}
+
 void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
         const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload)
 {
     emit(requestHandledSignal, 1L);
+
+    simtime_t now = simTime();
+    purgeExpiredBlockContexts(now);
 
     bool reqConfirmable = (header->getMessageType() == COAP_TYPE_CON) && !destIsMulticast;
     uint16_t reqMid = header->getMessageId();
@@ -720,9 +797,18 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
     bool hasObserve = false;
     uint32_t observeVal = 0;
     bool hasIfNoneMatch = false;
+    bool hasBlock1 = false;
+    blockwise::CoapBlockOption b1Opt;
+    bool hasBlock2 = false;
+    blockwise::CoapBlockOption b2Opt;
+    bool hasSize1 = false;
+    uint32_t size1Val = 0;
+    bool hasSize2 = false;
+    uint32_t size2Val = 0;
     std::vector<std::vector<uint8_t>> ifMatchValues;
     std::vector<std::vector<uint8_t>> reqEtags;
     std::vector<std::string> uriQueries;
+    std::vector<std::vector<uint8_t>> requestTags;
 
     for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
         const auto& opt = header->getOptions(i);
@@ -795,6 +881,71 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
                 q.push_back(static_cast<char>(opt.getValue(j)));
             uriQueries.push_back(std::move(q));
         }
+        else if (optNum == COAP_OPT_BLOCK1) {
+            if (hasBlock1) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            auto st = blockwise::decodeCoapBlockOption(opt, b1Opt);
+            if (st == blockwise::CoapBlockDecodeStatus::BAD_FORMAT) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            if (st == blockwise::CoapBlockDecodeStatus::RESERVED_SZX_7) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_REQUEST, errHeader, emptyPayload);
+                return;
+            }
+            hasBlock1 = true;
+        }
+        else if (optNum == COAP_OPT_BLOCK2) {
+            if (hasBlock2) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            auto st = blockwise::decodeCoapBlockOption(opt, b2Opt);
+            if (st == blockwise::CoapBlockDecodeStatus::BAD_FORMAT) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            if (st == blockwise::CoapBlockDecodeStatus::RESERVED_SZX_7) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_REQUEST, errHeader, emptyPayload);
+                return;
+            }
+            hasBlock2 = true;
+        }
+        else if (optNum == COAP_OPT_SIZE1) {
+            if (hasSize1 || !decodeCoapUintValue(opt, size1Val, 4)) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            hasSize1 = true;
+        }
+        else if (optNum == COAP_OPT_SIZE2) {
+            if (hasSize2 || !decodeCoapUintValue(opt, size2Val, 4)) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            hasSize2 = true;
+        }
+        else if (optNum == COAP_OPT_REQUEST_TAG) {
+            if (valSize > 8) {
+                auto errHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_OPTION, errHeader, emptyPayload);
+                return;
+            }
+            std::vector<uint8_t> val(valSize);
+            for (size_t j = 0; j < valSize; ++j)
+                val[j] = opt.getValue(j);
+            requestTags.push_back(std::move(val));
+        }
     }
 
     std::vector<std::string> pathSegments = extractPathSegments(*header);
@@ -803,6 +954,11 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         if (method != COAP_CODE_GET) {
             auto respHeader = makeShared<CoapHeader>();
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_METHOD_NOT_ALLOWED, respHeader, emptyPayload);
+            return;
+        }
+        if (hasBlock1) {
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_REQUEST, respHeader, emptyPayload);
             return;
         }
         if (!checkPreconditions(true, {}, ifMatchValues, hasIfNoneMatch)) {
@@ -822,7 +978,8 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         addCoapOptionUint(respHeader, COAP_OPT_CONTENT_FORMAT, 40U);
         if (defaultMaxAgeSeconds != 60U)
             addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, defaultMaxAgeSeconds);
-        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader, linkBytes);
+        sendBlockwiseResponse(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader,
+                linkBytes, hasBlock2, b2Opt);
         return;
     }
 
@@ -835,6 +992,23 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
 
     auto it = resources.find(pathKey);
     bool foundConfigured = (it != resources.end() && it->second.pathSegments == pathSegments);
+
+    blockwise::CoapBlockRequestKey blockKey;
+    blockKey.peer = peer;
+    blockKey.methodCode = method;
+    blockKey.pathSegments = pathSegments;
+    blockKey.uriQueries = uriQueries;
+    blockKey.contentFormat = hasContentFormat ? static_cast<int32_t>(reqContentFormat) : -1;
+    blockKey.acceptFormat = hasAccept ? static_cast<int32_t>(requestedAccept) : -1;
+    blockKey.ifMatchValues = ifMatchValues;
+    blockKey.hasIfNoneMatch = hasIfNoneMatch;
+    blockKey.requestTags = requestTags;
+
+    if (hasBlock1 && method != COAP_CODE_PUT && method != COAP_CODE_POST) {
+        auto respHeader = makeShared<CoapHeader>();
+        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_REQUEST, respHeader, emptyPayload);
+        return;
+    }
 
     if (method == COAP_CODE_GET) {
         if (!foundConfigured || !it->second.exists) {
@@ -885,7 +1059,6 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
                 if (!alreadyPresent)
                     emit(activeObserversSignal, static_cast<long>(observers.size()));
 
-                simtime_t now = simTime();
                 uint64_t nowTick = observe::currentObserveTick(now);
                 if (rel.lastSentValid && nowTick <= rel.lastSentTick && responseDelay == SIMTIME_ZERO) {
                     minObserveDelay = SimTime(rel.lastSentTick + 1, SIMTIME_MS) - now;
@@ -946,34 +1119,226 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
         if (entry.explicitMaxAge || entry.maxAge != 60U)
             addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, entry.maxAge);
 
-        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader, entry.payload,
-                minObserveDelay, delayedObs, delayedObs ? &obsKey : nullptr);
+        sendBlockwiseResponse(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTENT, respHeader,
+                entry.payload, hasBlock2, b2Opt, minObserveDelay, delayedObs, delayedObs ? &obsKey : nullptr);
         return;
     }
 
+    // Handle follow-up POST Block2 retrieval of retained combined result without Block1.
+    if (method == COAP_CODE_POST && !hasBlock1 && hasBlock2 && b2Opt.num > 0) {
+        auto retIt = retainedBlock2.find(blockKey);
+        if (retIt == retainedBlock2.end()) {
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+            return;
+        }
+        auto& retained = retIt->second;
+        retained.expiresAt = now + maxTransmitWait;
+        auto respHeader = makeShared<CoapHeader>();
+        if (!retained.etag.empty())
+            addCoapOption(respHeader, COAP_OPT_ETAG, retained.etag);
+        if (retained.contentFormat >= 0)
+            addCoapOptionUint(respHeader, COAP_OPT_CONTENT_FORMAT, static_cast<uint32_t>(retained.contentFormat));
+        if (retained.explicitMaxAge || retained.maxAge != 60U)
+            addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, retained.maxAge);
+        sendBlockwiseResponse(peer, reqConfirmable, reqMid, header, retained.responseCode, respHeader,
+                retained.payload, hasBlock2, b2Opt);
+        rescheduleDeadlineTimer();
+        return;
+    }
+
+    // Validate resource availability & method permissions before buffering Block1.
     if (method == COAP_CODE_PUT) {
         if (!foundConfigured) {
             auto respHeader = makeShared<CoapHeader>();
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_NOT_FOUND, respHeader, emptyPayload);
             return;
         }
-
-        CoapResourceEntry& entry = it->second;
+        const CoapResourceEntry& entry = it->second;
         if (!entry.allowPut || (!entry.exists && !entry.creatable)) {
             auto respHeader = makeShared<CoapHeader>();
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_METHOD_NOT_ALLOWED, respHeader, emptyPayload);
             return;
         }
+    }
+    else if (method == COAP_CODE_POST) {
+        if (!foundConfigured || !it->second.exists) {
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_NOT_FOUND, respHeader, emptyPayload);
+            return;
+        }
+        const CoapResourceEntry& entry = it->second;
+        if (!entry.allowPost) {
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_METHOD_NOT_ALLOWED, respHeader, emptyPayload);
+            return;
+        }
+    }
 
+    // Handle atomic Block1 assembly on PUT / POST.
+    std::vector<uint8_t> assembledBody;
+    const std::vector<uint8_t> *effectiveBodyPtr = &payload;
+    bool includeFinalBlock1 = false;
+    blockwise::CoapBlockOption finalBlock1Opt;
+
+    if (hasBlock1) {
+        uint8_t prefSzx = 6;
+        blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+        uint8_t respSzx = std::min(b1Opt.szx, prefSzx);
+        uint32_t respBlockSize = 1U << (respSzx + 4U);
+
+        if (hasSize1 && size1Val > static_cast<uint32_t>(maxIncomingBlockSize)) {
+            auto respHeader = makeShared<CoapHeader>();
+            addCoapOptionUint(respHeader, COAP_OPT_SIZE1, static_cast<uint32_t>(maxIncomingBlockSize));
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, respHeader, emptyPayload);
+            return;
+        }
+
+        if ((b1Opt.more && payload.size() != b1Opt.blockSize()) || (!b1Opt.more && payload.size() > b1Opt.blockSize())) {
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_BAD_REQUEST, respHeader, emptyPayload);
+            return;
+        }
+
+        uint64_t offset = b1Opt.byteOffset();
+        if (offset + payload.size() > static_cast<uint64_t>(maxIncomingBlockSize)) {
+            incomingBlock1.erase(blockKey);
+            auto respHeader = makeShared<CoapHeader>();
+            addCoapOptionUint(respHeader, COAP_OPT_SIZE1, static_cast<uint32_t>(maxIncomingBlockSize));
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, respHeader, emptyPayload);
+            return;
+        }
+
+        if (!b1Opt.more && b1Opt.num == 0 && b1Opt.szx > prefSzx && payload.size() > respBlockSize) {
+            auto respHeader = makeShared<CoapHeader>();
+            addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue({0U, false, prefSzx}));
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, respHeader, emptyPayload);
+            return;
+        }
+
+        auto ctxIt = incomingBlock1.find(blockKey);
+        if (ctxIt != incomingBlock1.end() && b1Opt.num > 0 && offset < ctxIt->second.buffer.size()) {
+            // Identical already-buffered block re-transmission (e.g., new MID retry) -> re-ACK without double-append.
+            const auto& existingBuf = ctxIt->second.buffer;
+            if (offset + payload.size() <= existingBuf.size()
+                    && std::equal(payload.begin(), payload.end(), existingBuf.begin() + static_cast<std::ptrdiff_t>(offset))
+                    && ctxIt->second.hasContentFormat == hasContentFormat
+                    && (!hasContentFormat || ctxIt->second.contentFormat == static_cast<int32_t>(reqContentFormat))) {
+                if (b1Opt.more) {
+                    ctxIt->second.expiresAt = now + maxTransmitWait;
+                    auto respHeader = makeShared<CoapHeader>();
+                    uint32_t ackNum = static_cast<uint32_t>(offset / respBlockSize);
+                    addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue({ackNum, true, respSzx}));
+                    sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTINUE, respHeader, emptyPayload);
+                    rescheduleDeadlineTimer();
+                    return;
+                }
+            }
+            auto respHeader = makeShared<CoapHeader>();
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+            return;
+        }
+
+        if (b1Opt.num == 0) {
+            if (!b1Opt.more) {
+                incomingBlock1.erase(blockKey);
+                if (hasSize1 && payload.size() != size1Val) {
+                    auto respHeader = makeShared<CoapHeader>();
+                    sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+                    return;
+                }
+                assembledBody = payload;
+                effectiveBodyPtr = &assembledBody;
+                includeFinalBlock1 = true;
+                finalBlock1Opt = {0U, false, respSzx};
+            }
+            else {
+                if (ctxIt == incomingBlock1.end()
+                        && static_cast<int>(incomingBlock1.size()) >= maxIncomingBlockTransfers) {
+                    emit(capacityRejectedSignal, 1L);
+                    auto respHeader = makeShared<CoapHeader>();
+                    addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, static_cast<uint32_t>(std::ceil(maxTransmitWait.dbl())));
+                    sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_SERVICE_UNAVAILABLE, respHeader, emptyPayload);
+                    return;
+                }
+                blockwise::CoapServerBlock1Context& ctx = incomingBlock1[blockKey];
+                ctx.key = blockKey;
+                ctx.buffer = payload;
+                ctx.hasSize1 = hasSize1;
+                ctx.size1 = size1Val;
+                ctx.hasContentFormat = hasContentFormat;
+                ctx.contentFormat = hasContentFormat ? static_cast<int32_t>(reqContentFormat) : -1;
+                ctx.expiresAt = now + maxTransmitWait;
+
+                auto respHeader = makeShared<CoapHeader>();
+                addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue({0U, true, respSzx}));
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTINUE, respHeader, emptyPayload);
+                rescheduleDeadlineTimer();
+                return;
+            }
+        }
+        else {
+            if (ctxIt == incomingBlock1.end()) {
+                auto respHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+                return;
+            }
+            blockwise::CoapServerBlock1Context& ctx = ctxIt->second;
+            if (offset != ctx.buffer.size()
+                    || ctx.hasContentFormat != hasContentFormat
+                    || (hasContentFormat && ctx.contentFormat != static_cast<int32_t>(reqContentFormat))
+                    || (ctx.hasSize1 && hasSize1 && ctx.size1 != size1Val)) {
+                auto respHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+                return;
+            }
+
+            ctx.buffer.insert(ctx.buffer.end(), payload.begin(), payload.end());
+            ctx.expiresAt = now + maxTransmitWait;
+
+            if (b1Opt.more) {
+                uint32_t ackNum = static_cast<uint32_t>(offset / respBlockSize);
+                auto respHeader = makeShared<CoapHeader>();
+                addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue({ackNum, true, respSzx}));
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CONTINUE, respHeader, emptyPayload);
+                rescheduleDeadlineTimer();
+                return;
+            }
+
+            if (ctx.hasSize1 && ctx.buffer.size() != ctx.size1) {
+                incomingBlock1.erase(ctxIt);
+                auto respHeader = makeShared<CoapHeader>();
+                sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_INCOMPLETE, respHeader, emptyPayload);
+                return;
+            }
+
+            assembledBody = std::move(ctx.buffer);
+            incomingBlock1.erase(ctxIt);
+            effectiveBodyPtr = &assembledBody;
+            includeFinalBlock1 = true;
+            finalBlock1Opt = {static_cast<uint32_t>(offset / respBlockSize), false, respSzx};
+        }
+    }
+    else if (hasSize1 && size1Val > static_cast<uint32_t>(maxIncomingBlockSize)) {
+        auto respHeader = makeShared<CoapHeader>();
+        addCoapOptionUint(respHeader, COAP_OPT_SIZE1, static_cast<uint32_t>(maxIncomingBlockSize));
+        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, respHeader, emptyPayload);
+        return;
+    }
+
+    if (method == COAP_CODE_PUT) {
+        CoapResourceEntry& entry = it->second;
         if (!checkPreconditions(entry.exists, entry.etag, ifMatchValues, hasIfNoneMatch)) {
             auto respHeader = makeShared<CoapHeader>();
+            if (includeFinalBlock1)
+                addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue(finalBlock1Opt));
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_PRECONDITION_FAILED, respHeader, emptyPayload);
             return;
         }
 
         bool wasCreated = !entry.exists;
         entry.exists = true;
-        entry.payload = payload;
+        entry.payload = *effectiveBodyPtr;
         if (hasContentFormat)
             entry.contentFormat = static_cast<int32_t>(reqContentFormat);
         else if (wasCreated)
@@ -984,41 +1349,64 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
 
         auto respHeader = makeShared<CoapHeader>();
         addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
+        if (includeFinalBlock1)
+            addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue(finalBlock1Opt));
         sendResponsePacket(peer, reqConfirmable, reqMid, header,
                 wasCreated ? COAP_CODE_CREATED : COAP_CODE_CHANGED, respHeader, emptyPayload);
         return;
     }
 
     if (method == COAP_CODE_POST) {
-        if (!foundConfigured || !it->second.exists) {
-            auto respHeader = makeShared<CoapHeader>();
-            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_NOT_FOUND, respHeader, emptyPayload);
-            return;
-        }
-
         CoapResourceEntry& entry = it->second;
-        if (!entry.allowPost) {
-            auto respHeader = makeShared<CoapHeader>();
-            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_METHOD_NOT_ALLOWED, respHeader, emptyPayload);
-            return;
-        }
-
         if (!checkPreconditions(entry.exists, entry.etag, ifMatchValues, hasIfNoneMatch)) {
             auto respHeader = makeShared<CoapHeader>();
+            if (includeFinalBlock1)
+                addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue(finalBlock1Opt));
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_PRECONDITION_FAILED, respHeader, emptyPayload);
             return;
         }
 
         if (hasContentFormat && static_cast<int32_t>(reqContentFormat) != entry.contentFormat) {
             auto respHeader = makeShared<CoapHeader>();
+            if (includeFinalBlock1)
+                addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue(finalBlock1Opt));
             sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_UNSUPPORTED_CONTENT_FORMAT, respHeader, emptyPayload);
             return;
         }
 
-        entry.payload.insert(entry.payload.end(), payload.begin(), payload.end());
+        uint8_t prefSzx = 6;
+        blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+        uint8_t outSzx = hasBlock2 ? std::min(b2Opt.szx, prefSzx) : prefSzx;
+        uint32_t outBlockSize = 1U << (outSzx + 4U);
+        size_t projectedRespSize = entry.payload.size() + effectiveBodyPtr->size();
+        bool needsRetainedBlock2 = (projectedRespSize > outBlockSize) || hasBlock2;
+        if (needsRetainedBlock2 && projectedRespSize > outBlockSize
+                && retainedBlock2.find(blockKey) == retainedBlock2.end()
+                && static_cast<int>(retainedBlock2.size()) >= maxIncomingBlockTransfers) {
+            emit(capacityRejectedSignal, 1L);
+            auto respHeader = makeShared<CoapHeader>();
+            addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, static_cast<uint32_t>(std::ceil(maxTransmitWait.dbl())));
+            sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_SERVICE_UNAVAILABLE, respHeader, emptyPayload);
+            return;
+        }
+
+        entry.payload.insert(entry.payload.end(), effectiveBodyPtr->begin(), effectiveBodyPtr->end());
         entry.etag = allocateNextEtag();
 
         notifyObserversResourceMutated(pathKey, entry);
+
+        if (entry.payload.size() > outBlockSize) {
+            auto& retained = retainedBlock2[blockKey];
+            retained.key = blockKey;
+            retained.responseCode = COAP_CODE_CHANGED;
+            retained.contentFormat = entry.contentFormat;
+            retained.maxAge = entry.maxAge;
+            retained.explicitMaxAge = entry.explicitMaxAge;
+            retained.etag = entry.etag;
+            retained.payload = entry.payload;
+            retained.expiresAt = now + maxTransmitWait;
+            rescheduleDeadlineTimer();
+        }
 
         auto respHeader = makeShared<CoapHeader>();
         addCoapOption(respHeader, COAP_OPT_ETAG, entry.etag);
@@ -1026,7 +1414,10 @@ void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsM
             addCoapOptionUint(respHeader, COAP_OPT_CONTENT_FORMAT, static_cast<uint32_t>(entry.contentFormat));
         if (entry.explicitMaxAge || entry.maxAge != 60U)
             addCoapOptionUint(respHeader, COAP_OPT_MAX_AGE, entry.maxAge);
-        sendResponsePacket(peer, reqConfirmable, reqMid, header, COAP_CODE_CHANGED, respHeader, entry.payload);
+        if (includeFinalBlock1)
+            addCoapOptionUint(respHeader, COAP_OPT_BLOCK1, blockwise::encodeCoapBlockValue(finalBlock1Opt));
+        sendBlockwiseResponse(peer, reqConfirmable, reqMid, header, COAP_CODE_CHANGED, respHeader,
+                entry.payload, hasBlock2, b2Opt);
         return;
     }
 

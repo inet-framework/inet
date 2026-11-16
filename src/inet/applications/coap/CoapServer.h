@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "inet/applications/coap/CoapBlockwiseTransfer.h"
 #include "inet/applications/coap/CoapEndpointBase.h"
 #include "inet/applications/coap/CoapObservation.h"
 
@@ -71,6 +72,8 @@ class INET_API CoapServer : public CoapEndpointBase
     std::map<std::string, CoapResourceEntry> resources;
     std::deque<CoapPendingSeparateResponse> pendingSeparateResponses;
     std::map<CoapObserverKey, CoapServerObserverRelation> observers;
+    std::map<blockwise::CoapBlockRequestKey, blockwise::CoapServerBlock1Context> incomingBlock1;
+    std::map<blockwise::CoapBlockRequestKey, blockwise::CoapServerRetainedBlock2Context> retainedBlock2;
 
     static simsignal_t requestHandledSignal;
     static simsignal_t activeObserversSignal;
@@ -103,6 +106,12 @@ class INET_API CoapServer : public CoapEndpointBase
     void pumpObserverNotifications(simtime_t now);
     void removeObserverAndEmit(std::map<CoapObserverKey, CoapServerObserverRelation>::iterator it);
 
+    void purgeExpiredBlockContexts(simtime_t now);
+    void sendBlockwiseResponse(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
+            const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
+            const std::vector<uint8_t>& fullPayload, bool hasBlock2, const blockwise::CoapBlockOption& reqBlock2,
+            simtime_t minDelay = SIMTIME_ZERO, bool refreshObserveTick = false,
+            const CoapObserverKey *observeKey = nullptr);
     void sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
             const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
             const std::vector<uint8_t>& payload, simtime_t minDelay = SIMTIME_ZERO,

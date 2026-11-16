@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "inet/applications/coap/CoapBlockwiseTransfer.h"
 #include "inet/applications/coap/CoapEndpointBase.h"
 #include "inet/applications/coap/CoapObservation.h"
 
@@ -97,6 +98,13 @@ class INET_API CoapClient : public CoapEndpointBase
     std::map<uint64_t, CoapObserverKey> observeConsumerToRelation;
     std::vector<CoapClientObserveNotification> receivedNotifications;
 
+    // RFC 7959 Blockwise & RFC 9175 Request-Tag state
+    uint64_t nextRequestTagCounter = 1;
+    std::map<uint64_t, blockwise::CoapClientBlockTransfer> activeBlockTransfers;
+    std::map<uint64_t, uint64_t> subRequestToTransfer;
+    std::map<blockwise::CoapBlockRequestKey, uint64_t> activeKeyToTransfer;
+    std::map<blockwise::CoapBlockRequestKey, std::deque<blockwise::CoapClientBlockTransfer>> queuedBlockTransfers;
+
     static simsignal_t requestStartedSignal;
     static simsignal_t requestCompletedSignal;
     static simsignal_t requestFailedSignal;
@@ -114,6 +122,11 @@ class INET_API CoapClient : public CoapEndpointBase
     virtual void onEndpointStop() override;
     virtual void onEndpointCrash() override;
 
+    virtual void dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) override;
+    virtual void dispatchRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) override;
+    virtual void dispatchRequestAborted(uint64_t requestId) override;
+
     virtual bool handleUnsolicitedResponse(const CoapPeerEndpoint& peer, bool destIsMulticast,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override;
     virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
@@ -127,6 +140,16 @@ class INET_API CoapClient : public CoapEndpointBase
     virtual void onObserveTerminated(uint64_t relationId, uint8_t code, const char *reason) {}
 
     void scheduleNextSend(simtime_t when);
+    uint64_t submitWireExchange(const CoapPeerEndpoint& peer, bool peerMulticast, uint8_t methodCode,
+            bool isConfirmable, const CoapParsedUri& parsedUri, const std::vector<uint8_t>& body,
+            int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions,
+            const std::vector<uint8_t> *explicitToken);
+    bool startClientBlockTransfer(blockwise::CoapClientBlockTransfer& transfer);
+    bool sendNextTransferStep(blockwise::CoapClientBlockTransfer& transfer);
+    void releaseTransferSlotAndPumpQueue(const blockwise::CoapBlockRequestKey& key);
+    void failLogicalTransfer(uint64_t transferId, const char *reason, uint8_t coapCode = 0);
+    void completeLogicalTransfer(uint64_t transferId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& finalHeader, const std::vector<uint8_t>& finalPayload);
     uint64_t submitCoapRequestInternal(const L3Address& destAddr, int destPort, uint8_t methodCode,
             bool isConfirmable, const std::string& uriStr, const std::vector<uint8_t>& body,
             int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions,

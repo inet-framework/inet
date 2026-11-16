@@ -252,24 +252,50 @@ class INET_API CoapEndpointBase : public ApplicationBase, public UdpSocket::ICal
     void expirePendingRequests(simtime_t now);
     void cancelConfirmableExchangesForRequest(uint64_t requestId);
 
+    /** Returns true if a critical request option number is understood by this endpoint or derived handler. */
     virtual bool isRecognizedRequestOption(uint16_t optionNumber) const;
+    /** Returns true if a critical response option number is understood by this endpoint or derived handler. */
     virtual bool isRecognizedResponseOption(uint16_t optionNumber) const;
     bool findUnrecognizedCriticalOption(const CoapHeader& header, bool isRequest, uint16_t& badOptionOut) const;
 
+    /** Dispatches a validated inbound request (code 0.01..0.31) to the server or derived handler. */
     virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload);
+    /** Gives subclasses (e.g., Observe clients) first claim on response datagrams not matching an active pending token; returns true if handled. */
     virtual bool handleUnsolicitedResponse(const CoapPeerEndpoint& peer, bool destIsMulticast,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) { return false; }
+    /** Processes a response matched to a tracked pending request token and peer. */
     virtual void handleMatchedResponse(const CoapPendingRequest& request, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload);
+    /** Notified when an Empty ACK acknowledges an outbound confirmable transaction matching messageId. */
     virtual void handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t messageId);
+    /** Notified when an Empty RST rejects an outbound transaction matching messageId. */
     virtual void handleReset(const CoapPeerEndpoint& peer, uint16_t messageId);
+    /** Notified when an outbound non-request confirmable exchange exhausts retries without ACK. */
     virtual void onOutboundExchangeFailed(uint64_t exchangeId, const CoapPeerEndpoint& peer, uint16_t messageId, const char *reason) {}
+    /** Notified when an outbound item submitted with an explicit outboundId receives a matching ACK. */
     virtual void onOutboundItemAcknowledged(uint64_t outboundId) {}
+    /** Notified when an outbound item submitted with an explicit outboundId fails or exhausts retransmissions. */
     virtual void onOutboundItemFailed(uint64_t outboundId, const char *reason) {}
+    /** Internal intercept seam allowing derived clients to chain multi-block transfers before reporting one logical completion. */
+    virtual void dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) {
+        onRequestCompleted(requestId, peer, responseHeader, payload);
+    }
+    /** Internal intercept seam allowing derived clients to handle/retry blockwise sub-exchange failures before failing the logical request. */
+    virtual void dispatchRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) {
+        onRequestFailed(requestId, reason, coapCode);
+    }
+    /** Internal intercept seam allowing derived clients to clean up logical transfer state before emitting a single abort outcome. */
+    virtual void dispatchRequestAborted(uint64_t requestId) {
+        onRequestAborted(requestId);
+    }
+    /** Invoked when a logical CoAP request receives its final response (after any subclass blockwise/Observe assembly). */
     virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) {}
+    /** Invoked when a logical CoAP request fails via timeout, Reset, malformed reply, or capacity error. */
     virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode = 0) {}
+    /** Invoked when an unfinished logical CoAP request is aborted during endpoint stop or crash. */
     virtual void onRequestAborted(uint64_t requestId) {}
 
   public:

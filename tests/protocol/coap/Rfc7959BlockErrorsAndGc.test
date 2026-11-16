@@ -1,0 +1,176 @@
+%description:
+
+RFC 7959 Sections 2.2-2.5 -- Server/client blockwise error handling and GC:
+SZX=7 -> 4.00 Bad Request, >3B Block option -> 4.02 Bad Option,
+out-of-order NUM=1 / M=0 Size1 mismatch / expired context -> 4.08,
+oversized Size1 / assembled payload -> 4.13 + Size1,
+and exhausting/GC of maxIncomingBlockTransfers retained POST contexts -> 5.03 + Max-Age.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(coap_block_errors_and_gc)
+{
+    auto sendToServer = [](uint8_t method, uint16_t mid, uint8_t tok,
+            std::vector<RawCoapOption> opts, const std::vector<uint8_t>& body, const char *name) {
+        auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+        RawCoapMessage m;
+        m.type = 0; m.code = method; m.messageId = mid; m.token = {tok};
+        m.options = std::move(opts);
+        m.payload = body;
+        peer->sendRawNow(L3AddressResolver().resolve("hostB"), 5683, encodeRawCoap(m), name);
+    };
+
+    auto expectCode = [](uint8_t tok, uint8_t expectedCode, bool requireSize1 = false,
+            uint32_t expectedSize1 = 0, bool requireMaxAge = false) {
+        return on("hostA.app[0]").signal("packetReceivedFromLower")
+            .assertEvent([tok, expectedCode, requireSize1, expectedSize1, requireMaxAge](const MatchContext& ctx) {
+                RawCoapMessage raw;
+                if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                    return false;
+                if (raw.token != std::vector<uint8_t>{tok} || raw.code != expectedCode)
+                    return false;
+                if (requireSize1) {
+                    uint32_t s1 = 0;
+                    auto v = getRawOptionValues(raw, COAP_OPT_SIZE1);
+                    if (v.size() != 1 || !rawDecodeUint(v[0], s1) || s1 != expectedSize1)
+                        return false;
+                }
+                if (requireMaxAge) {
+                    auto v = getRawOptionValues(raw, COAP_OPT_MAX_AGE);
+                    if (v.size() != 1)
+                        return false;
+                }
+                return true;
+            }).within(0.5);
+    };
+
+    return ProtocolTest("coap_block_errors_and_gc")
+        // 1. SZX == 7 -> 4.00 Bad Request
+        .act(action().at(1.0).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_GET, 0x3001, 0x01,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")}, {COAP_OPT_BLOCK2, coapUintBytes(0x07U)}},
+                    {}, "ReqSzx7");
+        }))
+        .once(expectCode(0x01, COAP_CODE_BAD_REQUEST))
+        // 2. Block1 > 3 bytes -> 4.02 Bad Option
+        .act(action().at(1.2).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3002, 0x02,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")}, {COAP_OPT_BLOCK1, {0x01, 0x02, 0x03, 0x04}}},
+                    std::vector<uint8_t>(16, 'A'), "ReqBadBlockLen");
+        }))
+        .once(expectCode(0x02, COAP_CODE_BAD_OPTION))
+        // 3. Block1 starting at NUM=1 without prior NUM=0 -> 4.08 Request Entity Incomplete
+        .act(action().at(1.4).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3003, 0x03,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")}, {COAP_OPT_BLOCK1, coapUintBytes((1U << 4U) | 0x08U)}},
+                    std::vector<uint8_t>(16, 'B'), "ReqSkipNum0");
+        }))
+        .once(expectCode(0x03, COAP_CODE_REQUEST_ENTITY_INCOMPLETE))
+        // 4. Size1 > maxIncomingBlockSize (128B) -> 4.13 + Size1=128
+        .act(action().at(1.6).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3004, 0x04,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")},
+                     {COAP_OPT_BLOCK1, coapUintBytes(0x09U)}, // NUM=0, M=1, SZX=1 (32B)
+                     {COAP_OPT_SIZE1, coapUintBytes(256U)}},
+                    std::vector<uint8_t>(32, 'C'), "ReqTooBigSize1");
+        }))
+        .once(expectCode(0x04, COAP_CODE_REQUEST_ENTITY_TOO_LARGE, true, 128U))
+        // 5. Block1 M=0 length mismatch vs Size1 -> 4.08
+        .act(action().at(1.8).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3005, 0x05,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")},
+                     {COAP_OPT_BLOCK1, coapUintBytes(0x01U)}, // NUM=0, M=0, SZX=1
+                     {COAP_OPT_SIZE1, coapUintBytes(20U)}},
+                    std::vector<uint8_t>(10, 'D'), "ReqSize1Mismatch");
+        }))
+        .once(expectCode(0x05, COAP_CODE_REQUEST_ENTITY_INCOMPLETE))
+        // 6. Block1 GC expiry after maxTransmitWait (0.2s * (2^2 - 1) * 1.5 = 0.9s): send NUM=0 at 2.0s, wait 1.2s, send NUM=1 -> 4.08
+        .act(action().at(2.0).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3006, 0x06,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")},
+                     {COAP_OPT_BLOCK1, coapUintBytes(0x09U)}}, // NUM=0, M=1, SZX=1
+                    std::vector<uint8_t>(32, 'E'), "StartExpire");
+        }))
+        .once(expectCode(0x06, COAP_CODE_CONTINUE))
+        .act(action().at(3.2).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_PUT, 0x3007, 0x07,
+                    {{COAP_OPT_URI_PATH, asciiBytes("item")},
+                     {COAP_OPT_BLOCK1, coapUintBytes((1U << 4U) | 0x01U)}}, // NUM=1 after GC expiry
+                    std::vector<uint8_t>(16, 'E'), "AfterGcExpire");
+        }))
+        .once(expectCode(0x07, COAP_CODE_REQUEST_ENTITY_INCOMPLETE))
+        // 7. Retained Block2 POST capacity = 2 -> 3rd concurrent retained POST gets 5.03 + Max-Age; recovers after GC
+        .act(action().at(3.5).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_POST, 0x3008, 0x08,
+                    {{COAP_OPT_URI_PATH, asciiBytes("postlog")}, {COAP_OPT_URI_QUERY, asciiBytes("k=1")}},
+                    std::vector<uint8_t>(20, '1'), "PostSlot1");
+        }))
+        .once(expectCode(0x08, COAP_CODE_CHANGED))
+        .act(action().at(3.6).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_POST, 0x3009, 0x09,
+                    {{COAP_OPT_URI_PATH, asciiBytes("postlog")}, {COAP_OPT_URI_QUERY, asciiBytes("k=2")}},
+                    std::vector<uint8_t>(20, '2'), "PostSlot2");
+        }))
+        .once(expectCode(0x09, COAP_CODE_CHANGED))
+        .act(action().at(3.7).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_POST, 0x300A, 0x0A,
+                    {{COAP_OPT_URI_PATH, asciiBytes("postlog")}, {COAP_OPT_URI_QUERY, asciiBytes("k=3")}},
+                    std::vector<uint8_t>(20, '3'), "PostSlotFull503");
+        }))
+        .once(expectCode(0x0A, COAP_CODE_SERVICE_UNAVAILABLE, false, 0, true))
+        // After maxTransmitWait (0.9s) passes from 3.6s -> at 4.8s retained contexts are GCed so k=3 succeeds!
+        .act(action().at(4.8).run<CoapTestPeer>("hostA.app[0]", [sendToServer](CoapTestPeer&) {
+            sendToServer(COAP_CODE_POST, 0x300B, 0x0B,
+                    {{COAP_OPT_URI_PATH, asciiBytes("postlog")}, {COAP_OPT_URI_QUERY, asciiBytes("k=3")}},
+                    std::vector<uint8_t>(20, '3'), "PostAfterGc");
+        }))
+        .once(expectCode(0x0B, COAP_CODE_CHANGED));
+}
+
+%activity:
+EV << "coap_block_errors_and_gc compiled\n";
+
+%file: resources.xml
+<resources>
+    <resource path="/item" contentFormat="0" maxAge="60" methods="GET,PUT">init</resource>
+    <resource path="/postlog" contentFormat="0" maxAge="60" methods="GET,POST">012345678901234567890123</resource>
+</resources>
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 8s
+seed-set = 0
+*.tester.testName = "coap_block_errors_and_gc"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 32B
+*.hostB.app[0].maxIncomingBlockSize = 128B
+*.hostB.app[0].maxIncomingBlockTransfers = 2
+# maxTransmitWait = 0.2s * ((1 << 2) - 1) * 1.5 = 0.9s
+*.hostB.app[0].ackTimeout = 0.2s
+*.hostB.app[0].maxRetransmit = 1
+*.hostB.app[0].resources = xmldoc("resources.xml")
+
+%contains: stdout
+PROTOCOLTEST coap_block_errors_and_gc: PASS

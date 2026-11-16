@@ -251,6 +251,12 @@ void CoapClient::onEndpointStop()
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
+    for (auto& kv : queuedBlockTransfers) {
+        for (auto& queued : kv.second)
+            onRequestAborted(queued.transferId);
+    }
+    queuedBlockTransfers.clear();
+    activeKeyToTransfer.clear();
     emit(activeObservationsSignal, 0L);
 }
 
@@ -261,6 +267,12 @@ void CoapClient::onEndpointCrash()
     observationsByCacheKey.clear();
     pendingObserveRegistrations.clear();
     observeConsumerToRelation.clear();
+    for (auto& kv : queuedBlockTransfers) {
+        for (auto& queued : kv.second)
+            onRequestAborted(queued.transferId);
+    }
+    queuedBlockTransfers.clear();
+    activeKeyToTransfer.clear();
     emit(activeObservationsSignal, 0L);
 }
 
@@ -380,6 +392,186 @@ uint64_t CoapClient::submitCoapRequest(const L3Address& destAddr, int destPort, 
             body, reqContentFormat, reqAccept, extraOptions, nullptr, /*bypassObserveReuse=*/false);
 }
 
+uint64_t CoapClient::submitWireExchange(const CoapPeerEndpoint& peer, bool peerMulticast, uint8_t methodCode,
+        bool isConfirmable, const CoapParsedUri& parsedUri, const std::vector<uint8_t>& body,
+        int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions,
+        const std::vector<uint8_t> *explicitToken)
+{
+    std::vector<uint8_t> token;
+    if (explicitToken != nullptr) {
+        token = *explicitToken;
+    }
+    else if (!allocateToken(token)) {
+        return 0;
+    }
+
+    uint64_t subRequestId = 0;
+    if (!registerPendingRequest(peer, peerMulticast, isConfirmable, methodCode, token, subRequestId))
+        return 0;
+
+    auto header = makeShared<CoapHeader>();
+    header->setVersion(1);
+    header->setMessageType(isConfirmable ? COAP_TYPE_CON : COAP_TYPE_NON);
+    header->setCode(methodCode);
+    header->setTokenArraySize(token.size());
+    for (size_t i = 0; i < token.size(); ++i)
+        header->setToken(i, token[i]);
+
+    if (parsedUri.hasAuthority && !parsedUri.host.empty()) {
+        L3Address parsedAddr;
+        bool isIpLiteral = parsedAddr.tryParse(parsedUri.host.c_str());
+        if (!isIpLiteral || parsedAddr != peer.address)
+            addCoapOptionString(header, COAP_OPT_URI_HOST, parsedUri.host);
+    }
+
+    if (parsedUri.hasAuthority && parsedUri.port >= 0 && parsedUri.port != peer.port)
+        addCoapOptionUint(header, COAP_OPT_URI_PORT, static_cast<uint32_t>(parsedUri.port));
+
+    for (const auto& seg : parsedUri.pathSegments)
+        addCoapOptionString(header, COAP_OPT_URI_PATH, seg);
+
+    if (reqContentFormat >= 0)
+        addCoapOptionUint(header, COAP_OPT_CONTENT_FORMAT, static_cast<uint32_t>(reqContentFormat));
+
+    for (const auto& q : parsedUri.querySegments)
+        addCoapOptionString(header, COAP_OPT_URI_QUERY, q);
+
+    if (reqAccept >= 0)
+        addCoapOptionUint(header, COAP_OPT_ACCEPT, static_cast<uint32_t>(reqAccept));
+
+    for (const auto& opt : extraOptions) {
+        std::vector<uint8_t> val(opt.getValueArraySize());
+        for (size_t i = 0; i < opt.getValueArraySize(); ++i)
+            val[i] = opt.getValue(i);
+        addCoapOption(header, opt.getNumber(), val);
+    }
+
+    if (!submitOutboundMessage(peer, peerMulticast, isConfirmable, /*isRequest=*/true, subRequestId,
+            token, "CoapRequest", header, body)) {
+        removePendingRequest(token);
+        return 0;
+    }
+
+    return subRequestId;
+}
+
+bool CoapClient::sendNextTransferStep(blockwise::CoapClientBlockTransfer& transfer)
+{
+    CoapParsedUri parsedUri = parseCoapUri(transfer.uriStr);
+    std::vector<CoapOption> stepOptions;
+    bool hasExplicitBlock1 = false;
+    bool hasExplicitBlock2 = false;
+    for (const auto& opt : transfer.baseExtraOptions) {
+        uint16_t num = opt.getNumber();
+        if (transfer.uploadDone || transfer.uploadActive) {
+            if (num == COAP_OPT_BLOCK1 || num == COAP_OPT_SIZE1)
+                continue;
+        }
+        if (transfer.downloadActive && transfer.expectedNextOffset > 0) {
+            if (num == COAP_OPT_BLOCK2 || num == COAP_OPT_SIZE2)
+                continue;
+        }
+        if (num == COAP_OPT_BLOCK1)
+            hasExplicitBlock1 = true;
+        else if (num == COAP_OPT_BLOCK2)
+            hasExplicitBlock2 = true;
+        stepOptions.push_back(opt);
+    }
+
+    std::vector<uint8_t> stepBody;
+    transfer.sentBlock1InLastExchange = false;
+
+    if (transfer.uploadActive && !transfer.uploadDone) {
+        uint32_t bs = 1U << (transfer.uploadSzx + 4U);
+        size_t rem = transfer.uploadBody.size() - static_cast<size_t>(transfer.uploadOffset);
+        size_t chunkLen = std::min<size_t>(bs, rem);
+        bool more = (transfer.uploadOffset + chunkLen < transfer.uploadBody.size());
+        uint32_t num = static_cast<uint32_t>(transfer.uploadOffset / bs);
+
+        CoapOption b1Opt;
+        b1Opt.setNumber(COAP_OPT_BLOCK1);
+        std::vector<uint8_t> b1Val = encodeCoapUintValue(blockwise::encodeCoapBlockValue({num, more, transfer.uploadSzx}));
+        b1Opt.setValueArraySize(b1Val.size());
+        for (size_t i = 0; i < b1Val.size(); ++i)
+            b1Opt.setValue(i, b1Val[i]);
+        stepOptions.push_back(b1Opt);
+
+        if (num == 0) {
+            CoapOption s1Opt;
+            s1Opt.setNumber(COAP_OPT_SIZE1);
+            std::vector<uint8_t> s1Val = encodeCoapUintValue(static_cast<uint32_t>(transfer.uploadBody.size()));
+            s1Opt.setValueArraySize(s1Val.size());
+            for (size_t i = 0; i < s1Val.size(); ++i)
+                s1Opt.setValue(i, s1Val[i]);
+            stepOptions.push_back(s1Opt);
+        }
+
+        stepBody.assign(transfer.uploadBody.begin() + static_cast<std::ptrdiff_t>(transfer.uploadOffset),
+                transfer.uploadBody.begin() + static_cast<std::ptrdiff_t>(transfer.uploadOffset + chunkLen));
+        transfer.sentBlock1InLastExchange = true;
+    }
+    else if (transfer.downloadActive) {
+        uint32_t bs = 1U << (transfer.downloadSzx + 4U);
+        uint32_t num = static_cast<uint32_t>(transfer.expectedNextOffset / bs);
+        if (transfer.expectedNextOffset > 0 || !hasExplicitBlock2) {
+            CoapOption b2Opt;
+            b2Opt.setNumber(COAP_OPT_BLOCK2);
+            std::vector<uint8_t> b2Val = encodeCoapUintValue(blockwise::encodeCoapBlockValue({num, false, transfer.downloadSzx}));
+            b2Opt.setValueArraySize(b2Val.size());
+            for (size_t i = 0; i < b2Val.size(); ++i)
+                b2Opt.setValue(i, b2Val[i]);
+            stepOptions.push_back(b2Opt);
+        }
+    }
+    else {
+        stepBody = transfer.uploadBody;
+        transfer.sentBlock1InLastExchange = hasExplicitBlock1;
+    }
+
+    uint64_t subReqId = submitWireExchange(transfer.peer, transfer.peerIsMulticast, transfer.methodCode,
+            transfer.isConfirmable, parsedUri, stepBody, transfer.reqContentFormat, transfer.reqAccept,
+            stepOptions, nullptr);
+    if (subReqId == 0)
+        return false;
+
+    transfer.activeSubRequestId = subReqId;
+    subRequestToTransfer[subReqId] = transfer.transferId;
+    return true;
+}
+
+bool CoapClient::startClientBlockTransfer(blockwise::CoapClientBlockTransfer& transfer)
+{
+    uint64_t id = transfer.transferId;
+    activeBlockTransfers[id] = transfer;
+    auto& stored = activeBlockTransfers[id];
+    if (!sendNextTransferStep(stored)) {
+        activeBlockTransfers.erase(id);
+        return false;
+    }
+    return true;
+}
+
+void CoapClient::releaseTransferSlotAndPumpQueue(const blockwise::CoapBlockRequestKey& key)
+{
+    activeKeyToTransfer.erase(key);
+    auto qIt = queuedBlockTransfers.find(key);
+    while (qIt != queuedBlockTransfers.end() && !qIt->second.empty()) {
+        blockwise::CoapClientBlockTransfer next = std::move(qIt->second.front());
+        qIt->second.pop_front();
+        if (qIt->second.empty())
+            queuedBlockTransfers.erase(qIt);
+
+        next.serializedSlotHeld = true;
+        activeKeyToTransfer[key] = next.transferId;
+        if (startClientBlockTransfer(next))
+            return;
+
+        activeKeyToTransfer.erase(key);
+        onRequestFailed(next.transferId, "Failed to start queued CoAP blockwise transfer");
+        qIt = queuedBlockTransfers.find(key);
+    }
+}
+
 uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int destPort, uint8_t methodCode,
         bool isConfirmable, const std::string& uriStr, const std::vector<uint8_t>& body,
         int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions,
@@ -390,6 +582,42 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
     bool peerMulticast = destAddr.isMulticast();
     if (peerMulticast && isConfirmable)
         throw cRuntimeError("Confirmable CoAP requests must not target multicast address");
+
+    bool hasExplicitBlock1 = false;
+    bool hasExplicitBlock2 = false;
+    bool hasExplicitObserve = false;
+    bool hasExplicitRequestTag = false;
+    blockwise::CoapBlockOption explicitB2;
+    std::vector<std::vector<uint8_t>> ifMatchValues;
+    bool hasIfNoneMatch = false;
+    std::vector<std::vector<uint8_t>> requestTags;
+
+    for (const auto& opt : extraOptions) {
+        uint16_t num = opt.getNumber();
+        if (num == COAP_OPT_OBSERVE)
+            hasExplicitObserve = true;
+        else if (num == COAP_OPT_BLOCK1)
+            hasExplicitBlock1 = true;
+        else if (num == COAP_OPT_BLOCK2) {
+            hasExplicitBlock2 = true;
+            blockwise::decodeCoapBlockOption(opt, explicitB2);
+        }
+        else if (num == COAP_OPT_IF_MATCH) {
+            std::vector<uint8_t> val(opt.getValueArraySize());
+            for (size_t i = 0; i < val.size(); ++i)
+                val[i] = opt.getValue(i);
+            ifMatchValues.push_back(std::move(val));
+        }
+        else if (num == COAP_OPT_IF_NONE_MATCH)
+            hasIfNoneMatch = true;
+        else if (num == COAP_OPT_REQUEST_TAG) {
+            hasExplicitRequestTag = true;
+            std::vector<uint8_t> val(opt.getValueArraySize());
+            for (size_t i = 0; i < val.size(); ++i)
+                val[i] = opt.getValue(i);
+            requestTags.push_back(std::move(val));
+        }
+    }
 
     if (methodCode == COAP_CODE_GET && !bypassObserveReuse && explicitToken == nullptr && !peerMulticast) {
         bool hasBypassOption = false;
@@ -436,72 +664,95 @@ uint64_t CoapClient::submitCoapRequestInternal(const L3Address& destAddr, int de
 
     emit(requestStartedSignal, 1L);
 
-    std::vector<uint8_t> token;
-    if (explicitToken != nullptr) {
-        token = *explicitToken;
+    // Direct single-exchange path for Observe registrations/cancellations or explicit-token requests.
+    if (explicitToken != nullptr || hasExplicitObserve || bypassObserveReuse) {
+        uint64_t subReqId = submitWireExchange(peer, peerMulticast, methodCode, isConfirmable, parsedUri,
+                body, reqContentFormat, reqAccept, extraOptions, explicitToken);
+        if (subReqId == 0) {
+            ++failedCount;
+            emit(requestFailedSignal, 1L);
+            return 0;
+        }
+        activeRequestStarts[subReqId] = simTime();
+        return subReqId;
     }
-    else if (!allocateToken(token)) {
+
+    uint8_t prefSzx = 6;
+    blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+
+    blockwise::CoapClientBlockTransfer transfer;
+    transfer.transferId = nextRequestId++;
+    transfer.peer = peer;
+    transfer.peerIsMulticast = peerMulticast;
+    transfer.isConfirmable = isConfirmable;
+    transfer.methodCode = methodCode;
+    transfer.uriStr = uriStr;
+    transfer.reqContentFormat = reqContentFormat;
+    transfer.reqAccept = reqAccept;
+    transfer.baseExtraOptions = extraOptions;
+    transfer.logicalStartTime = simTime();
+    transfer.hasUploadBody = !body.empty();
+    transfer.uploadBody = body;
+    transfer.uploadSzx = prefSzx;
+    transfer.downloadSzx = hasExplicitBlock2 ? std::min(explicitB2.szx, prefSzx) : prefSzx;
+
+    bool needsBlock1 = (methodCode == COAP_CODE_PUT || methodCode == COAP_CODE_POST)
+            && !hasExplicitBlock1 && !peerMulticast
+            && body.size() > static_cast<size_t>(preferredBlockSize);
+
+    if (useRequestTag && !hasExplicitRequestTag && !peerMulticast
+            && (methodCode == COAP_CODE_PUT || methodCode == COAP_CODE_POST)) {
+        std::vector<uint8_t> autoTag = encodeCoapUintValue(static_cast<uint32_t>(nextRequestTagCounter++));
+        CoapOption tagOpt;
+        tagOpt.setNumber(COAP_OPT_REQUEST_TAG);
+        tagOpt.setValueArraySize(autoTag.size());
+        for (size_t i = 0; i < autoTag.size(); ++i)
+            tagOpt.setValue(i, autoTag[i]);
+        transfer.baseExtraOptions.push_back(tagOpt);
+        requestTags.push_back(std::move(autoTag));
+    }
+
+    transfer.uploadActive = needsBlock1;
+    transfer.downloadActive = hasExplicitBlock2;
+
+    transfer.serializationKey.peer = peer;
+    transfer.serializationKey.methodCode = methodCode;
+    transfer.serializationKey.pathSegments = parsedUri.pathSegments;
+    transfer.serializationKey.uriQueries = parsedUri.querySegments;
+    transfer.serializationKey.contentFormat = reqContentFormat;
+    transfer.serializationKey.acceptFormat = reqAccept;
+    transfer.serializationKey.ifMatchValues = std::move(ifMatchValues);
+    transfer.serializationKey.hasIfNoneMatch = hasIfNoneMatch;
+    transfer.serializationKey.requestTags = std::move(requestTags);
+
+    activeRequestStarts[transfer.transferId] = simTime();
+
+    bool alreadySerialized = (activeKeyToTransfer.find(transfer.serializationKey) != activeKeyToTransfer.end());
+    if (alreadySerialized) {
+        uint64_t queuedId = transfer.transferId;
+        auto& q = queuedBlockTransfers[transfer.serializationKey];
+        q.push_back(std::move(transfer));
+        return queuedId;
+    }
+
+    bool holdSlot = needsBlock1 || hasExplicitBlock2
+            || (!peerMulticast && (methodCode == COAP_CODE_POST || methodCode == COAP_CODE_PUT));
+    if (holdSlot) {
+        activeKeyToTransfer[transfer.serializationKey] = transfer.transferId;
+        transfer.serializedSlotHeld = true;
+    }
+
+    uint64_t transferId = transfer.transferId;
+    if (!startClientBlockTransfer(transfer)) {
+        activeRequestStarts.erase(transferId);
+        if (transfer.serializedSlotHeld)
+            activeKeyToTransfer.erase(transfer.serializationKey);
         ++failedCount;
         emit(requestFailedSignal, 1L);
         return 0;
     }
 
-    uint64_t requestId = 0;
-    if (!registerPendingRequest(peer, peerMulticast, isConfirmable, methodCode, token, requestId)) {
-        ++failedCount;
-        emit(requestFailedSignal, 1L);
-        return 0;
-    }
-
-    activeRequestStarts[requestId] = simTime();
-
-    auto header = makeShared<CoapHeader>();
-    header->setVersion(1);
-    header->setMessageType(isConfirmable ? COAP_TYPE_CON : COAP_TYPE_NON);
-    header->setCode(methodCode);
-    header->setTokenArraySize(token.size());
-    for (size_t i = 0; i < token.size(); ++i)
-        header->setToken(i, token[i]);
-
-    if (parsedUri.hasAuthority && !parsedUri.host.empty()) {
-        L3Address parsedAddr;
-        bool isIpLiteral = parsedAddr.tryParse(parsedUri.host.c_str());
-        if (!isIpLiteral || parsedAddr != destAddr)
-            addCoapOptionString(header, COAP_OPT_URI_HOST, parsedUri.host);
-    }
-
-    if (parsedUri.hasAuthority && parsedUri.port >= 0 && parsedUri.port != destPort)
-        addCoapOptionUint(header, COAP_OPT_URI_PORT, static_cast<uint32_t>(parsedUri.port));
-
-    for (const auto& seg : parsedUri.pathSegments)
-        addCoapOptionString(header, COAP_OPT_URI_PATH, seg);
-
-    if (reqContentFormat >= 0)
-        addCoapOptionUint(header, COAP_OPT_CONTENT_FORMAT, static_cast<uint32_t>(reqContentFormat));
-
-    for (const auto& q : parsedUri.querySegments)
-        addCoapOptionString(header, COAP_OPT_URI_QUERY, q);
-
-    if (reqAccept >= 0)
-        addCoapOptionUint(header, COAP_OPT_ACCEPT, static_cast<uint32_t>(reqAccept));
-
-    for (const auto& opt : extraOptions) {
-        std::vector<uint8_t> val(opt.getValueArraySize());
-        for (size_t i = 0; i < opt.getValueArraySize(); ++i)
-            val[i] = opt.getValue(i);
-        addCoapOption(header, opt.getNumber(), val);
-    }
-
-    if (!submitOutboundMessage(peer, peerMulticast, isConfirmable, /*isRequest=*/true, requestId,
-            token, "CoapRequest", header, body)) {
-        activeRequestStarts.erase(requestId);
-        removePendingRequest(token);
-        ++failedCount;
-        emit(requestFailedSignal, 1L);
-        return 0;
-    }
-
-    return requestId;
+    return transferId;
 }
 
 uint64_t CoapClient::subscribeObserve(const L3Address& destAddr, int destPort, const std::string& uriStr,
@@ -743,6 +994,258 @@ bool CoapClient::handleUnsolicitedResponse(const CoapPeerEndpoint& peer, bool de
 
     acceptObserveUpdate(obs, header, payload, obsVal);
     return true;
+}
+
+void CoapClient::failLogicalTransfer(uint64_t transferId, const char *reason, uint8_t coapCode)
+{
+    auto trIt = activeBlockTransfers.find(transferId);
+    if (trIt == activeBlockTransfers.end())
+        return;
+
+    blockwise::CoapBlockRequestKey key = trIt->second.serializationKey;
+    bool slotHeld = trIt->second.serializedSlotHeld;
+    activeBlockTransfers.erase(trIt);
+
+    onRequestFailed(transferId, reason, coapCode);
+
+    if (slotHeld)
+        releaseTransferSlotAndPumpQueue(key);
+}
+
+void CoapClient::completeLogicalTransfer(uint64_t transferId, const CoapPeerEndpoint& peer,
+        const Ptr<const CoapHeader>& finalHeader, const std::vector<uint8_t>& finalPayload)
+{
+    auto trIt = activeBlockTransfers.find(transferId);
+    if (trIt == activeBlockTransfers.end())
+        return;
+
+    blockwise::CoapBlockRequestKey key = trIt->second.serializationKey;
+    bool slotHeld = trIt->second.serializedSlotHeld;
+    activeBlockTransfers.erase(trIt);
+
+    onRequestCompleted(transferId, peer, finalHeader, finalPayload);
+
+    if (slotHeld)
+        releaseTransferSlotAndPumpQueue(key);
+}
+
+void CoapClient::dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpoint& peer,
+        const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload)
+{
+    auto mapIt = subRequestToTransfer.find(requestId);
+    if (mapIt == subRequestToTransfer.end()) {
+        onRequestCompleted(requestId, peer, responseHeader, payload);
+        return;
+    }
+
+    uint64_t transferId = mapIt->second;
+    subRequestToTransfer.erase(mapIt);
+
+    auto trIt = activeBlockTransfers.find(transferId);
+    if (trIt == activeBlockTransfers.end())
+        return;
+
+    blockwise::CoapClientBlockTransfer& t = trIt->second;
+    uint8_t code = responseHeader->getCode();
+
+    bool hasBlock1 = false;
+    blockwise::CoapBlockOption b1;
+    bool hasBlock2 = false;
+    blockwise::CoapBlockOption b2;
+    bool hasSize1 = false;
+    uint32_t size1Val = 0;
+    std::vector<std::vector<uint8_t>> etags;
+
+    for (size_t i = 0; i < responseHeader->getOptionsArraySize(); ++i) {
+        const auto& opt = responseHeader->getOptions(i);
+        uint16_t num = opt.getNumber();
+        if (num == COAP_OPT_BLOCK1) {
+            if (hasBlock1 || blockwise::decodeCoapBlockOption(opt, b1) != blockwise::CoapBlockDecodeStatus::OK) {
+                failLogicalTransfer(transferId, "Invalid Block1 option in server response");
+                return;
+            }
+            hasBlock1 = true;
+        }
+        else if (num == COAP_OPT_BLOCK2) {
+            if (hasBlock2 || blockwise::decodeCoapBlockOption(opt, b2) != blockwise::CoapBlockDecodeStatus::OK) {
+                failLogicalTransfer(transferId, "Invalid Block2 option in server response");
+                return;
+            }
+            hasBlock2 = true;
+        }
+        else if (num == COAP_OPT_SIZE1) {
+            if (!decodeCoapUintValue(opt, size1Val, 4)) {
+                failLogicalTransfer(transferId, "Invalid Size1 option in server response");
+                return;
+            }
+            hasSize1 = true;
+        }
+        else if (num == COAP_OPT_ETAG) {
+            std::vector<uint8_t> val(opt.getValueArraySize());
+            for (size_t j = 0; j < val.size(); ++j)
+                val[j] = opt.getValue(j);
+            etags.push_back(std::move(val));
+        }
+    }
+
+    if (code == COAP_CODE_CONTINUE) {
+        if (!t.uploadActive || t.uploadDone || !hasBlock1 || b1.szx > t.uploadSzx || b1.byteOffset() != t.uploadOffset) {
+            failLogicalTransfer(transferId, "Unexpected or inconsistent 2.31 Continue response", code);
+            return;
+        }
+
+        uint32_t sentBs = 1U << (t.uploadSzx + 4U);
+        size_t sentLen = std::min<size_t>(sentBs, t.uploadBody.size() - static_cast<size_t>(t.uploadOffset));
+        t.uploadOffset += sentLen;
+        t.uploadSzx = b1.szx;
+
+        if (t.uploadOffset >= t.uploadBody.size()) {
+            failLogicalTransfer(transferId, "2.31 Continue received after final Block1 segment", code);
+            return;
+        }
+
+        if (!t.serializedSlotHeld) {
+            t.serializedSlotHeld = true;
+            activeKeyToTransfer[t.serializationKey] = transferId;
+        }
+
+        if (!sendNextTransferStep(t))
+            failLogicalTransfer(transferId, "Failed to transmit next Block1 chunk");
+        return;
+    }
+
+    if (code == COAP_CODE_REQUEST_ENTITY_TOO_LARGE) {
+        uint8_t prefSzx = 6;
+        blockwise::szxFromBlockSize(static_cast<uint32_t>(preferredBlockSize), prefSzx);
+        uint8_t curSzx = t.sentBlock1InLastExchange ? t.uploadSzx : prefSzx;
+        bool acceptableSize = (!hasSize1 || size1Val >= t.uploadBody.size());
+        bool validSmallerSzx = hasBlock1 && ((t.sentBlock1InLastExchange && b1.szx < curSzx)
+                || (!t.sentBlock1InLastExchange && b1.szx <= curSzx
+                        && t.uploadBody.size() > (1ULL << (b1.szx + 4U))));
+        if (!t.uploadDone && !t.uploadRestartedOn413 && t.hasUploadBody && acceptableSize && validSmallerSzx) {
+            t.uploadRestartedOn413 = true;
+            t.uploadActive = true;
+            t.uploadOffset = 0;
+            t.uploadSzx = b1.szx;
+            if (!t.serializedSlotHeld) {
+                t.serializedSlotHeld = true;
+                activeKeyToTransfer[t.serializationKey] = transferId;
+            }
+            if (!sendNextTransferStep(t))
+                failLogicalTransfer(transferId, "Failed to restart Block1 upload after 4.13");
+            return;
+        }
+        completeLogicalTransfer(transferId, peer, responseHeader, payload);
+        return;
+    }
+
+    if (code < 128 && hasBlock2) {
+        t.uploadDone = true;
+        if (b2.byteOffset() != t.expectedNextOffset) {
+            failLogicalTransfer(transferId, "Unexpected Block2 offset from server");
+            return;
+        }
+
+        if (t.downloadActive && t.expectedNextOffset > 0) {
+            if (etags.empty()) {
+                failLogicalTransfer(transferId, "Multi-block Block2 response missing ETag");
+                return;
+            }
+            if (etags[0] != t.downloadEtag) {
+                if (!t.restartedOnEtagMismatch && t.methodCode == COAP_CODE_GET) {
+                    t.restartedOnEtagMismatch = true;
+                    t.downloadBuffer.clear();
+                    t.expectedNextOffset = 0;
+                    t.hasDownloadEtag = false;
+                    t.downloadEtag.clear();
+                    t.downloadActive = true;
+                    if (!t.serializedSlotHeld) {
+                        t.serializedSlotHeld = true;
+                        activeKeyToTransfer[t.serializationKey] = transferId;
+                    }
+                    if (!sendNextTransferStep(t))
+                        failLogicalTransfer(transferId, "Failed to restart Block2 download on ETag change");
+                    return;
+                }
+                failLogicalTransfer(transferId, "Block2 representation ETag changed repeatedly during download");
+                return;
+            }
+        }
+        else {
+            if (b2.more && etags.empty()) {
+                failLogicalTransfer(transferId, "Multi-block Block2 response missing ETag");
+                return;
+            }
+            if (!etags.empty()) {
+                t.hasDownloadEtag = true;
+                t.downloadEtag = etags[0];
+            }
+        }
+
+        if (b2.more && payload.size() != b2.blockSize()) {
+            failLogicalTransfer(transferId, "Intermediate Block2 chunk size mismatch");
+            return;
+        }
+        if (t.downloadBuffer.size() + payload.size() > static_cast<size_t>(maxIncomingBlockSize)) {
+            emit(capacityRejectedSignal, 1L);
+            failLogicalTransfer(transferId, "Assembled Block2 payload exceeds maxIncomingBlockSize");
+            return;
+        }
+
+        t.downloadBuffer.insert(t.downloadBuffer.end(), payload.begin(), payload.end());
+        t.expectedNextOffset += payload.size();
+        t.downloadSzx = std::min(t.downloadSzx, b2.szx);
+
+        if (b2.more) {
+            t.downloadActive = true;
+            if (!t.serializedSlotHeld) {
+                t.serializedSlotHeld = true;
+                activeKeyToTransfer[t.serializationKey] = transferId;
+            }
+            if (!sendNextTransferStep(t))
+                failLogicalTransfer(transferId, "Failed to request next Block2 chunk");
+            return;
+        }
+
+        std::vector<uint8_t> assembled = std::move(t.downloadBuffer);
+        completeLogicalTransfer(transferId, peer, responseHeader, assembled);
+        return;
+    }
+
+    completeLogicalTransfer(transferId, peer, responseHeader, payload);
+}
+
+void CoapClient::dispatchRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode)
+{
+    auto mapIt = subRequestToTransfer.find(requestId);
+    if (mapIt == subRequestToTransfer.end()) {
+        onRequestFailed(requestId, reason, coapCode);
+        return;
+    }
+    uint64_t transferId = mapIt->second;
+    subRequestToTransfer.erase(mapIt);
+    failLogicalTransfer(transferId, reason, coapCode);
+}
+
+void CoapClient::dispatchRequestAborted(uint64_t requestId)
+{
+    auto mapIt = subRequestToTransfer.find(requestId);
+    if (mapIt == subRequestToTransfer.end()) {
+        onRequestAborted(requestId);
+        return;
+    }
+    uint64_t transferId = mapIt->second;
+    subRequestToTransfer.erase(mapIt);
+
+    auto trIt = activeBlockTransfers.find(transferId);
+    if (trIt != activeBlockTransfers.end()) {
+        blockwise::CoapBlockRequestKey key = trIt->second.serializationKey;
+        bool slotHeld = trIt->second.serializedSlotHeld;
+        activeBlockTransfers.erase(trIt);
+        if (slotHeld)
+            activeKeyToTransfer.erase(key);
+        onRequestAborted(transferId);
+    }
 }
 
 void CoapClient::onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,

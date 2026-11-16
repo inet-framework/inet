@@ -147,7 +147,7 @@ void CoapEndpointBase::bindSocket()
 void CoapEndpointBase::clearTransientState(bool clearDuplicates)
 {
     for (const auto& kv : pendingRequests)
-        onRequestAborted(kv.second.requestId);
+        dispatchRequestAborted(kv.second.requestId);
 
     pendingRequests.clear();
     outboundMidToToken.clear();
@@ -670,7 +670,7 @@ void CoapEndpointBase::processConfirmableRetransmissions(simtime_t now)
                 bool stillPending = (pendingRequests.find(timedOut.token) != pendingRequests.end());
                 removePendingRequest(timedOut.token);
                 if (stillPending)
-                    onRequestFailed(timedOut.requestId, "CoAP confirmable exchange timed out");
+                    dispatchRequestFailed(timedOut.requestId, "CoAP confirmable exchange timed out");
             }
             else {
                 onOutboundExchangeFailed(timedOut.exchangeId, timedOut.peer, timedOut.messageId,
@@ -834,7 +834,7 @@ void CoapEndpointBase::expirePendingRequests(simtime_t now)
     for (const auto& item : expired) {
         cancelConfirmableExchangesForRequest(item.first);
         removePendingRequest(item.second);
-        onRequestFailed(item.first, "CoAP request timed out");
+        dispatchRequestFailed(item.first, "CoAP request timed out");
     }
 }
 
@@ -852,8 +852,13 @@ bool CoapEndpointBase::isRecognizedRequestOption(uint16_t optionNumber) const
         case COAP_OPT_MAX_AGE:
         case COAP_OPT_URI_QUERY:
         case COAP_OPT_ACCEPT:
+        case COAP_OPT_BLOCK2:
+        case COAP_OPT_BLOCK1:
+        case COAP_OPT_SIZE2:
         case COAP_OPT_PROXY_URI:
         case COAP_OPT_PROXY_SCHEME:
+        case COAP_OPT_SIZE1:
+        case COAP_OPT_REQUEST_TAG:
             return true;
         default:
             return false;
@@ -869,6 +874,10 @@ bool CoapEndpointBase::isRecognizedResponseOption(uint16_t optionNumber) const
         case COAP_OPT_LOCATION_QUERY:
         case COAP_OPT_CONTENT_FORMAT:
         case COAP_OPT_MAX_AGE:
+        case COAP_OPT_BLOCK2:
+        case COAP_OPT_BLOCK1:
+        case COAP_OPT_SIZE2:
+        case COAP_OPT_SIZE1:
             return true;
         default:
             return false;
@@ -1023,7 +1032,7 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
         if (findUnrecognizedCriticalOption(*header, false, badOpt)) {
             uint64_t reqId = reqIt->second.requestId;
             removePendingRequest(token);
-            onRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
+            dispatchRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
             delete packet;
             return;
         }
@@ -1061,7 +1070,7 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
             uint64_t reqId = reqIt->second.requestId;
             cancelConfirmableExchangesForRequest(reqId);
             removePendingRequest(token);
-            onRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
+            dispatchRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
         }
         delete packet;
         return;
@@ -1098,7 +1107,7 @@ void CoapEndpointBase::handleMatchedResponse(const CoapPendingRequest& request, 
         const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload)
 {
     removePendingRequest(request.token);
-    onRequestCompleted(request.requestId, peer, header, payload);
+    dispatchMatchedResponse(request.requestId, peer, header, payload);
 }
 
 void CoapEndpointBase::handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t messageId)
@@ -1135,7 +1144,7 @@ void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messag
             bool stillPending = (pendingRequests.find(ex.token) != pendingRequests.end());
             removePendingRequest(ex.token);
             if (stillPending)
-                onRequestFailed(ex.requestId, "CoAP exchange reset by peer");
+                dispatchRequestFailed(ex.requestId, "CoAP exchange reset by peer");
         }
         else {
             onOutboundExchangeFailed(ex.exchangeId, ex.peer, ex.messageId, "CoAP exchange reset by peer");
@@ -1159,7 +1168,7 @@ void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messag
     markPeerReachable(peer);
     uint64_t reqId = reqIt->second.requestId;
     removePendingRequest(token);
-    onRequestFailed(reqId, "CoAP exchange reset by peer");
+    dispatchRequestFailed(reqId, "CoAP exchange reset by peer");
 }
 
 } // namespace coap
