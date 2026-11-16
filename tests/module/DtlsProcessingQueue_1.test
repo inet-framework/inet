@@ -1,0 +1,84 @@
+%description:
+Two independent DTLS processing queues: synchronous zero cost, capacity,
+serialized service, cancellation of an active operation, and release on teardown.
+
+%file: TestNetwork.ned
+simple ProcessingQueueFixture
+{
+    @class(ProcessingQueueFixture);
+}
+network TestNetwork
+{
+    submodules:
+        fixture: ProcessingQueueFixture;
+}
+
+%file: ProcessingQueueFixture.cc
+#include <memory>
+#include <iostream>
+#include "inet/transportlayer/dtls/DtlsProcessingQueue.h"
+
+using namespace omnetpp;
+using namespace inet::dtls;
+
+namespace DtlsProcessingQueue_1 {
+
+class ProcessingQueueFixture : public cSimpleModule
+{
+    std::unique_ptr<DtlsProcessingQueue> input;
+    std::unique_ptr<DtlsProcessingQueue> output;
+    cMessage *finishTimer = nullptr;
+    int completed = 0;
+
+  protected:
+    virtual void initialize() override {
+        input = std::make_unique<DtlsProcessingQueue>(this, "input", 3);
+        output = std::make_unique<DtlsProcessingQueue>(this, "output", 3);
+        bool synchronous = false;
+        ASSERT(output->enqueue(1, 0, SIMTIME_ZERO, [&] { synchronous = true; }));
+        ASSERT(synchronous && output->getOccupiedBytes() == 0);
+        ASSERT(input->enqueue(1, 2, 2, [&] { ASSERT(simTime() == 2); ++completed; }));
+        ASSERT(input->enqueue(2, 1, 1, [&] { throw cRuntimeError("cancelled operation ran"); }));
+        ASSERT(!input->enqueue(3, 1, 1, [] {}));
+        ASSERT(output->enqueue(3, 1, 1, [&] {
+            ASSERT(simTime() == 1);
+            input->cancel(2);
+            ASSERT(output->enqueue(6, 1, SIMTIME_ZERO, [&] { ++completed; }));
+            ++completed;
+        }));
+        ASSERT(output->enqueue(4, 1, 1, [&] { ASSERT(simTime() == 2); ++completed; }));
+        ASSERT(output->enqueue(5, 1, 10, [&] { throw cRuntimeError("cancelled active operation ran"); }));
+        finishTimer = new cMessage("finish");
+        scheduleAt(3, finishTimer);
+    }
+    virtual void handleMessage(cMessage *message) override {
+        if (input->isTimer(message))
+            input->handleTimer();
+        else if (output->isTimer(message))
+            output->handleTimer();
+        else {
+            ASSERT(message == finishTimer);
+            output->cancel(5);
+            ASSERT(completed == 4);
+            ASSERT(input->getOccupiedBytes() == 0 && output->getOccupiedBytes() == 0);
+            ASSERT(input->enqueue(9, 1, 100, [&] { throw cRuntimeError("teardown operation ran"); }));
+            ASSERT(input->getOccupiedBytes() == 1);
+            std::cout << "DTLS processing queues PASS" << std::endl;
+        }
+    }
+  public:
+    virtual ~ProcessingQueueFixture() { cancelAndDelete(finishTimer); }
+};
+
+Define_Module(ProcessingQueueFixture);
+
+} // namespace DtlsProcessingQueue_1
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 4s
+
+%contains: stdout
+DTLS processing queues PASS
