@@ -14,6 +14,8 @@ Register_Serializer(DtlsClientHello, DtlsPacketSerializer);
 Register_Serializer(DtlsInnerContentType, DtlsPacketSerializer);
 Register_Serializer(DtlsAck, DtlsPacketSerializer);
 Register_Serializer(DtlsAlert, DtlsPacketSerializer);
+Register_Serializer(DtlsNewConnectionId, DtlsPacketSerializer);
+Register_Serializer(DtlsRequestConnectionId, DtlsPacketSerializer);
 
 static void requireBytes(MemoryInputStream& stream, size_t size)
 {
@@ -80,6 +82,16 @@ void DtlsPacketSerializer::serializeFields(MemoryOutputStream& s, const Ptr<cons
             s.writeUint64Be(ack->getSequenceNumbers(i));
         }
     }
+    else if (auto cid = dynamicPtrCast<const DtlsNewConnectionId>(chunk)) {
+        if (cid->getConnectionIdsArraySize() > 65535)
+            throw cRuntimeError("DTLS CID list exceeds 65535 bytes");
+        s.writeUint16Be(cid->getConnectionIdsArraySize());
+        for (size_t i = 0; i < cid->getConnectionIdsArraySize(); ++i)
+            s.writeUint8(cid->getConnectionIds(i));
+        s.writeUint8(cid->getUsage());
+    }
+    else if (auto request = dynamicPtrCast<const DtlsRequestConnectionId>(chunk))
+        s.writeUint8(request->getNumCids());
     else if (auto alert = dynamicPtrCast<const DtlsAlert>(chunk)) {
         s.writeUint8(alert->getLevel());
         s.writeUint8(alert->getDescription());
@@ -169,6 +181,23 @@ const Ptr<Chunk> DtlsPacketSerializer::deserializeFields(MemoryInputStream& s, c
             ack->setSequenceNumbers(i, s.readUint64Be());
         }
         return ack;
+    }
+    if (typeInfo == typeid(DtlsNewConnectionId)) {
+        requireBytes(s, 2);
+        auto length = s.readUint16Be();
+        requireBytes(s, length + 1);
+        auto cid = makeShared<DtlsNewConnectionId>();
+        cid->setConnectionIdsArraySize(length);
+        for (size_t i = 0; i < length; ++i)
+            cid->setConnectionIds(i, s.readUint8());
+        cid->setUsage(s.readUint8());
+        return cid;
+    }
+    if (typeInfo == typeid(DtlsRequestConnectionId)) {
+        requireBytes(s, 1);
+        auto request = makeShared<DtlsRequestConnectionId>();
+        request->setNumCids(s.readUint8());
+        return request;
     }
     if (typeInfo == typeid(DtlsAlert)) {
         requireBytes(s, 2);

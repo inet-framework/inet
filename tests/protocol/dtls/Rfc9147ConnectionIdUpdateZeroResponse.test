@@ -1,0 +1,50 @@
+%description:
+A capacity-one server replies with no spare IDs; the response fulfills a request.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int responses = 0;
+return establish("rfc9147_cid_zero_response")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (handshake(c, 10)) {
+            auto body = findChunk<inet::dtls::DtlsNewConnectionId>(c.event.packet);
+            require(body && body->getUsage() == 1 && body->getConnectionIdsArraySize() == 0, "bounded server supplies zero spare CIDs");
+            ++responses;
+        }
+        return false;
+    }).within(5)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(255); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(1); app.activateCid(); app.sendMarker(9); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>({true,true,false}) && responses == 2 && app.errorCount == 0, "empty spare response fulfills requests without inventing usable IDs");
+    }));
+}
+%activity:
+EV << "zero spare response compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host2.app[*].dtls.maxReceiveConnectionIds = 1
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_zero_response: PASS

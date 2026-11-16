@@ -68,3 +68,16 @@ class DtlsAlert extends FieldsChunk
     uint8_t level = 2;
     uint8_t description = 0;
 }
+
+// RFC 9147 Section 9. The vector holds length-prefixed opaque CID entries.
+class DtlsNewConnectionId extends FieldsChunk
+{
+    uint8_t connectionIds[];
+    uint8_t usage = 1; // cid_immediate(0), cid_spare(1)
+}
+
+class DtlsRequestConnectionId extends FieldsChunk
+{
+    chunkLength = B(1);
+    uint8_t numCids = 0;
+}

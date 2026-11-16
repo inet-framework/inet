@@ -34,7 +34,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C4 | EARLY, ADMISSION | Eleven explicit early-data protocol cases; store/offer units; engine lifecycle outcomes | DONE: fresh debug build; 24 combined protocol, 4 unit, 6 module PASS |
 | C5 | PROFILE | Eight profile/retry/hash/cost cases; extended negotiation/serializer/store units | DONE: fresh debug build; 37 combined protocol, 6 unit, 6 module PASS |
 | C6 | CID | Eight negotiation/budget/isolation/lifecycle cases; record/dissector unit; allocator module | DONE: fresh debug build; 45 combined protocol, 6 unit, 7 module PASS |
-| C7 | CID-REQUEST, EXCHANGE | Rfc9147ConnectionIdUpdate | NOT_STARTED |
+| C7 | CID-REQUEST, EXCHANGE | Fourteen CID update/request protocol cases; serializer unit; existing controls | DONE: fresh debug build; 59 combined protocol, 7 unit, 7 module PASS |
 | C8 | HEARTBEAT | Rfc9147Heartbeat; serializer units | NOT_STARTED |
 | C9 | PATH | Rfc9147Migration; routed/NAT fixtures | NOT_STARTED |
 | C10 | PHA | Rfc9147PostHandshakeAuth | NOT_STARTED |
@@ -127,3 +127,18 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds
 Artifacts are `c6-build-debug.log` and `c6-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Production cases pin seed 0, declared checksums/FCS and finite limits. Scoped architecture/naming, source protection, document seals, release formatting and DTLS documentation links pass. Existing global interface/link gate failures remain outside this change. Release, exact-parent and baseline comparisons remain unrun; no stored expectation changed. Migration remains unavailable until C9.
 
 The final six-unit and seven-module runs also pass with exit zero and nonzero selection against the final matching library. The allocator module is helper evidence; the real restart/close cases provide lifecycle and wire observations.
+
+## C7 execution
+
+Implemented protected NewConnectionId/RequestConnectionId bodies, directional admission, bounded spare/current ID choices, immediate replacement, independent recovery and separate request ACK/fulfillment state. Ticket output now uses the shared post-handshake fragment pump while preserving its default timer names and error reasons. Completed CID input remains reserved through logical input service; fresh-numbered duplicates share one logical cost. Retained old-epoch counters are pruned against all live recovery owners. Header-width changes reject affected application output before handoff. The [reviewer document](../../../../../tests/protocol/dtls/connection-id-updates.md) owns finite capacity, timeout, sequence-gap and epoch-retention limits.
+
+Final combined validation passes 59 protocol cases, seven serializer/selection/store units and seven module controls against a fresh matching debug library, with exit zero and nonzero selection. Fourteen new protocol cases cover loss of both message types and ACKs, fragmentation at 48 bytes, duplicate costs/conflicts, old-ID retirement, ticket/KeyUpdate overlap, excessive requests, capacity-one empty replies, unnegotiated messages, malformed bodies, both request timeout states, late fulfillment and update expiry.
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(ConnectionId.*|Algorithm.*|Sha384.*|EarlyData.*|Resumption.*|PskResumption|Handshake|PskHandshake|ClientAuthentication|KeyUpdate|SharedPortClose|CookieKeyShareRetry|UnsupportedSuite|UnofferedSelection|FullDuplexCosts|KeyUpdateInputCost)\.test$' --log-file audit/dtls-extensions/c7-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(TlsHandshakeParameters|TlsHandshakeSerializer|DtlsRecordSerializer|DtlsTicketSelection|DtlsSessionStore|TlsNewSessionTicket|DtlsConnectionIdUpdateSerializer)_1\.test$' --log-file audit/dtls-extensions/c7-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(ConnectionIds|EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c7-final-module-runner.log
+```
+
+Artifacts are `c7-build-debug.log` and `c7-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. Scoped engine/contract architecture and naming, source protection, document seals, release formatting and DTLS documentation links pass. The C++ gate cannot run because `clang-tidy` is absent from PATH (`c7-cpp.log`); this is not a pass. The previously recorded global interface/link failures remain outside this change. Release-mode execution, exact-parent trajectory checks and baseline comparisons remain unrun; stored expectations are unchanged. The new pure virtual CID operations have an incompatible release note and migration instructions for custom engines.

@@ -58,6 +58,12 @@ class INET_API IDtls
     virtual void close(AssociationId id) = 0;
     // Returns false for a synchronous rejection, without failing the association.
     virtual bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate) = 0;
+    // Synchronous admission only; count 1..255. Busy until ACK and fulfillment, including after timeout.
+    virtual bool requestConnectionIds(AssociationId id, int count) = 0;
+    // Count 0..255, bounded by local receive capacity. Zero is allowed only for spare delivery.
+    virtual bool provideConnectionIds(AssociationId id, int count, bool immediate) = 0;
+    // Select and consume the oldest retained peer-provided spare, if any.
+    virtual bool activateSpareConnectionId(AssociationId id) = 0;
 };
 
 } // namespace inet::dtls

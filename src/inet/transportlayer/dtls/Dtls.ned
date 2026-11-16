@@ -21,6 +21,10 @@ simple Dtls extends SimpleModule like IDtls
         bool clientAuthentication = default(false);
         bool connectionIdEnabled = default(false);
         bool receiveConnectionId = default(true); // Eight-byte receive CID, or an empty offer when false
+        int maxReceiveConnectionIds = default(4); // 1..4; spare issuance leaves room for an immediate update
+        @signal[connectionIdsReceived](type=long);
+        @signal[connectionIdChanged](type=long);
+        @signal[connectionIdRequestTimeout](type=long);
         bool resumptionEnabled = default(false); // cache/issue modeled stateful tickets
         bool earlyDataEnabled = default(false); // Requires resumptionEnabled; explicit application admission only
         int earlyDataBytes @unit(B) = default(4096B); // Allowance in newly issued tickets when enabled

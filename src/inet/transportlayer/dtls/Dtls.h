@@ -68,6 +68,7 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     std::map<std::vector<uint8_t>, AssociationId> cidIndex;
     std::vector<uint8_t> allocateConnectionId(AssociationId id);
     void removeConnectionIds(AssociationId id);
+    size_t countConnectionIds(AssociationId id) const;
     std::unique_ptr<DtlsProcessingQueue> inputProcessing;
     std::unique_ptr<DtlsProcessingQueue> outputProcessing;
 
@@ -150,6 +151,9 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void sendEarly(AssociationId id, Packet *packet, ICallback *requester) override;
     void close(AssociationId id) override;
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate) override;
+    bool requestConnectionIds(AssociationId id, int count) override;
+    bool provideConnectionIds(AssociationId id, int count, bool immediate) override;
+    bool activateSpareConnectionId(AssociationId id) override;
 };
 
 } // namespace inet::dtls

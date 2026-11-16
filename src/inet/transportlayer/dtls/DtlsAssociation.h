@@ -53,8 +53,8 @@ class INET_API DtlsAssociation
     std::unique_ptr<cMessage> delayedAckTimer;
     std::unique_ptr<cMessage> retentionTimer;
     std::unique_ptr<cMessage> closeDeadline;
-    // RFC 9147 Section 5.8.4: independent recovery owners, keyed by handshake type.
-    std::map<uint8_t, std::unique_ptr<DtlsPostHandshakeExchange>> postHandshakeExchanges;
+    // RFC 9147 Section 5.8.4: outgoing owners use handshake type; incoming CID owners set bit 8.
+    std::map<uint16_t, std::unique_ptr<DtlsPostHandshakeExchange>> postHandshakeExchanges;
     DtlsPostHandshakeExchange& keyUpdate() { return *postHandshakeExchanges.at(24); }
     bool updateRequested = false;
     bool awaitingPeerUpdate = false;
@@ -82,6 +82,19 @@ class INET_API DtlsAssociation
     bool cidNegotiated = false;
     std::vector<uint8_t> localCid;
     std::vector<uint8_t> peerCid;
+    std::deque<std::vector<uint8_t>> sparePeerCids;
+    std::vector<std::vector<uint8_t>> pendingLocalCids;
+    bool pendingCidsImmediate = false;
+    bool cidRequestUnfulfilled = false;
+    std::optional<uint8_t> deferredPeerCidRequest;
+    std::map<uint8_t, std::pair<uint16_t, std::vector<uint8_t>>> lastPeerCidMessages;
+    bool requestConnectionIds(int count);
+    bool provideConnectionIds(int count, bool immediate);
+    bool activateSpareConnectionId();
+    void receiveConnectionIdMessage(uint64_t epoch, uint64_t number, Packet *body);
+    void applyConnectionIdMessage(uint8_t type, uint16_t sequence);
+    void finishConnectionIdUpdate();
+    void serveConnectionIdRequest(uint8_t count);
     size_t recordOverhead() const { return 22 + (cidNegotiated ? peerCid.size() : 0); }
     Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length) const;
     std::optional<DtlsSessionStore::Entry> offeredSession;
@@ -96,8 +109,10 @@ class INET_API DtlsAssociation
     std::map<uint64_t, uint64_t> retainedSendCounters;
     DtlsPostHandshakeExchange *findPostHandshakeExchange(const std::shared_ptr<DtlsHandshakeFlight>& value);
     void issueTicket();
-    void pumpTicket();
-    void ticketRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& value, size_t index, uint64_t number);
+    bool startPostHandshake(uint8_t type, const Ptr<Chunk>& body, const char *name);
+    void pumpPostHandshake(uint8_t type);
+    void postHandshakeRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& value, size_t index, uint64_t number);
+    void pruneRetainedSendCounters();
     void receiveTicket(uint64_t epoch, uint64_t number, Packet *body);
     bool allocateRecord(uint64_t epoch, uint64_t& number);
     std::unique_ptr<DtlsRecordState> receiveEpoch2;

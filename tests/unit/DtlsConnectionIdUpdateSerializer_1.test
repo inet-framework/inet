@@ -1,0 +1,42 @@
+%description:
+Independent octet oracles for CID update/request bodies and truncated vectors.
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+using namespace inet;
+using namespace inet::dtls;
+%activity:
+auto update = makeShared<DtlsNewConnectionId>();
+update->setConnectionIdsArraySize(4);
+const std::vector<uint8_t> entries = {2, 0xab, 0xcd, 0};
+for (size_t i = 0; i < entries.size(); ++i) update->setConnectionIds(i, entries[i]);
+update->setUsage(0);
+update->setChunkLength(B(7));
+Packet packet("CID update", update);
+const std::vector<uint8_t> oracle = {0,4,2,0xab,0xcd,0,0};
+ASSERT(packet.peekDataAsBytes()->getBytes() == oracle);
+Packet raw("raw", makeShared<BytesChunk>(oracle));
+auto decoded = raw.popAtFront<DtlsNewConnectionId>(B(7));
+ASSERT(decoded->getUsage() == 0 && decoded->getConnectionIdsArraySize() == 4);
+for (size_t i = 0; i < entries.size(); ++i) ASSERT(decoded->getConnectionIds(i) == entries[i]);
+for (size_t count = 0; count < oracle.size(); ++count) {
+    Packet prefix("truncated", makeShared<BytesChunk>(std::vector<uint8_t>(oracle.begin(), oracle.begin() + count)));
+    bool rejected = false;
+    try { prefix.popAtFront<DtlsNewConnectionId>(prefix.getDataLength()); }
+    catch (const cRuntimeError&) { rejected = true; }
+    if (!rejected) throw cRuntimeError("Truncated CID update accepted");
+}
+auto request = makeShared<DtlsRequestConnectionId>();
+request->setNumCids(255);
+Packet requestPacket("request", request);
+ASSERT(requestPacket.peekDataAsBytes()->getBytes() == std::vector<uint8_t>{255});
+Packet requestRaw("raw request", requestPacket.peekDataAsBytes());
+ASSERT(requestRaw.popAtFront<DtlsRequestConnectionId>(B(1))->getNumCids() == 255);
+auto empty = makeShared<DtlsNewConnectionId>();
+empty->setChunkLength(B(3));
+Packet zero("zero spare response", empty);
+ASSERT(zero.peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0,0,1}));
+EV << "CID update serializer PASS\n";
+%contains: stdout
+CID update serializer PASS

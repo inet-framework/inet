@@ -29,6 +29,9 @@ class INET_API DtlsSocket
     void send(AssociationId id, Packet *packet) { checkEngine(); engine->send(id, packet, callback); }
     void close(AssociationId id) { checkEngine(); engine->close(id); }
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate = false) { checkEngine(); return engine->requestKeyUpdate(id, requestPeerUpdate); }
+    bool requestConnectionIds(AssociationId id, int count = 1) { checkEngine(); return engine->requestConnectionIds(id, count); }
+    bool provideConnectionIds(AssociationId id, int count = 1, bool immediate = true) { checkEngine(); return engine->provideConnectionIds(id, count, immediate); }
+    bool activateSpareConnectionId(AssociationId id) { checkEngine(); return engine->activateSpareConnectionId(id); }
 
   protected:
     void checkEngine() const {

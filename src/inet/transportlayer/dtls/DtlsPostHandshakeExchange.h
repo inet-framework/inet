@@ -23,6 +23,8 @@ class INET_API DtlsPostHandshakeExchange
     // RFC 9147 Section 5.8.2: initial retry interval in seconds.
     simtime_t timeout = 1;
     std::optional<uint16_t> receivingSequence;
+    bool receivingQueued = false;
+    bool recoveryExpired = false;
 
     DtlsPostHandshakeExchange(cSimpleModule& owner, const std::string& name);
     ~DtlsPostHandshakeExchange();

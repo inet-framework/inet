@@ -36,6 +36,7 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<AssociationId> establishedHandles;
     std::vector<AssociationId> closedHandles;
     std::vector<bool> updateResults;
+    std::vector<bool> cidResults;
     std::vector<bool> earlyResults;
     std::vector<int> earlyMarkers;
     bool closeOnEarlyData = false;
@@ -180,6 +181,18 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     void update(bool requestPeer = false)
     {
         scheduleCommand([this, requestPeer]() { updateResults.push_back(engine->requestKeyUpdate(lastHandle(), requestPeer)); });
+    }
+    void requestCids(int count)
+    {
+        scheduleCommand([this, count]() { cidResults.push_back(engine->requestConnectionIds(lastHandle(), count)); });
+    }
+    void provideCids(int count, bool immediate)
+    {
+        scheduleCommand([this, count, immediate]() { cidResults.push_back(engine->provideConnectionIds(lastHandle(), count, immediate)); });
+    }
+    void activateCid()
+    {
+        scheduleCommand([this]() { cidResults.push_back(engine->activateSpareConnectionId(lastHandle())); });
     }
     void sendBits(int bitCount)
     {

@@ -91,6 +91,8 @@ void Dtls::handleStartOperation(LifecycleOperation *)
     if (par("resumptionEnabled").boolValue() && (sessionLimit <= 0 || !std::isfinite(lifetime) || lifetime < 1 || lifetime > 604800 || lifetime != uint32_t(lifetime)))
         throw cRuntimeError("Invalid DTLS session capacity or integral ticket lifetime");
     sessions.configure(par("resumptionEnabled").boolValue() ? sessionLimit : 0);
+    if (par("connectionIdEnabled").boolValue() && (par("maxReceiveConnectionIds").intValue() < 1 || par("maxReceiveConnectionIds").intValue() > 4))
+        throw cRuntimeError("maxReceiveConnectionIds must be between 1 and 4");
     auto earlyLimit = par("earlyDataBytes").intValue();
     if (par("earlyDataEnabled").boolValue() && (!par("resumptionEnabled").boolValue() || earlyLimit <= 0 || uint64_t(earlyLimit) > UINT32_MAX))
         throw cRuntimeError("DTLS early data requires resumption and a positive 32-bit allowance");
@@ -750,8 +752,9 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     }
     auto eligible = [this, id, flight, index]() {
         auto current = associations.find(id);
+        auto exchange = current != associations.end() ? current->second->findPostHandshakeExchange(flight) : nullptr;
         return current != associations.end() && !current->second->closing &&
-               (current->second->flight == flight || current->second->findPostHandshakeExchange(flight)) &&
+               (current->second->flight == flight || (exchange && !exchange->recoveryExpired)) &&
                flight->get(index).queued && !flight->get(index).acknowledged;
     };
     auto skipped = [this, id, flight, index, reservedCredit]() {
@@ -770,6 +773,10 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
         if (current == associations.end() || (current->second->flight != flight && !current->second->findPostHandshakeExchange(flight)))
             return;
         auto fragment = flight->get(index);
+        if (fragment.epoch != 0 && fragment.data->getChunkLength() + B(12 + current->second->recordOverhead()) > B(par("udpPayloadLimit").intValue())) {
+            failAssociation(id, "DTLS CID update exceeds retained handshake record budget");
+            return;
+        }
         uint64_t recordNumber;
         if (fragment.epoch == 0) {
             if (!current->second->allocatePlaintextRecord(recordNumber)) {
@@ -824,7 +831,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
             if (current->second->keyUpdate().flight == flight)
                 current->second->updateRecordHandedOff(flight, index, recordNumber);
             else if (current->second->findPostHandshakeExchange(flight))
-                current->second->ticketRecordHandedOff(flight, index, recordNumber);
+                current->second->postHandshakeRecordHandedOff(flight, index, recordNumber);
             else if (current->second->flight == flight)
                 current->second->flightRecordHandedOff(flight, index, recordNumber);
         }
@@ -950,19 +957,28 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto retained = std::make_shared<std::unique_ptr<Packet>>(packet);
     auto delay = paid ? SIMTIME_ZERO : (sampledDelay ? *sampledDelay : processingDelay(id, "protectOutDelay"));
     auto started = std::make_shared<bool>(false);
+    auto overhead = it->second->recordOverhead();
     it->second->processingPacketIds.insert(packetId);
-    auto eligible = [this, id, started]() {
+    auto eligible = [this, id, started, overhead]() {
         auto current = associations.find(id);
         if (current == associations.end() || current->second->closing)
+            return false;
+        if (current->second->recordOverhead() != overhead)
             return false;
         return *started || (!current->second->keyUpdate().flight && !current->second->peerResponseDue &&
                (current->second->nextApplicationRecord < uint64_t(par("rekeyAfterRecords").intValue()) || current->second->sendEpoch >= Association::MAX_SEND_EPOCH));
     };
-    auto skipped = [this, id, packetId, retained, delay, paid]() {
+    auto skipped = [this, id, packetId, retained, delay, paid, overhead]() {
         auto current = associations.find(id);
         if (current == associations.end())
             return;
         current->second->processingPacketIds.erase(packetId);
+        if (current->second->recordOverhead() != overhead) {
+            auto callback = current->second->callback;
+            retained->reset();
+            callback->sendError(id, packetId, "DTLS header budget changed before output handoff");
+            return;
+        }
         if (!holdApplication(id, std::move(*retained), delay, paid))
             return;
         current = associations.find(id);
@@ -1148,6 +1164,10 @@ void Dtls::sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std:
             if (it == associations.end())
                 return;
             auto actualEpoch = sendEpoch >= 3 ? it->second->sendEpoch : sendEpoch;
+            if (actualEpoch != 0 && ack->getChunkLength() + B(it->second->recordOverhead()) > B(par("udpPayloadLimit").intValue())) {
+                failAssociation(id, "DTLS CID update exceeds retained ACK budget");
+                return;
+            }
             uint64_t number;
             if (actualEpoch == 0) {
                 if (!it->second->allocatePlaintextRecord(number)) {
@@ -1939,7 +1959,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
         if (epoch == 2 && association.receiveEpoch2 && association.state == HandshakeState::ESTABLISHED && contentType == 22 && (*retained)->getDataLength() >= B(12)) {
             try {
                 auto header = (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12));
-                mainHandshake = header->getMessageType() != 24 && header->getMessageType() != 4;
+                mainHandshake = header->getMessageType() != 24 && header->getMessageType() != 4 && header->getMessageType() != 9 && header->getMessageType() != 10;
             }
             catch (const cRuntimeError&) {
                 emit(recordDroppedSignal, (long)MALFORMED_RECORD);
@@ -1977,7 +1997,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             return;
         }
         auto retirePrevious = [this, &association, logicalEpoch]() {
-            if (logicalEpoch == association.receiveEpoch && !par("resumptionEnabled").boolValue())
+            if (logicalEpoch == association.receiveEpoch && !par("resumptionEnabled").boolValue() && !association.cidNegotiated)
                 association.previousReceiveEpoch.reset();
         };
         if (logicalEpoch == 1) {
@@ -2055,8 +2075,11 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
         }
         if (logicalEpoch >= 3 && contentType == 22 && current->second->state == HandshakeState::ESTABLISHED) {
             try {
-                if ((*retained)->getDataLength() >= B(12) && (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12))->getMessageType() == 4)
+                auto type = (*retained)->getDataLength() >= B(12) ? (*retained)->peekAtFront<DtlsHandshakeHeader>(B(12))->getMessageType() : 0;
+                if (type == 4)
                     current->second->receiveTicket(logicalEpoch, sequence, retained->get());
+                else if (type == 9 || type == 10)
+                    current->second->receiveConnectionIdMessage(logicalEpoch, sequence, retained->get());
                 else
                     current->second->receiveKeyUpdate(logicalEpoch, sequence, retained->get());
             }

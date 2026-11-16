@@ -32,33 +32,39 @@ void DtlsAssociation::cancelTimers()
 
 bool DtlsAssociation::handleTimer(cMessage *message)
 {
-    auto ticket = postHandshakeExchanges.find(4);
-    if (ticket != postHandshakeExchanges.end()) {
-        auto& exchange = *ticket->second;
+    for (auto& entry : postHandshakeExchanges) {
+        auto type = entry.first;
+        if (type == 24)
+            continue;
+        auto& exchange = *entry.second;
         if (message == exchange.retransmissionTimer.get()) {
             exchange.timeout = std::min(SimTime(60), exchange.timeout * 2);
             if (exchange.flight) {
                 exchange.flight->requestRetransmission();
-                pumpTicket();
+                pumpPostHandshake(type);
             }
             return true;
         }
         if (message == exchange.deadline.get()) {
-            if (exchange.flight) {
-                // Abandoning an unsent/unacknowledged handshake sequence would
-                // prevent subsequent ordered post-handshake messages from progressing.
-                engine.failAssociation(id, "DTLS session ticket timeout");
+            if (type == 9) {
+                exchange.recoveryExpired = true;
+                engine.cancelEvent(exchange.retransmissionTimer.get());
+                pruneRetainedSendCounters();
+                engine.emit(cComponent::registerSignal("connectionIdRequestTimeout"), (long)id);
+                return true;
+            }
+            if (exchange.flight || type != 4) {
+                engine.failAssociation(id, type == 4 ? "DTLS session ticket timeout" : "DTLS post-handshake exchange timeout");
                 return true;
             }
             exchange.cancelTimers();
-            exchange.flight.reset();
             if (exchange.receivingSequence) {
                 reassembly.discard(*exchange.receivingSequence);
                 if (*exchange.receivingSequence == nextPeerMessage)
-                    ++nextPeerMessage; // local ticket admission expired; ordinary data remains usable
+                    ++nextPeerMessage;
                 exchange.receivingSequence.reset();
             }
-            retainedSendCounters.clear();
+            pruneRetainedSendCounters();
             return true;
         }
     }
@@ -146,7 +152,7 @@ bool DtlsAssociation::advanceSendEpoch()
     if (sendEpoch >= MAX_SEND_EPOCH)
         return false;
     for (const auto& entry : postHandshakeExchanges)
-        if (entry.first != 24 && entry.second->flight && !entry.second->flight->isComplete())
+        if (entry.first != 24 && entry.second->flight && !entry.second->recoveryExpired && !entry.second->flight->isComplete())
             for (size_t i = 0; i < entry.second->flight->size(); ++i)
                 if (entry.second->flight->get(i).epoch == sendEpoch)
                     retainedSendCounters.emplace(sendEpoch, nextApplicationRecord);
@@ -157,6 +163,12 @@ bool DtlsAssociation::advanceSendEpoch()
 
 bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
 {
+    // Keep at most the current and previous receive epochs live at the peer.
+    for (const auto& entry : postHandshakeExchanges)
+        if (entry.first != 24 && entry.second->flight && !entry.second->recoveryExpired)
+            for (size_t i = 0; i < entry.second->flight->size(); ++i)
+                if (!entry.second->flight->get(i).acknowledged && entry.second->flight->get(i).epoch < sendEpoch)
+                    return false;
     // RFC 9846 Section 4.7.3 forbids another requested update until a subsequent peer KeyUpdate.
     if (state != HandshakeState::ESTABLISHED || closing || keyUpdate().flight ||
         (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
@@ -502,9 +514,11 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
             }
         }
     }
-    auto ticket = postHandshakeExchanges.find(4);
-    if (ticket != postHandshakeExchanges.end() && ticket->second->flight) {
-        auto& exchange = *ticket->second;
+    for (auto& entry : postHandshakeExchanges) {
+        auto type = entry.first;
+        auto& exchange = *entry.second;
+        if (type == 24 || type >= 256 || !exchange.flight)
+            continue;
         bool progress = false;
         for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
             auto result = exchange.flight->acknowledge(ack.getEpochs(i), ack.getSequenceNumbers(i), simTime());
@@ -515,13 +529,19 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
         if (progress) {
             owner.cancelEvent(exchange.retransmissionTimer.get());
             if (exchange.flight->isComplete()) {
-                owner.cancelEvent(exchange.deadline.get());
                 exchange.flight.reset();
-                retainedSendCounters.clear();
+                if (type != 9 || !cidRequestUnfulfilled)
+                    owner.cancelEvent(exchange.deadline.get());
+                pruneRetainedSendCounters();
+                if (type == 10) {
+                    finishConnectionIdUpdate();
+                    if (!owner.containsAssociation(handle))
+                        return;
+                }
             }
-            else {
+            else if (!exchange.recoveryExpired) {
                 exchange.flight->requestRetransmission();
-                pumpTicket();
+                pumpPostHandshake(type);
                 if (!owner.containsAssociation(handle))
                     return;
             }
