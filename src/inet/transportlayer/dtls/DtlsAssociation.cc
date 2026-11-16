@@ -18,6 +18,7 @@ DtlsAssociation::DtlsAssociation(Dtls& engine, size_t reassemblyLimit) : engine(
     retentionTimer = std::make_unique<cMessage>("dtlsFinalAckRetention");
     updateRetransmissionTimer = std::make_unique<cMessage>("dtlsUpdateRetransmission");
     updateDeadline = std::make_unique<cMessage>("dtlsUpdateDeadline");
+    closeDeadline = std::make_unique<cMessage>("dtlsCloseDeadline");
 }
 
 void DtlsAssociation::cancelTimers()
@@ -27,6 +28,7 @@ void DtlsAssociation::cancelTimers()
     engine.cancelEvent(retentionTimer.get());
     engine.cancelEvent(updateRetransmissionTimer.get());
     engine.cancelEvent(updateDeadline.get());
+    engine.cancelEvent(closeDeadline.get());
 }
 
 bool DtlsAssociation::handleTimer(cMessage *message)
@@ -42,6 +44,10 @@ bool DtlsAssociation::handleTimer(cMessage *message)
     }
     if (message == updateDeadline.get()) {
         engine.failAssociation(id, "DTLS KeyUpdate timeout");
+        return true;
+    }
+    if (message == closeDeadline.get()) {
+        engine.finishClose(id, true);
         return true;
     }
     if (message == retransmissionTimer.get()) {
@@ -118,7 +124,7 @@ bool DtlsAssociation::advanceSendEpoch()
 bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
 {
     // RFC 9846 Section 4.7.3 forbids another requested update until a subsequent peer KeyUpdate.
-    if (state != HandshakeState::ESTABLISHED || updateFlight ||
+    if (state != HandshakeState::ESTABLISHED || closing || updateFlight ||
         (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
         return false;
     auto timeout = SimTime(engine.par("handshakeTimeout").doubleValue());
@@ -150,7 +156,7 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
         it->second->pumpUpdate();
     }, [&owner, handle, update]() {
         auto it = owner.associations.find(handle);
-        return it != owner.associations.end() && it->second->updateFlight == update;
+        return it != owner.associations.end() && !it->second->closing && it->second->updateFlight == update;
     })) {
         owner.failAssociation(handle, "DTLS output processing queue is full");
         return true;
@@ -160,7 +166,7 @@ bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
 
 void DtlsAssociation::pumpUpdate()
 {
-    if (!updateFlight || updateFlight->isComplete())
+    if (closing || !updateFlight || updateFlight->isComplete())
         return;
     auto update = updateFlight;
     if (!update->reserve(0))

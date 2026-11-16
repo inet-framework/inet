@@ -15,7 +15,7 @@ The selected behavioral profile and exclusions are in [scope.md](scope.md). Exec
 | Datagrams and overhead | The 23 C5 cases mapped in [protected-datagrams.md](../../../../../tests/protocol/dtls/protected-datagrams.md) | PASS for delivery, processing, capacity and record/padding boundaries |
 | Replay/invalid input | Rfc9147ReplayWindow, ReplayWindow8, InvalidRecord, MalformedInner and RecordSizeLimits | PASS within the documented truncated-number reconstruction scope |
 | Key updates | The 18 cases in [key-updates.md](../../../../../tests/protocol/dtls/key-updates.md) | PASS on the isolated update boundary |
-| Graceful closure | The later closure/lifecycle review unit | NOT_RUN and not implemented at this boundary |
-| Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue, DtlsRecoveryLifecycle | Association, processing and recovery-timer cancellation PASS; C6 graceful close/restart extensions NOT_RUN |
+| Graceful closure | The 7 cases in [closure-and-lifecycle.md](../../../../../tests/protocol/dtls/closure-and-lifecycle.md) | PASS for local completion, forced closure, alert disposition, shared peers and delivery boundaries |
+| Lifecycle and processing | DtlsEngineLifecycle, DtlsProcessingQueue, DtlsRecoveryLifecycle, DtlsRestartLifecycle, sender/configuration cases | PASS for processing/recovery ownership, close preservation, crash and repeated restart |
 
 No achieved standards-test depth is claimed until the selected cases have executed and their observations have been examined. Cryptographic validation, protected-packet byte export, CID/migration and the omitted optional handshake modes are not supported claims.

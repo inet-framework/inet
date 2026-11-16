@@ -26,7 +26,8 @@ class INET_API IDtls
         virtual void dataArrived(AssociationId id, Packet *packet) = 0;
         // A rejected or cancelled application packet; the association may remain usable.
         virtual void sendError(AssociationId id, long packetId, const char *reason) = 0;
-        // Terminal failure of the named association.
+        // Invalidates the named handle. A forced local close may subsequently
+        // call closed(id); the borrowed callback must remain alive for both.
         virtual void error(AssociationId id, const char *reason) = 0;
         virtual void closed(AssociationId id) = 0;
     };

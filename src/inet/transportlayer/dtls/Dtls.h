@@ -118,6 +118,8 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     void transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHandshakeFlight>& flight, size_t index);
     void establish(AssociationId id);
     void failAssociation(AssociationId id, const char *reason, int alertDescription = -1);
+    void finishClose(AssociationId id, bool forced);
+    void beginClose(AssociationId id);
     void resumeApplications(AssociationId id);
     void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2);
     bool enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,

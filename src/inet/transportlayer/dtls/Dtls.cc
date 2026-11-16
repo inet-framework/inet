@@ -83,8 +83,31 @@ void Dtls::handleStartOperation(LifecycleOperation *)
 void Dtls::handleStopOperation(LifecycleOperation *)
 {
     listener = nullptr;
-    discardAll("node stopped", true);
-    udpSocket.close();
+    if (inputProcessing)
+        inputProcessing->clear();
+    std::set<AssociationId> closingIds;
+    for (const auto& entry : associations)
+        if (entry.second->closing)
+            closingIds.insert(entry.first);
+    if (outputProcessing)
+        outputProcessing->cancelExcept(closingIds);
+    std::vector<uint64_t> attempts;
+    for (const auto& attempt : prevalidationAttempts)
+        attempts.push_back(attempt->id);
+    for (auto id : attempts)
+        removePrevalidation(id);
+    std::vector<AssociationId> ids;
+    for (const auto& entry : associations)
+        ids.push_back(entry.first);
+    for (auto id : ids) {
+        auto it = associations.find(id);
+        if (it != associations.end() && it->second->state == HandshakeState::ESTABLISHED)
+            beginClose(id);
+        else
+            finishClose(id, true);
+    }
+    if (associations.empty())
+        udpSocket.close();
     delayActiveOperationFinish(par("closeTimeout"));
 }
 
@@ -334,6 +357,10 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
         callback->sendError(id, packetId, reason);
     emit(associationFailedSignal, (long)id);
     callback->error(id, reason);
+    if (association->closing)
+        callback->closed(id);
+    if (operationalState == STOPPING_OPERATION && associations.empty())
+        udpSocket.close();
 }
 
 static void appendUint16(std::vector<uint8_t>& bytes, size_t value)
@@ -647,7 +674,7 @@ void Dtls::transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHa
     }
     auto eligible = [this, id, flight, index]() {
         auto current = associations.find(id);
-        return current != associations.end() &&
+        return current != associations.end() && !current->second->closing &&
                (current->second->flight == flight || current->second->updateFlight == flight) &&
                flight->get(index).queued && !flight->get(index).acknowledged;
     };
@@ -779,11 +806,11 @@ bool Dtls::holdApplication(AssociationId id, std::unique_ptr<Packet> packet, std
         return false;
     auto bytes = std::max(size_t(1), (size_t)packet->getByteLength());
     auto limit = par("maxPendingBytes").intValue();
-    if (limit <= 0 || bytes > size_t(limit) || it->second->pendingBytes > size_t(limit) - bytes) {
+    if (it->second->closing || limit <= 0 || bytes > size_t(limit) || it->second->pendingBytes > size_t(limit) - bytes) {
         auto callback = it->second->callback;
         auto packetId = packet->getId();
         packet.reset();
-        callback->sendError(id, packetId, "DTLS pending application queue is full");
+        callback->sendError(id, packetId, "DTLS pending application queue is full or closing");
         return false;
     }
     it->second->pendingBytes += bytes;
@@ -795,7 +822,7 @@ void Dtls::resumeApplications(AssociationId id)
 {
     while (true) {
         auto it = associations.find(id);
-        if (it == associations.end() || it->second->state != HandshakeState::ESTABLISHED ||
+        if (it == associations.end() || it->second->closing || it->second->state != HandshakeState::ESTABLISHED ||
             it->second->updateFlight || it->second->peerResponseDue || it->second->pendingPackets.empty())
             return;
         auto pending = std::move(it->second->pendingPackets.front());
@@ -816,7 +843,8 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     auto callback = it->second->callback;
     auto packetId = packet->getId();
     auto bytes = packet->getDataLength();
-    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(22) > B(par("udpPayloadLimit").intValue())) {
+    if (bytes.get<b>() % 8 != 0 || bytes > B(DtlsRecordProtection::MAX_CONTENT_BYTES) || bytes + B(22) > B(par("udpPayloadLimit").intValue()) ||
+        it->second->closing) {
         delete packet;
         callback->sendError(id, packetId, "DTLS application record size or epoch limit exceeded");
         return;
@@ -840,7 +868,7 @@ void Dtls::sendApplication(AssociationId id, Packet *packet, std::optional<simti
     it->second->processingPacketIds.insert(packetId);
     auto eligible = [this, id, started]() {
         auto current = associations.find(id);
-        if (current == associations.end())
+        if (current == associations.end() || current->second->closing)
             return false;
         return *started || (!current->second->updateFlight && !current->second->peerResponseDue &&
                (current->second->nextApplicationRecord < uint64_t(par("rekeyAfterRecords").intValue()) || current->second->sendEpoch >= Association::MAX_SEND_EPOCH));
@@ -1841,7 +1869,7 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             return;
         }
         if (logicalEpoch >= 3 && contentType == 23) {
-            if (current->second->state != HandshakeState::ESTABLISHED) {
+            if (current->second->state != HandshakeState::ESTABLISHED || current->second->closing) {
                 emit(recordDroppedSignal, (long)UNKNOWN_EPOCH);
                 return;
             }
@@ -1915,6 +1943,12 @@ void Dtls::send(AssociationId id, Packet *packet, ICallback *requester)
         requester->sendError(id, packetId, "unknown or foreign DTLS association");
         return;
     }
+    if (it->second->closing) {
+        auto packetId = packet->getId();
+        delete packet;
+        requester->sendError(id, packetId, "DTLS association is closing");
+        return;
+    }
     if (it->second->state == HandshakeState::ESTABLISHED) {
         sendApplication(id, packet);
         return;
@@ -1936,6 +1970,86 @@ void Dtls::close(AssociationId id)
     Enter_Method("close");
     if (operationalState != OPERATING)
         return;
+    beginClose(id);
+}
+
+void Dtls::beginClose(AssociationId id)
+{
+    // RFC 9846 Section 6.1 sends close_notify; the bounded drain deadline is model policy.
+    auto it = associations.find(id);
+    if (it == associations.end() || it->second->closing)
+        return;
+    it->second->closing = true;
+    bool established = it->second->state == HandshakeState::ESTABLISHED;
+    cancelEvent(it->second->handshakeDeadline.get());
+    it->second->cancelTimers();
+    if (inputProcessing)
+        inputProcessing->cancel(id);
+    if (outputProcessing)
+        outputProcessing->cancel(id);
+    it = associations.find(id);
+    if (it == associations.end())
+        return;
+    auto callback = it->second->callback;
+    auto pending = std::move(it->second->pendingPackets);
+    it->second->pendingPackets.clear();
+    it->second->pendingBytes = 0;
+    auto processingIds = std::move(it->second->processingPacketIds);
+    it->second->processingPacketIds.clear();
+    for (auto& item : pending) {
+        auto packetId = item.packet->getId();
+        item.packet.reset();
+        callback->sendError(id, packetId, "association closing");
+    }
+    for (auto packetId : processingIds)
+        callback->sendError(id, packetId, "association closing");
+    it = associations.find(id);
+    if (it == associations.end())
+        return;
+    if (!established) {
+        finishClose(id, false);
+        return;
+    }
+    auto timeout = SimTime(par("closeTimeout").doubleValue());
+    if (timeout <= SIMTIME_ZERO) {
+        finishClose(id, true);
+        return;
+    }
+    scheduleAt(simTime() + timeout, it->second->closeDeadline.get());
+    auto delay = SimTime(par("protectOutDelay").doubleValue());
+    if (!enqueueProcessing(outputProcessing.get(), id, 24, delay, [this, id]() {
+        auto current = associations.find(id);
+        if (current == associations.end() || !current->second->closing)
+            return;
+        uint64_t number;
+        if (!current->second->allocateApplicationRecord(number)) {
+            finishClose(id, true);
+            return;
+        }
+        auto alert = makeShared<DtlsAlert>();
+        alert->setLevel(1);
+        alert->setDescription(0);
+        auto packet = new Packet("DTLS close_notify", alert);
+        DtlsRecordProtection::protect(packet, 21);
+        auto header = makeShared<DtlsCiphertextHeader>();
+        header->setEpochBits(current->second->sendEpoch & 3);
+        header->setSequenceNumber(number & 0xffff);
+        header->setLength(packet->getDataLength().get<B>());
+        packet->insertAtFront(header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&dtlsProtocol);
+        if (!current->second->localAddress.isUnspecified())
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(current->second->localAddress);
+        auto peer = current->second->peerAddress;
+        auto port = current->second->peerPort;
+        emit(packetSentToLowerSignal, packet);
+        udpSocket.sendTo(packet, peer, port);
+        finishClose(id, false);
+    }))
+        finishClose(id, true);
+}
+
+void Dtls::finishClose(AssociationId id, bool forced)
+{
     auto it = associations.find(id);
     if (it == associations.end())
         return;
@@ -1958,7 +2072,11 @@ void Dtls::close(AssociationId id)
     }
     for (auto packetId : association->processingPacketIds)
         callback->sendError(id, packetId, "association closed");
+    if (forced)
+        callback->error(id, "DTLS closure forced");
     callback->closed(id);
+    if (operationalState == STOPPING_OPERATION && associations.empty())
+        udpSocket.close();
 }
 
 bool Dtls::requestKeyUpdate(AssociationId id, bool requestPeerUpdate)
@@ -2257,7 +2375,7 @@ void Dtls::parseDatagram(Packet *packet)
                                 }
                             if (target != 0) {
                                 if (alert->getDescription() == 0)
-                                    close(target);
+                                    beginClose(target);
                                 else
                                     failAssociation(target, "peer sent a fatal DTLS alert");
                             }
