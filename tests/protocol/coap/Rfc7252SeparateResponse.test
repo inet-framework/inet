@@ -1,0 +1,236 @@
+%description:
+
+RFC 7252 Sections 4.2 and 5.2 -- Deferred separate responses over IPv4 & IPv6:
+Empty ACK stops client retries; separate CON response allocates new MID and
+retransmits across a lost attempt with single client delivery; client interops
+with NON response to CON request and CON response to NON request.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class SepTestClient : public CoapClient
+{
+  public:
+    int dropNextSepCon = 0;
+    std::vector<uint8_t> lastReqToken;
+    uint16_t lastReqMid = 0;
+
+    uint64_t sendManual(const std::string& host, int port, bool confirmable, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, confirmable, uri, {});
+    }
+
+  protected:
+    virtual void initialize(int stage) override {
+        CoapClient::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            dropNextSepCon = par("dropNextSepCon");
+    }
+
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        RawCoapMessage raw;
+        if (decodeRawCoap(packet->peekDataAsBytes()->getBytes(), raw) && (raw.code & 0xFFU) >= 1 && (raw.code & 0xFFU) <= 4) {
+            lastReqMid = raw.messageId;
+            lastReqToken = raw.token;
+        }
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+
+    virtual void socketDataArrived(UdpSocket *arrSocket, Packet *packet) override {
+        if (dropNextSepCon > 0) {
+            RawCoapMessage raw;
+            if (decodeRawCoap(packet->peekDataAsBytes()->getBytes(), raw) && raw.type == 0 && raw.code != 0) {
+                --dropNextSepCon;
+                delete packet;
+                return;
+            }
+        }
+        CoapClient::socketDataArrived(arrSocket, packet);
+    }
+};
+
+Define_Module(SepTestClient);
+
+Define_ProtocolTest(coap_separate_response)
+{
+    return ProtocolTest("coap_separate_response")
+        // Scenario 1 (t=1s): IPv4 separate CON response.
+        // Client A receives Empty ACK at ~1.0s, drops 1st separate CON at ~5.0s, accepts retry at [7s,8s].
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      auto *cli = check_and_cast<SepTestClient *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.token.empty()
+                              && raw.messageId == cli->lastReqMid;
+                  })
+                  .within(1.5))
+        // No request retry on hostA while awaiting separate CON (until 4.8s).
+        .never(on("hostA.app[0]").signal("packetSentToLower").within(3.8))
+        .once(on("hostB.app[0]").signal("retransmission").within(4.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(4.0))
+        .act(action().after(0.01).run<SepTestClient>("hostA.app[0]", [](SepTestClient& cli) {
+            if (cli.getCompletedResponses().size() != 1)
+                throw cRuntimeError("Expected 1 delivered response after separate CON retry");
+            if (cli.getCompletedResponses()[0].messageType != COAP_TYPE_CON)
+                throw cRuntimeError("Expected separate CON messageType");
+        }))
+        .never(on("hostB.app[0]").signal("retransmission").within(3.5))
+
+        // Scenario 2 (t=12s): IPv6 separate CON response after IPv6 setup.
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.token.empty();
+                  })
+                  .within(5.0))
+        .never(on("host6A.app[0]").signal("packetSentToLower").within(3.3))
+        .once(on("host6A.app[0]").signal("requestCompleted").within(1.0))
+
+        // Scenario 3: CON request -> Empty ACK + delayed NON 2.05 from independent peer (hostB.app[1]:5684).
+        .act(action().at(18.0).run<SepTestClient>("hostA.app[0]", [](SepTestClient& cli) {
+            cli.sendManual("hostB", 5684, true, "/peer-non-resp");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req) || req.type != 0)
+                          return false;
+                      RawCoapMessage emptyAck;
+                      emptyAck.type = 2; emptyAck.code = 0; emptyAck.messageId = req.messageId;
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(emptyAck), "PeerEmptyAck");
+                      RawCoapMessage nonResp;
+                      nonResp.type = 1; nonResp.code = COAP_CODE_CONTENT; nonResp.messageId = 0x9101;
+                      nonResp.token = req.token; nonResp.payload = asciiBytes("non-to-con");
+                      peer->scheduleRawSend(simTime() + 0.1, last.srcAddr.str(), last.srcPort, encodeRawCoap(nonResp), "PeerNonResp");
+                      return true;
+                  })
+                  .within(1.0))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .never(on("hostB.app[1]").signal("packetReceivedFromLower").within(0.2))
+
+        // Scenario 4: NON request -> CON 2.05 from independent peer -> client sends Empty ACK!
+        .act(action().at(19.0).run<SepTestClient>("hostA.app[0]", [](SepTestClient& cli) {
+            cli.sendManual("hostB", 5684, false, "/peer-con-resp");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req) || req.type != 1)
+                          return false;
+                      RawCoapMessage conResp;
+                      conResp.type = 0; conResp.code = COAP_CODE_CONTENT; conResp.messageId = 0x9102;
+                      conResp.token = req.token; conResp.payload = asciiBytes("con-to-non");
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(conResp), "PeerConResp");
+                      return true;
+                  })
+                  .within(1.0))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.messageId == 0x9102;
+                  })
+                  .within(0.5));
+}
+
+%activity:
+EV << "coap_separate_response compiled\n";
+
+%file: SepTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple SepTestClient extends CoapClient
+{
+    parameters:
+        @class(SepTestClient);
+        int dropNextSepCon = default(1);
+}
+
+%file: CoapSepDualStackNet.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+network CoapSepDualStackNet
+{
+    submodules:
+        tester: ProtocolTester;
+        configurator: Ipv4NetworkConfigurator;
+        configurator6: Ipv6FlatNetworkConfigurator;
+        hostA: StandardHost;
+        hostB: StandardHost;
+        host6A: StandardHost;
+        host6B: StandardHost;
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        host6A.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> host6B.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapSepDualStackNet
+sim-time-limit = 25s
+seed-set = 0
+*.tester.testName = "coap_separate_response"
+
+*.host*.ipv4.arp.typename = "GlobalArp"
+*.hostA.hasIpv6 = false
+*.hostB.hasIpv6 = false
+*.host6A.hasIpv4 = false
+*.host6A.hasIpv6 = true
+*.host6B.hasIpv4 = false
+*.host6B.hasIpv6 = true
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "SepTestClient"
+*.hostA.app[0].localPort = 15683
+*.hostA.app[0].peerAddress = "hostB"
+*.hostA.app[0].confirmable = true
+*.hostA.app[0].requestUri = "/slow"
+*.hostA.app[0].startTime = 1.0s
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].responseDelay = 4s
+*.hostB.app[0].resources = xml("<resources><resource path='/slow' contentFormat='0'>slow-body</resource></resources>")
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+*.host6A.numApps = 1
+*.host6A.app[0].typename = "CoapClient"
+*.host6A.app[0].peerAddress = "host6B"
+*.host6A.app[0].confirmable = true
+*.host6A.app[0].requestUri = "/slow6"
+*.host6A.app[0].startTime = 12.0s
+
+*.host6B.numApps = 1
+*.host6B.app[0].typename = "CoapServer"
+*.host6B.app[0].localPort = 5683
+*.host6B.app[0].responseDelay = 3.5s
+*.host6B.app[0].resources = xml("<resources><resource path='/slow6' contentFormat='0'>slow6-body</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_separate_response: PASS

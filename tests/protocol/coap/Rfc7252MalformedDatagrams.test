@@ -175,7 +175,39 @@ Define_ProtocolTest(coap_malformed_datagrams)
             l4->setDestPort(5683);
             srv.injectTypedPacket(pkt);
         }))
-        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1));
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 11. C3: Malformed Empty ACK/RST (TKL > 0 or trailing byte), and ACK carrying request code 0.01 -> silent ignore.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x61, 0x00, 0x11, 0x01, 0xAA}, "EmptyAckBadTkl");
+            peer.sendRawNow("hostB", 5683, {0x70, 0x00, 0x11, 0x02, 0xBB}, "EmptyRstExtraByte");
+            peer.sendRawNow("hostB", 5683, {0x60, 0x01, 0x11, 0x03}, "RequestInAck");
+            peer.sendRawNow("hostB", 5683, {0x71, 0x45, 0x11, 0x04, 0x01}, "ResponseInRst");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.1))
+
+        // 12. C3: Valid CON GET /sensors/temp still receives piggybacked ACK 2.05 proving endpoint remains usable.
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage validCon;
+            validCon.version = 1;
+            validCon.type = 0; // CON
+            validCon.code = 1; // GET
+            validCon.messageId = 0x1105;
+            validCon.token = {0x99, 0x88};
+            validCon.options.push_back({11, asciiBytes("sensors")});
+            validCon.options.push_back({11, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(validCon), "ValidConAfterMalformed");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == 69 /* 2.05 */
+                              && raw.messageId == 0x1105
+                              && raw.token == std::vector<uint8_t>({0x99, 0x88})
+                              && raw.payload == asciiBytes("22.5C");
+                  })
+                  .within(0.5));
 }
 
 %activity:
@@ -205,6 +237,7 @@ seed-set = 0
 *.hostB.numApps = 1
 *.hostB.app[0].typename = "TestInjectCoapServer"
 *.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/temp' contentFormat='0'>22.5C</resource></resources>")
 *.hostB.app[0].resources = xml("<resources><resource path='/temp'>21C</resource></resources>")
 
 %contains: stdout

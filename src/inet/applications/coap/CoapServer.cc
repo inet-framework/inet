@@ -146,30 +146,86 @@ void CoapServer::loadXmlResources(cXMLElement *root)
     }
 }
 
+simtime_t CoapServer::getNextSubclassDeadline() const
+{
+    simtime_t earliest = SIMTIME_ZERO;
+    for (const auto& sep : pendingSeparateResponses) {
+        if (earliest == SIMTIME_ZERO || sep.dueAt < earliest)
+            earliest = sep.dueAt;
+    }
+    return earliest;
+}
+
+void CoapServer::onSubclassTimer(simtime_t now)
+{
+    for (auto it = pendingSeparateResponses.begin(); it != pendingSeparateResponses.end();) {
+        if (it->dueAt <= now) {
+            CoapPendingSeparateResponse ready = std::move(*it);
+            it = pendingSeparateResponses.erase(it);
+            submitOutboundMessage(ready.peer, /*peerIsMulticast=*/false, ready.confirmable,
+                    /*isRequest=*/false, /*requestId=*/0, ready.token, "CoapSeparateResponse",
+                    ready.header, ready.payload);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+void CoapServer::onEndpointStop()
+{
+    pendingSeparateResponses.clear();
+}
+
+void CoapServer::onEndpointCrash()
+{
+    pendingSeparateResponses.clear();
+}
+
 void CoapServer::sendResponsePacket(const CoapPeerEndpoint& peer, bool requestWasConfirmable, uint16_t requestMid,
         const Ptr<const CoapHeader>& requestHeader, uint8_t responseCode, const Ptr<CoapHeader>& responseHeader,
         const std::vector<uint8_t>& payload)
 {
     responseHeader->setVersion(1);
     responseHeader->setCode(responseCode);
-    responseHeader->setTokenArraySize(requestHeader->getTokenArraySize());
-    for (size_t i = 0; i < requestHeader->getTokenArraySize(); ++i)
-        responseHeader->setToken(i, requestHeader->getToken(i));
+    std::vector<uint8_t> tokenVec(requestHeader->getTokenArraySize());
+    responseHeader->setTokenArraySize(tokenVec.size());
+    for (size_t i = 0; i < tokenVec.size(); ++i) {
+        uint8_t b = requestHeader->getToken(i);
+        tokenVec[i] = b;
+        responseHeader->setToken(i, b);
+    }
+
+    if (responseDelay > SIMTIME_ZERO) {
+        if (requestWasConfirmable)
+            sendEmptyMessageAndCacheDuplicate(COAP_TYPE_ACK, requestMid, peer);
+
+        responseHeader->setMessageType(requestWasConfirmable ? COAP_TYPE_CON : COAP_TYPE_NON);
+        CoapPendingSeparateResponse sep;
+        sep.dueAt = simTime() + responseDelay;
+        sep.peer = peer;
+        sep.confirmable = requestWasConfirmable;
+        sep.token = std::move(tokenVec);
+        sep.header = responseHeader;
+        sep.payload = payload;
+        pendingSeparateResponses.push_back(std::move(sep));
+        rescheduleDeadlineTimer();
+        return;
+    }
 
     if (requestWasConfirmable) {
         responseHeader->setMessageType(COAP_TYPE_ACK);
         responseHeader->setMessageId(requestMid);
+        Packet *packet = buildCoapPacket("CoapResponse", responseHeader, payload);
+        cacheDuplicateResponse(peer, requestMid, packet);
+        sendCoapPacket(packet, peer.address, peer.port);
     }
     else {
-        uint16_t mid = 0;
-        if (!allocateMessageId(mid))
-            return;
         responseHeader->setMessageType(COAP_TYPE_NON);
-        responseHeader->setMessageId(mid);
+        submitOutboundMessage(peer, /*peerIsMulticast=*/false, /*confirmable=*/false,
+                /*isRequest=*/false, /*requestId=*/0, tokenVec, "CoapResponse",
+                responseHeader, payload);
     }
-
-    Packet *packet = buildCoapPacket("CoapResponse", responseHeader, payload);
-    sendCoapPacket(packet, peer.address, peer.port);
 }
 
 void CoapServer::handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,

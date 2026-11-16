@@ -1,0 +1,220 @@
+%description:
+
+RFC 7252 Sections 4.5, 4.8.2 -- Confirmable duplicate suppression, cached
+piggybacked ACK replay, peer-scoped (endpoint, MID) keys, half-open
+EXCHANGE_LIFETIME (247s) boundary, and duplicate separate CON response handling.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class DupCountCoapServer : public CoapServer
+{
+  public:
+    int getInvokeCount = 0;
+
+  protected:
+    virtual void onGetResourceHandled(const std::string& pathKey, const CoapResourceEntry& resource) override {
+        ++getInvokeCount;
+    }
+};
+
+class DupTestClient : public CoapClient
+{
+  public:
+    int deliveredCount = 0;
+
+    uint64_t sendManualConGet(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, true, uri, {});
+    }
+
+  protected:
+    virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) override {
+        ++deliveredCount;
+        CoapClient::onRequestCompleted(requestId, peer, responseHeader, payload);
+    }
+};
+
+Define_Module(DupCountCoapServer);
+Define_Module(DupTestClient);
+
+Define_ProtocolTest(coap_duplicate_suppression)
+{
+    return ProtocolTest("coap_duplicate_suppression")
+        // Scenario 1 (t=1.0s): hostA.app[0] sends CON GET MID=0x2201. Replay exact MID at t=1.2s and t=247.9s (< 248.0s):
+        // server executes GET once, replays identical piggybacked ACK both times; then at t=248.001s (>=[t0, t0+247s)),
+        // same MID is treated as fresh and executes GET a 2nd time!
+        .act(action().at(1.0).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = 1; req.messageId = 0x2201; req.token = {0x31};
+            req.options.push_back({11, asciiBytes("val")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "ConGet1");
+            peer.scheduleRawSend(simTime() + 0.2, "hostB", 5683, encodeRawCoap(req), "ConGet1DupEarly");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .capture("firstReplyHex", [](const PacketEvent& ev) {
+                      return cValue(bytesToHexString(ev.packet->peekDataAsBytes()->getBytes()).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == 69 && raw.messageId == 0x2201
+                              && raw.payload == asciiBytes("dup-body");
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      std::string hex = bytesToHexString(ctx.event.packet->peekDataAsBytes()->getBytes());
+                      return hex == ctx.get("firstReplyHex").stringValue();
+                  })
+                  .within(0.5))
+        .act(action().after(0.01).run<DupCountCoapServer>("hostB.app[0]", [](DupCountCoapServer& srv) {
+            if (srv.getInvokeCount != 1)
+                throw cRuntimeError("Expected getInvokeCount=1 after duplicate CON, got %d", srv.getInvokeCount);
+        }))
+
+        // Scenario 2: Same MID=0x2201 from SECOND endpoint hostA.app[1] executes cleanly (peer-scoped).
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[1]", [](CoapTestPeer& peer2) {
+            RawCoapMessage req;
+            req.type = 0; req.code = 1; req.messageId = 0x2201; req.token = {0x32};
+            req.options.push_back({11, asciiBytes("val")});
+            peer2.sendRawNow("hostB", 5683, encodeRawCoap(req), "ConGetPeer2SameMid");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == 69 && raw.messageId == 0x2201;
+                  })
+                  .within(0.5))
+        .act(action().after(0.01).run<DupCountCoapServer>("hostB.app[0]", [](DupCountCoapServer& srv) {
+            if (srv.getInvokeCount != 2)
+                throw cRuntimeError("Expected getInvokeCount=2 from distinct peer endpoint, got %d", srv.getInvokeCount);
+        }))
+
+        // Scenario 3: Duplicate CON at t=247.9s (1.0 + 246.9s < 1.0 + 247.0s) still suppressed; at 248.005s (>= 248s) executed!
+        .act(action().at(247.9).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = 1; req.messageId = 0x2201; req.token = {0x31};
+            req.options.push_back({11, asciiBytes("val")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "ConGetDupJustBeforeBoundary");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().at(248.005).run<DupCountCoapServer>("hostB.app[0]", [](DupCountCoapServer& srv) {
+            if (srv.getInvokeCount != 2)
+                throw cRuntimeError("Expected duplicate just before 247s boundary to stay suppressed, got %d", srv.getInvokeCount);
+        }))
+        .act(action().at(248.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = 1; req.messageId = 0x2201; req.token = {0x33};
+            req.options.push_back({11, asciiBytes("val")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "ConGetAfterBoundary");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.01).run<DupCountCoapServer>("hostB.app[0]", [](DupCountCoapServer& srv) {
+            if (srv.getInvokeCount != 3)
+                throw cRuntimeError("Expected expired MID at t0+EXCHANGE_LIFETIME to re-execute, got %d", srv.getInvokeCount);
+        }))
+
+        // Scenario 4: Client receives duplicate separate CON response (same peer, same MID) -> replays Empty ACK, delivers ONCE.
+        .act(action().at(250.0).run<DupTestClient>("hostA.app[2]", [](DupTestClient& cli) {
+            cli.sendManualConGet("hostB", 5684, "/cli-dup");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      RawCoapMessage eack;
+                      eack.type = 2; eack.code = 0; eack.messageId = req.messageId;
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(eack), "CliEmptyAck");
+
+                      RawCoapMessage sep;
+                      sep.type = 0; sep.code = COAP_CODE_CONTENT; sep.messageId = 0x7711;
+                      sep.token = req.token; sep.payload = asciiBytes("once");
+                      peer->scheduleRawSend(simTime() + 0.05, last.srcAddr.str(), last.srcPort, encodeRawCoap(sep), "Sep1");
+                      peer->scheduleRawSend(simTime() + 0.15, last.srcAddr.str(), last.srcPort, encodeRawCoap(sep), "Sep1Dup");
+                      return true;
+                  })
+                  .within(1.0))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.messageId == 0x7711;
+                  })
+                  .within(0.5))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return decodeRawCoap(ctx.event.packet->peekDataAsBytes()->getBytes(), raw)
+                              && raw.type == 2 && raw.code == 0 && raw.messageId == 0x7711;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<DupTestClient>("hostA.app[2]", [](DupTestClient& cli) {
+            if (cli.deliveredCount != 1)
+                throw cRuntimeError("Expected client deliveredCount=1 across duplicate separate CON responses, got %d", cli.deliveredCount);
+        }));
+}
+
+%activity:
+EV << "coap_duplicate_suppression compiled\n";
+
+%file: DupCountCoapServer.ned
+import inet.applications.coap.CoapServer;
+
+simple DupCountCoapServer extends CoapServer
+{
+    parameters:
+        @class(DupCountCoapServer);
+}
+
+%file: DupTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple DupTestClient extends CoapClient
+{
+    parameters:
+        @class(DupTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 260s
+seed-set = 0
+*.tester.testName = "coap_duplicate_suppression"
+
+*.hostA.numApps = 3
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[1].typename = "CoapTestPeer"
+*.hostA.app[1].localPort = 16001
+*.hostA.app[2].typename = "DupTestClient"
+*.hostA.app[2].localPort = 16002
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "DupCountCoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/val' contentFormat='0'>dup-body</resource></resources>")
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+%contains: stdout
+PROTOCOLTEST coap_duplicate_suppression: PASS

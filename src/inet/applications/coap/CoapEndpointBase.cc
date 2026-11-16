@@ -70,8 +70,6 @@ void CoapEndpointBase::parseAndValidateParameters()
     processingDelay = par("processingDelay");
 
     maxPendingRequests = par("maxPendingRequests");
-    maxDuplicateEntries = par("maxDuplicateEntries");
-    maxDuplicatePerPeer = par("maxDuplicatePerPeer");
     maxPendingOutboundPerEndpoint = par("maxPendingOutboundPerEndpoint");
     maxIncomingBlockSize = par("maxIncomingBlockSize");
     preferredBlockSize = par("preferredBlockSize");
@@ -94,8 +92,8 @@ void CoapEndpointBase::parseAndValidateParameters()
         throw cRuntimeError("maxLatency must be positive");
     if (processingDelay < SIMTIME_ZERO)
         throw cRuntimeError("processingDelay must be non-negative");
-    if (maxPendingRequests < 1 || maxDuplicateEntries < 1 || maxDuplicatePerPeer < 1 || maxPendingOutboundPerEndpoint < 1)
-        throw cRuntimeError("Queue and history capacities must be >= 1");
+    if (maxPendingRequests < 1 || maxPendingOutboundPerEndpoint < 1)
+        throw cRuntimeError("Queue and pending capacities must be >= 1");
     if (maxIncomingBlockSize < 16 || maxIncomingBlockTransfers < 1 || maxObservers < 1)
         throw cRuntimeError("Block and observer capacities must be valid positive values");
     bool validPrefBlock = (preferredBlockSize == 16 || preferredBlockSize == 32 || preferredBlockSize == 64 ||
@@ -146,16 +144,22 @@ void CoapEndpointBase::bindSocket()
         socket.setTos(tos);
 }
 
-void CoapEndpointBase::clearTransientState()
+void CoapEndpointBase::clearTransientState(bool clearDuplicates)
 {
     for (const auto& kv : pendingRequests)
         onRequestAborted(kv.second.requestId);
 
     pendingRequests.clear();
     outboundMidToToken.clear();
-    duplicateOrder.clear();
-    duplicateEntries.clear();
-    duplicatePeerCounts.clear();
+    activeExchanges.clear();
+    peerCongestion.clear();
+    outboundQueue.clear();
+
+    if (clearDuplicates) {
+        conDuplicateOrder.clear();
+        nonDuplicateOrder.clear();
+        duplicateEntries.clear();
+    }
 }
 
 void CoapEndpointBase::handleMessageWhenUp(cMessage *msg)
@@ -190,7 +194,7 @@ void CoapEndpointBase::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
     onEndpointStop();
-    clearTransientState();
+    clearTransientState(false);
     socket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -199,7 +203,7 @@ void CoapEndpointBase::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(deadlineTimer);
     onEndpointCrash();
-    clearTransientState();
+    clearTransientState(true);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
     else
@@ -230,18 +234,43 @@ void CoapEndpointBase::rescheduleDeadlineTimer()
 
     cancelEvent(deadlineTimer);
 
+    simtime_t now = simTime();
     simtime_t nextDeadline = SIMTIME_ZERO;
-    for (const auto& kv : pendingRequests) {
-        if (nextDeadline == SIMTIME_ZERO || kv.second.expiresAt < nextDeadline)
-            nextDeadline = kv.second.expiresAt;
+    auto considerDeadline = [&](simtime_t t) {
+        if (t > SIMTIME_ZERO && (nextDeadline == SIMTIME_ZERO || t < nextDeadline))
+            nextDeadline = t;
+    };
+
+    for (const auto& kv : pendingRequests)
+        considerDeadline(kv.second.expiresAt);
+
+    for (const auto& kv : activeExchanges)
+        considerDeadline(kv.second.nextRetryAt);
+
+    for (const auto& kv : peerCongestion) {
+        if (kv.second.probingEarliestAt > now)
+            considerDeadline(kv.second.probingEarliestAt);
     }
 
-    simtime_t subclassDeadline = getNextSubclassDeadline();
-    if (subclassDeadline > SIMTIME_ZERO && (nextDeadline == SIMTIME_ZERO || subclassDeadline < nextDeadline))
-        nextDeadline = subclassDeadline;
+    if (midPoolExhausted && !midReservationOrder.empty())
+        considerDeadline(midReservationOrder.front().second);
+
+    if (!conDuplicateOrder.empty()) {
+        auto it = duplicateEntries.find(conDuplicateOrder.front());
+        if (it != duplicateEntries.end())
+            considerDeadline(it->second.expiry);
+    }
+
+    if (!nonDuplicateOrder.empty()) {
+        auto it = duplicateEntries.find(nonDuplicateOrder.front());
+        if (it != duplicateEntries.end())
+            considerDeadline(it->second.expiry);
+    }
+
+    considerDeadline(getNextSubclassDeadline());
 
     if (nextDeadline > SIMTIME_ZERO)
-        scheduleAt(std::max(nextDeadline, simTime()), deadlineTimer);
+        scheduleAt(std::max(nextDeadline, now), deadlineTimer);
 }
 
 void CoapEndpointBase::onDeadlineTimer()
@@ -249,6 +278,8 @@ void CoapEndpointBase::onDeadlineTimer()
     simtime_t now = simTime();
     purgeExpiredMidReservations(now);
     purgeExpiredDuplicates(now);
+    processConfirmableRetransmissions(now);
+    pumpOutboundQueue(now);
     expirePendingRequests(now);
     onSubclassTimer(now);
     rescheduleDeadlineTimer();
@@ -284,8 +315,10 @@ void CoapEndpointBase::purgeExpiredMidReservations(simtime_t now)
         if (front.second > now)
             break;
         auto it = reservedOutgoingMids.find(front.first);
-        if (it != reservedOutgoingMids.end() && it->second <= now)
+        if (it != reservedOutgoingMids.end() && it->second <= now) {
             reservedOutgoingMids.erase(it);
+            midPoolExhausted = false;
+        }
         midReservationOrder.pop_front();
     }
 }
@@ -315,7 +348,7 @@ bool CoapEndpointBase::allocateToken(std::vector<uint8_t>& tokenOut)
     return true;
 }
 
-bool CoapEndpointBase::allocateMessageId(uint16_t& midOut)
+bool CoapEndpointBase::allocateMessageId(uint16_t& midOut, bool emitOnFailure)
 {
     simtime_t now = simTime();
     purgeExpiredMidReservations(now);
@@ -329,11 +362,13 @@ bool CoapEndpointBase::allocateMessageId(uint16_t& midOut)
             midReservationOrder.emplace_back(candidate, expiry);
             nextMessageId = static_cast<uint16_t>(candidate + 1U);
             midOut = candidate;
+            midPoolExhausted = false;
             return true;
         }
     }
 
-    emit(capacityRejectedSignal, 1L);
+    if (emitOnFailure)
+        emit(capacityRejectedSignal, 1L);
     return false;
 }
 
@@ -405,27 +440,238 @@ void CoapEndpointBase::sendEmptyMessage(CoapMessageType type, uint16_t messageId
     sendCoapPacket(packet, destAddr, destPort);
 }
 
-void CoapEndpointBase::purgeExpiredDuplicates(simtime_t now)
+void CoapEndpointBase::sendEmptyMessageAndCacheDuplicate(CoapMessageType type, uint16_t messageId, const CoapPeerEndpoint& peer)
 {
-    while (!duplicateOrder.empty()) {
-        const auto& key = duplicateOrder.front();
-        auto it = duplicateEntries.find(key);
-        if (it == duplicateEntries.end()) {
-            duplicateOrder.pop_front();
+    auto header = makeShared<CoapHeader>();
+    header->setVersion(1);
+    header->setMessageType(type);
+    header->setCode(COAP_CODE_EMPTY);
+    header->setMessageId(messageId);
+    const char *pktName = (type == COAP_TYPE_RST) ? "CoapReset"
+            : (type == COAP_TYPE_ACK ? "CoapAck" : "CoapEmpty");
+    std::vector<uint8_t> emptyPayload;
+    Packet *packet = buildCoapPacket(pktName, header, emptyPayload);
+    cacheDuplicateResponse(peer, messageId, packet);
+    sendCoapPacket(packet, peer.address, peer.port);
+}
+
+void CoapEndpointBase::markPeerReachable(const CoapPeerEndpoint& peer)
+{
+    auto it = peerCongestion.find(peer);
+    if (it != peerCongestion.end()) {
+        it->second.inProbingBackoff = false;
+        it->second.probingEarliestAt = SIMTIME_ZERO;
+    }
+}
+
+bool CoapEndpointBase::submitOutboundMessage(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
+        bool isRequest, uint64_t requestId, const std::vector<uint8_t>& token, const char *packetName,
+        const Ptr<CoapHeader>& header, const std::vector<uint8_t>& payload)
+{
+    if (peerIsMulticast) {
+        uint16_t mid = 0;
+        if (!allocateMessageId(mid, true))
+            return false;
+        header->setMessageId(mid);
+        if (isRequest) {
+            auto reqIt = pendingRequests.find(token);
+            if (reqIt != pendingRequests.end()) {
+                if (reqIt->second.sentMids.empty())
+                    reqIt->second.initialMid = mid;
+                reqIt->second.sentMids.insert(mid);
+            }
+        }
+        Packet *packet = buildCoapPacket(packetName, header, payload);
+        sendCoapPacket(packet, peer.address, peer.port);
+        rescheduleDeadlineTimer();
+        return true;
+    }
+
+    if (static_cast<int>(outboundQueue.size()) >= maxPendingOutboundPerEndpoint) {
+        emit(capacityRejectedSignal, 1L);
+        return false;
+    }
+
+    CoapOutboundItem item;
+    item.outboundId = nextOutboundId++;
+    item.peer = peer;
+    item.peerIsMulticast = false;
+    item.confirmable = confirmable;
+    item.isRequest = isRequest;
+    item.requestId = requestId;
+    item.token = token;
+    item.packetName = packetName;
+    item.header = header;
+    item.payload = payload;
+    outboundQueue.push_back(std::move(item));
+
+    pumpOutboundQueue(simTime());
+    rescheduleDeadlineTimer();
+    return true;
+}
+
+bool CoapEndpointBase::sendConfirmablePing(const CoapPeerEndpoint& peer, uint64_t& exchangeIdOut)
+{
+    auto header = makeShared<CoapHeader>();
+    header->setVersion(1);
+    header->setMessageType(COAP_TYPE_CON);
+    header->setCode(COAP_CODE_EMPTY);
+    std::vector<uint8_t> emptyToken;
+    std::vector<uint8_t> emptyPayload;
+    uint64_t expectedExchange = nextExchangeId;
+    if (!submitOutboundMessage(peer, false, true, false, 0, emptyToken, "CoapPing", header, emptyPayload))
+        return false;
+    exchangeIdOut = expectedExchange;
+    return true;
+}
+
+void CoapEndpointBase::pumpOutboundQueue(simtime_t now)
+{
+    if (operationalState != State::OPERATING || outboundQueue.empty())
+        return;
+
+    std::set<CoapPeerEndpoint> blockedPeers;
+    for (size_t idx = 0; idx < outboundQueue.size();) {
+        const auto& item = outboundQueue[idx];
+        if (blockedPeers.count(item.peer) > 0) {
+            ++idx;
             continue;
         }
-        if (it->second.expiry > now)
-            break;
 
-        auto peerIt = duplicatePeerCounts.find(key.peer);
-        if (peerIt != duplicatePeerCounts.end()) {
-            peerIt->second -= 1;
-            if (peerIt->second <= 0)
-                duplicatePeerCounts.erase(peerIt);
+        auto& peerState = peerCongestion[item.peer];
+        if (peerState.inProbingBackoff && peerState.probingEarliestAt > now) {
+            blockedPeers.insert(item.peer);
+            ++idx;
+            continue;
         }
-        duplicateEntries.erase(it);
-        duplicateOrder.pop_front();
+        if (item.confirmable && peerState.activeConfirmables >= nstart) {
+            blockedPeers.insert(item.peer);
+            ++idx;
+            continue;
+        }
+
+        uint16_t mid = 0;
+        if (!allocateMessageId(mid, false)) {
+            midPoolExhausted = true;
+            break;
+        }
+
+        CoapOutboundItem dispatched = std::move(outboundQueue[idx]);
+        outboundQueue.erase(outboundQueue.begin() + static_cast<std::ptrdiff_t>(idx));
+
+        dispatched.header->setMessageId(mid);
+        if (dispatched.isRequest) {
+            auto reqIt = pendingRequests.find(dispatched.token);
+            if (reqIt != pendingRequests.end()) {
+                if (reqIt->second.sentMids.empty())
+                    reqIt->second.initialMid = mid;
+                reqIt->second.sentMids.insert(mid);
+                outboundMidToToken[std::make_pair(dispatched.peer, mid)] = dispatched.token;
+            }
+        }
+
+        Packet *pkt = buildCoapPacket(dispatched.packetName.c_str(), dispatched.header, dispatched.payload);
+        auto wireBytesChunk = pkt->peekDataAsBytes();
+        std::vector<uint8_t> wireBytes = wireBytesChunk->getBytes();
+
+        if (peerState.inProbingBackoff) {
+            simtime_t pacing = SimTime(static_cast<double>(wireBytes.size()) / probingRateBytesPerSec);
+            peerState.probingEarliestAt = now + pacing;
+        }
+
+        if (dispatched.confirmable) {
+            cRNG *rng = getRNG(rngStream);
+            double randFactor = 1.0 + rng->doubleRand() * (ackRandomFactor - 1.0);
+            simtime_t initTimeout = ackTimeout * randFactor;
+
+            CoapOutboundExchange ex;
+            ex.exchangeId = nextExchangeId++;
+            ex.peer = dispatched.peer;
+            ex.messageId = mid;
+            ex.isRequest = dispatched.isRequest;
+            ex.requestId = dispatched.requestId;
+            ex.token = dispatched.token;
+            ex.packetName = dispatched.packetName;
+            ex.wireBytes = wireBytes;
+            ex.initialTimeout = initTimeout;
+            ex.currentTimeout = initTimeout;
+            ex.nextRetryAt = now + initTimeout;
+            ex.retransmitCount = 0;
+
+            activeExchanges[std::make_pair(dispatched.peer, mid)] = std::move(ex);
+            peerState.activeConfirmables += 1;
+        }
+
+        sendCoapPacket(pkt, dispatched.peer.address, dispatched.peer.port);
     }
+}
+
+void CoapEndpointBase::processConfirmableRetransmissions(simtime_t now)
+{
+    std::vector<std::pair<CoapPeerEndpoint, uint16_t>> dueKeys;
+    for (const auto& kv : activeExchanges) {
+        if (kv.second.nextRetryAt <= now)
+            dueKeys.push_back(kv.first);
+    }
+
+    for (const auto& key : dueKeys) {
+        auto it = activeExchanges.find(key);
+        if (it == activeExchanges.end())
+            continue;
+
+        CoapOutboundExchange& ex = it->second;
+        if (ex.retransmitCount < maxRetransmit) {
+            ex.retransmitCount += 1;
+            ex.currentTimeout *= 2.0;
+            ex.nextRetryAt = now + ex.currentTimeout;
+
+            Packet *retry = new Packet(ex.packetName.c_str());
+            retry->insertAtBack(makeShared<BytesChunk>(ex.wireBytes));
+            emit(retransmissionSignal, 1L);
+            sendCoapPacket(retry, ex.peer.address, ex.peer.port);
+        }
+        else {
+            CoapOutboundExchange timedOut = std::move(it->second);
+            activeExchanges.erase(it);
+
+            auto& peerState = peerCongestion[timedOut.peer];
+            peerState.activeConfirmables = std::max(0, peerState.activeConfirmables - 1);
+            peerState.inProbingBackoff = true;
+            simtime_t probeWait = SimTime(static_cast<double>(timedOut.wireBytes.size()) / probingRateBytesPerSec);
+            peerState.probingEarliestAt = std::max(peerState.probingEarliestAt, now + probeWait);
+
+            if (timedOut.isRequest) {
+                bool stillPending = (pendingRequests.find(timedOut.token) != pendingRequests.end());
+                removePendingRequest(timedOut.token);
+                if (stillPending)
+                    onRequestFailed(timedOut.requestId, "CoAP confirmable exchange timed out");
+            }
+            else {
+                onOutboundExchangeFailed(timedOut.exchangeId, timedOut.peer, timedOut.messageId,
+                        "CoAP confirmable exchange timed out");
+            }
+        }
+    }
+}
+
+void CoapEndpointBase::purgeExpiredDuplicates(simtime_t now)
+{
+    auto purgeDeque = [&](std::deque<CoapDuplicateKey>& order) {
+        while (!order.empty()) {
+            const auto& key = order.front();
+            auto it = duplicateEntries.find(key);
+            if (it == duplicateEntries.end()) {
+                order.pop_front();
+                continue;
+            }
+            if (it->second.expiry > now)
+                break;
+            duplicateEntries.erase(it);
+            order.pop_front();
+        }
+    };
+    purgeDeque(conDuplicateOrder);
+    purgeDeque(nonDuplicateOrder);
 }
 
 bool CoapEndpointBase::checkAndHandleDuplicate(const CoapPeerEndpoint& peer, uint16_t messageId, CoapMessageType type)
@@ -463,53 +709,33 @@ void CoapEndpointBase::recordDuplicateEntry(const CoapPeerEndpoint& peer, uint16
         return;
     }
 
-    auto eraseKey = [&](const CoapDuplicateKey& targetKey) {
-        auto it = duplicateEntries.find(targetKey);
-        if (it != duplicateEntries.end()) {
-            auto peerIt = duplicatePeerCounts.find(targetKey.peer);
-            if (peerIt != duplicatePeerCounts.end()) {
-                peerIt->second -= 1;
-                if (peerIt->second <= 0)
-                    duplicatePeerCounts.erase(peerIt);
-            }
-            duplicateEntries.erase(it);
-        }
-    };
-
-    // Enforce per-peer duplicate history limit cleanly in FIFO order.
-    while (duplicatePeerCounts[peer] >= maxDuplicatePerPeer) {
-        bool removed = false;
-        for (auto qIt = duplicateOrder.begin(); qIt != duplicateOrder.end(); ++qIt) {
-            if (qIt->peer == peer) {
-                CoapDuplicateKey oldestPeerKey = *qIt;
-                duplicateOrder.erase(qIt);
-                eraseKey(oldestPeerKey);
-                removed = true;
-                break;
-            }
-        }
-        if (!removed)
-            break;
-    }
-
-    // Enforce global duplicate history limit cleanly in FIFO order.
-    while (static_cast<int>(duplicateEntries.size()) >= maxDuplicateEntries && !duplicateOrder.empty()) {
-        CoapDuplicateKey oldestKey = duplicateOrder.front();
-        duplicateOrder.pop_front();
-        eraseKey(oldestKey);
-    }
-
     CoapDuplicateEntry entry;
     entry.key = key;
     entry.expiry = now + lifetime;
     entry.isConfirmable = isConfirmable;
     duplicateEntries[key] = entry;
-    duplicateOrder.push_back(key);
-    duplicatePeerCounts[peer] += 1;
+    if (isConfirmable)
+        conDuplicateOrder.push_back(key);
+    else
+        nonDuplicateOrder.push_back(key);
+}
+
+void CoapEndpointBase::cacheDuplicateResponse(const CoapPeerEndpoint& peer, uint16_t messageId, Packet *responsePacket)
+{
+    if (responsePacket == nullptr)
+        return;
+    auto wireBytesChunk = responsePacket->peekDataAsBytes();
+    std::vector<uint8_t> wireBytes = wireBytesChunk->getBytes();
+    CoapDuplicateKey key{peer, messageId};
+    auto it = duplicateEntries.find(key);
+    if (it != duplicateEntries.end()) {
+        it->second.hasCachedResponse = true;
+        it->second.cachedWireBytes = std::move(wireBytes);
+    }
 }
 
 bool CoapEndpointBase::registerPendingRequest(const CoapPeerEndpoint& peer, bool peerIsMulticast, bool confirmable,
-        uint8_t requestCode, const std::vector<uint8_t>& token, uint16_t mid, uint64_t& requestIdOut)
+        uint8_t requestCode, const std::vector<uint8_t>& token, uint64_t& requestIdOut)
 {
     if (static_cast<int>(pendingRequests.size()) >= maxPendingRequests) {
         emit(capacityRejectedSignal, 1L);
@@ -528,15 +754,10 @@ bool CoapEndpointBase::registerPendingRequest(const CoapPeerEndpoint& peer, bool
     req.confirmable = confirmable;
     req.requestCode = requestCode;
     req.token = token;
-    req.initialMid = mid;
-    req.sentMids.insert(mid);
     req.createdAt = simTime();
     req.expiresAt = simTime() + exchangeLifetime;
 
     pendingRequests[token] = req;
-    if (!peerIsMulticast)
-        outboundMidToToken[std::make_pair(peer, mid)] = token;
-
     requestIdOut = req.requestId;
     rescheduleDeadlineTimer();
     return true;
@@ -555,6 +776,27 @@ void CoapEndpointBase::removePendingRequest(const std::vector<uint8_t>& token)
     rescheduleDeadlineTimer();
 }
 
+void CoapEndpointBase::cancelConfirmableExchangesForRequest(uint64_t requestId)
+{
+    if (requestId == 0)
+        return;
+    bool releasedAny = false;
+    for (auto it = activeExchanges.begin(); it != activeExchanges.end();) {
+        if (it->second.isRequest && it->second.requestId == requestId) {
+            auto peerIt = peerCongestion.find(it->first.first);
+            if (peerIt != peerCongestion.end())
+                peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+            it = activeExchanges.erase(it);
+            releasedAny = true;
+        }
+        else {
+            ++it;
+        }
+    }
+    if (releasedAny)
+        pumpOutboundQueue(simTime());
+}
+
 void CoapEndpointBase::expirePendingRequests(simtime_t now)
 {
     std::vector<std::pair<uint64_t, std::vector<uint8_t>>> expired;
@@ -564,6 +806,7 @@ void CoapEndpointBase::expirePendingRequests(simtime_t now)
     }
 
     for (const auto& item : expired) {
+        cancelConfirmableExchangesForRequest(item.first);
         removePendingRequest(item.second);
         onRequestFailed(item.first, "CoAP request timed out");
     }
@@ -659,8 +902,9 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
     uint16_t mid = header->getMessageId();
     uint8_t codeClass = getCoapCodeClass(code);
 
-    // Reject impossible request-in-ACK/RST combinations before dispatching.
-    if (codeClass == 0 && code != COAP_CODE_EMPTY && (type == COAP_TYPE_ACK || type == COAP_TYPE_RST)) {
+    // Reject impossible request-in-ACK/RST and non-empty RST combinations before dispatching.
+    if ((codeClass == 0 && code != COAP_CODE_EMPTY && (type == COAP_TYPE_ACK || type == COAP_TYPE_RST))
+            || (type == COAP_TYPE_RST && code != COAP_CODE_EMPTY)) {
         emit(malformedReceivedSignal, 1L);
         delete packet;
         return;
@@ -678,7 +922,7 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
     if (code == COAP_CODE_EMPTY) {
         if (type == COAP_TYPE_CON) {
             if (!destIsMulticast)
-                sendEmptyMessage(COAP_TYPE_RST, mid, peer.address, peer.port);
+                sendEmptyMessageAndCacheDuplicate(COAP_TYPE_RST, mid, peer);
         }
         else if (type == COAP_TYPE_ACK) {
             handleEmptyAck(peer, mid);
@@ -703,7 +947,9 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
                 for (size_t i = 0; i < header->getTokenArraySize(); ++i)
                     errHeader->setToken(i, header->getToken(i));
                 std::vector<uint8_t> emptyPayload;
-                sendCoapPacket(buildCoapPacket("CoapBadOption", errHeader, emptyPayload), peer.address, peer.port);
+                Packet *errPkt = buildCoapPacket("CoapBadOption", errHeader, emptyPayload);
+                cacheDuplicateResponse(peer, mid, errPkt);
+                sendCoapPacket(errPkt, peer.address, peer.port);
             }
             delete packet;
             return;
@@ -718,6 +964,42 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
     for (size_t i = 0; i < header->getTokenArraySize(); ++i)
         token[i] = header->getToken(i);
 
+    if (type == COAP_TYPE_ACK) {
+        auto exIt = activeExchanges.find(std::make_pair(peer, mid));
+        if (exIt == activeExchanges.end() || exIt->second.token != token) {
+            delete packet;
+            return;
+        }
+
+        auto reqIt = pendingRequests.find(token);
+        if (reqIt == pendingRequests.end() || (!reqIt->second.peerIsMulticast && reqIt->second.peer != peer)) {
+            delete packet;
+            return;
+        }
+
+        // Valid piggybacked ACK completes message-layer CON retransmission.
+        markPeerReachable(peer);
+        auto peerIt = peerCongestion.find(peer);
+        if (peerIt != peerCongestion.end())
+            peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+        activeExchanges.erase(exIt);
+        pumpOutboundQueue(simTime());
+
+        uint16_t badOpt = 0;
+        if (findUnrecognizedCriticalOption(*header, false, badOpt)) {
+            uint64_t reqId = reqIt->second.requestId;
+            removePendingRequest(token);
+            onRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
+            delete packet;
+            return;
+        }
+
+        CoapPendingRequest matchedReq = reqIt->second;
+        handleMatchedResponse(matchedReq, peer, header, payload);
+        delete packet;
+        return;
+    }
+
     auto reqIt = pendingRequests.find(token);
     bool peerMatches = false;
     if (reqIt != pendingRequests.end()) {
@@ -727,23 +1009,30 @@ void CoapEndpointBase::socketDataArrived(UdpSocket *arrivedSocket, Packet *packe
 
     if (reqIt == pendingRequests.end() || !peerMatches) {
         if ((type == COAP_TYPE_CON || type == COAP_TYPE_NON) && !destIsMulticast)
-            sendEmptyMessage(COAP_TYPE_RST, mid, peer.address, peer.port);
+            sendEmptyMessageAndCacheDuplicate(COAP_TYPE_RST, mid, peer);
         delete packet;
         return;
     }
 
+    markPeerReachable(peer);
+
     uint16_t badOpt = 0;
     if (findUnrecognizedCriticalOption(*header, false, badOpt)) {
-        if (type == COAP_TYPE_CON && !destIsMulticast)
-            sendEmptyMessage(COAP_TYPE_RST, mid, peer.address, peer.port);
-        uint64_t reqId = reqIt->second.requestId;
-        removePendingRequest(token);
-        onRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
+        if (type == COAP_TYPE_CON && !destIsMulticast) {
+            sendEmptyMessageAndCacheDuplicate(COAP_TYPE_RST, mid, peer);
+            uint64_t reqId = reqIt->second.requestId;
+            cancelConfirmableExchangesForRequest(reqId);
+            removePendingRequest(token);
+            onRequestFailed(reqId, "Unrecognized critical option in CoAP response", COAP_CODE_BAD_OPTION);
+        }
         delete packet;
         return;
     }
 
     CoapPendingRequest matchedReq = reqIt->second;
+    if (type == COAP_TYPE_CON && !destIsMulticast)
+        sendEmptyMessageAndCacheDuplicate(COAP_TYPE_ACK, mid, peer);
+    cancelConfirmableExchangesForRequest(matchedReq.requestId);
     handleMatchedResponse(matchedReq, peer, header, payload);
     delete packet;
 }
@@ -761,7 +1050,9 @@ void CoapEndpointBase::handleInboundRequest(const CoapPeerEndpoint& peer, bool d
         for (size_t i = 0; i < header->getTokenArraySize(); ++i)
             respHeader->setToken(i, header->getToken(i));
         std::vector<uint8_t> emptyPayload;
-        sendCoapPacket(buildCoapPacket("CoapMethodNotAllowed", respHeader, emptyPayload), peer.address, peer.port);
+        Packet *respPkt = buildCoapPacket("CoapMethodNotAllowed", respHeader, emptyPayload);
+        cacheDuplicateResponse(peer, header->getMessageId(), respPkt);
+        sendCoapPacket(respPkt, peer.address, peer.port);
     }
 }
 
@@ -774,11 +1065,45 @@ void CoapEndpointBase::handleMatchedResponse(const CoapPendingRequest& request, 
 
 void CoapEndpointBase::handleEmptyAck(const CoapPeerEndpoint& peer, uint16_t messageId)
 {
-    // Confirmable exchange release is implemented in C3.
+    auto exIt = activeExchanges.find(std::make_pair(peer, messageId));
+    if (exIt == activeExchanges.end())
+        return;
+
+    markPeerReachable(peer);
+    auto peerIt = peerCongestion.find(peer);
+    if (peerIt != peerCongestion.end())
+        peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+    activeExchanges.erase(exIt);
+    pumpOutboundQueue(simTime());
+    rescheduleDeadlineTimer();
 }
 
 void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messageId)
 {
+    auto exIt = activeExchanges.find(std::make_pair(peer, messageId));
+    if (exIt != activeExchanges.end()) {
+        CoapOutboundExchange ex = std::move(exIt->second);
+        activeExchanges.erase(exIt);
+
+        markPeerReachable(peer);
+        auto peerIt = peerCongestion.find(peer);
+        if (peerIt != peerCongestion.end())
+            peerIt->second.activeConfirmables = std::max(0, peerIt->second.activeConfirmables - 1);
+
+        if (ex.isRequest) {
+            bool stillPending = (pendingRequests.find(ex.token) != pendingRequests.end());
+            removePendingRequest(ex.token);
+            if (stillPending)
+                onRequestFailed(ex.requestId, "CoAP exchange reset by peer");
+        }
+        else {
+            onOutboundExchangeFailed(ex.exchangeId, ex.peer, ex.messageId, "CoAP exchange reset by peer");
+        }
+        pumpOutboundQueue(simTime());
+        rescheduleDeadlineTimer();
+        return;
+    }
+
     auto mapIt = outboundMidToToken.find(std::make_pair(peer, messageId));
     if (mapIt == outboundMidToToken.end())
         return;
@@ -790,6 +1115,7 @@ void CoapEndpointBase::handleReset(const CoapPeerEndpoint& peer, uint16_t messag
         return;
     }
 
+    markPeerReachable(peer);
     uint64_t reqId = reqIt->second.requestId;
     removePendingRequest(token);
     onRequestFailed(reqId, "CoAP exchange reset by peer");

@@ -298,31 +298,33 @@ uint64_t CoapClient::submitCoapRequest(const L3Address& destAddr, int destPort, 
         int reqContentFormat, int reqAccept, const std::vector<CoapOption>& extraOptions)
 {
     CoapParsedUri parsedUri = parseCoapUri(uriStr);
-    std::vector<uint8_t> token;
-    if (!allocateToken(token))
-        return 0;
-
-    uint16_t mid = 0;
-    if (!allocateMessageId(mid))
-        return 0;
-
     CoapPeerEndpoint peer{destAddr, destPort};
     bool peerMulticast = destAddr.isMulticast();
     if (peerMulticast && isConfirmable)
         throw cRuntimeError("Confirmable CoAP requests must not target multicast address");
 
-    uint64_t requestId = 0;
-    if (!registerPendingRequest(peer, peerMulticast, isConfirmable, methodCode, token, mid, requestId))
+    emit(requestStartedSignal, 1L);
+
+    std::vector<uint8_t> token;
+    if (!allocateToken(token)) {
+        ++failedCount;
+        emit(requestFailedSignal, 1L);
         return 0;
+    }
+
+    uint64_t requestId = 0;
+    if (!registerPendingRequest(peer, peerMulticast, isConfirmable, methodCode, token, requestId)) {
+        ++failedCount;
+        emit(requestFailedSignal, 1L);
+        return 0;
+    }
 
     activeRequestStarts[requestId] = simTime();
-    emit(requestStartedSignal, 1L);
 
     auto header = makeShared<CoapHeader>();
     header->setVersion(1);
     header->setMessageType(isConfirmable ? COAP_TYPE_CON : COAP_TYPE_NON);
     header->setCode(methodCode);
-    header->setMessageId(mid);
     header->setTokenArraySize(token.size());
     for (size_t i = 0; i < token.size(); ++i)
         header->setToken(i, token[i]);
@@ -356,8 +358,15 @@ uint64_t CoapClient::submitCoapRequest(const L3Address& destAddr, int destPort, 
         addCoapOption(header, opt.getNumber(), val);
     }
 
-    Packet *packet = buildCoapPacket("CoapRequest", header, body);
-    sendCoapPacket(packet, destAddr, destPort);
+    if (!submitOutboundMessage(peer, peerMulticast, isConfirmable, /*isRequest=*/true, requestId,
+            token, "CoapRequest", header, body)) {
+        activeRequestStarts.erase(requestId);
+        removePendingRequest(token);
+        ++failedCount;
+        emit(requestFailedSignal, 1L);
+        return 0;
+    }
+
     return requestId;
 }
 
