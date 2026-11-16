@@ -20,4 +20,4 @@ The `inet.applications.coap` package (`CoapEndpointBase`, `CoapClient`, `CoapSer
 | [COAP-F-OBSERVE](../../protocol/coap/features.md#coap-f-observe) | optional | yes (RFC 7641) | implemented | PASS (C5) |
 | [COAP-F-BLOCKWISE](../../protocol/coap/features.md#coap-f-blockwise) | optional | yes (RFC 7959, RFC 9175 §3) | implemented | PASS (C6) |
 | [COAP-F-OBSERVE-BLOCK2](../../protocol/coap/features.md#coap-f-observe-block2) | optional | yes (RFC 7959 §2.6, §3.4) | implemented | PASS (C7) |
-| [COAP-F-DTLS](../../protocol/coap/features.md#coap-f-dtls) | optional | yes (RFC 7252 §9, RFC 9147, RFC 9175 §4) | planned (C3–C6) | NOT_RUN |
+| [COAP-F-DTLS](../../protocol/coap/features.md#coap-f-dtls) | optional | yes (RFC 7252 §9, RFC 9147, RFC 9175 §4) | planned (C2–C5) | NOT_RUN |
