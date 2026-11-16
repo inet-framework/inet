@@ -259,6 +259,17 @@ inline std::vector<uint8_t> asciiBytes(const std::string& text)
     return std::vector<uint8_t>(text.begin(), text.end());
 }
 
+inline bool rawDecodeUint(const std::vector<uint8_t>& bytes, uint32_t& out, size_t maxBytes = 4)
+{
+    if (bytes.size() > maxBytes)
+        return false;
+    uint32_t v = 0;
+    for (uint8_t b : bytes)
+        v = (v << 8U) | b;
+    out = v;
+    return true;
+}
+
 } // namespace protocoltest
 } // namespace inet
 

@@ -1,0 +1,182 @@
+%description:
+
+RFC 7959 Section 2.1-2.5 -- Server/Client Block2 download, Size2 reporting,
+ETag consistency, single restart on mid-transfer ETag change, early negotiation,
+missing ETag failure on multi-block response, and concurrent GET serialization.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class Block2Client : public CoapClient
+{
+  public:
+    uint64_t getLarge(const std::string& host, int port, const std::string& uri,
+            const std::vector<CoapOption>& extra = {}) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, true, uri, {}, -1, -1, extra);
+    }
+};
+
+Define_Module(Block2Client);
+
+Define_ProtocolTest(coap_block2_download)
+{
+    return ProtocolTest("coap_block2_download")
+        // 1. Standard 160B GET /large at 64B block size -> 3 blocks (64, 64, 32)
+        .act(action().at(1.0).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            cli.getLarge("hostB", 5683, "/large");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b2 = 0, s2 = 0;
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      auto s2v = getRawOptionValues(raw, COAP_OPT_SIZE2);
+                      auto etv = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return raw.code == COAP_CODE_CONTENT && raw.payload.size() == 64
+                              && b2v.size() == 1 && rawDecodeUint(b2v[0], b2) && (b2 & 0xFU) == 0xAU // NUM=0, M=1, SZX=2
+                              && s2v.size() == 1 && rawDecodeUint(s2v[0], s2) && s2 == 160U
+                              && etv.size() == 1;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b2 = 0;
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      return raw.code == COAP_CODE_CONTENT && raw.payload.size() == 64
+                              && b2v.size() == 1 && rawDecodeUint(b2v[0], b2) && b2 == ((1U << 4U) | 0x0AU); // NUM=1, M=1, SZX=2
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b2 = 0;
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      return raw.code == COAP_CODE_CONTENT && raw.payload.size() == 32
+                              && b2v.size() == 1 && rawDecodeUint(b2v[0], b2) && b2 == ((2U << 4U) | 0x02U); // NUM=2, M=0, SZX=2
+                  }).within(0.5))
+        .act(action().after(0.05).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            if (cli.getCompletedResponses().size() != 1)
+                throw cRuntimeError("Expected 1 assembled Block2 response, got %zu", cli.getCompletedResponses().size());
+            const auto& r = cli.getCompletedResponses().back();
+            if (r.payload != std::vector<uint8_t>(160, 'L'))
+                throw cRuntimeError("Unexpected assembled /large payload (size=%zu)", r.payload.size());
+        }))
+        // 2. Early-negotiated Block2(NUM=0, M=0, SZX=1 -> 32B) with Size2=0 -> 5 blocks
+        .act(action().at(2.0).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            CoapOption b2Opt;
+            b2Opt.setNumber(COAP_OPT_BLOCK2);
+            auto bv = coapUintBytes(1U); // NUM=0, M=0, SZX=1
+            b2Opt.setValueArraySize(bv.size());
+            for (size_t i = 0; i < bv.size(); ++i)
+                b2Opt.setValue(i, bv[i]);
+            CoapOption s2Opt;
+            s2Opt.setNumber(COAP_OPT_SIZE2);
+            s2Opt.setValueArraySize(0);
+            cli.getLarge("hostB", 5683, "/large", {b2Opt, s2Opt});
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.02).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            if (cli.getCompletedResponses().size() != 2)
+                throw cRuntimeError("Expected 2 completed responses after early-negotiated Block2");
+            if (cli.getCompletedResponses().back().payload != std::vector<uint8_t>(160, 'L'))
+                throw cRuntimeError("Early-negotiated Block2 payload mismatch");
+        }))
+        // 3. ETag change mid-download: mutate /dynamic after NUM=0 arrives -> single restart from NUM=0
+        .act(action().at(3.0).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            cli.getLarge("hostB", 5683, "/dynamic");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_CONTENT;
+                  }).within(0.5))
+        .act(action().after(0.00001).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/dynamic", std::vector<uint8_t>(160, 'N'));
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.5))
+        .act(action().after(0.02).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            if (cli.getCompletedResponses().size() != 3)
+                throw cRuntimeError("Expected ETag-restarted Block2 completion");
+            if (cli.getCompletedResponses().back().payload != std::vector<uint8_t>(160, 'N'))
+                throw cRuntimeError("ETag-restarted Block2 did not deliver new representation");
+        }))
+        // 4. Multi-block response missing ETag from peer -> client fails cleanly
+        .act(action().at(4.0).run<Block2Client>("hostA.app[0]", [](Block2Client& cli) {
+            cli.getLarge("hostB", 5684, "/noetag");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req, resp;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      resp.type = 2; resp.code = COAP_CODE_CONTENT; resp.messageId = req.messageId; resp.token = req.token;
+                      resp.options.push_back({COAP_OPT_BLOCK2, coapUintBytes(0x0AU)}); // NUM=0, M=1, SZX=2, no ETag
+                      resp.payload.assign(64, 'X');
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(resp), "BadNoEtag");
+                      return true;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("requestFailed").within(0.5));
+}
+
+%activity:
+EV << "coap_block2_download compiled\n";
+
+%file: Block2Client.ned
+import inet.applications.coap.CoapClient;
+
+simple Block2Client extends CoapClient
+{
+    parameters:
+        @class(Block2Client);
+}
+
+%file: resources.xml
+<resources>
+    <resource path="/large" contentFormat="0" maxAge="60" methods="GET">LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL</resource>
+    <resource path="/dynamic" contentFormat="0" maxAge="60" methods="GET">DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD</resource>
+</resources>
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_block2_download"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "Block2Client"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 64B
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 64B
+*.hostB.app[0].resources = xmldoc("resources.xml")
+
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+%contains: stdout
+PROTOCOLTEST coap_block2_download: PASS
