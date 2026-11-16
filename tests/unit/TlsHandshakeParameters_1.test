@@ -70,6 +70,14 @@ ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
 ASSERT(decoded.versions == std::vector<uint16_t>({Parameters::DTLS_13}));
 setExtensions({0, 43, 0, 3, 2, 0xfe});
 ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
+auto earlyWithoutPsk = extensions;
+earlyWithoutPsk.insert(earlyWithoutPsk.end(), {0, 42, 0, 0});
+setExtensions(earlyWithoutPsk);
+ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
+earlyWithoutPsk.back() = 1; // declared nonempty early_data cannot be a ClientHello offer
+earlyWithoutPsk.push_back(0);
+setExtensions(earlyWithoutPsk);
+ASSERT(!Parameters::decodeOffer(hello, decoded).empty());
 EV << "DTLS handshake parameters PASS\n";
 
 %contains: stdout

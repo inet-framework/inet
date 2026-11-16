@@ -63,6 +63,23 @@ void DtlsSocketIo::sendError(IDtls::AssociationId id, long packetId, const char 
     EV_WARN << "DTLS send " << packetId << " on association " << id << " failed: " << reason << endl;
 }
 
+void DtlsSocketIo::earlyDataArrived(IDtls::AssociationId, Packet *packet)
+{
+    Enter_Method("earlyDataArrived");
+    take(packet);
+    if (operationalState == NOT_OPERATING || operationalState == CRASHING_OPERATION || !par("acceptEarlyData").boolValue()) {
+        delete packet;
+        return;
+    }
+    emit(registerSignal("earlyPacketReceived"), packet);
+    send(packet, "trafficOut");
+}
+
+void DtlsSocketIo::earlyDataStatus(IDtls::AssociationId id, bool accepted)
+{
+    EV_INFO << "DTLS association " << id << " early data " << (accepted ? "accepted" : "rejected") << endl;
+}
+
 void DtlsSocketIo::error(IDtls::AssociationId id, const char *reason)
 {
     if (id == clientId)

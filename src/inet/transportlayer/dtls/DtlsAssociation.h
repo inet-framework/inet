@@ -79,6 +79,14 @@ class INET_API DtlsAssociation
     tls::TlsHandshakeParameters::AuthenticationMode authenticationMode = tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE;
     std::optional<DtlsSessionStore::Entry> offeredSession;
     uint16_t selectedPsk = 0;
+    bool earlyRequested = false;
+    bool earlyOffered = false;
+    bool earlyAccepted = false;
+    bool earlyStatusReported = false;
+    uint64_t earlySentBytes = 0;
+    uint64_t earlyReceivedBytes = 0;
+    uint64_t nextEarlyRecord = 0;
+    std::unique_ptr<DtlsRecordState> receiveEarly;
     std::map<uint64_t, uint64_t> retainedSendCounters;
     DtlsPostHandshakeExchange *findPostHandshakeExchange(const std::shared_ptr<DtlsHandshakeFlight>& value);
     void issueTicket();

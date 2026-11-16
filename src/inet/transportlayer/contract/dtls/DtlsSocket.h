@@ -24,6 +24,8 @@ class INET_API DtlsSocket
     AssociationId open(const L3Address& peerAddress, int peerPort) { checkEngine(); return engine->open(peerAddress, peerPort, callback); }
     AssociationId open(const L3Address& peerAddress, int peerPort, bool resumeSession) { checkEngine(); return engine->open(peerAddress, peerPort, callback, resumeSession); }
     bool isResumed(AssociationId id) const { checkEngine(); return engine->isResumed(id); }
+    AssociationId open(const L3Address& peerAddress, int peerPort, const DtlsOpenOptions& options) { checkEngine(); return engine->open(peerAddress, peerPort, callback, options); }
+    void sendEarly(AssociationId id, Packet *packet) { checkEngine(); engine->sendEarly(id, packet, callback); }
     void send(AssociationId id, Packet *packet) { checkEngine(); engine->send(id, packet, callback); }
     void close(AssociationId id) { checkEngine(); engine->close(id); }
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate = false) { checkEngine(); return engine->requestKeyUpdate(id, requestPeerUpdate); }

@@ -1,0 +1,5 @@
+DTLS early-data callbacks
+
+IDtls callbacks now require earlyDataArrived and earlyDataStatus operations, separating delivery before completed authentication from ordinary delivery and reporting admission independently of UDP datagram delivery. Custom engines also implement the explicit early-open options and sendEarly operation. Applications that do not accept early operations should discard the marked packet; DtlsSocketIo does this by default.
+
+The optional modeled capability uses bounded ticket allowances, single-use server admission and epoch-1 datagrams. HRR rejects early data, and rejected payload is never automatically retried as ordinary traffic. Early data remains disabled by default and uses the existing abstract protection model. See the development migration guide for signatures and opt-in calls.

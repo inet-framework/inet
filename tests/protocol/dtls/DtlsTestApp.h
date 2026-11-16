@@ -36,6 +36,9 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
     std::vector<AssociationId> establishedHandles;
     std::vector<AssociationId> closedHandles;
     std::vector<bool> updateResults;
+    std::vector<bool> earlyResults;
+    std::vector<int> earlyMarkers;
+    bool closeOnEarlyData = false;
     int establishedCount = 0;
     int errorCount = 0;
     int closedCount = 0;
@@ -118,6 +121,38 @@ class DtlsTestDriver : public cSimpleModule, public inet::dtls::IDtls::ICallback
         });
     }
     bool isResumed() const { return engine->isResumed(lastHandle()); }
+    void resumeEarly(int marker = 46, int bytes = 32)
+    {
+        scheduleCommand([this, marker, bytes]() {
+            auto id = engine->open(L3AddressResolver().resolve(par("peerAddress")), par("peerPort"), this, inet::dtls::DtlsOpenOptions{true, true});
+            handles.push_back(id);
+            auto packet = new Packet("dtls-test-early");
+            packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(bytes, marker)));
+            engine->sendEarly(id, packet, this);
+        });
+    }
+    void earlyDataStatus(AssociationId, bool accepted) override
+    {
+        earlyResults.push_back(accepted);
+        emit(registerSignal("earlyDataStatus"), accepted ? 1L : 0L);
+    }
+    void sendEarlyMarker(int marker, int bytes = 32)
+    {
+        scheduleCommand([this, marker, bytes]() {
+            auto packet = new Packet("dtls-test-early");
+            packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(bytes, marker)));
+            engine->sendEarly(lastHandle(), packet, this);
+        });
+    }
+    void earlyDataArrived(AssociationId id, Packet *packet) override
+    {
+        earlyMarkers.push_back(packet->peekDataAsBytes()->getBytes().at(0));
+        emit(registerSignal("earlyPacketReceived"), packet);
+        delete packet;
+        emit(registerSignal("earlyDataReceived"), (long)earlyMarkers.size());
+        if (closeOnEarlyData)
+            engine->close(id);
+    }
     void listenPeer() { scheduleCommand([this]() { engine->listen(this); }); }
     void openPeer(const char *address, int port = 4433)
     {

@@ -21,6 +21,8 @@ class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback
     void accepted(IDtls::AssociationId id, const L3Address& localAddress, int localPort, const L3Address& peerAddress, int peerPort) override;
     void established(IDtls::AssociationId id) override;
     void dataArrived(IDtls::AssociationId id, Packet *packet) override;
+    void earlyDataArrived(IDtls::AssociationId id, Packet *packet) override;
+    void earlyDataStatus(IDtls::AssociationId id, bool accepted) override;
     void sendError(IDtls::AssociationId id, long packetId, const char *reason) override;
     void error(IDtls::AssociationId id, const char *reason) override;
     void closed(IDtls::AssociationId id) override;

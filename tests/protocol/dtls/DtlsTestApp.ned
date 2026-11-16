@@ -16,6 +16,9 @@ simple DtlsTestDriver
         double startTime @unit(s) = default(0.1s);
         @signal[controlStateChanged](type=long);
         @signal[packetSentToUpper](type=inet::Packet);
+        @signal[earlyPacketReceived](type=inet::Packet);
+        @signal[earlyDataReceived](type=long);
+        @signal[earlyDataStatus](type=long);
     gates:
         input socketIn;
         output socketOut;

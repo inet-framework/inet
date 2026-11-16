@@ -46,6 +46,30 @@ ASSERT(store.insert(c, 10));
 ASSERT(store.size() == 1); // expired entries release both roles' capacity
 store.clear();
 ASSERT(store.size() == 0 && !store.find({4}, false, 10));
+auto early = a;
+early.ticket = {5};
+early.serverSide = true;
+early.earlyDataBytes = 64;
+std::vector<uint8_t> random(32, 0x11);
+ASSERT(store.insert(early, 0));
+ASSERT(store.consumeEarly({5}, random, 7, 0));
+ASSERT(store.consumeEarly({5}, random, 7, 1)); // same live owning attempt
+ASSERT(!store.consumeEarly({5}, random, 8, 1)); // replacement cannot reuse admission
+random[0] = 0x22;
+ASSERT(!store.consumeEarly({5}, random, 7, 1));
+ASSERT(store.find({5}, true, 1)->earlyConsumed);
+ASSERT(!store.insert(early, 1)); // duplicate issuance cannot restore admission
+ASSERT(!store.consumeEarly({5}, random, 8, 1));
+ASSERT(!store.consumeEarly({5}, random, 7, 10)); // exact expiry
+store.configure(1);
+ASSERT(store.insert(early, 0));
+ASSERT(store.consumeEarly({5}, random, 7, 0));
+early.ticket = {6};
+ASSERT(store.insert(early, 0));
+ASSERT(!store.consumeEarly({5}, random, 8, 1)); // evicted identity is unknown
+ASSERT(store.consumeEarly({6}, random, 8, 1));
+store.clear();
+ASSERT(!store.consumeEarly({6}, random, 9, 1));
 EV << "DTLS session store PASS\n";
 
 %contains: stdout

@@ -20,6 +20,8 @@ simple Dtls extends SimpleModule like IDtls
         bool offerInitialKeyShare = default(true);
         bool clientAuthentication = default(false);
         bool resumptionEnabled = default(false); // cache/issue modeled stateful tickets
+        bool earlyDataEnabled = default(false); // Requires resumptionEnabled; explicit application admission only
+        int earlyDataBytes @unit(B) = default(4096B); // Allowance in newly issued tickets when enabled
         int maxSessions = default(64); // aggregate client/server ticket entries per engine
         double ticketLifetime @unit(s) = default(3600s); // integral seconds, 1..604800
         @signal[sessionResumed](type=long);

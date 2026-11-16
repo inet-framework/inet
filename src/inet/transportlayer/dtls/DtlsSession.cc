@@ -48,6 +48,7 @@ void DtlsAssociation::issueTicket()
     entry.issuedAt = simTime();
     entry.expiresAt = simTime() + SimTime(owner.par("ticketLifetime").doubleValue());
     entry.ageAdd = (uint32_t(owner.intuniform(0, 65535)) << 16) | owner.intuniform(0, 65535);
+    entry.earlyDataBytes = owner.par("earlyDataEnabled").boolValue() ? owner.par("earlyDataBytes").intValue() : 0;
     if (!owner.sessions.insert(entry, simTime()))
         return;
     auto body = makeShared<tls::TlsNewSessionTicket>();
@@ -59,7 +60,13 @@ void DtlsAssociation::issueTicket()
     body->setTicketArraySize(entry.ticket.size());
     for (size_t i = 0; i < entry.ticket.size(); ++i)
         body->setTicket(i, entry.ticket[i]);
-    body->setChunkLength(B(13 + 8 + entry.ticket.size()));
+    if (entry.earlyDataBytes != 0) {
+        body->setExtensionsArraySize(8);
+        const std::vector<uint8_t> early = {0,42,0,4,uint8_t(entry.earlyDataBytes >> 24),uint8_t(entry.earlyDataBytes >> 16),uint8_t(entry.earlyDataBytes >> 8),uint8_t(entry.earlyDataBytes)};
+        for (size_t i = 0; i < early.size(); ++i)
+            body->setExtensions(i, early[i]);
+    }
+    body->setChunkLength(B(13 + 8 + entry.ticket.size() + body->getExtensionsArraySize()));
     body->markImmutable();
     auto exchange = std::make_unique<DtlsPostHandshakeExchange>(owner, "Ticket");
     auto flight = std::make_shared<DtlsHandshakeFlight>();
@@ -193,6 +200,7 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
                 if (message->getDataLength() != b(0))
                     throw cRuntimeError("Trailing ticket bytes");
                 std::set<uint16_t> extensions;
+                uint32_t earlyLimit = 0;
                 for (size_t offset = 0; offset < ticket->getExtensionsArraySize();) {
                     auto end = ticket->getExtensionsArraySize();
                     if (end - offset < 4)
@@ -202,6 +210,12 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
                     offset += 4;
                     if (length > end - offset || !extensions.insert(type).second)
                         throw cRuntimeError("Invalid ticket extension vector");
+                    if (type == 42) {
+                        if (length != 4)
+                            throw cRuntimeError("Invalid ticket early-data allowance");
+                        for (size_t i = offset; i < offset + 4; ++i)
+                            earlyLimit = (earlyLimit << 8) | ticket->getExtensions(i);
+                    }
                     offset += length;
                 }
                 ++it->second->nextPeerMessage;
@@ -216,6 +230,7 @@ void DtlsAssociation::receiveTicket(uint64_t epoch, uint64_t number, Packet *bod
                     entry.issuedAt = simTime();
                     entry.expiresAt = simTime() + SimTime(std::min<uint32_t>(604800, ticket->getTicketLifetime()));
                     entry.ageAdd = ticket->getTicketAgeAdd();
+                    entry.earlyDataBytes = earlyLimit;
                     for (size_t i = 0; i < ticket->getTicketArraySize(); ++i)
                         entry.ticket.push_back(ticket->getTicket(i));
                     owner.sessions.insert(entry, simTime());

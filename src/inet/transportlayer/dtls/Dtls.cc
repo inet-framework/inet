@@ -72,6 +72,9 @@ void Dtls::handleStartOperation(LifecycleOperation *)
     if (par("resumptionEnabled").boolValue() && (sessionLimit <= 0 || !std::isfinite(lifetime) || lifetime < 1 || lifetime > 604800 || lifetime != uint32_t(lifetime)))
         throw cRuntimeError("Invalid DTLS session capacity or integral ticket lifetime");
     sessions.configure(par("resumptionEnabled").boolValue() ? sessionLimit : 0);
+    auto earlyLimit = par("earlyDataBytes").intValue();
+    if (par("earlyDataEnabled").boolValue() && (!par("resumptionEnabled").boolValue() || earlyLimit <= 0 || uint64_t(earlyLimit) > UINT32_MAX))
+        throw cRuntimeError("DTLS early data requires resumption and a positive 32-bit allowance");
     auto processingBytes = par("maxProcessingBytes").intValue();
     if (processingBytes <= 0)
         throw cRuntimeError("maxProcessingBytes must be positive");
@@ -166,6 +169,11 @@ bool Dtls::isResumed(AssociationId id) const
 
 IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession)
 {
+    return open(peerAddress, peerPort, callback, DtlsOpenOptions{resumeSession, false});
+}
+
+IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICallback *callback, const DtlsOpenOptions& options)
+{
     Enter_Method("open");
     if (operationalState != OPERATING)
         return 0;
@@ -192,8 +200,10 @@ IDtls::AssociationId Dtls::open(const L3Address& peerAddress, int peerPort, ICal
             break;
         }
     association->authenticationMode = std::string(par("profile").stringValue()) == "certificate" ? tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE : tls::TlsHandshakeParameters::AuthenticationMode::EXTERNAL_PSK;
-    if (resumeSession && par("resumptionEnabled").boolValue())
+    if ((options.resumeSession || options.offerEarlyData) && par("resumptionEnabled").boolValue())
         association->offeredSession = sessions.select(peerAddress, peerPort, par("identity").stdstringValue(), tls::TlsHandshakeParameters::DTLS_13, simTime());
+    association->earlyRequested = options.offerEarlyData;
+    association->earlyOffered = options.offerEarlyData && par("earlyDataEnabled").boolValue() && association->offeredSession && association->offeredSession->earlyDataBytes != 0;
     auto replayWindow = par("replayWindowSize").intValue();
     if (replayWindow <= 0 || replayWindow > 65536)
         throw cRuntimeError("Invalid DTLS replay window size");
@@ -370,6 +380,8 @@ void Dtls::failAssociation(AssociationId id, const char *reason, int alertDescri
             sendAlert(association->localAddress, association->peerAddress, association->peerPort, alertDescription, encrypted, number, epoch);
     }
     auto callback = association->callback;
+    if (association->earlyRequested && !association->earlyStatusReported)
+        callback->earlyDataStatus(id, false);
     for (auto& pending : association->pendingPackets) {
         auto packetId = pending.packet->getId();
         pending.packet.reset();
@@ -1703,6 +1715,15 @@ void Dtls::handlePlainHandshake(Packet *body, const L3Address& localAddress, int
             const auto& identityBytes = offer.pskIdentities.at(selection.selectedPsk);
             association->offeredSession = sessions.find(std::vector<uint8_t>(identityBytes.begin(), identityBytes.end()), true, simTime());
         }
+        if (offer.hasEarlyData && selection.authenticationMode == Parameters::AuthenticationMode::TICKET_PSK && selection.selectedPsk == 0 &&
+            handshake->getMessageSequence() == 0 && par("earlyDataEnabled").boolValue() && association->offeredSession) {
+            std::vector<uint8_t> random;
+            for (size_t i = 0; i < 32; ++i)
+                random.push_back(hello->getRandom(i));
+            association->earlyAccepted = sessions.consumeEarly(association->offeredSession->ticket, random, association->id, simTime());
+            if (association->earlyAccepted)
+                association->receiveEarly = std::make_unique<DtlsRecordState>(replayWindow);
+        }
         association->clientAuthRequested = !selection.usesPsk() && par("clientAuthentication").boolValue();
         association->serverSide = true;
         association->addressValidated = handshake->getMessageSequence() == 1;
@@ -1820,10 +1841,13 @@ void Dtls::handleProtectedHandshake(AssociationId id, uint16_t epoch, uint16_t t
         bool serverAwaitingFlight = (state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE ||
                                      state == HandshakeState::SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY ||
                                      state == HandshakeState::SERVER_WAIT_CLIENT_FINISHED) && epoch == 2 && !current->second->serverFlightQueued;
-        bool knownEpoch = (epoch == 2 && current->second->receiveEpoch2) || (current->second->receiveEpoch & 3) == epoch ||
+        bool earlyEpoch = epoch == 1 && current->second->receiveEarly && !current->second->peerFinishedProcessed;
+        if (epoch == 1)
+            EV_DEBUG << "DTLS epoch 1 input: association=" << id << ", early=" << earlyEpoch << ", closing=" << current->second->closing << endl;
+        bool knownEpoch = earlyEpoch || (epoch == 2 && current->second->receiveEpoch2) || (current->second->receiveEpoch & 3) == epoch ||
                           (current->second->previousReceiveEpoch && (current->second->previousReceiveEpochNumber & 3) == epoch);
         if (waitingForShare || serverAwaitingFlight || !knownEpoch ||
-            (epoch != 2 && state != HandshakeState::ESTABLISHED && !(current->second->serverSide && current->second->ownFinishedHandedOff))) {
+            (epoch != 2 && !earlyEpoch && state != HandshakeState::ESTABLISHED && !(current->second->serverSide && current->second->ownFinishedHandedOff))) {
             emit(recordDroppedSignal, (long)UNKNOWN_EPOCH);
             return;
         }
@@ -1867,7 +1891,11 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             (association.receiveEpoch & 3) != epoch &&
             (!association.previousReceiveEpoch || (association.previousReceiveEpochNumber & 3) != epoch))
             mainHandshake = true;
-        if (mainHandshake) {
+        if (epoch == 1 && association.receiveEarly && !association.peerFinishedProcessed) {
+            logicalEpoch = 1;
+            replay = association.receiveEarly.get();
+        }
+        else if (mainHandshake) {
             logicalEpoch = 2;
             replay = association.receiveEpoch2.get();
         }
@@ -1893,6 +1921,26 @@ void Dtls::handleAvailableProtectedHandshake(AssociationId id, uint16_t epoch, u
             if (logicalEpoch == association.receiveEpoch && !par("resumptionEnabled").boolValue())
                 association.previousReceiveEpoch.reset();
         };
+        if (logicalEpoch == 1) {
+            EV_DEBUG << "DTLS early content: type=" << int(contentType) << ", server=" << association.serverSide << ", accepted=" << association.earlyAccepted << endl;
+            if (contentType != 23 || !association.serverSide || !association.earlyAccepted || association.closing)
+                return;
+            auto bytes = (*retained)->getDataLength().get<B>();
+            auto limit = association.offeredSession->earlyDataBytes;
+            if (uint64_t(bytes) > limit - association.earlyReceivedBytes) {
+                failAssociation(id, "DTLS early data allowance exceeded", 10);
+                return;
+            }
+            replay->accept(sequence);
+            association.earlyReceivedBytes += bytes;
+            auto incoming = retained->release();
+            auto callback = association.callback;
+            emit(packetReceivedSignal, incoming);
+            emit(packetSentToUpperSignal, incoming);
+            drop(incoming);
+            callback->earlyDataArrived(id, incoming);
+            return;
+        }
         if (contentType == 21 && (*retained)->getDataLength() == B(2)) {
             try {
                 auto alert = (*retained)->popAtFront<DtlsAlert>(B(2));
@@ -2120,6 +2168,8 @@ void Dtls::finishClose(AssociationId id, bool forced)
     }
     for (auto packetId : association->processingPacketIds)
         callback->sendError(id, packetId, "association closed");
+    if (association->earlyRequested && !association->earlyStatusReported)
+        callback->earlyDataStatus(id, false);
     if (forced)
         callback->error(id, "DTLS closure forced");
     callback->closed(id);
@@ -2163,6 +2213,8 @@ void Dtls::discardAll(const char *reason, bool notify)
         emitReassemblyBytes();
     if (notify) {
         for (const auto& entry : old) {
+            if (entry.second->earlyRequested && !entry.second->earlyStatusReported)
+                entry.second->callback->earlyDataStatus(entry.first, false);
             for (auto& pending : entry.second->pendingPackets) {
                 auto packetId = pending.packet->getId();
                 pending.packet.reset();
@@ -2455,7 +2507,8 @@ void Dtls::parseDatagram(Packet *packet)
                         (it->second->localAddress.isUnspecified() || it->second->localAddress == localAddress) &&
                         (it->second->localPort < 0 || it->second->localPort == localPort)) {
                         match = it;
-                        if ((header->getEpochBits() == 2 && it->second->state != HandshakeState::ESTABLISHED) ||
+                        if ((header->getEpochBits() == 1 && it->second->receiveEarly) ||
+                            (header->getEpochBits() == 2 && it->second->state != HandshakeState::ESTABLISHED) ||
                             (header->getEpochBits() == 3 && it->second->state == HandshakeState::ESTABLISHED))
                             break;
                     }

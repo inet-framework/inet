@@ -129,14 +129,17 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
                            DtlsProcessingQueue::Completion started = {}, bool recordDelay = true);
     bool containsAssociation(AssociationId id) const { return associations.find(id) != associations.end(); }
     static bool hasConsistentEncoding(const Packet *packet);
+    void reportEarlyData(AssociationId id, bool accepted);
 
   public:
     ~Dtls() override;
     void listen(ICallback *callback) override;
     AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback) override;
     AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession) override;
+    AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, const DtlsOpenOptions& options) override;
     bool isResumed(AssociationId id) const override;
     void send(AssociationId id, Packet *packet, ICallback *requester) override;
+    void sendEarly(AssociationId id, Packet *packet, ICallback *requester) override;
     void close(AssociationId id) override;
     bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate) override;
 };

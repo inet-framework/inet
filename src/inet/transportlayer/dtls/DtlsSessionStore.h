@@ -27,6 +27,9 @@ class INET_API DtlsSessionStore
         simtime_t expiresAt;
         uint32_t ageAdd = 0;
         uint32_t earlyDataBytes = 0;
+        bool earlyConsumed = false;
+        uint64_t earlyAssociationId = 0;
+        std::vector<uint8_t> earlyClientRandom;
     };
 
   protected:
@@ -38,6 +41,7 @@ class INET_API DtlsSessionStore
     void clear() { entries.clear(); }
     [[nodiscard]] size_t size() const { return entries.size(); }
     bool insert(const Entry& entry, simtime_t now);
+    bool consumeEarly(const std::vector<uint8_t>& ticket, const std::vector<uint8_t>& clientRandom, uint64_t associationId, simtime_t now);
     [[nodiscard]] std::optional<Entry> find(const std::vector<uint8_t>& ticket, bool serverSide, simtime_t now) const;
     [[nodiscard]] std::optional<Entry> select(const L3Address& peer, int port, const std::string& identity, uint16_t version, simtime_t now) const;
 };

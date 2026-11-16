@@ -845,6 +845,8 @@ void DtlsAssociation::sendClientHello(const std::vector<uint8_t>& cookie)
         cookieExtension.insert(cookieExtension.end(), cookie.begin(), cookie.end());
         appendExtension(extensions, 44, cookieExtension);
     }
+    if (earlyOffered && !retried)
+        appendExtension(extensions, 42, {});
     if (profile == "psk" || offeredSession) {
         appendExtension(extensions, 45, {1, Parameters::PSK_DHE_KE});
         std::string identity = owner.par("identity").stringValue();
@@ -907,7 +909,7 @@ void DtlsAssociation::sendServerFlight()
         size_t maximum = std::min<size_t>(udpLimit - overhead, DtlsRecordProtection::MAX_CONTENT_BYTES - 12);
         return length + ((length + maximum - 1) / maximum) * overhead;
     };
-    size_t flightBytes = wireSize(40 + 46 + (useCertificate ? 0 : 6), 25) + wireSize(2, 34) + wireSize(32, 34);
+    size_t flightBytes = wireSize(40 + 46 + (useCertificate ? 0 : 6), 25) + wireSize(earlyAccepted ? 6 : 2, 34) + wireSize(32, 34);
     if (useCertificate) {
         certificate = owner.makeCertificate();
         verify = owner.makeCertificateVerify();
@@ -944,7 +946,14 @@ void DtlsAssociation::sendServerFlight()
     if (!owner.containsAssociation(handle))
         return;
     auto encryptedExtensions = makeShared<tls::TlsEncryptedExtensions>();
-    encryptedExtensions->setChunkLength(B(2));
+    if (earlyAccepted) {
+        encryptedExtensions->setExtensionsArraySize(4);
+        encryptedExtensions->setExtensions(0, 0);
+        encryptedExtensions->setExtensions(1, 42);
+        encryptedExtensions->setExtensions(2, 0);
+        encryptedExtensions->setExtensions(3, 0);
+    }
+    encryptedExtensions->setChunkLength(B(earlyAccepted ? 6 : 2));
     uint16_t messageSequence = base + 1;
     owner.sendProtectedHandshake(handle, 8, messageSequence++, encryptedExtensions);
     if (!owner.containsAssociation(handle))
@@ -1112,6 +1121,7 @@ void DtlsAssociation::processServerHello(uint16_t messageSequence, Packet *body,
         serverMessageBase = 1;
         acknowledgeFlightImplicitly();
         owner.sendClientHello(handle, cookie);
+        owner.reportEarlyData(handle, false);
         return;
     }
     if (messageSequence != serverMessageBase)
@@ -1158,6 +1168,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
             engine.failAssociation(id, "trailing encrypted extensions data", 50);
             return;
         }
+        bool acceptedEarly = false;
         if (extensions->getExtensionsArraySize() != 0) {
             size_t pos = 0, end = extensions->getExtensionsArraySize();
             std::set<uint16_t> seen;
@@ -1177,13 +1188,18 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
                     engine.failAssociation(id, "duplicate encrypted extension", 47);
                     return;
                 }
+                if (type != 42 || length != 0 || !earlyOffered || retried || selectedPsk != 0 ||
+                    authenticationMode != tls::TlsHandshakeParameters::AuthenticationMode::TICKET_PSK) {
+                    engine.failAssociation(id, "unoffered or unsupported encrypted extension", 110);
+                    return;
+                }
+                acceptedEarly = true;
                 pos += length;
             }
-            engine.failAssociation(id, "unsupported encrypted extension", 110);
-            return;
         }
         ++nextPeerMessage;
         state = authenticationMode == tls::TlsHandshakeParameters::AuthenticationMode::CERTIFICATE ? HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE : HandshakeState::CLIENT_WAIT_SERVER_FINISHED;
+        engine.reportEarlyData(id, acceptedEarly);
     }
     else if (state == HandshakeState::CLIENT_WAIT_SERVER_CERTIFICATE && handshake->getMessageType() == 13 && !clientAuthRequested) {
         Ptr<const tls::TlsCertificateRequest> request;
@@ -1317,6 +1333,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         }
         ++nextPeerMessage;
         peerFinishedProcessed = true;
+        receiveEarly.reset();
         addressValidated = true;
         peerFinishedRecord = sequence;
         acknowledgeFlightImplicitly();

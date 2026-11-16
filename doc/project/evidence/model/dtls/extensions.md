@@ -31,7 +31,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C1 | All selected obligations and exclusions | Primary-source/errata reconciliation, profile table, links | DONE, documentation only, commit 4756b0cfeb |
 | C2 | EXCHANGE | DtlsPostHandshakeExchange_1 and three module controls; five production KeyUpdate controls | DONE: fresh debug build, 4 module PASS, 5 protocol PASS |
 | C3 | TICKET | Eight production ticket cases, session lifecycle module, five serializer/store/selection/reassembly units | DONE: fresh debug build; 8 ticket protocol, 5 unit, 5 module PASS; 7 existing protocol controls PASS before the final timeout-only adjustment |
-| C4 | EARLY, ADMISSION | Rfc9147EarlyData; store units | NOT_STARTED |
+| C4 | EARLY, ADMISSION | Eleven explicit early-data protocol cases; store/offer units; engine lifecycle outcomes | DONE: fresh debug build; 24 combined protocol, 4 unit, 6 module PASS |
 | C5 | PROFILE | Rfc9147AlgorithmProfiles; handshake/record units | NOT_STARTED |
 | C6 | CID | Rfc9147ConnectionId; record units | NOT_STARTED |
 | C7 | CID-REQUEST, EXCHANGE | Rfc9147ConnectionIdUpdate | NOT_STARTED |
@@ -78,3 +78,18 @@ Before the final correction, seven existing protocol controls also passed: `Rfc9
 One additional ticket case, `Rfc9147ResumptionReceiveDeadline.test`, passes using the same protocol command with its exact filename selector. Logs are `c3-receive-deadline-{runner,console}.log`. It starts one second of logical ticket input service against a 0.5 s receive deadline and verifies that the later continuation cannot create a resumable row. Together the two runs execute eight new ticket cases.
 
 Scoped DTLS/TLS/application architecture checks and DTLS/TLS naming checks pass. The global interface gate fails on 16 classes in unchanged files; `IDtls` is not reported. This remains a repository-wide gate failure, not a passing final gate. No source seal is modified. Release-mode behavior, exact-parent runtime comparison, fingerprints, general queued-admission fault injection and alternate-hash production negotiation remain unrun; the latter belongs to C5. No skill package scripts exist in this checkout, so the supplied skill-source packaging commands cannot run here.
+
+### C4 focused evidence
+
+A fresh debug library includes explicit early-open options, separate send/delivery/status operations, epoch-1 replay state, bounded single-use ticket admission and callback cleanup. All capabilities remain off by default. The final combined protocol run executes 24 cases and passes: eleven new early-data cases, eight ticket cases and five existing controls (full certificate/PSK, initial client authentication, KeyUpdate and shared-port close). The callback-driven failed attempt, queued Finished boundary and unrelated-peer limit checks are production-path evidence. The [reviewer document](../../../../../tests/protocol/dtls/early-data.md) provides each fixture and observation.
+
+```sh
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/dtls$' -f 'Rfc9147(EarlyData.*|Resumption.*|PskResumption|Handshake|PskHandshake|ClientAuthentication|KeyUpdate|SharedPortClose)\.test$' --log-file audit/dtls-extensions/c4-final-protocol-runner.log
+opp_run_unit_tests --load . -p inet -m debug --no-build -f '(DtlsSessionStore|TlsHandshakeParameters|TlsNewSessionTicket|DtlsTicketSelection)_1\.test$' --log-file audit/dtls-extensions/c4-final-unit-runner.log
+opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(EngineLifecycle|SessionLifecycle|RecoveryLifecycle|RestartLifecycle|SenderState|PostHandshakeExchange)_1\.test$' --log-file audit/dtls-extensions/c4-final-module-runner.log
+```
+
+Artifacts are `c4-build-debug.log` and `c4-final-{protocol,unit,module}-{runner,console}.log` under `audit/dtls-extensions/`. The protocol run uses declared checksums/FCS, seed 0 and finite limits; helper/module cases retain their specified fixtures. Scoped architecture/naming, source protection, document seals and release-note format checks pass. The existing global interface-gate failures remain unresolved. Release-mode execution, exact-parent runtime comparison, fingerprint comparison and alternate-suite early compatibility remain unrun. Stored expectations have not changed.
+
+The final helper run passes four units, and the final module run passes six cases against the same fresh library. The engine lifecycle case observes exactly one negative early outcome on each stopped/crashed pending attempt. Module fixture compiler warnings about pre-existing overloaded virtual methods remain warnings, with no executed-case failures.

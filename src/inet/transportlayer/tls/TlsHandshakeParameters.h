@@ -24,6 +24,7 @@ class INET_API TlsHandshakeParameters
     enum class Profile { PSK, CERTIFICATE };
     enum class AuthenticationMode { CERTIFICATE = 0, EXTERNAL_PSK = 1, TICKET_PSK = 2 };
     struct Offer {
+        bool hasEarlyData = false;
         std::vector<uint16_t> versions;
         std::vector<uint16_t> cipherSuites;
         std::vector<uint16_t> groups;

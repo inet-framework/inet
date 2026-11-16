@@ -38,12 +38,15 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
     int closedCount = 0;
     int rejectedReconnects = 0;
     int sentPackets = 0;
+    int earlyRejections = 0;
 
   public:
     DtlsLifecycleFixture() : cSimpleModule(65536) {}
     virtual void accepted(IDtls::AssociationId, const L3Address&, int, const L3Address&, int) override { throw cRuntimeError("unexpected accept"); }
     virtual void established(IDtls::AssociationId) override { throw cRuntimeError("unexpected establishment"); }
     virtual void dataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected data"); }
+    void earlyDataArrived(IDtls::AssociationId, Packet *packet) override { delete packet; throw cRuntimeError("unexpected early data"); }
+    void earlyDataStatus(IDtls::AssociationId, bool accepted) override { ASSERT(!accepted); ++earlyRejections; }
     virtual void sendError(IDtls::AssociationId, long, const char *) override { ++sendErrors; }
     virtual void error(IDtls::AssociationId, const char *) override {
         ++errors;
@@ -55,7 +58,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
     virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { ++sentPackets; }
 
     void openAndQueue() {
-        auto id = dtls->open(peer, 4433, this);
+        auto id = dtls->open(peer, 4433, this, DtlsOpenOptions{true, true});
         ASSERT(id != 0);
         auto packet = new Packet("queued data", makeShared<BytesChunk>(std::vector<uint8_t>{42}));
         dtls->send(id, packet, this);
@@ -75,6 +78,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
         wait(1.5);
         ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
         ASSERT(sendErrors == 1 && errors == 1 && closedCount == 1 && rejectedReconnects == 1 && sentPackets == 0);
+        ASSERT(earlyRejections == 1);
         wait(1.5);
         ASSERT(dtls->up());
         dtls->arm();
@@ -82,6 +86,7 @@ class DtlsLifecycleFixture : public cSimpleModule, public IDtls::ICallback, publ
         wait(1.5);
         ASSERT(!dtls->up() && dtls->queued() == 0 && !dtls->completed);
         ASSERT(sendErrors == 2 && errors == 2 && closedCount == 2 && rejectedReconnects == 2 && sentPackets == 0);
+        ASSERT(earlyRejections == 2);
         wait(1.5);
         ASSERT(dtls->up() && dtls->queued() == 0);
         wait(8);

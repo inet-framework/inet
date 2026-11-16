@@ -1,0 +1,56 @@
+%description:
+Reject an incoming epoch-1 datagram larger than the advertised allowance while
+another association on the same engine continues. See early-data.md.
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_early_data_peer_limit")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.closePeer(); }))
+    .act(action().after(2.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.resumeEarly(); }))
+    .meanwhile(tap("tap").from("host1").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        auto payload = makeShared<BytesChunk>(std::vector<uint8_t>(65, 46)); payload->markImmutable();
+        auto type = makeShared<inet::dtls::DtlsInnerContentType>(); type->setContentType(23); type->markImmutable();
+        auto inner = makeShared<SequenceChunk>(); inner->insertAtBack(payload); inner->insertAtBack(type); inner->markImmutable();
+        replaceProtectedInner(p, inner);
+    }))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.lastError == "DTLS early data allowance exceeded" && app.earlyMarkers.empty(), "excessive peer data fails before early delivery");
+    }).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.sendMarker(50); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>{50} && app.errorCount == 1, "early-data failure preserves unrelated peer progress");
+    }));
+}
+%activity:
+EV << "early peer limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host1.app[1].localPort = 4436
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host*.app[*].dtls.earlyDataEnabled = true
+*.host*.app[*].dtls.earlyDataBytes = 64B
+*.host2.app[*].dtls.cookieRequired = false
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_early_data_peer_limit: PASS

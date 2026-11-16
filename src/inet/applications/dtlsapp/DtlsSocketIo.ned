@@ -13,6 +13,8 @@ simple DtlsSocketIo extends SimpleModule
         bool server = default(false);
         bool resumeSession = default(false); // best-effort use of a cached ticket on open
         string destAddress = default("");
+        bool acceptEarlyData = default(false); // Explicit policy before completed authentication
+        @signal[earlyPacketReceived](type=inet::Packet);
         int destPort = default(-1);
         @lifecycleSupport();
         @signal[packetSent](type=inet::Packet);

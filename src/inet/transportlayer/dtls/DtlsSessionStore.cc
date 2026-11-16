@@ -11,6 +11,20 @@ void DtlsSessionStore::configure(size_t limit)
     capacity = limit;
 }
 
+bool DtlsSessionStore::consumeEarly(const std::vector<uint8_t>& ticket, const std::vector<uint8_t>& clientRandom, uint64_t associationId, simtime_t now)
+{
+    for (auto& entry : entries)
+        if (entry.serverSide && entry.ticket == ticket && entry.expiresAt > now && entry.earlyDataBytes != 0 && associationId != 0) {
+            if (entry.earlyConsumed)
+                return entry.earlyAssociationId == associationId && entry.earlyClientRandom == clientRandom;
+            entry.earlyConsumed = true;
+            entry.earlyAssociationId = associationId;
+            entry.earlyClientRandom = clientRandom;
+            return true;
+        }
+    return false;
+}
+
 bool DtlsSessionStore::insert(const Entry& entry, simtime_t now)
 {
     entries.erase(std::remove_if(entries.begin(), entries.end(), [now](const auto& value) { return value.expiresAt <= now; }), entries.end());

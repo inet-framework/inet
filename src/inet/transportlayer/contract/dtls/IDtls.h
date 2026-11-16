@@ -10,6 +10,11 @@
 
 namespace inet::dtls {
 
+struct DtlsOpenOptions {
+    bool resumeSession = false;
+    bool offerEarlyData = false;
+};
+
 /** The local interface of a datagram security engine. */
 class INET_API IDtls
 {
@@ -24,6 +29,10 @@ class INET_API IDtls
         virtual void established(AssociationId id) = 0;
         // Packet ownership is transferred to the callback.
         virtual void dataArrived(AssociationId id, Packet *packet) = 0;
+        // Ownership transfers as for dataArrived. This delivery precedes completed authentication.
+        virtual void earlyDataArrived(AssociationId id, Packet *packet) = 0;
+        // Client admission outcome, not an acknowledgement of any datagram.
+        virtual void earlyDataStatus(AssociationId id, bool accepted) = 0;
         // A rejected or cancelled application packet; the association may remain usable.
         virtual void sendError(AssociationId id, long packetId, const char *reason) = 0;
         // Invalidates the named handle. A forced local close may subsequently
@@ -39,10 +48,13 @@ class INET_API IDtls
     virtual AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback) = 0;
     // Best-effort ticket resumption; absence or refusal permits the ordinary configured handshake.
     virtual AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, bool resumeSession) = 0;
+    virtual AssociationId open(const L3Address& peerAddress, int peerPort, ICallback *callback, const DtlsOpenOptions& options) = 0;
     // False for an invalid/unestablished handle or a handshake without a selected ticket.
     virtual bool isResumed(AssociationId id) const = 0;
     // Ownership is transferred to the engine, including on rejection.
     virtual void send(AssociationId id, Packet *packet, ICallback *requester) = 0;
+    // Explicit early operation; ownership transfers even on refusal. Never retried as ordinary data.
+    virtual void sendEarly(AssociationId id, Packet *packet, ICallback *requester) = 0;
     virtual void close(AssociationId id) = 0;
     // Returns false for a synchronous rejection, without failing the association.
     virtual bool requestKeyUpdate(AssociationId id, bool requestPeerUpdate) = 0;

@@ -120,6 +120,11 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
             while (pos < end)
                 result.pskModes.push_back(bytes[pos++]);
         }
+        else if (type == 42) {
+            if (length != 0)
+                return "invalid early_data offer";
+            result.hasEarlyData = true;
+        }
         else if (type == 41) {
             if (end != bytes.size())
                 return "pre_shared_key is not the last extension";
@@ -152,6 +157,8 @@ std::string TlsHandshakeParameters::decodeOffer(const Ptr<const TlsClientHello>&
         }
         pos = end; // unknown extensions remain opaque
     }
+    if (result.hasEarlyData && !result.hasPsk)
+        return "early_data requires a PSK offer";
     offer = std::move(result);
     return {};
 }
