@@ -1,0 +1,5 @@
+CoAP over UDP application models
+
+Added the CoAP over UDP protocol and application models (`inet.applications.coap`, `CoapClient`, `CoapServer`, `CoapEndpointBase`, and `CoapHeader`), enabled by the `Coap` feature in `.oppfeatures`.
+
+The model implements RFC 7252 CoAP messaging over UDP including confirmable and non-confirmable exchanges, duplicate suppression, NSTART and probing-rate congestion control, resource methods (GET, POST, PUT, DELETE), conditional requests, CoRE Link Format discovery (`/.well-known/core` per RFC 6690), resource observation (RFC 7641), block-wise transfers (RFC 7959), and Request-Tag protection (RFC 9175).
