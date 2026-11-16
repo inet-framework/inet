@@ -2,7 +2,7 @@
 
 > **Kind:** report · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [features.md](../../protocol/coap/features.md), [coverage.md](coverage.md), [standards.md](../../protocol/coap/standards.md)
 
-Step 8 artifact of the standards test workflow. This skeleton defines the target conformance claims for the CoAP over UDP (`NoSec`) model and is updated with final run verdicts in `C9`.
+Step 8 artifact of the standards test workflow documenting the conformance claims and final verification verdicts for the CoAP over UDP (`NoSec`) model.
 
 ## Part 1 — what the model claims
 
@@ -12,11 +12,11 @@ The `inet.applications.coap` package (`CoapEndpointBase`, `CoapClient`, `CoapSer
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
-| [COAP-F-ENCODING](../../protocol/coap/features.md#coap-f-encoding) | mandatory | yes (RFC 7252, RFC 7959) | pending | pending (C2/C6) |
-| [COAP-F-NON](../../protocol/coap/features.md#coap-f-non) | mandatory | yes (RFC 7252) | pending | pending (C2) |
-| [COAP-F-CON](../../protocol/coap/features.md#coap-f-con) | mandatory | yes (RFC 7252) | pending | pending (C3) |
-| [COAP-F-RESOURCES](../../protocol/coap/features.md#coap-f-resources) | mandatory | yes (RFC 7252) | pending | pending (C4) |
-| [COAP-F-DISCOVERY](../../protocol/coap/features.md#coap-f-discovery) | mandatory | yes (RFC 6690, RFC 7252, RFC 7641) | pending | pending (C4/C5) |
-| [COAP-F-OBSERVE](../../protocol/coap/features.md#coap-f-observe) | optional | yes (RFC 7641) | pending | pending (C5) |
-| [COAP-F-BLOCKWISE](../../protocol/coap/features.md#coap-f-blockwise) | optional | yes (RFC 7959, RFC 9175 §3) | pending | pending (C6) |
-| [COAP-F-OBSERVE-BLOCK2](../../protocol/coap/features.md#coap-f-observe-block2) | optional | yes (RFC 7959 §2.6, §3.4) | pending | pending (C7) |
+| [COAP-F-ENCODING](../../protocol/coap/features.md#coap-f-encoding) | mandatory | yes (RFC 7252, RFC 7959) | implemented | PASS (C2/C5/C6) |
+| [COAP-F-NON](../../protocol/coap/features.md#coap-f-non) | mandatory | yes (RFC 7252) | implemented | PASS (C2) |
+| [COAP-F-CON](../../protocol/coap/features.md#coap-f-con) | mandatory | yes (RFC 7252) | implemented | PASS (C3) |
+| [COAP-F-RESOURCES](../../protocol/coap/features.md#coap-f-resources) | mandatory | yes (RFC 7252) | implemented | PASS (C4) |
+| [COAP-F-DISCOVERY](../../protocol/coap/features.md#coap-f-discovery) | mandatory | yes (RFC 6690, RFC 7252, RFC 7641) | implemented | PASS (C4/C5) |
+| [COAP-F-OBSERVE](../../protocol/coap/features.md#coap-f-observe) | optional | yes (RFC 7641) | implemented | PASS (C5) |
+| [COAP-F-BLOCKWISE](../../protocol/coap/features.md#coap-f-blockwise) | optional | yes (RFC 7959, RFC 9175 §3) | implemented | PASS (C6) |
+| [COAP-F-OBSERVE-BLOCK2](../../protocol/coap/features.md#coap-f-observe-block2) | optional | yes (RFC 7959 §2.6, §3.4) | implemented | PASS (C7) |

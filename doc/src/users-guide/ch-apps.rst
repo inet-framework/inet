@@ -496,3 +496,69 @@ The model also contains a host component that groups the applications
 and the LLC and MAC components together (:ned:`EthernetHost`). This node
 does not contain higher layer protocols; it generates Ethernet traffic
 directly. By default, it is configured to use half-duplex MAC (CSMA/CD).
+
+
+.. _ug:sec:apps:coap-applications:
+
+CoAP applications
+-----------------
+
+The ``inet.applications.coap`` package provides Constrained Application Protocol
+(CoAP) over UDP (``NoSec``) endpoints implementing core messaging (RFC 7252),
+CoRE Link Format discovery (RFC 6690), resource observation (RFC 7641),
+blockwise transfers (RFC 7959), and ``Request-Tag`` upload isolation
+(RFC 9175). Both :ned:`CoapClient` and :ned:`CoapServer` extend
+:ned:`CoapEndpointBase`, sharing message-layer deduplication, exponential
+confirmable backoff, Empty ``ACK``/``RST`` handling, ``NSTART=1`` and
+``PROBING_RATE`` congestion control, token/MID allocation, and INET node
+lifecycle management.
+
+.. _ug:sec:apps:coapserver:
+
+CoapServer
+~~~~~~~~~~
+
+:ned:`CoapServer` hosts an in-memory resource tree configured through its
+:par:`resources` XML parameter (supporting ``GET``, ``PUT``, ``POST`` append,
+``DELETE``, ``contentFormat``, ``maxAge``, ``obs``, ``rt``, ``if``, ``title``,
+and ``creatable`` path policies) and automatically serves filtered
+``/.well-known/core`` queries in CoRE Link Format (content format ``40``).
+Resources retain permission metadata across deletion and preserve representations
+and duplicate tombstones across ordinary stop/start restarts, while resetting to
+initial XML defaults on crash with strictly monotonic 8-byte ``ETag`` allocation.
+Configurable :par:`responseDelay` triggers separate confirmable responses
+preceded by an Empty ``ACK``. Observed resources emit 1 ms tick-paced
+confirmable notifications, coalesce same-tick updates, supersede stalled
+in-flight notifications, and slice payloads exceeding :par:`preferredBlockSize`
+via ``Block2`` and ``Size2``.
+
+.. _ug:sec:apps:coapclient:
+
+CoapClient
+~~~~~~~~~~
+
+:ned:`CoapClient` issues configured periodic requests or programmatic
+interactions to a peer UDP port and supports ``confirmable``, ``contentFormat``,
+``accept``, ``observe``, and ``useRequestTag`` options alongside
+``preferredBlockSize`` and ``maxIncomingBlockSize`` controls. Observe
+subscriptions validate notification order via 24-bit serial arithmetic with the
+128 s elapsed window, reuse fresh complete representations for matching local
+``GET`` lookups without generating wire traffic, schedule randomized
+``Max-Age`` plus ``[5s, 15s]`` freshness re-registrations, and fetch multi-block
+notifications through normal ``Block2`` follow-up ``GET`` requests using a
+fresh exchange token while superseding stale partial assemblies on newer
+notifications or re-registering after an ``ETag`` mismatch.
+
+Recorded statistics include endpoint-level ``packetSent``,
+``packetReceived``, ``retransmission``, ``duplicateReceived``,
+``malformedReceived``, and ``capacityRejected`` counts, plus client/server
+outcomes (``requestStarted``, ``requestCompleted``, ``requestFailed``,
+``requestAborted``, ``requestLatency``, ``notificationReceived``,
+``activeObservations``, ``requestHandled``, ``activeObservers``, and
+``notificationSent``). See the ``examples/coap`` scenarios (``NonConfirmable``,
+``ConfirmableLoss``, ``SeparateResponse``, ``ResourceDiscovery``, ``Observe``,
+``Block1Upload``, ``Block2Download``, ``ObserveBlockwise``, and ``Ipv6``) for
+runnable configurations. DTLS (``coaps://``), OSCORE, forward/reverse proxying
+(returning ``5.05 Proxying Not Supported``), multicast CoAP, and TCP/TLS
+transports are not supported.
+

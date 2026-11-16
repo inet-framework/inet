@@ -2021,6 +2021,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "CoapExamples"
+        name = "CoAP example simulations"
+        description = "Example simulations demonstrating CoAP over UDP."
+        initiallyEnabled = "true"
+        requires = "Coap Ethernet Ieee8022 Ipv4 Ipv6 Loopback PhysicalLayerWiredCommon Queueing Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.coap
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "CoapTests"
         name = "CoAP protocol tests"
         description = "Protocol conformance tests for CoAP over UDP."
