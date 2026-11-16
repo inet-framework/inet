@@ -1,0 +1,330 @@
+%description:
+
+RFC 7959 and RFC 9175 Section 3 over DTLS 1.3 -- Block1 PUT (3 KiB,
+preferredBlockSize = 1024B within udpPayloadLimit = 1200B), Block2 GET (3 KiB),
+two concurrent Request-Tag Block1 uploads over one DTLS association,
+Observe + Block2 notification retrieval, and incomplete Block1 context cleanup
+when a DTLS session closes (orphan NUM=1 on session 2 returns 4.08).
+
+%includes:
+#include <string>
+#include <vector>
+#include "inet/applications/coap/CoapBlockwiseTransfer.h"
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "../coap/CoapChecks.h"
+#include "CoapDtlsTestPeer.h"
+#include "CoapDtlsTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class BlockDtlsClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> obsNotifs;
+
+    uint64_t putReq(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_PUT, true, uri, body);
+    }
+
+    uint64_t getReq(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {});
+    }
+
+    uint64_t subObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true);
+    }
+
+  protected:
+    virtual void onObserveNotification(const CoapClientObserveNotification& notif) override {
+        obsNotifs.push_back(notif);
+        CoapClient::onObserveNotification(notif);
+    }
+};
+
+Define_Module(BlockDtlsClient);
+
+class BlockDtlsServer : public CoapServer
+{
+  public:
+    bool setBlob(const std::vector<uint8_t>& body) {
+        return updateResourceValue("/files/blob", body, 0);
+    }
+    bool setLargeObs(const std::vector<uint8_t>& body) {
+        return updateResourceValue("/obs/large", body, 0);
+    }
+    std::vector<uint8_t> getResourceBytes(const std::string& pathKey) const {
+        auto it = resources.find(pathKey);
+        return it == resources.end() ? std::vector<uint8_t>{} : it->second.payload;
+    }
+};
+
+Define_Module(BlockDtlsServer);
+
+static int app0Done = 0;
+static int app1Done = 0;
+static uint64_t b1Sid1 = 0;
+static uint64_t b1Sid2 = 0;
+static int obsNotifCount = 0;
+
+Define_ProtocolTestProgram()
+{
+    app0Done = 0;
+    app1Done = 0;
+    b1Sid1 = 0;
+    b1Sid2 = 0;
+    obsNotifCount = 0;
+
+    std::string blob3k(3072, 'B');
+    std::string upload3k(3072, 'U');
+
+    return ProtocolTest("coap_dtls_blockwise")
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[0].coap").signal("requestCompleted").filterEvent([](const MatchContext&) {
+                ++app0Done;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[1].coap").signal("requestCompleted").filterEvent([](const MatchContext&) {
+                ++app1Done;
+                return true;
+            }).within(15.0)))
+        .meanwhile(anyNumberOfTimes(
+            on("host1.app[2].coap").signal("notificationReceived").filterEvent([](const MatchContext&) {
+                ++obsNotifCount;
+                return true;
+            }).within(15.0)))
+
+        // Phase 1: Initialize 3 KiB /files/blob and 1 KiB /obs/large, then run 3 KiB Block1 PUT + 3 KiB Block2 GET over DTLS.
+        .act(action().at(0.1).run<BlockDtlsServer>("host2.app[0].coap", [blob3k](BlockDtlsServer& srv) {
+            srv.setBlob(std::vector<uint8_t>(blob3k.begin(), blob3k.end()));
+            srv.setLargeObs(std::vector<uint8_t>(1024, 'L'));
+        }))
+        .act(action().at(0.2).run<BlockDtlsClient>("host1.app[0].coap", [upload3k](BlockDtlsClient& cli) {
+            std::vector<uint8_t> body(upload3k.begin(), upload3k.end());
+            if (cli.putReq("host2", 5684, "coaps://host2:5684/upload/single", body) == 0)
+                throw cRuntimeError("Failed to start 3 KiB Block1 PUT");
+        }))
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(4.0))
+        .act(action().run<BlockDtlsClient>("host1.app[0].coap", [upload3k](BlockDtlsClient& cli) {
+            if (cli.getCompletedResponses().size() != 1 || cli.getCompletedResponses()[0].code != COAP_CODE_CHANGED)
+                throw cRuntimeError("Expected 2.04 Changed after 3 KiB Block1 PUT");
+            if (cli.getReq("host2", 5684, "coaps://host2:5684/files/blob") == 0)
+                throw cRuntimeError("Failed to start 3 KiB Block2 GET");
+        }).run<BlockDtlsServer>("host2.app[0].coap", [upload3k](BlockDtlsServer& srv) {
+            auto stored = srv.getResourceBytes("upload/single");
+            if (std::string(stored.begin(), stored.end()) != upload3k)
+                throw cRuntimeError("Server Block1 reassembled body mismatch (size=%zu)", stored.size());
+        }))
+        .once(on("host1.app[0].coap").signal("requestCompleted").within(4.0))
+        .act(action().run<BlockDtlsClient>("host1.app[0].coap", [blob3k](BlockDtlsClient& cli) {
+            if (cli.getCompletedResponses().size() != 2)
+                throw cRuntimeError("Expected 2 completed responses on app[0]");
+            const auto& got = cli.getCompletedResponses()[1].payload;
+            if (std::string(got.begin(), got.end()) != blob3k)
+                throw cRuntimeError("Block2 GET reassembled payload mismatch (size=%zu)", got.size());
+        }))
+
+        // Phase 2: Two concurrent Request-Tag Block1 uploads over one DTLS association (app[1]).
+        .act(action().run<BlockDtlsClient>("host1.app[1].coap", [](BlockDtlsClient& cli) {
+            std::vector<uint8_t> tagA(1024, 'A');
+            std::vector<uint8_t> tagB(1024, 'C');
+            if (cli.putReq("host2", 5684, "coaps://host2:5684/upload/concurrent", tagA) == 0)
+                throw cRuntimeError("Failed concurrent PUT A");
+            if (cli.putReq("host2", 5684, "coaps://host2:5684/upload/concurrent", tagB) == 0)
+                throw cRuntimeError("Failed concurrent PUT B");
+        }))
+        .once(on("host1.app[1].coap").signal("requestCompleted").filterEvent([](const MatchContext&) { return app1Done >= 2; }).within(5.0))
+        .act(action().run<BlockDtlsClient>("host1.app[1].coap", [](BlockDtlsClient& cli) {
+            if (cli.getCompletedResponses().size() != 2 || cli.getFailedCount() != 0)
+                throw cRuntimeError("Expected 2 concurrent Request-Tag completions, got %zu / fail=%d",
+                        cli.getCompletedResponses().size(), cli.getFailedCount());
+        }).run<BlockDtlsServer>("host2.app[0].coap", [](BlockDtlsServer& srv) {
+            auto stored = srv.getResourceBytes("upload/concurrent");
+            if (stored.size() != 1024)
+                throw cRuntimeError("Concurrent Request-Tag uploads corrupted size=%zu", stored.size());
+            bool allA = (stored == std::vector<uint8_t>(1024, 'A'));
+            bool allC = (stored == std::vector<uint8_t>(1024, 'C'));
+            if (!allA && !allC)
+                throw cRuntimeError("Concurrent Request-Tag uploads spliced A and C blocks");
+        }))
+
+        // Phase 3: Observe + Block2 large notification retrieval over DTLS (app[2], preferredBlockSize = 256B).
+        .act(action().run<BlockDtlsClient>("host1.app[2].coap", [](BlockDtlsClient& cli) {
+            if (cli.subObs("host2", 5684, "coaps://host2:5684/obs/large") == 0)
+                throw cRuntimeError("Failed Observe+Block2 subscribe");
+        }))
+        .once(on("host1.app[2].coap").signal("notificationReceived").within(4.0))
+        .act(action().run<BlockDtlsServer>("host2.app[0].coap", [](BlockDtlsServer& srv) {
+            srv.setLargeObs(std::vector<uint8_t>(1024, 'N'));
+        }))
+        .once(on("host1.app[2].coap").signal("notificationReceived").within(4.0))
+        .act(action().run<BlockDtlsClient>("host1.app[2].coap", [](BlockDtlsClient& cli) {
+            if (cli.obsNotifs.size() != 2)
+                throw cRuntimeError("Expected 2 assembled Observe+Block2 notifications, got %zu", cli.obsNotifs.size());
+            if (cli.obsNotifs[0].payload != std::vector<uint8_t>(1024, 'L')
+                    || cli.obsNotifs[1].payload != std::vector<uint8_t>(1024, 'N'))
+                throw cRuntimeError("Observe+Block2 reassembled notification payload mismatch");
+        }))
+
+        // Phase 4: Incomplete Block1 cleanup on DTLS session close -> orphan NUM=1 on session 2 returns 4.08!
+        .act(action().run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            b1Sid1 = peer.openSession("host2", 5684);
+            if (b1Sid1 == 0)
+                throw cRuntimeError("Failed to open Block1 test session 1");
+        }))
+        .once(on("host1.app[3].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage blk0;
+            blk0.type = COAP_TYPE_CON;
+            blk0.code = COAP_CODE_PUT;
+            blk0.messageId = 0x5100;
+            blk0.token = {0xAA};
+            blk0.options.push_back({COAP_OPT_URI_PATH, asciiBytes("upload")});
+            blk0.options.push_back({COAP_OPT_URI_PATH, asciiBytes("chunked")});
+            // SZX=2 -> 64B, NUM=0, M=1 -> (0 << 4) | 0x08 | 2 = 0x0A
+            blk0.options.push_back({COAP_OPT_BLOCK1, {0x0A}});
+            blk0.options.push_back({COAP_OPT_REQUEST_TAG, {0x42}});
+            blk0.payload.assign(64, 'Z');
+            peer.sendBytes(b1Sid1, encodeRawCoap(blk0), "Blk0");
+        }))
+        .once(on("host1.app[3].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage ack;
+            if (!decodeRawCoap(peer.getReceived().back().bytes, ack) || ack.code != COAP_CODE_CONTINUE)
+                throw cRuntimeError("Expected 2.31 Continue for session 1 Block1 NUM=0");
+            peer.clearReceived();
+            peer.closeSession(b1Sid1);
+            if (!peer.isSessionClosed(b1Sid1))
+                throw cRuntimeError("Expected local peer session b1Sid1 closed");
+        }))
+        .act(action().after(0.05).run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            b1Sid2 = peer.openSession("host2", 5684);
+            if (b1Sid2 == 0)
+                throw cRuntimeError("Failed to open Block1 test session 2");
+        }))
+        .once(on("host1.app[3].peer").signal("controlStateChanged").filterValue(CoapDtlsTestPeer::ESTABLISHED).within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage blk1;
+            blk1.type = COAP_TYPE_CON;
+            blk1.code = COAP_CODE_PUT;
+            blk1.messageId = 0x5101;
+            blk1.token = {0xBB};
+            blk1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("upload")});
+            blk1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("chunked")});
+            // SZX=2 -> 64B, NUM=1, M=0 -> (1 << 4) | 0x00 | 2 = 0x12
+            blk1.options.push_back({COAP_OPT_BLOCK1, {0x12}});
+            blk1.options.push_back({COAP_OPT_REQUEST_TAG, {0x42}});
+            blk1.payload.assign(64, 'W');
+            peer.sendBytes(b1Sid2, encodeRawCoap(blk1), "Blk1Orphan");
+        }))
+        .once(on("host1.app[3].peer").signal("packetReceivedFromLower").within(2.0))
+        .act(action().run<CoapDtlsTestPeer>("host1.app[3].peer", [](CoapDtlsTestPeer& peer) {
+            RawCoapMessage rsp;
+            if (!decodeRawCoap(peer.getReceived().back().bytes, rsp) || rsp.code != COAP_CODE_REQUEST_ENTITY_INCOMPLETE)
+                throw cRuntimeError("Expected 4.08 Request Entity Incomplete for orphaned Block1 NUM=1 after DTLS session close, got code=%u", rsp.code);
+        }));
+}
+
+%activity:
+EV << "coap_dtls_blockwise compiled\n";
+
+%file: BlockTestApps.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.applications.contract.IApp;
+import inet.transportlayer.contract.IDtls;
+
+simple BlockDtlsClient extends CoapClient
+{
+    parameters:
+        @class(BlockDtlsClient);
+}
+
+simple BlockDtlsServer extends CoapServer
+{
+    parameters:
+        @class(BlockDtlsServer);
+}
+
+module BlockDtlsClientApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        coap: BlockDtlsClient {
+            dtlsModule = "^.dtls";
+        }
+        dtls: <default("Dtls")> like IDtls {
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+module BlockDtlsServerApp like IApp
+{
+    parameters:
+        @application;
+    gates:
+        input socketIn;
+        output socketOut;
+    submodules:
+        dtls: <default("Dtls")> like IDtls {
+            localPort = default(5684);
+        }
+        coap: BlockDtlsServer {
+            dtlsModule = "^.dtls";
+        }
+    connections allowunconnected:
+        socketIn --> dtls.socketIn;
+        dtls.socketOut --> socketOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.coapdtls.work
+sim-time-limit = 25s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+
+*.host1.numApps = 4
+*.host1.app[0].typename = "BlockDtlsClientApp"
+*.host1.app[0].coap.numRequests = 0
+*.host1.app[0].coap.preferredBlockSize = 1024B
+
+*.host1.app[1].typename = "BlockDtlsClientApp"
+*.host1.app[1].coap.numRequests = 0
+*.host1.app[1].coap.preferredBlockSize = 256B
+*.host1.app[1].coap.useRequestTag = true
+
+*.host1.app[2].typename = "BlockDtlsClientApp"
+*.host1.app[2].coap.numRequests = 0
+*.host1.app[2].coap.preferredBlockSize = 256B
+
+*.host1.app[3].typename = "inet.protocoltest.coapdtls.CoapDtlsTestApp"
+*.host1.app[3].server = false
+*.host1.app[3].dtls.closeTimeout = 0.2s
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "BlockDtlsServerApp"
+*.host2.app[0].coap.preferredBlockSize = 1024B
+*.host2.app[0].dtls.closeTimeout = 0.2s
+*.host2.app[0].coap.resources = xml("<resources><resource path='/upload/single' contentFormat='0' methods='GET,PUT'>init</resource><resource path='/upload/concurrent' contentFormat='0' methods='GET,PUT'>init</resource><resource path='/upload/chunked' contentFormat='0' methods='GET,PUT'>init</resource><resource path='/files/blob' contentFormat='0' methods='GET'>BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB</resource><resource path='/obs/large' contentFormat='0' methods='GET' obs='true'>init</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_dtls_blockwise: PASS

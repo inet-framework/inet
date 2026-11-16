@@ -124,6 +124,8 @@ class INET_API CoapClient : public CoapEndpointBase
     virtual void onEndpointStart() override;
     virtual void onEndpointStop() override;
     virtual void onEndpointCrash() override;
+    virtual void onDtlsSessionClosing(uint64_t sessionId, const char *reason) override;
+    virtual void onDtlsSessionClosed(uint64_t sessionId, const char *reason) override;
 
     virtual void dispatchMatchedResponse(uint64_t requestId, const CoapPeerEndpoint& peer,
             const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) override;

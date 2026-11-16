@@ -507,6 +507,32 @@ void CoapServer::onDtlsSessionClosed(uint64_t sessionId, const char *reason)
             std::remove_if(pendingSeparateResponses.begin(), pendingSeparateResponses.end(),
                     [sessionId](const CoapPendingSeparateResponse& item) { return item.peer.sessionId == sessionId; }),
             pendingSeparateResponses.end());
+
+    std::vector<CoapObserverKey> closedObserverKeys;
+    for (const auto& kv : observers) {
+        if (kv.first.peer.sessionId == sessionId)
+            closedObserverKeys.push_back(kv.first);
+    }
+    for (const auto& key : closedObserverKeys) {
+        auto it = observers.find(key);
+        if (it != observers.end())
+            removeObserverAndEmit(it);
+    }
+
+    for (auto it = incomingBlock1.begin(); it != incomingBlock1.end();) {
+        if (it->first.peer.sessionId == sessionId)
+            it = incomingBlock1.erase(it);
+        else
+            ++it;
+    }
+
+    for (auto it = retainedBlock2.begin(); it != retainedBlock2.end();) {
+        if (it->first.peer.sessionId == sessionId)
+            it = retainedBlock2.erase(it);
+        else
+            ++it;
+    }
+
     rescheduleDeadlineTimer();
 }
 

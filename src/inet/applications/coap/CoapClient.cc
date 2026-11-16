@@ -301,6 +301,37 @@ void CoapClient::onEndpointCrash()
     emit(activeObservationsSignal, 0L);
 }
 
+void CoapClient::onDtlsSessionClosing(uint64_t sessionId, const char *reason)
+{
+    std::deque<blockwise::CoapClientBlockTransfer> doomedTransfers;
+    for (auto it = queuedBlockTransfers.begin(); it != queuedBlockTransfers.end();) {
+        if (it->first.peer.sessionId == sessionId) {
+            for (auto& queued : it->second)
+                doomedTransfers.push_back(std::move(queued));
+            it = queuedBlockTransfers.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+    const char *effectiveReason = (reason != nullptr && reason[0] != '\0') ? reason : "DTLS session closing";
+    for (const auto& queued : doomedTransfers)
+        onRequestFailed(queued.transferId, effectiveReason, 0);
+}
+
+void CoapClient::onDtlsSessionClosed(uint64_t sessionId, const char *reason)
+{
+    std::vector<CoapObserverKey> obsKeys;
+    for (const auto& kv : observationsByPeerToken) {
+        if (kv.first.peer.sessionId == sessionId)
+            obsKeys.push_back(kv.first);
+    }
+    const char *effectiveReason = (reason != nullptr && reason[0] != '\0') ? reason : "DTLS session closed";
+    for (const auto& key : obsKeys)
+        terminateObservation(key, 0, effectiveReason);
+    rescheduleDeadlineTimer();
+}
+
 simtime_t CoapClient::getNextSubclassDeadline() const
 {
     simtime_t earliest = SIMTIME_ZERO;
