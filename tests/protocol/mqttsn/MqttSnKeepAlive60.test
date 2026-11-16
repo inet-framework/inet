@@ -1,0 +1,45 @@
+%description:
+Gateway keepalive expiry for a silent client with duration 60s and the declared 50 percent tolerance. No client auto-ping can mask the boundary.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+#include "inet/common/ProtocolTag_m.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnKeepAlive60")
+        .once(on("gateway.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->getTag<PacketProtocolTag>()->getProtocol() == &mqttsn::mqttSnProtocol &&
+                c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::CONNACK;
+        }).within(1))
+        .never(on("gateway.app[0]").signal("sessionStateChanged").filterValue(7).within(89.99))
+        .once(on("gateway.app[0]").signal("sessionStateChanged").filterValue(7).within(0.02));
+}
+
+%activity:
+EV << "Duration boundary fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 120s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='60' clientId='script'/><expect type='5'/><wait timeout='89.9s'/></script>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnKeepAlive60: PASS

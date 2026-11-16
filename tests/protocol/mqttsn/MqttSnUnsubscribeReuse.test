@@ -1,0 +1,44 @@
+%description:
+A completed UNSUBSCRIBE id/filter is reused after a fresh subscription. It must unsubscribe upstream again, rather than replaying an obsolete cached response.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnUnsubscribeReuse")
+        .once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN session boundary fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='30' clientId='script'/><expect type='5'/><send type='18' flags='32' messageId='1' topic='data'/><expect type='19' messageId='1'/><send type='20' messageId='2' topic='data'/><expect type='21' messageId='2'/><send type='18' flags='32' messageId='1' topic='data'/><expect type='19' messageId='1'/><send type='20' messageId='2' topic='data'/><expect type='21' messageId='2'/><wait timeout='1s' forbidType='12'/><send type='24'/><expect type='24'/></script>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "publisher"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><publish at='500ms' topic='data' qos='1' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnUnsubscribeReuse: PASS

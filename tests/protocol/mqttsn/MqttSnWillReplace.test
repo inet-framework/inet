@@ -1,0 +1,48 @@
+%description:
+Production gateway CleanSession/Will matrix across ordinary disconnect and reconnect: MqttSnWillReplace.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnWillReplace");
+    test.meanwhile(exactlyTimes(1,on("observer.app[0]").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+        return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66});
+    }).within(3)));
+    test.once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(3));
+    return test;
+}
+
+%activity:
+EV << "Will matrix fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 4s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='8' duration='1' clientId='script'/><expect type='6'/><send type='7' topic='will'/><expect type='8'/><send type='9' payload='41'/><expect type='5'/><send type='24'/><expect type='24'/><send type='4' flags='8' duration='1' clientId='script'/><expect type='6'/><send type='7' topic='will'/><expect type='8'/><send type='9' payload='42'/><expect type='5'/><wait timeout='2s'/></script>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='will' qos='1'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnWillReplace: PASS

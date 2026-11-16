@@ -1,0 +1,41 @@
+%description:
+Unavailable upstream TCP setup is refused with MQTT-SN congestion, never accepted.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnUnavailableBroker")
+        .meanwhile(never(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::CONNACK && p->getReturnCode() == 0;
+        }).within(.5)))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::CONNACK && p->getReturnCode() == 1;
+        }).within(1));
+}
+
+%activity:
+EV << "Unavailable broker fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST MqttSnUnavailableBroker: PASS

@@ -1,0 +1,81 @@
+%description:
+Production MQTT-SN client stop/start and crash/start cancel pending timers and
+restore delivery, with persistent ordinary restart and clean reset after crash.
+
+%file: check.cc
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+namespace inet::mqttsntest {
+class LifecycleCheck : public cSimpleModule, public cListener {
+    std::set<int> delivered;
+    simsignal_t sent, upper;
+    void initialize() override {
+        sent = registerSignal("packetSentToLower"); upper = registerSignal("packetSentToUpper");
+        getSimulation()->getSystemModule()->subscribe(sent, this);
+        getSimulation()->getSystemModule()->subscribe(upper, this);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *) override {
+        std::string path = source->getFullPath();
+        if (path.find("sensor.app[0]") == std::string::npos) return;
+        bool down = (simTime() > SimTime(1.01) && simTime() < SimTime(2)) || (simTime() > SimTime(3.01) && simTime() < SimTime(4));
+        if (signal == sent && down) throw cRuntimeError("MQTT-SN callback sent while application down");
+        if (signal == upper) {
+            ASSERT(!down);
+            auto packet = check_and_cast<Packet *>(value); auto bytes = packet->peekDataAsBytes()->getBytes();
+            ASSERT(bytes.size() == 1); delivered.insert(bytes[0]);
+        }
+    }
+    void finish() override {
+        ASSERT(delivered == std::set<int>({65,66,67,69}));
+        getSimulation()->getSystemModule()->unsubscribe(sent, this);
+        getSimulation()->getSystemModule()->unsubscribe(upper, this);
+        EV << "MQTTSN LIFECYCLE PASS\n";
+    }
+};
+Define_Module(LifecycleCheck);
+}
+
+%activity:
+EV << "MQTT-SN lifecycle fixture compiled\n";
+
+%file: test.ned
+import inet.tests.mqttsn.MqttSnTestNetwork;
+import inet.common.scenario.ScenarioManager;
+simple LifecycleCheck { parameters: @class(::inet::mqttsntest::LifecycleCheck); }
+network LifecycleNetwork extends MqttSnTestNetwork {
+    submodules:
+        scenarioManager: ScenarioManager;
+        check: LifecycleCheck;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifecycleNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.scenarioManager.script = xml("<scenario><at t='1'><shutdown module='sensor.app[0]'/></at><at t='2'><startup module='sensor.app[0]'/></at><at t='3'><crash module='sensor.app[0]'/></at><at t='4'><startup module='sensor.app[0]'/></at></scenario>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].cleanSession = false
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].keepAlive = 1s
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='data' qos='1'/></mqttsn>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "publisher"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><publish at='0.5s' topic='data' qos='1' payload='41'/><publish at='1.5s' topic='data' qos='1' payload='42'/><publish at='2.5s' topic='data' qos='1' payload='43'/><publish at='3.5s' topic='data' qos='1' payload='44'/><publish at='4.5s' topic='data' qos='1' payload='45'/></mqtt>")
+
+%contains: stdout
+MQTTSN LIFECYCLE PASS

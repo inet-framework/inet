@@ -1,0 +1,85 @@
+%description:
+Production MQTT-SN connection and bidirectional binary delivery over static IPv6
+unicast. The gateway's existing MQTT broker connection uses IPv4 independently.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+
+%file: setup.cc
+#include "inet/common/INETDefs.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
+namespace inet::mqttsntest {
+class StaticIpv6Setup : public cSimpleModule {
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_NETWORK_CONFIGURATION) return;
+        int id = 1;
+        for (const char *name : {"sensor", "secondSensor", "gateway", "alternative", "broker", "observer"}) {
+            auto node = getParentModule()->getSubmodule(name);
+            auto table = check_and_cast<IInterfaceTable *>(node->getSubmodule("interfaceTable"));
+            auto interface = table->findInterfaceByName("eth0"); ASSERT(interface);
+            Ipv6Address address(("2001:db8::" + std::to_string(id++)).c_str());
+            interface->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(address, false, SIMTIME_ZERO, SIMTIME_ZERO);
+            auto routing = check_and_cast<Ipv6RoutingTable *>(node->getSubmodule("ipv6")->getSubmodule("routingTable"));
+            auto route = new Ipv6Route(Ipv6Address("2001:db8::"), 64, IRoute::MANUAL); route->setInterface(interface); routing->addRoute(route);
+        }
+    }
+};
+Define_Module(StaticIpv6Setup);
+}
+
+%file: test.ned
+import inet.tests.mqttsn.MqttSnTestNetwork;
+simple StaticIpv6Setup { parameters: @class(::inet::mqttsntest::StaticIpv6Setup); }
+network StaticIpv6Network extends MqttSnTestNetwork { submodules: ipv6Setup: StaticIpv6Setup; }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("mqttsn_ipv6_qos0")
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::CONNACK;
+        }).assertEvent([](const MatchContext& c) { return c.event.packet->getTag<L3AddressInd>()->getSrcAddress().getType() == L3Address::IPv6; }).within(1))
+        .once(on("observer.app[0]").signal("packetSentToUpper").assertEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0,255,65});
+        }).within(1))
+        .once(on("sensor.app[0]").signal("packetSentToUpper").assertEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66,0,255});
+        }).within(1));
+}
+
+%activity:
+EV << "IPv6 MQTT-SN fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = StaticIpv6Network
+seed-set = 0
+sim-time-limit = 3s
+**.hasIpv6 = true
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "2001:db8::3"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='from/+' qos='0'/><publish at='500ms' topic='to/broker' qos='0' payload='00ff41'/></mqttsn>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='to/#' qos='0'/><publish at='1s' topic='from/broker' qos='0' payload='4200ff'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqttsn_ipv6_qos0: PASS

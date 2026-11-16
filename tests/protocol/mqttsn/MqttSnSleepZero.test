@@ -1,0 +1,38 @@
+%description:
+Duration zero is acknowledged, then the gateway expires the sleep relationship without a synthetic delay.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnSleepZero")
+        .once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN session boundary fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='30' clientId='script'/><expect type='5'/><send type='24' duration='0'/><expect type='24'/><send after='10ms' type='22' clientId='script'/><expect type='24'/></script>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+
+%contains: stdout
+PROTOCOLTEST MqttSnSleepZero: PASS

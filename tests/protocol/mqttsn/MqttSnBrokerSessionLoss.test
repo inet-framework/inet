@@ -1,0 +1,77 @@
+%description:
+A scripted broker loses its session after a QoS2 delivery. The sensor reconnects
+through the production gateway. Session Present false restores the subscription
+and clears upstream incoming duplicate state, allowing the same broker id again.
+
+%includes:
+#include "ProtocolTest.h"
+#include "../../../mqtt/MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../../mqtt/MqttScriptedPeer.cc"
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    auto connections = std::make_shared<int>(0);
+    auto sent = std::make_shared<std::set<int>>();
+    return ProtocolTest("MqttSnBrokerSessionLoss")
+        .act(action().at(0).run<mqtttest::MqttScriptedPeer>("broker.app[0]", [connections,sent](auto& app) {
+            app.socket().bind(1883); app.socket().listen(); app.closeOnPeerClose = true;
+            app.responder = [connections,sent](auto& peer, auto& socket, const auto& p) {
+                if (p->getType() == mqtt::CONNECT) {
+                    if (std::string(p->getClientIdentifier()) == "sensor") { ASSERT(!p->getCleanSession()); ++*connections; }
+                    auto reply = makeShared<mqtt::MqttPacket>(); reply->setType(mqtt::CONNACK); peer.sendMqtt(socket,reply);
+                }
+                else if (p->getType() == mqtt::SUBSCRIBE) {
+                    auto ack = makeShared<mqtt::MqttPacket>(); ack->setType(mqtt::SUBACK); ack->setPacketIdentifier(p->getPacketIdentifier());
+                    ack->setResultsArraySize(1); ack->setResults(0,2); peer.sendMqtt(socket,ack);
+                    if (sent->insert(*connections).second) {
+                        auto incoming = makeShared<mqtt::MqttPacket>(); incoming->setType(mqtt::PUBLISH); incoming->setTopic("tt");
+                        incoming->setQos(2); incoming->setPacketIdentifier(7); incoming->setPayloadArraySize(1);
+                        incoming->setPayload(0,*connections == 1 ? 65 : 66); peer.sendMqtt(socket,incoming);
+                    }
+                }
+                else if (p->getType() == mqtt::PUBREC) {
+                    if (*connections == 1) socket.close();
+                    else { auto rel = makeShared<mqtt::MqttPacket>(); rel->setType(mqtt::PUBREL); rel->setPacketIdentifier(7); peer.sendMqtt(socket,rel); }
+                }
+                else if (p->getType() == mqtt::PUBCOMP) { ASSERT(*connections == 2); peer.emit(peer.registerSignal("scenarioComplete"),1L); }
+            };
+        }))
+        .meanwhile(exactlyTimes(2,on("sensor.app[0]").signal("packetSentToUpper").within(2.5)))
+        .once(on("broker.app[0]").signal("scenarioComplete").filterValue(1).within(2.5));
+}
+
+%activity:
+EV << "MQTT-SN broker session loss fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].cleanSession = false
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='tt' qos='2'/></mqttsn>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnBrokerSessionLoss: PASS

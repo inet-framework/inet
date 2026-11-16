@@ -1,0 +1,44 @@
+%description:
+Late PUBREC advances the saved phase during sleep, but PUBREL waits until the sensor polls.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnSleepLatePubrec")
+        .once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN bounded fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='1' clientId='script'/><expect type='5'/><send type='18' messageId='1' flags='66' topicId='29812'/><expect type='19' messageId='1' qos='2'/><expect type='12' messageId='1' payload='41'/><send type='24' duration='3'/><expect type='24'/><send type='15' messageId='1'/><wait timeout='400ms' forbidType='16'/><send type='22' clientId='script'/><expect type='16' messageId='1'/><send type='14' messageId='1'/><expect type='23'/><send type='24'/><expect type='24'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].clientIdentifier = "publisher"
+*.observer.app[0].workload = xml("<mqtt><publish at='500ms' topic='tt' qos='2' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnSleepLatePubrec: PASS
