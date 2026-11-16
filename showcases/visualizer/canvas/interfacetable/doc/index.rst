@@ -40,11 +40,13 @@ takes a format string, which can contain the following directives:
 -  ``%N``: interface name
 -  ``%4``: IPv4 address
 -  ``%6``: IPv6 address
+-  ``%a``: IPv4 or IPv6 address
 -  ``%n``: network address. This is either the IPv4 or the IPv6 address
 -  ``%l``: netmask length
 -  ``%m``: MAC address
 -  ``%\\``: conditional newline for wired interfaces. (Note that the backslash
    needs to be doubled, due to escaping.)
+-  ``%/``: a ``/``, but only if the interface has a network address
 -  ``%s``: the ``str()`` functions for the interface entry class
 
 The default format string is ``"%N %\\%a%/%l"``, i.e. interface name, IP
