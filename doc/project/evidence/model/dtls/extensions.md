@@ -38,7 +38,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C8 | HEARTBEAT | Thirteen heartbeat protocol cases; serializer unit; selected existing controls | DONE: fresh debug build; 22 combined protocol, 8 unit, 7 module PASS |
 | C9 | PATH | Seventeen migration cases; NAT translation, switched/routed IPv4 and routed IPv6, rebind/error checks | DONE: 60 protocol, eight unit and seven module cases pass in debug |
 | C10 | PHA | Twenty-two PHA cases; contextual serializers, offer/store units and existing controls | DONE: full 230-case debug suite passes; final byte-bound correction passes 31 focused cases |
-| C11a | Existing fragmentation-request API | tests/protocol/ipv6/Ipv6DontFragmentRequest; source-fragmentation control | NOT_STARTED |
+| C11a | Existing fragmentation-request API | Immediate/delayed Ipv6DontFragmentRequest; source-fragmentation control | DONE: parent reproduces both defects; fresh debug child passes all three cases |
 | C11 | PMTU | Rfc9147PathMtu; flight/path units | NOT_STARTED |
 | C12 | 12-RECORD | Dtls12RecordSerializer_1, Dtls12HandshakeSerializer_1; unsupported-version control | NOT_STARTED |
 | C13 | VERSION, 12-RECOVERY | Rfc6347Handshake, Recovery, Datagrams; Rfc9147VersionNegotiation | NOT_STARTED |
@@ -199,3 +199,28 @@ opp_run_module_tests --load . -p inet -m debug --no-build -f 'Dtls(SenderState|E
 ```
 
 Build logs are `c10-build-debug.log` and `c10-budget-build-debug.log`; runner/console pairs use the above prefixes under `audit/dtls-extensions/`. The earlier sequential full-suite attempt was interrupted deliberately to switch to the supported concurrent mode; its partial logs are `c10-partial-sequential-*` and are not a complete run. Only one protocol runner used a suite work directory at a time. Scoped engine/TLS/contract/application architecture, DTLS/TLS naming, source protection, document seals, release formatting and selected documentation links pass. The global interface gate still fails on the same 16 unchanged classes, with no `IDtls` finding (`c10-interfaces.log`). The C++ checker remains unavailable without `clang-tidy`; prior global link failures, release, exact-parent, fingerprint and active-authentication stop/crash execution remain unrun. No stored expectation changed.
+
+## C11a implementation contract
+
+Validated before the source edit: `Ipv6::fragmentAndSend()` receives the selected interface and next hop after routing/neighbor resolution, distinguishes local from forwarded traffic using `InterfaceInd`, sends fitting packets directly, and reports Packet Too Big for oversized forwarded packets. It currently fragments oversized local packets without reading `FragmentationReq`. Add the existing tag check after the fitting/forwarded branches and before creating fragments. For an explicit true request, count and emit `PACKET_TOO_BIG`, delete the owned packet and return. Absent/false tags, fitting output and forwarding keep their existing branches. No new tag, socket API or ICMP wire behavior is introduced. Source protection and scoped IPv6 architecture checks pass.
+
+The proposed direct checks send a first oversized tagged packet, a small tagged packet and an oversized untagged control over a 1280-byte source link with static IPv6 addresses. Repeat with delayed neighbor advertisement so the tag must survive the pending-resolution queue. Require one local drop, no forbidden output/delivery, small unfragmented delivery and exactly two fragments/reassembled delivery for the untagged control. Exercise the same fixtures on parent `7bbb8784c2` before the fix and retain raw evidence. The existing source-fragmentation control will also run. These are local API checks rather than a newly claimed IPv6 wire requirement.
+
+### C11a execution and evidence
+
+Implemented the existing tag check in `Ipv6::fragmentAndSend()` after fitting/forwarded output and before local fragmentation. The [reviewer document](../../../../../tests/protocol/ipv6/dont-fragment-request.md) owns topology, parameters, stimuli, packet sizes, observations and limits. No DTLS policy or new generic interface is included.
+
+On parent `7bbb8784c2`, both new cases compile and reach their final runtime assertion but fail: no requested local drop occurs, each log shows two fragmentation operations, and UDP delivers to ports 5001, 5000 and 5002. The delayed case records the actual 300 ms Neighbor Advertisement delay. Parent raw logs are saved under `audit/dtls-extensions/c11a-parent/`; `c11a-parent-fixtures.sha256` verifies that both causal runs used byte-for-byte identical fixtures. One trailing-space-only blank line was trimmed from the immediate fixture afterward. An earlier NED work-package exclusion setup error was corrected before these causal runs. The parent source-fragmentation control passes with explicit `dontFragment = false`.
+
+A fresh matching debug child library passes **all three protocol cases** with exit zero and nonzero selection: the immediate/delayed request checks and the existing routed source-fragmentation control. The new cases observe exactly one local drop, no forbidden output/delivery, one small unfragmented datagram, and exactly two untagged fragments with successful reassembly. Exact commands:
+
+```sh
+# Parent library, before the IPv6 source edit:
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/ipv6$' -f 'Ipv6DontFragmentRequest.*\.test$' --log-file audit/dtls-extensions/c11a-parent-runner.log
+opp_run_protocol_tests --load . -p inet -m debug --no-build --no-concurrent -w '^tests/protocol/ipv6$' -f 'Rfc8200SourceFragmentation\.test$' --log-file audit/dtls-extensions/c11a-parent-control-runner.log
+# Changed library:
+make -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/ipv6$' -f '(Ipv6DontFragmentRequest.*|Rfc8200SourceFragmentation)\.test$' --log-file audit/dtls-extensions/c11a-child-runner.log
+```
+
+Build and runner/console logs use those prefixes under `audit/dtls-extensions/`. Scoped IPv6 architecture, source protection, document seals, release formatting and reviewer-document links pass. The scoped IPv6 naming gate fails on the unchanged `headers` directory and `Ipv6ExtHeaderTag.msg`/`Ipv6ExtensionHeaders.msg` file-stem findings; these are not introduced or resolved here. The previously recorded global interface/link and missing-C++-checker limitations remain. Release execution and fingerprints remain unrun. No stored expectation changed.
