@@ -124,6 +124,7 @@ void MqttSnGateway::socketEstablished(TcpSocket *socket)
     auto packet = makeShared<mqtt::MqttPacket>(); packet->setType(mqtt::CONNECT);
     packet->setClientIdentifier(peer->clientIdentifier.c_str()); packet->setCleanSession(peer->cleanSession);
     packet->setKeepAlive(par("brokerKeepAlive"));
+    // MQTT 3.1.1, 3.1.2.8–3.1.2.9: an empty password is distinct from an absent password.
     packet->setUserNamePresent(*par("userName").stringValue()); packet->setUserName(par("userName"));
     packet->setPasswordPresent(*par("password").stringValue());
     std::string password = par("password").stdstringValue(); packet->setPasswordArraySize(password.size());
@@ -138,6 +139,7 @@ void MqttSnGateway::finishSetup(Peer& peer)
 
 void MqttSnGateway::acceptConnect(const Ptr<MqttSnPacket>& packet, const L3Address& source, int port)
 {
+    // MQTT-SN v1.2 (2013), 6.2–6.3: clean setup clears the sensor's subscriptions and Will data.
     if (packet->getProtocolId() != 1 || std::string(packet->getClientIdentifier()) == shared.clientIdentifier) {
         auto refusal = MqttSnSession::makePacket(CONNACK); refusal->setReturnCode(NOT_SUPPORTED); sendTo(refusal, source, port); return;
     }
@@ -183,6 +185,7 @@ bool MqttSnGateway::replayReply(Peer& peer, const Ptr<MqttSnPacket>& request)
 
 void MqttSnGateway::enqueueBroker(Peer& peer, const Ptr<MqttSnPacket>& packet, const std::string& topic)
 {
+    // Local model policy: terminate hop QoS independently, as defined in plan/pending/mqtt-sn.md.
     auto publication = makeShared<mqtt::MqttPacket>(); publication->setType(mqtt::PUBLISH); publication->setTopic(topic.c_str());
     publication->setQos(std::max(0, qos(*packet))); publication->setRetain(packet->getFlags() & RETAIN);
     publication->setPayloadArraySize(packet->getPayloadArraySize());
@@ -193,6 +196,7 @@ void MqttSnGateway::enqueueBroker(Peer& peer, const Ptr<MqttSnPacket>& packet, c
 
 void MqttSnGateway::disconnectPeer(Peer& peer, bool lost)
 {
+    // MQTT-SN v1.2 (2013), 6.3 and 6.14: loss activates the Will, then applies session cleanup.
     if (lost && peer.phase != LOST && peer.phase != DISCONNECTED && peer.will)
         enqueueBroker(shared, peer.will, peer.will->getTopic());
     peer.phase = lost ? LOST : DISCONNECTED; peer.deadline = -1;
@@ -211,6 +215,7 @@ void MqttSnGateway::disconnectPeer(Peer& peer, bool lost)
 void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& packet)
 {
     int type = packet->getType(), id = packet->getMessageId();
+    // MQTT-SN v1.2 (2013), 6.2: each Will prompt retains its own retry phase.
     if (type == WILLTOPIC && peer.phase == WILL_TOPIC) {
         if (!packet->getWillTopicPresent()) { peer.transactions.erase(-WILLTOPICREQ); peer.will = nullptr; finishSetup(peer); return; }
         if (!mqtt::MqttTopicFilter::isValidTopic(packet->getTopic()) || qos(*packet) < 0) return;
@@ -225,6 +230,8 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
     if (type == WILLTOPIC && peer.phase == WILL_MESSAGE) { transmit(peer, MqttSnSession::makePacket(WILLMSGREQ)); return; }
     if ((type == WILLTOPIC || type == WILLMSG) && (peer.phase == CONNECTING || peer.phase == ACTIVE)) return;
     if (type == DISCONNECT) {
+        // MQTT-SN v1.2 (2013), 6.12 and 6.14: sleep retains the session and suspends downlink deadlines.
+        // Fixed tolerance follows the local interpretation of 7.2 in plan/pending/mqtt-sn.md.
         if (packet->getDurationPresent() && (peer.phase == ACTIVE || peer.phase == ASLEEP || peer.phase == AWAKE)) {
             peer.phase = ASLEEP; peer.sleepDuration = packet->getDuration();
             peer.deadline = simTime() + SimTime(peer.sleepDuration * (peer.sleepDuration <= 60 ? 1.5 : 1.1));
@@ -238,6 +245,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
     }
     if (peer.phase == ACTIVE && peer.keepAlive) peer.deadline = simTime() + SimTime(peer.keepAlive * (peer.keepAlive <= 60 ? 1.5 : 1.1));
     if (type == PINGREQ) {
+        // MQTT-SN v1.2 (2013), 6.14: resume pending delivery before closing the awake drain.
         if (peer.phase == ASLEEP || peer.phase == AWAKE) {
             bool wasAsleep = peer.phase == ASLEEP;
             peer.phase = AWAKE; peer.deadline = -1;
@@ -253,12 +261,14 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
         return;
     }
     if (type == REGISTER) {
+        // MQTT-SN v1.2 (2013), 6.5 and 7.3: normal bindings belong to this sensor relationship.
         if (replayReply(peer, packet)) return;
         auto reply = MqttSnSession::makePacket(REGACK, id);
         int topic = mqtt::MqttTopicFilter::isValidTopic(packet->getTopic()) ? peer.allocateTopic(packet->getTopic()) : 0;
         reply->setTopicId(topic); reply->setReturnCode(topic ? ACCEPTED : CONGESTION); rememberReply(peer, packet, reply); return;
     }
     if (type == SUBSCRIBE || type == UNSUBSCRIBE) {
+        // MQTT-SN v1.2 (2013), 6.9: translate one filter and preserve the sensor's reply identity.
         if (replayReply(peer, packet)) return;
         for (const auto& entry : peer.pendingSubscriptions) if (MqttSnSession::sameRequest(*packet, *entry.second)) return;
         std::string filter = topicKind(*packet) == NORMAL_TOPIC ? packet->getTopic() : peer.resolveTopic(*packet);
@@ -273,6 +283,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
         peer.pendingSubscriptions[mqttId] = packet; brokerSend(peer, request); return;
     }
     if (type == PUBLISH) {
+        // MQTT-SN v1.2 (2013), 6.6–6.7; inherited MQTT QoS 2 Method B suppresses repeated handoff.
         std::string topic = peer.resolveTopic(*packet);
         if (topic.empty() || qos(*packet) < 0) {
             auto reply = MqttSnSession::makePacket(PUBACK, id); reply->setTopicId(packet->getTopicId()); reply->setReturnCode(INVALID_TOPIC); transmit(peer, reply); return;
@@ -285,6 +296,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
     }
     if (type == PUBREL) { peer.inboundQos2.erase(id); transmit(peer, MqttSnSession::makePacket(PUBCOMP, id)); return; }
     if (type == WILLTOPICUPD || type == WILLMSGUPD) {
+        // MQTT-SN v1.2 (2013), 6.4: topic/flags and binary message update independently.
         auto reply = MqttSnSession::makePacket(type == WILLTOPICUPD ? WILLTOPICRESP : WILLMSGRESP);
         if (type == WILLTOPICUPD) {
             if (!packet->getWillTopicPresent()) peer.will = nullptr;
@@ -298,6 +310,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
         transmit(peer, reply); return;
     }
     if (type == PUBACK && id == 0) {
+        // MQTT-SN v1.2 (2013), 6.6–6.7: QoS 0 can receive congestion/invalid-topic feedback.
         auto context = peer.qosZeroTopics.find(packet->getTopicId());
         if (context == peer.qosZeroTopics.end()) return;
         if (packet->getReturnCode() == CONGESTION) peer.publishAfter = simTime() + par("congestionWait");
@@ -315,6 +328,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
         peer.transactions.erase(id); drive(peer); return;
     }
     if (type == PUBREC && request->getType() == PUBLISH && qos(*request) == 2) {
+        // MQTT-SN v1.2 (2013), 5.4.14 and 6.14: advance while asleep but transmit on the next poll.
         auto release = MqttSnSession::makePacket(PUBREL, id);
         peer.transactions[id] = {release, peer.phase == ASLEEP ? SimTime::getMaxTime() : simTime() + par("retryInterval"), 0};
         if (peer.phase != ASLEEP) transmit(peer, release);
@@ -339,6 +353,7 @@ void MqttSnGateway::receiveControlPacket(Peer& peer, const Ptr<MqttSnPacket>& pa
 
 void MqttSnGateway::drive(Peer& peer)
 {
+    // MQTT-SN v1.2 (2013), 6.10 and 6.14: register unknown concrete topics and drain before PINGRESP.
     if (peer.phase != ACTIVE && peer.phase != AWAKE) return;
     if (!peer.transactions.empty() || simTime() < peer.publishAfter) return;
     while (!peer.publications.empty()) {
@@ -389,6 +404,7 @@ void MqttSnGateway::brokerReceive(Peer& peer, const Ptr<mqtt::MqttPacket>& packe
 {
     int type = packet->getType(), id = packet->getPacketIdentifier();
     if (!peer.brokerActive) {
+        // MQTT-SN v1.2 (2013), 6.2: the local bridge admits the sensor only after broker acceptance.
         if (type != mqtt::CONNACK || (peer.cleanSession && packet->getSessionPresent())) throw cRuntimeError("Invalid upstream MQTT CONNACK");
         if (packet->getReturnCode()) {
             failBroker(peer, packet->getReturnCode() == 3 ? CONGESTION : NOT_SUPPORTED); return;
@@ -476,6 +492,7 @@ void MqttSnGateway::socketDataArrived(UdpSocket *, Packet *message)
         auto packet = MqttSnPacketSerializer::decode(message->peekDataAsBytes()->getBytes());
         emit(registerSignal("packetReceivedFromLower"), message);
         if (packet->getType() == SEARCHGW) {
+            // MQTT-SN v1.2 (2013), 6.1: announce only while connected to a server.
             if (packet->getRadius() == 1 && shared.brokerActive) {
                 auto info = MqttSnSession::makePacket(GWINFO); info->setGatewayId(par("gatewayId"));
                 sendTo(info, L3AddressResolver().resolve(par("broadcastAddress")), par("localPort"));
@@ -483,6 +500,7 @@ void MqttSnGateway::socketDataArrived(UdpSocket *, Packet *message)
         }
         else if (packet->getType() == CONNECT) acceptConnect(packet, source, port);
         else if (packet->getType() == PUBLISH && qos(*packet) == -1) {
+            // MQTT-SN v1.2 (2013), 6.8 and 7.1: connectionless traffic uses the shared broker connection.
             if (topicKind(*packet) == PREDEFINED_TOPIC || topicKind(*packet) == SHORT_TOPIC) {
                 auto topic = shared.resolveTopic(*packet); if (!topic.empty()) enqueueBroker(shared, packet, topic);
             }
@@ -557,6 +575,7 @@ void MqttSnGateway::scheduleTimer()
 
 void MqttSnGateway::handleMessageWhenUp(cMessage *message)
 {
+    // MQTT-SN v1.2 (2013), 6.1, 6.11 and 6.13–6.14; gateway retry symmetry is local profile policy.
     if (message != timer) {
         if (auto connection = check_and_cast_nullable<TcpSocket *>(brokerSockets.findSocketFor(message))) connection->processMessage(message);
         else if (socket.belongsToSocket(message)) socket.processMessage(message);

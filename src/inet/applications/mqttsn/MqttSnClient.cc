@@ -143,6 +143,7 @@ void MqttSnClient::transmit(const Ptr<MqttSnPacket>& packet, bool track)
 
 void MqttSnClient::connectGateway()
 {
+    // MQTT-SN v1.2 (2013), 6.1 and 6.13: try alternative gateways before searching again.
     if (gateway.isUnspecified()) {
         for (const auto& candidate : candidates) {
             if (candidate.second.expiry <= simTime() || attemptedGateways.count(candidate.first)) continue;
@@ -159,6 +160,7 @@ void MqttSnClient::connectGateway()
             return;
         }
     }
+    // MQTT-SN v1.2 (2013), 6.2–6.3. Gateway changes force clean setup under our UDP profile.
     effectiveClean = par("cleanSession").boolValue() || resetSession;
     if (effectiveClean) { session.clearExchanges(); session.topics.clear(); }
     auto packet = MqttSnSession::makePacket(CONNECT);
@@ -219,6 +221,7 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
         return;
     }
     if ((type == WILLTOPICREQ || type == WILLMSGREQ) && phase == CONNECTING) {
+        // MQTT-SN v1.2 (2013), 6.2: the gateway prompts separately for Will topic and message.
         auto reply = MqttSnSession::makePacket(type == WILLTOPICREQ ? WILLTOPIC : WILLMSG);
         if (type == WILLTOPICREQ) {
             reply->setWillTopicPresent(*par("willTopic").stringValue()); reply->setTopic(par("willTopic"));
@@ -228,6 +231,7 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
         transmit(reply); return;
     }
     if (type == DISCONNECT) {
+        // MQTT-SN v1.2 (2013), 6.12 and 6.14: a sleep acknowledgement omits the duration.
         if (phase == CLOSING) { complete(-DISCONNECT); socket.close(); return; }
         auto pending = session.transactions.find(-DISCONNECT);
         if (pending != session.transactions.end() && pending->second.packet->getDurationPresent()) {
@@ -239,12 +243,14 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
     if (phase == AWAKE && type != PINGRESP && session.transactions.count(-PINGREQ))
         session.transactions.at(-PINGREQ).deadline = simTime() + par("retryInterval");
     if (type == REGISTER) {
+        // MQTT-SN v1.2 (2013), 6.5 and 6.10: bind the concrete downlink topic before publishing.
         auto reply = MqttSnSession::makePacket(REGACK, id); reply->setTopicId(packet->getTopicId());
         bool valid = packet->getTopicId() > 0 && packet->getTopicId() < 65535 && mqtt::MqttTopicFilter::isValidTopic(packet->getTopic());
         if (valid) session.topics[packet->getTopicId()] = packet->getTopic();
         reply->setReturnCode(valid ? ACCEPTED : INVALID_TOPIC); transmit(reply); return;
     }
     if (type == PUBLISH) {
+        // MQTT-SN v1.2 (2013), 6.6–6.7 and 6.10; inherited MQTT QoS 2 Method B retains the id until PUBREL.
         auto topic = session.resolveTopic(*packet);
         if (topic.empty() || qos(*packet) < 0) {
             auto reply = MqttSnSession::makePacket(PUBACK, id); reply->setTopicId(packet->getTopicId()); reply->setReturnCode(INVALID_TOPIC); transmit(reply); return;
@@ -258,12 +264,14 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
     }
     if (type == PUBREL) { session.inboundQos2.erase(id); transmit(MqttSnSession::makePacket(PUBCOMP, id)); return; }
     if (type == PINGREQ) { transmit(MqttSnSession::makePacket(PINGRESP)); return; }
+    // MQTT-SN v1.2 (2013), 6.11 and 6.14: PINGRESP also completes a sleeping client's drain.
     if (type == PINGRESP) {
         if (session.transactions.count(-PINGREQ)) { complete(-PINGREQ); if (phase == AWAKE) changePhase(ASLEEP); }
         return;
     }
     if (type == WILLTOPICRESP || type == WILLMSGRESP) { complete(-(type == WILLTOPICRESP ? WILLTOPICUPD : WILLMSGUPD)); return; }
     if (type == PUBACK && id == 0) {
+        // MQTT-SN v1.2 (2013), 6.6–6.7: error PUBACK applies even to QoS 0, without an ACK transaction.
         auto context = session.qosZeroTopics.find(packet->getTopicId());
         if (context == session.qosZeroTopics.end()) return;
         if (packet->getReturnCode() == CONGESTION) session.publishAfter = simTime() + par("congestionWait");
@@ -275,6 +283,7 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
     if (pending == session.transactions.end()) return;
     auto request = pending->second.packet;
     if (type == REGACK && request->getType() == REGISTER) {
+        // MQTT-SN v1.2 (2013), 6.5 and 6.9: match registration/subscription replies by message id.
         if (packet->getReturnCode() == ACCEPTED && packet->getTopicId() > 0 && packet->getTopicId() < 65535)
             session.topics[packet->getTopicId()] = request->getTopic();
         else session.publishAfter = simTime() + par("congestionWait");
@@ -293,6 +302,7 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
         complete(id); return;
     }
     if (type == PUBREC && request->getType() == PUBLISH && qos(*request) == 2) {
+        // MQTT-SN v1.2 (2013), 5.4.14 and 6.6: after PUBREC retain PUBREL, never the old PUBLISH.
         transmit(MqttSnSession::makePacket(PUBREL, id), true); return;
     }
     if (type == PUBREC && request->getType() == PUBREL) { transmit(staticPtrCast<MqttSnPacket>(request->dupShared())); return; }
@@ -317,6 +327,7 @@ void MqttSnClient::receiveControlPacket(const Ptr<MqttSnPacket>& packet, const L
 
 void MqttSnClient::receiveDiscovery(const Ptr<MqttSnPacket>& packet, const L3Address& source)
 {
+    // MQTT-SN v1.2 (2013), 6.1: peer-search suppression, delayed GWINFO and candidate lifetimes.
     if (*par("gatewayAddress").stringValue()) return;
     if (packet->getType() == SEARCHGW && packet->getRadius() == 1) {
         if (searchAt >= SIMTIME_ZERO) { searchAt = -1; searchResponseAt = simTime() + par("searchResponseTimeout"); }
@@ -326,6 +337,7 @@ void MqttSnClient::receiveDiscovery(const Ptr<MqttSnPacket>& packet, const L3Add
     if (packet->getType() == ADVERTISE || packet->getType() == GWINFO) {
         L3Address address = source;
         if (packet->getType() == GWINFO && packet->getGatewayAddressArraySize()) {
+            // IPv4 length/address encoding is the local UDP profile in plan/pending/mqtt-sn.md.
             if (packet->getGatewayAddressArraySize() != 5 || packet->getGatewayAddress(0) != 4) return;
             uint32_t value = 0;
             for (int i = 1; i <= 4; i++) value = value * 256 + packet->getGatewayAddress(i);
@@ -348,6 +360,7 @@ void MqttSnClient::drive()
         transmit(request, true); return;
     }
     if (phase == ACTIVE && !session.publications.empty() && session.transactions.empty() && simTime() >= session.publishAfter) {
+        // MQTT-SN v1.2 (2013), 6.5–6.6: register an unknown normal topic before sending its publication.
         auto packet = session.publications.front();
         if (topicKind(*packet) == NORMAL_TOPIC && !session.findTopic(packet->getTopic())) {
             auto registration = MqttSnSession::makePacket(REGISTER, session.allocateMessageId()); registration->setTopic(packet->getTopic());
@@ -401,6 +414,7 @@ void MqttSnClient::scheduleTimer()
 void MqttSnClient::handleMessageWhenUp(cMessage *message)
 {
     if (message != timer) { socket.processMessage(message); return; }
+    // MQTT-SN v1.2 (2013), 6.13; bounded poll retries follow 6.14.
     for (auto it = session.transactions.begin(); it != session.transactions.end(); ++it) {
         if (it->second.deadline > simTime()) continue;
         if (it->second.retries >= par("retryCount").intValue()) {
@@ -422,6 +436,7 @@ void MqttSnClient::handleMessageWhenUp(cMessage *message)
         searchAt = -1; searchResponseAt = simTime() + par("searchResponseTimeout");
     }
     if (searchResponseAt >= SIMTIME_ZERO && searchResponseAt <= simTime()) {
+        // MQTT-SN v1.2 (2013), 6.1: increase unanswered search intervals exponentially.
         if (searchBackoff <= SIMTIME_ZERO) searchBackoff = par("searchResponseTimeout");
         searchAt = simTime() + searchBackoff + uniform(0, par("searchDelay").doubleValue());
         searchBackoff = std::min(searchBackoff * 2, SimTime(par("searchRetryMax")));
@@ -439,6 +454,7 @@ void MqttSnClient::handleMessageWhenUp(cMessage *message)
             }
         }
     }
+    // MQTT-SN v1.2 (2013), 6.11: only active sessions send autonomous keepalive requests.
     if (phase == ACTIVE && !par("connectionless").boolValue() && par("keepAlive").intValue() && !session.transactions.count(-PINGREQ) &&
             simTime() >= lastSent + SimTime(par("keepAlive"))) transmit(MqttSnSession::makePacket(PINGREQ), true);
     drive(); scheduleTimer();
