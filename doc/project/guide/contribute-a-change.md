@@ -42,7 +42,7 @@ Record only a genuinely new deviation, as an `AV-*` row in [audit/architecture-e
 
 ## 8. Submit a reviewable change
 
-Divide the work into commits by concern: each part that can stand alone in a commit of its own, the whitespace and mechanical sweeps apart from the logic, the shared-component change before the model that needs it, the regenerated baselines inside the commit that moves them, and the pin of a baseline in another repository inside that commit too. Start each message with the answers to the [reviewer's questions](../rule/pull-request.md#the-reviewers-questions), in proportion to the change. Every rule for this step is in [pull-request.md](../rule/pull-request.md).
+Divide the work into commits by concern: each part that can stand alone in a commit of its own, the whitespace and mechanical sweeps apart from the logic, the shared-component change before the model that needs it, the regenerated baselines inside the commit that moves them, and the pin of a baseline in another repository inside that commit too. Keep the code that moves a baseline small, give its message the `Baseline changes:` list with a reason on each line, and summarize the baseline changes of the series in a section `Baseline changes` of the description ([change-a-baseline.md](change-a-baseline.md)). Start each message with the answers to the [reviewer's questions](../rule/pull-request.md#the-reviewers-questions), in proportion to the change. Every rule for this step is in [pull-request.md](../rule/pull-request.md).
 
 ## 9. Sealing last
 

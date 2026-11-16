@@ -32,19 +32,44 @@ After approval, regenerate only the baselines the change actually moves. A blank
 
 **The regenerated values go in the same commit as the source change that moves them** ([PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline), [TR-BASELINE-COMMIT](../rule/testing.md#tr-baseline-commit)). The commit then passes its own fingerprint test, and `git bisect` over the suite gives a true answer.
 
-The body of the message gives the reason ([TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance)):
+The body of the message gives the reason ([TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance)): the behavior that moves, and the `Baseline changes:` list with a reason on each line. Get the computed list of the staged store:
+
+```bash
+python3 doc/project/enforcement/fingerprint_moves.py --list <(git show HEAD:tests/fingerprint/store.json) tests/fingerprint/store.json
+```
+
+Copy the list into the message, and write the reason of each line after " — ". A line that starts with 4 or more spaces continues the reason:
 
 ```
 ethernet: reset the PLCA burst counter after the last frame of the burst
 
-The counter was reset one transmission early, so a burst carried one frame
-fewer than 802.3cg 148.4.5.4 requires.
+The counter was reset one transmission early, so a burst carried one frame fewer than 802.3cg 148.4.5.4 requires.
 
-The 14 fingerprints below all use PLCA with maxBurstCount > 1 and now show
-one more frame per burst. No other configuration moves.
+Baseline changes:
+  fingerprint runs changed in tplx,~tND,~tNl (14; examples/ethernet 14) — these runs use PLCA
+    with maxBurstCount > 1, and each burst now carries one more frame
 ```
 
-"Fingerprints updated" is not a reason. Two years later this message is the only thing that tells a developer with a bisect in hand whether the movement was intended.
+"Fingerprints updated" is not a reason. Two years later this message is the only thing that tells a developer with a bisect in hand whether the movement was intended. Each line of the list is one way in which the runs move. Two lines usually have two causes: give each its own reason, or divide the commit ([PR-SPLIT-ONE-CHANGE](../rule/pull-request.md#pr-split-one-change)).
+
+**Make the code that moves the values small** ([TR-BASELINE-ATTRIBUTION](../rule/testing.md#tr-baseline-attribution)). The reviewer accepts the new values because the reviewer can read the change and see that it is correct. A commit of 100 changed lines is wrong when 10 of its lines move the same fingerprints: put the other 90 lines into a commit before it that moves no fingerprint. The gate counts the changed source lines of the commit. Above 100 lines it fails, and above 30 lines it gives a note.
+
+If the commit cannot be small, give a reduction: a small patch that shows the same move. Put the patch at the end of the message, after a line `Reduction:`, and name its direction in the trailer `Attribution:`. `reverse` is a patch for the commit that gives the old fingerprints; `forward` is a patch for the parent that gives the new fingerprints. Write the patch with `git diff`, and keep it in the message as it is:
+
+```
+Baseline changes:
+  fingerprint runs changed in tplx,tyf (7; examples/tcp 7) — TcpWestwood takes an RTT sample
+    from each ACK of new data, so its congestion window grows faster
+
+Reduction:
+diff --git a/src/inet/transportlayer/tcp/flavours/TcpWestwood.cc b/src/inet/transportlayer/tcp/flavours/TcpWestwood.cc
+...
+
+Change: ...
+Attribution: reverse
+```
+
+A reduction is an experiment, not code that lands. The check `Check: baseline attribution` applies the patch, builds, and runs the moved fingerprint tests. A fingerprint change that only adds, removes or renames runs, or that changes no source line, needs no attribution.
 
 The reviewer reads the source change alone with `git show <sha> -- . ':!tests'`.
 
@@ -65,6 +90,17 @@ Do not put such a re-record inside an unrelated fix. It has no cause there.
 
 The description lists every baseline update ([PR-REQ-STORY](../rule/pull-request.md#pr-req-story)). A reviewer who has to discover a baseline change by reading the file list has already been failed by the description.
 
+Give the description a section `## Baseline changes` ([PR-REQ-BASELINES](../rule/pull-request.md#pr-req-baselines)). It has one entry for each commit that changes the fingerprint store or moves a pin over results: the exact subject of the commit, then a summary of its baseline changes in your words. A series can have more than one such commit, and the section is the one place where the reviewer sees all of them:
+
+```
+## Baseline changes
+
+- ethernet: reset the PLCA burst counter after the last frame of the burst
+  14 fingerprint runs of examples/ethernet move: each PLCA burst carries one more frame.
+```
+
+The lists with a reason for each line stay in the commits. The report of the gate prints the computed lists beside the section.
+
 ## A baseline in another repository
 
 The statistical baseline is in the `statistics` repository, and the chart baseline is in the `media` repository. `inet.opp` pins one commit of each ([TR-BASELINE-PIN](../rule/testing.md#tr-baseline-pin)). Steps 1 to 3 apply as they are. The other steps change as follows.
@@ -79,7 +115,7 @@ opp_run_chart_tests -m release -w '<showcase-directory-regex>'
 
 A test and an update never move a checkout. They give a warning when a checkout is not at its pin.
 
-Record the candidate values in the CI environment. When the statistical or the chart tests of a pull request fail, the run uploads the artifact `statistical-candidates` or `chart-candidates`: the new files of the failed tests, `moved-results.txt` with the block for the record, and `environment.txt` with the versions. The local copy of the CI job gives the same files. Values from a developer machine can differ in the last digit, and such a baseline fails in CI ([TR-BASELINE-DELIBERATE](../rule/testing.md#tr-baseline-deliberate)). The update commands change only the files of the tests that move:
+Record the candidate values in the CI environment. When the statistical or the chart tests of a pull request fail, the run uploads the artifact `statistical-candidates` or `chart-candidates`: the new files of the failed tests, `baseline-changes.txt` with the computed list for the record, and `environment.txt` with the versions. The local copy of the CI job gives the same files. Values from a developer machine can differ in the last digit, and such a baseline fails in CI ([TR-BASELINE-DELIBERATE](../rule/testing.md#tr-baseline-deliberate)). The update commands change only the files of the tests that move:
 
 ```bash
 opp_update_statistical_test_results -m release -w '<simulation-directory-regex>' -c '<config-regex>'
@@ -100,7 +136,7 @@ A reduction is an experiment, not code that lands. Its limit is 100 changed line
 
 ### Commit the values with their record
 
-Make one baseline commit for one INET commit, on a branch with the name of the INET branch. Stage only the files that move. Then get the summary of the staged change:
+Make one baseline commit for one INET commit, on a branch with the name of the INET branch. Stage only the files that move. Then get the computed list of the staged change:
 
 ```bash
 python3 doc/project/enforcement/baseline_summary.py statistics
@@ -122,24 +158,21 @@ so "reception decision computation count" grows by the factor 3 ...
 The trajectory moves in 44 of the configurations. A reception can draw
 two random numbers instead of one ...
 
-Moved results:
-  tests: 141 changed, 0 added, 0 removed
-  rows of the changed tests: 138836 changed, 9 added, 9 removed
-  folders: examples/wireless 54, showcases/wireless 25, ...
-  groups of the changed tests, by the names of their moved rows:
-  - 95 test(s): interference cache hit, reception cache hit, ...
-  - 44 test(s): more than 12 names each
-  - 1 test(s): reception decision cache hit
-  names of the moved rows:
-  - queueLength:timeavg: 908 changed, -100 % to +3.34e+04 %
-  - ...
+Baseline changes:
+  statistical tests changed, large (95; examples/wireless 38, ...): interference cache hit, reception cache hit and 4 more — the medium
+    computes three decisions for each reception instead of one, so the cache counters grow
+  statistical tests changed, large (44; examples/manetrouting 19, ...): queueLength, packetDrop and 1104 more — a reception can
+    draw two random numbers, so the drops and the queues move
+  statistical tests changed, large (1; showcases/wireless 1): reception decision cache hit — this configuration has no
+    interference, so only the decision cache counts more
 
 INET-Subject: physicallayer: change: decide the header and the data of a reception separately
 Attribution: commit
 ```
 
-- Paste the `Moved results:` block as the tool prints it. The gate computes the block again and compares.
-- Explain each group of the block. A group of one test is an exception that the reader will ask about.
+- Copy the list as the tool prints it, and write a reason after " — " on each line. Keep the computed text and " — " on the first line of the item; a line that starts with 4 or more spaces continues only the reason. The gate computes the list again, compares the lines, and fails a line with no reason.
+- A line of one test is an exception that the reader will ask about. Its reason says why that test moves in another way.
+- More prose in the message is welcome, but it does not replace a reason on a line.
 - For a chart, look at the old and the new image, and say how the picture changes: which curve or bar moves, and by how much.
 - `INET-Subject:` is the exact subject of the INET commit that moves the pin.
 
