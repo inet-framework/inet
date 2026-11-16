@@ -160,13 +160,13 @@ jobs:
               echo "## The statistical tests fail"
               echo
               echo "If the change moves these results on purpose, the artifact \`statistical-candidates\` holds the new files, recorded"
-              echo "in this CI environment, with \`moved-results.txt\` and \`environment.txt\`. Leave out the files of the tests"
+              echo "in this CI environment, with \`baseline-changes.txt\` and \`environment.txt\`. Leave out the files of the tests"
               echo "that fail at the parent commit too, commit the rest to the baseline repository with the record, and move"
               echo "the pin in the commit that causes the change. The procedure is in doc/project/guide/change-a-baseline.md."
               echo
               echo '```'
               sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/candidates.txt" | grep -E '^(error|warning)|need a candidate|candidate file' || true
-              cat "$GITHUB_WORKSPACE/candidates/moved-results.txt" 2>/dev/null || true
+              cat "$GITHUB_WORKSPACE/candidates/baseline-changes.txt" 2>/dev/null || true
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi

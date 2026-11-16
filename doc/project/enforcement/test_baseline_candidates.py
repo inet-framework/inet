@@ -106,9 +106,8 @@ class ScriptTest(unittest.TestCase):
         self.assertEqual((self.output / "examples/a/omnetpp.ini-General-#0.sca").read_text(), SCA.format(11))
         self.assertFalse((self.output / "examples/b").exists())
         self.assertFalse((self.output / "examples/a/omnetpp.ini-General-#0.diff").exists())
-        block = (self.output / "moved-results.txt").read_text()
-        self.assertIn("tests: 1 changed, 0 added, 0 removed", block)
-        self.assertIn("- packets sent: 1 changed, +10 % to +10 %", block)
+        block = (self.output / "baseline-changes.txt").read_text()
+        self.assertEqual(block, "Baseline changes:\n  statistical tests changed, large (1; examples/a 1): packets sent — \n")
         self.assertEqual((self.output / "removed.txt").read_text(), "")
         self.assertIn("statistical baseline checkout:", (self.output / "environment.txt").read_text())
 

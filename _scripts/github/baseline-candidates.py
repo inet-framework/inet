@@ -5,8 +5,9 @@ The CI job runs the tests with --result-file and, when they fail, calls this scr
 selects the tests with an unexpected FAIL, and the tests with an ERROR because no stored result
 exists. It runs the update command for these tests only, and copies each result file that the update
 adds or changes to the output folder, at its path in the baseline repository. The output folder also
-gets the "Moved results:" block of the change (moved-results.txt), the files that the change removes
-(removed.txt), and the versions of the environment (environment.txt).
+gets the "Baseline changes:" list of the change with an empty reason on each line
+(baseline-changes.txt), the files that the change removes (removed.txt), and the versions of the
+environment (environment.txt).
 
 The candidates are evidence, not a baseline (TR-BASELINE-DELIBERATE in doc/project/rule/testing.md).
 The author examines them, leaves out the files of the tests that fail at the parent commit too
@@ -144,7 +145,7 @@ def main(argv=None):
             os.makedirs(os.path.dirname(target), exist_ok=True)
             shutil.copyfile(os.path.join(folder, path), target)
         block = "\n".join(baseline_summary.block(baseline_summary.analyze(folder, is_result=is_result))) + "\n"
-        with open(os.path.join(args.output_folder, "moved-results.txt"), "w") as f:
+        with open(os.path.join(args.output_folder, "baseline-changes.txt"), "w") as f:
             f.write(block)
         with open(os.path.join(args.output_folder, "removed.txt"), "w") as f:
             f.write("".join(path + "\n" for path in removed))

@@ -20,6 +20,7 @@ CHECKER = Path(__file__).with_name("check-baselines.sh").resolve()
 SUBJECT = "src: change: one value"
 ANALYSIS = ("The change adds a counter to the host. Each host now sends one more packet, so the number of sent "
             "packets and the number of received packets both rise by one, and the other rows stay the same.")
+REASON = "the host sends one more packet in this test"
 CHANGE = "Change: src | behavior.change | "
 SCA_A = "examples/a/omnetpp.ini-General-#0.sca"
 SCA_B = "examples/b/omnetpp.ini-General-#0.sca"
@@ -138,15 +139,16 @@ class GateTestCase(unittest.TestCase):
     def record(self, repository, changes, inet_subject=SUBJECT, attribution="commit", analysis=ANALYSIS,
                block=None, subject="Move the results"):
         """Makes a baseline commit with its record. A change of None removes the file. inet_subject and
-        attribution of None leave the trailer out. A block of "none" leaves the block out, a function
-        edits the computed lines. Returns the hash."""
+        attribution of None leave the trailer out. Each computed line gets a reason. A block of "none" leaves
+        the list out, a function edits the lines of the list. Returns the hash."""
         for path, content in changes.items():
             if content is None:
                 self.git(repository, "rm", "-q", path)
             else:
                 self.write(repository, path, content)
         self.git(repository, "add", "-A")
-        lines = baseline_summary.block(baseline_summary.analyze(str(repository), is_result=self.result_filter(repository)))
+        moved = baseline_summary.analyze(str(repository), is_result=self.result_filter(repository))
+        lines = baseline_summary.block(moved, {line: REASON for line in baseline_summary.lines(moved)})
         if block == "none":
             lines = None
         elif block is not None:
@@ -249,14 +251,11 @@ class PassTest(GateTestCase):
         changes = {SCA_A: sca(sent="10.0", rcvd="8")}
         self.write(self.stat, SCA_A, changes[SCA_A])
         self.git(self.stat, "add", "-A")
-        block = baseline_summary.block(baseline_summary.analyze(str(self.stat)))
-        self.assertIn("  rows of the changed tests: 1 changed, 0 added, 0 removed", block)
-        self.assertNotIn("  - packets sent: 1 changed", block)
+        lines = baseline_summary.lines(baseline_summary.analyze(str(self.stat)))
+        self.assertEqual(lines, ["statistical tests changed, large (1; examples/a 1): rcvdPk:count"])
         self.git(self.stat, "reset", "-q", "--hard")
         self.move(stat=changes)
-        result = self.assert_passes()
-        self.assertIn("rows of the changed tests: 1 changed, 0 added, 0 removed", result.stdout)
-        self.assertNotIn("- packets sent", result.stdout)
+        self.assert_passes()
 
 
 class PinViolationTest(GateTestCase):
@@ -315,24 +314,49 @@ class RecordViolationTest(GateTestCase):
         self.move(stat={SCA_A: sca(sent="11")}, stat_record={"inet_subject": "src: change: another value"})
         self.assert_fails("INET-Subject is not the subject of")
 
-    def test_no_moved_results_block_fails(self):
+    def test_no_baseline_changes_list_fails(self):
         self.move(stat={SCA_A: sca(sent="11")}, stat_record={"block": "none"})
-        self.assert_fails("has no 'Moved results:' block")
+        self.assert_fails("has no 'Baseline changes:' list")
 
-    def test_a_block_with_a_changed_number_fails(self):
+    def test_a_list_with_a_changed_number_fails(self):
         def wrong(lines):
-            return [line.replace("1 changed, 0 added", "2 changed, 0 added") for line in lines]
+            return [line.replace("(1; examples/a 1)", "(2; examples/a 2)") for line in lines]
         self.move(stat={SCA_A: sca(sent="11")}, stat_record={"block": wrong})
-        self.assert_fails("has a 'Moved results:' block that is not the computed block")
+        self.assert_fails("has a 'Baseline changes:' list that is not the computed list")
 
-    def test_an_analysis_of_fewer_than_20_words_fails(self):
-        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"analysis": "It sends more packets now."})
-        self.assert_fails("has no analysis: 5 words of prose")
+    def test_the_failure_of_a_missing_list_prints_the_expected_list(self):
+        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"block": "none"})
+        result = self.assert_fails("has no 'Baseline changes:' list")
+        self.assertIn("  statistical tests changed, large (1; examples/a 1): packets sent — ", result.stdout)
 
-    def test_a_line_of_the_analysis_that_starts_with_a_word_and_a_colon_counts(self):
-        analysis = ("Note: each host now sends one more packet, so the number of sent packets rises by one in "
-                    "this test and the other rows stay the same.")
-        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"analysis": analysis})
+    def test_a_list_with_the_right_lines_in_another_order_fails(self):
+        def reversed_lines(lines):
+            return lines[:1] + lines[:0:-1]
+        self.move(stat={SCA_A: sca(sent="11"), SCA_B: sca(rcvd="8")}, stat_record={"block": reversed_lines})
+        self.assert_fails("has a 'Baseline changes:' list that is not the computed list")
+
+    def test_a_line_with_no_reason_gives_exactly_one_violation_that_names_the_line(self):
+        def without_reason(lines):
+            return [line.split(" — ")[0] + " — " if "rcvdPk:count" in line else line for line in lines]
+        self.move(stat={SCA_A: sca(sent="11"), SCA_B: sca(rcvd="8")}, stat_record={"block": without_reason})
+        result = self.assert_fails("no reason for: statistical tests changed, large (1; examples/b 1): rcvdPk:count")
+        self.assertEqual(result.stdout.count("VIOLATION"), 1, result.stdout)
+        self.assertNotIn("no reason for: statistical tests changed, large (1; examples/a 1)", result.stdout)
+
+    def test_a_line_with_no_separator_has_no_reason(self):
+        def without_separator(lines):
+            return [line.split(" — ")[0] for line in lines]
+        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"block": without_separator})
+        self.assert_fails("no reason for: statistical tests changed, large (1; examples/a 1): packets sent")
+
+    def test_a_reason_may_continue_on_an_indented_line(self):
+        def continued(lines):
+            return lines + ["      and the other rows stay the same."]
+        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"block": continued})
+        self.assert_passes()
+
+    def test_an_analysis_in_the_message_is_optional(self):
+        self.move(stat={SCA_A: sca(sent="11")}, stat_record={"analysis": ""})
         self.assert_passes()
 
     def test_a_result_file_that_changes_only_in_text_fails(self):
@@ -409,7 +433,7 @@ class NoteTest(GateTestCase):
         self.move(stat={SCA_A: sca(sent="11"), SCA_B: sca(rcvd="8")})
         result = self.assert_passes()
         self.assertIn("note:", result.stdout)
-        self.assertIn("moves its tests in 2 ways", result.stdout)
+        self.assertIn("has 2 lines of changed entries", result.stdout)
         self.assertIn("(PR-SPLIT-ONE-CHANGE)", result.stdout)
 
     def test_the_commit_that_adds_the_first_pins_gives_a_note(self):
@@ -451,7 +475,6 @@ class UrlTest(GateTestCase):
                                  f"statistical=file://{self.stat}"], cwd=self.inet, capture_output=True, text=True)
         self.assert_passes(result)
         self.assertNotIn("read from the local clone", result.stdout)
-        self.assertIn("rows of the changed tests: 1 changed, 0 added, 0 removed", result.stdout)
 
 
 class ResultRuleTest(GateTestCase):
@@ -494,17 +517,17 @@ class ResultRuleTest(GateTestCase):
 
     def test_a_result_commit_that_also_changes_a_documentation_image_lists_only_the_chart(self):
         self.move(media={PNG_A: b"\x89PNG new", PNG_DOC: b"\x89PNG new documentation"})
-        result = self.assert_passes()
-        self.assertIn(f"  - {PNG_A}: changed", result.stdout)
-        self.assertNotIn(f"  - {PNG_DOC}", result.stdout)
+        self.assert_passes()
+        message = self.git(self.media, "log", "-1", "--format=%B").stdout
+        self.assertEqual([text for text, _ in baseline_summary.read_block(message)],
+                         ["chart images changed (1; showcases/a 1): chart"])
 
-    def test_a_block_that_lists_a_documentation_image_fails(self):
+    def test_a_list_that_names_a_documentation_image_fails(self):
         def with_documentation(lines):
-            lines = [line.replace("charts: 1 changed", "charts: 2 changed") for line in lines]
-            return lines + [f"  - {PNG_DOC}: changed"]
+            return lines + [f"  chart images changed (1; showcases/b 1): chart{baseline_summary.SEPARATOR}{REASON}"]
         self.move(media={PNG_A: b"\x89PNG new", PNG_DOC: b"\x89PNG new documentation"},
                   media_record={"block": with_documentation})
-        self.assert_fails("has a 'Moved results:' block that is not the computed block")
+        self.assert_fails("has a 'Baseline changes:' list that is not the computed list")
 
     def test_a_behavior_free_change_that_moves_the_statistical_pin_over_a_result_fails(self):
         self.move(stat={SCA_A: sca(sent="11")}, trailer="Change: src | refactor | statistical")
@@ -524,7 +547,7 @@ class ResultRuleTest(GateTestCase):
     def test_the_removal_of_an_image_that_only_the_parent_names_needs_the_record(self):
         self.move(media={PNG_A: None}, media_record={"attribution": "removal", "block": "none"},
                   files={ANF: ANF_TEXT_WITHOUT_CHART})
-        self.assert_fails("has no 'Moved results:' block")
+        self.assert_fails("has no 'Baseline changes:' list")
 
     def test_a_pin_that_moves_over_a_merge_commit_of_the_baseline_repository_fails(self):
         self.git(self.media, "checkout", "-q", "-b", "side")
@@ -539,6 +562,14 @@ class ResultRuleTest(GateTestCase):
         images = baseline_summary.chart_images_at("HEAD", ENTRY, cwd=self.inet)
         self.assertEqual(images, {PNG_A, PNG_A2})
         self.assertEqual(baseline_summary.chart_images_in_work_tree(ENTRY, cwd=self.inet), images)
+
+
+K = ("Net.host", "packets sent")
+
+
+def changed_test(path, *names, old=100.0, new=200.0):
+    """A changed test of the analysis, with the given names of changed rows."""
+    return ("M", path, [(("Net.host", name), old, new) for name in names], [], [])
 
 
 class BaselineSummaryTest(unittest.TestCase):
@@ -583,24 +614,155 @@ class BaselineSummaryTest(unittest.TestCase):
         new = baseline_summary.read_scalars("scalar Net.host x 10.0\n")
         self.assertEqual(baseline_summary.compare_scalars(old, new), ([], [], []))
 
-    def test_find_block_returns_the_lines_up_to_the_blank_line(self):
-        message = "Subject\n\nAnalysis.\n\nMoved results:\n  tests: 1 changed\n  folders: a 1\n\nAttribution: commit\n"
-        self.assertEqual(baseline_summary.find_block(message), ["Moved results:", "  tests: 1 changed", "  folders: a 1"])
+    def test_lines_of_no_change_are_empty(self):
+        self.assertEqual(baseline_summary.lines({"tests": [], "charts": []}), [])
 
-    def test_find_block_returns_none_when_the_message_has_no_block(self):
-        self.assertIsNone(baseline_summary.find_block("Subject\n\nAnalysis.\n\nAttribution: commit\n"))
+    def test_lines_name_the_added_and_removed_tests_and_the_changed_charts(self):
+        moved = {"tests": [("A", "examples/a/x.sca", [], [], []), ("A", "examples/a/y.sca", [], [], []),
+                           ("D", "examples/b/z.sca", [], [], [])],
+                 "charts": [("A", "showcases/a/doc/c1.png"), ("D", "showcases/a/doc/c2.png"), ("M", "showcases/b/doc/c3.png")]}
+        self.assertEqual(baseline_summary.lines(moved), [
+            "statistical tests added (2; examples/a 2)", "statistical tests removed (1; examples/b 1)",
+            "chart images added (1; showcases/a 1): c1", "chart images removed (1; showcases/a 1): c2",
+            "chart images changed (1; showcases/b 1): c3"])
 
-    def test_block_sums_the_names_beyond_the_20th_in_an_other_names_line(self):
-        changed = [(("Net.host", f"n{i:02d}"), 1.0, 2.0) for i in range(25)]
-        lines = baseline_summary.block({"tests": [("M", "examples/a/x.sca", changed, [], [])], "charts": []})
-        self.assertEqual(lines[0], "Moved results:")
-        self.assertIn("  - 5 other names: 5 rows", lines)
-        self.assertEqual(sum(1 for line in lines if line.startswith("  - n")), 20)
-        self.assertIn("  - 1 test(s): more than 12 names each", lines)
-        self.assertIn("  - n00: 1 changed, +100 % to +100 %", lines)
+    def test_block_has_the_heading_and_a_line_with_the_reason_of_each_computed_line(self):
+        moved = {"tests": [changed_test("examples/a/x.sca", "n")], "charts": [("M", "showcases/a/doc/c.png")]}
+        text = "statistical tests changed, large (1; examples/a 1): n"
+        block = baseline_summary.block(moved, {text: "the reason"})
+        self.assertEqual(block, ["Baseline changes:", f"  {text} — the reason", "  chart images changed (1; showcases/a 1): c — "])
 
-    def test_block_of_no_change_says_that_no_result_moves(self):
-        self.assertEqual(baseline_summary.block({"tests": [], "charts": []}), ["Moved results:", "  no result moves"])
+    def test_block_of_no_change_is_the_heading_only(self):
+        self.assertEqual(baseline_summary.block({"tests": [], "charts": []}), ["Baseline changes:"])
+
+    def test_read_block_returns_the_texts_and_reasons_up_to_the_empty_line(self):
+        message = "Subject\n\nAnalysis.\n\nBaseline changes:\n  text one — reason one\n  text two — reason two\n\nAttribution: commit\n"
+        self.assertEqual(baseline_summary.read_block(message), [("text one", "reason one"), ("text two", "reason two")])
+
+    def test_read_block_returns_none_when_the_message_has_no_list(self):
+        self.assertIsNone(baseline_summary.read_block("Subject\n\nAnalysis.\n\nAttribution: commit\n"))
+
+    def test_read_block_joins_a_line_with_four_spaces_to_the_reason_before_it(self):
+        message = "S\n\nBaseline changes:\n  text one — first part\n      second part\n  text two — reason two\n"
+        self.assertEqual(baseline_summary.read_block(message), [("text one", "first part second part"), ("text two", "reason two")])
+
+    def test_read_block_gives_an_empty_reason_for_a_line_with_no_separator(self):
+        self.assertEqual(baseline_summary.read_block("S\n\nBaseline changes:\n  text one\n"), [("text one", "")])
+
+    def test_check_block_accepts_the_computed_list_with_reasons(self):
+        message = "S\n\n" + "\n".join(["Baseline changes:", "  a — r1", "  b — r2"]) + "\n"
+        self.assertEqual(baseline_summary.check_block(message, ["a", "b"]), [])
+
+    def test_check_block_reports_a_missing_list(self):
+        self.assertEqual(baseline_summary.check_block("S\n\nbody\n", ["a"]), ["no 'Baseline changes:' list"])
+
+    def test_check_block_reports_a_list_that_is_not_the_computed_list(self):
+        message = "S\n\nBaseline changes:\n  a — r1\n  other — r2\n"
+        self.assertEqual(baseline_summary.check_block(message, ["a", "b"]), ["a 'Baseline changes:' list that is not the computed list"])
+
+    def test_check_block_reports_the_right_lines_in_another_order(self):
+        message = "S\n\nBaseline changes:\n  b — r2\n  a — r1\n"
+        self.assertEqual(baseline_summary.check_block(message, ["a", "b"]), ["a 'Baseline changes:' list that is not the computed list"])
+
+    def test_check_block_reports_one_problem_for_each_line_without_a_reason(self):
+        message = "S\n\nBaseline changes:\n  a — \n  b — r2\n  c\n"
+        self.assertEqual(baseline_summary.check_block(message, ["a", "b", "c"]), ["no reason for: a", "no reason for: c"])
+
+    def test_size_class_large_for_a_change_of_one_percent_or_more(self):
+        self.assertEqual(baseline_summary.size_class([(K, 100.0, 101.0)], [], []), "large")
+        self.assertEqual(baseline_summary.size_class([(K, 100.0, 50.0)], [], []), "large")
+
+    def test_size_class_large_for_a_change_from_zero(self):
+        self.assertEqual(baseline_summary.size_class([(K, 0.0, 1e-12)], [], []), "large")
+
+    def test_size_class_large_for_a_text_value(self):
+        self.assertEqual(baseline_summary.size_class([(K, "idle", "busy")], [], []), "large")
+        self.assertEqual(baseline_summary.size_class([(K, 1.0, "busy")], [], []), "large")
+
+    def test_size_class_large_for_a_value_that_is_not_finite(self):
+        nan, inf = float("nan"), float("inf")
+        self.assertEqual(baseline_summary.size_class([(K, nan, 1.0)], [], []), "large")
+        self.assertEqual(baseline_summary.size_class([(K, 1.0, inf)], [], []), "large")
+
+    def test_size_class_minor_for_a_change_below_one_percent(self):
+        self.assertEqual(baseline_summary.size_class([(K, 100.0, 100.5)], [], []), "minor")
+        self.assertEqual(baseline_summary.size_class([(K, 1.0, 1.0 + 1e-8)], [], []), "minor")
+
+    def test_size_class_noise_for_a_change_of_at_most_1e_9(self):
+        self.assertEqual(baseline_summary.size_class([(K, 1.0, 1.0 + 1e-10)], [], []), "noise")
+
+    def test_size_class_takes_the_largest_change_of_the_rows(self):
+        changed = [(K, 1.0, 1.0 + 1e-10), (("Net.host", "other"), 100.0, 100.5)]
+        self.assertEqual(baseline_summary.size_class(changed, [], []), "minor")
+
+    def test_size_class_rows_when_only_rows_are_added_or_removed(self):
+        self.assertEqual(baseline_summary.size_class([], [K], []), "rows")
+        self.assertEqual(baseline_summary.size_class([], [], [K]), "rows")
+
+    def test_size_class_no_value_when_nothing_changes(self):
+        self.assertEqual(baseline_summary.size_class([], [], []), "no value")
+
+    def test_lines_of_changed_tests_are_ordered_by_class_and_then_by_the_number_of_tests(self):
+        moved = {"tests": [
+            ("M", "examples/a/t1.sca", [], [], []),
+            ("M", "examples/a/t2.sca", [], [K], []),
+            changed_test("examples/a/t3.sca", "noise", old=1.0, new=1.0 + 1e-10),
+            changed_test("examples/a/t4.sca", "minor", old=100.0, new=100.5),
+            changed_test("examples/a/t5.sca", "minor", old=100.0, new=100.5),
+            changed_test("examples/a/t6.sca", "few"),
+            changed_test("examples/a/t7.sca", "many"),
+            changed_test("examples/a/t8.sca", "many"),
+        ], "charts": []}
+        classes = [line.split(" (")[0] for line in baseline_summary.lines(moved)]
+        self.assertEqual(classes, ["statistical tests changed, large"] * 2 + ["statistical tests changed, minor",
+                         "statistical tests changed, noise", "statistical tests changed, rows", "statistical tests changed, no value"])
+        self.assertEqual([line.rsplit(": ", 1)[-1] for line in baseline_summary.lines(moved)[:2]], ["many", "few"])
+
+    def test_a_group_marks_an_added_row_with_a_plus_and_a_removed_row_with_a_minus(self):
+        test = ("M", "examples/a/x.sca", [(("Net.host", "x"), 100.0, 200.0)], [("Net.host", "extra")], [("Net.host", "gone")])
+        self.assertEqual(baseline_summary.lines({"tests": [test], "charts": []}),
+                         ["statistical tests changed, large (1; examples/a 1): +extra, -gone, x"])
+
+    def test_a_group_of_more_than_12_names_orders_its_names_by_the_number_of_tests_that_move_them(self):
+        first = changed_test("examples/a/t1.sca", *[f"n{i:02d}" for i in range(13)])
+        second = changed_test("examples/a/t2.sca", "n12", "n11", *[f"m{i:02d}" for i in range(11)])
+        lines = baseline_summary.lines({"tests": [first, second], "charts": []})
+        self.assertEqual(lines, ["statistical tests changed, large (2; examples/a 2): n11, n12, m00, m01, m02, m03 and 18 more"])
+
+    def test_a_group_of_12_names_stays_a_group_of_its_own(self):
+        first = changed_test("examples/a/t1.sca", *[f"n{i:02d}" for i in range(12)])
+        second = changed_test("examples/a/t2.sca", *[f"n{i:02d}" for i in range(1, 13)])
+        self.assertEqual(len(baseline_summary.lines({"tests": [first, second], "charts": []})), 2)
+
+    def test_more_than_10_folders_give_a_count_of_the_other_folders(self):
+        tests = [("A", f"examples/f{i:02d}/x.sca", [], [], []) for i in range(12)]
+        shown = ", ".join(f"examples/f{i:02d} 1" for i in range(10))
+        self.assertEqual(baseline_summary.lines({"tests": tests, "charts": []}),
+                         [f"statistical tests added (12; {shown}, 2 other folders)"])
+
+    def test_exactly_10_folders_give_no_count_of_other_folders(self):
+        tests = [("A", f"examples/f{i:02d}/x.sca", [], [], []) for i in range(10)]
+        self.assertNotIn("other folders", baseline_summary.lines({"tests": tests, "charts": []})[0])
+
+    def test_more_than_6_names_give_a_count_of_more_names(self):
+        test = changed_test("examples/a/x.sca", *[f"n{i}" for i in range(8)])
+        self.assertEqual(baseline_summary.lines({"tests": [test], "charts": []}),
+                         ["statistical tests changed, large (1; examples/a 1): n0, n1, n2, n3, n4, n5 and 2 more"])
+
+    def test_exactly_6_names_give_no_count_of_more_names(self):
+        test = changed_test("examples/a/x.sca", *[f"n{i}" for i in range(6)])
+        self.assertNotIn("more", baseline_summary.lines({"tests": [test], "charts": []})[0])
+
+    def test_more_than_5_renames_give_a_count_of_more_renames(self):
+        renames = [(f"examples/a/o{i}.sca", f"examples/a/n{i}.sca") for i in range(7)]
+        text = ", ".join(f"{old} -> {new}" for old, new in renames[:5])
+        self.assertEqual(baseline_summary.lines({"tests": [], "charts": [], "renamed tests": renames}),
+                         [f"statistical tests renamed (7): {text} and 2 more"])
+
+    def test_lines_name_the_renamed_charts_after_the_other_chart_lines(self):
+        moved = {"tests": [], "charts": [("M", "showcases/a/doc/c.png")], "renamed charts": [("a/old.png", "a/new.png")]}
+        self.assertEqual(baseline_summary.lines(moved),
+                         ["chart images changed (1; showcases/a 1): c", "chart images renamed (1): a/old.png -> a/new.png"])
 
     def test_chart_images_names_the_images_of_the_charts_of_each_analysis_file(self):
         texts = {
@@ -654,7 +816,80 @@ class BaselineSummaryTest(unittest.TestCase):
             everything = baseline_summary.analyze(folder, old, new)
             only_a = baseline_summary.analyze(folder, old, new, is_result=lambda path: path == "a.png")
         self.assertEqual(everything["charts"], [("M", "a.png"), ("M", "b.png")])
-        self.assertEqual(only_a, {"tests": [], "charts": [("M", "a.png")]})
+        self.assertEqual(only_a, {"tests": [], "charts": [("M", "a.png")], "renamed tests": [], "renamed charts": []})
+
+
+class RenameTest(unittest.TestCase):
+    """analyze() with two commits of a small baseline repository."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.folder = self.tempdir.name
+        self.git("init", "-q", "-b", "master")
+        for name, value in (("user.email", "test@example.invalid"), ("user.name", "Test"), ("commit.gpgsign", "false")):
+            self.git("config", name, value)
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def git(self, *args):
+        return subprocess.run(["git", *args], cwd=self.folder, check=True, capture_output=True, text=True).stdout.strip()
+
+    def commit(self, files):
+        """Commits the files; a content of None removes the file. Returns the hash."""
+        for path, content in files.items():
+            if content is None:
+                self.git("rm", "-q", path)
+            else:
+                GateTestCase.write(self.folder, path, content)
+        self.git("add", "-A")
+        self.git("commit", "-q", "-m", "commit")
+        return self.git("rev-parse", "HEAD")
+
+    def analyze_between(self, before, after):
+        old = self.commit(before)
+        new = self.commit(after)
+        return baseline_summary.analyze(self.folder, old, new)
+
+    def test_a_test_file_that_moves_to_another_name_with_the_same_rows_is_a_rename(self):
+        result = self.analyze_between({"examples/a/x-General-#0.sca": sca()}, {"examples/a/x-General-#0.sca": None, "examples/a/y-General-#0.sca": sca()})
+        self.assertEqual(result["renamed tests"], [("examples/a/x-General-#0.sca", "examples/a/y-General-#0.sca")])
+        self.assertEqual(result["tests"], [])
+
+    def test_a_test_file_that_differs_only_in_the_run_attribute_experiment_is_a_rename(self):
+        renamed = sca().replace("attr experiment General", "attr experiment Wifi")
+        result = self.analyze_between({"examples/a/x-General-#0.sca": sca()},
+                                      {"examples/a/x-General-#0.sca": None, "examples/a/x-Wifi-#0.sca": renamed})
+        self.assertEqual(result["renamed tests"], [("examples/a/x-General-#0.sca", "examples/a/x-Wifi-#0.sca")])
+        self.assertEqual(result["tests"], [])
+        self.assertEqual(baseline_summary.lines(result),
+                         ["statistical tests renamed (1): examples/a/x-General-#0.sca -> examples/a/x-Wifi-#0.sca"])
+
+    def test_an_added_and_a_removed_test_file_with_different_rows_are_no_rename(self):
+        result = self.analyze_between({"examples/a/x-General-#0.sca": sca()},
+                                      {"examples/a/x-General-#0.sca": None, "examples/a/y-General-#0.sca": sca(sent="11")})
+        self.assertEqual(result["renamed tests"], [])
+        self.assertEqual([(test[0], test[1]) for test in result["tests"]],
+                         [("D", "examples/a/x-General-#0.sca"), ("A", "examples/a/y-General-#0.sca")])
+
+    def test_an_added_and_a_removed_test_file_without_scalar_rows_are_no_rename(self):
+        empty = "version 3\nrun General-0-x\nattr experiment General\n"
+        result = self.analyze_between({"examples/a/x.sca": empty}, {"examples/a/x.sca": None, "examples/a/y.sca": empty})
+        self.assertEqual(result["renamed tests"], [])
+        self.assertEqual(len(result["tests"]), 2)
+
+    def test_a_chart_image_that_moves_to_another_name_with_the_same_bytes_is_a_rename(self):
+        result = self.analyze_between({"showcases/a/doc/old.png": b"\x89PNG same"},
+                                      {"showcases/a/doc/old.png": None, "showcases/a/doc/new.png": b"\x89PNG same"})
+        self.assertEqual(result["renamed charts"], [("showcases/a/doc/old.png", "showcases/a/doc/new.png")])
+        self.assertEqual(result["charts"], [])
+        self.assertEqual(baseline_summary.lines(result), ["chart images renamed (1): showcases/a/doc/old.png -> showcases/a/doc/new.png"])
+
+    def test_an_added_and_a_removed_chart_image_with_different_bytes_are_no_rename(self):
+        result = self.analyze_between({"showcases/a/doc/old.png": b"\x89PNG old"},
+                                      {"showcases/a/doc/old.png": None, "showcases/a/doc/new.png": b"\x89PNG new"})
+        self.assertEqual(result["renamed charts"], [])
+        self.assertEqual(result["charts"], [("A", "showcases/a/doc/new.png"), ("D", "showcases/a/doc/old.png")])
 
 
 if __name__ == "__main__":

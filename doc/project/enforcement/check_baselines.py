@@ -8,8 +8,8 @@ PR-SPLIT-BASELINE for a baseline in another repository.
                            a pin moves only forward, over at most one commit that changes results;
                            the pinned commit is in the baseline repository
   TR-BASELINE-PROVENANCE   the baseline commit, which is the commit that changes results, has its
-                           record: the computed "Moved results:" block, an analysis, and the
-                           trailers INET-Subject (or INET-Commit) and Attribution
+                           record: the computed "Baseline changes:" list with a reason on each
+                           line, and the trailers INET-Subject (or INET-Commit) and Attribution
   TR-BASELINE-PARENT       each changed result file differs in a value
   TR-BASELINE-ATTRIBUTION  the form of the attribution holds: the size of the cause commit or of
                            the reduction, a reduction that applies, files that only come or only go
@@ -22,8 +22,8 @@ chart of an analysis file of the INET tree exports. A commit of a baseline repos
 no result, such as documentation media, needs no record, and a pin can move over it.
 
 The gate reads git objects only. It never runs content of the series, so the pull-request
-workflow can run it on untrusted content. Whether an analysis is true, and whether a reduction
-gives the results that it claims, needs a run and a reviewer; this gate cannot say.
+workflow can run it on untrusted content. Whether a reason is true, and whether a reduction gives
+the results that it claims, needs a run and a reviewer; this gate cannot say.
 
 Usage, from the INET repository root:
   check-baselines.sh BASE..HEAD
@@ -48,7 +48,6 @@ from baseline_pins import PinError, git, is_full_hash, read_baselines  # noqa: E
 
 FAIL_LINES = 100
 NOTE_LINES = 30
-ANALYSIS_WORDS = 20
 FORMS = ("commit", "forward", "reverse", "first-record", "removal", "environment")
 REDUCTION_FORMS = ("forward", "reverse")
 # a path whose content can change a result: model source, simulations and the Python of the project
@@ -215,20 +214,17 @@ def obligations_of(commit):
     return fields[2].split() if len(fields) >= 3 else None
 
 
-def analysis_words(message, trailer_lines=()):
-    """The number of words of the prose of a baseline commit message: the body without the block
-    of the moved results and without the lines of the trailer block."""
-    words = 0
-    in_block = False
-    trailer_lines = {line.strip() for line in trailer_lines}
-    for line in message.splitlines()[1:]:
-        if line.strip() == baseline_summary.HEADING:
-            in_block = True
-        elif not line.strip():
-            in_block = False
-        elif not in_block and line.strip() not in trailer_lines:
-            words += len(line.split())
-    return words
+def check_list(report, where, message, expected):
+    """TR-BASELINE-PROVENANCE: the message holds the computed "Baseline changes:" list, with a reason on each line."""
+    problems = baseline_summary.check_block(message, expected)
+    for problem in problems:
+        report.flag(f"{where} has {problem}" if problem.startswith(("no '", "a '")) else f"{where}: {problem}")
+    if problems and any(problem.startswith(("no '", "a '")) for problem in problems):
+        print(f"      the list is (write the reason of each line after the dash):")
+        print("\n".join("        " + line for line in [baseline_summary.HEADING] + [f"  {line}{baseline_summary.SEPARATOR}" for line in expected]))
+    changed = sum(1 for line in expected if " changed" in line.split("(")[0])
+    if changed > 1:
+        report.note(f"{where} has {changed} lines of changed entries: do their reasons name one cause? If not, the commit holds more than one change (PR-SPLIT-ONE-CHANGE)")
 
 
 def check_pins(report, commits, base, baselines):
@@ -306,23 +302,10 @@ def check_record(report, repository, kind, commit, parent, old, new, is_result):
         if path != reduction_path or status != "A":
             report.flag(f"{where} changes {path}; a baseline commit adds only the reduction that its Attribution names to the folder {baseline_summary.ATTRIBUTION_FOLDER}")
 
-    # the summary and the analysis
+    # the list of the changes, with a reason on each line
     repository.fetch_contents(old, new)
     moved = baseline_summary.analyze(repository.folder, old, new, is_result)
-    expected = baseline_summary.block(moved)
-    found = baseline_summary.find_block(message)
-    if found is None:
-        report.flag(f"{where} has no '{baseline_summary.HEADING}' block; the block is:")
-        print("\n".join("      " + line for line in expected))
-    elif [line.strip() for line in found] != [line.strip() for line in expected]:
-        report.flag(f"{where} has a '{baseline_summary.HEADING}' block that is not the computed block; the block is:")
-        print("\n".join("      " + line for line in expected))
-    groups = baseline_summary.count_groups(moved)
-    if groups > 1:
-        report.note(f"{where} moves its tests in {groups} ways (the groups of the block), one explanation each? If the ways have different causes, the INET commit holds more than one change (PR-SPLIT-ONE-CHANGE)")
-    words = analysis_words(message, repository.trailer_lines(new))
-    if words < ANALYSIS_WORDS:
-        report.flag(f"{where} has no analysis: {words} words of prose; say why the change causes each group of the moved results")
+    check_list(report, where, message, baseline_summary.lines(moved))
 
     # only results that move
     for status, path, changed, added, removed in moved["tests"]:

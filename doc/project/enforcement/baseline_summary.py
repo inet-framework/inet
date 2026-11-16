@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Computes the "Moved results:" block of a baseline commit (TR-BASELINE-PROVENANCE).
+"""Computes the "Baseline changes:" list of a baseline commit (TR-BASELINE-PROVENANCE).
 
-The block is the summary of one baseline change: how many tests and rows move, in which folders,
-in which groups of tests, and for which result names, with the range of the relative change. A
-group holds the tests whose moved rows have the same names; tests that move in different ways
-usually need different explanations. The author puts the block into the message of the baseline
-commit. check-baselines.sh computes it again and compares, so the
-summary in a message is always true.
+The list has one line for each category of the change: test files or chart images that are added,
+removed, renamed or changed. A changed test file goes to the line of its size class and of the group
+of its moved row names, because tests that move in different ways usually have different reasons.
+The author writes the reason of each line after " — ". check-baselines.sh computes the lines again,
+compares them, and checks that each line has a reason.
+
+Size classes of a changed test file, by the largest relative change of its rows:
+  large    1 % or more, a change from or to zero, a change that is not finite, or a changed text
+  minor    less than 1 %
+  noise    at most 1e-9, the level of the differences of another compiler or C library
+  rows     no value changes; rows are only added or removed
+In a group of row names, "+name" is a row that the change adds and "-name" a row that it removes.
 
 A stored result file (.sca) is compared as the statistical test compares it: by its scalar rows and
 its run attributes, with numbers as numbers. A different text for the same number is no change. A
@@ -32,14 +38,17 @@ import shlex
 import subprocess
 import sys
 
-HEADING = "Moved results:"
+HEADING = "Baseline changes:"
+SEPARATOR = " — "
 RUN_ATTRIBUTES = ("experiment", "measurement", "replication")
 ATTRIBUTION_FOLDER = "attribution/"
-NAME_LIMIT = 20
-GROUP_LIMIT = 10
 GROUP_NAME_LIMIT = 12
+NAMES_SHOWN = 6
+RENAMES_SHOWN = 5
 FOLDER_LIMIT = 10
-CHART_LIMIT = 30
+NOISE = 1e-9
+MINOR = 1e-2
+CLASSES = ("large", "minor", "noise", "rows", "no value")
 CHART_PROPERTY = re.compile(r'<property name="image_export_filename" value="([^"]+)"/>')
 
 
@@ -91,12 +100,17 @@ def relative_change(old, new):
     return None
 
 
-def percent(value):
-    return f"{100 * value:+.3g} %"
-
-
-def counts(changed, added, removed):
-    return f"{changed} changed, {added} added, {removed} removed"
+def size_class(changed, added, removed):
+    """The size class of a changed test file."""
+    if not changed:
+        return "rows" if added or removed else "no value"
+    largest = 0.0
+    for _, old_value, new_value in changed:
+        change = relative_change(old_value, new_value)
+        if change is None:
+            return "large"
+        largest = max(largest, abs(change))
+    return "noise" if largest <= NOISE else "minor" if largest < MINOR else "large"
 
 
 def changed_files(folder, old=None, new=None):
@@ -208,27 +222,64 @@ def is_test(path):
     return path.endswith(".sca")
 
 
+def blob_ids(folder, old=None, new=None):
+    """{path: (old object name, new object name)} of the changed files: between two commits, or of
+    the staged changes. A side where the file does not exist has None."""
+    args = ["diff", "--no-renames", "--raw", "--no-abbrev", "-z"]
+    out = git(folder, *args, old, new) if old else git(folder, *args, "--cached")
+    fields, ids = out.split("\0"), {}
+    for i in range(0, len(fields) - 1, 2):
+        _, _, old_id, new_id, _ = fields[i].split()
+        ids[fields[i + 1]] = tuple(None if set(name) == {"0"} else name for name in (old_id, new_id))
+    return ids
+
+
 def analyze(folder, old=None, new=None, is_result=is_result):
-    """The moved results between two commits of a baseline repository, or of its staged changes.
+    """The changed results between two commits of a baseline repository, or of its staged changes.
     is_result says which files are results; the other files are not in the answer.
-    Returns {"tests": [...], "charts": [...]}: a test is (status, path, changed, added, removed),
-    a chart is (status, path)."""
+    Returns {"tests": [...], "charts": [...], "renamed tests": [...], "renamed charts": [...]}.
+    A test is (status, path, changed, added, removed), a chart is (status, path), a rename is
+    (old path, new path). A removed and an added test file with the same scalar rows are a rename
+    (the run attributes hold the name of the config, so they do not count); a removed and an added
+    image with the same bytes are a rename. A rename is not in "tests" or "charts"."""
     old_revision, new_revision = (old, new) if old else ("HEAD", "")
-    tests, charts = [], []
+    tests, charts, rows = [], [], {}
+    ids = blob_ids(folder, old, new)
     for status, path in changed_files(folder, old, new):
         if not is_result(path):
             continue
         if is_test(path):
             old_rows = read_scalars(read_file(folder, old_revision, path)) if status != "A" else {}
             new_rows = read_scalars(read_file(folder, new_revision, path)) if status != "D" else {}
+            rows[path] = old_rows if status == "D" else new_rows
             tests.append((status, path, *compare_scalars(old_rows, new_rows)))
         else:
             charts.append((status, path))
-    return {"tests": sorted(tests, key=lambda test: test[1]), "charts": sorted(charts, key=lambda chart: chart[1])}
 
+    def scalars(table):
+        return {key: value for key, value in table.items() if key[0]}
 
-def count_status(items):
-    return counts(*(sum(1 for item in items if item[0] == status) for status in "MAD"))
+    def pair(items, content):
+        """Pairs each removed item with an added item of the same content; returns the renames and the rest."""
+        added = [item for item in items if item[0] == "A"]
+        renames, used = [], set()
+        for item in items:
+            if item[0] != "D":
+                continue
+            for other in added:
+                if other[1] not in used and content(item[1], "old") == content(other[1], "new") and content(item[1], "old") is not None:
+                    renames.append((item[1], other[1]))
+                    used |= {item[1], other[1]}
+                    break
+        return renames, [item for item in items if item[1] not in used]
+
+    def test_content(path, side):
+        table = scalars(rows[path])
+        return tuple(sorted((key, repr(value)) for key, value in table.items())) if table else None
+    renamed_tests, tests = pair(tests, test_content)
+    renamed_charts, charts = pair(charts, lambda path, side: ids.get(path, (None, None))[0 if side == "old" else 1])
+    return {"tests": sorted(tests, key=lambda test: test[1]), "charts": sorted(charts, key=lambda chart: chart[1]),
+            "renamed tests": sorted(renamed_tests), "renamed charts": sorted(renamed_charts)}
 
 
 def group_folder(path):
@@ -240,85 +291,106 @@ def most_first(table):
     return sorted(table.items(), key=lambda item: (-item[1], item[0]))
 
 
-def count_groups(moved):
-    """The number of ways in which the changed tests move: the groups of the block."""
-    groups = set()
-    for status, _, changed, added, removed in moved["tests"]:
-        if status == "M":
-            names = sorted({key[1] for key, _, _ in changed} | {key[1] for key in added} | {key[1] for key in removed})
-            groups.add(tuple(names) if len(names) <= GROUP_NAME_LIMIT else None)
-    return len(groups)
+def folders_text(paths):
+    """"<count>; <folder> <count>, ..." of a list of paths."""
+    folders = {}
+    for path in paths:
+        folders[group_folder(path)] = folders.get(group_folder(path), 0) + 1
+    shown = most_first(folders)[:FOLDER_LIMIT]
+    text = ", ".join(f"{name} {count}" for name, count in shown)
+    if len(folders) > len(shown):
+        text += f", {len(folders) - len(shown)} other folders"
+    return f"{len(paths)}; {text}"
 
 
-def block(moved):
-    """The lines of the "Moved results:" block."""
-    lines = [HEADING]
+def names_text(names, limit=NAMES_SHOWN):
+    shown = list(names[:limit])
+    return ", ".join(shown) + (f" and {len(names) - limit} more" if len(names) > limit else "")
+
+
+def renames_text(renames):
+    shown = [f"{old} -> {new}" for old, new in renames[:RENAMES_SHOWN]]
+    return ", ".join(shown) + (f" and {len(renames) - RENAMES_SHOWN} more" if len(renames) > RENAMES_SHOWN else "")
+
+
+def test_group(changed, added, removed):
+    """The names of the moved rows of a changed test, with a mark for an added or a removed row."""
+    return tuple(sorted({key[1] for key, _, _ in changed} | {"+" + key[1] for key in added} | {"-" + key[1] for key in removed},
+                        key=lambda name: (name.lstrip("+-"), name)))
+
+
+def lines(moved):
+    """The computed lines of the "Baseline changes:" list, without their reasons."""
+    result = []
     tests, charts = moved["tests"], moved["charts"]
-    if tests:
-        lines.append(f"  tests: {count_status(tests)}")
-        # the rows of a test that the commit adds or removes are all new or all gone; they say
-        # nothing about a move, so the row counts and the names are of the changed tests only
-        changed_tests = [test for test in tests if test[0] == "M"]
-        lines.append("  rows of the changed tests: " + counts(*(sum(len(test[i]) for test in changed_tests) for i in (2, 3, 4))))
-        folders = {}
-        for test in tests:
-            folders[group_folder(test[1])] = folders.get(group_folder(test[1]), 0) + 1
-        shown = most_first(folders)[:FOLDER_LIMIT]
-        lines.append("  folders: " + ", ".join(f"{name} {count}" for name, count in shown)
-                     + (f", {len(folders) - len(shown)} other folders" if len(folders) > len(shown) else ""))
-        names, groups = {}, {}
-        for _, _, changed, added, removed in changed_tests:
-            moved_names = sorted({key[1] for key, _, _ in changed} | {key[1] for key in added} | {key[1] for key in removed})
-            group = tuple(moved_names) if len(moved_names) <= GROUP_NAME_LIMIT else None
-            groups[group] = groups.get(group, 0) + 1
-            for (_, name), old_value, new_value in changed:
-                names.setdefault(name, [0, 0, 0, []])[0] += 1
-                change = relative_change(old_value, new_value)
-                if change is not None:
-                    names[name][3].append(change)
-            for _, name in added:
-                names.setdefault(name, [0, 0, 0, []])[1] += 1
-            for _, name in removed:
-                names.setdefault(name, [0, 0, 0, []])[2] += 1
-        if changed_tests:
-            lines.append("  groups of the changed tests, by the names of their moved rows:")
-            ordered_groups = sorted(groups.items(), key=lambda item: (-item[1], item[0] is None, item[0] or ()))
-            for group, count in ordered_groups[:GROUP_LIMIT]:
-                lines.append(f"  - {count} test(s): " + (", ".join(group) if group is not None else f"more than {GROUP_NAME_LIMIT} names each"))
-            if len(ordered_groups) > GROUP_LIMIT:
-                lines.append(f"  - {len(ordered_groups) - GROUP_LIMIT} other groups: {sum(count for _, count in ordered_groups[GROUP_LIMIT:])} test(s)")
-            lines.append("  names of the moved rows:")
-        ordered = most_first({name: sum(entry[:3]) for name, entry in names.items()})
-        for name, _ in ordered[:NAME_LIMIT]:
-            changed, added, removed, changes = names[name]
-            parts = [f"{count} {word}" for count, word in ((changed, "changed"), (added, "added"), (removed, "removed")) if count]
-            if changes:
-                parts.append(f"{percent(min(changes))} to {percent(max(changes))}")
-            lines.append(f"  - {name}: {', '.join(parts)}")
-        if len(ordered) > NAME_LIMIT:
-            lines.append(f"  - {len(ordered) - NAME_LIMIT} other names: {sum(count for _, count in ordered[NAME_LIMIT:])} rows")
-    if charts:
-        lines.append(f"  charts: {count_status(charts)}")
-        words = {"M": "changed", "A": "added", "D": "removed"}
-        for status, path in charts[:CHART_LIMIT]:
-            lines.append(f"  - {path}: {words[status]}")
-        if len(charts) > CHART_LIMIT:
-            lines.append(f"  - {len(charts) - CHART_LIMIT} other charts")
-    if not tests and not charts:
-        lines.append("  no result moves")
-    return lines
+    for status, word in (("A", "added"), ("D", "removed")):
+        paths = [test[1] for test in tests if test[0] == status]
+        if paths:
+            result.append(f"statistical tests {word} ({folders_text(paths)})")
+    if moved.get("renamed tests"):
+        result.append(f"statistical tests renamed ({len(moved['renamed tests'])}): {renames_text(moved['renamed tests'])}")
+    groups = {}
+    for status, path, changed, added, removed in tests:
+        if status == "M":
+            names = test_group(changed, added, removed)
+            groups.setdefault((size_class(changed, added, removed), names if len(names) <= GROUP_NAME_LIMIT else None), []).append((path, names))
+    for (cls, group), members in sorted(groups.items(), key=lambda item: (CLASSES.index(item[0][0]), -len(item[1]), item[0][1] is None, item[0][1] or ())):
+        if group is not None:
+            names = list(group)
+        else:
+            # a group of tests with many moved rows: the names that move in the most tests first
+            frequency = {}
+            for _, member_names in members:
+                for name in member_names:
+                    frequency[name] = frequency.get(name, 0) + 1
+            names = [name for name, _ in most_first(frequency)]
+        result.append(f"statistical tests changed, {cls} ({folders_text([path for path, _ in members])}): {names_text(names)}")
+    for status, word in (("A", "added"), ("D", "removed"), ("M", "changed")):
+        paths = [chart[1] for chart in charts if chart[0] == status]
+        if paths:
+            stems = sorted(os.path.splitext(os.path.basename(path))[0] for path in paths)
+            result.append(f"chart images {word} ({folders_text(paths)}): {names_text(stems)}")
+    if moved.get("renamed charts"):
+        result.append(f"chart images renamed ({len(moved['renamed charts'])}): {renames_text(moved['renamed charts'])}")
+    return result
 
 
-def find_block(message):
-    """The lines of the "Moved results:" block of a commit message, or None."""
-    lines = message.splitlines()
-    for index, line in enumerate(lines):
+def block(moved, reasons=None):
+    """The "Baseline changes:" list as lines of a message: each computed line, the separator, and its
+    reason from {line: reason}, empty when unknown."""
+    reasons = reasons or {}
+    return [HEADING] + [f"  {line}{SEPARATOR}{reasons.get(line, '')}" for line in lines(moved)]
+
+
+def read_block(message):
+    """[(computed text, reason)] of the "Baseline changes:" list of a commit message, or None when the
+    message has no list. An item starts with two spaces; a line with more indentation continues the
+    reason of the item before it."""
+    message_lines = message.splitlines()
+    for index, line in enumerate(message_lines):
         if line.strip() == HEADING:
-            end = index + 1
-            while end < len(lines) and lines[end].strip():
-                end += 1
-            return [HEADING] + [line.rstrip() for line in lines[index + 1:end]]
+            items = []
+            for item in message_lines[index + 1:]:
+                if not item.strip():
+                    break
+                if item.startswith("    ") and items:
+                    text, reason = items[-1]
+                    items[-1] = (text, (reason + " " + item.strip()).strip())
+                    continue
+                text, _, reason = item.strip().partition(SEPARATOR.strip())
+                items.append((text.strip(), reason.strip()))
+            return items
     return None
+
+
+def check_block(message, expected):
+    """The problems of the list of a message against the computed lines: [] when it is correct."""
+    items = read_block(message)
+    if items is None:
+        return [f"no '{HEADING}' list"]
+    if [text for text, _ in items] != expected:
+        return [f"a '{HEADING}' list that is not the computed list"]
+    return [f"no reason for: {text}" for text, reason in items if not reason]
 
 
 def result_filter_of_folder(folder):
