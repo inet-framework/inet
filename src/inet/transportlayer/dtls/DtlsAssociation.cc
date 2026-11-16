@@ -16,6 +16,8 @@ DtlsAssociation::DtlsAssociation(Dtls& engine, size_t reassemblyLimit) : engine(
     retransmissionTimer = std::make_unique<cMessage>("dtlsRetransmission");
     delayedAckTimer = std::make_unique<cMessage>("dtlsDelayedAck");
     retentionTimer = std::make_unique<cMessage>("dtlsFinalAckRetention");
+    updateRetransmissionTimer = std::make_unique<cMessage>("dtlsUpdateRetransmission");
+    updateDeadline = std::make_unique<cMessage>("dtlsUpdateDeadline");
 }
 
 void DtlsAssociation::cancelTimers()
@@ -23,11 +25,25 @@ void DtlsAssociation::cancelTimers()
     engine.cancelEvent(retransmissionTimer.get());
     engine.cancelEvent(delayedAckTimer.get());
     engine.cancelEvent(retentionTimer.get());
+    engine.cancelEvent(updateRetransmissionTimer.get());
+    engine.cancelEvent(updateDeadline.get());
 }
 
 bool DtlsAssociation::handleTimer(cMessage *message)
 {
     // RFC 9147 Section 5.8.2 recommends doubling the retransmission timer up to at least 60 seconds.
+    if (message == updateRetransmissionTimer.get()) {
+        updateTimeout = std::min(SimTime(60), updateTimeout * 2);
+        if (updateFlight) {
+            updateFlight->requestRetransmission();
+            pumpUpdate();
+        }
+        return true;
+    }
+    if (message == updateDeadline.get()) {
+        engine.failAssociation(id, "DTLS KeyUpdate timeout");
+        return true;
+    }
     if (message == retransmissionTimer.get()) {
         if (flight && !flight->isComplete()) {
             retransmissionTimeout = std::min(SimTime(60), retransmissionTimeout * 2);
@@ -38,11 +54,12 @@ bool DtlsAssociation::handleTimer(cMessage *message)
         return true;
     }
     if (message == delayedAckTimer.get()) {
-        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? 3 : 2);
+        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? sendEpoch : 2);
         return true;
     }
     if (message == retentionTimer.get()) {
         processedHandshakes.clear();
+        receiveEpoch2.reset();
         return true;
     }
     return false;
@@ -52,7 +69,7 @@ void DtlsAssociation::noteHandshakeRecord(uint64_t epoch, uint64_t recordNumber,
 {
     pendingAcks.emplace(epoch, recordNumber);
     if (immediate)
-        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? 3 : 2);
+        flushAcknowledgements(state == HandshakeState::ESTABLISHED ? sendEpoch : 2);
     else if (!delayedAckTimer->isScheduled())
         engine.scheduleAt(simTime() + std::max(SimTime::fromRaw(1), retransmissionTimeout / 4), delayedAckTimer.get());
 }
@@ -71,6 +88,197 @@ void DtlsAssociation::clearAcknowledgements()
 {
     engine.cancelEvent(delayedAckTimer.get());
     pendingAcks.clear();
+}
+
+bool DtlsAssociation::allocateApplicationRecord(uint64_t& number)
+{
+    if (nextApplicationRecord >= MAX_PROTECTED_RECORDS)
+        return false;
+    number = nextApplicationRecord++;
+    return true;
+}
+
+bool DtlsAssociation::allocatePlaintextRecord(uint64_t& number)
+{
+    if (nextEpoch0Record >= MAX_PLAINTEXT_RECORDS)
+        return false;
+    number = nextEpoch0Record++;
+    return true;
+}
+
+bool DtlsAssociation::advanceSendEpoch()
+{
+    if (sendEpoch >= MAX_SEND_EPOCH)
+        return false;
+    ++sendEpoch;
+    nextApplicationRecord = 0;
+    return true;
+}
+
+bool DtlsAssociation::requestUpdate(bool requestPeerUpdate)
+{
+    // RFC 9846 Section 4.7.3 forbids another requested update until a subsequent peer KeyUpdate.
+    if (state != HandshakeState::ESTABLISHED || updateFlight ||
+        (requestPeerUpdate && awaitingPeerUpdate) || sendEpoch >= MAX_SEND_EPOCH || localMessagesExhausted)
+        return false;
+    auto timeout = SimTime(engine.par("handshakeTimeout").doubleValue());
+    if (timeout <= SIMTIME_ZERO)
+        return false;
+    auto body = makeShared<tls::TlsKeyUpdate>();
+    body->setRequestUpdate(requestPeerUpdate ? 1 : 0);
+    body->setChunkLength(B(1));
+    body->markImmutable();
+    auto update = std::make_shared<DtlsHandshakeFlight>();
+    auto messageSequence = nextLocalMessage;
+    if (nextLocalMessage == std::numeric_limits<uint16_t>::max())
+        localMessagesExhausted = true;
+    else
+        ++nextLocalMessage;
+    update->add(24, messageSequence, 1, 0, sendEpoch, body);
+    updateFlight = update;
+    updateRequested = requestPeerUpdate;
+    updateTimeout = 1;
+    auto& owner = engine;
+    auto handle = id;
+    owner.scheduleAt(simTime() + timeout, updateDeadline.get());
+    auto delay = SimTime(owner.par("handshakeOutDelay").doubleValue());
+    if (!owner.enqueueProcessing(owner.outputProcessing.get(), handle, 13, delay, [&owner, handle, update]() {
+        auto it = owner.associations.find(handle);
+        if (it == owner.associations.end() || it->second->updateFlight != update)
+            return;
+        update->markReady(0);
+        it->second->pumpUpdate();
+    }, [&owner, handle, update]() {
+        auto it = owner.associations.find(handle);
+        return it != owner.associations.end() && it->second->updateFlight == update;
+    })) {
+        owner.failAssociation(handle, "DTLS output processing queue is full");
+        return true;
+    }
+    return true;
+}
+
+void DtlsAssociation::pumpUpdate()
+{
+    if (!updateFlight || updateFlight->isComplete())
+        return;
+    auto update = updateFlight;
+    if (!update->reserve(0))
+        return;
+    engine.transmitFlightFragment(id, update, 0);
+}
+
+void DtlsAssociation::updateRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index, uint64_t recordNumber)
+{
+    if (updateFlight != sentFlight)
+        return;
+    bool retransmission = sentFlight->get(index).transmissions != 0;
+    sentFlight->handedOff(index, recordNumber, simTime());
+    if (!retransmission && updateRequested)
+        awaitingPeerUpdate = true;
+    auto& owner = engine;
+    auto handle = id;
+    if (retransmission)
+        owner.emit(Dtls::handshakeRetransmissionSignal, (long)handle);
+    auto it = owner.associations.find(handle);
+    if (it != owner.associations.end() && it->second->updateFlight == sentFlight && !sentFlight->isComplete() &&
+        !it->second->updateRetransmissionTimer->isScheduled())
+        owner.scheduleAt(simTime() + it->second->updateTimeout, it->second->updateRetransmissionTimer.get());
+}
+
+void DtlsAssociation::updateRecordSkipped(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index)
+{
+    sentFlight->cancelReservation(index);
+}
+
+void DtlsAssociation::receiveKeyUpdate(uint64_t epoch, uint64_t recordSequence, Packet *body)
+{
+    if (body->getDataLength() < B(12))
+        return;
+    auto header = body->popAtFront<DtlsHandshakeHeader>(B(12));
+    if (header->getMessageType() != 24 || header->getMessageLength() != 1 || header->getFragmentOffset() != 0 ||
+        header->getFragmentLength() > 1 || body->getDataLength() != B(header->getFragmentLength()))
+        return;
+    if (header->getFragmentLength() == 0)
+        return;
+    Ptr<const tls::TlsKeyUpdate> update;
+    try {
+        update = body->popAtFront<tls::TlsKeyUpdate>(B(1));
+    }
+    catch (const cRuntimeError&) {
+        return;
+    }
+    auto flag = update->getRequestUpdate();
+    auto sequence = header->getMessageSequence();
+    bool duplicate = hasPeerUpdate && sequence == lastPeerUpdateMessage && epoch == lastPeerUpdateEpoch;
+    if (!duplicate && (epoch != receiveEpoch || sequence != nextPeerMessage))
+        return;
+    if (flag > 1) {
+        engine.failAssociation(id, "invalid DTLS KeyUpdate request", 47);
+        return;
+    }
+    if (duplicate) {
+        if (flag != lastPeerUpdateFlag) {
+            engine.failAssociation(id, "conflicting DTLS KeyUpdate", 47);
+            return;
+        }
+        auto replay = epoch == receiveEpoch ? receiveEpoch3.get() : previousReceiveEpoch.get();
+        if (!replay || !replay->accept(recordSequence))
+            return;
+        noteHandshakeRecord(epoch, recordSequence, true);
+        return;
+    }
+    if (receiveEpoch == std::numeric_limits<uint64_t>::max()) {
+        engine.failAssociation(id, "DTLS receiving epoch exhausted");
+        return;
+    }
+    auto& owner = engine;
+    auto handle = id;
+    auto delay = SimTime(owner.par("handshakeInDelay").doubleValue());
+    bool satisfiesRequest = awaitingPeerUpdate;
+    bool previousResponseDue = peerResponseDue;
+    if (flag == 1 && sendEpoch < MAX_SEND_EPOCH)
+        peerResponseDue = true;
+    if (!owner.inputProcessing->enqueueContinuation(handle, 13, delay, [&owner, handle, epoch, recordSequence, sequence, flag, satisfiesRequest]() {
+        auto it = owner.associations.find(handle);
+        if (it != owner.associations.end())
+            it->second->applyKeyUpdate(epoch, recordSequence, sequence, flag, satisfiesRequest);
+    }, {}, {}, [&owner, delay]() { owner.emit(Dtls::processingDelaySignal, delay.dbl()); })) {
+        peerResponseDue = previousResponseDue;
+        owner.emit(Dtls::recordDroppedSignal, (long)Dtls::RESOURCE_LIMIT);
+    }
+}
+
+void DtlsAssociation::applyKeyUpdate(uint64_t epoch, uint64_t recordSequence, uint16_t sequence, uint8_t flag, bool satisfiesRequest)
+{
+    // RFC 9147 Section 8 advances the receiving epoch on a new KeyUpdate, not its retransmissions.
+    if (epoch != receiveEpoch || sequence != nextPeerMessage)
+        return;
+    if (!receiveEpoch3->accept(recordSequence))
+        return;
+    previousReceiveEpoch = std::move(receiveEpoch3);
+    previousReceiveEpochNumber = receiveEpoch++;
+    receiveEpoch3 = std::make_unique<DtlsRecordState>(engine.par("replayWindowSize").intValue());
+    lastPeerUpdateMessage = sequence;
+    lastPeerUpdateEpoch = epoch;
+    lastPeerUpdateFlag = flag;
+    hasPeerUpdate = true;
+    ++nextPeerMessage;
+    if (satisfiesRequest)
+        awaitingPeerUpdate = false;
+    if (flag == 1 && sendEpoch < MAX_SEND_EPOCH)
+        peerResponseDue = true;
+    auto& owner = engine;
+    auto handle = id;
+    noteHandshakeRecord(epoch, recordSequence, true);
+    auto current = owner.associations.find(handle);
+    if (current == owner.associations.end())
+        return;
+    if (current->second->peerResponseDue && !current->second->updateFlight) {
+        current->second->peerResponseDue = false;
+        if (!current->second->requestUpdate(false) && owner.containsAssociation(handle))
+            owner.failAssociation(handle, "DTLS KeyUpdate response could not start");
+    }
 }
 
 void DtlsAssociation::beginFlight()
@@ -205,7 +413,49 @@ void DtlsAssociation::flightRecordSkipped(const std::shared_ptr<DtlsHandshakeFli
 
 void DtlsAssociation::acceptAck(const DtlsAck& ack)
 {
-    if (!flight || ack.getEpochsArraySize() != ack.getSequenceNumbersArraySize())
+    if (ack.getEpochsArraySize() != ack.getSequenceNumbersArraySize())
+        return;
+    auto& owner = engine;
+    auto handle = id;
+    if (updateFlight) {
+        auto update = updateFlight;
+        bool updateProgress = false;
+        for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
+            auto result = update->acknowledge(ack.getEpochs(i), ack.getSequenceNumbers(i), simTime());
+            updateProgress |= result.matched;
+            if (result.rtt)
+                updateTimeout = std::max(SimTime::fromRaw(1), *result.rtt * 1.5);
+        }
+        if (updateProgress) {
+            owner.cancelEvent(updateRetransmissionTimer.get());
+            if (update->isComplete()) {
+                owner.cancelEvent(updateDeadline.get());
+                updateFlight.reset();
+                if (!advanceSendEpoch()) {
+                    owner.failAssociation(handle, "DTLS sending epoch exhausted");
+                    return;
+                }
+                if (peerResponseDue) {
+                    peerResponseDue = false;
+                    if (!requestUpdate(false) && owner.containsAssociation(handle)) {
+                        owner.failAssociation(handle, "DTLS KeyUpdate response could not start");
+                        return;
+                    }
+                }
+                else
+                    owner.resumeApplications(handle);
+                if (!owner.containsAssociation(handle))
+                    return;
+            }
+            else {
+                update->requestRetransmission();
+                pumpUpdate();
+                if (!owner.containsAssociation(handle))
+                    return;
+            }
+        }
+    }
+    if (!flight)
         return;
     bool progress = false;
     for (size_t i = 0; i < ack.getEpochsArraySize(); ++i) {
@@ -219,8 +469,10 @@ void DtlsAssociation::acceptAck(const DtlsAck& ack)
         return;
     engine.cancelEvent(retransmissionTimer.get());
     if (flight->isComplete()) {
-        if (!serverSide && state == HandshakeState::ESTABLISHED)
+        if (!serverSide && state == HandshakeState::ESTABLISHED) {
             processedHandshakes.clear();
+            receiveEpoch2.reset();
+        }
     }
     else {
         flight->requestRetransmission();
@@ -615,6 +867,7 @@ void DtlsAssociation::sendServerFlight()
     auto finished = makeShared<tls::TlsFinished>();
     finished->setVerifyDataArraySize(32);
     finished->setChunkLength(B(32));
+    nextLocalMessage = messageSequence + 1;
     owner.sendProtectedHandshake(handle, 20, messageSequence, finished, false, true);
     if (owner.containsAssociation(handle))
         finishFlight();
@@ -942,6 +1195,7 @@ void DtlsAssociation::processHandshake(uint64_t sequence, Packet *body)
         auto finished = makeShared<tls::TlsFinished>();
         finished->setVerifyDataArraySize(32);
         finished->setChunkLength(B(32));
+        nextLocalMessage = nextMessage + 1;
         owner.sendProtectedHandshake(handle, 20, nextMessage, finished, true);
         if (owner.containsAssociation(handle))
             finishFlight();

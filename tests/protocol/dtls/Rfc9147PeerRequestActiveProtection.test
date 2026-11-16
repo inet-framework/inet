@@ -1,0 +1,79 @@
+%description:
+
+A peer requests an update while application protection is active. Pay that cost
+once, hold its UDP handoff until the required response is ACKed, and keep queued
+application work outside the shared processor until the update completes.
+
+%includes:
+#include <cmath>
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static std::vector<simtime_t> costs;
+static std::vector<simtime_t> appHandoffs;
+static std::vector<simtime_t> handshakeCosts;
+static simtime_t requestArrival;
+static uint64_t responseRecord = 65535;
+static bool responseAcked = false;
+static simtime_t responseAckTime;
+static bool responseAck(const MatchContext& c)
+{
+    auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+    if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i)
+        if (a->getEpochs(i) == 3 && a->getSequenceNumbers(i) == responseRecord) return true;
+    return false;
+}
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_peer_request_active_protection")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 0.02) < 1e-9) costs.push_back(c.event.time); return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 0.05) < 1e-9) handshakeCosts.push_back(c.event.time); return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (responseAck(c)) { responseAcked = true; responseAckTime = c.event.time; } return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (applicationRecord(c)) appHandoffs.push_back(c.event.time); return false; }).within(3)))
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return applicationRecord(c) && (!responseAcked || !protectedRecord(c, 0)); }).within(3)))
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1); }))
+    .once(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { return std::abs(c.event.value - 0.02) < 1e-9; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(true); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto u = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return u && u->getRequestUpdate() == 1; }).assertEvent([](const MatchContext& c) { requestArrival = c.event.time; return costs.size() == 1 && c.event.time > costs.front() && c.event.time < costs.front() + SimTime(0.02); }).within(0.01))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto u = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return u && u->getRequestUpdate() == 0; }).assertEvent([](const MatchContext& c) {
+        responseRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber();
+        require(handshakeCosts.size() == 1, "the peer update pays one logical input cost");
+        auto ready = handshakeCosts.front() + SimTime(0.05);
+        return handshakeCosts.front() >= requestArrival && handshakeCosts.front() < costs.front() + SimTime(0.02) && ready > costs.front() + SimTime(0.02) && c.event.time >= ready + SimTime(0.02) && c.event.time <= ready + SimTime(0.040000001);
+    }).within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent(responseAck).within(0.1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({1, 2}) && app.errorCount == 0, "both held application records deliver under the updated epoch"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+            require(costs.size() == 4, "two application records, one ACK and one response each pay protection once");
+            require(appHandoffs.size() == 2 && appHandoffs.front() >= responseAckTime && appHandoffs.back() == appHandoffs.front() + SimTime(0.02), "the paid record resumes at ACK processing and the unpaid record follows one service interval later");
+            require(costs[1] >= costs[0] + SimTime(0.02) && costs[2] >= costs[1] + SimTime(0.02) && costs[3] >= responseAckTime, "queued application processing waits outside the shared processor through request input cost and response acknowledgement");
+            require(app.errorCount == 0 && app.sendErrorCount == 0, "holding active protection preserves admitted application sends");
+        }));
+}
+%activity:
+EV << "rfc9147_peer_request_active_protection compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.protectOutDelay = simTime() < 1s ? 0s : 0.02s
+*.host1.app[0].dtls.handshakeInDelay = simTime() < 1s ? 0s : 0.05s
+*.host2.app[0].dtls.handshakeInDelay = 0.05s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_peer_request_active_protection: PASS

@@ -1,0 +1,64 @@
+%description:
+
+DTLS production-path variant KeyUpdateAutomatic: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static int serverInitialRecords = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_key_update_automatic")
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto module = check_and_cast<cModule *>(c.event.module);
+        auto app = check_and_cast<DtlsTestDriver *>(module->getParentModule()->getSubmodule("driver"));
+        return handshake(c, 24) && app->establishedCount == 0;
+    }).within(1)))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto module = check_and_cast<cModule *>(c.event.module);
+        auto app = check_and_cast<DtlsTestDriver *>(module->getParentModule()->getSubmodule("driver"));
+        if (app->establishedCount == 0 && protectedRecord(c, 2) && findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)) serverInitialRecords++;
+        return handshake(c, 24) && app->establishedCount == 0;
+    }).within(1)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(serverInitialRecords >= 5, "initial protected handshake crosses the configured rekey threshold without a KeyUpdate");
+        app.sendMarker(1); app.sendMarker(2); app.sendMarker(3); app.sendMarker(4); app.sendMarker(5);
+    }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord)
+        .assertEvent([](const MatchContext& c) { return protectedRecord(c, 0); }).within(1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>({1, 2, 3, 4, 5}), "automatic update resumes held app data without duplicate delivery");
+    }));
+}
+%activity:
+EV << "rfc9147_key_update_automatic compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.rekeyAfterRecords = 4
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.clientAuthentication = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_key_update_automatic: PASS

@@ -6,26 +6,33 @@ The test uses the real UDP-backed Dtls engine, seed 0 and explicit packet faults
 
 %includes:
 #include "DtlsTestUtils.h"
+#include <cmath>
 
 %global:
 using namespace inet;
 using namespace inet::protocoltest;
 using namespace inet::protocoltest::dtls;
+static unsigned deprotectionSamples = 0;
 
 Define_ProtocolTestProgram()
 {
 return establish("rfc9147_invalid_record")
+    .act(action().after(0.2).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "initial handshake processing has settled"); }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 0.02) < 1e-9) ++deprotectionSamples; return false; }).within(1)))
     .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(1); }))
     .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
     .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetApplication(p); }).nth(1).mutate([](Packet *packet) {
         require(mutateHeader<inet::dtls::DtlsCiphertextHeader>(packet, [](inet::dtls::DtlsCiphertextHeader& h) { h.setEpochBits(1); }), "fault targets an actual protected record");
     }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return protectedRecord(c, 1); }).within(0.1))
     .once(on("host2.app[0].dtls").signal("recordDropped").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver&) { require(deprotectionSamples == 0, "definitely unknown epoch bits are rejected before deprotection service"); }))
     .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(2); }))
     .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
     .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
         require(app.receivedMarkers == std::vector<int>{2}, "unknown epoch is discarded and valid following record is delivered");
         require(app.errorCount == 0, "invalid record does not destroy the established association");
+        require(deprotectionSamples == 1, "only the subsequent valid record pays the configured input cost");
     }));
 }
 
@@ -48,6 +55,7 @@ seed-set = 0
 *.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
 *.host1.app[*].server = false
 *.host2.app[*].server = true
+*.host2.app[0].dtls.protectInDelay = 0.02s
 
 *.host1.app[*].driver.startTime = 0.2s
 *.host2.app[*].driver.startTime = 0.1s

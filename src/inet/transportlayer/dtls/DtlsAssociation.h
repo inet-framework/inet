@@ -5,6 +5,7 @@
 #include <array>
 #include <deque>
 #include <memory>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -32,6 +33,11 @@ class INET_API DtlsAssociation
         SERVER_WAIT_CLIENT_CERTIFICATE, SERVER_WAIT_CLIENT_CERTIFICATE_VERIFY, SERVER_WAIT_CLIENT_FINISHED, ESTABLISHED };
 
   protected:
+    // RFC 9147 Section 8 limits the sending epoch; the protected-record cap is model policy.
+    static constexpr uint64_t MAX_SEND_EPOCH = (uint64_t(1) << 48) - 1;
+    static constexpr uint64_t MAX_PLAINTEXT_RECORDS = uint64_t(1) << 48;
+    static constexpr uint64_t MAX_PROTECTED_RECORDS = uint64_t(1) << 24;
+    static constexpr uint64_t MAX_REKEY_AFTER_RECORDS = uint64_t(1) << 23;
     static constexpr std::array<uint8_t, 32> HELLO_RETRY_RANDOM = {
         0xcf, 0x21, 0xad, 0x74, 0xe5, 0x9a, 0x61, 0x11, 0xbe, 0x1d, 0x8c, 0x02, 0x1e, 0x65, 0xb8, 0x91,
         0xc2, 0xa2, 0x11, 0x16, 0x7a, 0xbb, 0x8c, 0x5e, 0x07, 0x9e, 0x09, 0xe2, 0xc8, 0xa8, 0x33, 0x9c
@@ -42,6 +48,14 @@ class INET_API DtlsAssociation
     std::unique_ptr<cMessage> retransmissionTimer;
     std::unique_ptr<cMessage> delayedAckTimer;
     std::unique_ptr<cMessage> retentionTimer;
+    std::unique_ptr<cMessage> updateRetransmissionTimer;
+    std::unique_ptr<cMessage> updateDeadline;
+    std::shared_ptr<DtlsHandshakeFlight> updateFlight;
+    // RFC 9147 Section 5.8.2 recommends an initial one-second retransmission timer.
+    simtime_t updateTimeout = 1;
+    bool updateRequested = false;
+    bool awaitingPeerUpdate = false;
+    bool peerResponseDue = false;
     simtime_t retransmissionTimeout = 1;
     bool buildingFlight = false;
     bool pumpingFlight = false;
@@ -61,8 +75,18 @@ class INET_API DtlsAssociation
     tls::TlsHandshakeParameters::Offer offer;
     std::unique_ptr<DtlsRecordState> receiveEpoch2;
     std::unique_ptr<DtlsRecordState> receiveEpoch3;
+    std::unique_ptr<DtlsRecordState> previousReceiveEpoch;
     uint64_t nextEpoch2Record = 0;
-    uint64_t nextEpoch3Record = 0;
+    uint64_t nextApplicationRecord = 0;
+    uint64_t sendEpoch = 3;
+    uint64_t receiveEpoch = 3;
+    uint64_t previousReceiveEpochNumber = 0;
+    uint16_t nextLocalMessage = 0;
+    bool localMessagesExhausted = false;
+    uint16_t lastPeerUpdateMessage = 0;
+    uint64_t lastPeerUpdateEpoch = 0;
+    uint8_t lastPeerUpdateFlag = 0;
+    bool hasPeerUpdate = false;
     size_t receivedBytes = 0;
     size_t sentBytes = 0;
     size_t reservedBytes = 0;
@@ -88,7 +112,12 @@ class INET_API DtlsAssociation
     std::vector<uint8_t> processingHandshakeBody;
     std::map<uint16_t, uint64_t> completeRecordNumbers;
     std::map<uint16_t, DtlsHandshakeReassembly::Message> processedHandshakes;
-    std::deque<std::unique_ptr<Packet>> pendingPackets;
+    struct PendingPacket {
+        std::unique_ptr<Packet> packet;
+        std::optional<simtime_t> delay;
+        bool paid = false;
+    };
+    std::deque<PendingPacket> pendingPackets;
     size_t pendingBytes = 0;
     std::set<long> processingPacketIds;
     simtime_t startedAt = SIMTIME_ZERO;
@@ -115,6 +144,15 @@ class INET_API DtlsAssociation
     void noteHandshakeRecord(uint64_t epoch, uint64_t recordNumber, bool immediate);
     void flushAcknowledgements(uint64_t sendEpoch);
     void clearAcknowledgements();
+    bool requestUpdate(bool requestPeerUpdate);
+    void pumpUpdate();
+    void updateRecordHandedOff(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index, uint64_t recordNumber);
+    void updateRecordSkipped(const std::shared_ptr<DtlsHandshakeFlight>& sentFlight, size_t index);
+    void receiveKeyUpdate(uint64_t epoch, uint64_t recordSequence, Packet *body);
+    void applyKeyUpdate(uint64_t epoch, uint64_t recordSequence, uint16_t messageSequence, uint8_t flag, bool satisfiesRequest);
+    bool allocateApplicationRecord(uint64_t& number);
+    bool allocatePlaintextRecord(uint64_t& number);
+    bool advanceSendEpoch();
     bool handleTimer(cMessage *message);
     void cancelTimers();
 

@@ -1,0 +1,80 @@
+%description:
+
+The requested-update guard survives its record ACK and an old peer-update copy.
+A peer update received before the local request's first handoff cannot fulfill
+it. Only a subsequent new peer KeyUpdate permits another requested update.
+
+%includes:
+#include "DtlsTestUtils.h"
+#include <cmath>
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool holdPeerUpdates = true;
+static uint16_t firstLocalRecord, firstLocalMessage, oldPeerMessage, oldCopyRecord;
+static simtime_t firstLocalHandoff, earlyPeerArrival;
+static std::vector<simtime_t> inputCosts;
+static bool ackNames(const Packet *p, uint64_t epoch, uint64_t number)
+{
+    auto a = findChunk<inet::dtls::DtlsAck>(p);
+    if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i)
+        if (a->getEpochs(i) == epoch && a->getSequenceNumbers(i) == number) return true;
+    return false;
+}
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_update_request_guard")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (std::abs(c.event.value - 0.05) < 1e-9) inputCosts.push_back(c.event.time); return false; }).within(4)))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 24); }).nth(1).duplicate(0.15))
+    .meanwhile(tap("tap").from("host2").copiesOnly().filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 24); }).mutate([](Packet *p) { mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { oldCopyRecord = h.getSequenceNumber() + 200; h.setSequenceNumber(oldCopyRecord); }); }))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return holdPeerUpdates && packetHandshake(p, 24); }).drop())
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(false); }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).assertEvent([](const MatchContext& c) {
+        earlyPeerArrival = c.event.time;
+        oldPeerMessage = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence();
+        return firstLocalHandoff == SIMTIME_ZERO && protectedRecord(c, 3);
+    }).within(0.01))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto u = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return u && u->getRequestUpdate() == 1; }).assertEvent([](const MatchContext& c) {
+        firstLocalHandoff = c.event.time;
+        firstLocalRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber();
+        firstLocalMessage = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence();
+        return firstLocalHandoff > earlyPeerArrival && protectedRecord(c, 3) && inputCosts.size() == 1 && inputCosts.front() < firstLocalHandoff && inputCosts.front() + SimTime(0.05) > firstLocalHandoff;
+    }).within(0.03))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return ackNames(c.event.packet, 3, firstLocalRecord); }).within(0.02))
+    .act(action().after(0.04).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(simTime() > inputCosts.front() + SimTime(0.05), "the earlier peer input has finished before testing the ACK-only guard"); app.update(true); }))
+    .act(action().after(0.001).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>({true, false}), "ACK alone and late application of an earlier peer update cannot fulfill the requested-update guard"); }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return h && r && h->getMessageType() == 24 && h->getMessageSequence() == oldPeerMessage && r->getSequenceNumber() == oldCopyRecord; }).within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return ackNames(c.event.packet, 3, oldCopyRecord); }).within(0.05))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .act(action().after(0.001).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>({true, false, false}), "a positively acknowledged old peer-update duplicate cannot clear the guard"); holdPeerUpdates = false; }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 24 && h->getMessageSequence() != oldPeerMessage; }).assertEvent([](const MatchContext& c) { return c.event.time > firstLocalHandoff; }).within(2))
+    .act(action().after(0.06).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(true); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto u = findChunk<inet::tls::TlsKeyUpdate>(c.event.packet); return u && u->getRequestUpdate() == 1; }).assertEvent([](const MatchContext& c) { return protectedRecord(c, 0) && findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageSequence() != firstLocalMessage; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>({true, false, false, true}) && app.errorCount == 0, "a new later peer update clears the guard and permits a new requested exchange"); }));
+}
+%activity:
+EV << "rfc9147_update_request_guard compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.protectOutDelay = simTime() < 1s ? 0s : 0.02s
+*.host1.app[0].dtls.handshakeInDelay = simTime() < 1s ? 0s : 0.05s
+*.host2.app[0].dtls.handshakeInDelay = simTime() < 1s ? 0.05s : 0s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_update_request_guard: PASS

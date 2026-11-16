@@ -111,15 +111,18 @@ class INET_API Dtls : public OperationalBase, public UdpSocket::ICallback, publi
     int checkCertificateVerify(Packet *body) const;
     void sendFinalAck(AssociationId id, uint64_t sequence);
     void sendAcknowledgements(AssociationId id, uint64_t sendEpoch, const std::vector<std::pair<uint64_t, uint64_t>>& records);
-    void sendApplication(AssociationId id, Packet *packet);
+    void sendApplication(AssociationId id, Packet *packet, std::optional<simtime_t> sampledDelay = {}, bool paid = false);
+    bool holdApplication(AssociationId id, std::unique_ptr<Packet> packet, std::optional<simtime_t> sampledDelay = {}, bool paid = false);
     void sendPlainHandshake(AssociationId id, uint8_t messageType, uint16_t messageSequence, const Ptr<Chunk>& body);
     void sendProtectedHandshake(AssociationId id, uint8_t messageType, uint16_t messageSequence, const Ptr<Chunk>& body, bool establishAfterSend = false, bool serverFinished = false);
     void transmitFlightFragment(AssociationId id, const std::shared_ptr<DtlsHandshakeFlight>& flight, size_t index);
     void establish(AssociationId id);
     void failAssociation(AssociationId id, const char *reason, int alertDescription = -1);
-    void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0);
+    void resumeApplications(AssociationId id);
+    void sendAlert(const L3Address& localAddress, const L3Address& peerAddress, int peerPort, uint8_t description, bool encrypted, uint64_t sequence = 0, uint64_t epoch = 2);
     bool enqueueProcessing(DtlsProcessingQueue *queue, AssociationId id, size_t bytes, simtime_t delay, DtlsProcessingQueue::Completion completion,
-                           DtlsProcessingQueue::Eligibility eligible = {}, DtlsProcessingQueue::Completion skipped = {});
+                           DtlsProcessingQueue::Eligibility eligible = {}, DtlsProcessingQueue::Completion skipped = {},
+                           DtlsProcessingQueue::Completion started = {}, bool recordDelay = true);
     bool containsAssociation(AssociationId id) const { return associations.find(id) != associations.end(); }
     static bool hasConsistentEncoding(const Packet *packet);
 
