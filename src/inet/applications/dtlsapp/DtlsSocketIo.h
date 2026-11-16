@@ -3,11 +3,12 @@
 #define INET_DTLSSOCKETIO_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/scenario/IScriptable.h"
 #include "inet/transportlayer/contract/dtls/DtlsSocket.h"
 
 namespace inet::dtls {
 
-class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback
+class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback, public IScriptable
 {
   protected:
     DtlsSocket socket;
@@ -29,6 +30,9 @@ class INET_API DtlsSocketIo : public ApplicationBase, public IDtls::ICallback
     void sendError(IDtls::AssociationId id, long packetId, const char *reason) override;
     void error(IDtls::AssociationId id, const char *reason) override;
     void closed(IDtls::AssociationId id) override;
+
+  public:
+    void processCommand(const cXMLElement& node) override;
 };
 
 } // namespace inet::dtls

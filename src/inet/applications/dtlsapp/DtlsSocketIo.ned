@@ -4,6 +4,8 @@ package inet.applications.dtlsapp;
 import inet.common.SimpleModule;
 
 // Adapter between generic packet sources/sinks and a DTLS engine.
+// ScenarioManager may invoke close/open-dtls, send-early-dtls, request-dtls-cid,
+// rebind-dtls (port attribute) and authenticate-dtls on its current association.
 simple DtlsSocketIo extends SimpleModule
 {
     parameters:

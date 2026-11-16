@@ -1,0 +1,6 @@
+Scripted DTLS application actions
+
+DtlsSocketIo accepts ScenarioManager commands for closing and reopening its
+current association, sending an explicitly requested early datagram, requesting
+a spare CID, rebinding the client port and requesting client authentication.
+These opt-in actions use the existing socket API and change no protocol defaults.

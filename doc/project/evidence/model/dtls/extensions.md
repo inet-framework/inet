@@ -44,7 +44,8 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C13 | VERSION, 12-RECOVERY | 38 legacy/mixed protocol cases; version configuration modules; bounded reassembly unit | DONE: full 283-case debug suite before final policy corrections; final fresh build and all 47 selected protocol cases PASS |
 | C14 | 12-SESSION | 22 Rfc6347Resumption cases; ticket/store units | DONE: fresh debug build; 83 selected protocol, 14 unit and 20 module cases PASS |
 | C15 | 12-PATH | 43 legacy CID/heartbeat/path cases; header unit and protection module | DONE: fresh debug build; 171 combined protocol PASS plus corrected IPv6 fixture PASS; 15 unit and 21 module PASS |
-| C16 | Integration/documentation | Owning cases repeated, deterministic examples, both build modes | NOT_STARTED |
+| C16a | Scenario adapter | Public socket actions exercised by sixteen fixed-seed examples | DONE: fresh debug build; sixteen examples assert successful outcomes |
+| C16 | Integration/documentation | Owning cases repeated, deterministic examples, both build modes | IN_PROGRESS |
 
 ## Validation
 
@@ -389,3 +390,17 @@ opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^te
 ```
 
 Self-audit retraced CID allocation/index cleanup, directional negotiation/overhead, retained tags and inner limits, replay commitment before/inside heartbeat dispatch, path callbacks, static CID reuse, quoted nonce/token correlation and cancellation against the contract. Scoped architecture/naming, source/document protection, release formatting and selected documentation links pass. Global interface findings remain the previously recorded sixteen; clang-tidy remains unavailable. Release execution, the complete final protocol suite and feature-disabled builds remain C16. No baseline changed.
+
+## C16a/C16 execution contract
+
+Validated against DtlsSocketIo, DtlsSocket, ScenarioManager/IScriptable and the existing app composition. The generic adapter currently only opens once; examples need application actions to exercise the approved behavior. Add the existing IScriptable interface to that adapter, without changing the protocol engine or starting a second timer/driver. Retain one current handle, including the latest accepted server handle; closure/error/lifecycle clears it. Scenario commands use public socket methods, transfer newly created early packets once, reject invalid role/state/admission and add no default actions. Existing source/sink traffic remains unchanged. Demonstrations verify real endpoint outcomes and explicit callbacks in both modes; no protocol conformance or physical performance claim follows from example completion.
+
+Separate this small consumer preparation as C16a before the planned documentation commit. The dynamic-MTU demonstration reuses the preceding asserting routed fixture through an explicit runner command, rather than adding another router controller. Other examples remain standalone INET configurations. Build enabled debug/release, run the complete DTLS suite and units/modules in both modes, run examples with seed zero, and compile/test an isolated DTLS-disabled copy. No baseline refresh, push or PR is authorized by this execution task.
+
+### C16a preparation evidence
+
+The adapter now invokes only the existing public socket operations through IScriptable. ScenarioManager owns timing; there is no added timer, protocol state or default scenario. The latest accepted server handle is retained for deferred-authentication actions, while normal callbacks/lifecycle clear matching handles. Early packets transfer ownership directly to sendEarly. Port attributes are checked before rebind admission; invalid role/state/command/admission fails the scenario explicitly.
+
+The matching debug build passes (`c16-build-debug.log`). `examples/dtls/verify.py` executes the original six and ten opt-in configurations with seed zero. It requires both expected establishment counts, zero association failures and real application delivery, then checks resumed/early/path/authentication callbacks, selected processing cost, legacy expansion and the routed confirmed budget. It exports one selected scalar run through opp_scavetool CSV-R; absent/ambiguous results fail. The first ten examples pass in `c16-examples-verified-debug/`; its next AlgorithmCost run correctly rejects an external-PSK/SHA-384 configuration. After changing that example to the certificate profile, all remaining six pass in `c16-examples-extra-debug/`. Their raw commands, logs and scalar exports are retained. No production correction was needed. Release compilation and full integration remain in progress for C16.
+
+Self-audit checked role/state guards, callback lifetime/ownership, selected handle cleanup, zero-cost synchronous callbacks, actual socket actions, XML dispatch and default configuration preservation. Scoped application architecture/naming and protection checks pass. C16 owns the complete mode matrix and published user-facing instructions/results.
