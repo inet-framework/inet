@@ -1,0 +1,44 @@
+%description:
+DTLS record-number reconstruction and replay window boundaries.
+
+%includes:
+#include "inet/transportlayer/dtls/DtlsRecordState.h"
+#include <limits>
+
+using namespace inet::dtls;
+
+%activity:
+DtlsRecordState state(4);
+ASSERT(state.reconstruct(0, 16) == 0);
+ASSERT(state.accept(65534));
+ASSERT(state.reconstruct(65535, 16) == 65535);
+ASSERT(state.accept(65535));
+ASSERT(state.reconstruct(0, 16) == 65536);
+ASSERT(state.accept(65536));
+ASSERT(state.reconstruct(1, 16) == 65537);
+ASSERT(state.isAcceptable(65533));
+ASSERT(state.accept(65533));
+ASSERT(!state.accept(65533));
+ASSERT(!state.accept(65532));
+ASSERT(!state.accept(65536));
+ASSERT(state.accept(65537));
+ASSERT(!state.isAcceptable(65533));
+DtlsRecordState shortNumbers(64);
+ASSERT(shortNumbers.accept(255));
+ASSERT(shortNumbers.reconstruct(0, 8) == 256);
+ASSERT(shortNumbers.reconstruct(254, 8) == 254);
+DtlsRecordState upperBoundary(64);
+const auto maximum = std::numeric_limits<uint64_t>::max();
+ASSERT(upperBoundary.accept(maximum - 1));
+ASSERT(upperBoundary.reconstruct(65535, 16) == maximum);
+ASSERT(upperBoundary.accept(maximum));
+ASSERT(upperBoundary.reconstruct(65535, 16) == maximum);
+ASSERT(!upperBoundary.accept(maximum - 64));
+bool rejected = false;
+try { static_cast<void>(shortNumbers.reconstruct(256, 8)); }
+catch (const omnetpp::cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+EV << "DTLS record state PASS\n";
+
+%contains: stdout
+DTLS record state PASS
