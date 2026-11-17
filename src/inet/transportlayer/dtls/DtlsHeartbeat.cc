@@ -41,7 +41,8 @@ bool DtlsAssociation::startHeartbeatProbe(size_t udpBytes, ProbePurpose purpose)
         return false;
     auto path = purpose == ProbePurpose::PATH_VALIDATION ? candidatePath->path : currentPath();
     auto overhead = recordOverheadForCid(cidForPath(path));
-    auto minimum = std::max<size_t>(overhead, isDtls12() ? recordOverheadForCid(localCid) : 22 + localCid.size()) + 27;
+    auto cidBytes = cidNegotiated ? std::max(cidForPath(path).size(), localCid.size()) : 0;
+    auto minimum = minimumHeartbeatBytes(isDtls12(), cidBytes);
     if (udpBytes == 0)
         udpBytes = minimum;
     if (udpBytes < minimum || udpBytes > uint64_t(engine.par("udpPayloadLimit").intValue()) || udpBytes - overhead > maximumRecordContent())

@@ -229,7 +229,16 @@ class INET_API DtlsAssociation
     void applyConnectionIdMessage(uint8_t type, uint16_t sequence);
     void finishConnectionIdUpdate();
     void serveConnectionIdRequest(uint8_t count);
-    size_t recordOverheadForCid(const std::vector<uint8_t>& cid) const { return isDtls12() ? 37 + (cidNegotiated && !cid.empty() ? 1 + cid.size() : 0) : 22 + (cidNegotiated ? cid.size() : 0); }
+    static size_t recordOverheadForCid(bool legacy, size_t cidBytes) {
+        return legacy ? 37 + (cidBytes ? 1 + cidBytes : 0) : 22 + cidBytes;
+    }
+    // Three heartbeat header bytes, an eight-byte correlation token and sixteen padding bytes.
+    static size_t minimumHeartbeatBytes(bool legacy, size_t cidBytes) {
+        return recordOverheadForCid(legacy, cidBytes) + 27;
+    }
+    size_t recordOverheadForCid(const std::vector<uint8_t>& cid) const {
+        return recordOverheadForCid(isDtls12(), cidNegotiated ? cid.size() : 0);
+    }
     size_t recordOverhead() const { return recordOverheadForCid(peerCid); }
     size_t maximumRecordContent() const { return isDtls12() && cidNegotiated && !peerCid.empty() ? 16383 : 16384; }
     Ptr<DtlsCiphertextHeader> makeRecordHeader(uint64_t epoch, uint64_t number, uint16_t length, const std::vector<uint8_t> *cidOverride = nullptr) const;

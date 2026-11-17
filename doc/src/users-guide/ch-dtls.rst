@@ -109,6 +109,11 @@ stale or ordinary-application quotes do not change the budget. ICMP is not
 authenticated. Migration resets confirmation to the base. Unconfirmed/error paths
 may suspend application output while retaining small control exchanges.
 
+Startup rejects a base that cannot carry a heartbeat for every allowed version
+and the configured CID profile. A mixed-version offer therefore needs room for
+legacy expansion even if a particular peer later selects 1.3. Negotiated peer
+CID lengths are checked again by the association.
+
 DTLS 1.3 record overhead is 22 bytes plus an outgoing CID. DTLS 1.2 uses 37 bytes
 without CID, or 38 plus the CID length, including its explicit nonce and inner
 content type. No-padding application limits are 16384 bytes normally and 16383

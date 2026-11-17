@@ -1,0 +1,5 @@
+DTLS path MTU base validation
+
+DTLS now rejects path MTU bases that cannot carry a heartbeat for every enabled
+version. Legacy and mixed-version profiles account for DTLS 1.2 record and CID
+expansion before opening the UDP engine.

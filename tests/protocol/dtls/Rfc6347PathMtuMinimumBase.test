@@ -1,0 +1,91 @@
+%description:
+Six real UDP-backed pairs confirm the smallest heartbeat-capable PMTU base.
+Legacy-only, mixed-client legacy fallback and default 1.3 each cover no CID and
+an eight-byte CID, then deliver a maximum-size application datagram.
+%includes:
+#include <array>
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+    static std::array<int, 6> probes{};
+    const std::array<int, 6> budgets{64, 73, 64, 73, 49, 57};
+    auto test = ProtocolTest("path_mtu_minimum_base");
+    std::vector<EventPattern> confirmations, deliveries;
+    auto send = action();
+    auto check = action();
+    for (size_t i = 0; i < budgets.size(); ++i) {
+        auto client = "host1.app[" + std::to_string(i) + "]";
+        auto server = "host2.app[" + std::to_string(i) + "]";
+        test.meanwhile(anyNumberOfTimes(on((client + ".dtls").c_str()).signal("packetSentToLower").filterEvent([i, budgets](const MatchContext& c) {
+            if (heartbeat(c, 1)) {
+                require(c.event.packet->getByteLength() == budgets[i], "probe uses exactly the configured base");
+                if (i < 4)
+                    require(findChunk<inet::dtls::Dtls12CidHeader>(c.event.packet) ||
+                            findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet), "legacy-only and mixed fallback use legacy records");
+                else
+                    require(findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet) != nullptr, "default controls retain 1.3 records");
+                ++probes[i];
+            }
+            return false;
+        }).within(5)));
+        confirmations.push_back(on((client + ".driver").c_str()).signal("maximumDatagramSizeChanged").filterValue(27).within(4));
+        confirmations.push_back(on((server + ".driver").c_str()).signal("maximumDatagramSizeChanged").filterValue(27).within(4));
+        send.run<DtlsTestDriver>((client + ".driver").c_str(), [i](DtlsTestDriver& app) {
+            require(app.establishedCount == 1 && app.errorCount == 0 && app.maximumDatagramSize() == 27 &&
+                    app.maximumDatagramSizes == std::vector<size_t>{27} && probes[i] > 0, "one established handle confirms the exact boundary");
+            app.sendMarker(210 + i, 27);
+        });
+        deliveries.push_back(on((server + ".driver").c_str()).signal("packetSentToUpper").within(1));
+        check.run<DtlsTestDriver>((server + ".driver").c_str(), [i](DtlsTestDriver& app) {
+            require(app.establishedCount == 1 && app.errorCount == 0 && app.maximumDatagramSize() == 27 &&
+                    app.receivedMarkers == std::vector<int>{int(210 + i)}, "maximum-size data delivers on every confirmed profile");
+        });
+    }
+    return test.unordered(confirmations).act(send).unordered(deliveries).act(check);
+}
+%activity:
+EV << "minimum path budget compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 6
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].localPort = 4434 + ancestorIndex(0)
+*.host2.app[*].localPort = 4433 + ancestorIndex(0)
+*.host*.app[*].driver.peerPort = 4433 + ancestorIndex(1)
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[0].dtls.versions = "1.2"
+*.host*.app[1].dtls.versions = "1.2"
+*.host1.app[2].dtls.versions = "1.3 1.2"
+*.host1.app[3].dtls.versions = "1.3 1.2"
+*.host2.app[2].dtls.versions = "1.2"
+*.host2.app[3].dtls.versions = "1.2"
+*.host*.app[1].dtls.connectionIdEnabled = true
+*.host*.app[3].dtls.connectionIdEnabled = true
+*.host*.app[5].dtls.connectionIdEnabled = true
+*.host*.app[0].dtls.pathMtuBase = 64B
+*.host*.app[1].dtls.pathMtuBase = 73B
+*.host*.app[2].dtls.pathMtuBase = 64B
+*.host*.app[3].dtls.pathMtuBase = 73B
+*.host*.app[4].dtls.pathMtuBase = 49B
+*.host*.app[5].dtls.pathMtuBase = 57B
+*.host*.app[*].dtls.pathMtuProbeCeiling = pathMtuBase
+%contains: stdout
+PROTOCOLTEST path_mtu_minimum_base: PASS

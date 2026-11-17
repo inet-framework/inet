@@ -125,7 +125,7 @@ void DtlsAssociation::tryStartPathMtuProbe()
         pathMtu->probeDue = false;
         return;
     }
-    if (size < 49 + std::max(localCid.size(), peerCid.size())) {
+    if (size < minimumHeartbeatBytes(isDtls12(), cidNegotiated ? std::max(localCid.size(), peerCid.size()) : 0)) {
         engine.failAssociation(id, "DTLS path MTU base cannot carry the negotiated probe profile");
         return;
     }

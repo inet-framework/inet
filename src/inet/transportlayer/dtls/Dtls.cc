@@ -104,7 +104,9 @@ void Dtls::handleStartOperation(LifecycleOperation *)
     if (par("pathMtuDiscoveryEnabled").boolValue()) {
         auto base = par("pathMtuBase").intValue();
         auto ceiling = par("pathMtuProbeCeiling").intValue();
-        auto minimum = 49 + (par("connectionIdEnabled").boolValue() ? 8 : 0);
+        // Every allowed version must be able to confirm this base after negotiation.
+        auto cidBytes = par("connectionIdEnabled").boolValue() ? 8 : 0;
+        auto minimum = int64_t(Association::minimumHeartbeatBytes(allowDtls12, cidBytes));
         auto timeout = par("pathMtuProbeTimeout").doubleValue();
         auto confirmation = par("pathMtuConfirmationInterval").doubleValue();
         auto raise = par("pathMtuRaiseInterval").doubleValue();

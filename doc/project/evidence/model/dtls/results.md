@@ -4,7 +4,17 @@
 
 The selected model now includes the opt-in extensions described in [scope.md](scope.md). Their stage-specific executed evidence is in [extensions.md](extensions.md), including legacy full/abbreviated exchanges, CID/heartbeat/path support and their limits. The historical initial-profile results below retain their original source boundaries and counts; they are not a claim that the current extension union was run by those earlier commands.
 
-## Final extension integration matrix
+## Minimum path-budget correction
+
+C17 of the [plan](../../../../../plan/pending/dtls-extensions.md) rejects a PMTU base that cannot carry a heartbeat for every enabled version and configured CID profile. The [reviewer document](../../../../../tests/protocol/dtls/path-mtu-minimum-base.md) explains the byte boundary, six real peer pairs and four expected configuration-error cases.
+
+The unchanged rejection fixtures were executed on `c95450bb5648`: all four fail because the parent accepts the invalid configuration, binds UDP and exits normally at its cutoff instead of reporting the required error. The six-profile protocol fixture already passes on that parent and is a preservation control. An earlier real-UDP diagnostic also establishes both legacy peers at a 50-byte base but fails the required confirmation; its 64-byte control passes. These are measured parent observations, not fixture compilation failures.
+
+After the correction, matching debug and release builds pass. The selected debug protocol campaign passes 77 cases covering heartbeat, PMTU, migration and default/legacy setup, including the new six-profile boundary fixture. All ten selected PMTU module cases pass, including a negative-base guard control. Release passes the new protocol fixture and all five new module configuration-error cases. No unexpected result remains in these selections. The expected error is checked by exit status and exact error text; it is not declared as an expected protocol failure.
+
+Raw commands, outputs, fixture/source/library hashes and the message-only commit mapping are retained under `audit/pull-request/pr-1465-corrections/`. The original tip is preserved as `refs/audit/pr-1465-before-corrections`; message corrections preserve every historical tree, author, committer and timestamp. No stored baseline was compared or changed. The earlier broad extension campaigns below retain their original source boundaries; they were not repeated as part of this focused repair. clang-tidy and independent Mermaid rendering remain unavailable/unverified.
+
+## Extension integration matrix before the minimum-base correction
 
 Matching debug and release builds pass on the corrected model source `62b7af5f28`; the subsequent helper correction `467b99fa9f` changes test checks only. Both native library hashes and all 61 tracked model/application source hashes remain verified in `audit/dtls-extensions/c16-corrected-source-manifest.json`. The [execution ledger](extensions.md) records exact commands and the 60-case release selection.
 

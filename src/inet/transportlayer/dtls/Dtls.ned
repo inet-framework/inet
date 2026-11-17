@@ -26,7 +26,7 @@ simple Dtls extends SimpleModule like IDtls
         bool postHandshakeAuthEnabled = default(false); // Advertise support (client) or admit requests (server)
         bool postHandshakeCertificateAvailable = default(true); // If false, decline with an empty certificate list
         bool pathMtuDiscoveryEnabled = default(false);
-        int pathMtuBase @unit(B) = default(512B); // Small-MTU model profile; below RFC 8899's IPv4/IPv6 bases
+        int pathMtuBase @unit(B) = default(512B); // Small-MTU profile; minimum 49B (1.3) or 64B (any enabled 1.2), 57B/73B with CID
         int pathMtuProbeCeiling @unit(B) = default(udpPayloadLimit);
         double pathMtuProbeTimeout @unit(s) = default(16s); // Per attempt, at least 1 s; three actual size-probe handoffs
         double pathMtuConfirmationInterval @unit(s) = default(60s);
