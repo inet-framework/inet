@@ -1,0 +1,3 @@
+IPv6 requests to suppress source fragmentation
+
+IPv6 now honors FragmentationReq.dontFragment for oversized locally generated packets. It reports a PACKET_TOO_BIG drop instead of creating source fragments. Fitting packets and untagged source fragmentation keep their existing behavior; forwarded packets retain the existing ICMPv6 Packet Too Big path.

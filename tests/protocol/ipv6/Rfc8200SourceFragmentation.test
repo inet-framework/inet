@@ -106,6 +106,7 @@ seed-set = 0
 *.hostA.app[0].destPort = 5000
 *.hostA.app[0].localPort = 4000
 *.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].dontFragment = false
 *.hostA.app[0].timeToLive = 64
 *.hostA.app[0].startTime = 5s
 *.hostA.app[0].sendInterval = 10s
