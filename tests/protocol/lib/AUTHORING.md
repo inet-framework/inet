@@ -1,5 +1,8 @@
 # Protocol Test Framework — Authoring Guide & Cookbook
 
+Publication association: C01. The retained execution statements refer to their original donor revisions. Fresh reconstructed results and exact-parent execution status are recorded separately; no historical PASS is attributed to this prefix.
+
+
 A framework for writing **protocol conformance / behavioural tests** against INET
 simulations. A test does two things in one program: it **matches the packet trace** of a
 running simulation against an expected pattern (direction, node/interface, packet contents,
@@ -360,11 +363,20 @@ selectors must hold, and a rule has exactly one action.
 | Selector | The frame |
 | --- | --- |
 | `.filterPacket(expr)` | matches a PacketFilter expression; the expression can name `{captures}` |
+| `.filterPacket(predicate)` | matches `bool(const Packet *)`; typed C++ inspection combines with the expression using AND, before `.nth` / `.fromNth` count matches |
 | `.minBytes(n)` | has at least `n` bytes |
 | `.from(node)` / `.to(node)` | comes from the node / goes to the node. On a `PacketTap`, the node behind a side; on the radio medium, the node of the transmitter / of the receiver radio |
 | `.copiesOnly()` | is a copy that a `duplicate(...)` rule made |
 | `.nth(k)` / `.fromNth(k)` | is the k-th frame that the rule selects / the k-th and each one after it |
 | `.within(d)` | comes less than `d` after the start of the rule; then the rule ends |
+
+Use the C++ predicate when the production packet retains typed nested chunks that the
+generic dissector does not expose as fields. It receives the complete tapped frame for
+read-only inspection. Set both overloads to require the expression and predicate together;
+nonmatching packets do not advance occurrence counting. This supports selecting a particular
+handshake fragment even when earlier UDP datagrams remain queued on the same link. Selecting
+the next UDP datagram after a sender-side observation is insufficient in that situation.
+[TypedTapPredicate.test](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/udp/TypedTapPredicate.test) exercises both selectors and `.nth(2)`.
 
 | Action | On a `PacketTap` | On the radio medium |
 | --- | --- | --- |
@@ -561,11 +573,11 @@ library, one folder per subject:
 
 | Folder | Subject |
 | --- | --- |
-| [`../self/`](../self) | the framework itself: the matching engine, the combinators, injection, interception |
-| [`../tcp/`](../tcp) | TCP |
+| [`../self/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/self) | the framework itself: the matching engine, the combinators, injection, interception |
+| [`../tcp/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/tcp) | TCP |
 | [`../tcp/parameter/`](../tcp/parameter/README.md) | TCP: one test for each class of values of each NED parameter ([the procedure](../../../doc/project/guide/derive-tests-from-parameters.md)) |
-| [`../arp/`](../arp), [`../ipv4/`](../ipv4), [`../ipv6/`](../ipv6), [`../ethernet/`](../ethernet) | one folder per protocol |
-| [`../wifi/`](../wifi) | the IEEE 802.11 conformance suite (its own runner) |
+| [`../arp/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/arp), [`../ipv4/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/ipv4), [`../ipv6/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/ipv6), [`../ethernet/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/ethernet) | one folder per protocol |
+| [`../wifi/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/wifi) | the IEEE 802.11 conformance suite (its own runner) |
 
 Before running, follow the
 [INET library freshness and build-mode guidance](../../../doc/project/guide/run-the-gates.md#keep-the-tested-library-current).
@@ -591,7 +603,7 @@ common ini settings via [`protocoltest-base.ini`](protocoltest-base.ini)
 A test does not need a `ProtocolTester` declared in its network. Define the program with
 `Define_ProtocolTestProgram()` (one per build, no name/selection) and the framework attaches
 a `ProtocolTester` to whatever network runs — so a test can target an **unmodified external
-network** just by pointing `network =` at it. Every test in [`../self/`](../self) is such
+network** just by pointing `network =` at it. Every test in [`../self/`](https://github.com/mgonzalezlopezudc/inet/blob/5284847df92eea8451bf056d8722fabb0ddf65bd/tests/protocol/self) is such
 an example: `Basic.test` is the smallest one, `ViolationDetected.test` asserts that the
 framework reports a violation, and `InterceptMutate.test` drives a fault into the wire.
 Each carries its program in `%global`, its (tester-less) network in `%file`, and asserts
