@@ -1,0 +1,3 @@
+Decoded IPv6 Fragment header lifetime
+
+IPv6 local delivery retains the decoded Fragment header until reassembly has consumed it. This prevents a dangling pointer when the header is decoded from serialized bytes rather than retained as an existing typed packet chunk.

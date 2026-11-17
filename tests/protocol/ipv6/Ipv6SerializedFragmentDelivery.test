@@ -1,0 +1,135 @@
+%description:
+Actual IPv6 source fragmentation and normal destination UDP delivery after an
+existing Ethernet tap makes only the IPv6 region byte-identical serialized chunks.
+
+%file: SerializedDeliveryCheck.cc
+#include "ITap.h"
+#include "inet/common/InitStages.h"
+#include "inet/common/MemoryOutputStream.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include <algorithm>
+#include <set>
+#include <vector>
+namespace inet::protocoltest {
+class SerializedDeliveryCheck : public cSimpleModule,public cListener {
+    cModule *sourceApp=nullptr,*sink=nullptr,*udp=nullptr;
+    int sent=0,converted=0,byteExact=0,udpDeliveries=0,appDeliveries=0;
+    bool identityExact=true;
+    std::vector<uint8_t> payload,sourceAddress,destAddress;
+    std::set<int> offsets;
+    int64_t identification=-1;
+    static b ipv6Offset(const Packet& packet){
+        for(b offset=b(0);offset<packet.getDataLength();){auto chunk=packet.peekDataAt<Chunk>(offset);if(dynamicPtrCast<const Ipv6Header>(chunk))return offset;offset+=chunk->getChunkLength();}
+        throw cRuntimeError("Selected fragment has no typed IPv6 region");
+    }
+    void serialize(Packet *frame){
+        auto offset=ipv6Offset(*frame);auto header=frame->peekDataAt<Ipv6Header>(offset);
+        ASSERT(header->getProtocolId()==44);
+        B length=B(40)+header->getPayloadLength();auto ip=frame->peekDataAt<BytesChunk>(offset,length)->getBytes();
+        ASSERT(ip.size()>=48&&ip[6]==44&&ip[40]==17);
+        int fragmentOffset=((ip[42]<<8)|ip[43])&0xfff8;
+        uint32_t id=(uint32_t(ip[44])<<24)|(uint32_t(ip[45])<<16)|(uint32_t(ip[46])<<8)|ip[47];
+        if(identification<0){identification=id;sourceAddress.assign(ip.begin()+8,ip.begin()+24);destAddress.assign(ip.begin()+24,ip.begin()+40);}
+        ASSERT(identification==id&&std::equal(ip.begin()+8,ip.begin()+24,sourceAddress.begin())&&std::equal(ip.begin()+24,ip.begin()+40,destAddress.begin()));
+        ASSERT((fragmentOffset==0&&(ip[43]&1))||(fragmentOffset==1232&&!(ip[43]&1)));
+        bool unique=offsets.insert(fragmentOffset).second;ASSERT(unique);
+        auto before=frame->peekDataAsBytes()->getBytes();auto packetId=frame->getId();auto front=frame->getFrontOffset(),back=frame->getBackOffset();
+        int tags=frame->getNumTags(),regions=frame->getNumRegionTags();
+        std::vector<Ptr<const TagBase>> tagObjects;for(int i=0;i<tags;i++)tagObjects.push_back(frame->getTag(i));
+        auto regionObjects=frame->getRegionTags();
+        frame->replaceDataAt<Chunk>(makeShared<BytesChunk>(ip),offset,length);
+        auto after=frame->peekDataAsBytes()->getBytes();bool same=before==after;
+        identityExact=identityExact&&frame->getId()==packetId&&frame->getFrontOffset()==front&&frame->getBackOffset()==back&&frame->getNumTags()==tags&&frame->getNumRegionTags()==regions;
+        for(int i=0;i<tags;i++)identityExact=identityExact&&frame->getTag(i)==tagObjects[i];
+        for(int i=0;i<regions;i++){
+            const auto& beforeTag=regionObjects.getRegionTag(i);const auto& afterTag=frame->getRegionTags().getRegionTag(i);
+            identityExact=identityExact&&beforeTag.getTag()==afterTag.getTag()&&beforeTag.getOffset()==afterTag.getOffset()&&beforeTag.getLength()==afterTag.getLength();
+        }
+        converted++;if(same)byteExact++;
+        ASSERT(same&&identityExact);
+        ASSERT(dynamicPtrCast<const BytesChunk>(frame->peekDataAt<Chunk>(offset))!=nullptr);
+    }
+  protected:
+    int numInitStages()const override{return NUM_INIT_STAGES;}
+    void initialize(int stage)override {
+        if(stage!=INITSTAGE_LAST)return;
+        auto root=getParentModule();sourceApp=root->getSubmodule("hostA")->getSubmodule("app",0);sink=root->getSubmodule("hostB")->getSubmodule("app",0);udp=root->getSubmodule("hostB")->getSubmodule("udp");
+        sourceApp->subscribe("packetSent",this);sink->subscribe("packetReceived",this);udp->subscribe("packetReceivedFromLower",this);
+        Interception rule;rule.matchExpression="ipv6.protocolId == 44";rule.action="mutate";rule.mutator=[this](Packet *frame){serialize(frame);};
+        auto tap=check_and_cast<ITap*>(root->getSubmodule("tap"));tap->addInterception(rule,nullptr);
+    }
+    void receiveSignal(cComponent*source,simsignal_t,cObject*object,cObject*)override {
+        auto packet=check_and_cast<Packet*>(object);
+        if(source==sourceApp){payload=packet->peekDataAsBytes()->getBytes();sent++;ASSERT(payload.size()==1452);return;}
+        if(source==sink){auto received=packet->peekDataAsBytes()->getBytes();appDeliveries++;ASSERT(received==payload&&received.size()==1452);return;}
+        ASSERT(source==udp);
+        auto header=packet->peekAtFront<UdpHeader>();udpDeliveries++;
+        ASSERT(header->getSourcePort()==4000&&header->getDestinationPort()==5000&&header->getTotalLengthField()==B(1460));
+        auto received=packet->peekDataAt<BytesChunk>(B(8),B(1452))->getBytes();ASSERT(received==payload);
+        auto addresses=packet->getTag<L3AddressInd>();
+        auto sourceBytes=addresses->getSrcAddress().toIpv6();auto destBytes=addresses->getDestAddress().toIpv6();
+        MemoryOutputStream src,dst;src.writeIpv6Address(sourceBytes);dst.writeIpv6Address(destBytes);
+        ASSERT(sourceAddress==src.getData()&&destAddress==dst.getData());
+    }
+    void finish()override {
+        std::cout<<"serialized-fragment sent="<<sent<<" converted="<<converted<<" byteExact="<<byteExact<<" identityExact="<<identityExact<<" id="<<identification<<" offsets=";for(auto offset:offsets)std::cout<<offset<<',';
+        std::cout<<" udp="<<udpDeliveries<<" app="<<appDeliveries<<" payloadBytes="<<payload.size()<<std::endl;
+        ASSERT(sent==1&&converted==2&&byteExact==2&&identityExact&&offsets==std::set<int>({0,1232})&&udpDeliveries==1&&appDeliveries==1);
+        std::cout<<"Serialized IPv6 fragment bytes reach normal UDP delivery exactly once\n";
+    }
+};
+Define_Module(SerializedDeliveryCheck);
+}
+
+%file: test.ned
+@namespace(inet::protocoltest);
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+simple SerializedDeliveryCheck {}
+network SerializedDeliveryNetwork {
+    submodules:
+        configurator:Ipv6FlatNetworkConfigurator;
+        hostA:StandardHost6;
+        router:Router6;
+        hostB:StandardHost6;
+        tap:PacketTap;
+        check:SerializedDeliveryCheck;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network=SerializedDeliveryNetwork
+sim-time-limit=10s
+seed-set=0
+**.vector-recording=false
+**.scalar-recording=false
+**.checksumMode="computed"
+**.fcsMode="computed"
+*.hostA.numApps=1
+*.hostA.app[0].typename="UdpBasicApp"
+*.hostA.app[0].destAddresses="hostB"
+*.hostA.app[0].destPort=5000
+*.hostA.app[0].localPort=4000
+*.hostA.app[0].messageLength=1452B
+*.hostA.app[0].timeToLive=64
+*.hostA.app[0].startTime=5s
+*.hostA.app[0].sendInterval=10s
+*.hostA.eth[0].mac.mtu=1280B
+*.hostB.numApps=1
+*.hostB.app[0].typename="UdpSink"
+*.hostB.app[0].localPort=5000
+
+%contains: stdout
+Serialized IPv6 fragment bytes reach normal UDP delivery exactly once

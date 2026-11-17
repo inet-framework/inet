@@ -1,0 +1,49 @@
+%description:
+Independent ICMPv6 pseudo-header checksum vector, address-sensitive validation,
+declared modes and safe raw dissection without enclosing IPv6 metadata.
+
+%includes:
+#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/Icmpv6ProtocolDissector.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+using namespace inet;
+
+%global:
+class IcmpObserver : public ProtocolDissector::ICallback {
+  public:
+    int incorrect = 0;
+    virtual void startProtocolDataUnit(const Protocol *) override {}
+    virtual void endProtocolDataUnit(const Protocol *) override {}
+    virtual void markIncorrect() override { incorrect++; }
+    virtual void visitChunk(const Ptr<const Chunk>&, const Protocol *) override {}
+    virtual void dissectPacket(Packet *packet, const Protocol *) override { packet->popAtFront(); }
+};
+
+%activity:
+// One's-complement sum of IPv6 source/destination, length12, NH58 and these bytes.
+Packet packet("independent", makeShared<BytesChunk>(std::vector<uint8_t>{0x80,0,0x62,0x3c,0x12,0x34,0xab,0xcd,1,2,3,4}));
+auto addresses = packet.addTag<L3AddressInd>();
+addresses->setSrcAddress(Ipv6Address("2001:db8::1"));
+addresses->setDestAddress(Ipv6Address("2001:db8::2"));
+ASSERT(Icmpv6::verifyChecksum(&packet));
+addresses->setDestAddress(Ipv6Address("2001:db8::3"));
+ASSERT(!Icmpv6::verifyChecksum(&packet));
+packet.removeTag<L3AddressInd>();
+ASSERT(!Icmpv6::verifyChecksum(&packet));
+IcmpObserver observer;
+Icmpv6ProtocolDissector().dissect(&packet, &Protocol::icmpv6, observer);
+ASSERT(observer.incorrect == 0 && packet.getDataLength() == B(0));
+for (auto mode : {CHECKSUM_DECLARED_CORRECT, CHECKSUM_DECLARED_INCORRECT, CHECKSUM_COMPUTED}) {
+    Packet payload("payload", makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3,4}));
+    auto header = makeShared<Icmpv6EchoRequestMsg>();
+    header->setType(ICMPv6_ECHO_REQUEST);
+    Icmpv6::insertChecksum(mode, header, &payload);
+    if (mode == CHECKSUM_COMPUTED) ASSERT(header->getChksum() == 0); // Deferred until IPv6 source is selected.
+    payload.insertAtFront(header);
+    ASSERT(Icmpv6::verifyChecksum(&payload) == (mode == CHECKSUM_DECLARED_CORRECT));
+}
+EV << "ICMPv6 pseudo-header vector and dissection verified\n";
+
+%contains: stdout
+ICMPv6 pseudo-header vector and dissection verified

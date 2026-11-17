@@ -25,6 +25,7 @@ simple Icmpv6 extends SimpleModule
 {
     parameters:
         @class(Icmpv6);
+        string networkProtocolModule = default("^.ipv6"); // IPv6 egress checksum finalization hook owner.
         string interfaceTableModule;   // The path to the InterfaceTable module
         string checksumMode @enum("declared", "computed") = default("declared");
         string mldModule = default("");  // Path to the MLD module, or "" if MLD is not enabled; MLD messages are dropped when empty

@@ -103,6 +103,9 @@ In the order of the chain.
 | [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md) | procedure | — | How do I compare, summarize, and plot simulation results without false repetitions? |
 | [history/design-history.md](history/design-history.md) | history | — | How did the current state come to be? |
 
+The [6LoWPAN standards map](evidence/protocol/6lowpan/standards.md) records the core,
+Neighbor Discovery and advanced extension reference sets.
+
 ## The header
 
 Every document starts with one block-quote line under its title ([DR-HEADER](rule/documentation.md#dr-header)):
