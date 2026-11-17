@@ -1,0 +1,138 @@
+%description:
+Test the native IEEE 802.15.4 address value.
+
+%includes:
+#include "inet/linklayer/ieee802154/Ieee802154Address.h"
+
+#include <functional>
+#include <sstream>
+#include <unordered_set>
+
+%global:
+
+using namespace inet;
+using Address = Ieee802154Address;
+
+static void expectFailure(const std::function<void()>& action)
+{
+    bool failed = false;
+    try {
+        action();
+    }
+    catch (const cRuntimeError&) {
+        failed = true;
+    }
+    ASSERT(failed);
+}
+
+static void assertRejectedAndUnchanged(Address& address, const char *text, const Address& expected)
+{
+    ASSERT(!address.tryParse(text));
+    ASSERT(address == expected);
+}
+
+%activity:
+
+Address none;
+ASSERT(none.isNone());
+ASSERT(none.getType() == Address::AddressType::NONE);
+ASSERT(none.str() == "<none>");
+ASSERT(Address("<none>") == none);
+expectFailure([&] { none.getShort(); });
+expectFailure([&] { none.getExtended(); });
+
+auto shortAddress = Address::fromShort(0x1234);
+auto shortUnallocated = Address::SHORT_UNALLOCATED_ADDRESS;
+auto shortBroadcast = Address::SHORT_BROADCAST_ADDRESS;
+ASSERT(shortAddress.isShort());
+ASSERT(shortAddress.getType() == Address::AddressType::SHORT);
+ASSERT(shortAddress.getShort() == 0x1234);
+ASSERT(shortAddress.str() == "short:1234");
+ASSERT(!shortAddress.isBroadcast());
+ASSERT(shortUnallocated.isShortUnallocated());
+ASSERT(!shortUnallocated.isNone());
+ASSERT(shortUnallocated.getShort() == 0xfffe);
+ASSERT(shortBroadcast.isShortBroadcast());
+ASSERT(shortBroadcast.isBroadcast());
+ASSERT(shortBroadcast.getShort() == 0xffff);
+ASSERT(Address("short:abcd") == Address::fromShort(0xabcd));
+auto shortUnallocatedText = shortUnallocated.str();
+auto shortBroadcastText = shortBroadcast.str();
+ASSERT(Address(shortUnallocatedText.c_str()) == shortUnallocated);
+ASSERT(Address(shortBroadcastText.c_str()) == shortBroadcast);
+
+auto individual = Address::fromExtended(0x0011223344556677ULL);
+auto group = Address::fromExtended(0x0111223344556676ULL);
+auto extendedBroadcast = Address::EXTENDED_BROADCAST_ADDRESS;
+ASSERT(individual.isExtended());
+ASSERT(individual.getType() == Address::AddressType::EXTENDED);
+ASSERT(individual.getExtended() == 0x0011223344556677ULL);
+ASSERT(individual.str() == "extended:00-11-22-33-44-55-66-77");
+ASSERT(!individual.isExtendedGroup());
+ASSERT(group.isExtendedGroup());
+ASSERT(!group.isBroadcast());
+ASSERT(extendedBroadcast.isExtendedGroup());
+ASSERT(extendedBroadcast.isBroadcast());
+ASSERT(extendedBroadcast.getExtended() == UINT64_MAX);
+ASSERT(Address("extended:01-11-22-33-44-55-66-76") == group);
+ASSERT(Address("extended:aa-bb-22-33-44-55-66-77") == Address::fromExtended(0xaabb223344556677ULL));
+auto extendedBroadcastText = extendedBroadcast.str();
+ASSERT(Address(extendedBroadcastText.c_str()) == extendedBroadcast);
+
+std::ostringstream stream;
+stream << individual;
+ASSERT(stream.str() == "extended:00-11-22-33-44-55-66-77");
+
+expectFailure([&] { shortAddress.getExtended(); });
+expectFailure([&] { individual.getShort(); });
+
+ASSERT(none < shortAddress);
+ASSERT(shortAddress < shortUnallocated);
+ASSERT(shortUnallocated < shortBroadcast);
+ASSERT(shortBroadcast < Address::fromExtended(0));
+ASSERT(Address::fromExtended(0) < individual);
+ASSERT(individual < Address::fromExtended(0xaabb223344556677ULL));
+ASSERT(shortAddress != shortBroadcast);
+ASSERT(individual != group);
+ASSERT(shortBroadcast > shortAddress);
+ASSERT(Address::fromExtended(0xaabb223344556677ULL) > individual);
+
+auto parsed = individual;
+ASSERT(parsed.tryParse("extended:aa-bb-cc-dd-ee-ff-00-11"));
+ASSERT(parsed == Address::fromExtended(0xaabbccddeeff0011ULL));
+ASSERT(parsed.str() == "extended:AA-BB-CC-DD-EE-FF-00-11");
+auto parsedValue = parsed;
+assertRejectedAndUnchanged(parsed, "extended:aa-bb-cc-dd-ee-ff-00", parsedValue);
+assertRejectedAndUnchanged(parsed, "short:123", parsedValue);
+assertRejectedAndUnchanged(parsed, "short:12345", parsedValue);
+assertRejectedAndUnchanged(parsed, "extended:aa:bb-cc-dd-ee-ff-00-11", parsedValue);
+assertRejectedAndUnchanged(parsed, "extended:gg-bb-cc-dd-ee-ff-00-11", parsedValue);
+assertRejectedAndUnchanged(parsed, "short:12 34", parsedValue);
+assertRejectedAndUnchanged(parsed, "none", parsedValue);
+assertRejectedAndUnchanged(parsed, nullptr, parsedValue);
+expectFailure([&] { Address("short:10000"); });
+expectFailure([&] { Address("extended:aa-bb-cc-dd-ee-ff-00"); });
+expectFailure([&] { parsed.set("short:10000"); });
+ASSERT(parsed == parsedValue);
+expectFailure([&] { parsed.set(nullptr); });
+ASSERT(parsed == parsedValue);
+expectFailure([&] { Address(nullptr); });
+
+std::unordered_set<Address> addresses;
+addresses.insert(none);
+addresses.insert(Address::fromShort(0));
+addresses.insert(Address::fromExtended(0));
+addresses.insert(individual);
+addresses.insert(Address::fromExtended(0xaabb223344556677ULL));
+ASSERT(addresses.size() == 5);
+ASSERT(addresses.count(none) == 1);
+ASSERT(addresses.count(Address::fromShort(0)) == 1);
+ASSERT(addresses.count(Address::fromExtended(0)) == 1);
+ASSERT(addresses.count(individual) == 1);
+ASSERT(addresses.count(Address::fromExtended(0xaabb223344556677ULL)) == 1);
+ASSERT(std::hash<Address>()(individual) == std::hash<Address>()(Address::fromExtended(0x0011223344556677ULL)));
+
+EV << ".\n";
+
+%contains: stdout
+.

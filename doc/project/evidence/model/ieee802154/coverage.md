@@ -3,7 +3,8 @@
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [conformance.md](conformance.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
 Level reached: **1 (Survey)** for the model families named in the claim survey. The initial survey ran no checks. The step-0 pass below adds draft English checks,
-but no protocol check has run and no higher achieved level is claimed. No protocol conformance verdict is
+but no protocol check has run and no higher achieved level is claimed. The separate step-1a
+value test below establishes only the standalone address API. No protocol conformance verdict is
 recorded; successful corpus retrieval validates tooling, not the simulation model.
 
 | Area | Survey evidence | Next evidence needed |
@@ -150,3 +151,15 @@ provisional until actual fixtures demonstrate that they reach the claimed observ
 | 2026-09-19 | Service/integration dependency closure | 83 statements; direct security-error service routing, channel descriptor, clause-6 procedure dispositions and native consumer compatibility recorded; runtime tests remain NOT_RUN |
 | 2026-09-19 | Companion address reference | Pinned IEEE Std 802-2024; two imported definitions and three address vectors resolve group-bit layout; sender/receiver AR distinction resolved without an invented receive-filter rule |
 | 2026-09-19 | Bounded M1 step-0 closure | PASS after independent review; 87 mapped statements and nine procedures, explicit policy/timing/admission decisions and bounded reference dispositions; no executable support evidence |
+
+## Step-1a value evidence
+
+The native [Ieee802154Address](../../../../../src/inet/linklayer/ieee802154/Ieee802154Address.h)
+value has one passing [unit case](../../../../../tests/unit/Ieee802154Address_1.test), run in debug
+mode. It checks none/short/extended identity, full-width values including equal-low-48-bit pairs,
+strict parsing, atomic rejection, comparisons, hashing and reserved/group/broadcast classification.
+
+This is partial supporting evidence for the address portion of package 1a. It does not execute
+IEEE802154-C-WIRE, prove byte order, or exercise the real interface. The catalog-to-protocol-check
+verdicts above remain NOT_RUN; package 1a service contracts and package 1d integration remain owed.
+Commands and limitations are in [results.md](results.md#step-1a-native-address-value).

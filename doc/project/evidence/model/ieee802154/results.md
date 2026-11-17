@@ -288,3 +288,50 @@ protocol and model evidence directories (2/3/5 files, zero broken links), `check
 (19 document seal units, index consistent), and `git diff --check`. A structural check confirmed
 87 unique catalog IDs, exact coverage-row correspondence, the 84-selected/3-deferred partition,
 and nine English checks. These are documentation checks, not executable model evidence.
+
+## Step-1a native address value
+
+The first production subunit is the standalone
+[Ieee802154Address](../../../../../src/inet/linklayer/ieee802154/Ieee802154Address.h) value, with
+[implementation](../../../../../src/inet/linklayer/ieee802154/Ieee802154Address.cc) and a focused
+[unit case](../../../../../tests/unit/Ieee802154Address_1.test). It has no existing MAC, PHY,
+serializer, packet-tag or interface caller. Runtime simulation behavior is not changed by this
+addition; service contracts and production integration remain later work.
+
+The pre-write contract was completed read-only by the implementer and independently validated
+before write authorization. The value owns mode plus complete numeric identity, while parsing
+validates before assignment. Wrong-mode access and throwing parse APIs use `cRuntimeError`;
+nonthrowing parse refusal retains the prior value. There are no packet-ownership, timer, callback
+or lifecycle paths in this subunit. The target subtree is unsealed and no shared-core edit is
+needed. The contract deliberately defers byte order, MSG declarations and runtime integration.
+
+Source classification uses IEEE Std 802-2024, 8.2.2 for the numeric bit-56 group flag and all-ones
+broadcast; IEEE Std 802.15.4-2024, 6.2 for broadcast and 10.21.5.2/10.4.12.2 for `0xfffe` meaning
+association without short allocation. Clause 6.6.1 independently excludes `0xfffe` and `0xffff`
+from allocated short source values. All values remain representable, including group extended
+values; constructing a value does not certify a valid device EUI identity.
+
+Validation from the repository root, debug mode, default enabled feature set:
+
+- `make MODE=debug -j8`: fresh full build passed, exit 0; rerun after adding the source passed
+  and explicitly compiled `Ieee802154Address.cc`. Logs: `/tmp/802154-debug-build.log` and
+  `/tmp/802154-address-build.log`.
+- `MPLCONFIGDIR=/tmp/802154-matplotlib inet_run_unit_tests -m debug -f 'Ieee802154Address_1\.test'`:
+  one executed case, PASS, exit 0. Log: `/tmp/802154-address-unit.log`; normalized envelope:
+  `/tmp/802154-address-verification.json`. The earlier test compilation failed on three
+  `std::string` arguments passed to the `const char *` constructor; the test calls were corrected
+  and the same focused command passed. No runtime assertion failed in that earlier attempt.
+- Scoped `check-architecture.sh` and `check-naming.sh` on `src/inet/linklayer/ieee802154` passed,
+  as did `git diff --check`; implementer syntax and formatting checks also passed.
+
+The unit test proves the standalone value API, including high-16-bit distinction through a hashed
+container, sentinel/mode separation, strict format, malformed/null rejection and full-width boundary
+values. It does not prove serialization, production delivery, frame exchanges or M1 support.
+Release compilation and runtime/fingerprint campaigns have not been run for this subunit.
+
+Independent review of the final three-file source/test change found no actionable correctness
+findings: **11 PASS, 15 N/A, 0 FLAG, 0 QUESTION** under the general semantic checklist. Its API
+visibility observation was resolved by making the comparison helper private; retained public mode,
+comparison and stream operations have direct behavior assertions. The final debug rebuild and
+focused unit rerun both passed after that change. Review artifact with exact file hashes:
+`/tmp/802154-address-review.md`. No exception-ledger change or sealed-path approval was needed.
