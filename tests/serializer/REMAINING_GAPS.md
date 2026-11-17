@@ -467,7 +467,12 @@ capture invokes**. Cross-referencing those 42 against the constructed test:
 | **Ethernet sub-fields** | 3 | EthernetMacAddressFields, EthernetTypeOrLengthField, EthernetFragmentFcs | The address / type-or-length / fragment-FCS field serializers are **internal to EthernetMacHeader encoding**, not standalone top-level chunks a capture surfaces | covered indirectly via Ethernet frames |
 | **802.1 tag EPD headers** | 2 | Ieee8021aeTagEpdHeader (MACsec), Ieee802EpdHeader | The R-TAG is covered by a generated capture now. MACsec has no example to record from, and the generic 802 EPD header is only popped in the 5.9 GHz 802.11 band | a MACsec capture (M) |
 | **PIM** | 1 | PimStateRefresh | No public capture, and the shipped PIM-DM example never originates a State Refresh either, so there was nothing to record | a scenario that originates one, then record (M) |
-| **IEEE 802.15.4** | 1 | Ieee802154MacHeader | `Ieee802154MacHeader` is a 3-field placeholder (hard-coded FCF `0xCC01`) that cannot represent real 802.15.4 frames, so the capture was removed as untestable (documented TODO on the `.msg`) | model the real 802.15.4 wire format (L) |
+| **Legacy IEEE 802.15.4** | 1 | Ieee802154MacHeader | The retained legacy header is a 3-field placeholder (hard-coded FCF `0xCC01`); its mixed old capture is not admitted as a standard-wire oracle | migrate remaining legacy consumers to the native frame model |
+
+The native `Ieee802154Frame` codec has separate admitted [M1 wire-vector captures](pcap/generated/ieee802154-m1.md).
+`serializer_ieee802154.test` exercises its registered dissector/serializer with and without
+FCS, typed-frame coverage and exact byte comparison. The legacy row does not describe that
+replacement codec, and the new fixtures do not repair or reinterpret the old mixed capture.
 
 ### Exercised by neither test (3)
 
@@ -572,7 +577,7 @@ instead of fixed.
 | **SCTP PKTDROP** | The chunk's payload is handled as an encapsulated `cPacket`, but an `SctpHeader` is a `Chunk`, so a payload the cast accepts cannot be constructed at all; the deserialize case is commented out | model the dropped packet as a chunk (or remove the type) | **M** |
 | **SCTP INIT/INIT-ACK AUTH parameters** | `random`, `hmacTypes`, `sctpChunkTypes`, `msg_rwnd` back the RANDOM / HMAC_ALGO / CHUNKS parameters; the fillers do not build them, so those serializer branches are unexercised | a filler variant per parameter | **S** |
 | **Modelled but never serialized** | `PimHelloOptionType::AddressList` has no serializer case, `Ieee8021ae*::sci` and `EthernetFragmentFcs::mFcs` are never written or read, the AH/ESP extension-header content is a zero-fill TODO | either serialize the field or drop it from the model; each currently costs an entry on the test's knownUnfilled list | **S** each |
-| **IEEE 802.15.4 header length** | The MAC module sizes the header from its `headerLength` parameter (72 b) while the serializer writes 23 octets, so a serialized 802.15.4 frame fails the length check | model the real wire format (the same item as in the table above) | **L** |
+| **Legacy IEEE 802.15.4 header length** | The retained legacy MAC uses `headerLength` (72 b) while its serializer writes 23 octets | migrate consumers to `Ieee802154Frame` with complete variable MPDU lengths; preserve the legacy capture's interpretation | **L** |
 
 ---
 

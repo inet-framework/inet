@@ -1,0 +1,85 @@
+%description:
+Independent Content octets for all eight selected legacy commands, malformed and
+unsupported boundaries, and complete registered command-frame serialization.
+This checks the codec, not command procedure execution.
+
+%includes:
+#include "inet/linklayer/ieee802154/Ieee802154CommandCodec.h"
+#include "inet/linklayer/ieee802154/Ieee802154FrameCodec.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+using namespace inet;
+
+%activity:
+using Codec = Ieee802154CommandCodec;
+using Command = Codec::Command;
+using Error = Codec::Error;
+// Content formats: 10.21.5.1–3, 10.22.4.1, 10.17.4.1, 10.20.3.1, 7.5.2, 7.5.4.
+const std::vector<std::pair<Command, std::vector<uint8_t>>> vectors = {
+    {Codec::AssociationRequest{0x8e}, {1, 0x8e}},
+    {Codec::AssociationResponse{0x5678, 0}, {2, 0x78, 0x56, 0}},
+    {Codec::AssociationResponse{0xfffe, 0}, {2, 0xfe, 0xff, 0}},
+    {Codec::AssociationResponse{0xffff, 2}, {2, 0xff, 0xff, 2}},
+    {Codec::DisassociationNotification{1}, {3, 1}},
+    {Codec::DisassociationNotification{2}, {3, 2}},
+    {Codec::DataRequest{}, {4}},
+    {Codec::PanConflictNotification{}, {5}},
+    {Codec::OrphanNotification{}, {6}},
+    {Codec::BeaconRequest{}, {7}},
+    {Codec::CoordinatorRealignment{0x1234, 0x5678, 26, 0xfffe}, {8, 0x34, 0x12, 0x78, 0x56, 26, 0xfe, 0xff}}
+};
+for (const auto& [command, bytes] : vectors) {
+    ASSERT(Codec::encode(command) == bytes);
+    auto result = Codec::decode(bytes);
+    auto decoded = std::get_if<Command>(&result);
+    ASSERT(decoded && decoded->index() == command.index());
+    ASSERT(Codec::encode(*decoded) == bytes);
+    for (size_t length = 0; length < bytes.size(); ++length) {
+        auto prefix = std::vector<uint8_t>(bytes.begin(), bytes.begin() + length);
+        ASSERT(std::get<Error>(Codec::decode(prefix)) == Error::TRUNCATED);
+    }
+    auto extra = bytes;
+    extra.push_back(0);
+    if (bytes[0] != 8)
+        ASSERT(std::get<Error>(Codec::decode(extra)) == Error::MALFORMED);
+    else {
+        // Optional octet with Extended Channel Number zero has reserved low bits.
+        extra.back() = 0x7f;
+        auto optional = Codec::decode(extra);
+        ASSERT(std::get<Codec::CoordinatorRealignment>(std::get<Command>(optional)).channelNumber == 26);
+        extra.back() = 0x80;
+        ASSERT(std::get<Error>(Codec::decode(extra)) == Error::UNSUPPORTED);
+    }
+}
+for (int id : {0, 9, 0x13, 0xff})
+    ASSERT(std::get<Error>(Codec::decode({uint8_t(id)})) == Error::UNSUPPORTED);
+
+// Beacon Request: version 0, short destination, broadcast PAN/address, no source, no AR.
+// Independent no-FCS octets derived from 7.5.2 and the legacy FCF bit assignments.
+const std::vector<uint8_t> beaconRequest = {3, 8, 0x6a, 0xff, 0xff, 0xff, 0xff, 7};
+auto frame = Ieee802154FrameCodec::decode(beaconRequest, false);
+ASSERT(frame->getDecodeStatus() == Ieee802154FrameCodec::OK);
+ASSERT(frame->getFrameType() == 3 && !frame->getAckRequest());
+ASSERT(frame->getDestinationAddress().isShortBroadcast() && frame->getSourceAddress().isNone());
+ASSERT(Ieee802154FrameCodec::encode(*frame) == beaconRequest);
+// Poll: version 1, compressed PAN, source/destination short, AR=1, Command ID 4 only.
+const std::vector<uint8_t> poll = {0x63, 0x98, 0xff, 0x34, 0x12, 0x78, 0x56, 0xbc, 0x9a, 4};
+frame = Ieee802154FrameCodec::decode(poll, false);
+ASSERT(frame->getDecodeStatus() == Ieee802154FrameCodec::OK && frame->getAckRequest());
+ASSERT(frame->getSourceAddress() == Ieee802154Address::fromShort(0x9abc));
+ASSERT(Ieee802154FrameCodec::encode(*frame) == poll);
+frame->setFcsPresent(true);
+frame->setComputeFcs(true);
+Ieee802154FrameCodec::finalize(*frame);
+Packet typed("poll");
+typed.insertAtBack(frame);
+auto serialized = typed.peekDataAsBytes();
+Packet raw("poll bytes");
+raw.insertAtBack(serialized);
+auto converted = raw.peekAtFront<Ieee802154Frame>(raw.getDataLength());
+ASSERT(converted->getFcsValid() && converted->getFrameType() == 3);
+ASSERT(converted->getPayloadArraySize() == 1 && converted->getPayload(0) == 4);
+std::cout << "Selected command fields, independent octets and registered framing verified.\n";
+
+%contains: stdout
+Selected command fields, independent octets and registered framing verified.

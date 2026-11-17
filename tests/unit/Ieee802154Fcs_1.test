@@ -1,0 +1,38 @@
+%description:
+Independent CRC known answers, absent and invalid FCS preservation, O-QPSK size limits.
+
+%includes:
+#include "inet/linklayer/ieee802154/Ieee802154FrameCodec.h"
+#include <vector>
+using namespace inet;
+
+%activity:
+using Codec = Ieee802154FrameCodec;
+// IEEE 802.15.4-2024, 7.2.11 ACK example converted from time-ordered bits.
+ASSERT(Codec::calculateFcs({0x02, 0x00, 0x6a}) == 0x79e4);
+ASSERT(Codec::calculateFcs({'1','2','3','4','5','6','7','8','9'}) == 0x2189);
+const std::vector<uint8_t> ackBytes = {0x02, 0, 0x6a, 0xe4, 0x79};
+auto ack = Codec::decode(ackBytes);
+ASSERT(ack->getFcsPresent() && ack->getFcsValid() && ack->getDecodeStatus() == Codec::OK);
+ASSERT(Codec::encode(*ack) == ackBytes);
+auto corrupt = ackBytes;
+corrupt[3] ^= 1;
+auto invalid = Codec::decode(corrupt);
+ASSERT(invalid->getDecodeStatus() == Codec::OK && !invalid->getFcsValid());
+ASSERT(!invalid->isCorrect() && Codec::encode(*invalid) == corrupt);
+auto absent = Codec::decode({0x02, 0, 0x6a}, false);
+ASSERT(!absent->getFcsPresent() && !absent->getFcsValid());
+ASSERT(Codec::encode(*absent) == std::vector<uint8_t>({0x02, 0, 0x6a}));
+auto data = makeShared<Ieee802154Frame>();
+data->setPayloadArraySize(122);
+ASSERT(Codec::encode(*data).size() == 127);
+data->setPayloadArraySize(123);
+bool rejected = false;
+try { Codec::encode(*data); } catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+auto oversized = std::vector<uint8_t>(128, 0);
+ASSERT(Codec::decode(oversized)->getDecodeStatus() == Codec::MALFORMED);
+std::cout << "Independent FCS vectors, forensic preservation and selected PSDU bounds verified.\n";
+
+%contains: stdout
+Independent FCS vectors, forensic preservation and selected PSDU bounds verified.

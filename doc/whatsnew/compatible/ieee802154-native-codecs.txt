@@ -1,0 +1,3 @@
+Native IEEE 802.15.4 frame codecs
+
+Added legacy-frame encoding, FCS, command and beacon codecs, with serializer, packet inspection and capture support for full 64-bit addresses.

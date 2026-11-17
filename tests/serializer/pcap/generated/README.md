@@ -1,10 +1,14 @@
 # Generated captures
 
-The captures here were **recorded from INET simulations** rather than taken off a real
+Most captures here were **recorded from INET simulations** rather than taken off a real
 network, because no public capture of the protocol exists (or none that carries the
-message types the serializers need). Each one is verified with `tshark` before it enters
+message types the serializers need). Each simulation recording is verified with `tshark` before it enters
 the corpus: Wireshark has to decode every frame as the protocol it claims to be, with no
 `[Malformed Packet]`.
+
+The [IEEE 802.15.4 M1 fixtures](ieee802154-m1.md) instead come from independently
+specified wire vectors, generated without INET and checked with Scapy. Their
+provenance, CRC oracle and regeneration command are documented separately.
 
 That check is what makes a self-recorded capture worth anything. On its own it would be
 circular -- INET reading back what INET wrote proves only that it is self-consistent --
