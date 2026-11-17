@@ -184,6 +184,8 @@ config.fillers = getAllChunkFillers();
 // Anything not listed here that ends up unset fails the test, so a field a filler
 // forgets -- or a newly added .msg field nothing fills -- cannot pass unnoticed.
 config.knownUnfilled = R"KEYS(
+// MQTT 3.1.1 CONNECT uses the literal protocol name MQTT, tested by wire vectors.
+inet::mqtt::MqttPacket::protocolName
 // -- fields the wire format requires to be zero (reserved / unused / must-be-zero),
 // so their "unfilled" default IS the value under test -- the type of a CFM end TLV is
 // among them: zero is what makes it the TLV that ends the list

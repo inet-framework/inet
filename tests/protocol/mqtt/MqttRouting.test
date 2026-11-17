@@ -1,0 +1,50 @@
+%description:
+Production wildcard subscription routes a binary publication through the broker.
+Unsubscribe prevents a second matching publication within the stated window.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_routing")
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType() == SUBACK; }).within(1))
+        .once(on("subscriber.app[0]").signal("packetSentToUpper")
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0,255,65}); }).within(1))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType() == UNSUBACK; }).within(1))
+        .never(on("subscriber.app[0]").signal("packetSentToUpper").within(1.5));
+}
+
+%activity:
+EV << "MQTT routing fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 4s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/line1/temperature' payload='00ff41'/><publish at='2s' topic='factory/line1/temperature' payload='42'/></mqtt>")
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/+/temperature'/><unsubscribe at='1s' filter='factory/+/temperature'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_routing: PASS

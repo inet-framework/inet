@@ -1,0 +1,67 @@
+%description:
+Golden CONNECT and PING bytes cross real TCP and the production MQTT framer.
+The peers do not implement MQTT session semantics in this codec-only stage.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+#include "MqttReferenceVectors.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_wire")
+        .act(action().at(0).run<MqttScriptedPeer>("host2.app[0]", [](auto& app) {
+            for (const char *hex : mqttReferenceVectors) {
+                std::string text(hex); std::vector<uint8_t> bytes;
+                for (size_t i=0; i<text.size(); i+=2) bytes.push_back(std::stoul(text.substr(i,2),nullptr,16));
+                auto decoded = MqttPacketSerializer::decode(bytes);
+                ASSERT(MqttPacketSerializer::encode(*decoded) == bytes);
+            }
+            app.socket().bind(1883); app.socket().listen();
+        }))
+        .act(action().at(0.1).run<MqttScriptedPeer>("host1.app[0]", [](auto& app) {
+            app.socket().connect(app.addressOf("host2"), 1883);
+        }))
+        .once(on("host1.app[0]").signal("socketEstablished").within(1))
+        .act(action().after(0.01).run<MqttScriptedPeer>("host1.app[0]", [](auto& app) {
+            app.sendBytes(app.socket(), {0x10,0x0d,0,4,'M','Q','T','T',4,2,0,0,0,1,'c',0xc0,0});
+        }))
+        .exactlyTimes(2, on("host2.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().run<MqttScriptedPeer>("host2.app[0]", [](auto& app) {
+            ASSERT(app.received.size() == 2);
+            ASSERT(app.received[0]->getType() == CONNECT);
+            ASSERT(std::string(app.received[0]->getClientIdentifier()) == "c");
+            ASSERT(app.received[1]->getType() == PINGREQ);
+        }));
+}
+
+%activity:
+EV << "mqtt wire compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp {
+    parameters:
+        @class(::inet::mqtttest::MqttScriptedPeer);
+        @signal[packetReceivedFromLower](type=inet::Packet);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+sim-time-limit = 2s
+seed-set = 0
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[0].typename = "MqttScriptedPeer"
+
+%contains: stdout
+PROTOCOLTEST mqtt_wire: PASS
