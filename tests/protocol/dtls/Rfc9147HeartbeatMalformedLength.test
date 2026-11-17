@@ -1,0 +1,58 @@
+%description:
+A forged heartbeat payload length cannot cause an echo; a later retry recovers.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int requests = 0, replies = 0;
+return establish("rfc9147_heartbeat_malformed_length")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetHeartbeat(p, 1); }).nth(1).mutate([](Packet *p) {
+        auto actual = findChunk<inet::dtls::DtlsHeartbeat>(p);
+        Packet body("actual heartbeat bytes", actual);
+        auto bytes = body.peekDataAsBytes()->getBytes();
+        bytes[1] = 0xff; bytes[2] = 0xff;
+        auto inner = makeShared<SequenceChunk>();
+        auto encoded = makeShared<BytesChunk>(bytes); encoded->markImmutable();
+        inner->insertAtBack(encoded);
+        auto type = makeShared<inet::dtls::DtlsInnerContentType>(); type->setContentType(24);
+        type->markImmutable();
+        inner->insertAtBack(type); inner->markImmutable();
+        mutateNestedHeader<EncryptedChunk>(p, [&](auto& h) { h.setChunk(inner); h.setLength(inner->getChunkLength()); });
+    }))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) ++requests; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 2)) ++replies; return false; }).within(3)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .never(on("host1.app[0].dtls").signal("probeResult").within(0.5))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).within(1))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(requests == 2 && replies == 1 && dtls.probeAdmissions == std::vector<bool>{true}, "overclaimed length is discarded without an amplified reply; retry completes"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.receivedMarkers.empty(), "malformed request is silently ignored, not delivered or fatal"); }));
+}
+%activity:
+EV << "wrong response compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_malformed_length: PASS

@@ -1,0 +1,93 @@
+%description:
+Five production associations cover bidirectional, unidirectional, empty and
+unnegotiated CIDs. Check actual headers, directional UDP budgets and delivery.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static unsigned clients = 0, servers = 0;
+static bool correct = true;
+return ProtocolTest("rfc9147_connection_id")
+    .meanwhile(anyNumberOfTimes(on("host1").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (!applicationRecord(c)) return false;
+        for (unsigned i = 0; i < 5; ++i) if (c.event.sourcePath.find("app[" + std::to_string(i) + "]") != std::string::npos) {
+            auto header = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+            correct &= header->getConnectionIdArraySize() == (i < 2 ? 8 : 0) && c.event.packet->getByteLength() == 1200;
+            clients |= 1 << i;
+        }
+        return false;
+    }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host2").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (!applicationRecord(c)) return false;
+        for (unsigned i = 0; i < 5; ++i) if (c.event.sourcePath.find("app[" + std::to_string(i) + "]") != std::string::npos) {
+            auto header = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+            correct &= header->getConnectionIdArraySize() == (i == 0 ? 8 : 0) && c.event.packet->getByteLength() == 1200;
+            servers |= 1 << i;
+        }
+        return false;
+    }).within(3)))
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "CID profile establishes"); app.sendMarker(10, 1170); app.sendMarker(99, 1171); })
+.run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "CID profile establishes"); app.sendMarker(11, 1170); app.sendMarker(99, 1171); })
+.run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "CID profile establishes"); app.sendMarker(12, 1178); app.sendMarker(99, 1179); })
+.run<DtlsTestDriver>("host1.app[3].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "CID profile establishes"); app.sendMarker(13, 1178); app.sendMarker(99, 1179); })
+.run<DtlsTestDriver>("host1.app[4].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "CID profile establishes"); app.sendMarker(14, 1178); app.sendMarker(99, 1179); }))
+    .unordered({on("host2.app[0].driver").signal("packetSentToUpper").within(1), on("host2.app[1].driver").signal("packetSentToUpper").within(1), on("host2.app[2].driver").signal("packetSentToUpper").within(1), on("host2.app[3].driver").signal("packetSentToUpper").within(1), on("host2.app[4].driver").signal("packetSentToUpper").within(1)})
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{10}, "directional CID input delivers once"); app.sendMarker(20, 1170); })
+.run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{11}, "directional CID input delivers once"); app.sendMarker(21, 1178); })
+.run<DtlsTestDriver>("host2.app[2].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{12}, "directional CID input delivers once"); app.sendMarker(22, 1178); })
+.run<DtlsTestDriver>("host2.app[3].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{13}, "directional CID input delivers once"); app.sendMarker(23, 1178); })
+.run<DtlsTestDriver>("host2.app[4].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{14}, "directional CID input delivers once"); app.sendMarker(24, 1178); }))
+    .unordered({on("host1.app[0].driver").signal("packetSentToUpper").within(1), on("host1.app[1].driver").signal("packetSentToUpper").within(1), on("host1.app[2].driver").signal("packetSentToUpper").within(1), on("host1.app[3].driver").signal("packetSentToUpper").within(1), on("host1.app[4].driver").signal("packetSentToUpper").within(1)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{20} && app.sendErrorCount == 1, "directional reply and one-byte budget refusal"); })
+.run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{21} && app.sendErrorCount == 1, "directional reply and one-byte budget refusal"); })
+.run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{22} && app.sendErrorCount == 1, "directional reply and one-byte budget refusal"); })
+.run<DtlsTestDriver>("host1.app[3].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{23} && app.sendErrorCount == 1, "directional reply and one-byte budget refusal"); })
+.run<DtlsTestDriver>("host1.app[4].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{24} && app.sendErrorCount == 1, "directional reply and one-byte budget refusal"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver&) { require(correct && clients == 31 && servers == 31, "all five negotiated header forms use the actual UDP budget"); }));
+}
+%activity:
+EV << "CID negotiation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 5
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[3].dtls.connectionIdEnabled = false
+*.host2.app[4].dtls.connectionIdEnabled = false
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[0].dtls.profile = "certificate"
+*.host*.app[0].dtls.cipherSuites = "TLS_AES_256_GCM_SHA384"
+*.host*.app[0].dtls.signatureSchemes = "rsa_pss_rsae_sha256"
+*.host2.app[0].dtls.clientAuthentication = true
+*.host1.app[1].dtls.receiveConnectionId = false
+*.host*.app[2].dtls.receiveConnectionId = false
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.peerPort = 4435
+*.host2.app[1].localPort = 4435
+*.host1.app[2].localPort = 4438
+*.host1.app[2].driver.peerPort = 4437
+*.host2.app[2].localPort = 4437
+*.host1.app[3].localPort = 4440
+*.host1.app[3].driver.peerPort = 4439
+*.host2.app[3].localPort = 4439
+*.host1.app[4].localPort = 4442
+*.host1.app[4].driver.peerPort = 4441
+*.host2.app[4].localPort = 4441
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_connection_id: PASS

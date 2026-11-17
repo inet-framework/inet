@@ -1,0 +1,54 @@
+%description:
+Production CID request/update recovery, spare selection, immediate replacement,
+busy admission and independent KeyUpdate. Overlap pending ticket delivery with CID request/update and KeyUpdate.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int tickets = 0, replacements = 0;
+return ProtocolTest("rfc9147_cid_overlap")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (handshake(c, 4)) ++tickets;
+        if (handshake(c, 10)) ++replacements;
+        return false;
+    }).within(8)))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 4); }).nth(1).delay(0.5))
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop())
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(); app.provideCids(1, true); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdChanged").within(4))
+    .act(action().after(1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.updateResults == std::vector<bool>{true} && app.cidResults == std::vector<bool>{true} && app.errorCount == 0 && tickets >= 2 && replacements >= 2, "ticket and CID retry survive a concurrent KeyUpdate and selective ACKs");
+        app.sendMarker(12);
+    }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{12} && app.errorCount == 0, "new-epoch application delivery survives independent old-epoch recovery"); }));
+}
+%activity:
+EV << "CID updates compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host*.app[*].dtls.profile = "certificate"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_overlap: PASS

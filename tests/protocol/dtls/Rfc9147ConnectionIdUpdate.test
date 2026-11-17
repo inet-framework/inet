@@ -1,0 +1,94 @@
+%description:
+Production CID request/update recovery, spare selection, immediate replacement,
+busy admission and independent KeyUpdate. Lose both message types and their ACKs.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int requests = 0, updates = 0;
+static std::vector<uint8_t> firstCid, spareCid, immediateCid;
+static std::map<int, std::vector<uint8_t>> sentCids;
+return establish("rfc9147_connection_id_update")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (handshake(c, 9)) ++requests;
+        if (applicationRecord(c)) {
+            auto h = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+            auto marker = findChunk<BytesChunk>(c.event.packet)->getByte(0);
+            std::vector<uint8_t> cid;
+            for (size_t i = 0; i < h->getConnectionIdArraySize(); ++i) cid.push_back(h->getConnectionId(i));
+            sentCids[marker] = cid;
+        }
+        return false;
+    }).within(20)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (handshake(c, 10)) {
+            ++updates;
+            auto body = findChunk<inet::dtls::DtlsNewConnectionId>(c.event.packet);
+            if (body && body->getConnectionIdsArraySize() >= 9) {
+                std::vector<uint8_t> cid;
+                for (size_t i = 1; i <= 8; ++i) cid.push_back(body->getConnectionIds(i));
+                (body->getUsage() == 0 ? immediateCid : spareCid) = cid;
+            }
+        }
+        return false;
+    }).within(20)))
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetHandshake(p, 9); }).nth(1).drop())
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 10); }).nth(1).drop())
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop())
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop())
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        app.sendMarker(1); app.requestCids(2); app.requestCids(1);
+    }))
+    .act(action().after(5).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>({true,false}) && requests >= 2 && updates >= 2, "independent retry and busy admission");
+        app.activateCid(); app.sendMarker(2);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(1, true); app.provideCids(1, true); }))
+    .act(action().after(0.2).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(3); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>({true,false,true}) && app.updateResults == std::vector<bool>{true} && app.errorCount == 0, "spare activation and KeyUpdate succeed");
+        require(sentCids[1].size() == 8, "initial record carries eight CID bytes");
+        require(sentCids[2] == spareCid && !spareCid.empty(), "second record carries oldest spare");
+        require(sentCids[3] == immediateCid && !immediateCid.empty(), "third record carries immediate ID");
+        require(sentCids[1] != sentCids[2] && sentCids[2] != sentCids[3], "each selected CID differs");
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>({true,false}) && app.receivedMarkers == std::vector<int>({1,2,3}) && app.errorCount == 0, "replacement admission and exactly once data after retries");
+    }))
+    .meanwhile(tap("tap").from("host1").filterPacket(packetApplication).nth(1).mutate([](Packet *p) {
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { for (size_t i = 0; i < 8; ++i) h.setConnectionId(i, sentCids[1][i]); });
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(4); }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(6).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(5); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({1,2,3,5}), "ACKed immediate replacement retires the initial receive ID"); }));
+}
+%activity:
+EV << "CID updates compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 20s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_connection_id_update: PASS

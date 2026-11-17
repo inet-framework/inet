@@ -1,0 +1,3 @@
+Optional DTLS path payload discovery
+
+DTLS can probe and adapt per-path UDP budgets, recover from black holes, and re-fragment retained handshake recovery while preserving byte-range ACK coverage. The new maximum-datagram query and required callback expose application payload availability. Discovery is disabled by default and retains abstract cryptography.

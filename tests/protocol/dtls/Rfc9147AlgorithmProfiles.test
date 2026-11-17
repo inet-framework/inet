@@ -1,0 +1,87 @@
+%description:
+Three simultaneous production certificate profiles cover the additional suites,
+secp256r1 and RSA-PSS. Observe selected wire fields, actual signature and Finished
+lengths, then deliver one application datagram on each association.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static unsigned suites = 0, signatures = 0, hashes = 0, groups = 0;
+return ProtocolTest("rfc9147_algorithm_profiles")
+    .meanwhile(anyNumberOfTimes(on("host2").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (auto h = findChunk<inet::tls::TlsServerHello>(c.event.packet)) {
+            if (h->getCipherSuite() >= 0x1301 && h->getCipherSuite() <= 0x1303) suites |= 1 << (h->getCipherSuite() - 0x1301);
+            for (size_t i = 0; i + 4 <= h->getExtensionsArraySize();) {
+                unsigned type = (h->getExtensions(i) << 8) | h->getExtensions(i + 1);
+                unsigned length = (h->getExtensions(i + 2) << 8) | h->getExtensions(i + 3);
+                if (type == 51 && length >= 4) {
+                    unsigned group = (h->getExtensions(i + 4) << 8) | h->getExtensions(i + 5);
+                    if (group == 23 && length == 69 && h->getExtensions(i + 8) == 4) groups |= 1;
+                    if (group == 29 && length == 36) groups |= 2;
+                }
+                i += 4 + length;
+            }
+        }
+        if (auto h = findChunk<inet::tls::TlsCertificateVerify>(c.event.packet)) {
+            if (h->getSignatureScheme() == 0x0804 && h->getSignatureArraySize() == 256) signatures |= 1;
+            if (h->getSignatureScheme() == 0x0403 && h->getSignatureArraySize() == 64) signatures |= 2;
+        }
+        if (auto h = findChunk<inet::tls::TlsFinished>(c.event.packet)) {
+            if (h->getVerifyDataArraySize() == 48) hashes |= 1;
+            if (h->getVerifyDataArraySize() == 32) hashes |= 2;
+        }
+        return false;
+    }).within(2)))
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && suites == 7 && signatures == 3 && hashes == 3 && groups == 3, "all selected suites, groups, RSA/ECDSA and hash lengths appear on the wire"); app.sendMarker(51, 1178); app.sendMarker(99, 1179);
+    }).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "ChaCha profile establishes"); app.sendMarker(52, 1178); app.sendMarker(99, 1179); })
+      .run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1, "AES128 alternate group/signature establishes"); app.sendMarker(53, 1178); app.sendMarker(99, 1179); }))
+    .unordered({on("host2.app[0].driver").signal("packetSentToUpper").within(1), on("host2.app[1].driver").signal("packetSentToUpper").within(1), on("host2.app[2].driver").signal("packetSentToUpper").within(1)})
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{51}, "SHA-384 datagram delivered"); })
+        .run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{52}, "ChaCha datagram delivered"); })
+        .run<DtlsTestDriver>("host2.app[2].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{53}, "alternate profile datagram delivered"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1, "AES256 rejects one byte above UDP budget"); })
+        .run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1, "ChaCha rejects one byte above UDP budget"); })
+        .run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { require(app.sendErrorCount == 1, "AES128 rejects one byte above UDP budget"); }));
+}
+%activity:
+EV << "algorithm profiles compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 3
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[*].dtls.profile = "certificate"
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.peerPort = 4435
+*.host2.app[1].localPort = 4435
+*.host1.app[2].localPort = 4438
+*.host1.app[2].driver.peerPort = 4437
+*.host2.app[2].localPort = 4437
+*.host*.app[0].dtls.cipherSuites = "TLS_AES_256_GCM_SHA384"
+*.host*.app[0].dtls.keyExchangeGroups = "secp256r1"
+*.host*.app[0].dtls.signatureSchemes = "rsa_pss_rsae_sha256"
+*.host*.app[1].dtls.cipherSuites = "TLS_CHACHA20_POLY1305_SHA256"
+*.host1.app[1].dtls.keyExchangeGroups = "secp256r1 x25519"
+*.host2.app[1].dtls.keyExchangeGroups = "x25519 secp256r1"
+*.host2.app[0].dtls.clientAuthentication = true
+*.host*.app[2].dtls.keyExchangeGroups = "secp256r1"
+*.host*.app[2].dtls.signatureSchemes = "rsa_pss_rsae_sha256"
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_algorithm_profiles: PASS

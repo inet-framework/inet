@@ -1,0 +1,71 @@
+%description:
+Certificate-origin association advertises PHA, admits one server request, and
+authenticates twice with distinct contexts without replacing its handle.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<std::vector<uint8_t>> contexts;
+return establish("rfc9147_post_handshake_auth")
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto request = findChunk<inet::tls::TlsCertificateRequest>(c.event.packet);
+        if (request && request->getRequestContextArraySize()) {
+            std::vector<uint8_t> context;
+            for (size_t i = 0; i < request->getRequestContextArraySize(); ++i) context.push_back(request->getRequestContext(i));
+            contexts.push_back(context);
+        }
+        return false;
+    }).within(5)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(!app.peerAuthentication().certificateAuthenticated, "initial server-side client is anonymous");
+        app.requestAuthentication(); app.requestAuthentication(); app.sendMarker(31);
+    }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(2))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.authenticationAdmissions == std::vector<bool>({true,false}) && app.authenticationResults == std::vector<bool>{true}, "one active request and one server result");
+        require(app.peerAuthentication().certificateAuthenticated && !app.peerAuthentication().resumed && !app.peerAuthentication().identity.empty(), "fresh server-side certificate authentication");
+        app.requestAuthentication();
+    }))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(2))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.authenticationResults == std::vector<bool>({true,true}) && app.establishedCount == 1 && app.errorCount == 0, "two authentication results without reconnection");
+        require(contexts.size() == 2 && contexts[0].size() == 16 && contexts[0] != contexts[1], "nonempty unique request contexts");
+        app.sendMarker(32);
+    }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.authenticationResults.empty() && app.receivedMarkers == std::vector<int>({31,32}), "client gets no server-acceptance callback and ordinary data continues");
+        app.requestAuthentication(); app.sendMarker(33);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.authenticationAdmissions == std::vector<bool>{false}, "client cannot initiate authentication"); }));
+}
+%activity:
+EV << "post-handshake authentication compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_post_handshake_auth: PASS

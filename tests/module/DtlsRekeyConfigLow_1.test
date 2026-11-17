@@ -1,0 +1,26 @@
+%description:
+Reject a rekey threshold below the selected profile's allowed range.
+
+%file: TestNetwork.ned
+import inet.node.inet.StandardHost;
+network TestNetwork
+{
+    submodules:
+        host: StandardHost;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.rekeyAfterRecords = 0
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > rekey-error.out || true
+%contains: rekey-error.out
+rekeyAfterRecords must be between 1 and 2^23

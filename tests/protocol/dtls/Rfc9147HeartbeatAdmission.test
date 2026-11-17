@@ -1,0 +1,46 @@
+%description:
+Probe queue admission failure releases its slot without failing ordinary traffic.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_heartbeat_admission")
+    .meanwhile(exactlyTimes(1, on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_OUTPUT_REFUSED).within(1)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(1200); dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).within(0.1))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(dtls.probeAdmissions == std::vector<bool>({false,true}), "oversized queue reservation is refused and the next probe is admitted"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(27); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{27} && app.errorCount == 0, "queue refusal preserves association and application delivery"); }));
+}
+%activity:
+EV << "heartbeat admission compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[*].dtls.maxProcessingBytes = 512B
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_admission: PASS

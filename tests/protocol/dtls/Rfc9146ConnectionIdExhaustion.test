@@ -1,0 +1,57 @@
+%description:
+Fault-injected exhaustion of the legacy server's receive-ID allocator rejects
+admission as RESOURCE_LIMIT without aborting or retaining an attempt. Restore
+the test allocator before the client's genuine retransmission; require a normal
+handshake and application delivery with exactly one accepted handle.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("legacy_cid_exhaustion")
+    .meanwhile(never(on("host2.app[0].dtls").signal("recordDropped").filterValue(1).within(2)))
+    .act(action().after(0.15).run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) { dtls.setNextConnectionIdForTest(0); }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(4).within(1))
+    .act(action().run<ProbeDtls>("host2.app[0].dtls", [](ProbeDtls& dtls) {
+        require(dtls.hasNoAdmissionStateForTest(), "CID exhaustion removes prevalidation without an association or index");
+        dtls.setNextConnectionIdForTest(100);
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.handles.empty() && app.establishedCount == 0 && app.errorCount == 0, "resource refusal has no accepted or terminal association callback");
+    }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3), on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(71); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.handles.size() == 1 && app.establishedCount == 1 && app.errorCount == 0 && app.receivedMarkers == std::vector<int>{71}, "a genuine retry progresses after the refused admission");
+    }));
+}
+%activity:
+EV << "legacy CID resource admission compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 7s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_cid_exhaustion: PASS

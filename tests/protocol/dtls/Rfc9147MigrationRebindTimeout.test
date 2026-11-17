@@ -1,0 +1,50 @@
+%description:
+Validation failure after replacing the UDP socket retires the association and held data.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_migration_rebind_timeout")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .meanwhile(tap("tap").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).drop())
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.rebindPort(4438); app.sendMarker(28); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1.2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.migrationResults == std::vector<bool>{true} && app.errorCount == 1 && app.sendErrorCount == 1 && app.lastError == "DTLS path validation failed after local socket rebind" && app.confirmedPaths.empty(), "lost local socket cannot be restored after failed validation; held data is rejected once");
+        app.rebindPort(4440); app.sendMarker(29);
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.migrationResults == std::vector<bool>({true,false}) && app.sendErrorCount == 2 && app.errorCount == 1, "failed rebind invalidates its handle"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers.empty(), "ordinary data never leaves before local rebind validation"); }));
+}
+%activity:
+EV << "rebind timeout compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host1.app[*].dtls.probeTimeout = 1s
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_rebind_timeout: PASS

@@ -1,0 +1,45 @@
+%description:
+After HRR selected AES128, remove it from the retry ClientHello while leaving
+another allowed SHA-256 suite. The retained retry must reject the changed
+selection rather than complete with a different cipher suite.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_algorithm_retry_selection")
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); })
+        .assertEvent([](const MatchContext& c) { return findChunk<inet::tls::TlsServerHello>(c.event.packet)->getCipherSuite() == 0x1301; }).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).mutate([](Packet *p) {
+        editClientHello(p, [](auto& hello) { hello.setCipherSuitesArraySize(1); hello.setCipherSuites(0, 0x1303); });
+    }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0 && app.errorCount == 1, "retry cannot change the negotiated cipher suite");
+    }));
+}
+%activity:
+EV << "retry selection compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[*].dtls.cipherSuites = "TLS_AES_128_GCM_SHA256 TLS_CHACHA20_POLY1305_SHA256"
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_algorithm_retry_selection: PASS

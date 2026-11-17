@@ -1,0 +1,3 @@
+DTLS post-handshake client authentication
+
+DTLS engines add opt-in post-handshake client authentication, independent response recovery and saved peer-authentication queries. IDtls implementations must provide requestClientAuthentication() and getPeerAuthentication(); callbacks must implement authenticationResult(). Results are server-only, and ticket resumption restores saved context without claiming fresh authentication.

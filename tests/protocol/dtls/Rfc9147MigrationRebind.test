@@ -1,0 +1,65 @@
+%description:
+Actual local UDP rebind uses a fresh socket ID, validates both directions and
+resumes held application data without charging completed service twice.
+%includes:
+#include <cmath>
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int oldSocket, charges = 0, staleDrops = 0;
+static bool active = false;
+static uint64_t handle;
+return establish("rfc9147_migration_rebind")
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { handle = app.lastHandle(); app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (active && std::abs(c.event.value - 0.005) < 1e-9) ++charges; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("recordDropped").filterEvent([](const MatchContext& c) { if (c.event.value == 5) ++staleDrops; return false; }).within(3)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { oldSocket = dtls.socketIdForTest(); active = true; })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(88); app.rebindPort(4438); app.rebindPort(4439); app.sendMarker(89); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.rebindPort(4439); }))
+    .unordered({on("host1.app[0].driver").signal("pathChanged").within(1), on("host2.app[0].driver").signal("pathChanged").within(1)})
+    .unordered({
+        on("host2.app[0].driver").signal("packetSentToUpper").filterEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getByte(0) == 88; }).within(1),
+        on("host2.app[0].driver").signal("packetSentToUpper").filterEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getByte(0) == 89; }).within(1)
+    })
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.migrationResults == std::vector<bool>({true,false}) && app.lastHandle() == handle && app.establishedCount == 1 && app.confirmedPaths.size() == 1 && app.confirmedPaths[0].localPort == 4438, "one local rebind changes the endpoint while preserving its handle");
+        require(charges == 4, "active data, validation request/reply and second data pay once; held paid data is free to resume");
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.migrationResults == std::vector<bool>{false}, "listener refuses shared-socket movement");
+        require(app.receivedMarkers.size() == 2 && std::set<int>(app.receivedMarkers.begin(), app.receivedMarkers.end()) == std::set<int>({88,89}) && app.confirmedPaths.size() == 1 && app.confirmedPaths[0].peerPort == 4438, "held datagrams deliver once on the validated peer port without imposing stream ordering");
+    }).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(oldSocket != dtls.socketIdForTest() && staleDrops == 0, "rebind allocated a fresh socket ID"); dtls.injectStaleSocketClose(oldSocket); }))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(staleDrops == 1 && app.closedCount == 0 && app.errorCount == 0, "old socket close indication is discarded"); app.sendMarker(90); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers.size() == 3 && std::set<int>(app.receivedMarkers.begin(), app.receivedMarkers.end()) == std::set<int>({88,89,90}) && app.errorCount == 0, "new socket remains usable after the stale indication"); }));
+}
+%activity:
+EV << "local socket rebind compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_rebind: PASS

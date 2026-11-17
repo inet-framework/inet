@@ -1,0 +1,77 @@
+%description:
+
+Hold final-flight ACKs while the server completes three updates, advancing its
+sending epoch from3 to6. A regenerated ACK then has outer bits2 but names epoch2
+Finished content. It must retire recovery using the current application state.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool holdFinalAcks = true;
+static uint16_t updateRecord;
+static std::vector<simtime_t> finishedHandoffs;
+static simtime_t nextRetry;
+static bool updateAck(const MatchContext& c, unsigned epoch)
+{
+    auto a = findChunk<inet::dtls::DtlsAck>(c.event.packet);
+    if (a) for (size_t i = 0; i < a->getEpochsArraySize(); ++i)
+        if (a->getEpochs(i) == epoch && a->getSequenceNumbers(i) == updateRecord) return true;
+    return false;
+}
+static bool saveUpdate(const MatchContext& c, unsigned lowBits)
+{
+    auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+    if (!r) return false;
+    updateRecord = r->getSequenceNumber();
+    return r->getEpochBits() == lowBits;
+}
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_epoch_alias_final_ack")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return holdFinalAcks && packetAckForEpoch(p, 2); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (handshake(c, 20)) finishedHandoffs.push_back(c.event.time); return false; }).within(8)))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(false); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).assertEvent([](const MatchContext& c) { return saveUpdate(c, 3); }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return updateAck(c, 3); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(false); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).assertEvent([](const MatchContext& c) { return saveUpdate(c, 0); }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return updateAck(c, 4); }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(false); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 24); }).assertEvent([](const MatchContext& c) { return saveUpdate(c, 1); }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return updateAck(c, 5); }).within(0.1))
+    .act(action().after(0.001).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>({true, true, true}), "three acknowledged updates advance the known server sending state from3 to6"); holdFinalAcks = false; }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return protectedRecord(c, 2) && packetAckForEpoch(c.event.packet, 2); }).assertEvent([](const MatchContext& c) {
+        auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet);
+        require(finishedHandoffs.size() >= 2, "regenerated final ACK follows a positively observed Finished retry");
+        auto last = finishedHandoffs.back();
+        nextRetry = 2 * (last - finishedHandoffs[finishedHandoffs.size() - 2]);
+        return r->getSequenceNumber() == 0 && nextRetry > SIMTIME_ZERO && nextRetry <= SimTime(5) && c.event.time < last + nextRetry;
+    }).within(2))
+    .never(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).within(5))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0 && nextRetry <= SimTime(5), "application-epoch6 ACK retires Finished recovery across its independently measured next timeout"); }));
+}
+%activity:
+EV << "rfc9147_epoch_alias_final_ack compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_epoch_alias_final_ack: PASS

@@ -1,0 +1,100 @@
+%description:
+Two independent DTLS processing queues: synchronous zero cost, capacity,
+serialized service, cancellation of an active operation, and release on teardown.
+
+%file: TestNetwork.ned
+simple ProcessingQueueFixture
+{
+    @class(ProcessingQueueFixture);
+}
+network TestNetwork
+{
+    submodules:
+        fixture: ProcessingQueueFixture;
+}
+
+%file: ProcessingQueueFixture.cc
+#include "../DtlsTestAssertions.h"
+#include <memory>
+#include <iostream>
+#include <vector>
+#include "inet/transportlayer/dtls/DtlsProcessingQueue.h"
+
+using namespace omnetpp;
+using namespace inet::dtls;
+
+namespace DtlsProcessingQueue_1 {
+
+class ProcessingQueueFixture : public cSimpleModule
+{
+    std::unique_ptr<DtlsProcessingQueue> input;
+    std::unique_ptr<DtlsProcessingQueue> output;
+    cMessage *finishTimer = nullptr;
+    int completed = 0;
+    std::vector<int> continuationOrder;
+
+  protected:
+    virtual void initialize() override {
+        input = std::make_unique<DtlsProcessingQueue>(this, "input", 3);
+        output = std::make_unique<DtlsProcessingQueue>(this, "output", 4);
+        bool synchronous = false;
+        DTLS_TEST_CHECK(output->enqueue(1, 0, SIMTIME_ZERO, [&] { synchronous = true; }));
+        DTLS_TEST_CHECK(synchronous && output->getOccupiedBytes() == 0);
+        bool skipped = false, started = false;
+        DTLS_TEST_CHECK(output->enqueue(1, 1, 1, [] { throw cRuntimeError("ineligible operation ran"); }, [] { return false; }, [&] { skipped = true; }, [&] { started = true; }));
+        DTLS_TEST_CHECK(skipped && !started && output->getOccupiedBytes() == 0);
+        DTLS_TEST_CHECK(input->enqueue(1, 2, 2, [&] {
+            DTLS_TEST_CHECK(simTime() == 2);
+            DTLS_TEST_CHECK(input->enqueueContinuation(8, 1, SIMTIME_ZERO, [&] { continuationOrder.push_back(1); }));
+            ++completed;
+        }));
+        DTLS_TEST_CHECK(input->enqueue(2, 1, 1, [&] { throw cRuntimeError("cancelled operation ran"); }));
+        DTLS_TEST_CHECK(!input->enqueue(3, 1, 1, [] {}));
+        DTLS_TEST_CHECK(output->enqueue(3, 1, 1, [&] {
+            DTLS_TEST_CHECK(simTime() == 1);
+            input->cancel(2);
+            DTLS_TEST_CHECK(input->enqueue(7, 1, SIMTIME_ZERO, [&] { continuationOrder.push_back(2); }));
+            DTLS_TEST_CHECK(output->enqueue(6, 1, SIMTIME_ZERO, [&] { ++completed; }));
+            ++completed;
+        }));
+        DTLS_TEST_CHECK(output->enqueue(4, 1, 1, [&] { DTLS_TEST_CHECK(simTime() == 2); ++completed; }));
+        DTLS_TEST_CHECK(output->enqueue(5, 1, 10, [&] { throw cRuntimeError("cancelled active operation ran"); }));
+        finishTimer = new cMessage("finish");
+        scheduleAt(3, finishTimer);
+    }
+    virtual void handleMessage(cMessage *message) override {
+        if (input->isTimer(message))
+            input->handleTimer();
+        else if (output->isTimer(message))
+            output->handleTimer();
+        else {
+            DTLS_TEST_CHECK(message == finishTimer);
+            bool kept = false;
+            DTLS_TEST_CHECK(output->enqueue(11, 1, SIMTIME_ZERO, [] { throw cRuntimeError("batch-cancelled operation ran"); }));
+            DTLS_TEST_CHECK(output->enqueue(10, 1, SIMTIME_ZERO, [&] { kept = true; }));
+            output->cancelExcept({6, 10});
+            DTLS_TEST_CHECK(kept);
+            DTLS_TEST_CHECK(completed == 4);
+            DTLS_TEST_CHECK(continuationOrder == std::vector<int>({1, 2}));
+            DTLS_TEST_CHECK(input->getOccupiedBytes() == 0 && output->getOccupiedBytes() == 0);
+            DTLS_TEST_CHECK(input->enqueue(9, 1, 100, [&] { throw cRuntimeError("teardown operation ran"); }));
+            DTLS_TEST_CHECK(input->getOccupiedBytes() == 1);
+            std::cout << "DTLS processing queues PASS" << std::endl;
+        }
+    }
+  public:
+    virtual ~ProcessingQueueFixture() { cancelAndDelete(finishTimer); }
+};
+
+Define_Module(ProcessingQueueFixture);
+
+} // namespace DtlsProcessingQueue_1
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 4s
+
+%contains: stdout
+DTLS processing queues PASS

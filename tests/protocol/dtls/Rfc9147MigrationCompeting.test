@@ -1,0 +1,53 @@
+%description:
+A competing fresh tuple cannot replace the single candidate being validated.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool active = false;
+static std::vector<int> probePorts;
+return establish("rfc9147_migration_competing")
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *) { return active; }).mutate([](Packet *p) {
+        int port = packetApplication(p) && findChunk<BytesChunk>(p)->getByte(0) == 2 ? 6634 : 5534;
+        mutateHeader<UdpHeader>(p, [=](auto& h) { h.setSrcPort(port); });
+    }))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { auto h = findChunk<UdpHeader>(p); return active && h && (h->getDestPort() == 5534 || h->getDestPort() == 6634); }).mutate([](Packet *p) {
+        if (packetHeartbeat(p, 1)) probePorts.push_back(findChunk<UdpHeader>(p)->getDestPort());
+        mutateHeader<UdpHeader>(p, [](auto& h) { h.setDestPort(4434); });
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { active = true; app.sendMarker(1); app.sendMarker(2); }))
+    .once(on("host2.app[0].driver").signal("pathChanged").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.confirmedPaths.size() == 1 && app.confirmedPaths[0].peerPort == 5534 && probePorts == std::vector<int>{5534} && app.receivedMarkers == std::vector<int>({1,2}) && app.errorCount == 0, "fresh competing data does not replace or add a candidate");
+    }));
+}
+%activity:
+EV << "competing candidate compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_competing: PASS

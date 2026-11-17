@@ -1,0 +1,74 @@
+%description:
+An established resumed client retains its final flight while the peer waits.
+Stop/crash clears that timer and cache; a fresh full handshake survives old deadlines.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool resuming=false;
+return ProtocolTest("resumption_clientcrash12")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return resuming && packetHandshake(p,20); }).drop())
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.closePeer(); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { resuming=true; app.resumePeer(); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.isResumed() && app.establishedCount==2,"client is the abbreviated final sender"); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(1))
+    .act(action().after(1.2).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { resuming=false; app.resumePeer(); }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount==3 && app.closedCount==2 && app.errorCount==1 && !app.isResumed(),"restart clears the resumed cache and retains exactly the lifecycle callbacks"); }))
+    .act(action().after(305).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(163); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount==2 && app.closedCount==2 && app.errorCount==0 && app.receivedMarkers==std::vector<int>{163},"old final retention and waiting-peer deadline do not affect the fresh handle"); }));
+}
+%activity:
+EV << "resumed client lifecycle compiled\n";
+%file: ResumedClientRestartNetwork.ned
+import inet.protocoltest.TapPairNetwork;
+import inet.common.scenario.ScenarioManager;
+network ResumedClientRestartNetwork extends TapPairNetwork
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+}
+%file: scenario.xml
+<scenario>
+    <at t="1s"><crash module="host1"/></at>
+    <at t="2s"><startup module="host1"/></at>
+</scenario>
+%inifile: omnetpp.ini
+[General]
+network = ResumedClientRestartNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 320s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.scenarioManager.script = xmldoc("scenario.xml")
+*.host1.hasStatus = true
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host1.app[*].dtls.handshakeTimeout = 120s
+*.host2.app[*].dtls.handshakeTimeout = 300s
+%contains: stdout
+PROTOCOLTEST resumption_clientcrash12: PASS

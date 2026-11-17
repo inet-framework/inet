@@ -1,0 +1,42 @@
+%description:
+
+Two envelopes in one plaintext record overlap with conflicting ClientHello
+bytes. Reject the record with illegal_parameter and never ACK its fragments.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_packed_client_hello_conflict")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).mutate([](Packet *p) { packClientHello(p, true); }))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).within(0.5)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).assertEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h->getFragmentLength() < h->getMessageLength(); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 47; }).within(0.1))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.acceptedEndpoints.empty(), "conflicting packed fragments never promote an association"); }));
+}
+%activity:
+EV << "rfc9147_packed_client_hello_conflict compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_packed_client_hello_conflict: PASS

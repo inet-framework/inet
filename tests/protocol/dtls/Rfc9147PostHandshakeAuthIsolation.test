@@ -1,0 +1,54 @@
+%description:
+One client engine sends ordinary data for a second association during a fragmented PHA response for the first association.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool authenticating = false, finished = false;
+return establish("pha_isolation")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (authenticating && handshake(c, 20)) finished = true; return false; }).within(8)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.handles.push_back(app.engine->open(L3AddressResolver().resolve("host2"), 4435, &app)); }))
+    .once(on("host2.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { authenticating = true; app.requestAuthentication(); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 2, "two associations share the response sender"); app.sendMarker(80, 32, app.handles.back()); }))
+    .once(on("host2.app[1].driver").signal("packetSentToUpper").within(0.2))
+    .act(action().run<DtlsTestDriver>("host2.app[1].driver", [](DtlsTestDriver& app) { require(!finished && app.receivedMarkers == std::vector<int>{80}, "the other association delivers before the PHA response finishes"); app.sendMarker(81); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(0.2))
+    .once(on("host2.app[0].driver").signal("authenticationResult").filterValue(1).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{81} && app.receivedHandles == std::vector<uint64_t>{app.handles.back()} && app.errorCount == 0, "unrelated bidirectional traffic survives the per-association fence"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host2.numApps = 2
+*.host2.app[1].localPort = 4435
+*.host1.app[*].dtls.certificateBytes = 8192B
+*.host*.app[*].dtls.udpPayloadLimit = 128B
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_isolation: PASS

@@ -1,0 +1,50 @@
+%description:
+
+DTLS production-path variant AssociationLimit: explicit association-isolation requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("legacy12_association_limit")
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.3),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.3)})
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host1.app[1].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && app.closedCount == 0, "full server rejects promotion without evicting its established peer");
+    }).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.closedCount == 0, "unrelated established client remains open"); }));
+}
+%activity:
+EV << "legacy12_association_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 0.4s
+*.host1.app[1].dtls.handshakeTimeout = 1s
+*.host2.app[0].dtls.maxAssociations = 1
+*.host*.app[*].dtls.cookieRequired = false
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy12_association_limit: PASS

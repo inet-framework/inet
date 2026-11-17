@@ -1,0 +1,81 @@
+%description:
+A host with two Ethernet interfaces moves its source address. Real router, IPv4
+and UDP delivery prove requests and replies use the selected second interface.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int oldOut = 0, oldIn = 0, newOut = 0, newIn = 0, probeOut = 0, probeIn = 0;
+static uint64_t handle;
+return establish("rfc9147_migration_routed")
+    .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (applicationRecord(c)) ++oldOut; return false; }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (applicationRecord(c)) ++oldIn; return false; }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host1.eth[1].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (applicationRecord(c)) ++newOut; if (heartbeat(c, 1)) ++probeOut; return false; }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host1.eth[1].mac").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (applicationRecord(c)) ++newIn; if (heartbeat(c, 2)) ++probeIn; return false; }).within(5)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { handle = app.lastHandle(); app.sendMarker(10); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(11); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.migrateAddress(L3AddressResolver().resolve("host1%eth1")); app.requestCids(2); }))
+    .once(on("host1.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        auto node = getContainingNode(&app);
+        auto table = L3AddressResolver().getIpv4RoutingTableOf(node);
+        auto interface = L3AddressResolver().interfaceTableOf(node)->findInterfaceByName("eth1");
+        for (int i = 0; i < table->getNumRoutes(); ++i)
+            if (table->getRoute(i)->getDestination() == Ipv4Address("10.0.3.2")) {
+                table->getRoute(i)->setInterface(interface);
+                table->getRoute(i)->setGateway(Ipv4Address("10.0.2.2"));
+            }
+        app.migrateAddress(L3Address("10.9.0.9"));
+        app.migrateAddress(L3AddressResolver().resolve("host1%eth1"));
+    }))
+    .unordered({on("host1.app[0].driver").signal("pathChanged").within(1), on("host2.app[0].driver").signal("pathChanged").within(1)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.migrationResults == std::vector<bool>({false,false,true}) && app.lastHandle() == handle && app.establishedCount == 1 && app.confirmedPaths.size() == 1, "missing spare and unowned address refuse before one admitted move");
+        require(app.confirmedPaths[0].localAddress == L3Address("10.0.2.1") && app.confirmedPaths[0].interfaceId >= 0, "callback exposes confirmed second-interface source");
+        app.sendMarker(12);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.confirmedPaths.size() == 1 && app.confirmedPaths[0].peerAddress == L3Address("10.0.2.1") && app.receivedMarkers == std::vector<int>({10,12}), "server confirms and delivers from the new address");
+        app.sendMarker(13);
+    }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.receivedMarkers == std::vector<int>({11,13}) && app.errorCount == 0 && oldOut == 1 && oldIn == 1 && newOut == 1 && newIn == 1 && probeOut == 1 && probeIn == 1, "actual MAC egress and ingress move from interface zero to one, with bidirectional validation and UDP data");
+    }));
+}
+%activity:
+EV << "multihomed migration compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.dtls.DtlsMigrationRoutedNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/><interface hosts='router' names='eth0' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='host1' names='eth1' address='10.0.2.1' netmask='255.255.255.0'/><interface hosts='router' names='eth1' address='10.0.2.2' netmask='255.255.255.0'/><interface hosts='router' names='eth2' address='10.0.3.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='10.0.3.2' netmask='255.255.255.0'/><route hosts='host1' destination='10.0.3.2' netmask='255.255.255.255' gateway='10.0.1.2' interface='eth0'/><route hosts='host2' destination='*' netmask='0.0.0.0' gateway='10.0.3.1' interface='eth0'/></config>")
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.migrationEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_migration_routed: PASS

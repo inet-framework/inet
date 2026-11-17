@@ -1,0 +1,147 @@
+%description:
+ACKs identify actually handed-off records and acknowledge their retained ranges.
+Reserved-only records cannot complete a flight; retransmission suppresses RTT samples.
+
+%includes:
+#include "../DtlsTestAssertions.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/transportlayer/dtls/DtlsHandshakeFlight.h"
+
+using namespace inet;
+using namespace inet::dtls;
+
+%activity:
+auto bytes = makeShared<BytesChunk>(std::vector<uint8_t>{1, 2});
+bytes->markImmutable();
+DtlsHandshakeFlight flight;
+auto mutableBytes = makeShared<BytesChunk>(std::vector<uint8_t>{9});
+bool mutableRejected = false;
+try { flight.add(11, 1, 1, 0, 2, mutableBytes); }
+catch (const cRuntimeError&) { mutableRejected = true; }
+DTLS_TEST_CHECK(mutableRejected && flight.size() == 0);
+auto bits = makeShared<BitCountChunk>(b(1));
+bits->markImmutable();
+bool unalignedRejected = false;
+try { flight.add(11, 1, 1, 0, 2, bits); }
+catch (const cRuntimeError&) { unalignedRejected = true; }
+DTLS_TEST_CHECK(unalignedRejected && flight.size() == 0);
+bool overlongRejected = false;
+try { flight.add(11, 1, 0x1000000, 0, 2, bytes); }
+catch (const cRuntimeError&) { overlongRejected = true; }
+DTLS_TEST_CHECK(overlongRejected && flight.size() == 0);
+auto first = flight.add(11, 2, 4, 0, 2, bytes);
+auto second = flight.add(11, 2, 4, 2, 2, bytes);
+DTLS_TEST_CHECK(!flight.reserve(first));
+flight.markReady(first);
+flight.markReady(second);
+DTLS_TEST_CHECK(flight.reserve(first) && flight.reserve(second));
+DTLS_TEST_CHECK(!flight.acknowledge(2, 10, SimTime(1)).matched);
+DTLS_TEST_CHECK(!flight.isComplete());
+flight.handedOff(first, 10, SimTime(0.25));
+flight.handedOff(second, 11, SimTime(0.5));
+DTLS_TEST_CHECK(!flight.acknowledge(3, 10, SimTime(0.75)).matched);
+auto firstAck = flight.acknowledge(2, 10, SimTime(0.75));
+DTLS_TEST_CHECK(firstAck.matched && !firstAck.flightComplete);
+DTLS_TEST_CHECK(!firstAck.rtt);
+DTLS_TEST_CHECK(flight.get(first).acknowledged && !flight.get(second).acknowledged);
+DTLS_TEST_CHECK(!flight.acknowledge(2, 10, SimTime(1)).matched);
+flight.requestRetransmission();
+DTLS_TEST_CHECK(!flight.reserve(first) && flight.reserve(second));
+flight.cancelReservation(second);
+DTLS_TEST_CHECK(flight.reserve(second));
+flight.handedOff(second, 12, SimTime(1));
+auto lateOriginalAck = flight.acknowledge(2, 11, SimTime(1.5));
+DTLS_TEST_CHECK(lateOriginalAck.matched && lateOriginalAck.flightComplete);
+DTLS_TEST_CHECK(!lateOriginalAck.rtt);
+DTLS_TEST_CHECK(!flight.acknowledge(2, 12, SimTime(1.75)).matched);
+DTLS_TEST_CHECK(flight.isComplete());
+DtlsHandshakeFlight empty;
+DTLS_TEST_CHECK(empty.size() == 0 && !empty.isComplete());
+DTLS_TEST_CHECK(!empty.acknowledge(2, 10, SimTime(2)).matched);
+
+DtlsHandshakeFlight partial;
+first = partial.add(11, 3, 4, 0, 2, bytes);
+second = partial.add(11, 3, 4, 2, 2, bytes);
+partial.markReady(first);
+partial.markReady(second);
+DTLS_TEST_CHECK(partial.reserve(first) && partial.reserve(second));
+partial.handedOff(first, 20, SimTime(2));
+auto implicitAck = partial.acknowledgeSent(SimTime(2.25));
+DTLS_TEST_CHECK(implicitAck.matched && !implicitAck.flightComplete);
+DTLS_TEST_CHECK(!implicitAck.rtt);
+DTLS_TEST_CHECK(!partial.get(second).acknowledged);
+partial.cancelReservation(second);
+DTLS_TEST_CHECK(partial.reserve(second));
+DTLS_TEST_CHECK(!partial.acknowledge(2, 21, SimTime(2.5)).matched);
+
+DtlsHandshakeFlight eligible;
+first = eligible.add(11, 4, 4, 0, 2, bytes);
+second = eligible.add(11, 4, 4, 2, 2, bytes);
+eligible.markReady(first);
+eligible.markReady(second);
+DTLS_TEST_CHECK(eligible.reserve(first) && eligible.reserve(second));
+eligible.handedOff(first, 30, SimTime(3));
+eligible.handedOff(second, 31, SimTime(3.25));
+DTLS_TEST_CHECK(!eligible.acknowledge(2, 31, SimTime(3.5)).rtt);
+auto completeMessage = eligible.acknowledge(2, 30, SimTime(3.75));
+DTLS_TEST_CHECK(completeMessage.matched && completeMessage.flightComplete);
+DTLS_TEST_CHECK(completeMessage.rtt && *completeMessage.rtt == SimTime(0.5));
+DTLS_TEST_CHECK(!eligible.acknowledge(2, 30, SimTime(4)).rtt);
+
+auto six = makeShared<BytesChunk>(std::vector<uint8_t>{1,2,3,4,5,6});
+six->markImmutable();
+DtlsHandshakeFlight split;
+auto original = split.add(11, 9, 6, 0, 3, six);
+split.markReady(original);
+DTLS_TEST_CHECK(split.reserve(original));
+split.handedOff(original, 50, SimTime(5));
+DTLS_TEST_CHECK(split.refragment(2) && split.size() == 4 && split.get(original).superseded);
+DTLS_TEST_CHECK(!split.reserve(original));
+for (size_t i = 1; i < 4; ++i) {
+    DTLS_TEST_CHECK(split.get(i).offset == (i - 1) * 2 && split.get(i).messageSequence == 9 && split.get(i).messageLength == 6);
+    DTLS_TEST_CHECK(split.reserve(i));
+}
+split.handedOff(1, 51, SimTime(5.1));
+DTLS_TEST_CHECK(split.acknowledge(3, 51, SimTime(5.2)).matched && !split.isComplete());
+DTLS_TEST_CHECK(split.get(1).acknowledged && !split.get(2).acknowledged);
+auto preSplitAck = split.acknowledge(3, 50, SimTime(5.3));
+DTLS_TEST_CHECK(preSplitAck.matched && preSplitAck.flightComplete && !preSplitAck.rtt);
+DTLS_TEST_CHECK(split.get(2).acknowledged && split.get(3).acknowledged);
+split.cancelReservation(2);
+split.cancelReservation(3);
+DTLS_TEST_CHECK(!split.reserve(2) && !split.reserve(3) && !split.acknowledge(3, 50, SimTime(5.4)).matched);
+
+DtlsHandshakeFlight pendingGeneration;
+original = pendingGeneration.add(11, 10, 6, 0, 3, six);
+DTLS_TEST_CHECK(pendingGeneration.refragment(2));
+DTLS_TEST_CHECK(pendingGeneration.refragment(1));
+pendingGeneration.markReady(original); // The original queued logical operation completes after both splits.
+size_t leaves = 0;
+for (size_t i = 0; i < pendingGeneration.size(); ++i)
+    if (!pendingGeneration.get(i).superseded) {
+        DTLS_TEST_CHECK(pendingGeneration.get(i).ready && pendingGeneration.get(i).data->getChunkLength() == B(1));
+        DTLS_TEST_CHECK(pendingGeneration.reserve(i));
+        pendingGeneration.handedOff(i, 100 + leaves++, SimTime(6));
+    }
+DTLS_TEST_CHECK(leaves == 6 && !pendingGeneration.acknowledge(3, 50, SimTime(6.1)).matched);
+for (size_t i = 0; i < leaves; ++i)
+    DTLS_TEST_CHECK(pendingGeneration.acknowledge(3, 100 + i, SimTime(6.2)).matched);
+DTLS_TEST_CHECK(pendingGeneration.isComplete());
+DtlsHandshakeFlight ordered;
+original = ordered.add(11, 11, 6, 0, 3, six);
+auto verifyIndex = ordered.add(15, 12, 2, 0, 3, bytes);
+ordered.markReady(original); ordered.markReady(verifyIndex);
+DTLS_TEST_CHECK(ordered.reserve(original) && ordered.reserve(verifyIndex));
+DTLS_TEST_CHECK(ordered.refragment(2) && !ordered.isFirstTransmissionOrdered(verifyIndex));
+ordered.cancelReservation(verifyIndex);
+DTLS_TEST_CHECK(!ordered.reserve(verifyIndex));
+for (size_t i = 2; i < ordered.size(); ++i) {
+    DTLS_TEST_CHECK(ordered.reserve(i));
+    ordered.handedOff(i, 200 + i, SimTime(7));
+}
+DTLS_TEST_CHECK(ordered.isFirstTransmissionOrdered(verifyIndex) && ordered.reserve(verifyIndex));
+EV << "DTLS handshake flight PASS\n";
+
+%contains: stdout
+DTLS handshake flight PASS

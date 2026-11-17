@@ -1,0 +1,75 @@
+%description:
+Bounded handshake reassembly preserves identical overlaps, rejects conflicting
+bytes atomically, and releases advertised-body reservations when consumed.
+
+%includes:
+#include "../DtlsTestAssertions.h"
+#include "inet/transportlayer/dtls/DtlsHandshakeReassembly.h"
+
+using namespace inet::dtls;
+
+%activity:
+using Result = DtlsHandshakeReassembly::Result;
+DtlsHandshakeReassembly reassembly(8);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 0, {}) == Result::EMPTY);
+DTLS_TEST_CHECK(reassembly.getEntryCount() == 0 && reassembly.getReservedBytes() == 0);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 4, {50}) == Result::INCOMPLETE);
+DTLS_TEST_CHECK(reassembly.getContiguousPrefix(1).empty() && reassembly.getContiguousPrefix(99).empty());
+DTLS_TEST_CHECK(reassembly.getEntryCount() == 1 && reassembly.getReservedBytes() == 5);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 1, {20, 30, 40}) == Result::INCOMPLETE);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 2, {30, 40, 50}) == Result::INCOMPLETE);
+DTLS_TEST_CHECK(reassembly.insert(11, 2, 4, 0, {1}) == Result::LIMIT);
+DTLS_TEST_CHECK(reassembly.getEntryCount() == 1 && reassembly.getReservedBytes() == 5);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 0, {99, 88}) == Result::CONFLICT);
+DTLS_TEST_CHECK(reassembly.insert(12, 1, 5, 0, {10}) == Result::CONFLICT);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 6, 0, {10}) == Result::CONFLICT);
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 6, {}) == Result::OUT_OF_RANGE);
+// If conflict handling had installed the new byte 99 before checking overlap,
+// filling the missing prefix with 10 would fail instead of completing.
+DTLS_TEST_CHECK(reassembly.insert(11, 1, 5, 0, {10}) == Result::COMPLETE);
+DTLS_TEST_CHECK(reassembly.getContiguousPrefix(1) == std::vector<uint8_t>({10,20,30,40,50}));
+DTLS_TEST_CHECK(reassembly.isComplete(1));
+auto message = reassembly.take(1);
+DTLS_TEST_CHECK(message.type == 11);
+DTLS_TEST_CHECK(message.body == std::vector<uint8_t>({10, 20, 30, 40, 50}));
+DTLS_TEST_CHECK(reassembly.getEntryCount() == 0 && reassembly.getReservedBytes() == 0);
+DTLS_TEST_CHECK(reassembly.insert(11, 2, 4, 0, {1, 2, 3, 4}) == Result::COMPLETE);
+DTLS_TEST_CHECK(reassembly.insert(11, 3, 5, 0, {9}) == Result::LIMIT);
+DTLS_TEST_CHECK(reassembly.insert(11, 3, 0x1000000, 0, {}) == Result::OUT_OF_RANGE);
+DTLS_TEST_CHECK(reassembly.getReservedBytes() == 4 && reassembly.getEntryCount() == 1);
+reassembly.clear();
+DTLS_TEST_CHECK(!reassembly.isComplete(2));
+DTLS_TEST_CHECK(reassembly.getReservedBytes() == 0 && reassembly.getEntryCount() == 0);
+DtlsHandshakeReassembly sequences(8);
+DTLS_TEST_CHECK(sequences.insert(1, 0, 4, 1, {2}) == Result::INCOMPLETE);
+DTLS_TEST_CHECK(sequences.getContiguousPrefix(0).empty());
+DTLS_TEST_CHECK(sequences.insert(1, 0, 4, 0, {1}) == Result::INCOMPLETE);
+DTLS_TEST_CHECK(sequences.getContiguousPrefix(0) == std::vector<uint8_t>({1,2}));
+DTLS_TEST_CHECK(sequences.insert(1, 1, 4, 0, {3, 4, 5, 6}) == Result::COMPLETE);
+DTLS_TEST_CHECK(sequences.hasEntry(0) && sequences.hasEntry(1));
+DTLS_TEST_CHECK(sequences.take(1).body == std::vector<uint8_t>({3, 4, 5, 6}));
+DTLS_TEST_CHECK(sequences.getEntryCount() == 1);
+DTLS_TEST_CHECK(sequences.hasEntry(0) && !sequences.hasEntry(1));
+DTLS_TEST_CHECK(!sequences.isComplete(0));
+DTLS_TEST_CHECK(sequences.insert(4, 2, 4, 0, {7}) == Result::INCOMPLETE);
+sequences.discard(0);
+DTLS_TEST_CHECK(!sequences.hasEntry(0) && sequences.hasEntry(2));
+DTLS_TEST_CHECK(sequences.getEntryCount() == 1 && sequences.getReservedBytes() == 4);
+sequences.discard(0); // an already released sequence is harmless
+DtlsHandshakeReassembly emptyMessages(1);
+DTLS_TEST_CHECK(emptyMessages.insert(14,0,0,0,{}) == Result::EMPTY);
+DTLS_TEST_CHECK(emptyMessages.insertEmptyMessage(14,0) == Result::COMPLETE);
+DTLS_TEST_CHECK(emptyMessages.insertEmptyMessage(14,0) == Result::COMPLETE);
+DTLS_TEST_CHECK(emptyMessages.insertEmptyMessage(11,0) == Result::CONFLICT);
+DTLS_TEST_CHECK(emptyMessages.insertEmptyMessage(14,1) == Result::LIMIT);
+DTLS_TEST_CHECK(emptyMessages.getReservedBytes() == 1 && emptyMessages.isComplete(0));
+DTLS_TEST_CHECK(emptyMessages.take(0).body.empty() && emptyMessages.getReservedBytes() == 0);
+DTLS_TEST_CHECK(emptyMessages.insertEmptyMessage(14,1) == Result::COMPLETE);
+emptyMessages.discard(1);
+DTLS_TEST_CHECK(emptyMessages.getReservedBytes() == 0 && emptyMessages.getEntryCount() == 0);
+DtlsHandshakeReassembly noEmptyCapacity(0);
+DTLS_TEST_CHECK(noEmptyCapacity.insertEmptyMessage(14,0) == Result::LIMIT);
+EV << "DTLS handshake reassembly PASS\n";
+
+%contains: stdout
+DTLS handshake reassembly PASS

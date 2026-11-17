@@ -1,0 +1,53 @@
+%description:
+Actual legacy CID records exercise silent admission and preserve later valid data.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool hit=false;
+return establish12("cid_missing12")
+    .meanwhile(tap("tap").from("host1").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { auto sequence=dynamicPtrCast<const SequenceChunk>(p->peekData()); require(sequence!=nullptr,"native wire sequence");
+        std::vector<Ptr<const Chunk>> chunks(sequence->getChunks().begin(),sequence->getChunks().end()); bool found=false;
+        for (auto& chunk:chunks) if (auto h=dynamicPtrCast<const inet::dtls::Dtls12CidHeader>(chunk)) { auto plain=makeShared<inet::dtls::DtlsPlaintextHeader>(); plain->setContentType(23); plain->setEpoch(h->getEpoch()); plain->setSequenceNumber(h->getSequenceNumber()); plain->setLength(h->getLength()); chunk=plain; found=true; break; }
+        require(found,"replace actual CID header only"); p->removeData(); for (const auto& chunk:chunks) p->insertAtBack(chunk);
+        require(mutateHeader<UdpHeader>(p,[](auto& h) { h.setTotalLengthField(h.getTotalLengthField()-B(8)); }),"UDP length");
+        require(mutateHeader<Ipv4Header>(p,[](auto& h) { h.setTotalLengthField(h.getTotalLengthField()-B(8)); }),"IP length"); resizeTapEnvelope(p,-8); hit=true; }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(174); }))
+    .once(on("host2.app[0].dtls").signal("recordDropped").filterValue(6).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(175); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(hit && app.receivedMarkers==std::vector<int>{175} && app.errorCount==0 && app.establishedCount==1,"invalid record is silently discarded before later delivery"); }));
+}
+%activity:
+EV << "legacy CID rejection compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.connectionIdEnabled = true
+%contains: stdout
+PROTOCOLTEST cid_missing12: PASS

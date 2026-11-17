@@ -1,0 +1,45 @@
+%description:
+DTLS record-number reconstruction and replay window boundaries.
+
+%includes:
+#include "../DtlsTestAssertions.h"
+#include "inet/transportlayer/dtls/DtlsRecordState.h"
+#include <limits>
+
+using namespace inet::dtls;
+
+%activity:
+DtlsRecordState state(4);
+DTLS_TEST_CHECK(state.reconstruct(0, 16) == 0);
+DTLS_TEST_CHECK(state.accept(65534));
+DTLS_TEST_CHECK(state.reconstruct(65535, 16) == 65535);
+DTLS_TEST_CHECK(state.accept(65535));
+DTLS_TEST_CHECK(state.reconstruct(0, 16) == 65536);
+DTLS_TEST_CHECK(state.accept(65536));
+DTLS_TEST_CHECK(state.reconstruct(1, 16) == 65537);
+DTLS_TEST_CHECK(state.isAcceptable(65533));
+DTLS_TEST_CHECK(state.accept(65533));
+DTLS_TEST_CHECK(!state.accept(65533));
+DTLS_TEST_CHECK(!state.accept(65532));
+DTLS_TEST_CHECK(!state.accept(65536));
+DTLS_TEST_CHECK(state.accept(65537));
+DTLS_TEST_CHECK(!state.isAcceptable(65533));
+DtlsRecordState shortNumbers(64);
+DTLS_TEST_CHECK(shortNumbers.accept(255));
+DTLS_TEST_CHECK(shortNumbers.reconstruct(0, 8) == 256);
+DTLS_TEST_CHECK(shortNumbers.reconstruct(254, 8) == 254);
+DtlsRecordState upperBoundary(64);
+const auto maximum = std::numeric_limits<uint64_t>::max();
+DTLS_TEST_CHECK(upperBoundary.accept(maximum - 1));
+DTLS_TEST_CHECK(upperBoundary.reconstruct(65535, 16) == maximum);
+DTLS_TEST_CHECK(upperBoundary.accept(maximum));
+DTLS_TEST_CHECK(upperBoundary.reconstruct(65535, 16) == maximum);
+DTLS_TEST_CHECK(!upperBoundary.accept(maximum - 64));
+bool rejected = false;
+try { static_cast<void>(shortNumbers.reconstruct(256, 8)); }
+catch (const omnetpp::cRuntimeError&) { rejected = true; }
+DTLS_TEST_CHECK(rejected);
+EV << "DTLS record state PASS\n";
+
+%contains: stdout
+DTLS record state PASS

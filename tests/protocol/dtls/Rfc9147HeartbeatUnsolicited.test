@@ -1,0 +1,50 @@
+%description:
+A delayed duplicate response after completion cannot finish another probe.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int requests = 0, replies = 0, receivedReplies = 0;
+return establish("rfc9147_heartbeat_unsolicited")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).nth(1).duplicate(0.1))
+    .meanwhile(tap("tap").from("host2").copiesOnly().filterPacket([](const Packet *p) { return packetHeartbeat(p, 2); }).mutate([](Packet *p) {
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + 20); });
+    }))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 2)) ++receivedReplies; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) ++requests; return false; }).within(3)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 2)) ++replies; return false; }).within(3)))
+    .act(action().after(0.1).run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { dtls.probePeer(); }))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_SUCCEEDED).within(1))
+    .never(on("host1.app[0].dtls").signal("probeResult").within(0.2))
+    .act(action().run<ProbeDtls>("host1.app[0].dtls", [](ProbeDtls& dtls) { require(requests == 1 && replies == 1 && receivedReplies == 2 && dtls.probeAdmissions == std::vector<bool>{true}, "a fresh-numbered unsolicited response cannot complete another probe"); })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.receivedMarkers.empty(), "unsolicited duplicate is silently ignored, not delivered or fatal"); }));
+}
+%activity:
+EV << "wrong response compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_unsolicited: PASS

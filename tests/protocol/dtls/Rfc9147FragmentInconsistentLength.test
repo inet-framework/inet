@@ -1,0 +1,46 @@
+%description:
+
+DTLS production-path variant FragmentInconsistentLength: explicit C4 requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint32_t originalLength;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_fragment_inconsistent_length")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).nth(2).mutate([](Packet *p) {
+        mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setMessageLength(h.getMessageLength() + 1); });
+    }))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).assertEvent([](const MatchContext& c) { originalLength = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageLength(); return true; }).within(2))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 11 && h->getFragmentOffset() > 0; }).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet)->getMessageLength() == originalLength + 1; }).within(0.1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 47; }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 1 && app.establishedCount == 0, "inconsistent total length aborts the affected handshake"); }));
+}
+%activity:
+EV << "rfc9147_fragment_inconsistent_length compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 4000B
+
+%contains: stdout
+PROTOCOLTEST rfc9147_fragment_inconsistent_length: PASS

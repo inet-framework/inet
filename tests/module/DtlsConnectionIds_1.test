@@ -1,0 +1,60 @@
+%description:
+Engine-owned CID allocation refuses collisions and exhaustion, preserves other
+owners on removal, and does not rewind after clearing lookup state. This helper
+fixture bypasses network initialization; it claims no wire exchange or lifecycle.
+%file: CidAllocatorFixture.cc
+#include "../DtlsTestAssertions.h"
+#include <iostream>
+#include <limits>
+#include "inet/transportlayer/dtls/Dtls.h"
+namespace DtlsConnectionIds_1 {
+using namespace inet;
+using namespace inet::dtls;
+class CidAllocatorFixture : public Dtls
+{
+  protected:
+    void initialize(int stage) override {
+        if (stage != 0) return;
+        auto first = allocateConnectionId(11);
+        auto second = allocateConnectionId(12);
+        DTLS_TEST_CHECK(first.size() == 8 && second.size() == 8 && first != second && cidIndex.size() == 2);
+        nextConnectionId = 1; // fault injection: cannot overwrite another owner's index
+        DTLS_TEST_CHECK(allocateConnectionId(13).empty());
+        DTLS_TEST_CHECK(cidIndex.at(first) == 11 && cidIndex.at(second) == 12);
+        nextConnectionId = 3;
+        removeConnectionIds(11);
+        DTLS_TEST_CHECK(cidIndex.count(first) == 0 && cidIndex.at(second) == 12);
+        auto third = allocateConnectionId(13);
+        DTLS_TEST_CHECK(third != first && third != second);
+        cidIndex.clear();
+        auto afterClear = allocateConnectionId(14);
+        DTLS_TEST_CHECK(afterClear != first && afterClear != second && afterClear != third);
+        nextConnectionId = std::numeric_limits<uint64_t>::max();
+        DTLS_TEST_CHECK(allocateConnectionId(15).size() == 8 && nextConnectionId == 0);
+        DTLS_TEST_CHECK(allocateConnectionId(16).empty());
+        cidIndex.clear();
+        std::cout << "DTLS CID allocation PASS" << std::endl;
+    }
+};
+Define_Module(CidAllocatorFixture);
+}
+%file: TestNetwork.ned
+import inet.transportlayer.dtls.Dtls;
+simple CidAllocatorFixture extends Dtls
+{
+    @class(::DtlsConnectionIds_1::CidAllocatorFixture);
+}
+network TestNetwork
+{
+    submodules:
+        fixture: CidAllocatorFixture;
+    connections allowunconnected:
+}
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1s
+seed-set = 0
+%contains: stdout
+DTLS CID allocation PASS

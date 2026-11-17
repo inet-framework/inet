@@ -1,0 +1,25 @@
+%description:
+Reject a PMTU base one byte below the largest enabled-version heartbeat.
+This is an expected configuration-error check, not an expected protocol failure.
+%file: TestNetwork.ned
+import inet.node.inet.StandardHost;
+network TestNetwork { submodules: host: StandardHost; connections allowunconnected: }
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 0.01s
+seed-set = 0
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.versions = "1.3 1.2"
+*.host.app[0].dtls.connectionIdEnabled = true
+*.host.app[0].dtls.heartbeatEnabled = true
+*.host.app[0].dtls.pathMtuDiscoveryEnabled = true
+*.host.app[0].dtls.pathMtuBase = 72B
+%exitcode: 1
+%postrun-command: rg '<!>' test.out test.err > configuration-error.out || true
+%contains: configuration-error.out
+Invalid DTLS path MTU base, ceiling or timer profile

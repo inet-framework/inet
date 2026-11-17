@@ -1,0 +1,3 @@
+Validated DTLS connection migration
+
+DTLS can opt into CID-based endpoint changes with migrationEnabled. A correlated, fresh heartbeat response confirms a candidate before ordinary output moves. Local address/interface changes and restricted UDP port rebinding preserve the association handle; timeout preserves a usable old path, while failed validation after socket replacement invalidates the association. Custom IDtls engines must implement the two local-movement operations, and callbacks must implement pathChanged with the confirmed DtlsPath. Existing runtime defaults remain disabled.

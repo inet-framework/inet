@@ -1,0 +1,68 @@
+%description:
+Certificate-origin DTLS 1.3 ticket resumption through the production UDP engine.
+The first ticket ACK is lost. A fresh record number carries the retransmission;
+the cached ticket subsequently selects PSK-DHE and delivers application data.
+See resumption.md for topology, observations and limitations.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+
+Define_ProtocolTestProgram()
+{
+static uint16_t ticketRecord;
+return ProtocolTest("rfc9147_sha384_resumption")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).nth(1).drop().describe("lose first ticket ACK"))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 4); })
+        .assertEvent([](const MatchContext& c) { ticketRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return true; }).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 4); })
+        .assertEvent([](const MatchContext& c) { return ticketRecord != findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); }).within(3))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(!app.isResumed(), "initial association uses certificate authentication"); app.closePeer(); }))
+    .act(action().after(2.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.resumePeer(); }))
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(2)))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 2 && app.isResumed(), "client establishes using the cached certificate-origin ticket");
+        app.sendMarker(42);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 2 && app.isResumed(), "server recognizes its ticket");
+        require(app.receivedMarkers == std::vector<int>{42}, "resumed application delivery is exactly once");
+    }));
+}
+
+%activity:
+EV << "rfc9147_sha384_resumption compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 12s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+*.host*.app[*].dtls.cipherSuites = "TLS_AES_256_GCM_SHA384"
+*.host*.app[*].dtls.keyExchangeGroups = "secp256r1"
+*.host*.app[*].dtls.signatureSchemes = "rsa_pss_rsae_sha256"
+%contains: stdout
+PROTOCOLTEST rfc9147_sha384_resumption: PASS

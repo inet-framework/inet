@@ -1,0 +1,53 @@
+%description:
+
+DTLS production-path variant AmplificationLimit: implements an explicit plan requirement.
+UDP-backed production engine; seed 0; positive stimulus and outcome assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static long offered = 0, transmitted = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_amplification_limit")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").fromNth(2).drop())
+    .meanwhile(never(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        transmitted += c.event.packet->getByteLength();
+        return transmitted > 3 * offered;
+    }).within(2)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); })
+        .assertEvent([](const MatchContext& c) { offered = c.event.packet->getByteLength(); return offered > 0; }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1.2))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0 && transmitted <= 3 * offered, "oversized unvalidated flight exhausts credit then fails at deadline");
+    }));
+}
+%activity:
+EV << "rfc9147_amplification_limit compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.cookieRequired = false
+*.host2.app[0].dtls.certificateBytes = 1000B
+*.host2.app[0].dtls.handshakeTimeout = 1s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_amplification_limit: PASS

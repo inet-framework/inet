@@ -1,0 +1,121 @@
+%description:
+Selected DTLS 1.3 handshake offer compatibility and retry-key-share selection.
+
+%includes:
+#include "../DtlsTestAssertions.h"
+#include "inet/transportlayer/tls/TlsHandshakeParameters.h"
+
+using namespace inet::tls;
+
+%activity:
+using Parameters = TlsHandshakeParameters;
+Parameters::Offer offer;
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {Parameters::AES_128_GCM_SHA256};
+offer.groups = {Parameters::X25519};
+offer.keyShares = {Parameters::X25519};
+offer.hasSupportedGroups = true;
+offer.hasKeyShare = true;
+offer.signatures = {Parameters::ECDSA_P256_SHA256};
+offer.pskModes = {Parameters::PSK_DHE_KE};
+offer.hasPsk = true;
+offer.pskIdentity = "peer";
+Parameters::Selection selected;
+DTLS_TEST_CHECK(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected).empty());
+DTLS_TEST_CHECK(selected.usesPsk() && !selected.retryKeyShare && selected.signature == 0);
+DTLS_TEST_CHECK(Parameters::wasOffered(offer, selected));
+DTLS_TEST_CHECK(!Parameters::select(offer, Parameters::Profile::PSK, "other", selected).empty());
+offer.keyShares.clear();
+DTLS_TEST_CHECK(Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+DTLS_TEST_CHECK(!selected.usesPsk() && selected.retryKeyShare && selected.signature == Parameters::ECDSA_P256_SHA256);
+DTLS_TEST_CHECK(Parameters::wasOffered(offer, selected));
+selected.retryKeyShare = false;
+DTLS_TEST_CHECK(!Parameters::wasOffered(offer, selected));
+offer.versions = {0xfefd};
+DTLS_TEST_CHECK(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {0xffff};
+DTLS_TEST_CHECK(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.cipherSuites = {Parameters::AES_128_GCM_SHA256};
+offer.groups.clear();
+DTLS_TEST_CHECK(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+offer.groups = {Parameters::X25519};
+offer.signatures.clear();
+DTLS_TEST_CHECK(!Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected).empty());
+auto hello = inet::makeShared<TlsClientHello>();
+hello->setCipherSuitesArraySize(1);
+hello->setCipherSuites(0, Parameters::AES_128_GCM_SHA256);
+const std::vector<uint8_t> extensions = {
+    0, 43, 0, 3, 2, 0xfe, 0xfc,
+    0, 10, 0, 4, 0, 2, 0, 29,
+    0, 13, 0, 4, 0, 2, 4, 3,
+    0, 51, 0, 2, 0, 0
+};
+auto setExtensions = [&](const std::vector<uint8_t>& bytes) {
+    hello->setExtensionsArraySize(bytes.size());
+    for (size_t i = 0; i < bytes.size(); ++i)
+        hello->setExtensions(i, bytes[i]);
+};
+setExtensions(extensions);
+Parameters::Offer decoded;
+DTLS_TEST_CHECK(Parameters::decodeOffer(hello, decoded).empty());
+DTLS_TEST_CHECK(decoded.hasSupportedGroups && decoded.hasKeyShare && decoded.keyShares.empty());
+auto pha = extensions;
+pha.insert(pha.end(), {0,49,0,0});
+setExtensions(pha);
+DTLS_TEST_CHECK(Parameters::decodeOffer(hello, decoded).empty() && decoded.hasPostHandshakeAuth);
+pha.back() = 1;
+pha.push_back(0);
+setExtensions(pha);
+DTLS_TEST_CHECK(Parameters::decodeOffer(hello, decoded) == "invalid post_handshake_auth extension length");
+setExtensions(extensions);
+DTLS_TEST_CHECK(Parameters::decodeOffer(hello, decoded).empty() && !decoded.hasPostHandshakeAuth);
+DTLS_TEST_CHECK(decoded.versions == std::vector<uint16_t>({Parameters::DTLS_13}));
+DTLS_TEST_CHECK(Parameters::select(decoded, Parameters::Profile::CERTIFICATE, "", selected).empty());
+DTLS_TEST_CHECK(selected.retryKeyShare);
+auto duplicate = extensions;
+duplicate.insert(duplicate.end(), extensions.begin(), extensions.begin() + 7);
+setExtensions(duplicate);
+DTLS_TEST_CHECK(!Parameters::decodeOffer(hello, decoded).empty());
+// Refusal must leave the caller's previously decoded offer intact.
+DTLS_TEST_CHECK(decoded.versions == std::vector<uint16_t>({Parameters::DTLS_13}));
+setExtensions({0, 43, 0, 3, 2, 0xfe});
+DTLS_TEST_CHECK(!Parameters::decodeOffer(hello, decoded).empty());
+auto earlyWithoutPsk = extensions;
+earlyWithoutPsk.insert(earlyWithoutPsk.end(), {0, 42, 0, 0});
+setExtensions(earlyWithoutPsk);
+DTLS_TEST_CHECK(!Parameters::decodeOffer(hello, decoded).empty());
+earlyWithoutPsk.back() = 1; // declared nonempty early_data cannot be a ClientHello offer
+earlyWithoutPsk.push_back(0);
+setExtensions(earlyWithoutPsk);
+DTLS_TEST_CHECK(!Parameters::decodeOffer(hello, decoded).empty());
+EV << "DTLS handshake parameters PASS\n";
+offer.versions = {Parameters::DTLS_13};
+offer.cipherSuites = {0x1301, 0x1302, 0x1303};
+offer.groups = {23, 29};
+offer.keyShares = {23, 29};
+offer.signatures = {0x0403, 0x0804};
+for (auto suite : offer.cipherSuites)
+    for (auto group : offer.groups)
+        for (auto signature : offer.signatures) {
+            Parameters::Preferences preferences;
+            preferences.cipherSuites = {suite}; preferences.groups = {group}; preferences.signatures = {signature};
+            DTLS_TEST_CHECK(Parameters::select(offer, Parameters::Profile::CERTIFICATE, "", selected, preferences, 32).empty());
+            DTLS_TEST_CHECK(selected.cipherSuite == suite && selected.group == group && selected.signature == signature && Parameters::wasOffered(offer, selected));
+            DTLS_TEST_CHECK(Parameters::findCipherSuite(suite)->tagBytes == 16 && Parameters::findCipherSuite(suite)->recordLimit == (uint64_t(1) << 24));
+            DTLS_TEST_CHECK(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected, preferences, 32).empty() == (suite != 0x1302));
+            DTLS_TEST_CHECK(Parameters::select(offer, Parameters::Profile::PSK, "peer", selected, preferences, 48).empty() == (suite == 0x1302));
+        }
+DTLS_TEST_CHECK(Parameters::keyShareBytes(23) == 65 && Parameters::keyShareBytes(29) == 32 && Parameters::keyShareBytes(99) == 0);
+DTLS_TEST_CHECK(Parameters::findCipherSuite(0x1302)->hashBytes == 48 && !Parameters::findCipherSuite(0xffff));
+auto preferences = Parameters::parsePreferences("TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256", "secp256r1 x25519", "rsa_pss_rsae_sha256");
+DTLS_TEST_CHECK(preferences.cipherSuites == std::vector<uint16_t>({0x1303, 0x1301}) && preferences.groups.front() == 23 && preferences.signatures.front() == 0x0804);
+for (auto invalid : {"", "unknown", "TLS_AES_128_GCM_SHA256 TLS_AES_128_GCM_SHA256"}) {
+    bool rejected = false;
+    try { Parameters::parsePreferences(invalid, "x25519", "ecdsa_secp256r1_sha256"); }
+    catch (const omnetpp::cRuntimeError&) { rejected = true; }
+    DTLS_TEST_CHECK(rejected);
+}
+
+%contains: stdout
+DTLS handshake parameters PASS

@@ -1,0 +1,75 @@
+%description:
+An expired legacy session ID forces full authentication on a real reconnect.
+%includes:
+#include <set>
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int done=0,exchanges=0,certificates=0,ccs=0;
+static std::set<std::vector<uint8_t>> tickets;
+auto wire=[](const MatchContext& c) {
+    auto header=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+    require(header && !findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet),"resumption uses legacy records");
+    if (header->getContentType()==20) ++ccs;
+    if (handshake(c,14)) ++done;
+    if (handshake(c,16)) ++exchanges;
+    if (handshake(c,11)) ++certificates;
+    if (auto h=findChunk<inet::dtls::Dtls12NewSessionTicket>(c.event.packet)) {
+        std::vector<uint8_t> bytes; for (size_t i=0;i<h->getTicketArraySize();++i) bytes.push_back(h->getTicket(i));
+        require(bytes.size()==16 && header->getEpoch()==0,"legacy ticket precedes cipher change"); tickets.insert(bytes);
+    }
+    return false;
+};
+return ProtocolTest("resumption_sessionidexpiry12")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(wire).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(wire).within(5)))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(!app.isResumed(),"first handshake is full"); app.closePeer(); }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(1))
+    .act(action().after(1.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.resumePeer(); }))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(2)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount==2 && app.errorCount==0 && !app.isResumed() && app.maximumDatagramSize()==1163,"client has a resumed legacy handle");
+        require(done==2 && exchanges==2 && certificates==0 && ccs==4 && tickets.size()==0,"abbreviated exchange omits full-handshake messages and renews tickets");
+        require(app.peerAuthentication().certificateAuthenticated==false,"saved server authentication is restored"); app.sendMarker(160,16);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount==2 && app.errorCount==0 && !app.isResumed() && app.receivedMarkers==std::vector<int>{160} && app.peerAuthentication().certificateAuthenticated==false,"server resumes with saved client authentication"); app.sendMarker(161,16); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "legacy resumption compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.resumptionEnabled = true
+*.host*.app[*].dtls.ticketLifetime = 1s
+*.host*.app[*].dtls.dtls12SessionTicketsEnabled = false
+%contains: stdout
+PROTOCOLTEST resumption_sessionidexpiry12: PASS

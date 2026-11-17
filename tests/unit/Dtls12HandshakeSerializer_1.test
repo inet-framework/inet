@@ -1,0 +1,106 @@
+%description:
+DTLS 1.2 handshake bodies have independent length/octet oracles. Reused legacy
+Hello forms distinguish absent extensions from an empty encoded vector.
+%includes:
+#include "../DtlsTestAssertions.h"
+#include "inet/common/MemoryOutputStream.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+#include "inet/transportlayer/dtls/DtlsPlaintextHeader_m.h"
+#include "inet/transportlayer/tls/TlsClientHello_m.h"
+
+using namespace inet;
+using namespace inet::dtls;
+using namespace inet::tls;
+template<typename T> void oracle(const Ptr<T>& body, const std::vector<uint8_t>& expected) {
+    body->setChunkLength(B(expected.size()));
+    Packet p("typed", body);
+    auto bytes = p.peekDataAsBytes()->getBytes();
+    if (bytes != expected) throw cRuntimeError("DTLS 1.2 independent octet oracle differs");
+    Packet raw("raw", makeShared<BytesChunk>(expected));
+    auto parsed = raw.popAtFront<T>(B(expected.size()));
+    Packet back("round trip", parsed);
+    if (back.peekDataAsBytes()->getBytes() != expected) throw cRuntimeError("DTLS 1.2 parsed body differs");
+}
+template<typename T> bool rejects(const std::vector<uint8_t>& bytes) {
+    try { Packet p("invalid", makeShared<BytesChunk>(bytes)); p.popAtFront<T>(B(bytes.size())); return false; }
+    catch (const cRuntimeError&) { return true; }
+}
+%activity:
+auto ticket = makeShared<Dtls12NewSessionTicket>();
+ticket->setTicketLifetime(0x01020304);
+ticket->setTicketArraySize(3); ticket->setTicket(0,0xaa); ticket->setTicket(1,0xbb); ticket->setTicket(2,0xcc);
+oracle(ticket, {1,2,3,4,0,3,0xaa,0xbb,0xcc});
+oracle(makeShared<Dtls12NewSessionTicket>(), {0,0,0,0,0,0});
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,1}));
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,2,0xaa}));
+DTLS_TEST_CHECK(rejects<Dtls12NewSessionTicket>({0,0,0,1,0,0,0xaa}));
+auto hvr = makeShared<Dtls12HelloVerifyRequest>();
+hvr->setCookieArraySize(3);
+for (size_t i=0; i<3; ++i) hvr->setCookie(i, 0xa0+i);
+oracle(hvr, {0xfe,0xff,3,0xa0,0xa1,0xa2});
+auto cert = makeShared<Dtls12Certificate>();
+cert->setCertificateArraySize(2); cert->setCertificate(0,0xaa); cert->setCertificate(1,0xbb);
+oracle(cert, {0,0,5,0,0,2,0xaa,0xbb});
+oracle(makeShared<Dtls12Certificate>(), {0,0,0});
+auto hint = makeShared<Dtls12PskServerKeyExchange>();
+hint->setIdentityHintArraySize(2); hint->setIdentityHint(0,'h'); hint->setIdentityHint(1,'i');
+oracle(hint, {0,2,'h','i'});
+oracle(makeShared<Dtls12PskServerKeyExchange>(), {0,0});
+auto identity = makeShared<Dtls12PskClientKeyExchange>();
+identity->setIdentityArraySize(2); identity->setIdentity(0,'i'); identity->setIdentity(1,'d');
+oracle(identity, {0,2,'i','d'});
+auto ske = makeShared<Dtls12EcdheServerKeyExchange>();
+ske->setPublicKeyArraySize(65); ske->setPublicKey(0,4);
+ske->setSignatureArraySize(2); ske->setSignature(0,0xaa); ske->setSignature(1,0xbb);
+std::vector<uint8_t> point(65,0); point[0]=4;
+std::vector<uint8_t> signedPoint = {3,0,23,65};
+signedPoint.insert(signedPoint.end(), point.begin(), point.end());
+signedPoint.insert(signedPoint.end(), {4,3,0,2,0xaa,0xbb});
+oracle(ske, signedPoint);
+auto cke = makeShared<Dtls12EcdheClientKeyExchange>();
+cke->setPublicKeyArraySize(65); cke->setPublicKey(0,4);
+std::vector<uint8_t> clientPoint = {65}; clientPoint.insert(clientPoint.end(), point.begin(), point.end());
+oracle(cke, clientPoint);
+auto request = makeShared<Dtls12CertificateRequest>();
+request->setCertificateTypesArraySize(1); request->setCertificateTypes(0,64);
+request->setSignatureSchemesArraySize(1); request->setSignatureSchemes(0,0x0403);
+oracle(request, {1,64,0,2,4,3,0,0});
+auto verify = makeShared<TlsCertificateVerify>();
+verify->setSignatureScheme(0x0403); verify->setSignatureArraySize(2); verify->setSignature(0,0xaa); verify->setSignature(1,0xbb);
+oracle(verify, {4,3,0,2,0xaa,0xbb});
+auto finished = makeShared<TlsFinished>(); finished->setVerifyDataArraySize(12);
+for (size_t i=0; i<12; ++i) finished->setVerifyData(i,0xcc);
+oracle(finished, std::vector<uint8_t>(12,0xcc));
+auto done = makeShared<Dtls12ServerHelloDone>();
+MemoryOutputStream empty;
+Chunk::serialize(empty, done, b(0), b(0));
+DTLS_TEST_CHECK(empty.getLength() == b(0));
+DTLS_TEST_CHECK(rejects<Dtls12HelloVerifyRequest>({0xfe,0xff,3,1}));
+DTLS_TEST_CHECK(rejects<Dtls12Certificate>({0,0,4,0,0,2,1}));
+DTLS_TEST_CHECK(rejects<Dtls12PskClientKeyExchange>({0,0}));
+DTLS_TEST_CHECK(rejects<Dtls12EcdheClientKeyExchange>({2,4}));
+DTLS_TEST_CHECK(rejects<Dtls12CertificateRequest>({1,64,0,1,4,0,0}));
+DTLS_TEST_CHECK(rejects<Dtls12EcdheServerKeyExchange>({1,0,23,1,4,4,3,0,1,0}));
+auto client = makeShared<DtlsClientHello>();
+client->setCipherSuitesArraySize(1); client->setCipherSuites(0,0x00a8);
+client->setCompressionMethodsArraySize(1); client->setCompressionMethods(0,0);
+client->setExtensionsPresent(false);
+std::vector<uint8_t> clientHello = {0xfe,0xfd}; clientHello.resize(34,0);
+clientHello.insert(clientHello.end(), {0,0,0,2,0,0xa8,1,0});
+oracle(client, clientHello);
+auto server = makeShared<TlsServerHello>(); server->setLegacyVersion(0xfefd); server->setCipherSuite(0x00a8); server->setExtensionsPresent(false);
+std::vector<uint8_t> serverHello = {0xfe,0xfd}; serverHello.resize(34,0);
+serverHello.insert(serverHello.end(), {0,0,0xa8,0});
+oracle(server, serverHello);
+server = staticPtrCast<TlsServerHello>(server->dupShared());
+server->setExtensionsPresent(true); serverHello.insert(serverHello.end(), {0,0});
+oracle(server, serverHello);
+auto invalid = makeShared<TlsServerHello>(); invalid->setExtensionsPresent(false); invalid->setChunkLength(B(38));
+bool refused = false;
+try { Packet p("invalid omission", invalid); p.peekDataAsBytes(); } catch (const cRuntimeError&) { refused = true; }
+if (!refused) throw cRuntimeError("TLS 1.3 legacy version accepted omitted extension vector");
+std::cout << "DTLS 1.2 handshake serializers PASS" << std::endl;
+%contains: stdout
+DTLS 1.2 handshake serializers PASS

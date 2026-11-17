@@ -1,0 +1,47 @@
+%description:
+A late CID response fulfills a timed-out request and permits another request.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int requests = 0, timeouts = 0;
+return establish("rfc9147_cid_late_fulfillment")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 10) && simTime() < SimTime(2.5); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (handshake(c, 9)) ++requests; return false; }).within(8)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("connectionIdRequestTimeout").filterEvent([](const MatchContext&) { ++timeouts; return false; }).within(8)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(2); }))
+    .act(action().after(3).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(1); app.sendMarker(7); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>({true,false}) && app.errorCount == 0 && requests == 1 && timeouts == 1, "ACK stops retry without fulfilling request; timeout and second refusal preserve data");
+    }).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{7}, "ordinary data survives request timeout"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.requestCids(1); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.cidResults == std::vector<bool>({true,false,true}) && requests == 2 && timeouts == 1, "late response releases request admission after timeout"); }));
+}
+%activity:
+EV << "CID request compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host1.app[*].dtls.handshakeTimeout = 2s
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_late_fulfillment: PASS

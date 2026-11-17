@@ -1,0 +1,69 @@
+%description:
+Production DTLS 1.2 full handshake with explicit CCS/epoch-one Finished and
+whole application datagrams. No unified header or 1.3-only message is emitted.
+%includes:
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int ccs=0, finished=0, requests=0, done=0, certificates=0;
+auto observe=[](const MatchContext& c) {
+    auto h=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet);
+    require(h && !findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet), "all wire records use the 1.2 header");
+    if (h->getContentType()==20) { require(h->getEpoch()==0 && h->getLength()==1, "CCS remains in the old epoch"); ++ccs; }
+    auto hs=findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet);
+    if (hs) {
+        require(hs->getMessageType()!=8 && hs->getMessageType()!=24 && hs->getMessageType()!=26, "no 1.3-only handshake body");
+        if (hs->getMessageType()==3) ++requests;
+        if (hs->getMessageType()==14) { require(hs->getMessageLength()==0, "ServerHelloDone is empty"); ++done; }
+        if (hs->getMessageType()==11) ++certificates;
+        if (hs->getMessageType()==20) { require(h->getEpoch()==1 && hs->getMessageLength()==12, "Finished uses epoch one and twelve verification bytes"); ++finished; }
+    }
+    return false;
+};
+return ProtocolTest("rfc6347_handshakemutual")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(observe).within(4)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(observe).within(4)))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3), on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount==1 && app.errorCount==0 && app.maximumDatagramSize()==1163, "the client exposes the actual 37-byte overhead");
+        require(ccs==2 && finished==2 && requests==1 && done==1 && certificates==2, "one cookie exchange and one full handshake without spurious recovery");
+        app.sendMarker(101,1100);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers==std::vector<int>{101} && app.establishedCount==1 && app.errorCount==0, "one original forward datagram delivers"); app.sendMarker(102,700); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers==std::vector<int>{102} && app.errorCount==0, "the reverse datagram delivers"); }));
+}
+%activity:
+EV << "DTLS 1.2 full handshake compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = true
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc6347_handshakemutual: PASS

@@ -1,0 +1,54 @@
+%description:
+An actual ServerHello carries an unsupported extension alongside its ticket promise.
+The consumer must report unsupported_extension rather than a generic decode error.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool hit=false;
+return ProtocolTest("resumption_extension12")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p,2); }).nth(1).mutate([](Packet *p) {
+        require(mutateHeader<inet::tls::TlsServerHello>(p,[](auto& h) { auto n=h.getExtensionsArraySize(); h.setExtensionsArraySize(n+4); h.setExtensions(n,0x12); h.setExtensions(n+1,0x34); h.setExtensions(n+2,0); h.setExtensions(n+3,0); h.setChunkLength(h.getChunkLength()+B(4)); }),"extend actual ServerHello");
+        require(mutateHeader<inet::dtls::DtlsHandshakeHeader>(p,[](auto& h) { h.setMessageLength(h.getMessageLength()+4); h.setFragmentLength(h.getFragmentLength()+4); }),"handshake length");
+        require(mutateHeader<inet::dtls::DtlsPlaintextHeader>(p,[](auto& h) { h.setLength(h.getLength()+4); }),"record length");
+        require(mutateHeader<UdpHeader>(p,[](auto& h) { h.setTotalLengthField(h.getTotalLengthField()+B(4)); }),"UDP length");
+        require(mutateHeader<Ipv4Header>(p,[](auto& h) { h.setTotalLengthField(h.getTotalLengthField()+B(4)); }),"IP length");
+        resizeTapEnvelope(p,4); hit=true;
+    }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a=findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription()==110; }).within(2))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(hit && app.errorCount==1 && app.establishedCount==0,"unknown extension fails with its required alert before establishment"); }));
+}
+%activity:
+EV << "legacy extension check compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+*.host*.app[*].dtls.resumptionEnabled = true
+%contains: stdout
+PROTOCOLTEST resumption_extension12: PASS

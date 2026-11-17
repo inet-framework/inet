@@ -1,0 +1,77 @@
+%description:
+
+Retain a valid one-byte payload with zero padding up to the full inner limit of
+16385 bytes. All-zero content without a type and an inner length of 16386 bytes
+must be discarded without replay commit; valid following records still deliver.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static uint16_t invalidFuture;
+static void paddedInner(Packet *p, int marker, int padding)
+{
+    auto payload = makeShared<BytesChunk>(std::vector<uint8_t>{(uint8_t)marker}); payload->markImmutable();
+    auto type = makeShared<inet::dtls::DtlsInnerContentType>(); type->setContentType(23); type->markImmutable();
+    auto zeros = makeShared<ByteCountChunk>(B(padding), 0); zeros->markImmutable();
+    auto inner = makeShared<SequenceChunk>(); inner->insertAtBack(payload); inner->insertAtBack(type); inner->insertAtBack(zeros); inner->markImmutable();
+    replaceProtectedInner(p, inner);
+    auto root = dynamicPtrCast<const SequenceChunk>(p->peekData());
+    bool tagRetained = false;
+    for (const auto& child : root->getChunks()) if (auto tag = dynamicPtrCast<const ByteCountChunk>(child)) if (tag->getChunkLength() == B(16)) tagRetained = true;
+    require(tagRetained, "padding changes the encrypted inner content while preserving the separate 16-byte tag");
+}
+static void futureNumber(Packet *p)
+{
+    mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { invalidFuture = h.getSequenceNumber() + 1; h.setSequenceNumber(invalidFuture); });
+}
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_inner_padding")
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(10, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { paddedInner(p, 10, 16383); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return r && r->getLength() == 16401; }).within(1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").assertEvent([](const MatchContext& c) { return c.event.packet->getByteLength() == 1; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(11, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(0.1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { auto zeros = makeShared<BytesChunk>(std::vector<uint8_t>(4, 0)); zeros->markImmutable(); replaceProtectedInner(p, zeros); futureNumber(p); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return r && r->getSequenceNumber() == invalidFuture && r->getLength() == 20; }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(12, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() == invalidFuture; }).within(0.1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(13, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).within(0.1))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetApplication).nth(1).mutate([](Packet *p) { paddedInner(p, 13, 16384); futureNumber(p); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); return r && r->getSequenceNumber() == invalidFuture && r->getLength() == 16402; }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("recordDropped").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(14, 1); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent(applicationRecord).assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber() == invalidFuture; }).within(0.1))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 0 && app.receivedMarkers == std::vector<int>({10, 12, 14}), "zero padding preserves payload, invalid inners are discarded, and valid records reuse uncommitted numbers"); }));
+}
+%activity:
+EV << "rfc9147_inner_padding compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.udpPayloadLimit = 20000B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_inner_padding: PASS

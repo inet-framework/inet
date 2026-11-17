@@ -1,0 +1,51 @@
+%description:
+
+A full ClientHello starts two seconds of input service. Its server attempt must
+expire one second after first UDP arrival, releasing service for another peer.
+The expired input must never later emit a retry or accepted association.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_first_arrival_deadline")
+    .meanwhile(never(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); }).within(2.5)))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .once(on("host2.app[0].dtls").signal("processingDelay").filterValue(2).within(0.1))
+    .once(on("host1.app[1].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1.2))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.1))
+    .act(action().after(1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 1 && app.acceptedEndpoints.size() == 1 && app.acceptedEndpoints.front().peerPort == 4436, "first-arrival deadline cancels input service and prevents late promotion of the expired peer");
+    }));
+}
+%activity:
+EV << "rfc9147_first_arrival_deadline compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 4s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host1.numApps = 2
+*.host2.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.handshakeTimeout = 0.8s
+*.host1.app[1].localPort = 4436
+*.host1.app[1].driver.startTime = 1.3s
+*.host2.app[0].dtls.handshakeInDelay = simTime() < 0.5s ? 2s : 0s
+*.host2.app[0].dtls.handshakeTimeout = 1s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_first_arrival_deadline: PASS

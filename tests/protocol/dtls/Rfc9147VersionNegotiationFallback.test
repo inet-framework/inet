@@ -1,0 +1,74 @@
+%description:
+Real endpoint version negotiation preserves 1.3 preference, explicit legacy
+fallback and downgrade representation; both application directions deliver.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int ccs=0, unified=0;
+static bool initial=false, marker=false;
+auto wire=[](const MatchContext& c) { if (findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)) ++unified; auto p=findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); if (p && p->getContentType()==20) ++ccs; return false; };
+return ProtocolTest("version_negotiationfallback")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([wire](const MatchContext& c) {
+        wire(c);
+        if (auto hello=findChunk<inet::dtls::DtlsClientHello>(c.event.packet); hello && !initial) {
+            initial=true;
+            require(hasHelloExtension(*hello,43)==true, "the initial offer reflects the allowed versions");
+            bool legacySuite=false;
+            for (size_t i=0; i<hello->getCipherSuitesArraySize(); ++i) legacySuite |= hello->getCipherSuites(i)==0x00a8;
+            require(legacySuite==true, "the fixed legacy suite is offered only when permitted");
+        }
+        return false;
+    }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([wire](const MatchContext& c) {
+        wire(c);
+        if (auto hello=findChunk<inet::tls::TlsServerHello>(c.event.packet)) {
+            static const uint8_t value[]={'D','O','W','N','G','R','D',1};
+            bool match=true; for (size_t i=0; i<8; ++i) match &= hello->getRandom(24+i)==value[i];
+            marker |= match;
+        }
+        return false;
+    }).within(5)))
+    .unordered({on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3),on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3)})
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(initial && marker==false && ccs==2 && (unified>0)==false, "actual records and sentinel identify the selected version");
+        require(app.maximumDatagramSize()==1163 && app.establishedCount==1 && app.errorCount==0, "selected-version overhead and one establishment");
+        app.sendMarker(111,1100);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers==std::vector<int>{111} && app.errorCount==0, "selected version delivers forward"); app.sendMarker(112); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "version negotiation compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].dtls.versions = "1.3 1.2"
+*.host2.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "psk"
+*.host2.app[*].dtls.cookieRequired = true
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST version_negotiationfallback: PASS

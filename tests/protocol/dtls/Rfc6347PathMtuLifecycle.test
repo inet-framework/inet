@@ -1,0 +1,83 @@
+%description:
+Server shutdown and crash cancel active size probes and their timers. After
+restart fresh real handshakes use fresh tokens and can confirm the base.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool drop = true;
+static int requests = 0, results = 0, saved = 0;
+static std::set<std::vector<uint8_t>> tokens;
+return ProtocolTest("legacy_pmtu_lifecycle")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return drop && packetHeartbeat(p, 2); }).drop())
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) { ++requests; auto h = findChunk<inet::dtls::DtlsHeartbeat>(c.event.packet); std::vector<uint8_t> token; for (size_t i = 0; i < h->getPayloadArraySize(); ++i) token.push_back(h->getPayload(i)); tokens.insert(token); } return false; }).within(7)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("probeResult").filterEvent([](const MatchContext&) { ++results; return false; }).within(7)))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return heartbeat(c, 1); }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver&) { saved = requests; require(results == 0, "shutdown cancels without a late probe result"); }))
+    .act(action().after(1.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(requests == saved && results == 0, "stopped probe timer emits no retry"); app.listenPeer(); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[1].driver", [](DtlsTestDriver& app) { app.openPeer("host2"); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return heartbeat(c, 1); }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::CLOSED).within(2))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver&) { saved = requests; }))
+    .act(action().after(1.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(requests == saved && results == 0, "crash cancels the outstanding retry without late completion"); drop = false; app.listenPeer(); }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[2].driver", [](DtlsTestDriver& app) { app.openPeer("host2"); }))
+    .once(on("host2.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(466).within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 3 && tokens.size() >= 3 && tokens.size() == size_t(requests), "restart creates fresh discovery state and non-reused correlation tokens"); }));
+}
+%activity:
+EV << "lifecycle discovery compiled\n";
+%file: PathMtuRestartNetwork.ned
+import inet.protocoltest.TapPairNetwork;
+import inet.common.scenario.ScenarioManager;
+network PathMtuRestartNetwork extends TapPairNetwork
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+}
+%file: scenario.xml
+<scenario>
+    <at t="1s"><shutdown module="host2"/></at>
+    <at t="2s"><startup module="host2"/></at>
+    <at t="4s"><crash module="host2"/></at>
+    <at t="5s"><startup module="host2"/></at>
+</scenario>
+%inifile: omnetpp.ini
+[General]
+network = PathMtuRestartNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.scenarioManager.script = xmldoc("scenario.xml")
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host1.numApps = 3
+*.host2.numApps = 1
+*.host2.hasStatus = true
+*.host1.app[1].active = false
+*.host1.app[2].active = false
+*.host1.app[1].localPort = 4436
+*.host1.app[2].localPort = 4438
+*.host1.app[*].dtls.pathMtuDiscoveryEnabled = false
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_pmtu_lifecycle: PASS

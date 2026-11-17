@@ -1,0 +1,43 @@
+%description:
+An unknown negotiated heartbeat mode is rejected with illegal_parameter.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_heartbeat_invalid_selection")
+    .meanwhile(exactlyTimes(1, on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 47; }).within(1)))
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 8); }).nth(1).mutate([](Packet *p) {
+        mutateNestedHeader<inet::tls::TlsEncryptedExtensions>(p, [](auto& h) { require(h.getExtensionsArraySize() == 5 && h.getExtensions(1) == 15, "actual EE negotiates heartbeat"); h.setExtensions(4, 3); });
+    }))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 0 && app.errorCount == 1, "invalid heartbeat mode prevents establishment"); }));
+}
+%activity:
+EV << "invalid heartbeat mode compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsHeartbeatTestApp"
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_heartbeat_invalid_selection: PASS

@@ -1,0 +1,3 @@
+Recoverable DTLS 1.3 connection identifier updates
+
+CID-enabled DTLS associations can exchange bounded spare and immediate replacement identifiers through the public engine/socket interface. Updates and requests recover independently from tickets and KeyUpdate; ACK receipt and request fulfillment remain separate. Defaults remain disabled. The model includes malformed-input handling, finite admission and timeout policies, and continues ordinary data after CID request expiry. Custom IDtls implementations must implement the three new CID operations described in the migration guide.

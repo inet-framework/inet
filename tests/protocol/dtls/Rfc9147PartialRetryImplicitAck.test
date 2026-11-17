@@ -1,0 +1,47 @@
+%description:
+
+Drop explicit HRR ACKs and hold every retry-ClientHello fragment except its first.
+Retaining that valid responding fragment must implicitly acknowledge the HRR,
+even while the complete retry message is unavailable for more than its1s RTO.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static simtime_t retryHandoff;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_partial_retry_implicit_ack")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket(packetAck).within(1.35).drop())
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 1 && ((h->getMessageSequence() == 0 && retryHandoff > SIMTIME_ZERO) || (h->getMessageSequence() == 1 && h->getFragmentOffset() > 0)); }).within(1.35).drop())
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 2 && h->getFragmentOffset() + h->getFragmentLength() == h->getMessageLength(); }).assertEvent([](const MatchContext& c) { retryHandoff = c.event.time; return true; }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1 && h->getFragmentOffset() == 0 && h->getFragmentLength() < h->getMessageLength(); }).within(0.1))
+    .never(on("host2.app[0].dtls").signal("handshakeRetransmission").within(1.05))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(simTime() > retryHandoff + SimTime(1) && app.acceptedEndpoints.empty(), "a retained partial retry suppresses the HRR timeout before full validation"); }))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(4))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "release of the remaining retry fragments completes once"); }));
+}
+%activity:
+EV << "rfc9147_partial_retry_implicit_ack compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.udpPayloadLimit = 64B
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_partial_retry_implicit_ack: PASS

@@ -1,0 +1,3 @@
+DTLS 1.3 connection identifier negotiation
+
+The DTLS engine can negotiate receiver-selected connection identifiers, including empty and unidirectional choices. CID records select associations through an engine-local index and include their actual header overhead in record and queue budgets. Receive IDs remain unique across close and engine restart. Unknown or inconsistent IDs are dropped; address changes are refused until a validated path mechanism is available. Enable connectionIdEnabled to opt in; defaults preserve the existing record format. CIDs remain modeled routing metadata, not cryptographic authentication.

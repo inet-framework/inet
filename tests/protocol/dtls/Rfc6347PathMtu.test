@@ -1,0 +1,69 @@
+%description:
+Discovery starts at 512 UDP bytes, grows by 128 to the configured ceiling, and
+uses small replies despite the reverse sender's 512-byte ceiling. All DTLS output
+is nonfragmenting, including the initial handshake. Handles stay established.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static std::vector<int> probes, responses;
+static int nonfragmenting = 0;
+return ProtocolTest("legacy_path_mtu")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 1)) probes.push_back(c.event.packet->getByteLength()); return false; }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (heartbeat(c, 2)) responses.push_back(c.event.packet->getByteLength()); return false; }).within(5)))
+    .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (auto udp = findChunk<UdpHeader>(c.event.packet); udp && udp->getSourcePort() == 4434) {
+            auto ip = findChunk<Ipv4Header>(c.event.packet);
+            require(ip && ip->getDontFragment() && ip->getFragmentOffset() == 0 && !ip->getMoreFragments(), "every real IPv4 DTLS output requests no fragmentation");
+            ++nonfragmenting;
+        }
+        return false;
+    }).within(5)))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1154).within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.maximumDatagramSize() == 1154 && app.maximumDatagramSizes == std::vector<size_t>({466,594,722,850,978,1106,1154}), "confirmed maxima include actual CID and record overhead");
+        require(probes == std::vector<int>({512,640,768,896,1024,1152,1200}) && responses == std::vector<int>(7,73), "monotone sized requests and minimum replies test the forward direction");
+        require(nonfragmenting >= 9 && app.establishedCount == 1 && app.errorCount == 0, "initial handshake and discovery share real nonfragmenting output");
+        app.sendMarker(200, 1100);
+    }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.maximumDatagramSize() == 466 && app.maximumDatagramSizes == std::vector<size_t>{466} && app.receivedMarkers == std::vector<int>{200}, "reverse budget stays independent and a larger forward datagram delivers");
+        app.sendMarker(201);
+    }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>{201}, "ordinary reverse data stays usable"); }));
+}
+%activity:
+EV << "path MTU compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host2.app[*].dtls.udpPayloadLimit = 512B
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_path_mtu: PASS

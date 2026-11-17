@@ -1,0 +1,45 @@
+%description:
+Client declines with an empty certificate list; the server fails mandatory authentication.
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("pha_emptycertificate")
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); }))
+    .unordered({on("host2.app[0].driver").signal("authenticationResult").filterValue(0).within(3), on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(3)})
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.authenticationAdmissions == std::vector<bool>{true} && app.authenticationResults == std::vector<bool>{false} && app.errorCount == 1, "one negative result and one handle invalidation");
+    }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host1.app[*].dtls.postHandshakeCertificateAvailable = false
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_emptycertificate: PASS

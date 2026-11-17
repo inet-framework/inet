@@ -1,0 +1,45 @@
+%description:
+
+A second logical HelloRetryRequest reuses the first retry's body but has handshake
+messageSequence1. It must fail with unexpected_message, even if its cookie matches.
+The normal ServerHello is delayed so the client is still waiting for it.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_second_retry_sequence")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 2); }).nth(1).duplicate(0.02))
+    .intercept(tap("tap").from("host2").copiesOnly().filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 2); }).mutate([](Packet *p) { mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setMessageSequence(1); }); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 1 && h->getMessageSequence() == 1; }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return h && h->getMessageType() == 2 && h->getMessageSequence() == 1; }).within(0.05))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 10; }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 1 && app.establishedCount == 0, "second logical retry fails despite matching original body"); }));
+}
+%activity:
+EV << "rfc9147_second_retry_sequence compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host2.app[0].dtls.handshakeOutDelay = 0.05s
+%contains: stdout
+PROTOCOLTEST rfc9147_second_retry_sequence: PASS

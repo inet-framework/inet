@@ -1,0 +1,46 @@
+%description:
+Malformed actual DTLS 1.2 handshake records fail explicitly.
+%includes:
+#include "DtlsTestUtils.h"
+#include "inet/transportlayer/dtls/Dtls12HelloVerifyRequest_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static bool hit=false;
+return ProtocolTest("malformed12_certificate")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p,11); }).nth(1).mutate([](Packet *p) { require(mutateHeader<inet::dtls::Dtls12Certificate>(p,[](auto& h) { h.setCertificate(0,255); }),"actual certificate mutated"); hit=true; }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a=findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription()==42; }).within(2))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(hit && app.establishedCount==0 && app.errorCount==1, "wire mutation reaches production rejection before establishment"); }));
+}
+%activity:
+EV << "malformed legacy compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 6s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.handshakeOutDelay = 10ms
+*.host*.app[*].dtls.handshakeInDelay = 10ms
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host2.app[*].dtls.clientAuthentication = false
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST malformed12_certificate: PASS

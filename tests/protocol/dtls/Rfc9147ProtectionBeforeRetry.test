@@ -1,0 +1,60 @@
+%description:
+
+DTLS production-path variant ProtectionBeforeRetry: see the owning reviewer document.
+UDP-backed production engine; seed 0; explicit stimulus and assertions.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static simtime_t lastHelloHandoff, expectedTimeout, finishedHandoff;
+static uint64_t finishedRecord;
+
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_protection_before_retry")
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); bool finalFragment = h && h->getMessageType() == 1 && h->getFragmentOffset() + h->getFragmentLength() == h->getMessageLength(); if (finalFragment) lastHelloHandoff = c.event.time; return finalFragment; }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto h = findChunk<inet::tls::TlsServerHello>(c.event.packet);
+        if (expectedTimeout == SIMTIME_ZERO && handshake(c, 2) && h && !hasHelloExtension(*h, 44)) expectedTimeout = 1.5 * (c.event.time - lastHelloHandoff);
+        return false;
+    }).within(1)))
+    .once(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).within(5))
+    .never(on("host1.app[0].dtls").signal("handshakeRetransmission").within(1.19))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) { finishedHandoff = c.event.time; finishedRecord = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet)->getSequenceNumber(); return expectedTimeout > SIMTIME_ZERO; }).within(0.1))
+    .meanwhile(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 2); }).nth(1).drop())
+    .unordered({
+        on("host1.app[0].dtls").signal("handshakeRetransmission").assertEvent([](const MatchContext& c) { auto error = c.event.time - finishedHandoff - expectedTimeout; return error >= SimTime(-0.000001) && error <= SimTime(0.000001); }).within(0.1),
+        on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsCiphertextHeader>(c.event.packet); auto error = c.event.time - finishedHandoff - expectedTimeout; return r && r->getEpochBits() == 2 && r->getSequenceNumber() != finishedRecord && error >= SimTime(-0.000001) && error <= SimTime(0.000001); }).within(0.1)
+    })
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).within(1));
+}
+
+%activity:
+EV << "rfc9147_protection_before_retry compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 30s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[0].dtls.protectOutDelay = simTime() < 0.209s ? 1.2s : 0s
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_protection_before_retry: PASS

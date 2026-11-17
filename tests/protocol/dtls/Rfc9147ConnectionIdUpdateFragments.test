@@ -1,0 +1,46 @@
+%description:
+CID update reassembly and selective retransmission at the minimum CID ACK budget.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+static int fragments = 0;
+return establish("rfc9147_cid_fragments")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetHandshake(p, 10); }).nth(2).drop())
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (handshake(c, 10)) { require(c.event.packet->getByteLength() <= 48, "CID fragment obeys configured UDP limit"); ++fragments; }
+        return false;
+    }).within(5)))
+    .act(action().after(0.1).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(2, false); }))
+    .once(on("host2.app[0].dtls").signal("connectionIdsReceived").filterValue(2).within(3))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.activateCid(); app.sendMarker(13, 1); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(fragments >= 5 && app.receivedMarkers == std::vector<int>{13} && app.errorCount == 0, "missing fragment recovers into one usable CID set"); }));
+}
+%activity:
+EV << "CID fragments compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.udpPayloadLimit = 48B
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_fragments: PASS

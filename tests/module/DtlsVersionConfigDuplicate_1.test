@@ -1,0 +1,18 @@
+%description:
+Reject invalid allowed-version configuration before opening the UDP engine.
+%file: TestNetwork.ned
+import inet.node.inet.StandardHost;
+network TestNetwork { submodules: host: StandardHost; connections allowunconnected: }
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+*.host.numApps = 1
+*.host.app[0].typename = "DtlsApp"
+*.host.app[0].server = true
+*.host.app[0].dtls.localPort = 4433
+*.host.app[0].dtls.versions = "1.3 1.3"
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > configuration-error.out || true
+%contains: configuration-error.out
+DTLS versions must contain distinct supported values

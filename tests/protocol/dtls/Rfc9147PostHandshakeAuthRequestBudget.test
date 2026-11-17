@@ -1,0 +1,45 @@
+%description:
+A request larger than the aggregate retained-body budget refuses synchronously while ordinary data delivers.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("pha_requestbudget")
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.requestAuthentication(); app.sendMarker(76); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.update(); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.authenticationAdmissions == std::vector<bool>{false} && app.authenticationResults.empty() && app.errorCount == 0, "request refuses before consuming a handshake sequence or failing the association"); }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.updateResults == std::vector<bool>{false} && app.errorCount == 0, "KeyUpdate also obeys the aggregate retained-byte bound"); }));
+}
+%activity:
+EV << "PHA check compiled\n";
+%inifile: omnetpp.ini
+[General]
+*.host2.app[*].dtls.maxPendingBytes = 16B
+*.host1.app[*].dtls.maxPendingBytes = 12B
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.profile = "certificate"
+*.host*.app[*].dtls.postHandshakeAuthEnabled = true
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST pha_requestbudget: PASS

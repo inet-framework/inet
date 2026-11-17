@@ -1,0 +1,43 @@
+%description:
+An unacknowledged immediate CID update fails its association at its deadline.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_cid_update_timeout")
+    .meanwhile(tap("tap").from("host1").filterPacket([](const Packet *p) { return packetAckForEpoch(p, 3); }).drop())
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(1, true); }))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(3))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.cidResults == std::vector<bool>{true} && app.errorCount == 1 && app.lastError == "DTLS post-handshake exchange timeout", "replacement ACK loss expires the owning association");
+        app.provideCids(1, true); app.requestCids(1); app.activateCid();
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.cidResults == std::vector<bool>({true,false,false,false}) && app.errorCount == 1, "retired handle refuses all CID operations"); }));
+}
+%activity:
+EV << "CID timeout compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host2.app[*].dtls.handshakeTimeout = 2s
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_update_timeout: PASS

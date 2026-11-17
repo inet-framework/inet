@@ -1,0 +1,54 @@
+%description:
+
+A represented expected client Finished reaches the server while its own Finished
+is still queued. Establishment requires both peer processing and own UDP handoff.
+This uses the declared modeled protection abstraction and makes no MAC claim.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static bool ownFinishedHanded = false;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_early_peer_finished")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 14434").filterPacket([](const Packet *p) { return packetHandshake(p, 20); }).mutate([](Packet *p) { require(mutateHeader<UdpHeader>(p, [](auto& h) { h.setSrcPort(4434); }), "crafted Finished uses pending client's actual tuple"); }))
+    .meanwhile(never(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).filterEvent([](const MatchContext&) { return !ownFinishedHanded; }).within(2)))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendRaw(rawProtectedFinished(1)); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).within(0.1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); }).assertEvent([](const MatchContext& c) {
+        auto module = check_and_cast<cModule *>(c.event.module);
+        auto app = check_and_cast<DtlsTestDriver *>(module->getParentModule()->getSubmodule("driver"));
+        ownFinishedHanded = true;
+        return app->establishedCount == 0;
+    }).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(0.01))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "early peer Finished cannot bypass own output completion gate"); }));
+}
+%activity:
+EV << "rfc9147_early_peer_finished compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.cookieRequired = false
+*.host2.app[0].dtls.handshakeOutDelay = 0.05s
+*.host2.app[0].dtls.protectOutDelay = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_early_peer_finished: PASS

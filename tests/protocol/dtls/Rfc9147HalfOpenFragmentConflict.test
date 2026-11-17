@@ -1,0 +1,52 @@
+%description:
+
+While replacing an established quartet, conflicting duplicate ClientHello
+fragments must fail the half-open candidate and preserve the established handle.
+
+%includes:
+#include "DtlsFragmentTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static unsigned copies = 0;
+static uint64_t originalServer;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_half_open_fragment_conflict")
+    .act(action().after(0.2).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { originalServer = app.acceptedEndpoints.front().id; })
+        .run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.reopenPeer(); }))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).nth(1).duplicate(0.01, 2))
+    .meanwhile(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).mutate([](Packet *p) { ++copies; sliceClientHello(p, false, copies, copies == 2); }))
+    .once(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(c.event.packet); return r && r->getSequenceNumber() == 2 && h && h->getFragmentLength() < h->getMessageLength(); }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 47; }).within(0.1))
+    .act(action().run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(copies == 2 && app.establishedCount == 1 && std::find(app.closedHandles.begin(), app.closedHandles.end(), originalServer) == app.closedHandles.end(), "conflict fails only the candidate, retaining the old established quartet");
+        app.sendMarker(71, 1, originalServer);
+    }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(0.1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.receivedMarkers == std::vector<int>({71}), "the established same-quartet association remains usable"); }));
+}
+%activity:
+EV << "rfc9147_half_open_fragment_conflict compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 5s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.cookieRequired = false
+*.host2.app[0].dtls.protectOutDelay = 0.05s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_half_open_fragment_conflict: PASS

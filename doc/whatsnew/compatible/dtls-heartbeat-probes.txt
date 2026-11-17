@@ -1,0 +1,3 @@
+DTLS heartbeat negotiation and correlated probes
+
+DTLS can opt into directional heartbeat support through heartbeatEnabled. Protected requests and replies use the existing processing queues, bounded payload/padding serializers and one shared probe slot per association. The internal primitive supplies correlated results, finite retries, local admission outcomes and cleanup for the planned path-validation and size-discovery consumers. Defaults preserve existing behavior; automatic keepalive is not enabled.

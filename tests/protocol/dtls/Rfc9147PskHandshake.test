@@ -1,0 +1,60 @@
+%description:
+
+Loss-free PSK handshake on a controlled link with cookies disabled. This isolates
+production establishment and one queued application send from later certificate/retry work.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_psk_handshake")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(1))
+    .act(action().after(0.001).run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { app.sendMarker(42); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 2); })
+        .assertEvent([](const MatchContext& c) { return findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet)->getEpoch() == 0; }).within(1))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); })
+        .assertEvent([](const MatchContext& c) { return protectedRecord(c, 2); }).within(1))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 20); })
+        .assertEvent([](const MatchContext& c) {
+            auto module = check_and_cast<cModule *>(c.event.module);
+            auto app = check_and_cast<DtlsTestDriver *>(module->getParentModule()->getSubmodule("driver"));
+            return protectedRecord(c, 2) && app->establishedCount == 0;
+        }).within(1))
+    .unordered({
+        on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1),
+        on("host2.app[0].dtls").signal("packetSentToLower").filterEvent(acknowledgement).assertEvent([](const MatchContext& c) {
+            auto network = c.event.node->getParentModule();
+            auto app = check_and_cast<DtlsTestDriver *>(network->getSubmodule("host1")->getSubmodule("app", 0)->getSubmodule("driver"));
+            return protectedRecord(c, 3) && app->establishedCount == 1;
+        }).within(1),
+        on("host2.app[0].driver").signal("packetSentToUpper").within(1)
+    })
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "client establishes once"); })
+        .run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.receivedMarkers == std::vector<int>{42}, "server establishes and receives one queued datagram"); }));
+}
+%activity:
+EV << "rfc9147_psk_handshake compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host*.app[0].dtls.cookieRequired = false
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_psk_handshake: PASS

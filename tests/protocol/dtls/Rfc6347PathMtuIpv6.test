@@ -1,0 +1,59 @@
+%description:
+Actual IPv6 PTB quotes a native prefix; conversion subtracts 40 IP and 8 UDP bytes, with no source fragmentation and independent directional budgets.
+%includes:
+#include "DtlsHeartbeatTestUtils.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("legacy_pmtu_ipv6")
+    .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) { if (findChunk<UdpHeader>(c.event.packet)) require(!findChunk<Ipv6FragmentHeader>(c.event.packet), "discovery emits no IPv6 source fragment"); return false; }).within(5)))
+    .once(on("host1.app[0].dtls").signal("probeResult").filterValue(inet::dtls::IDtls::PROBE_PACKET_TOO_BIG).within(2))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize() == 1106, "IPv6 PTB is a hint rather than a positive confirmation"); }))
+    .once(on("host1.app[0].driver").signal("maximumDatagramSizeChanged").filterValue(1186).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize() == 1186, "1280 IP bytes minus the actual 48 consumed IPv6/UDP bytes gives 1232 UDP bytes"); app.sendMarker(222, 1170); }))
+    .once(on("host2.app[0].driver").signal("packetSentToUpper").within(1))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { require(app.maximumDatagramSize() == 1406 && app.receivedMarkers == std::vector<int>{222}, "reverse IPv6 path independently reaches its configured ceiling"); app.sendMarker(223, 1400); }))
+    .once(on("host1.app[0].driver").signal("packetSentToUpper").within(1));
+}
+%activity:
+EV << "routed path MTU compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.dtls.DtlsPathMtuNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 14s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.host*.hasIpv4 = false
+*.host*.hasIpv6 = true
+*.router.hasIpv4 = false
+*.router.hasIpv6 = true
+*.host*.ipv6.configurator.networkConfiguratorModule = "^.^.^.configurator"
+*.router.ipv6.configurator.networkConfiguratorModule = "^.^.^.configurator"
+*.router.eth[2].mac.mtu = 1280B
+*.router.eth[*].mac.mtu = 2000B
+*.host*.eth[*].mac.mtu = 2000B
+*.configurator.typename = "Ipv6NetworkConfigurator"
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth0' address='2001:db8:1::2' dupAddrDetectTransmits='0'/><interface hosts='host1' names='eth1' address='2001:db8:2::1' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth1' address='2001:db8:2::2' dupAddrDetectTransmits='0'/><interface hosts='router' names='eth2' address='2001:db8:3::1' dupAddrDetectTransmits='0'/><interface hosts='host2' names='eth0' address='2001:db8:3::2' dupAddrDetectTransmits='0'/><route hosts='host1' destination='2001:db8:3::2/128' gateway='2001:db8:1::2' interface='eth0'/></config>")
+*.host*.app[*].dtls.udpPayloadLimit = 1452B
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.versions = "1.2"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host*.app[*].dtls.heartbeatEnabled = true
+*.host*.app[*].dtls.pathMtuDiscoveryEnabled = true
+*.host*.app[*].dtls.pathMtuProbeTimeout = 1s
+*.host*.app[*].dtls.protectOutDelay = 5ms
+*.host*.app[*].dtls.protectInDelay = 3ms
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST legacy_pmtu_ipv6: PASS

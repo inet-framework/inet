@@ -1,0 +1,42 @@
+%description:
+An altered fresh-numbered duplicate cannot change a processed CID update.
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return establish("rfc9147_cid_conflict")
+    .meanwhile(tap("tap").from("host2").filterPacket([](const Packet *p) { return packetHandshake(p, 10); }).nth(1).duplicate(0.05))
+    .meanwhile(tap("tap").from("host2").copiesOnly().filterPacket([](const Packet *p) { return packetHandshake(p, 10); }).nth(1).mutate([](Packet *p) {
+        mutateHeader<inet::dtls::DtlsCiphertextHeader>(p, [](auto& h) { h.setSequenceNumber(h.getSequenceNumber() + 20); });
+        mutateNestedHeader<inet::dtls::DtlsNewConnectionId>(p, [](auto& body) { body.setUsage(1); });
+    }))
+    .act(action().after(0.1).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) { app.provideCids(1, true); }))
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 47; }).within(1))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.errorCount == 1 && app.receivedMarkers.empty(), "malformed update fails exactly once without data delivery"); }));
+}
+%activity:
+EV << "CID malformed input compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 8s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host*.app[*].dtls.connectionIdEnabled = true
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_cid_conflict: PASS

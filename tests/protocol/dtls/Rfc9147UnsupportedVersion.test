@@ -1,0 +1,50 @@
+%description:
+
+DTLS production-path variant UnsupportedVersion: valid envelope carrying a specific invalid offer.
+The mutated production ClientHello traverses UDP; the test requires the specified alert.
+
+%includes:
+#include "DtlsTestUtils.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_unsupported_version")
+    .once(on("host1.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 1); }).within(2))
+    .meanwhile(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").nth(1).mutate([](Packet *p) { editClientHello(p, [](auto& h) { editHelloExtension(h, 43, {2, 0xfe, 0xfd}); }); }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        auto a = findChunk<inet::dtls::DtlsAlert>(c.event.packet); return a && a->getDescription() == 70;
+    }).within(1))
+    .once(on("host1.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ERROR).within(1))
+    .act(action().after(0.01).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.establishedCount == 0 && app.receivedMarkers.empty(), "rejected offer cannot establish or deliver data");
+    }))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) {
+        require(app.errorCount == 1 && app.establishedCount == 0 && app.maximumDatagramSize() == 0, "record representation alone does not enable DTLS 1.2 negotiation");
+    }));
+}
+%activity:
+EV << "rfc9147_unsupported_version compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_unsupported_version: PASS

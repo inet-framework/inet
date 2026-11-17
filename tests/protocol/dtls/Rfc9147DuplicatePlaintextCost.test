@@ -1,0 +1,54 @@
+%description:
+
+Duplicate real plaintext ClientHello and ServerHello while the first copy is in
+input processing. Each logical message incurs handshake input cost once.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+static unsigned serverCosts = 0, clientCosts = 0, helloCopies = 0, retryCopies = 0;
+static unsigned helloCopiesReceived = 0, retryCopiesReceived = 0;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_duplicate_plaintext_cost")
+    .intercept(tap("tap").from("host1").filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { auto h = findChunk<inet::dtls::DtlsHandshakeHeader>(p); return h && h->getMessageType() == 1 && h->getMessageSequence() == 0; }).nth(1).duplicate(0.003, 4))
+    .intercept(tap("tap").from("host1").copiesOnly().filterPacket("udp.srcPort == 4434").filterPacket([](const Packet *p) { return packetHandshake(p, 1); }).mutate([](Packet *p) { mutateHeader<inet::dtls::DtlsPlaintextHeader>(p, [](auto& h) { h.setSequenceNumber(100 + ++helloCopies); }); }))
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { auto h = findChunk<inet::tls::TlsServerHello>(p); return packetHandshake(p, 2) && h && hasHelloExtension(*h, 44); }).nth(1).duplicate(0.003, 3))
+    .intercept(tap("tap").from("host2").copiesOnly().filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 2); }).mutate([](Packet *p) { mutateHeader<inet::dtls::DtlsPlaintextHeader>(p, [](auto& h) { h.setSequenceNumber(200 + ++retryCopies); }); }))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (c.event.value == 0.01) ++serverCosts; return false; }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("processingDelay").filterEvent([](const MatchContext& c) { if (c.event.value == 0.007) ++clientCosts; return false; }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host2.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); if (r && r->getSequenceNumber() > 100 && r->getSequenceNumber() <= 104 && handshake(c, 1)) ++helloCopiesReceived; return false; }).within(1)))
+    .meanwhile(anyNumberOfTimes(on("host1.app[0].dtls").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) { auto r = findChunk<inet::dtls::DtlsPlaintextHeader>(c.event.packet); if (r && r->getSequenceNumber() > 200 && r->getSequenceNumber() <= 203 && handshake(c, 2)) ++retryCopiesReceived; return false; }).within(1)))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(1))
+    .act(action().after(0.05).run<DtlsTestDriver>("host2.app[0].driver", [](DtlsTestDriver& app) {
+        require(serverCosts == 3 && helloCopies == 4 && helloCopiesReceived == 4, "server samples input cost once for each logical ClientHello and once for client Finished despite four received fresh-numbered duplicates");
+        require(clientCosts == 4 && retryCopies == 3 && retryCopiesReceived == 3, "client samples input cost once each for HRR, ServerHello, EncryptedExtensions and Finished despite three received fresh-numbered HRR duplicates");
+        require(app.establishedCount == 1 && app.errorCount == 0, "duplicate plaintext messages do not change handshake callbacks");
+    }));
+}
+%activity:
+EV << "rfc9147_duplicate_plaintext_cost compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = inet.protocoltest.dtls.work
+sim-time-limit = 3s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host2.app[0].dtls.handshakeInDelay = 0.01s
+*.host1.app[0].dtls.handshakeInDelay = 0.007s
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+%contains: stdout
+PROTOCOLTEST rfc9147_duplicate_plaintext_cost: PASS

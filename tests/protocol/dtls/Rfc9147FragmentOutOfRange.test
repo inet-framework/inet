@@ -1,0 +1,45 @@
+%description:
+
+DTLS production-path variant FragmentOutOfRange: explicit C4 requirement.
+
+%includes:
+#include "DtlsTestUtils.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::protocoltest::dtls;
+Define_ProtocolTestProgram()
+{
+return ProtocolTest("rfc9147_fragment_out_of_range")
+    .intercept(tap("tap").from("host2").filterPacket("udp.srcPort == 4433").filterPacket([](const Packet *p) { return packetHandshake(p, 11); }).nth(1).mutate([](Packet *p) {
+        mutateNestedHeader<inet::dtls::DtlsHandshakeHeader>(p, [](auto& h) { h.setFragmentOffset(h.getMessageLength()); });
+    }))
+    .once(on("host2.app[0].dtls").signal("packetSentToLower").filterEvent([](const MatchContext& c) { return handshake(c, 11); }).within(2))
+    .once(on("host1.app[0].dtls").signal("recordDropped").assertValue(1).within(1))
+    .once(on("host2.app[0].driver").signal("controlStateChanged").filterValue(DtlsTestDriver::ESTABLISHED).within(3))
+    .act(action().run<DtlsTestDriver>("host1.app[0].driver", [](DtlsTestDriver& app) { require(app.establishedCount == 1 && app.errorCount == 0, "consistent retransmission recovers discarded out-of-range fragment"); }));
+}
+%activity:
+EV << "rfc9147_fragment_out_of_range compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+sim-time-limit = 10s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+**.ipv4.arp.typename = "GlobalArp"
+*.linkDelay = 1ms
+*.host*.numApps = 1
+*.host*.app[*].typename = "inet.protocoltest.dtls.DtlsTestApp"
+*.host1.app[*].server = false
+*.host2.app[*].server = true
+*.host1.app[*].driver.startTime = 0.2s
+*.host2.app[*].driver.startTime = 0.1s
+ned-package-exclusions = inet.protocoltest.dtls.work
+*.host*.app[0].dtls.profile = "certificate"
+*.host2.app[0].dtls.certificateBytes = 4000B
+
+%contains: stdout
+PROTOCOLTEST rfc9147_fragment_out_of_range: PASS
