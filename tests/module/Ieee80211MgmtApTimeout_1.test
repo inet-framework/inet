@@ -91,7 +91,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         auto& sta = staList[address];
         sta.address = address;
         clearPendingAssociation(&sta);
-        mib->bssAccessPointData.stations[address] = status;
+        mib->setPeerAssociationStatus(address, status);
         short aid = mib->reserveAssociationId(address);
         sta.pendingAssociationSuccessful = true;
         sta.pendingAssociationTransactionId = createAssociationTransactionId();
@@ -105,9 +105,9 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         sta.address = address;
         clearPendingAssociation(&sta);
         short aid = mib->allocateAssociationId(address);
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
-        if (mib->isHtOperationSupported())
-            mib->setPeerHtCapabilities(address, mib->localHtCapabilities, mib->getHtOperation());
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::ASSOCIATED);
+        if (mib->isLocalHtCapable())
+            mib->setPeerHtCapabilities(address, mib->getLocalHtCapabilities());
         ASSERT(mib->reserveAssociationId(address) == aid);
         sta.pendingAssociationSuccessful = true;
         sta.pendingAssociationTransactionId = createAssociationTransactionId();
@@ -158,15 +158,15 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
     short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
-    bool hasCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end(); }
+    bool hasCommittedAssociationId(const MacAddress& address) const { return mib->getBssAccessPointData().associationIds.find(address) != mib->getBssAccessPointData().associationIds.end(); }
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
-    short getCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.at(address); }
-    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
+    short getCommittedAssociationId(const MacAddress& address) const { return mib->getBssAccessPointData().associationIds.at(address); }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->getBssAccessPointData().stations.at(address); }
     void markAuthenticated(const MacAddress& address)
     {
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     void setAuthenticationSequenceExpected(const MacAddress& address, int sequenceNumber)

@@ -30,7 +30,6 @@ extern INET_API simsignal_t // admin
 
     linkBrokenSignal, // used for manet link layer feedback
 
-    modesetChangedSignal,
 
     interpacketGapStartedSignal,
     interpacketGapEndedSignal,

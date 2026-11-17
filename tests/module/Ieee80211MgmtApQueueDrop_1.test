@@ -36,7 +36,7 @@ class TestIeee80211MgmtApQueueDrop : public Ieee80211MgmtAp
         Enter_Method("markAuthenticated");
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     void submitAssociationRequest(const MacAddress& address)
@@ -66,7 +66,7 @@ class TestIeee80211MgmtApQueueDrop : public Ieee80211MgmtAp
 
     short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
-    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->getBssAccessPointData().stations.at(address); }
 
   protected:
     virtual void frameTransmissionFinished(const Packet *frame, FrameTransmissionStatus status) override

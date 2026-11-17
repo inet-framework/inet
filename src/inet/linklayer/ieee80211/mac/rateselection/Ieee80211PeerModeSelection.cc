@@ -110,7 +110,7 @@ static const IIeee80211Mode *selectCompatibleMode(const Ieee80211ModeSet *modeSe
         throw cRuntimeError("HT mode '%s' is not contained in IEEE 802.11 mode set '%s'",
                 mode->getName(), modeSet->getName());
 
-    if (receiverCapabilities == nullptr || !receiverCapabilities->valid)
+    if (operation == nullptr || receiverCapabilities == nullptr || !receiverCapabilities->valid)
         return getLegacyFallback(modeSet, mode, peerAddress);
     if (isCompatibleHtMode(mode, *receiverCapabilities, *operation))
         return mode;
@@ -132,34 +132,36 @@ static const IIeee80211Mode *selectCompatibleMode(const Ieee80211ModeSet *modeSe
 } // namespace
 
 bool isPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
-        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode)
+        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode,
+        const Ieee80211HtOperation *operation, bool htEligible)
 {
     if (!modeSet || !mode || !modeSet->containsMode(mode))
         return false;
     if (mode->getHtMcsIndex() < 0)
         return true;
-    return peerHtState && peerHtState->valid &&
-        isCompatibleHtMode(mode, peerHtState->negotiatedCapabilities.localTxPeerRx, peerHtState->negotiatedCapabilities.operation);
+    return htEligible && operation && peerHtState && peerHtState->valid && peerHtState->negotiatedCapabilities &&
+        isCompatibleHtMode(mode, peerHtState->negotiatedCapabilities->localTxPeerRx, *operation);
 }
 
 const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
-        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode, const MacAddress& peerAddress)
+        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode, const MacAddress& peerAddress,
+        const Ieee80211HtOperation *operation, bool htEligible)
 {
-    const auto *negotiated = peerHtState != nullptr && peerHtState->valid ? &peerHtState->negotiatedCapabilities : nullptr;
+    const auto *negotiated = peerHtState != nullptr && peerHtState->valid ? peerHtState->negotiatedCapabilities.get() : nullptr;
     return selectCompatibleMode(modeSet, mode, peerAddress,
-            negotiated != nullptr ? &negotiated->localTxPeerRx : nullptr,
-            negotiated != nullptr ? &negotiated->operation : nullptr);
+            htEligible && negotiated != nullptr ? &negotiated->localTxPeerRx : nullptr, operation);
 }
 
 const IIeee80211Mode *selectPeerCompatibleResponseMode(const Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode,
-        const MacAddress& peerAddress, ResponseQueryRole role)
+        const MacAddress& peerAddress, ResponseQueryRole role,
+        const Ieee80211HtOperation *operation, bool htEligible)
 {
-    const auto *negotiated = peerHtState != nullptr && peerHtState->valid ? &peerHtState->negotiatedCapabilities : nullptr;
-    const auto *direction = negotiated == nullptr ? nullptr :
+    const auto *negotiated = peerHtState != nullptr && peerHtState->valid ? peerHtState->negotiatedCapabilities.get() : nullptr;
+    const auto *direction = !htEligible || negotiated == nullptr ? nullptr :
             role == ResponseQueryRole::PREDICT ? &negotiated->localRxPeerTx : &negotiated->localTxPeerRx;
     return selectCompatibleMode(modeSet, mode, peerAddress, direction,
-            negotiated != nullptr ? &negotiated->operation : nullptr);
+            operation);
 }
 
 } // namespace ieee80211

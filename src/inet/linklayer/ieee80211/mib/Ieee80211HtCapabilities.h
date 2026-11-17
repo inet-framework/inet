@@ -98,16 +98,14 @@ struct Ieee80211NegotiatedHtCapabilities
     Ieee80211HtCapabilities peerAdvertisement;
     Ieee80211HtDirectionalCapabilities localTxPeerRx;
     Ieee80211HtDirectionalCapabilities localRxPeerTx;
-    Ieee80211HtOperation operation;
 };
 
 inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211HtCapabilities& local,
-        const Ieee80211HtCapabilities& peer, const Ieee80211HtOperation& operation)
+        const Ieee80211HtCapabilities& peer)
 {
     Ieee80211NegotiatedHtCapabilities negotiated;
     negotiated.localAdvertisement = local;
     negotiated.peerAdvertisement = peer;
-    negotiated.operation = operation;
     for (const auto& width : local.supportedChannelWidths)
         if (peer.supportedChannelWidths.count(width)) {
             negotiated.localTxPeerRx.supportedChannelWidths.insert(width);

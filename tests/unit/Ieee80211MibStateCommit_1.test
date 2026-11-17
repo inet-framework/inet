@@ -40,10 +40,16 @@ record-scalar-results = false
 %activity:
 using namespace Ieee80211MibStateCommit_1;
 auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-mib->setPrimaryChannel(1);
-mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
-auto capabilities = mib->localHtCapabilities;
-auto operation = mib->getHtOperation();
+Ieee80211HtCapabilities localProfile;
+localProfile.supportedChannelWidths.insert(MHz(20));
+for (int mcs = 0; mcs < 8; mcs++)
+    localProfile.rxMcsSupported[mcs] = true;
+mib->installLocalHtCapabilities(localProfile, true);
+Ieee80211HtOperation localOperation;
+localOperation.primaryChannel = 1;
+mib->commitBss("test", mib->address, nullptr, 1, &localOperation);
+mib->publishStateChange();
+auto capabilities = mib->getLocalHtCapabilities();
 const MacAddress peer("02:00:00:00:00:01");
 Ieee80211RateSetState rates;
 rates.supported.known = true;
@@ -65,7 +71,7 @@ observer.check = [&]() {
         ASSERT(ht->advertisedCapabilities == capabilities);
 };
 auto install = [&]() {
-    mib->installBssAndPeerState(expectedRates, peer, expectedRates, expectHt ? &capabilities : nullptr, operation);
+    mib->installBssAndPeerState(expectedRates, peer, expectedRates, expectHt ? &capabilities : nullptr);
 };
 install();
 ASSERT(observer.notifications == 1);
@@ -92,20 +98,18 @@ auto invalid = rates;
 invalid.operational.legacyRates.insert(Mbps(0));
 bool rejected = false;
 try {
-    mib->installBssAndPeerState(rates, peer, invalid, &capabilities, operation);
+    mib->installBssAndPeerState(rates, peer, invalid, &capabilities);
 }
 catch (const cRuntimeError&) { rejected = true; }
 ASSERT(rejected && observer.notifications == 5);
 observer.check();
-mib->localHtCapabilitiesValid = false;
 rejected = false;
 try {
-    mib->installBssAndPeerState(rates, peer, rates, &capabilities, operation);
+    mib->installLocalHtCapabilities(capabilities, false);
 }
 catch (const cRuntimeError&) { rejected = true; }
 ASSERT(rejected && observer.notifications == 5);
 observer.check();
-mib->localHtCapabilitiesValid = true;
 
 bool replaced = false;
 observer.check = [&]() {
@@ -115,9 +119,9 @@ observer.check = [&]() {
     ASSERT(mib->getBssRateSet() == rates);
     ASSERT(*mib->findPeerRateSet(peer) == rates);
     replaced = true;
-    mib->installBssAndPeerState(Ieee80211RateSetState(), peer, Ieee80211RateSetState(), nullptr, operation);
+    mib->installBssAndPeerState(Ieee80211RateSetState(), peer, Ieee80211RateSetState(), nullptr);
 };
-mib->installBssAndPeerState(rates, peer, rates, &capabilities, operation);
+mib->installBssAndPeerState(rates, peer, rates, &capabilities);
 ASSERT(mib->findPeerHtState(peer) == nullptr);
 ASSERT(mib->findPeerRateSet(peer) != nullptr && !mib->findPeerRateSet(peer)->operational.known);
 ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());

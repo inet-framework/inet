@@ -25,10 +25,11 @@ namespace inet::ieee80211 {
 using namespace physicallayer;
 class LocalInputMac : public Ieee80211Mac {
   public:
-    void reselectModeSet() {
-        Enter_Method("reselectModeSet");
-        modeSet = Ieee80211ModeSet::getModeSet("a");
-        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+    void prepareCatalogAgain() {
+        Enter_Method("prepareCatalogAgain");
+        const auto *catalog = modeSet;
+        prepareLocalCapabilities();
+        ASSERT(modeSet == catalog);
     }
 };
 Define_Module(LocalInputMac);
@@ -277,8 +278,14 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                 }
             }
             if (scenario >= 31 && scenario <= 48) {
-                if (scenario == 35 || scenario == 45 || scenario == 48)
-                    check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->setPrimaryChannel(1);
+                if (scenario == 35 || scenario == 45 || scenario == 48) {
+                    auto mib = check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"));
+                    Ieee80211HtOperation operation;
+                    operation.primaryChannel = 1;
+                    operation.protectionMode = Ieee80211HtProtectionMode::NON_HT_MIXED;
+                    mib->commitBss("test", mib->address, nullptr, 1, &operation);
+                    mib->publishStateChange();
+                }
                 gap = SimTime(2, SIMTIME_US);
                 if (scenario == 41 || scenario == 43)
                     gap += SimTime(200, SIMTIME_NS);
@@ -317,7 +324,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         else if (name == "second")
         {
             if (scenario == 50)
-                check_and_cast<LocalInputMac *>(getSimulation()->getModuleByPath("receiver.wlan[0].mac"))->reselectModeSet();
+                check_and_cast<LocalInputMac *>(getSimulation()->getModuleByPath("receiver.wlan[0].mac"))->prepareCatalogAgain();
             auto receiverRadio = check_and_cast<Ieee80211Radio *>(getSimulation()->getModuleByPath("receiver.wlan[0].radio"));
             if (scenario == 5)
                 receiverRadio->setChannelNumber(receiverRadio->par("channelNumber"));
@@ -369,7 +376,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                     ASSERT(rx->lastStart - rx->firstEnd == gap);
                 bool expected = scenario == 0 || scenario == 1 || scenario == 4 || scenario == 27 || scenario == 28 ||
                     (scenario >= 19 && scenario <= 26 && (scenario - 19) % 4 < 2) ||
-                    scenario == 31 || scenario == 41 || scenario == 42 || (scenario >= 45 && scenario <= 48);
+                    scenario == 50 || scenario == 31 || scenario == 41 || scenario == 42 || (scenario >= 45 && scenario <= 48);
                 ASSERT(rx->related == expected);
             }
             completed = true;

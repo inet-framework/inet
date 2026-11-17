@@ -17,6 +17,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateSelection;
 simple RateSelection extends SimpleModule like IRateSelection
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(RateSelection);
         string rateControlModule;
         string mibModule = default("^.^.^.mib");

@@ -1,0 +1,5 @@
+IEEE 802.11 capability and BSS state ownership
+
+HT capabilities are prepared independently of the active BSS operation. Simplified associations prepare both peers before network configuration, regardless of node declaration order. Accepted BSS changes publish a bssStateChanged notification after management completes its bookkeeping. Legacy simplified stations retain BSS identity and channel information without accepting the HT operation advertised by an HT access point.
+
+Custom WLAN modules must replace ModeSetListener and modesetChanged with an explicit modeSetModule dependency on IIeee80211ModeSetProvider. Management preparation uses IIeee80211MacConfiguration, and replace direct MIB BSS/profile writes with the owner APIs. Custom HT PHY contributors use typed capability interfaces. The migration guide describes these source and wiring changes.

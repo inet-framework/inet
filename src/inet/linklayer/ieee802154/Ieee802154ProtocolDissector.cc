@@ -9,7 +9,9 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/FcsInd_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/ieee802154/Ieee802154FrameCodec.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
 
 namespace inet {
@@ -18,6 +20,26 @@ Register_Protocol_Dissector(&Protocol::ieee802154, Ieee802154ProtocolDissector);
 
 void Ieee802154ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
+    // Typed legacy packets retain their explicitly selected legacy interpretation.
+    // Captured bytes use the standard codec, with capture-provided FCS presence.
+    if (!dynamicPtrCast<const Ieee802154MacHeader>(packet->peekAtFront())) {
+        callback.startProtocolDataUnit(&Protocol::ieee802154);
+        auto typed = dynamicPtrCast<const Ieee802154Frame>(packet->peekAtFront());
+        Ptr<const Ieee802154Frame> frame;
+        if (typed)
+            frame = typed;
+        else {
+            auto bytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+            auto fcs = packet->findTag<FcsInd>();
+            frame = Ieee802154FrameCodec::decode(bytes->getBytes(), !fcs || fcs->getHasFcs());
+        }
+        packet->popAtFront(packet->getDataLength(), Chunk::PF_ALLOW_ALL);
+        if (frame->getDecodeStatus() != Ieee802154FrameCodec::OK || (frame->getFcsPresent() && !frame->getComputeFcs() && !frame->getFcsValid()))
+            callback.markIncorrect();
+        callback.visitChunk(frame, &Protocol::ieee802154);
+        callback.endProtocolDataUnit(&Protocol::ieee802154);
+        return;
+    }
     const auto& header = packet->popAtFront<Ieee802154MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802154);
     callback.visitChunk(header, &Protocol::ieee802154);

@@ -243,7 +243,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
 
     void checkClearedRates(Ieee80211Mib *mib, const MacAddress& peer)
     {
-        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(!mib->getBssStationData().isAssociated);
         ASSERT(mib->findPeerHtState(peer) == nullptr);
         ASSERT(mib->findPeerRateSet(peer) == nullptr);
         const auto& bss = mib->getBssRateSet();
@@ -318,13 +318,13 @@ class RatePublicationTest : public cSimpleModule, public cListener
             if (checkApCleanup) {
                 ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
                 ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
-                ASSERT(apMib->bssAccessPointData.associationIds.empty());
+                ASSERT(apMib->getBssAccessPointData().associationIds.empty());
                 if (checkApStop) {
-                    ASSERT(apMib->bssAccessPointData.stations.empty());
+                    ASSERT(apMib->getBssAccessPointData().stations.empty());
                     ASSERT(!apMib->getBssRateSet().operational.known);
                 }
                 else {
-                    ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == expectedApState);
+                    ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == expectedApState);
                     ASSERT(apMib->getBssRateSet().operational.known);
                     auto ap = check_and_cast<RatePublicationAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
                     ASSERT(ap->pendingTransaction(staMib->address) == 0);
@@ -344,7 +344,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
             if (simpleDepartureNotifications == 0) {
                 ASSERT(simpleAp->findPeerHtState(simpleSta->address) == nullptr);
                 ASSERT(simpleAp->findPeerRateSet(simpleSta->address) == nullptr);
-                ASSERT(simpleAp->bssAccessPointData.stations.count(simpleSta->address) == 0);
+                ASSERT(simpleAp->getBssAccessPointData().stations.count(simpleSta->address) == 0);
                 ASSERT(simpleAp->getBssRateSet().operational.known);
                 checkClearedRates(simpleSta, simpleAp->address);
             }
@@ -352,7 +352,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
             return;
         }
         rateNotifications++;
-        if (checkTeardown && !staMib->bssStationData.isAssociated) {
+        if (checkTeardown && !staMib->getBssStationData().isAssociated) {
             checkClearedRates(staMib, apMib->address);
             auto sta = check_and_cast<RatePublicationSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
             ASSERT(sta->getAssociatedAp()->address.isUnspecified());
@@ -360,7 +360,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
             teardownNotifications++;
         }
         if (checkAtomicRates) {
-            ASSERT(staMib->bssStationData.isAssociated);
+            ASSERT(staMib->getBssStationData().isAssociated);
             ASSERT(staMib->findPeerRateSet(apMib->address) != nullptr);
             ASSERT(staMib->getBssRateSet() == *staMib->findPeerRateSet(apMib->address));
         }
@@ -393,8 +393,8 @@ class RatePublicationTest : public cSimpleModule, public cListener
         }
         auto ap = check_and_cast<RatePublicationAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
         auto sta = check_and_cast<RatePublicationSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
-        ASSERT(staMib->bssStationData.isAssociated);
-        ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(staMib->getBssStationData().isAssociated);
+        ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
         ASSERT(ap->beacon != nullptr && ap->response != nullptr && sta->request != nullptr);
         ASSERT(ap->beacon->getExtendedSupportedRatesPresent());
         checkRates(apMib->getLocalRateSet(), ap->beacon);
@@ -425,7 +425,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
         sta->advertisement(apMib->address, changed, true);
         ASSERT(staMib->getBssRateSet() == original);
         sta->refuse(other);
-        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssStationData().isAssociated);
         ASSERT(staMib->getBssRateSet() == original);
         ASSERT(*staMib->findPeerRateSet(apMib->address) == original);
         auto invalid = makeShared<Ieee80211BeaconFrame>(*changed);
@@ -459,7 +459,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
                     sta->advertisement(apMib->address, malformed);
                     ASSERT(staMib->getBssRateSet() == original);
                     ASSERT(*staMib->findPeerRateSet(apMib->address) == original);
-                    ASSERT(staMib->bssStationData.isAssociated);
+                    ASSERT(staMib->getBssStationData().isAssociated);
                     ASSERT(rateNotifications == beforeInvalid);
                 }
             }
@@ -548,7 +548,7 @@ class RatePublicationTest : public cSimpleModule, public cListener
         checkTeardown = true;
         sta->replaceAssociation(apMib->address, ap->response);
         ASSERT(teardownNotifications == 2);
-        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssStationData().isAssociated);
         ASSERT(staMib->getBssRateSet() == *staMib->findPeerRateSet(apMib->address));
         checkApCleanup = checkApStop = true;
         delete message;

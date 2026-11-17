@@ -1,0 +1,3 @@
+IEEE 802.15.4 MAC service contracts
+
+IEEE 802.15.4 MAC service interfaces define DATA, GET, SET and RESET requests, receive indications, packet ownership and cancellation/lifecycle outcomes. These are extension contracts with test-local implementations; operational MAC services are not yet provided.
