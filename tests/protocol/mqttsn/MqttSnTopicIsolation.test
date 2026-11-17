@@ -1,0 +1,71 @@
+%description:
+Two real sensors allocate the same numeric normal topic id for different names.
+A broker observer receives both distinct payloads with no cross-client aliasing.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/applications/mqtt/MqttProtocol.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnTopicIsolation")
+        .meanwhile(exactlyTimes(1, on("observer.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>();
+            return p->getType() == mqtt::PUBLISH && std::string(p->getTopic()) == "first/value" && p->getPayloadArraySize() == 1 && p->getPayload(0) == 65;
+        }).within(1.5)))
+        .meanwhile(exactlyTimes(1, on("observer.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>();
+            return p->getType() == mqtt::PUBLISH && std::string(p->getTopic()) == "second/value" && p->getPayloadArraySize() == 1 && p->getPayload(0) == 66;
+        }).within(1.5)))
+        .meanwhile(exactlyTimes(1, on("observer.app[0]").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({65});
+        }).within(1.5)))
+        .meanwhile(exactlyTimes(1, on("observer.app[0]").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66});
+        }).within(1.5)))
+        .meanwhile(exactlyTimes(2, on("gateway.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            if (c.event.packet->getTag<PacketProtocolTag>()->getProtocol() != &mqttsn::mqttSnProtocol) return false;
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::REGACK && p->getTopicId() == 1;
+        }).within(1.5)));
+}
+
+%activity:
+EV << "Independent topic binding fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "first"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].workload = xml("<mqttsn><publish at='300ms' topic='first/value' payload='41'/></mqttsn>")
+*.secondSensor.numApps = 1
+*.secondSensor.app[0].typename = "MqttSnClient"
+*.secondSensor.app[0].clientIdentifier = "second"
+*.secondSensor.app[0].gatewayAddress = "gateway"
+*.secondSensor.app[0].startTime = 0.1s
+*.secondSensor.app[0].workload = xml("<mqttsn><publish at='300ms' topic='second/value' payload='42'/></mqttsn>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='#'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnTopicIsolation: PASS

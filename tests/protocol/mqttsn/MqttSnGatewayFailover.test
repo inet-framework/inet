@@ -1,0 +1,83 @@
+%description:
+Partition only the original gateway's UDP traffic through a real packet tap.
+Its TCP broker connection remains alive. The production sensor selects a second
+gateway, resets the old session, restores subscriptions and receives later data.
+The old gateway must not fight the new gateway through autonomous MQTT reconnect.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnGateway.h"
+#include "inet/applications/mqtt/MqttProtocol.h"
+#include "inet/common/ProtocolTag_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("mqttsn_failover")
+        .once(on("peer[0].app[0]").signal("sessionStateChanged").filterValue(2).within(1))
+        .act(action().at(1).run<mqttsn::MqttSnGateway>("host1.app[0]", [](auto&) {}))
+        .meanwhile(tap("tap").filterPacket("udp.destPort == 1884").drop().within(4.5))
+        .meanwhile(never(on("host1.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            if (c.event.packet->getTag<PacketProtocolTag>()->getProtocol() != &mqtt::mqttProtocol) return false;
+            auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>();
+            return p->getType() == mqtt::CONNECT && std::string(p->getClientIdentifier()) == "sensor";
+        }).within(4)))
+        .once(on("peer[1].app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->getTag<PacketProtocolTag>()->getProtocol() == &mqttsn::mqttSnProtocol &&
+                c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::CONNACK;
+        }).within(2))
+        .once(on("peer[0].app[0]").signal("packetSentToUpper").assertEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({65});
+        }).within(1.5))
+        .once(on("peer[0].app[0]").signal("packetSentToUpper").assertEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66});
+        }).within(1.5));
+}
+
+%activity:
+EV << "MQTT-SN live gateway partition fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapSwitchNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.numPeers = 4
+*.linkDelay = 1ms
+*.host1.numApps = 1
+*.host1.app[0].typename = "MqttSnGateway"
+*.host1.app[0].gatewayId = 1
+*.host1.app[0].gatewayClientIdentifier = "gateway1"
+*.host1.app[0].brokerAddress = "peer[2]"
+*.host1.app[0].advertisementInterval = 1s
+*.host1.app[0].retryInterval = 100ms
+*.host1.app[0].retryCount = 2
+*.peer[1].numApps = 1
+*.peer[1].app[0].typename = "MqttSnGateway"
+*.peer[1].app[0].gatewayId = 2
+*.peer[1].app[0].gatewayClientIdentifier = "gateway2"
+*.peer[1].app[0].brokerAddress = "peer[2]"
+*.peer[1].app[0].advertisementInterval = 1s
+*.peer[1].app[0].retryInterval = 100ms
+*.peer[1].app[0].retryCount = 2
+*.peer[2].numApps = 1
+*.peer[2].app[0].typename = "MqttBroker"
+*.peer[0].numApps = 1
+*.peer[0].app[0].typename = "MqttSnClient"
+*.peer[0].app[0].clientIdentifier = "sensor"
+*.peer[0].app[0].cleanSession = false
+*.peer[0].app[0].startTime = 0.2s
+*.peer[0].app[0].keepAlive = 1s
+*.peer[0].app[0].retryInterval = 100ms
+*.peer[0].app[0].retryCount = 2
+*.peer[0].app[0].searchDelay = 10ms
+*.peer[0].app[0].workload = xml("<mqttsn><subscribe at='0s' filter='data' qos='1'/></mqttsn>")
+*.peer[3].numApps = 1
+*.peer[3].app[0].typename = "MqttClient"
+*.peer[3].app[0].connectAddress = "peer[2]"
+*.peer[3].app[0].clientIdentifier = "publisher"
+*.peer[3].app[0].workload = xml("<mqtt><publish at='2s' topic='data' qos='1' payload='41'/><publish at='3s' topic='data' qos='1' payload='42'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqttsn_failover: PASS

@@ -1,0 +1,63 @@
+%description:
+The gateway maps MQTT broker admission refusal to MQTT-SN refusal without reporting
+acceptance. The shared gateway connection remains independently admitted.
+
+%includes:
+#include "ProtocolTest.h"
+#include "../../../mqtt/MqttScriptedPeer.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%file: peer.cc
+#include "../../../mqtt/MqttScriptedPeer.cc"
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("mqttsn_broker_refusal4")
+        .act(action().at(0).run<mqtttest::MqttScriptedPeer>("broker.app[0]", [](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder = [](auto& peer, auto& socket, const auto& request) {
+                if (request->getType() != mqtt::CONNECT) return;
+                auto reply = makeShared<mqtt::MqttPacket>(); reply->setType(mqtt::CONNACK);
+                reply->setReturnCode(std::string(request->getClientIdentifier()) == "sensor" ? 4 : 0);
+                peer.sendMqtt(socket, reply);
+            };
+        }))
+        .meanwhile(never(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::CONNACK && p->getReturnCode() == mqttsn::ACCEPTED;
+        }).within(0.5)))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::CONNACK && p->getReturnCode() == mqttsn::NOT_SUPPORTED;
+        }).within(1));
+}
+
+%activity:
+EV << "Broker refusal fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+
+%contains: stdout
+PROTOCOLTEST mqttsn_broker_refusal4: PASS

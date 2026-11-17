@@ -1,0 +1,28 @@
+%description:
+Production per-client topic allocation uses all nonreserved ids, rejects exhaustion,
+reuses an existing name, and never changes another client's mapping. This is helper
+coverage of allocation, complementary to UDP registration in MqttSnTopics.test.
+
+%includes:
+#include "inet/applications/mqttsn/MqttSnSession.h"
+
+%activity:
+using namespace inet;
+using namespace inet::mqttsn;
+MqttSnSession first, second;
+ASSERT(second.allocateTopic("other") == 1);
+for (int i = 1; i <= 65534; i++) first.topics[i] = "occupied" + std::to_string(i);
+ASSERT(first.allocateTopic("overflow") == 0);
+ASSERT(first.allocateTopic("occupied32768") == 32768);
+ASSERT(second.topics.size() == 1 && second.topics.at(1) == "other");
+first.topics.erase(32768);
+ASSERT(first.allocateTopic("replacement") == 32768);
+ASSERT(!first.topics.count(0) && !first.topics.count(65535));
+for (int i = 1; i <= 65535; i++) first.transactions[i] = {};
+ASSERT(first.allocateMessageId() == 0);
+first.transactions.erase(65535);
+ASSERT(first.allocateMessageId() == 65535);
+EV << "MQTTSN CAPACITY PASS\n";
+
+%contains: stdout
+MQTTSN CAPACITY PASS

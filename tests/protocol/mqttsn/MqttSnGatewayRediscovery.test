@@ -1,0 +1,51 @@
+%description:
+After exhausting CONNECT retries to a discovered gateway, the client can select
+that same gateway in a new discovery round. Repeated GWINFO does not prevent
+selection. A later disconnect and rediscovery of the same id also recover.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnGatewayRediscovery");
+    test.meanwhile(exactlyTimes(2, on("sensor.app[0]").signal("sessionStateChanged").filterValue(2).within(2.5)));
+    test.meanwhile(exactlyTimes(5, on("sensor.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::CONNECT;
+    }).within(2.5)));
+    test.once(on("gateway.app[0]").signal("scenarioComplete").filterValue(1).within(2.5));
+    return test;
+}
+
+%activity:
+EV << "MQTT-SN rediscovery of a previously attempted gateway\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].remoteAddress = "sensor"
+*.gateway.app[0].remotePort = 1884
+*.gateway.app[0].script = xml("<script><send after='100ms' type='0' gatewayId='1' duration='30'/><expect type='4'/><expect type='4'/><expect type='4'/><send after='250ms' type='2' gatewayId='1'/><send after='1ms' type='2' gatewayId='1'/><expect type='4'/><send type='5'/><send after='100ms' type='24'/><send after='250ms' type='2' gatewayId='1'/><expect type='4'/><send type='5'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = ""
+*.sensor.app[0].startTime = 0.2s
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].searchDelay = 0s
+*.sensor.app[0].searchResponseTimeout = 100ms
+*.sensor.app[0].searchRetryMax = 200ms
+
+%contains: stdout
+PROTOCOLTEST MqttSnGatewayRediscovery: PASS

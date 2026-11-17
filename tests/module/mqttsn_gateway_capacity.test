@@ -1,0 +1,58 @@
+%description:
+A test-only gateway subclass fills the selected peer's topic table immediately
+before the real UDP REGISTER callback. The production handler must answer congestion
+and leave the independent peer mapping intact. No production test hook is added.
+
+%file: peer.cc
+#include "../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%file: capacity.cc
+#include "inet/applications/mqttsn/MqttSnGateway.h"
+#include "inet/applications/mqttsn/MqttSnPacketSerializer.h"
+namespace inet::mqttsntest {
+class CapacityGateway : public mqttsn::MqttSnGateway {
+    bool checked = false;
+    void socketDataArrived(UdpSocket *socket, Packet *packet) override {
+        auto wire = mqttsn::MqttSnPacketSerializer::decode(packet->peekDataAsBytes()->getBytes());
+        if (wire->getType() == mqttsn::REGISTER) {
+            auto& peer = peers.at("script");
+            peers["independent"].topics[1] = "other";
+            for (int id = 1; id <= 65534; id++) peer.topics[id] = "occupied" + std::to_string(id);
+            MqttSnGateway::socketDataArrived(socket, packet);
+            ASSERT(peer.topics.size() == 65534);
+            ASSERT(peers.at("independent").topics.at(1) == "other");
+            checked = true;
+        }
+        else MqttSnGateway::socketDataArrived(socket, packet);
+    }
+    void finish() override { ASSERT(checked); EV << "MQTTSN GATEWAY CAPACITY PASS\n"; }
+};
+Define_Module(CapacityGateway);
+}
+
+%file: test.ned
+import inet.tests.mqttsn.MqttSnTestNetwork;
+import inet.applications.mqttsn.MqttSnGateway;
+module CapacityGateway extends MqttSnGateway { parameters: @class(::inet::mqttsntest::CapacityGateway); }
+
+%activity:
+EV << "Production topic-capacity fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='30' clientId='script'/><expect type='5' code='0'/><send type='10' messageId='1' topic='overflow'/><expect type='11' messageId='1' topicId='0' code='1'/><send type='24'/><expect type='24'/></script>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "CapacityGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+
+%contains: stdout
+MQTTSN GATEWAY CAPACITY PASS

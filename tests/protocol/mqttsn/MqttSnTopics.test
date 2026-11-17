@@ -1,0 +1,38 @@
+%description:
+Production gateway registers stable per-client topics, replays a duplicate registration, and handles wildcard subscribe/unsubscribe and invalid-topic errors.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnTopics").once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN deterministic scenario compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='30' clientId='script'/><expect type='5' code='0'/><send type='10' messageId='65535' topic='factory/value'/><expect type='11' messageId='65535' topicId='1' code='0'/><send type='10' messageId='65535' topic='factory/value'/><expect type='11' messageId='65535' topicId='1' code='0'/><send type='18' messageId='2' topic='factory/+'/><expect type='19' messageId='2' topicId='0' code='0'/><send type='12' topicId='65535' payload='41'/><expect type='13' topicId='65535' messageId='0' code='2'/><send type='20' messageId='3' topic='factory/+'/><expect type='21' messageId='3'/><send type='24'/><expect type='24'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+
+%contains: stdout
+PROTOCOLTEST MqttSnTopics: PASS

@@ -1,0 +1,123 @@
+%description:
+Scripted broker interrupts a production client's QoS 1 and QoS 2 sender phases,
+duplicates inbound QoS 2 control packets and then loses its own session state.
+The client must retry the correct phase and hand three distinct incoming messages
+onward exactly once each, including a reused identifier in the new broker session.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+struct RecoveryState {
+    int connection=0;
+    int qos1Identifier=0;
+    int qos2Identifier=0;
+    int received17=0;
+    int completed17=0;
+};
+static void sendIncoming(MqttScriptedPeer& peer,TcpSocket& socket,int identifier,int value,bool duplicate=false) {
+    auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic("outside/subscription"); p->setQos(2);
+    p->setPacketIdentifier(identifier); p->setDuplicate(duplicate); p->setPayloadArraySize(1); p->setPayload(0,value); peer.sendMqtt(socket,p);
+}
+static void reply(MqttScriptedPeer& peer,TcpSocket& socket,int type,int identifier) {
+    auto p=makeShared<MqttPacket>(); p->setType(type); p->setPacketIdentifier(identifier); peer.sendMqtt(socket,p);
+}
+Define_ProtocolTestProgram()
+{
+    auto state=std::make_shared<RecoveryState>();
+    return ProtocolTest("mqtt_client_recovery")
+        .meanwhile(exactlyTimes(3,on("publisher.app[0]").signal("packetSentToUpper").within(8)))
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[0]",[state](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder=[state](auto& peer,auto& socket,const auto& p) {
+                if (p->getType()==CONNECT) {
+                    state->connection++;
+                    ASSERT(!p->getCleanSession());
+                    auto answer=makeShared<MqttPacket>(); answer->setType(CONNACK);
+                    answer->setSessionPresent(state->connection==2 || state->connection==3); peer.sendMqtt(socket,answer);
+                    if (state->connection==4) sendIncoming(peer,socket,18,69);
+                }
+                else if (p->getType()==SUBSCRIBE) {
+                    auto answer=makeShared<MqttPacket>(); answer->setType(SUBACK); answer->setPacketIdentifier(p->getPacketIdentifier());
+                    answer->setResultsArraySize(p->getFiltersArraySize());
+                    for (size_t i=0;i<p->getFiltersArraySize();i++) answer->setResults(i,p->getResults(i));
+                    peer.sendMqtt(socket,answer);
+                }
+                else if (p->getType()==PUBLISH && p->getQos()==1) {
+                    if (state->connection==1) {
+                        ASSERT(!p->getDuplicate()); state->qos1Identifier=p->getPacketIdentifier(); socket.close();
+                    }
+                    else {
+                        ASSERT(state->connection==2 && p->getDuplicate() && p->getPacketIdentifier()==state->qos1Identifier);
+                        reply(peer,socket,PUBACK,p->getPacketIdentifier());
+                    }
+                }
+                else if (p->getType()==PUBLISH && p->getQos()==2) {
+                    ASSERT(state->connection==2 && !p->getDuplicate()); state->qos2Identifier=p->getPacketIdentifier();
+                    reply(peer,socket,PUBREC,p->getPacketIdentifier());
+                }
+                else if (p->getType()==PUBREL) {
+                    ASSERT(p->getPacketIdentifier()==state->qos2Identifier);
+                    if (state->connection==2) socket.close();
+                    else {
+                        ASSERT(state->connection==3);
+                        auto bytes=MqttPacketSerializer::encode(*p); ASSERT(bytes[0]==0x62);
+                        // The inbound and outbound exchanges share a number, not state.
+                        sendIncoming(peer,socket,state->qos2Identifier,67);
+                        reply(peer,socket,PUBCOMP,p->getPacketIdentifier());
+                    }
+                }
+                else if (p->getType()==PUBREC && p->getPacketIdentifier()==state->qos2Identifier) {
+                    if (++state->received17==1) sendIncoming(peer,socket,state->qos2Identifier,67,true);
+                    else { ASSERT(state->received17==2); reply(peer,socket,PUBREL,state->qos2Identifier); }
+                }
+                else if (p->getType()==PUBCOMP && p->getPacketIdentifier()==state->qos2Identifier) {
+                    if (++state->completed17==1) reply(peer,socket,PUBREL,state->qos2Identifier);
+                    else { ASSERT(state->completed17==2); sendIncoming(peer,socket,18,68); }
+                }
+                else if (p->getType()==PUBREC && p->getPacketIdentifier()==18) {
+                    if (state->connection==3) socket.close();
+                    else { ASSERT(state->connection==4); reply(peer,socket,PUBREL,18); }
+                }
+                else if (p->getType()==PUBCOMP && p->getPacketIdentifier()==18) {
+                    ASSERT(state->connection==4); peer.emit(peer.registerSignal("scenarioComplete"),1L);
+                }
+                else throw cRuntimeError("Unexpected packet in client recovery script");
+            };
+        }))
+        .once(on("broker.app[0]").signal("scenarioComplete").filterValue(1).within(7))
+        .never(on("publisher.app[0]").signal("packetSentToUpper").within(1));
+}
+
+%activity:
+EV << "MQTT client recovery matrix compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 10s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].cleanSession = false
+*.publisher.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='2'/><publish at='0.1s' topic='factory/value' qos='1' payload='41'/><publish at='0.2s' topic='factory/value' qos='2' payload='42'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_client_recovery: PASS

@@ -1,0 +1,96 @@
+%description:
+All 65535 sender identifiers remain live while a new publication waits. A real
+client reconnects to a scripted broker with Session Present false and must retry
+old publications before it can allocate a subscription-restoration identifier.
+One ACK frees an identifier; SUBACK must then unblock the queued publication.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%file: workload.py
+from pathlib import Path
+rows=["<mqtt><subscribe at='0s' filter='factory/#' qos='1'/>"]
+for i in range(65536):
+    rows.append("<publish at='" + str(i*100) + "us' topic='factory/value' qos='1' payload='" + ("42" if i==65535 else "41") + "'/>")
+rows.append("</mqtt>")
+Path('workload.xml').write_text(''.join(rows))
+
+%prerun-command: python3 workload.py
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate publications(bool duplicate) {
+    return [duplicate](const MatchContext& c) {
+        auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getType()==PUBLISH && p->getDuplicate()==duplicate;
+    };
+}
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_identifier_exhaustion")
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[0]",[](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder=[](auto& peer,auto& socket,const auto& p) {
+                if (p->getType()==CONNECT) {
+                    auto reply=makeShared<MqttPacket>(); reply->setType(CONNACK); peer.sendMqtt(socket,reply);
+                }
+                else if (p->getType()==SUBSCRIBE) {
+                    auto reply=makeShared<MqttPacket>(); reply->setType(SUBACK); reply->setPacketIdentifier(p->getPacketIdentifier());
+                    reply->setResultsArraySize(p->getFiltersArraySize());
+                    for (size_t i=0;i<p->getFiltersArraySize();i++) reply->setResults(i,p->getResults(i));
+                    peer.sendMqtt(socket,reply);
+                }
+            };
+        }))
+        .exactlyTimes(65535,on("broker.app[0]").signal("packetReceivedFromLower").filterEvent(publications(false)).within(10))
+        .never(on("broker.app[0]").signal("packetReceivedFromLower").filterEvent(publications(false)).within(0.1))
+        .act(action().run<MqttScriptedPeer>("broker.app[0]",[](auto& app) { app.accepted().close(); }))
+        .exactlyTimes(65535,on("broker.app[0]").signal("packetReceivedFromLower").filterEvent(publications(true)).within(10))
+        .act(action().run<MqttScriptedPeer>("broker.app[0]",[](auto& app) {
+            std::set<int> identifiers;
+            for (auto& p:app.received) if (p->getType()==PUBLISH) identifiers.insert(p->getPacketIdentifier());
+            ASSERT(identifiers.size()==65535 && !identifiers.count(0));
+            auto p=makeShared<MqttPacket>(); p->setType(PUBACK); p->setPacketIdentifier(2);
+            app.sendMqtt(app.accepted(app.getNumAccepted()-1),p);
+        }))
+        .once(on("broker.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==SUBSCRIBE; })
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getPacketIdentifier()==2; }).within(1))
+        .once(on("broker.app[0]").signal("packetReceivedFromLower").filterEvent(publications(false))
+            .assertEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getPayloadArraySize()==1 && p->getPayload(0)==66 && p->getPacketIdentifier()==2;
+            }).within(1));
+}
+
+%activity:
+EV << "MQTT exhaustion fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+**.cmdenv-log-level = warn
+cmdenv-event-banners = false
+sim-time-limit = 30s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].cleanSession = false
+*.publisher.app[0].workload = xmldoc("workload.xml")
+
+%contains: stdout
+PROTOCOLTEST mqtt_identifier_exhaustion: PASS

@@ -1,0 +1,47 @@
+%description:
+Distinct downlink messages queue asleep and during the awake drain; PINGRESP waits for all acknowledgements.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnSleepDrainArrival");
+    test.once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+    return test;
+}
+
+%activity:
+EV << "MQTT-SN deterministic fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='1' clientId='script'/><expect type='5'/><send type='18' flags='34' messageId='1' topicId='29812'/><expect type='19' messageId='1'/><send type='24' duration='3'/><expect type='24'/><wait timeout='800ms' forbidType='12'/><send type='22' clientId='script'/><expect type='12' topicId='29812' messageId='1' payload='41'/><send after='50ms' type='13' topicId='29812' messageId='1'/><expect type='12' messageId='2' payload='42'/><send after='50ms' type='13' topicId='29812' messageId='2'/><expect type='12' messageId='3' payload='43'/><send type='13' topicId='29812' messageId='3'/><expect type='23'/><send type='24'/><expect type='24'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].clientIdentifier = "publisher"
+*.observer.app[0].workload = xml("<mqtt><publish at='400ms' topic='tt' qos='1' payload='41'/><publish at='500ms' topic='tt' qos='1' payload='42'/><publish at='930ms' topic='tt' qos='1' payload='43'/></mqtt>")
+
+
+%contains: stdout
+PROTOCOLTEST MqttSnSleepDrainArrival: PASS

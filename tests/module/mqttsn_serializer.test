@@ -1,0 +1,63 @@
+%description:
+MQTT-SN production codec golden vectors, every message layout, optional fields,
+extended length boundaries, binary payloads and malformed datagram bounds.
+
+%includes:
+#include "inet/applications/mqttsn/MqttSnPacketSerializer.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "../../serializer/lib/ChunkFillers.h"
+namespace inet { std::vector<std::vector<uint8_t>> mqttSnWireVectors(); }
+
+%file: vectors.cc
+#include "../../../serializer/lib/fillers/ChunkFillers_mqttsn.cc"
+
+%activity:
+using namespace inet;
+using namespace inet::mqttsn;
+std::vector<ChunkFiller> fillers;
+addFillers_mqttsn(fillers);
+ASSERT(fillers.size() == mqttSnWireVectors().size());
+for (const auto& filler : fillers) {
+    auto packet = makeShared<MqttSnPacket>(); filler.fill(packet.get());
+    Packet wire("filled", packet);
+    auto bytes = wire.peekDataAsBytes()->getBytes();
+    ASSERT(B(bytes.size()) == packet->getChunkLength());
+    ASSERT(MqttSnPacketSerializer::encode(*MqttSnPacketSerializer::decode(bytes)) == bytes);
+}
+for (auto bytes : mqttSnWireVectors()) {
+    auto packet = MqttSnPacketSerializer::decode(bytes);
+    ASSERT(MqttSnPacketSerializer::encode(*packet) == bytes);
+    Packet wire("wire", packet);
+    ASSERT(wire.peekDataAsBytes()->getBytes() == bytes);
+    Packet raw("raw", makeShared<BytesChunk>(bytes));
+    auto restored = raw.peekAtFront<MqttSnPacket>();
+    ASSERT(MqttSnPacketSerializer::encode(*restored) == bytes);
+}
+auto unsupported = MqttSnPacketSerializer::decode({7,4,4,2,0,30,'s'});
+ASSERT(unsupported->getProtocolId() == 2);
+for (auto bytes : std::vector<std::vector<uint8_t>>{{}, {1}, {1,0}, {2,4}, {3,23,0},
+        {7,12,3,0,1,0,0}, {3,5,4}, {3,24,0}, {3,26,0}, {6,4,0,1,0,0},
+        {2,255}, {1,0,5,23}, {4,12,0,0}, {7,12,0,0,1,0,1}}) {
+    bool rejected = false;
+    try { MqttSnPacketSerializer::decode(bytes); } catch (cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+for (int size : {248,249,250,65526}) {
+    auto packet = makeShared<MqttSnPacket>(); packet->setType(PUBLISH);
+    packet->setTopicId(1); packet->setPayloadArraySize(size);
+    MqttSnPacketSerializer::setLength(packet);
+    auto bytes = MqttSnPacketSerializer::encode(*packet);
+    ASSERT(bytes.size() == size_t(size + (size <= 248 ? 7 : 9)));
+    ASSERT(MqttSnPacketSerializer::decode(bytes)->getPayloadArraySize() == size_t(size));
+}
+auto tooLarge = makeShared<MqttSnPacket>(); tooLarge->setType(PUBLISH);
+tooLarge->setPayloadArraySize(65527);
+bool rejected = false;
+try { MqttSnPacketSerializer::encode(*tooLarge); } catch (cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+EV << "MQTTSN CODEC PASS\n";
+
+%contains: stdout
+MQTTSN CODEC PASS

@@ -1,0 +1,48 @@
+%description:
+Gateway Will negotiation and live updates: sensor silence publishes the current Will through the shared broker connection, after clean sensor state is discarded.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnWill");
+    test.meanwhile(exactlyTimes(1,on("observer.app[0]").signal("packetSentToUpper")
+        .filterEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66}); }).within(3.5)));
+    test.once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(3.5));
+    return test;
+}
+
+%activity:
+EV << "MQTT-SN deterministic fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 4s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='12' duration='1' clientId='script'/><expect type='6'/><send type='7' topic='w' flags='32'/><expect type='8'/><send type='9' payload='41'/><expect type='5'/><send type='26' topic='w2'/><expect type='27'/><send type='28' payload='42'/><expect type='29'/><wait timeout='2s'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='w2' qos='2'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnWill: PASS
