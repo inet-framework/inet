@@ -1,59 +1,163 @@
 Datagram Transport Layer Security
 ================================
 
-The DTLS model supplies a datagram security protocol simulation over the existing UDP stack. It models DTLS 1.3 handshake messages, cookie validation, fragmentation, loss recovery, record numbering, application datagrams and key updates. It uses the host's application slot, so existing hosts require no additional transport submodule.
+The DTLS model runs over ordinary UDP/IP in a host application slot. It models
+handshake messages, cookie validation, fragmentation, recovery, record numbering,
+application datagrams and closure. DTLS 1.3 is the default. Optional capabilities
+are disabled unless explicitly configured.
 
 Model fidelity
 --------------
 
-Cryptography follows the INET IPsec abstraction. An ``EncryptedChunk`` wraps retained logical content, and the model accounts for record expansion and configurable processing time. It does not perform encryption, authentication-tag verification, key derivation, signature generation or certificate-chain validation. Compatible transmitted identity labels and configured profiles represent successful authentication. Measurements describe traffic and timing, not resistance to attacks.
+Cryptography follows INET's IPsec abstraction: an ``EncryptedChunk`` retains
+logical content while accounting for expansion and directional processing time.
+There is no actual AEAD, key derivation, signature or certificate-chain validation.
+Compatible identity labels represent modeled authentication success. These models
+measure simulated traffic and timing; they do not establish security or hardware
+performance. Use declared UDP checksums and Ethernet FCS. Exporting arbitrary
+protected packets as real ciphertext bytes is unsupported.
 
-The selected profile uses ``TLS_AES_128_GCM_SHA256`` with modeled X25519 shares and either external PSK or certificate authentication. Certificate contents and signatures are configured-sized placeholders. DTLS 1.2, connection IDs and address migration, session tickets/resumption, early data and post-handshake certificate authentication are outside this model.
+The default profile uses AES-128-GCM/SHA-256 with X25519 and external PSK, or
+modeled ECDSA certificate authentication when ``profile = "certificate"``.
+DTLS 1.3 additionally supports the finite AES-256-GCM/SHA-384 and
+ChaCha20-Poly1305/SHA-256 profiles, P-256 key shares and modeled RSA-PSS signatures.
+Select preferences through ``cipherSuites``, ``keyExchangeGroups`` and
+``signatureSchemes``. Certificate/signature bodies remain sized placeholders.
+Algorithm-specific delay parameters inherit the generic directional costs unless
+explicitly set. Their values are simulation inputs, not measured algorithm speeds.
+The configured external PSK uses SHA-256; select the certificate profile for the
+AES-256/SHA-384 demonstration rather than combining it with that PSK.
 
-Use declared UDP checksums and link FCS. The protected content has no real ciphertext byte representation, so computed checksums over it, protected-packet raw export and packet-data fingerprints are unsupported. Replay filtering is tested within the truncated-number reconstruction range; old records whose partial numbers alias later records cannot be cryptographically disambiguated. The same limitation applies to overlapping old associations on one address/port quartet.
+Composition and application API
+-------------------------------
 
-Configuration
--------------
+``DtlsApp`` composes a generic source/sink, ``DtlsSocketIo`` and a replaceable
+``IDtls`` engine. Existing host UDP/IP modules carry its packets; hosts need no
+additional transport submodule. The default adapter sends client source packets
+to the current association and delivers received packets to its sink. Applications
+that need multiple handles or finer admission policy should use ``DtlsSocket``
+with their own callback implementation.
 
-Select ``DtlsApp`` in a host application slot. Configure its ``dtls`` submodule for the local UDP endpoint and profile, and its ``io`` submodule for the client destination. Set the compound application's ``server`` parameter to listen without a traffic source. For example:
+``open`` returns a stable association handle or zero when admission fails.
+Packets passed to ``send`` or ``sendEarly`` transfer ownership to the engine,
+including refusal paths. Normal ``send`` waits for establishment as necessary;
+application datagrams retain UDP loss semantics. A later ``sendError`` identifies
+the refused packet. It does not imply association failure. Keep callbacks alive
+through the terminal ``error``/``closed`` sequence, and handle synchronous callbacks
+when configured service cost is zero. Application callbacks may close a handle.
 
-.. code-block:: ini
+Custom callbacks must implement ``earlyDataArrived``, ``earlyDataStatus``,
+``pathChanged``, ``authenticationResult`` and ``maximumDatagramSizeChanged`` in
+addition to the original association callbacks. Early delivery requires an
+explicit application policy; ordinary data must not silently stand in for it.
+For dynamic budgets, query ``getMaximumDatagramSize`` after establishment and
+consume budget-change callbacks. Zero means that application output is currently
+unavailable. A queued datagram may become too large after a path change and receive
+``sendError``; the engine never splits an application datagram into DTLS messages.
 
-   *.client.numApps = 1
-   *.client.app[0].typename = "DtlsApp"
-   *.client.app[0].dtls.localPort = 44000
-   *.client.app[0].io.destAddress = "server"
-   *.client.app[0].io.destPort = 4433
-   *.client.app[0].source.initialProductionOffset = 100ms
-   *.client.app[0].source.productionInterval = 500ms
-   *.client.app[0].source.packetLength = 128B
-   *.server.numApps = 1
-   *.server.app[0].typename = "DtlsApp"
-   *.server.app[0].dtls.localPort = 4433
-   *.server.app[0].server = true
-   **.checksumMode = "declared"
-   **.fcsMode = "declared"
+Session and early-data policy
+-----------------------------
 
-The generic server adapter delivers incoming datagrams to its sink. A custom application can use ``DtlsSocket`` and association handles for bidirectional conversations with several peers. Closing one handle leaves the engine's shared listening socket and other associations usable.
+Enable ``resumptionEnabled`` to issue and cache modeled opaque tickets. The store
+is bounded by ``maxSessions`` and ``ticketLifetime`` and is cleared by engine
+stop/crash. Normal association close preserves eligible sessions. ``open`` with
+resume intent falls back to a full handshake when no compatible live entry exists;
+``isResumed`` reports the actual outcome. Tickets are stateful simulated identities,
+not stateless encrypted credentials.
 
-``open`` returns zero if the attempt cannot be admitted synchronously. ``send`` transfers packet ownership even when rejected; ``sendError`` reports an individual packet failure. An association ``error`` is terminal and invalidates that handle. ``requestKeyUpdate`` returns whether the request was admitted, so a busy rejection leaves the existing association and update deadline intact. An admitted update can still report an immediate terminal error if required control work cannot be queued.
+DTLS 1.3 early data additionally requires ``earlyDataEnabled``, a compatible unused
+saved allowance, explicit ``DtlsOpenOptions::offerEarlyData`` and ``sendEarly``.
+The application receives a separate early status and delivery callback. Cookie
+retry rejects early data. The acceptance example therefore deliberately disables
+the server cookie policy. Rejected early data is never replayed automatically as
+ordinary data. The bounded ticket store models one-use admission; it cannot prove
+cryptographic anti-replay or security across independent servers.
 
-Set both endpoints' ``dtls.profile`` to ``"certificate"`` for modeled certificate authentication. The listener's ``dtls.clientAuthentication`` additionally requests a certificate during the initial client handshake. ``certificateBytes`` and ``signatureBytes`` control the placeholder sizes. Setting the client's ``offerInitialKeyShare`` to false exercises HelloRetryRequest for the selected key exchange group.
+Connection IDs, migration and authentication
+--------------------------------------------
 
-The NED declaration is the reference for parameter defaults and signals. ``udpPayloadLimit`` is a configured known-safe UDP payload budget, not automatic path MTU discovery. Application datagrams exceeding the resulting record limit or the TLS 16 KiB content limit are rejected rather than split into several deliveries. Larger handshake messages are fragmented within the record and UDP budgets.
+``connectionIdEnabled`` negotiates eight-byte local receive IDs. Setting
+``receiveConnectionId = false`` offers an empty receive ID; directional overhead
+then differs. DTLS 1.3 can request/provide spare IDs and activate one through the
+socket API. DTLS 1.2 uses a static negotiated CID and refuses those update APIs.
 
-Timing and recovery
--------------------
+Migration requires ``migrationEnabled``, negotiated nonempty CIDs and heartbeat
+permission. ``migrateLocal`` selects an owned local address/interface;
+``rebindLocalPort`` replaces the actual client UDP socket and is restricted to one
+association without a listener. DTLS 1.3 local moves require a spare peer CID.
+The destination changes only after a fresh correlated heartbeat response. A
+successful move preserves the association handle. A failed rebind validation
+terminates that handle because the old socket has been replaced. This is modeled
+heartbeat validation, not RFC 9853 or cryptographic path authentication.
 
-Cookies are enabled by default and model return reachability. The server limits output before validation. Its handshake deadline starts at the first structurally valid ClientHello arrival, including queued processing and reassembly, and a cookie retry preserves that deadline. A flight is retained until its peer response or ACK establishes receipt; lost handshake content is retransmitted with backoff. Retransmitted fragments preserve message bytes and epoch but use fresh record numbers. Application data retains UDP semantics: packet loss does not initiate application retransmission or ordered-stream recovery.
+``postHandshakeAuthEnabled`` lets a DTLS 1.3 server request a client certificate
+later using ``requestClientAuthentication``. One request may be active. Query
+``getPeerAuthentication`` for its current modeled snapshot. Tickets preserve the
+snapshot at issuance; later authentication does not retroactively rewrite them.
+DTLS 1.2 refuses this API and refuses renegotiation with no_renegotiation.
 
-Record protection, unprotection and handshake work use independent incoming and outgoing service queues. Delay parameters default to zero and can model finite processing cost. A zero-cost operation with an idle queue completes synchronously; positive processing costs schedule completion. An attempt waiting for sending credit or a key-update ACK does not occupy the shared processor.
+Path budgets and record service
+--------------------------------
 
-Key updates change modeled protection epochs. The sender waits for its update's ACK before using the next epoch. Both manual requests and the configured record-count threshold use this path. A duplicate update is acknowledged without advancing receiving state twice.
+``pathMtuDiscoveryEnabled`` uses heartbeat to confirm a directional UDP budget.
+The configured ``pathMtuBase`` defaults to 512 bytes: this is an explicit small-MTU
+simulation departure from RFC 8899's IPv4/IPv6 bases. Search increases in 128-byte
+steps with three actual attempts per size, exponentially spaced from
+``pathMtuProbeTimeout``. Confirmation and upward search have separate intervals.
+Typed ICMP quotations are correlated with the current probe; truncated, raw,
+stale or ordinary-application quotes do not change the budget. ICMP is not
+authenticated. Migration resets confirmation to the base. Unconfirmed/error paths
+may suspend application output while retaining small control exchanges.
 
-Lifecycle and observation
--------------------------
+DTLS 1.3 record overhead is 22 bytes plus an outgoing CID. DTLS 1.2 uses 37 bytes
+without CID, or 38 plus the CID length, including its explicit nonce and inner
+content type. No-padding application limits are 16384 bytes normally and 16383
+for legacy CID records. The query also applies the current UDP budget. Discovery
+sets the existing don't-fragment request. In this checkout, explicit interface
+selection for IPv6 emits Ethernet broadcasts, which can suppress ICMPv6 feedback;
+loss-based confirmation remains conservative in that case.
 
-An association close attempts one ``close_notify`` and completes locally without depending on reliable peer notification. A deadline bounds delayed processing; forced closure reports a terminal ``error`` followed by one ``closed`` completion after cleanup. The callback object must remain alive through that notification sequence. A crash cancels work without sending an alert. Module stop closes the shared UDP socket after association shutdown, and restart rebinds it for fresh associations while retaining cumulative counters.
+Input and output have independent service queues. Zero-cost work can finish
+synchronously; positive costs schedule completion. Retransmissions use fresh
+record numbers and retain logical handshake content without charging its service
+twice. A stalled peer does not occupy the shared processor while waiting for credit
+or a control response. Application data is never made reliable by handshake retry.
 
-Use declared DTLS signals for establishment, handshake retransmission, record drops and processing delay, together with source/sink statistics. Observers do not drive protocol decisions. The ``examples/dtls`` configurations demonstrate loss-free setup, certificate overhead, fragmentation, seeded link errors, processing costs and IPv6. Protocol tests supply deterministic assertions separately from those demonstrations.
+Legacy version selection
+------------------------
+
+Set ``versions = "1.2"`` or ``"1.3 1.2"`` to permit legacy operation. A dual offer
+prefers 1.3; a timeout never triggers fallback. Legacy profiles are fixed
+PSK-AES-128-GCM/SHA-256 or ECDHE-ECDSA-AES-128-GCM/SHA-256 with P-256/ECDSA.
+Legacy records use full numbers, HelloVerifyRequest cookies, CCS and whole-flight
+retry. The final sender retains its response for 240 seconds independently of the
+120-second default handshake deadline. With resumption enabled,
+``dtls12SessionTicketsEnabled = false`` selects session-ID-only operation;
+otherwise opaque tickets are permitted. Each resumed association negotiates fresh
+CIDs. Early data, KeyUpdate, deferred authentication and dynamic CID updates are
+unavailable in 1.2. Reaching its configured record-use bound fails the association
+rather than invoking KeyUpdate.
+
+Lifecycle, scenarios and observation
+-----------------------------------
+
+Graceful close attempts one close_notify and completes without reliable peer
+notification. A deadline bounds delayed processing. Crash cancels work without
+sending an alert; restart binds a fresh socket. Observe establishment, failure,
+record overhead, retransmission and processing signals together with source/sink
+statistics. Observers publish completed facts and do not drive protocol decisions.
+
+``DtlsSocketIo`` implements ScenarioManager's ``IScriptable`` contract for opt-in
+application actions: ``close-dtls``, ``open-dtls`` (optional ``early="true"``),
+``send-early-dtls`` (a 32-byte demonstration datagram), ``request-dtls-cid``,
+``rebind-dtls`` (required integer ``port``) and ``authenticate-dtls``. Reopen uses
+its ``resumeSession`` preference. Commands act on the current client handle or
+latest accepted server handle and require an operating adapter. Use a custom
+application for multiple independently controlled server associations.
+
+``examples/dtls`` includes standalone configurations and a fixed-seed verifier
+for all sixteen demonstrations. Its README also gives the asserting routed
+MTU-change fixture command. Those deterministic checks demonstrate selected
+outcomes; protocol tests and their reviewer documents state the wider behavior
+coverage and limits. No stored statistical or fingerprint baseline is refreshed
+by the example verifier.

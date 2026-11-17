@@ -1,10 +1,45 @@
 # DTLS verification results
 
-> **Kind:** report · **Status:** snapshot 2026-11-16 · **Seal:** none · **Owns:** — · **Stands on:** [coverage.md](coverage.md)
+> **Kind:** report · **Status:** snapshot 2026-11-17 · **Seal:** none · **Owns:** — · **Stands on:** [coverage.md](coverage.md)
 
-The selected DTLS protocol behavior through graceful closure has executed debug evidence. KeyUpdate and graceful closure were verified at separate source boundaries, with the queue mechanisms introduced before their first production consumers.
+The selected model now includes the opt-in extensions described in [scope.md](scope.md). Their stage-specific executed evidence is in [extensions.md](extensions.md), including legacy full/abbreviated exchanges, CID/heartbeat/path support and their limits. The historical initial-profile results below retain their original source boundaries and counts; they are not a claim that the current extension union was run by those earlier commands.
 
-## Receive-error correction and revised review boundaries
+## Final extension integration matrix
+
+Matching debug and release builds pass on the corrected model source `62b7af5f28`; the subsequent helper correction `467b99fa9f` changes test checks only. Both native library hashes and all 61 tracked model/application source hashes remain verified in `audit/dtls-extensions/c16-corrected-source-manifest.json`. The [execution ledger](extensions.md) records exact commands and the 60-case release selection.
+
+| Check | Debug | Release |
+| --- | ---: | ---: |
+| DTLS protocol cases | 351 PASS | 60 PASS |
+| DTLS/TLS units | 15 PASS | 15 PASS |
+| DTLS module cases | 21 PASS | 21 PASS |
+| Ordinary UDP and IPv6 fragmentation controls | 6 PASS | 6 PASS |
+| Fixed-seed application demonstrations | 16 PASS | 16 PASS |
+
+Every final selection is nonempty and exits zero. The full debug union includes the corrected resource-admission case; the release selection covers every extension and their principal interactions. Helper checks explicitly execute in both modes, preserving the model library's normal compiler flags. An isolated debug build with Dtls/TlsCommon disabled also passes all three selected UDP controls. Its loader resolves the isolated library, with no DTLS/TLS model symbols. Both corrected legacy source files are excluded there; all other tracked source inputs match the final model.
+
+Scoped architecture/naming, source/document protection, owned interfaces, selected links, release formatting and commit-series gates pass. The global interface gate retains sixteen findings in byte-identical base files. clang-tidy is unavailable. The supplied skill-source package scripts and test directory are absent from this INET checkout; their attempted checks remain unavailable. No fingerprint, statistical or chart baseline was compared or changed, and no cryptographic or arbitrary real-endpoint interoperability result is claimed. Raw attempts, final outputs, hashes and the matrix are retained under `audit/dtls-extensions/`, including `c16-final-run-record.json`.
+
+## Extension demonstration results
+
+The [example verifier](../../../../../examples/dtls/README.md) runs one deterministic seed-zero execution per configuration. It exports engine scalars through opp_scavetool CSV-R, checks one expected run and both endpoints, and requires callback-specific outcomes for the opt-in actions. The following executed counts agree between debug and release for datagrams received by the server engine, including explicitly accepted early delivery. They are not independent repetitions or estimates of physical performance.
+
+| Configuration | Server datagrams | Required behavior |
+| --- | ---: | --- |
+| Basic, Certificate, Fragmentation, Ipv6 | 20 each | Existing setup, sized authentication, fragmentation and IPv6 controls |
+| LossyHandshake | 50 | Fixed-seed error/recovery demonstration |
+| ProcessingCost | 4949 | Finite directional service, with pending work at the cutoff |
+| Reconnect, LegacyReconnect | 19 each | Both endpoints establish twice; the second association is resumed |
+| EarlyData | 20 | Explicit early intent and exactly one accepted status |
+| Migration, LegacyMigration | 20 each | Both actual rebind paths validate with one establishment |
+| DeferredAuthentication | 20 | One successful server authentication result after establishment |
+| AlgorithmCost | 20 | Certificate AES-256/SHA-384 profile with nonzero selected service |
+| PathMtu | 20 | Routed MTU 828 confirms a 770-byte application budget with CID |
+| Legacy, MixedVersions | 20 each | Actual selected 1.2 record expansion and data |
+
+All sixteen demonstrations have zero association failures in each mode. All 160 selected endpoint measurements agree between modes (`c16-examples-mode-comparison.json`). The reconnect schedule deliberately has a closed interval in which one generic source packet is discarded. The initial six counts equal their historical controls below. Final raw inputs/exports are under `audit/dtls-extensions/c16-examples-corrected-debug/` and `c16-examples-final-release/`. The execution ledger records commands and limits separately from this application demonstration.
+
+## Pre-extension receive-error correction and review boundaries
 
 The current suite contains 129 protocol cases: the original 125 plus four [malformed-handshake cases](../../../../../tests/protocol/dtls/malformed-handshake-records.md). A raw handshake-header conversion used to escape delayed input processing and abort the simulation. Two decode-only guards now discard those records before replay or association state changes; application callbacks remain outside the guards.
 
@@ -69,4 +104,4 @@ Independent correctness and final checklist review found no remaining actionable
 
 The C++ gate's raw exit status is one, not a clean pass. Its final owned diagnostic set contains fourteen easily-swappable-parameter warnings whose actual calls were reviewed, and the sanctioned named-instance spelling `dtlsProtocol`. No actionable owned diagnostic remains. Generated code and existing dependency diagnostics are outside that owned set. No suppression or exception-ledger change was introduced. The classification trailer correction passes its gate; final publication gates are recorded separately.
 
-Cryptography remains the IPsec retained-content abstraction. Actual AEAD, key derivation, signature/certificate validation, protected ciphertext export, CID/migration and authenticated far-old alias disambiguation are outside scope. No existing baseline was changed.
+Cryptography remains the IPsec retained-content abstraction. Actual AEAD, key derivation, signature/certificate validation, protected ciphertext export and authenticated far-old alias disambiguation remain outside scope. CID/migration was outside the historical initial implementation; its current finite coverage is recorded in the extension ledger. No existing baseline was changed by these historical results.

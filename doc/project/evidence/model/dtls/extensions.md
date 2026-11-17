@@ -47,7 +47,7 @@ All named new tests below are **NOT_IMPLEMENTED / NOT_RUN** until their owning s
 | C16a | Scenario adapter | Public socket actions exercised by sixteen fixed-seed examples | DONE: fresh debug build; sixteen examples assert successful outcomes |
 | C15b | Legacy admission correction | Rfc9146ConnectionIdExhaustion and CID controls | DONE: exact parent fails; matching debug/release builds and debug child pass; C16 repeats integration |
 | C16b | Mode-independent helper checks | DTLS/TLS units and DTLS module fixtures | DONE: three original release failures corrected; 15 unit and 21 module PASS in each mode |
-| C16 | Integration/documentation | Owning cases repeated, deterministic examples, both build modes | IN_PROGRESS |
+| C16 | Integration/documentation | Owning cases repeated, deterministic examples, both build modes | DONE: 351 debug / 60 release protocol; 15 unit, 21 module, 6 network controls and 16 examples per mode; disabled debug build and 3 UDP controls PASS |
 
 ## Validation
 
@@ -428,3 +428,49 @@ Before editing, validate a test-only correction: add one small DTLS_TEST_CHECK m
 ### C16b executed correction
 
 Added tests/DtlsTestAssertions.h and replaced ASSERT with DTLS_TEST_CHECK in exactly twenty-four DTLS/TLS helper fixtures. Every expression is evaluated once in either mode and retains its original condition and expected output. The other selected configuration/protection fixtures already use always-active checks or expected runtime failures. The three previously failing release fixtures now pass (`c16b-focused-{unit,module}-release-console.log`). The full repeats then pass all fifteen units and twenty-one module cases in **both debug and release**, with exit zero (`c16b-{unit,module}-{debug,release}-console.log`). The release test executable resolves src/libINET.so, not the debug library. No model flag, production source, native library or stored expectation changed in C16b; the same C15b libraries remain the integration inputs.
+
+## C16 final integration and documentation
+
+Completed locally on 2026-11-17 with OMNeT++ 6.4.0aipre2 and Ubuntu clang 21.1.8. The final model input is C15b `62b7af5f28`; C16b `467b99fa9f` fixes test checks without changing model source or flags. All 61 tracked model/application source hashes and both native library hashes remain verified in `c16-corrected-source-manifest.json`. Message-only corrections fixed C1's classification and explained the large integration boundaries; both rewrite maps verify every affected commit tree unchanged. The example verifier explicitly selects --debug/--release; its debug command is identical to the earlier verified invocation.
+
+| Final check | Debug | Release | Retained artifacts under audit/dtls-extensions |
+| --- | --- | --- | --- |
+| Matching model build | PASS | PASS | c15b-build-debug.log, c15b-build-release.log; preceding full builds in c16-build-* |
+| DTLS protocol | 351 PASS | 60 PASS | c16-final-debug-*, c16-final-release-*; exact release command/selection JSON |
+| DTLS/TLS units | 15 PASS | 15 PASS | c16b-unit-debug-console.log, c16b-unit-release-console.log |
+| DTLS modules | 21 PASS | 21 PASS | c16b-module-debug-console.log, c16b-module-release-console.log |
+| UDP/IPv6 controls | 6 PASS | 6 PASS | c16-final-network-debug-*, c16-network-release-* |
+| Application demonstrations | 16 PASS | 16 PASS | c16-examples-corrected-debug/, c16-examples-final-release/ |
+
+Every final selection is nonzero and exits zero. The release protocol selection covers default 1.3 setup/data/update/close, tickets/early admission and rejection, algorithm profiles, CID/update overlap, heartbeat/resumption, migration/rebind/freshness, PHA/ticket snapshots, MTU/late ACK/migration/authentication interactions, version negotiation/downgrade and legacy full/abbreviated/final-retention/CID/path behavior. It includes the C15b exhaustion correction. The 351-case debug union includes all current DTLS fixtures. This is finite modeled behavior evidence, not unrestricted standards or security conformance.
+
+Reproduction from the enabled checkout uses matching builds followed by:
+
+```sh
+make -j8 MODE=debug
+make -j8 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/dtls$'
+opp_run_protocol_tests --load . -p inet -m release --no-build --concurrent -w '^tests/protocol/dtls$' -f '(Rfc9147Handshake|Rfc9147PskHandshake|Rfc9147ApplicationDatagrams|Rfc9147KeyUpdate|Rfc9147Close|Rfc9147Resumption|Rfc9147PskResumption|Rfc9147Sha384Resumption|Rfc9147EarlyData|Rfc9147EarlyDataHrr|Rfc9147EarlyDataReplay|Rfc9147AlgorithmProfiles|Rfc9147AlgorithmFragmentation|Rfc9147ConnectionId|Rfc9147ConnectionIdUpdate|Rfc9147ConnectionIdUpdateOverlap|Rfc9147Heartbeat|Rfc9147HeartbeatResumption|Rfc9147Migration|Rfc9147MigrationRebind|Rfc9147MigrationKeyUpdate|Rfc9147PostHandshakeAuth|Rfc9147PostHandshakeAuthTicketSnapshot|Rfc9147PostHandshakeAuthMigration|Rfc9147PathMtu|Rfc9147PathMtuIpv4Hint|Rfc9147PathMtuIpv6|Rfc9147PathMtuLateAck|Rfc9147PathMtuMigration|Rfc9147PathMtuAuthPause|Rfc9147VersionNegotiation|Rfc9147VersionNegotiationFallback|Rfc9147VersionNegotiationDowngrade|Rfc6347Handshake|Rfc6347HandshakeCertificate|Rfc6347HandshakeMutual|Rfc6347Recovery|Rfc6347FinalRetention|Rfc6347Resumption|Rfc6347ResumptionSessionId|Rfc6347ResumptionCertificate|Rfc6347ResumptionLoss|Rfc6347ResumptionFinalRetention|Rfc6347ResumptionSharedVersions|Rfc6347HeartbeatCid|Rfc6347PathMtu|Rfc6347PathMtuIpv4Hint|Rfc6347PathMtuIpv6|Rfc6347PathMtuMigration|Rfc6347PathMtuMigrationIpv6|Rfc9146ConnectionId|Rfc9146ConnectionIdResumption|Rfc9146ConnectionIdEmptyClient|Rfc9146ConnectionIdInnerLimit|Rfc9146ConnectionIdClose|Rfc9146Migration|Rfc9146MigrationIpv6|Rfc9146MigrationFreshResponse|Rfc9146MigrationRebind|Rfc9146ConnectionIdExhaustion)\.test$'
+for dtls_mode in debug release; do
+  opp_run_unit_tests --load . -p inet -m "$dtls_mode" --no-build -f '(Dtls|Tls).*'
+  opp_run_module_tests --load . -p inet -m "$dtls_mode" --no-build -f 'Dtls.*'
+  opp_run_protocol_tests --load . -p inet -m "$dtls_mode" --no-build --concurrent -w '^tests/protocol/(udp|ipv6)$' -f '(Rfc768DatagramDelivery|Rfc768EmptyDatagram|TypedTapPredicate|Ipv6DontFragmentRequest|Ipv6DontFragmentRequestDelayed|Rfc8200SourceFragmentation)\.test$'
+done
+```
+
+The example verifier commands and outcomes are documented in [examples/dtls](../../../../../examples/dtls/README.md). Each configuration uses one seed-zero run, declared checksum/FCS and actual endpoint/callback observations. All 160 selected endpoint measurements agree between modes (`c16-examples-mode-comparison.json`). Original six server datagram counts remain 20, 20, 20, 50, 4949 and 20; the [results table](results.md) lists the ten new demonstrations. Reconnect deliberately discards one source packet during its closed interval, and ProcessingCost ends with pending service. These are deterministic demonstrations, not statistical confidence or hardware-performance measurements. The temporal MTU-change examples reuse the existing asserting routed fixtures, which run in the final mode matrix.
+
+Feature-off validation used the isolated checkout /tmp/inet-dtls-feature-off, initially at b2e35918e3 with a copy of the enabled feature state. In that checkout the executed sequence was:
+
+```sh
+opp_featuretool disable -f Dtls TlsCommon
+make -j8 MODE=debug
+source ./setenv -q
+opp_run_protocol_tests --load . -p inet -m debug --no-build --concurrent -w '^tests/protocol/udp$' -f '(Rfc768DatagramDelivery|Rfc768EmptyDatagram|TypedTapPredicate)\.test$'
+```
+
+The disabled build and all three controls pass with exit zero (`c16-feature-off-debug-build.log`, `c16-feature-off-udp-*`). The executable's loader resolves the isolated src/libINET_dbg.so, and DTLS/TLS namespace symbols are absent. Both C15b source changes are excluded from that Makefile; all other tracked src inputs are identical to the final model (`c16-feature-off-source-equivalence.json`). The state, library hash and loader output are retained in the feature-off manifests. This is a debug feature-off check; no disabled release build is claimed.
+
+Final self-audit retraced version/role selection, callback and packet ownership, finite admission outcomes, record/nonce/CID accounting, retained recovery, candidate-path commitment, quoted probe identity and cleanup against the selected contracts. Scoped architecture/naming, owned interfaces, source/document protection, selected links, release formatting and series checks pass. The global interface gate reports the same sixteen findings; every affected file is byte-identical to the base (`c16-interface-baseline-comparison.json`). clang-tidy is absent from PATH and no versioned alternative is installed, so the C++ lint gate is NOT_RUN. The supplied skill-source validator, packager and tests/skill-suite paths do not exist in this INET checkout; their attempts report missing files/directory (`c16-skill-package-*`). These gaps are not passing evidence.
+
+No stored fingerprint, statistical or chart baseline was compared or updated. No complete parent conformance campaign, arbitrary raw-ciphertext interoperability, real cryptography, authenticated ICMP/path security or physical-performance validation is claimed. Mermaid rendering remains unverified. The final matrix, commands, hashes and limits are summarized in c16-final-run-record.json. The unrelated AGENTS.md edit remains excluded. All planned implementation and available local validation are complete; the tooling gaps above remain explicit. Publication was not part of the authorization.

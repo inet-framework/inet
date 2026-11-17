@@ -1,0 +1,8 @@
+DTLS extension demonstrations and user guidance
+
+DTLS examples now demonstrate ticket reconnects, explicit early data, validated
+port migration, deferred client authentication, selected algorithm costs,
+routed path budgets and mixed DTLS versions. A fixed-seed verifier checks
+endpoint scalars and callback outcomes. The user guide describes opt-in policy,
+application ownership and budget handling, supported legacy profiles and model
+limits; cryptography remains abstracted.

@@ -1,12 +1,14 @@
 # Extend the DTLS simulation model
 
-**Status:** draft. Related guidance: [implemented DTLS plan](../done/dtls.md), [planning guidance](../../doc/project/guide/write-an-implementation-plan.md), [architecture](../../doc/project/rule/architecture.md), [testing](../../doc/project/rule/testing.md).
+**Status:** executed locally. Related guidance: [implemented DTLS plan](../done/dtls.md), [planning guidance](../../doc/project/guide/write-an-implementation-plan.md), [architecture](../../doc/project/rule/architecture.md), [testing](../../doc/project/rule/testing.md).
 
 Revision 5, 2026-11-16. Active checkout: `/home/miguel/workspace/inet-dtls-extensions`, implementation base `cb1691184444afa64b1819348d446d4cad610474`. The user authorized execution of this plan with “Execute the plan” after its iterative review. This covers the listed implementation, tests and local commit series. It does not authorize unrelated edits, stored-baseline changes or publication. Preserve the unrelated modified `AGENTS.md`.
 
+Implementation and the final validation matrix completed on 2026-11-17. The [execution ledger](../../doc/project/evidence/model/dtls/extensions.md) records actual scopes, corrections, commands and limits. The design and proposed commands below preserve the approved starting plan. This file remains under pending until the change lands.
+
 ## Purpose and scope
 
-The current model can establish a DTLS 1.3 association and exchange datagrams, but reconnecting devices repeat setup, moving peers lose address-based association lookup, and packet sizes depend on a configured safe budget. Extend it so simulations can investigate reconnection costs, early traffic, mobility, deferred authentication, algorithm-profile overhead and changing path sizes. Add a finite DTLS 1.2 profile for mixed-version studies.
+At plan approval, the model could establish a DTLS 1.3 association and exchange datagrams, but reconnecting devices repeated setup, moving peers lost address-based association lookup, and packet sizes depended on a configured safe budget. Extend it so simulations can investigate reconnection costs, early traffic, mobility, deferred authentication, algorithm-profile overhead and changing path sizes. Add a finite DTLS 1.2 profile for mixed-version studies.
 
 All seven requested extensions are included:
 
@@ -229,7 +231,7 @@ The model still cannot authenticate ciphertext, distinguish every truncated-numb
 
 ## Execution plan and gates
 
-`opp_run_protocol_tests` resolves in the current environment; its inspected `--help` supports `--load`, `-p`, `-m`, `-w`, `-f` and `--dry-run`. The following commands are **proposed execution**, not completed evidence. New targets do not exist yet. From the checkout root, build the matching library and run the exact owning files first, then the existing DTLS controls:
+`opp_run_protocol_tests` resolves in the current environment; its inspected `--help` supports `--load`, `-p`, `-m`, `-w`, `-f` and `--dry-run`. At approval, the following commands were **proposed execution**, with new targets still absent. The execution ledger now owns completed evidence and exact final selections. From the checkout root, build the matching library and run the exact owning files first, then the existing DTLS controls:
 
 ```sh
 make -j$(nproc) MODE=debug
@@ -244,7 +246,7 @@ Before publication, build debug and release, run the focused protocol suite in b
 
 Update `doc/project/evidence/model/dtls/results.md` only with executed results and exact limits. Add a development release note and callback/API migration instructions in the project's existing release-document locations. No security or hardware-performance validation is claimed without separate evidence.
 
-## Readiness and remaining decisions
+## Readiness at approval
 
 The component ownership, finite profiles, default-off compatibility policy, lifecycle policy and proposed tests above are the design for revision 5. C1 must turn the cited standards into an explicit obligation matrix, resolve applicable errata and confirm the detailed version-negotiation and record-use limits before dependent implementation. If any mandatory behavior does not fit the selected abstraction, revise the relevant claim/profile before coding it. Those detailed mappings remain a prerequisite, not a claim that this plan is ready for every implementation stage.
 
