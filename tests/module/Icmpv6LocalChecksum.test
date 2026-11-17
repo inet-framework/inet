@@ -1,0 +1,60 @@
+%description:
+Computed local ICMPv6 errors with unspecified original source bypass IPv6 routing,
+but must receive complete loopback pseudo-header context and reach local error delivery.
+
+%file: Check.cc
+#include "inet/common/InitStages.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+using namespace inet;
+namespace Icmpv6LocalChecksum {
+class Filter : public cSimpleModule, public NetfilterBase {
+    virtual void dropQueuedDatagram(const Packet *) override { ASSERT(false); }
+    virtual void reinjectQueuedDatagram(const Packet *) override { ASSERT(false); }
+};
+Define_Module(Filter);
+class Check : public Icmpv6 {
+    int delivered = 0;
+    virtual void initialize(int stage) override {
+        Icmpv6::initialize(stage);
+        if (stage != INITSTAGE_LAST) return;
+        auto header = makeShared<Ipv6Header>();
+        header->setSrcAddress(Ipv6Address::UNSPECIFIED_ADDRESS);
+        header->setDestAddress(Ipv6Address("2001:db8::1"));
+        header->setProtocolId(IP_PROT_IPv6_ICMP);
+        header->setPayloadLength(B(8));
+        Packet original("local-unroutable", header);
+        original.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{128,0,0,0,0,1,0,1}));
+        sendErrorMessage(&original, ICMPv6_DESTINATION_UNREACHABLE, 0);
+    }
+    virtual void errorOut(Indication *indication) override {
+        delivered++;
+        Icmpv6::errorOut(indication);
+    }
+    virtual void finish() override {
+        ASSERT(delivered == 1 && numErrorsReceived == 1);
+        std::cout << "Computed local ICMPv6 error delivery verified\n";
+    }
+};
+Define_Module(Check);
+}
+
+%file: test.ned
+import inet.networklayer.icmpv6.Icmpv6;
+simple Filter { @display("i=block/control"); }
+simple Check extends Icmpv6 { @class(Check); }
+network Test {
+    submodules:
+        filter: Filter;
+        icmp: Check { interfaceTableModule = ""; networkProtocolModule = "^.filter"; checksumMode = "computed"; }
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 1us
+
+%contains: stdout
+Computed local ICMPv6 error delivery verified

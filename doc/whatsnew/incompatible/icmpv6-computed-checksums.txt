@@ -1,0 +1,3 @@
+ICMPv6 computed checksums include the IPv6 pseudo-header
+
+Computed ICMPv6 checksums now include the IPv6 pseudo-header and the complete message after source selection, before fragmentation. Error quotations include the outer IPv6 header in the 1280-byte limit. Custom computed-checksum producers should follow the migration guide. Declared checksum modes are unchanged.

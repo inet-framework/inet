@@ -23,10 +23,36 @@
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 
 namespace inet {
 
 Define_Module(Icmpv6);
+
+namespace {
+void writeIcmpv6PseudoHeader(MemoryOutputStream& stream, const Ipv6Address& source, const Ipv6Address& destination, uint32_t length)
+{
+    for (int i = 0; i < 4; i++) stream.writeUint32Be(source.words()[i]);
+    for (int i = 0; i < 4; i++) stream.writeUint32Be(destination.words()[i]);
+    stream.writeUint32Be(length);
+    stream.writeUint32Be(IP_PROT_IPv6_ICMP);
+}
+
+void finalizeIcmpv6Checksum(Packet *packet, b offset, const Ipv6Address& source, const Ipv6Address& destination)
+{
+    auto length = packet->getDataLength() - offset;
+    auto header = packet->removeDataAt<Icmpv6Header>(offset);
+    header->setChksum(0);
+    MemoryOutputStream stream;
+    writeIcmpv6PseudoHeader(stream, source, destination, length.get<B>());
+    Chunk::serialize(stream, header);
+    if (packet->getDataLength() > offset)
+        Chunk::serialize(stream, packet->peekDataAt(offset, packet->getDataLength() - offset));
+    header->setChksum(internetChecksum(stream.getData()));
+    packet->insertDataAt(header, offset);
+}
+}
+
 
 void Icmpv6::initialize(int stage)
 {
@@ -44,6 +70,7 @@ void Icmpv6::initialize(int stage)
         WATCH(numErrorsReceived);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
+        getModuleFromPar<INetfilter>(par("networkProtocolModule"), this)->registerHook(0, this);
         registerService(Protocol::icmpv6, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::icmpv6, gate("ipv6Out"), gate("ipv6In"));
     }
@@ -297,14 +324,9 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
-    // Encapsulate the original datagram, but the whole ICMPv6 error
-    // packet cannot be larger than the minimum Ipv6 MTU (RFC 4443 2.4. (c)).
-    // NOTE: since we just overwrite the errorMsg length without actually
-    // truncating origDatagram, one can get "packet length became negative"
-    // error when decapsulating the origDatagram on the receiver side.
-    // A workaround is to avoid decapsulation, or to manually set the
-    // errorMessage length to be larger than the encapsulated message.
-    b copyLength = B(IPv6_MIN_MTU) - errorMsg->getDataLength();
+    // RFC 4443 section 2.4(c): include the outer IPv6 header in the minimum-MTU
+    // budget, otherwise the error itself requires IPv6 source fragmentation.
+    b copyLength = B(IPv6_MIN_MTU) - IPv6_HEADER_BYTES - errorMsg->getDataLength();
     errorMsg->insertAtBack(origDatagram->peekDataAt(b(0), std::min(copyLength, origDatagram->getDataLength())));
 
     auto icmpHeader = errorMsg->removeAtFront<Icmpv6Header>();
@@ -322,7 +344,12 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code, i
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->addTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->addTag<L3AddressInd>()->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS); // FIXME maybe use configured loopback address
+        auto addresses = errorMsg->addTag<L3AddressInd>();
+        addresses->setSrcAddress(Ipv6Address::LOOPBACK_ADDRESS);
+        addresses->setDestAddress(Ipv6Address::LOOPBACK_ADDRESS);
+        // This local indication bypasses IPv6 egress and therefore its checksum hook.
+        if (errorMsg->peekAtFront<Icmpv6Header>()->getChecksumMode() == CHECKSUM_COMPUTED)
+            finalizeIcmpv6Checksum(errorMsg, b(0), Ipv6Address::LOOPBACK_ADDRESS, Ipv6Address::LOOPBACK_ADDRESS);
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -461,20 +488,41 @@ void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& 
             // if the checksum mode is declared to be incorrect, then set the checksum to an easily recognizable value
             icmpHeader->setChksum(0xBAAD);
             break;
-        case CHECKSUM_COMPUTED: {
-            // if the checksum mode is computed, then compute the checksum and set it
-            icmpHeader->setChksum(0x0000); // make sure that the checksum is 0 in the header before computing the checksum
-            MemoryOutputStream icmpStream;
-            Chunk::serialize(icmpStream, icmpHeader);
-            if (packet->getByteLength() > 0)
-                Chunk::serialize(icmpStream, packet->peekDataAsBytes());
-            uint16_t checksum = internetChecksum(icmpStream.getData());
-            icmpHeader->setChksum(checksum);
+        case CHECKSUM_COMPUTED:
+            // Source selection has not happened yet. POST_ROUTING finalizes the
+            // RFC 4443 pseudo-header checksum before source fragmentation.
+            icmpHeader->setChksum(0);
             break;
-        }
         default:
             throw cRuntimeError("Unknown checksum mode %d", (int)checksumMode);
     }
+}
+
+
+INetfilter::IHook::Result Icmpv6::datagramPostRoutingHook(Packet *packet)
+{
+    Enter_Method("datagramPostRoutingHook");
+    if (packet->findTag<InterfaceInd>()) return ACCEPT;
+    auto ipv6 = packet->peekAtFront<Ipv6Header>();
+    auto nextHeader = ipv6->getProtocolId();
+    b offset = ipv6->getChunkLength();
+    bool activeRouting = false;
+    while (isIpv6ExtensionHeader(nextHeader)) {
+        // Locally prefragmented input must already carry its whole-message checksum.
+        if (nextHeader == IP_PROT_IPv6EXT_FRAGMENT) return ACCEPT;
+        auto extension = peekIpv6ExtensionHeaderAt(packet, offset, nextHeader);
+        if (nextHeader == IP_PROT_IPv6EXT_ROUTING)
+            activeRouting |= staticPtrCast<const Ipv6RoutingHeader>(extension)->getSegmentsLeft() != 0;
+        offset += extension->getChunkLength();
+        nextHeader = extension->getNextHeaderProtocol();
+    }
+    if (nextHeader != IP_PROT_IPv6_ICMP) return ACCEPT;
+    auto existing = packet->peekDataAt<Icmpv6Header>(offset);
+    if (existing->getChecksumMode() != CHECKSUM_COMPUTED) return ACCEPT;
+    if (activeRouting)
+        throw cRuntimeError("Computed ICMPv6 with active routing-header destination semantics is unsupported");
+    finalizeIcmpv6Checksum(packet, offset, ipv6->getSrcAddress(), ipv6->getDestAddress());
+    return ACCEPT;
 }
 
 bool Icmpv6::verifyChecksum(const Packet *packet)
@@ -490,7 +538,13 @@ bool Icmpv6::verifyChecksum(const Packet *packet)
         case CHECKSUM_COMPUTED: {
             // otherwise compute the checksum, the check passes if the result is 0xFFFF (includes the received checksum)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t checksum = internetChecksum(dataBytes->getBytes());
+            auto addresses = packet->findTag<L3AddressInd>();
+            if (!addresses || addresses->getSrcAddress().getType() != L3Address::IPv6 || addresses->getDestAddress().getType() != L3Address::IPv6)
+                return false;
+            MemoryOutputStream stream;
+            writeIcmpv6PseudoHeader(stream, addresses->getSrcAddress().toIpv6(), addresses->getDestAddress().toIpv6(), packet->getDataLength().get<B>());
+            stream.writeBytes(dataBytes->getBytes());
+            uint16_t checksum = internetChecksum(stream.getData());
             // TODO delete these isCorrect calls, rely on checksum only
             return checksum == 0 && icmpHeader->isCorrect();
         }
@@ -500,4 +554,3 @@ bool Icmpv6::verifyChecksum(const Packet *packet)
 }
 
 } // namespace inet
-

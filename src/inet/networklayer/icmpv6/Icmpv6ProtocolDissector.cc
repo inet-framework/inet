@@ -10,6 +10,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace inet {
@@ -35,7 +36,11 @@ void Icmpv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, 
         callback.dissectPacket(packet, &Protocol::mld);
         return;
     }
-    bool isBadPacket = !Icmpv6::verifyChecksum(packet);
+    auto candidate = packet->peekAtFront<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    // A raw dissector may lack the enclosing IPv6 addresses. In that case it
+    // checks structure but cannot claim pseudo-header checksum verification.
+    bool hasChecksumContext = candidate->getChecksumMode() != CHECKSUM_COMPUTED || packet->findTag<L3AddressInd>() != nullptr;
+    bool isBadPacket = hasChecksumContext ? !Icmpv6::verifyChecksum(packet) : !candidate->isCorrect();
     const auto& header = packet->popAtFront<Icmpv6Header>();
     callback.startProtocolDataUnit(&Protocol::icmpv6);
     if (isBadPacket)

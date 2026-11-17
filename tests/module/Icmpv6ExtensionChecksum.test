@@ -1,0 +1,76 @@
+%description:
+Computed ND and MLD egress checksums use the terminal ICMP length and IPv6
+pseudo-header when a Hop-by-Hop header precedes the control message.
+
+%file: Check.cc
+#include "inet/common/InitStages.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/icmpv6/MldMessage_m.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+using namespace inet;
+namespace Icmpv6ExtensionChecksum {
+class Filter : public cSimpleModule, public NetfilterBase {
+    virtual void dropQueuedDatagram(const Packet *) override { ASSERT(false); }
+    virtual void reinjectQueuedDatagram(const Packet *) override { ASSERT(false); }
+};
+Define_Module(Filter);
+class Check : public Icmpv6 {
+    virtual void initialize(int stage) override {
+        Icmpv6::initialize(stage);
+        if (stage != INITSTAGE_LAST) return;
+        for (bool mld : {false, true}) {
+            auto ip = makeShared<Ipv6Header>();
+            ip->setSrcAddress(Ipv6Address("fe80::1"));
+            ip->setDestAddress(Ipv6Address(mld ? "ff02::16" : "ff02::2"));
+            ip->setProtocolId(IP_PROT_IPv6EXT_HOP);
+            ip->setPayloadLength(B(mld ? 32 : 16));
+            auto hop = makeShared<Ipv6HopByHopOptionsHeader>();
+            hop->setNextHeaderProtocol(IP_PROT_IPv6_ICMP);
+            Ptr<Icmpv6Header> icmp;
+            if (mld) {
+                auto report = makeShared<MldReport>();
+                report->setMulticastAddress(Ipv6Address("ff02::1234"));
+                icmp = report;
+            }
+            else icmp = makeShared<Ipv6RouterSolicitation>();
+            icmp->setChecksumMode(CHECKSUM_COMPUTED);
+            Packet packet("computed-control", ip);
+            packet.insertAtBack(hop); packet.insertAtBack(icmp);
+            ASSERT(datagramPostRoutingHook(&packet) == ACCEPT);
+            auto completed = packet.peekDataAt<Icmpv6Header>(B(48));
+            // Independent one's-complement pseudo-header + literal control bytes.
+            ASSERT(completed->getChksum() == (mld ? 0x6ddb : 0x7d36));
+            packet.popAtFront(B(48));
+            auto addresses = packet.addTag<L3AddressInd>();
+            addresses->setSrcAddress(ip->getSrcAddress());
+            addresses->setDestAddress(ip->getDestAddress());
+            ASSERT(verifyChecksum(&packet));
+        }
+        std::cout << "Computed ND and MLD checksums after extension headers verified\n";
+    }
+};
+Define_Module(Check);
+}
+
+%file: test.ned
+import inet.networklayer.icmpv6.Icmpv6;
+simple Filter { @display("i=block/control"); }
+simple Check extends Icmpv6 { @class(Check); }
+network Test {
+    submodules:
+        filter: Filter;
+        icmp: Check { interfaceTableModule = ""; networkProtocolModule = "^.filter"; checksumMode = "computed"; }
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 1us
+
+%contains: stdout
+Computed ND and MLD checksums after extension headers verified
