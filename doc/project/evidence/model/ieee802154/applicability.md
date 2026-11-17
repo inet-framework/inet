@@ -118,6 +118,9 @@ ownership outcomes are implementation-contract obligations in step 1, not extra 
 
 ## PIB selection and service boundaries
 
+Concrete package-1b access, mutation, startup and reset choices are in the
+[selected MAC PIB contract](pib.md).
+
 The complete source rows of Tables 8-36, 8-37 and 12-2 are now recorded in the
 [catalog field domains](../../standard/ieee802154/catalog.md#pib-field-domains), including
 31 base MAC attributes, 22 functional-organization flags and 13 generic PHY attributes. The following is the M1 implementation selection;

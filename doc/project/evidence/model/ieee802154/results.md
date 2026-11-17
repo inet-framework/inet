@@ -388,3 +388,56 @@ actionable correctness findings: **18 PASS, 8 N/A, 0 FLAG, 0 QUESTION**. The rev
 resolution of the fixture ownership assertion defect and the passing final run. Full checklist
 and exact file hashes: `/tmp/802154-service-review.md`. Production MAC/PIB behavior and
 reset-interruption edge paths remain unverified; no exception-ledger or seal changes were needed.
+
+## Step-1b selected MAC PIB
+
+The [Ieee802154MacPib](../../../../../src/inet/linklayer/ieee802154/Ieee802154MacPib.h)
+[implementation](../../../../../src/inet/linklayer/ieee802154/Ieee802154MacPib.cc) owns the 43
+selected MAC attributes described in the [mutation contract](pib.md). It is a synchronous class,
+with no module, RNG, timers, callbacks or existing MAC caller. The future provider owns admission,
+request tracking, effective operational changes and notifications. No mutable PHY PIB is owned here.
+
+The implementation reuses the package-1a GET-confirm and SET-request values. GET returns canonical
+unsigned integers, exact Boolean variants or native extended-address values. SET rejects unknown
+names, read-only writes, invalid types, unsupported values and inconsistent BE pairs without
+changing any attribute. Startup overrides validate as a complete candidate, independent of order.
+Reset(false) retains all values; reset(true) restores standard/profile defaults using an injected
+DSN and retaining device identity and immutable PHY initialization context, without replaying
+startup overrides. Store reset alone is not evidence of an operational MLME reset.
+
+The architecture and normative lanes preceded a complete read-only implementation contract;
+the root validated that contract and separately authorized the three source/test files. Normative
+review confirmed the explicit local representations for unspecified coordinator context and the
+backoff range. Exact table/RESET extraction is in `/tmp/802154-1b-pib-evidence.md`; the tracked
+catalog and mutation contract preserve its relevant rules and locators.
+
+Validation from the repository root, debug mode, default enabled feature set:
+
+- `make MODE=debug -j8`: PASS, exit 0; explicitly compiled `Ieee802154MacPib.cc` and linked the
+  debug library. Log: `/tmp/802154-pib-build.log`.
+- `MPLCONFIGDIR=/tmp/802154-matplotlib inet_run_unit_tests -m debug -f 'Ieee802154MacPib_1\.test'`:
+  one executed case, PASS, exit 0. Log: `/tmp/802154-pib-unit.log`; normalized envelope:
+  `/tmp/802154-pib-verification.json`.
+- Scoped `check-architecture.sh` and `check-naming.sh` passed for
+  `src/inet/linklayer/ieee802154`; formatting and `git diff --check` passed.
+- Additional static C++ tooling was not run successfully: its compilation database was absent,
+  and the include checker stopped on a UTF-8 error in historical commit data. These are tooling
+  limits, not passing checks or failures of the focused unit case.
+
+The [unit case](../../../../../tests/unit/Ieee802154MacPib_1.test) independently enumerates 43
+expected defaults/access markers, checks exact-name lookup and canonical value types, rejected
+writes and state preservation, writable boundaries, unsupported capability enables, full-width
+identity, startup errors and BE ordering, CCA rounding, and reset retention/default restoration.
+Three draft fixture mistakes (a group-address identity, writing the unknown-coordinator sentinel,
+and a successful write inside a failure-only snapshot) were corrected before the first test run.
+
+This evidence establishes the compiled store's behavior only. Production service integration,
+NED parameter import, operational change notifications, PHY reset, and RNG stream/draw scheduling
+remain provider/composition work. Release compilation and simulation/fingerprint campaigns were
+not run. The nine normative protocol-check verdicts remain NOT_RUN.
+
+Independent review of the stable source/test change returned **11 PASS, 15 N/A, 0 FLAG,
+0 QUESTION**, with no actionable correctness findings. It independently reran the scoped
+architecture and naming checks. Exact file hashes and the full checklist are recorded in
+`/tmp/802154-pib-review.md`. Documentation links, seal-index consistency and whitespace checks
+also passed. No exception-ledger, source-seal or baseline changes were needed.

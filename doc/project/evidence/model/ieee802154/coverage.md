@@ -177,3 +177,17 @@ operational MCPS/MLME support, PIB validation, reset-interruption edge paths, pr
 integration or any of the nine normative protocol checks. Their verdicts remain NOT_RUN.
 Commands, intermediate fixture correction and limits are in
 [results.md](results.md#step-1a-mac-service-contracts).
+
+## Step-1b PIB evidence
+
+The [selected MAC PIB](pib.md) has one passing debug
+[unit case](../../../../../tests/unit/Ieee802154MacPib_1.test) that directly invokes the compiled
+store. It checks all 43 selected attribute defaults/access rules, type/domain rejection, failed
+write preservation, startup BE-pair validation, address identity, rounding and reset behavior.
+Independent review returned 11 PASS, 15 N/A, 0 FLAG and 0 QUESTION.
+
+This closes package 1b at the standalone store boundary. It is supporting evidence for
+IEEE802154-C-SERVICE, not execution of that protocol check: no production service provider,
+NED import, radio mutation, notifications or full MLME reset is exercised. The normative
+check verdicts remain NOT_RUN. Commands and limitations are in
+[results.md](results.md#step-1b-selected-mac-pib).
