@@ -1,0 +1,100 @@
+%description:
+The actual MeshPowerSave NED signal declaration accepts and delivers each
+service-period outcome payload when OMNeT++ signal checking is enabled. This
+isolated metadata test does not initialize the power policy or exercise RF.
+
+%file: MeshPowerSignalTest.cc
+#include "inet/linklayer/ieee80211/mesh/MeshPowerSave.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace mesh_power_signal_test {
+class Driver : public cSimpleModule, public cListener {
+    struct SignalCheckGuard {
+        bool previous = cComponent::getCheckSignals();
+        SignalCheckGuard() { cComponent::setCheckSignals(true); }
+        ~SignalCheckGuard() { cComponent::setCheckSignals(previous); }
+    };
+    struct Copy {
+        MacAddress peer;
+        MeshPeriodDirection direction;
+        MeshPeriodOutcome outcome;
+        int64_t openingId;
+        simtime_t openingTime;
+    };
+    std::vector<Copy> received;
+    int deliveryAttempts = 0;
+    void initialize() override { scheduleAt(simTime(), new cMessage("check")); }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        ++deliveryAttempts;
+        auto fact = check_and_cast<MeshPowerSave::PeriodOutcome *>(object);
+        received.push_back({fact->peer, fact->direction, fact->outcome, fact->openingId, fact->openingTime});
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto holder = getParentModule()->getSubmodule("holder");
+        auto policy = check_and_cast<MeshPowerSave *>(cModuleType::get("inet.linklayer.ieee80211.mesh.MeshPowerSave")->create("policy", holder));
+        policy->finalizeParameters();
+        policy->subscribe(MeshPowerSave::meshServicePeriodOutcomeSignal, this);
+        const MacAddress peer("02:00:00:00:00:05");
+        const bool previousChecking = cComponent::getCheckSignals();
+        {
+            SignalCheckGuard guard;
+            for (auto direction : {MeshPeriodDirection::OWNER, MeshPeriodDirection::RECIPIENT})
+                for (auto outcome : {MeshPeriodOutcome::CONFIRMED, MeshPeriodOutcome::WITHDRAWN, MeshPeriodOutcome::FAILED}) {
+                    int64_t id = 100 + received.size();
+                    simtime_t time = SimTime(id, SIMTIME_MS);
+                    MeshPowerSave::PeriodOutcome fact(peer, direction, outcome, id, time);
+                    policy->emit(MeshPowerSave::meshServicePeriodOutcomeSignal, &fact);
+                    ASSERT(received.size() == size_t(id - 99));
+                    const auto& copy = received.back();
+                    ASSERT(copy.peer == peer && copy.direction == direction && copy.outcome == outcome
+                            && copy.openingId == id && copy.openingTime == time);
+                }
+            cObject unrelated;
+            bool rejected = false;
+            try { policy->emit(MeshPowerSave::meshServicePeriodOutcomeSignal, &unrelated); }
+            catch (const cRuntimeError&) { rejected = true; }
+            ASSERT(rejected && received.size() == 6 && deliveryAttempts == 6);
+        }
+        ASSERT(cComponent::getCheckSignals() == previousChecking);
+        ASSERT(received.size() == 6);
+        policy->unsubscribe(MeshPowerSave::meshServicePeriodOutcomeSignal, this);
+        // Deleting the holder supplies the whole-subtree preDelete root; the
+        // intentionally uninitialized policy must not run isolated teardown.
+        holder->deleteModule();
+        EV << "mesh power outcome signal: PASS six payloads and wrong type rejected\n";
+        endSimulation();
+    }
+};
+Define_Module(Driver);
+}
+
+%file: test.ned
+simple SignalDriver { parameters: @class(::mesh_power_signal_test::Driver); }
+module SignalHolder {}
+network MeshPowerSignalTest {
+    submodules:
+        holder: SignalHolder;
+        driver: SignalDriver;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MeshPowerSignalTest
+seed-set = 0
+sim-time-limit = 1s
+cmdenv-express-mode = false
+
+%contains: stdout
+mesh power outcome signal: PASS six payloads and wrong type rejected
+
+%not-contains: stdout
+it doesn't own
+
+%not-contains: stdout
+undisposed object:
+
+%not-contains: stderr
+Error:

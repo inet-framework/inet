@@ -1,0 +1,3 @@
+Mesh power providers observe exchange resolution and recipient responses
+
+IMeshPowerSave adds explicit service-period planning, selected-set admission, actual-start authorization, accepted-member control and copied final-resolution/recipient-response methods. Replacement power providers must implement these contracts; the built-in MeshPowerSave provides the complete engine. Local recipient-response tags are internal observation proof and do not add wire fields or a QoS Null sequence epoch. See the development migration guide for adapter changes.

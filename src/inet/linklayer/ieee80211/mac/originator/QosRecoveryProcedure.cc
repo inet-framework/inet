@@ -13,6 +13,69 @@
 namespace inet {
 namespace ieee80211 {
 
+void QosRecoveryProcedure::beginBlockAckRecovery(MacAddress peer, Tid tid, const std::vector<Packet *>& originals)
+{
+    Enter_Method("beginBlockAckRecovery");
+    auto& recovery = blockAckRecoveries[{peer, tid}];
+    for (auto original : originals)
+        recovery.covered.emplace(original->getId(), getRetryKey(original->peekAtFront<Ieee80211DataHeader>()));
+}
+
+void QosRecoveryProcedure::cancelBlockAckRecovery(MacAddress peer, Tid tid)
+{
+    Enter_Method("cancelBlockAckRecovery");
+    blockAckRecoveries.erase({peer, tid});
+}
+
+std::set<int64_t> QosRecoveryProcedure::finishBlockAckRecovery(MacAddress peer, Tid tid)
+{
+    Enter_Method("finishBlockAckRecovery");
+    std::set<int64_t> covered;
+    auto it = blockAckRecoveries.find({peer,tid});
+    if (it != blockAckRecoveries.end()) {
+        for (const auto& entry : it->second.covered) covered.insert(entry.first);
+        blockAckRecoveries.erase(it);
+    }
+    return covered;
+}
+
+bool QosRecoveryProcedure::hasBlockAckRecovery(MacAddress peer, Tid tid) const
+{
+    return blockAckRecoveries.count({peer, tid}) != 0;
+}
+
+std::string QosRecoveryProcedure::describeBlockAckRecoveries() const
+{
+    std::ostringstream out;
+    for (const auto& entry : blockAckRecoveries) {
+        out << entry.first.first << "/TID=" << int(entry.first.second) << " expirations=" << entry.second.failures << " covered=";
+        for (const auto& covered : entry.second.covered) out << covered.first << " ";
+        out << "\n";
+    }
+    return out.str();
+}
+
+std::set<int64_t> QosRecoveryProcedure::blockAckRecoveryExpired(MacAddress peer, Tid tid, const std::set<int64_t>& live)
+{
+    Enter_Method("blockAckRecoveryExpired");
+    auto it = blockAckRecoveries.find({peer, tid});
+    if (it == blockAckRecoveries.end())
+        return {};
+    auto& recovery = it->second;
+    for (auto covered = recovery.covered.begin(); covered != recovery.covered.end();)
+        if (!live.count(covered->first)) covered = recovery.covered.erase(covered); else ++covered;
+    if (recovery.covered.empty()) {
+        blockAckRecoveries.erase(it);
+        return {};
+    }
+    if (++recovery.failures < shortRetryLimit)
+        return {};
+    std::set<int64_t> result;
+    for (const auto& covered : recovery.covered) result.insert(covered.first);
+    blockAckRecoveries.erase(it);
+    return result;
+}
+
 Define_Module(QosRecoveryProcedure);
 
 inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
@@ -42,6 +105,7 @@ void QosRecoveryProcedure::initialize(int stage)
         WATCH(stationShortRetryCounter);
         WATCH(shortRetryCounter);
         WATCH(longRetryCounter);
+        WATCH_EXPR("blockAckRecoveries", describeBlockAckRecoveries());
     }
 }
 
@@ -68,7 +132,11 @@ void QosRecoveryProcedure::incrementStationLrc()
 QosRecoveryProcedure::RetryKey QosRecoveryProcedure::getRetryKey(const Ptr<const Ieee80211DataHeader>& header) const
 {
     // IEEE Std 802.11-2024, 10.23.2.12.1: disposal resolves only this DATA's retry state.
-    return {header->getReceiverAddress(), {header->getTid(),
+    // Null uses SNS5 rather than DATA SNS2 (Table 10-5), and its fixed SC
+    // must not alias an independently retained DATA retry/covered original.
+    auto tid = header->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(header) ?
+        MESH_NULL_RETRY_NAMESPACE : header->getTid();
+    return {header->getReceiverAddress(), {tid,
         SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
 }
 
@@ -169,6 +237,14 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
 void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& header)
 {
     auto id = getRetryKey(header);
+    if (id.second.first != MESH_NULL_RETRY_NAMESPACE) {
+        auto procedure = blockAckRecoveries.find({header->getReceiverAddress(), header->getTid()});
+        if (procedure != blockAckRecoveries.end()) {
+            for (auto it = procedure->second.covered.begin(); it != procedure->second.covered.end();)
+                if (!(it->second < id) && !(id < it->second)) it = procedure->second.covered.erase(it); else ++it;
+            if (procedure->second.covered.empty()) blockAckRecoveries.erase(procedure);
+        }
+    }
     // RTS failure can leave an SRC entry even when the protected DATA uses an LRC entry.
     shortRetryCounter.erase(id);
     longRetryCounter.erase(id);
@@ -193,6 +269,12 @@ void QosRecoveryProcedure::dataFrameTransmissionFailed(Packet *packet, const Ptr
         incrementStationSrc();
         incrementCounter(failedHeader, shortRetryCounter);
     }
+}
+
+void QosRecoveryProcedure::ampduMemberTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
+{
+    // Per-MPDU retry state is independent of the one PPDU contention outcome.
+    incrementCounter(header, packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter);
 }
 
 //

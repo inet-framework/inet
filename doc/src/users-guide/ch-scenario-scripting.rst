@@ -99,3 +99,39 @@ Short scripts can also be written inline:
 .. code-block:: ini
 
    *.scenarioManager.script = xml("<x><shutdown t='2s' module='Router2'/></x>")
+
+Changing a mesh peer's power mode
+---------------------------------
+
+An enabled mesh power policy accepts ``set-mesh-power-mode`` through
+``ScenarioManager``. Point ``module`` at the policy submodule, and give
+``peer`` as the established peer's individual MAC address. For example,
+after assigning the peer interface this address in the configuration:
+
+.. code-block:: ini
+
+   *.peer.wlan[0].typename = "Ieee80211MeshInterface"
+   *.relay.wlan[0].typename = "Ieee80211MeshInterface"
+   *.peer.wlan[0].address = "0A-AA-00-00-00-02"
+   *.peer.wlan[0].powerSave = true
+   *.relay.wlan[0].powerSave = true
+   *.scenarioManager.script = xmldoc("scenario.xml")
+
+.. code-block:: xml
+
+   <scenario>
+       <at t="1s">
+           <set-mesh-power-mode module="relay.wlan[0].powerSavePolicy"
+                                peer="0A-AA-00-00-00-02" mode="light-sleep"/>
+       </at>
+   </scenario>
+
+The mode is exactly ``active``, ``light-sleep``, or ``deep-sleep``. The
+command requests a mode using the policy's existing peer transition: a
+lower-activity mode commits when its indication is acknowledged; a request
+for higher activity commits locally immediately. The interface's
+``powerSave`` parameter defaults to false. Enable it on peers that must honor
+the power-save exchanges, including peers that remain in ACTIVE mode. The
+command reports an error if
+the policy is disabled or down, the peer is not established, or either
+attribute is missing or invalid. It does not retain requests for later peers.

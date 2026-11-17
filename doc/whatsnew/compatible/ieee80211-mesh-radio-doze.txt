@@ -1,0 +1,5 @@
+Mesh awake-window and radio-doze coordination
+
+The intermediate mesh power model now coordinates real sleep and TRANSCEIVER wake with management-owned beacon timing, advertised awake windows and group delivery. Local windows start at actual timing-frame completion, and qualifying group transmissions extend PostAwakeDuration from their actual completion. Public switching observations provide a strict-before-TBTT wake lead. Deep maintenance uses a bounded ten-local-period, lowest-peer-address model policy.
+
+The coordinator uses the existing retained-copy deferred-start contract. A missed pre-air start preserves live originals without spending retry budgets or publishing payload-error/path-failure samples. Production activation remains gated until the complete mesh service-period engine is available.

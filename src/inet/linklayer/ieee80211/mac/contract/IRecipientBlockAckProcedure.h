@@ -23,6 +23,9 @@ class INET_API IRecipientBlockAckProcedure
 
     virtual void processReceivedBlockAckReq(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) = 0;
     virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) = 0;
+    // Accepted DATA supplies the implicit BAR context, after all members were recorded.
+    virtual void processReceivedAmpdu(Packet *elicitingPacket, const Ptr<const Ieee80211DataHeader>& header,
+        RecipientBlockAckAgreement *agreement, simtime_t responseDuration, IProcedureCallback *callback) = 0;
 };
 
 } // namespace ieee80211

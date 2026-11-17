@@ -1,0 +1,142 @@
+%description:
+Codec-boundary mesh action test. Fresh complete MAC/action octets pass through
+the registered production MAC dissector and body serializers. The harness emits
+their decoded chunks for typed observations. Valid RANN, reserved flags and an
+unknown optional IE are accepted; truncated tail and inconsistent PREQ count
+mark the whole body incorrect while preserving the fixed action header. This
+fixture does not claim radio, peering or HWMP state-machine operation.
+
+%file: MeshWireFormats.cc
+#include "WifiTestSupport.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::protocoltest;
+
+class MeshWireCollector : public ProtocolDissector::ICallback
+{
+  public:
+    Packet decoded{"mesh-action"};
+    int chunks = 0;
+    bool incorrect = false;
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override { incorrect = true; }
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *) override {
+        decoded.insertAtBack(chunk);
+        chunks++;
+    }
+    void dissectPacket(Packet *, const Protocol *) override {
+        throw cRuntimeError("Mesh action was not decoded as a typed mesh body");
+    }
+};
+
+class MeshWireDriver : public cSimpleModule
+{
+    int caseIndex = 0;
+  protected:
+    void initialize() override {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("decode"));
+    }
+    void handleMessage(cMessage *message) override {
+        // Figure 9-600, RANN: EID=126, Length=21, little-endian sequence/interval/metric.
+        std::vector<uint8_t> body = {
+            0x82,0x25, 0,1,4, 4,3,2,1, 2,0,0,0,0,1, 8,7,6,5,
+            0x10,0,0,0, 0x20,0,0,0, 1, 5, 2,0,0,0,0,3, 12,11,10,9,
+            0x83,0x1f, 0,2,3, 2,0,0,0,0,3, 12,11,10,9, 0x10,0,0,0,
+            0x20,0,0,0, 2,0,0,0,0,1, 8,7,6,5,
+            0x84,0x0f, 5,1, 0, 2,0,0,0,0,3, 12,11,10,9, 0x3f,0,
+            0x7e,0x15, 0,1,4, 2,0,0,0,0,1, 4,3,2,1, 0x10,0,0,0, 0x20,0,0,0};
+        if (caseIndex == 1)
+            body[2] = 0xb8; // reserved PREQ bits do not alter operational flags
+        if (caseIndex == 2)
+            body.insert(body.begin(), {0xdd,3,1,2,3});
+        if (caseIndex == 3)
+            body.insert(body.end(), {0x83,31,0}); // valid prefix followed by truncation
+        if (caseIndex == 4)
+            body = {0x82,0x25, 0,1,4, 4,3,2,1, 2,0,0,0,0,1, 8,7,6,5,
+                0x10,0,0,0, 0x20,0,0,0, 2, 5, 2,0,0,0,0,3, 12,11,10,9};
+        if (caseIndex == 5)
+            body.clear();
+        // 24-octet Action MAC header + Mesh category (13) / HWMP action (1).
+        std::vector<uint8_t> bytes = {
+            0xd0,0, 0,0, 2,0,0,0,0,2, 2,0,0,0,0,1,
+            0xff,0xff,0xff,0xff,0xff,0xff, 0x10,0, 13,1};
+        bytes.insert(bytes.end(), body.begin(), body.end());
+        bytes.insert(bytes.end(), {0,0,0,0}); // FCS trailer retained by dissection
+        Packet wire("mesh-wire", makeShared<BytesChunk>(bytes));
+        MeshWireCollector collector;
+        auto dissector = ProtocolDissectorRegistry::getInstance().getProtocolDissector(&Protocol::ieee80211Mac);
+        dissector->dissect(&wire, &Protocol::ieee80211Mac, collector);
+        ASSERT(collector.chunks == (caseIndex == 5 ? 2 : 3) && wire.getDataLength() == b(0));
+        if (caseIndex == 5)
+            ASSERT(collector.incorrect);
+        ASSERT(collector.decoded.getDataLength() == B(bytes.size()));
+        emit(registerSignal("packetReceivedFromLower"), &collector.decoded);
+        if (++caseIndex < 6)
+            scheduleAt(simTime() + SimTime(1, SIMTIME_US), message);
+        else
+            delete message;
+    }
+};
+Define_Module(MeshWireDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_wire_formats)
+{
+    auto valid = [](const MatchContext& c) {
+        auto header = c.event.packet->peekAtFront<Ieee80211MeshActionFrame>();
+        auto body = hwmpBody(c.event);
+        return header->getChunkLength() == B(26) && header->getCategory() == MESH_ACTION &&
+            header->getMeshAction() == MESH_HWMP_PATH_SELECTION && body && body->isCorrect() &&
+            body->getPreqsArraySize() == 1 && body->getPrepsArraySize() == 1 &&
+            body->getPerrsArraySize() == 1 && body->getRannsArraySize() == 1 &&
+            body->getPreqs(0).getTargets(0).sequenceNumber == 0x090a0b0c &&
+            body->getPreps(0).originatorSequenceNumber == 0x05060708 &&
+            body->getPerrs(0).getDestinations(0).reasonCode == 63 &&
+            body->getRanns(0).sequenceNumber == 0x01020304;
+    };
+    auto invalid = [](const MatchContext& c) {
+        auto body = hwmpBody(c.event);
+        return c.event.packet->peekAtFront<Ieee80211MeshActionFrame>()->isCorrect() && body && body->isIncorrect();
+    };
+    return ProtocolTest("mesh_wire_formats")
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent(valid).describe("literal RANN bytes decode").within(0.002))
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent(valid).describe("reserved flags are ignored").within(0.00001))
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent(valid).describe("unknown optional element is ignored").within(0.00001))
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent(invalid).describe("truncated tail invalidates entire body").within(0.00001))
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent(invalid).describe("inconsistent target count is rejected").within(0.00001))
+        .once(on("driver").signal("packetReceivedFromLower").assertEvent([](const MatchContext& c) {
+            return c.event.packet->getDataLength() == B(30) &&
+                c.event.packet->peekAtFront<Ieee80211MeshActionFrame>()->isCorrect();
+        }).describe("empty action body is rejected without losing its identity").within(0.00001));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+simple MeshWireDriver {
+    parameters:
+        @class(::MeshWireDriver);
+        @signal[packetReceivedFromLower](type=inet::Packet);
+}
+network Test {
+    submodules:
+        tester: ProtocolTester;
+        driver: MeshWireDriver;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+seed-set = 0
+sim-time-limit = 2ms
+*.tester.testName = "mesh_wire_formats"
+**.vector-recording = false
+
+%contains: stdout
+PROTOCOLTEST mesh_wire_formats: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_wire_formats: FAIL

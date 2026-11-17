@@ -1,0 +1,787 @@
+# HWMP mesh — implementation and verification ledger
+
+> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [Mesh features](../../protocol/wifi/features.md), [Mesh checks](../../protocol/wifi/checks.md), [Implementation plan](../../../../../plan/done/ieee80211-hwmp.md)
+
+This ledger separates selected behavior, implementation work and executed evidence. Implementation was requested on 2026-11-10 against source `91219b0fa7d2794ee67ac8a3dd45c3a09cfc45b0`. The C1 evidence documents define the selected profile; they do not establish runtime support. All planned behavior checks below are `NOT_RUN` until their named tests exist, select nonzero cases and execute against the matching library. No fingerprint or expected-result update is authorized.
+
+## Check-to-test map
+
+Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer documents travel with the behavior commit. The feature map and catalog contain the normative requirements; this table is the implementation-side mapping.
+
+| Check suffix (`WIFI-CHECK-`) | Planned protocol test | Commit | Reviewer document | Verdict |
+| --- | --- | --- | --- | --- |
+| WIRE | MeshWireFormats.test | C2 | hwmp-c2-wire.md | PASS at codec boundary; live consumers remain later checks |
+| PEERING | MeshPeering.test | C3 | hwmp-c3-peering.md | PASS for selected OFDM profiles |
+| PEERING-FAILURE | MeshPeeringFailure.test | C3 | hwmp-c3-peering.md | PASS |
+| BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | PASS |
+| FORWARDING | MeshForwarding.test | C4 | hwmp-c4-forwarding.md | PASS with fixture path provider |
+| GROUP-FORWARDING | MeshGroupForwarding.test | C4 | hwmp-c4-forwarding.md | PASS |
+| AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md; hwmp-h2-amsdu.md; hwmp-h3-ampdu.md | PASS for OFDM, HT/VHT A-MSDU and nested A-MPDU, nine configurations; sleep remains a later stage |
+| DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | PASS with production HWMP and both metric IDs |
+| PATH-SELECTION | HwmpPathSelection.test | C6, H3 | hwmp-c6-discovery.md; hwmp-h3-ampdu.md | PASS, six configurations including production aggregation costs for both metric IDs |
+| DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | PASS |
+| PATH-ERROR | HwmpPathError.test | C7 | hwmp-c7-errors.md | PASS |
+| REDISCOVERY | HwmpRediscovery.test | C7 | hwmp-c7-errors.md | PASS with actual terminal DATA failure and alternate relay |
+| ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
+| RANN | HwmpRann.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
+| ROOT-COEXISTENCE | HwmpRootCoexistence.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
+| HT-NEGOTIATION | MeshHtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 16 configurations |
+| VHT-NEGOTIATION | MeshVhtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 64 configurations |
+| HIGH-THROUGHPUT-DATA | MeshHighThroughputData.test | H1 | hwmp-h1-ht-vht.md | PASS, 34 configurations |
+| AMSDU | MeshAmsdu.test | H2 | hwmp-h2-amsdu.md | PASS, 104 configurations |
+| AMPDU-BLOCK-ACK | MeshAmpduBlockAck.test | H3 | hwmp-h3-ampdu.md | PASS, 128 configurations |
+| AGGREGATION-LIMITS | MeshAggregationLimits.test | H3 | hwmp-h3-ampdu.md | PASS, 64 configurations |
+| POWER-MODES | MeshPowerModes.test | P1 | hwmp-p1-power-modes.md | PASS, 19 physically awake configurations; actual doze remains a later stage |
+| TIM-DTIM | MeshTimDtim.test | P1 | hwmp-p1-power-modes.md | PASS, eight physically awake configurations |
+| AWAKE-WINDOW | MeshAwakeWindow.test | P2 | hwmp-p2-doze.md | PASS, 10 native cases; full P2 reconciliation below |
+| LIGHT-SLEEP | MeshLightSleep.test | P2 | hwmp-p2-doze.md | PASS, 16 native cases; service periods remain P3 |
+| DEEP-SLEEP | MeshDeepSleep.test | P2 | hwmp-p2-doze.md | PASS, 4 native cases including early-reference cadence |
+| SERVICE-PERIOD | MeshPeerServicePeriod.test | P3 | hwmp-p3-service-periods.md | PASS, 47 native cases on the corrected P3 model, including actual awake-window crossing and group mode indication |
+| POWER-RECOVERY | MeshPowerSaveRecovery.test | P3 | hwmp-p3-service-periods.md | PASS, 20 native cases covering retry accounting, collision notification order, supersession, disposal, DELBA and lower-cap fallback |
+| POWER-HT-VHT | MeshPowerSaveHtVht.test | P3 | hwmp-p3-service-periods.md | PASS, 29 native cases including rooted sleeping-relay delivery, genuine DATA terminal/PERR feedback and bounded expiry |
+
+The first frozen P3 retained protocol campaign failed in four earlier-stage
+power fixtures. Its immutable failed record and the corrected eight-file
+campaign remain separate; see the P3 evidence below. The corrected scope
+passes153 native runs. The other44 historical files retain their recorded
+model and five known failure outcomes. This is a mixed-model composition;
+the complete same-model final union remains C9 work.
+
+Supplementary cases are `tests/unit/Ieee80211MeshSerializer_1.test` (PASS at C2), `tests/unit/Ieee80211AirtimeMetric_1.test` (PASS at C5), and the planned `tests/module/Ieee80211MeshLifecycle_1.test` (NOT_RUN). Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart.
+
+The shared H0 prerequisite additionally uses `tests/module/RadioMedium_InterferenceObservation_1.test` (PASS, six configurations). It verifies a generic medium observation promise, not an IEEE protocol requirement.
+
+R3's generic recipient-observation prerequisite adds `tests/module/Ieee80211RecipientMemberObservation_1.test` (PASS, ten native scenarios). It verifies the synchronous member/duplicate observation boundary before deletion or payload reordering, including permitted agreement withdrawal; it adds no service-period interpretation or IEEE wire requirement. Direct duplicate/reordering/adapter controls and the separate inherited-hygiene comparison are recorded below.
+
+The T0 shared PHY timing prerequisite adds `tests/unit/Ieee80211HtVhtTiming_1.test` and `tests/module/Ieee80211HtVhtTransmissionTiming_1.test`, and corrects the existing part-duration unit's composition assumption. Focused literal/actual-transmission and final accumulated 24-unit/22-module campaigns pass; the latter covers 109 module simulations.
+
+## Model decisions
+
+These are selected modeling policies, not requirements attributed to IEEE. The [plan](../../../../../plan/done/ieee80211-hwmp.md) defines ownership and the complete implementation contract. Defaults are implemented in NED with units; this ledger records their rationale and evidence limits.
+
+| Decision | Selected policy | Reason and boundary |
+| --- | --- | --- |
+| Profile | Open, one fixed channel, one interface, endpoints only, LLC/SNAP, EPD disabled | Bounded mesh profile; neither portals nor proxy addressing is claimed |
+| PHY | Fixed legal per-peer tuple; RTS, fragmentation and adaptive rate control disabled | Enables reproducible directional airtime and capability checks |
+| Wider channelization | Bounded contiguous 5-GHz allocations using primary channels 36–64, explicit 40-MHz pairs, 80-MHz centers 42/58 and 160-MHz center 50 | Narrower PPDUs use the configured primary hierarchy; legacy catalog indices retain their existing meaning |
+| Wider analog model | Dimensional radio/medium; retain scalar 20-MHz OFDM reference | Off-center partial interference must be modeled rather than ignored |
+| Duplicate response decoding | Decode the primary 20-MHz copy, preserving split power and full-width occupied interference | No diversity combining or best-copy selection; decoded SNIR/power and occupied width describe different facts |
+| Fixed-width access | Primary CCA for contention, required secondary idle history before wider TXOP admission | Unavailable width defers/recontends with current CW and no retry/error sample; no dynamic narrowing |
+| Wider environment | Externally permitted/available allocation, regulatory/DFS/startup selection satisfied and compatible unprotected neighborhood | No radar, country policy, startup channel-selection or incompatible-OBSS protection mechanism is claimed |
+| Wider CCA visibility | Disable listening/MAC-address delivery filters and retain interference-range coverage | Idle history requires relevant energy start/end observations; startup/wake/unobserved intervals reset history rather than granting credit |
+| VHT operation signaling | Modern contiguous signaling with uniform NSS support across widths | Deprecated width-2 and extended-NSS unequal-across-width encodings are outside the selected profile |
+| Fixed tuple input | Optional family/MCS/GI with existing data bandwidth/NSS/bitrate; reject ambiguous or conflicting explicit tuples | Uses authoritative catalog entries without invented VHT mode names; defaults preserve old selection |
+| HT/VHT membership selectors | Omit on transmit under the non-AP permission; accept supported received requirements subject to profile/basic sets | Selectors express membership requirements, not capability flags or selector-list equality |
+| VHT device capability | Mandatory device20/40/80 baseline independent of operation; optional160 capability defaults disabled | Capability cannot exceed physical catalog support; current allocation separately bounds transmissions |
+| Short GI activation | Width-specific peer Rx support plus independent local Tx enablement | Advertising local Rx SGI does not enable local Tx SGI |
+| Metric selection | ID 1 for OFDM; ID 2 default for HT/VHT; explicit ID 1 comparison allowed mesh-wide | Follows high-rate recommendation without changing metric ID per peer |
+| Pending MSDUs | Shared capacity 64 packets and 256 KiB; five-second per-packet wait; drop new on overflow | Bounds memory and waiting; count existing LLC payload bytes before adding mesh encapsulation |
+| Duplicate retention | One second; seed locally originated group identity | Bounded duplicate history, not infinite duplicate exclusion |
+| Transit A-MSDU | Preserve constituent list and mesh forwarding-unit identity; do not split/merge transit units | Conservative endpoint-profile policy, avoiding unprovided identity rewriting rules |
+| Local A-MSDU formation | Form only from uncommitted local HT/VHT sources; retain lower-family plain DATA and mandatory standalone non-HT reception | Local transmit policy is separate from required receive support |
+| VHT final alignment at negotiated cap | Bound the last pre-EOF subframe's content end by the cap and structural prefix by roundUp4(cap); allow excess only as its final alignment | Explicit resolution of construction/capability wording tension: cap8191 admits content8191/prefix8192, rejects content8192/prefix8192; no new wire field or universal plus-three allowance |
+| Sequence comparison | Unsigned difference strictly between zero and 2^31 is newer; exact half-range unordered | Avoids signed overflow and chooses an explicit resolution of ambiguous serial ordering |
+| Target reply sequence | Known requested sequence is the increment baseline only if serial-newer; otherwise use own sequence | Resolves the unordered half-range locally; USN=1 reserved bytes never supply a baseline |
+| Received PREQ identities | Received-Lifetime retention, capacity 4096; drop new identity before mutation when full | Bounds history without silently evicting an unexpired identity; no infinite duplicate-history guarantee |
+| HWMP pacing anchor | Successful ownership handoff to management | Type-3 service request has no confirmation; this does not guarantee actual PPDU spacing after contention or sleep buffering |
+| Self-destination admission | Admit reverse next hop on target PREP generation and actual transmitter on accepted local-originator PREP reception | Derived integration bookkeeping for required final-destination admission, including validation-only replies; no learned route to self |
+| Reflected control | Reject received PREQ.originator=self and PREP.target=self before learning | Explicit no-self-learning policy, preserving node-owned sequence authority; normal target/reply cases remain supported |
+| PERR reason interpretation | Nonzero NO-FORWARDING accepts equal/newer after stale rejection; DESTINATION-UNREACHABLE requires newer | Explicit reading of the source's conjunction structure; zero is special only for NO-FORWARDING |
+| Deferred PERRs | One node-global handoff interval; exact semantic-key deduplication and recipient/TTL grouping, at most 19 distinct destinations/action | Immediate invalidation is separate; no deferred re-increment or per-recipient rate-limit bypass |
+| Deferred PERR retention | Snapshot precursor expiry for path errors; established transmitter dependency for unknown transit; prune unsent obsolete errors on repair | Values retain no packet ownership; management inactivity/owner cleanup clears volatile notifications while pacing history survives |
+| Proactive PREP sequence | Increment the local sequence before each locally generated proactive PREP; forwarded PREPs retain their sequence | Explicit interpretation of 14.11.8.3 with Table 14-21, whose broadcast-response update is ambiguous; preserves fresh reverse information without an equal-sequence lifetime exception |
+| Flag-zero root invitation | Retain the latest applicable invitation and reply when local source demand exists, in either event order | A successful local response handoff suppresses repetition for that invitation; this is not knowledge of the root's cache |
+| Root interval authority | Accepted RANN Interval updates one shared current scalar in wire order; own advertisements use it and forwarded announcements retain their received value | Configuration supplies the initial value; confirmation interval remains separate |
+| Root Action pacing | One station-wide RANN gate and one station-wide confirmation gate, alongside per-target PREQ history | Batch only equal actual receivers, with deterministic scheduling between receivers; no per-root bypass |
+| Root confirmation and source work | One per-target procedure with independent purposes; a confirmation counts as a source attempt only when source work is due | Source cancellation or expiry cannot cancel independent root confirmation or consume extra source attempts |
+| RANN waiting | Wait for usable forwarding information, forwarding/TTL eligibility and sending interval only | No additional random forwarding delay is selected; RANN alone does not establish a usable data path |
+| Mesh Action packing | At most 2302 encoded HWMP IE bytes after Category and Action | The selected non-HT management body limit is 2304 bytes including those two fields; PHY length limits are an additional bound |
+| Encoded cost | Ceiling conversion; finite clamp to [1, UINT32_MAX]; wide saturating path addition | Prevents cost wraparound from favoring a prohibitively expensive path |
+| Error samples | Per-direction `ef = 7/8 * ef + 1/8 * sample`, initially zero | Actual unicast payload ACK/BA success=0; genuine response timeout or matching BA-zero failure=1 per transmitted MPDU; excludes holds/internal collision/group/management/QoS Null |
+| Aggregate terminal recovery | Distinct DATA_RETRY_LIMIT and BAR_WAIT_LIMIT notifications after ordered samples and live-original cleanup | Matching BA-zero retry exhaustion is delivery failure, not terminalTimeout; coalesce simultaneous DATA exhaustions per peer/TID/exchange, never resample through BAR-only recovery |
+| Error approximation | Use traffic samples to estimate nominal-frame corruption | Assumes size-independent frame-error probability; not a claim of measurement for every size |
+| Aggregation samples | Per-direction `n = 7/8 * n + 1/8 * m`, initially one, fractional | One count per actually completed payload PPDU, including retries; nested constituents counted as MSDUs; no time decay |
+| ID 1 aggregation | Formula always uses n=1 | Aggregation observation does not change this metric's definition |
+| Metric overhead | AC_BE AIFS, mean initial contention, selected preamble/header, SIFS and legal ACK/BA duration | Approximation of channel cost, not per-packet contention or sleep waiting time |
+| Incoming Link Metric Report | Answer requests; do not overwrite local outgoing sample estimator | Standard permits an update but does not require one; local direction/sample authority stays explicit |
+| Estimate reset | Peer closure or accepted PHY tuple change resets ef/n; aggregation permission change resets n only | Samples belong to the current relationship and transmission profile |
+| Deep-sleep maintenance | Every ten local beacon periods, listen to established peer with lowest MAC address; invalid reference holds awake for reacquisition | Standard leaves deep-sleep synchronization algorithm local |
+| Wake lead | Public radio switching duration plus configured nonnegative margin and one kernel tick | The strict-before guard gives readiness before the required TBTT, including zero-duration switching; insufficient useful sleep budget keeps the radio awake |
+| Awake-window extension | Actual group PPDU start before the later original-AW/PostAW end qualifies for actual-completion plus nominal advertised AW duration | Selected rolling interpretation of 14.15.6, which supplies no recurrence formula. A straddling completion qualifies, an exact-endpoint start does not. Pending DTIM group delivery independently stays awake and eligible after both timed ends, without restarting the timer merely because work remains |
+| Mode transition trigger | Explicit peer policy; the selected individual QoS Null advertises a pending lower mode and its ACK commits it | Other individual DATA/MMPDUs advertise the committed mode, so an unrelated ACK cannot confirm the pending transition. Higher activity commits immediately; no second indication-history table |
+| Power-save pending queues | 64 frames and 256 KiB per AC, shared across peers; reject the new arrival on overflow | Existing HCF queue byte accounting; separate from forwarding's unresolved-destination capacity |
+| Mesh control wait | Five-second maximum queued wait for mesh MMPDUs and transition QoS Null, retained across retries | Model bound owned by existing HCF lifetime handling; expiry is not a payload error or terminal-link fact |
+| Native QoS Null endpoints | Individual A3=peer/A4=local transmitter; group A3=local transmitter | Direct-link completion of underdescribed payload-free endpoint fields, without multihop meaning or a Null-specific normative endpoint claim |
+| Mesh QoS Null sequence | Fixed SNS5 sequence zero and fragment zero; do not advance the shared management/non-QoS counter | Table10-5 permits any SNS5 value; fixed zero needs no new counter. Preserve ordinary/nonmesh assignment and raw nonzero receive values; Null bypasses receiver-cache duplicate detection |
+| Group Null power level | Use the same any-deep-local-peering PSL predicate as group mesh DATA and Mesh Configuration | Consistent integration of the permitted group Null indication; the explicit group-PSL formula names mesh DATA. PM separately follows nonpeer mode, so all-light peerings produce PM1/PSL0 |
+| Group mode-control admission | Admit the selected group QoS Null independently of buffered group MSDU/MMPDU delivery | Payload-free POWER_CONTROL remains excluded from TIM/group-BU accounting and requests No Ack. Its actual completion clears the matching command. The exception preserves ordinary group DATA/MMPDU DTIM gating and individual Null permissions |
+| Aggregate More Data snapshot | Exclude BUs in the final selected PPDU when computing additional buffered work; retain each member's BU identity | The standard does not settle same-PPDU sibling counting. This transmission snapshot is model policy, not treating an A-MPDU as one BU; current intact A-MSDU constituents form one BU, and rejected/unselected previews remain buffered |
+| MPSP trigger control | Apply eligible native DATA/Null RSPI/EOSP to current directional roles independently of payload duplicate delivery | Ongoing directions remain single; eligible closed directions may freshly initiate even on Retry1. No historical Null epoch/cache or blanket stale-retry claim; P3 implementation verification remains pending |
+| MPSP initiation time | Use receiver-derived `SignalTimeInd` PPDU start against existing own AW/PostAW deadlines; send admission uses the actual start against the peer's advertised window | Selected temporal boundary for the standard's initiation cases. Completion after the window does not invalidate a qualifying start. Missing reception timing grants no own-window exception; independent ACTIVE/LIGHT conditions still apply. An opposite period's awake hold alone grants no new direction |
+| MPSP endpoint proof | Receiver initiates from accepted trigger; sender confirms successful trigger from its own matching acknowledgment. Recipient termination waits for actual local ACK/positive-BA transmission; owner termination waits for its matching received acknowledgment | Nonserialized copied proof stays with the existing response copy. Cancelled-before-air differs from sent-but-lost; neither endpoint queries remote ACK knowledge |
+| MPSP missing-ACK default | `missingAckRetryLimit = 7`, range0..100, bounded by existing ordinary limits | Seven is model policy, not an IEEE default. Ordinary initial-inclusive attempt limits/history remain authoritative and can stop earlier |
+| MPSP ending allowance | Freeze actual ending originals at first ending air; each original's first actual EOSP1 in the episode is initial, even after earlier EOSP0 or retained Retry1; share subsequent ending retransmission slots | Conservative multi-member bookkeeping and EOSP0→1 initialization are model policy. Preserve ordinary history. Complete-set reversible admission and atomic actual-start charging prevent two ending retries using one slot; holds/BAR/previews charge zero |
+| MPSP ending fallback and failure | One initial ending Null for an OPEN-empty period; at most one replacement for authoritative payload expiry in a still-live ending episode, inheriting its remaining allowance | An allowed replacement initial may occur at remainder0; no second control after ending-control failure. Known ordinary exhaustion, control supersession and non-expiry whole-cohort disposal retire FAILED without fallback. Failure is not confirmation, payload resurrection or a synthetic PERR |
+| MPSP retrieval requests | Consume a request when it opens/joins the recipient period; preserve later independent TIM/rendezvous requests across its termination | Remaining individual MoreData1 knowledge alone neither holds awake nor immediately rearms retrieval. Existing beacon/period lifetimes supply the distinction without another timer or epoch |
+| MPSP trigger rejection | Keep the current failed trigger intent quiescent until a genuinely fresh rendezvous/TIM or distinct external request | Prevents same-time enqueue/drop/review loops under synchronous drop-NEW/expiry. Capacity alone or self-generated control notifications do not rearm; register before submission and preserve reentrant replacement by ID/peer-instance check |
+| Supported lifecycle | Isolated mesh owner cleanup/restart; operational topology failure; preserve node-owned sequences and required pacing history | Clear volatile paths, pending queues and samples; existing whole-NIC MAC child cleanup does not establish safe node stop/start |
+
+The independent arithmetic control uses O=100 microseconds, r=100 Mb/s, ef=0 and Bt=8192 bits. Expected ID-1 cost is 18; expected ID-2 costs are 18192 at n=1 and 10692 at n=4. A three-MSDU PPDU updates n from 1 to 5/4. An initial failed attempt updates ef to 1/8; its successful retry updates ef to 7/64. These examples define test oracles; they are not executed test results.
+
+## Standard extraction record
+
+The corpus status check reports ready/fresh for `ieee80211-2024`, source hash beginning `c08beb0e16bf`. Document-specific lint retains 14 ambiguous-heading errors and 56 unresolved-reference warnings; this is not a clean lint verdict. The independent extraction checked 18 outgoing references across selected HWMP receive, drift, awake, doze and termination nodes; those references resolved. That bounded result does not clear all corpus dependencies.
+
+The source PDF was used for mathematical grouping in the airtime formula, mesh A-MSDU layout/address/lifetime rules, the PERR table cross-reference mismatch, the PREQ receipt/propagation sequence mismatch and Block Ack originator pseudocode interrupted by Figure 10-42 in extracted text. C1 corrected the plan's A-MSDU endpoint, mesh sequence and expiry assumptions: source aggregates use common endpoints and one sequence, duplicate admission applies to the aggregate, and committed aggregate expiry follows the last constituent deadline. Normative source facts and interpretations stay in the [standards map](../../protocol/wifi/standards.md) and [catalog](../../standard/ieee80211/catalog.md). Neither extraction nor document link validation establishes an implemented feature.
+
+## Execution record
+
+| Stage | State | Evidence |
+| --- | --- | --- |
+| C1 requirements/check transcription | COMPLETE | 34 catalog entries mapped to features, 29 checks mapped to proposed tests; independent standards extraction and scoped links checked |
+| Initial debug library build | PASS | `make MODE=debug -j8`, raw log `/tmp/inet-mesh-initial-build.log`; C2 edits require the subsequent fresh build |
+| C2 matching debug library | PASS | `/tmp/inet-mesh-c2-complete-build.log` |
+| C2 direct units | PASS, 3/3 | Mesh, legacy management and MPDU-delimiter serializers; `/tmp/inet-mesh-c2-unit-complete.log` |
+| C2 boundary protocol fixture | PASS, 1/1 | `/tmp/inet-mesh-c2-protocol-complete.log`; no claim of live peering/forwarding |
+| C3 peering and timing | PASS, 3/3 | Fresh debug build, live peering/fault/timing fixtures; raw `/tmp/inet-mesh-c3-raw/` |
+| C4 native forwarding and peer retirement | PASS, 2/2 | Fixture path provider, actual radio data and three retirement boundaries |
+| C5 directional airtime and reporting | PASS, 1/1 new protocol; 5/5 units; 2/2 modules | Actual OFDM DATA/ACK outcomes, both metric IDs, retry/retirement boundaries and cleanup-complete publication |
+| C6 reactive HWMP and pending source queues | PASS, 3/3 new files (4 runs) | Production discovery, directional selection, bounded queues/retries, exact deadlines and isolated-owner lifecycle |
+| C7 path errors and rediscovery | PASS, 2/2 new files | Terminal DATA/peer-close causes, reason-specific PERRs, global pacing and alternate-path delivery |
+| C8 proactive roots and coexistence | PASS, 3/3 new files, six metric-ID runs | All fifteen mesh files pass; retained known legacy failure; five units and two modules pass |
+| H0 shared interference-observation query | PASS, 8/8 module files | New real-arrival fixture passes all six configurations with post-signal energy and normal teardown checks |
+| H0a complete VHT catalog | PASS, 7/7 units; compatibility outcomes unchanged | Isolated H0-based candidate; thirteen protocol files give ten passes and three declared failures matching the parent |
+| H1 negotiated HT/VHT transport | PASS, 18/18 mesh files | Final 36-file protocol union retains exact parent compatibility failures; 19 units and 11 module files pass |
+| Remaining live mesh behavior | NOT_RUN | Mesh aggregation and power save remain future stages |
+| C5 committed release compilation checkpoint | PASS | Isolated clean `7264369846`, matching release dependencies; no warning/error |
+| C8 committed release compilation checkpoint | PASS | Isolated clean `9820b39bdc`, matching release dependencies; no warning/error |
+| H0 committed release compilation checkpoint | PASS | Isolated clean `a7c505aa68`, matching dependencies and new API symbol; no warning/error |
+| Release compilation | NOT_RUN | Required before push |
+| C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
+| Parent legacy fingerprints | PASS, 19 simulations / 56 checks | Native stored budgets, all expected PASS; baseline unchanged |
+| C4 committed legacy fingerprint checkpoint | PASS, 19 simulations / 56 checks | All calculated values byte-identical to C1; final combined tree remains to be checked |
+| C7 committed legacy fingerprint checkpoint | PASS, 19 simulations / 56 checks | All calculated values byte-identical to C1 after documented build-storage recovery |
+| Final-tree legacy fingerprints | NOT_RUN | Same exact scope still required on the final combined tree |
+| Feature-disabled compilation | NOT_RUN | Required by C9 |
+| Examples and capture decode | NOT_RUN | Required by C10 |
+| Upstream PR | NOT_CREATED | Publication follows implementation and verification |
+
+C2 verification ran from this checkout on `8a76ae140f` plus the C2 changes, in debug mode. The unit selector was `Ieee80211(MeshSerializer|MgmtFrameSerializer|MpduSubframeHeaderSerializer)_1\.test$`; the protocol suite selector was `^tests/protocol/wifi$` with file selector `/mesh/MeshWireFormats\.test$`. Both used the installed runners with `--load . -p inet -m debug --no-build` after a fresh matching build. The mesh protocol fixture fixes run 0 and seed 0. Independent review found no remaining actionable source issue. Mermaid diagrams rendered with Mermaid 10.9.3 and Firefox headless and were visually inspected.
+
+The legacy selector was `/common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)\.test$`. Its four passing test files are distinct from `WifiBlockAckDataRetry`: retained raw output shows a run-0 protocol deadline failure at event 3708/time 1.023764276562 s, followed by a run-1 simultaneous-transmission runtime error at event 2639/time 1.014105463846 s. A successful simulation-run summary does not override a printed protocol failure. Raw unit, boundary-protocol and failing legacy artifacts are retained under `/tmp/inet-mesh-c2-raw/` and copied under `audit/hwmp-implementation/c2-raw/`. Independent immediate-parent reproduction at `8a76ae140f` built and loaded its own debug libraries with identical feature state, fixture and seed, and reproduced both failures at identical event numbers and simulation times. The failed legacy control therefore predates C2; it remains a failed control. Parent evidence is `/tmp/inet-mesh-c1-parent-evidence.md`. No expectation or fingerprint was changed.
+
+The supplied `AGENTS.md` asks for skill-suite scripts, but this checkout has no `scripts/` directory. Those package checks do not exist here; no skill package or deployment is changed. Use the active checkout's documented INET gates for this work.
+
+## C3 peering and timing execution
+
+C3 ran on source `320e19d47c` plus the C3 diff after `make MODE=debug -j4`, exit 0. `opp_run_protocol_tests --load . -p inet -m debug --no-build -w '^tests/protocol/wifi$'` selected `/(mesh/(MeshPeering|MeshPeeringFailure|MeshBeaconTiming|MeshWireFormats)|common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)|11n/N_Amsdu)\.test$`. Nine files passed and the known Block Ack retry control failed at the same two parent event/time boundaries. All four mesh files passed. The three C3 fixtures use General/run 0/seed 0; their [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c3-peering.md) explains the stimuli, deterministic channel separation, timing oracles and scope. After correcting Address 3 in two controlled management stimuli, the two affected fixtures passed again. Codec units also passed 3/3 with the C2 selector.
+
+Retained logs are `/tmp/inet-mesh-c3-final-build.log`, `/tmp/inet-mesh-c3-complete-protocol.log`, `/tmp/inet-mesh-c3-unit.log` and the final fixture logs listed in the reviewer document. Raw outputs are under `/tmp/inet-mesh-c3-raw/{complete-protocol,fixture-final,unit}/`. Three reviewer diagrams rendered with Mermaid 10.9.3 and Firefox and were visually inspected; screenshots are under `audit/hwmp-implementation/diagrams-c3/`. Scoped architecture and release-note checks passed. The global interface gate reports 16 preexisting classes, including unchanged `ITransmitStep` and `IReceiveStep`; no violation is introduced by `IMeshManagement`. Whole-scope naming reports 32 legacy candidates and no new mesh candidate. Global final gates and native fingerprint comparisons remain NOT_RUN for the final combined tree.
+
+## C4 native forwarding execution
+
+C4 ran on `f6a9863f8f` plus its working diff with a matching debug build. The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c4-forwarding.md) records the exact source/receive path, fixture path-owner responsibilities, literal address/TTL/length checks, precursor and path lifetime assertions, and IFS/on-air/ACK-wait retirement cases. Both new files passed; the complete six-file mesh selection passed. Five of six legacy controls passed, while `WifiBlockAckDataRetry` retained the same two parent failures. Four unit files, including the new cancellation assertions in `Ieee80211TxNavChoice_1`, and two frame-sequence/Rx completion module controls passed. The final two-fixture rerun also verifies already-queued unrelated data survives every peer-close case and both endpoints are ready before re-peering.
+
+The protocol suite selector is `^tests/protocol/wifi$`, with file selector `/(mesh/(MeshForwarding|MeshGroupForwarding|MeshPeering|MeshPeeringFailure|MeshBeaconTiming|MeshWireFormats)|common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)|11n/N_Amsdu)\.test$`. The unit selector adds `TxNavChoice` to C2's group. The module selector is `Ieee80211(FrameSequenceObservations|RxTransmissionCompletion)_1\.test$`. All use `--load . -p inet -m debug --no-build` after the recorded matching build. Logs are `/tmp/inet-mesh-c4-{final-build,final-protocol,focused-final,unit,module}.log`, with raw artifacts under `/tmp/inet-mesh-c4-raw/`. Scoped architecture, release/migration format and whitespace checks passed; independent review found no remaining actionable issue. Three diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c4/`. No baseline, expected failure, seal or exception ledger changed. This establishes native forwarding with a fixture provider, not production HWMP discovery.
+
+## Parent native trajectory reference
+
+The isolated C1 parent `8a76ae140f` completed 19 simulations and 56 fingerprint checks, exit 0, with no execution error or mismatch. Selection was `-w '^(examples/adhoc/qos|examples/wireless/qos|showcases/wireless/(aggregation|blockack)|showcases/routing/manet)$' -r '^0$'`, using local `--load . -p inet -m debug --no-build --no-concurrent`. All run/seed values are zero. The native stored limits are 10 seconds for the nine QoS runs, one second for the seven aggregation/Block Ack showcase runs, and 100 seconds for the three MANET runs. Ingredients are `tplx`, `~tNl`, `~tND`, except Gpsr has no stored `~tND`; no selected key has multiple time limits. The stored limits differ from some INI defaults and were preserved exactly.
+
+The campaign ran for 829.414 seconds after selection; CPU allowance remained 600 seconds per simulation. Parent source and store hashes remained unchanged. Exact tuples and calculated/stored fingerprints are retained in `/tmp/inet-mesh-c1-native-fingerprint-comparison-record.json`; execution and normalized records are `/tmp/inet-mesh-c1-native-fingerprint-execution.md` and `/tmp/inet-mesh-c1-native-fingerprint-normalized.json`, with raw logs under `/tmp/inet-mesh-c1-native-fingerprint-raw/`. This is the parent reference for a later identical final-tree comparison; it neither proves mesh correctness nor clears the separate failing protocol control.
+
+## C4 committed trajectory checkpoint
+
+An isolated clean worktree at `03489ad1f9272adc65df67a7f2deea56456964a2` completed an incremental debug build and the identical serial native campaign above. All 19 simulations reached their stored limits and all 56 checks passed, exit 0, in 823.375 seconds. Joining the exact case/run/limit/ingredient keys against the preserved C1 reference found 56 byte-identical calculated fingerprint values, zero differences and no first divergent case. Feature state and the baseline store remained unchanged; the active in-progress C5 tree was not used.
+
+Execution, normalized and per-case records are `/tmp/inet-mesh-c4-checkpoint-fingerprint-execution.md`, `/tmp/inet-mesh-c4-checkpoint-fingerprint-normalized.json` and `/tmp/inet-mesh-c4-checkpoint-fingerprint-comparison-record.json`; raw logs are under `/tmp/inet-mesh-c4-checkpoint-fingerprint-raw/`. Copies are retained under `audit/hwmp-implementation/`. This intermediate trajectory check does not replace final-tree verification or establish mesh protocol correctness.
+
+## C5 directional airtime execution
+
+C5 ran on `03489ad1f9` plus its working diff after a fresh matching `make MODE=debug -j4`, exit 0. The new General/run-0/seed-0 production fixture passed with both metric IDs: actual DATA/ACK attempts drive the directional EWMA and encoded costs, terminal timeout flags, local metric replies, accepted optional-rate updates and rejected fixed-mode incompatibility. Strengthened cases check collision-only exhaustion, TTL/pre-transmission drops, retired callbacks, both corrupt-response timing outcomes, Close interruption, fresh re-peering and isolated management stop with queued data. A test-only transparent recipient-service proxy verifies that the real recipient cleanup returns before the synchronous closed-peer observer runs; no production telemetry was added.
+
+The final protocol selection passed all seven mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained its independently reproduced run-0 protocol failure and run-1 runtime error at the same event/time boundaries; it remains a failed control. All five selected units passed, including both-ID arithmetic, below-one aggregation rejection, rounding and saturation; the two frame-sequence/Rx completion module controls also passed. Exact selectors, raw artifacts and boundaries are recorded in the [C5 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c5-airtime.md). Final logs are `/tmp/inet-mesh-c5-final-{build,protocol,unit,module}.log`, with retained raw artifacts under `/tmp/inet-mesh-c5-raw/`. Scoped architecture, release-note format and whitespace checks passed. Three reviewer diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c5/`. This establishes the selected unaggregated OFDM estimator/reporting policy; production HWMP and aggregation remain subsequent stages.
+
+An isolated clean worktree at committed C5 `7264369846` also completed `make MODE=release -j4`, exit 0, with matching release OMNeT++ dependencies and no compiler warning/error. Features and the baseline store remained unchanged; no simulations ran. Records are `/tmp/inet-mesh-c5-release-checkpoint.md` and `/tmp/inet-mesh-c5-release-checkpoint-record.json`, with the build log beside them and copies under `audit/hwmp-implementation/`. This intermediate compilation checkpoint does not replace the final combined-tree release build.
+
+## C6 reactive discovery execution
+
+C6 ran on `7264369846` plus its working diff after a fresh matching debug build. All three new protocol files passed; path selection executes separate ID-1 and ID-2 runs. They exercise actual three-station control/data exchange, both PREQ- and PREP-driven pending reverse release, asymmetric directional costs, freshness/wrap/half-range/saturation, flags and multiple targets, unsupported/malformed/nonpeer admission, bounded shared queues, retry budgets, exact expiry and preserved identities/pacing across isolated restarts. The [C6 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c6-discovery.md) explains each oracle and the model policies separately from IEEE requirements.
+
+The final 16-file protocol batch passed all ten mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained both exact parent failure boundaries. Five selected units and two frame-sequence/Rx module controls passed. Initial expanded-fixture failures were corrected oracles: later DATA changed the cost estimate after control receipt, and a purported worse metric was actually cheaper in ID-2 units. The late-Close failure at 180.04 ms/event 1714 was a real isolated-management-down defect; the narrow mesh down-input discard fixed it, and the final fixture keeps that delivery reachable rather than isolating the radio.
+
+Raw final fixtures/logs are under `/tmp/inet-mesh-c6-raw/{protocol-final,unit-final,module-final}/`; build and category logs use `/tmp/inet-mesh-c6-*`. Scoped architecture, changed NED/MSG naming, source-seal, release/migration format and whitespace checks passed. Existing broader naming/interface findings remain explicitly outside those scoped passes. All three diagrams rendered with Mermaid 10.9.3 and Firefox and were visually inspected under `audit/hwmp-implementation/diagrams-c6/`. No baseline, declared expectation, source seal or exception ledger was changed. Final combined-tree compilation/fingerprints remain separate gates; path-error/proactive/high-throughput/power-save claims remain pending their stages.
+
+## C7 path-error execution
+
+C7 ran on `ed1b774a4f` plus its working diff with a fresh matching debug build. Both new fixtures passed. Actual terminal DATA acknowledgment failure invalidates the selected B–C path once, sends the required error and enables later A–D–C discovery/delivery while an unrelated route remains usable. Separate on-air peer closure retires queued originals without a second terminal failure. The receive-table fixture covers each reason/sequence/next-hop/TTL case, whole-body external rejection, forwarding-disabled behavior, pressure splitting 25 destinations into 19+6, another recipient's ten destinations, and the global default handoff interval.
+
+Additional passing cases cover closed/re-peered precursor admission, expired deferred dependencies, exact duplicates versus differing semantic values, immediate repair pruning, stop/restart pacing, inactive management, rejected-response recovery, internal-collision retry exhaustion and unknown-transit exclusions. High-cardinality records are created through valid control processing; the fixture does not claim twenty-five additional live radio endpoints. The [C7 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c7-errors.md) records setup, assertions, interpretation boundaries and exact selectors.
+
+The final batch passed all twelve mesh files and five of six legacy controls (17/18 files). The remaining Block Ack retry control retained both exact parent failures. Five units and two modules passed. Logs are `/tmp/inet-mesh-c7-{build-final,protocol-final,unit-final,module-final}.log`; raw generated fixtures/output are under `/tmp/inet-mesh-c7-raw/{protocol-final,unit-final,module-final}/`. Scoped architecture/naming/seal, release/migration format and whitespace checks passed; independent review found no actionable issue. All three diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c7/`. Final combined-tree gates, L1 mechanical lint corrections and later mechanisms remain pending. No expectation or baseline was rewritten.
+
+## C7 committed trajectory checkpoint
+
+A clean isolated worktree at `95fe1da335` ran the same 19 native simulations/56 fingerprint checks as C1 and C4, serially with unchanged stored limits, features and baseline store. All simulations reached their native limits; all checks passed, exit 0, and all 56 calculated values were byte-identical to C1. First difference is null. Runtime was 787.553 seconds.
+
+The initial debug link failed with SIGBUS because the 16-GiB `/tmp` filesystem was full; no simulation ran against that output or the retained C4 library. Relocating 7,177 task-owned output entries to the larger filesystem preserved bytes, modes, timestamps and source paths. A supported `LN='ln -sf'` install override handled the cross-filesystem library link. Fresh relink and explicit loader verification established the matching C7 debug library before the successful campaign. Retained release output remained identified as C5.
+
+Records are `/tmp/inet-mesh-c7-checkpoint-fingerprint-execution.md`, `/tmp/inet-mesh-c7-checkpoint-fingerprint-comparison-record.json` and `/tmp/inet-mesh-c7-checkpoint-fingerprint-normalized.json`, with raw segments under `/tmp/inet-mesh-c7-checkpoint-fingerprint-raw/` and copies under `audit/hwmp-implementation/`. This pre-HT/VHT checkpoint is additional trajectory evidence; final combined-tree validation remains required.
+
+## C8 proactive-root execution
+
+C8 ran on `95fe1da335` plus its working diff after a fresh matching debug build. All three new fixtures pass with metric ID 1/run 0 and metric ID 2/run 1. The proactive fixture includes source demand both before and after a flag-zero invitation, sustained flag-one refresh, idle leaf-only traffic and completed root-state observation. The RANN fixture checks held-confirmation propagation, individually addressed confirmation without an existing path, source expiry while confirmation continues, interval boundaries, directional costs, pacing history across isolated restart and inactive-management pause/recovery. Coexistence checks two actual roots, ordinary discovery, shared source/confirmation spacing, receiver-compatible batching, the 2302-byte bound, pressure spills, fair recipient progress and independent expiry. Synthetic root records are pressure inputs, not additional live radio endpoints.
+
+The final batch passed all fifteen mesh files and five of six legacy controls (20/21 files). `WifiBlockAckDataRetry` retains the exact independently reproduced parent failures: run-0 step-2 deadline at 1.023764276562 s/event 3708 and run-1 exact-start abort at 1.014105463846 s/event 2639. Five units and two module controls pass. Exact selectors and explanation are in the [C8 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c8-roots.md). Logs are `/home/miguel/inet-mesh-c8-{build-final,protocol-final,unit-final,module-final}.log`, with generated fixtures, support snapshots and output under `/home/miguel/inet-mesh-c8-raw/{protocol-final,unit-final,module-final}/`. Copies are retained under `audit/hwmp-implementation/`.
+
+Earlier RANN failures were fixture assumptions about injected-control ownership and a fresh restart interval. Coexistence setup needed to hold an intermediate reply and put specific INI intervals before wildcard settings. These corrections changed no production behavior or expected result. Independent final review is clear, including the source-demand/observation corrections, fixture oracles and inactive-management case. Scoped architecture, changed NED/MSG naming, source-seal, release/migration format and whitespace checks pass. All three diagrams rendered and were visually inspected, and scoped local links/anchors passed. Final combined-tree compilation/fingerprints and later high-throughput/power-save stages remain separate requirements. No baseline or expected failure was rewritten.
+
+A clean isolated worktree at committed C8 `9820b39bdc` also completed `make MODE=release -j4 LN='ln -sf'`, exit 0, without compiler warnings/errors and with matching release dependencies. Feature state and fingerprint-store hashes remained unchanged. Release SHA256 is `77ee062691ab96d53540ac4eddda885ce7bddd7ff41de88f1bdc8e77ad034424`; retained debug output remains explicitly C7. Records and build/dependency logs use `/home/miguel/inet-mesh-c8-release-checkpoint*`, with copies under `audit/hwmp-implementation/`. No simulation or feature change ran. This intermediate checkpoint does not replace final combined-tree release validation.
+
+## H0 shared-medium observation contract
+
+H0 adds a pure read-only capability query without changing signal delivery. The direct module fixture observes actual overlapping energy that is not decodable at the receiving center, rather than inferring behavior from a repeated filter formula. Unrestricted delivery, interference-range delivery and receptive radio-mode filtering produce one arrival; listening, destination-address and communication-range controls suppress it. The latter geometry is asserted inside the reported interference range and outside communication range. Energy is positive during transmission and below threshold afterward; no decoded packet is delivered. All six configurations and normal teardown pass. Publisher references automatically clear on component deletion, correcting the fixture's initial teardown defect.
+
+The fresh matching debug build passed (`/home/miguel/inet-mesh-h0-build-final.log`). `opp_run_module_tests --load . -p inet -m debug --no-build` selected eight files with `/(RadioMedium_(InterferenceObservation_1|ComputeInterference|ListeningFilter_1|AddRadioWithoutReceiver_1|AddRadioDuringTransmission_1|PurgeByTimer|PurgeOnTransmission)|DimensionalMediumAnalogModel_AttenuationAcrossBand_1)\.test$` after an eight-file dry run. All eight passed, including all six configurations of the new fixture. Final output and generated sources are under `/home/miguel/inet-mesh-h0-raw/final/`, with log `/home/miguel/inet-mesh-h0-module-final.log` and copies under `audit/hwmp-implementation/`.
+
+The API promises relevant modeled arrival visibility after initialization while receiving/transceiving; it does not promise decoding success, analog accuracy or observation during other modes. External providers and subclasses changing delivery/filter semantics must supply a valid answer, returning false when unsure. The parent lacks the query, so an absent-method compilation is setup evidence rather than a runtime failure. Scoped architecture, source-seal, release/migration format and whitespace checks pass. Independent final review confirms the archived sources/results and has no remaining finding. H1's consumer is still unimplemented; no baseline or expected result was changed.
+
+An isolated clean worktree at committed H0 `a7c505aa68` completed `make MODE=release -j4 LN='ln -sf'`, exit 0, without compiler warnings/errors. Matching release dependencies and the new query symbol were verified; library SHA256 is `95c670ec1e7c3b8050bd83fba0ad5cb0a8cb103f9837c6b872d614e95ad91fdf`. C8 release provenance/binary and the identified C7 debug output were preserved. Features and the fingerprint store remained unchanged, and no simulation or feature change ran. Records use `/home/miguel/inet-mesh-h0-release-checkpoint*`, with audit copies. This is an intermediate compilation check, not final combined-tree validation.
+
+## H0a complete VHT catalog
+
+The opt-in `ac-complete` catalog retains the legacy non-VHT entries and expands each legal VHT tuple into both guard intervals. The independent grid oracle excludes all ten invalid width/NSS/MCS combinations and verifies mandatory flags, cache identity, timing and the unchanged legacy signature. No mesh profile selects the catalog in this preparation.
+
+Standalone candidate `ef9dcf42f545bbe41203a0f1d44d6b9801a86d06`, based on H0 `a7c505aa68`, passed a fresh debug build and seven unit files selected by `Ieee80211(CompleteVhtModeSet|HtModeSet|HtModeCache|VhtModeQueries|HtVhtPartDurations|NonHtReferenceRate|VhtHtCapabilities)_1\.test$`. Its thirteen retained HT/VHT protocol files execute fifteen simulations: ten files pass and three retain their declared failures. The failure assertions match the parent exactly: `N_Ampdu` at 2 s/event 149187, `Ac_Ampdu` at 2 s/event 161849, and `Ac_VhtIe` at 2.5 s/event 48880. Termination events occur two events later. No expected result was changed.
+
+The final source candidate `8953a6fd49e2f600ea8f2bf6a2afd20db94cc72c` differs only by adding clause 21.1.1 to a comment. Independent review checked that exact delta and cleared the preparation, with 16 general and seven WLAN checks passing and the remaining checks inapplicable. A refreshed debug build and all seven units also pass on that final source, with a byte-identical library. The original protocol comparison remains attributed to its original candidate. Reconciliation uses `/home/miguel/inet-mesh-h0a-final-citation-*`; the standalone record, loader proofs and raw results use `/home/miguel/inet-mesh-h0a-standalone-*`. Debug library SHA256 is `96a4dd9f459a10b13e90b08a96a8e67b9172f767ce09405cd291e2a3a6120148`. Features, release output and fingerprint-store hashes remained unchanged. This evidence establishes catalog preparation, not H1 negotiation, channel access or final combined-tree validation.
+
+## H1 negotiated HT/VHT transport
+
+H1 uses the opt-in complete catalog through the existing interface mode authority. Typed directional capabilities, fixed tuple validation and candidate timing are committed before publication; only an effective DATA/ACK tuple change resets the error estimate. Device width capability, operating allocation and local Tx SGI activation remain separate. The radio owns complete immutable channel geometry, primary CCA, secondary-idle history and the single-member envelope. Valid incoming members reach capture/MAC with zero-offset MAC tags and FCS intact; malformed envelopes remain consistently PHY-wrapped and opaque until corruption handling. These owners and the full case mapping are explained in the [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h1-ht-vht.md).
+
+The frozen checkpoint is based on `3ff5d570869262cedf14797f3629b4ab2888105b`. Its 56-input manifest SHA256 is `b28f1c2dfcce128715e2d33b6de903d29a8fcc6c7b3c8b33663a331b00c20cee` and matching debug library SHA256 is `de0a5ac9968d120b2c0a699f6dbc7918afb0b7556d37e09397cddbb2de64bba7`. Build/source records use `/home/miguel/inet-mesh-h1-source-checkpoint*`. Independent verification confirms those inputs, current/pinned library, feature state and fingerprint store remain unchanged.
+
+The deduplicated final protocol union selects 36 files and prepares 156 simulations. All eighteen mesh files pass: 135 mesh simulations, including HT16, VHT64, boundary34 and the three-run airtime fixture. The file results are 32 PASS, three declared FAIL and one known unexpected Block Ack retry failure. Independent raw comparison confirms the same three declared assertion reasons/times/events as H0 and both retry-control failures as C1. Assertion events are distinct from their later termination events. Exact selectors, generated sources, logs and 1344 file hashes are retained under `/home/miguel/inet-mesh-h1-raw/protocol-final/`; the log is `/home/miguel/inet-mesh-h1-protocol-final.log`.
+
+Nineteen focused unit files pass across eighteen initial passes and a separate repaired `TxNavChoice` mock rerun. The initial mock compile error is retained; the only repair adds the required inert interface method, preserving its NAV assertions. Its three completion-ownership warnings are retained baseline warnings also present at C8. Eleven module files pass 29 native simulations without ownership warnings, including the three-round 80-MHz primary-copy reception test. Original normalizer false positives on zero-failure summaries are preserved alongside authoritative adjudications. The complete unit/module record is `/home/miguel/inet-mesh-h1-final-verification/record.json`.
+
+Independent final capture audits check all 160 positive matrix PCAPs, 2880 exact MAC CRC32 values, 320 DATA records, actual tuple/channel metadata and all four member-length residues. A separate final boundary audit checks twelve captures and 367 CRCs, including opaque malformed reception versus valid retry and correctly captured policy-rejected oversized input. These records use `/home/miguel/inet-mesh-h1-final-positive-pcap-audit/` and `/home/miguel/inet-mesh-h1-faulted-capture-final-audit.json`. They establish bare-MAC capture boundaries and member FCS, without claiming delimiter CRC bytes are present in PCAP.
+
+Two direct full-network initialization probes reject scalar or listening-filtered high-profile media before on-air traffic, using the frozen library; a missing-relative-INI setup attempt is retained separately. A subsequent assertion extension checks actual post-capability-update PPDUs in all 34 boundary configurations with unchanged stimuli and production inputs. Exact records are `/home/miguel/inet-mesh-h1-initialization-refusals/record-final.json` and `/home/miguel/inet-mesh-h1-raw/boundary-actual-tuple-final/`. Development-only failures and snapshots remain separately attributed.
+
+Scoped architecture, changed NED/MSG naming, whitespace and source-protection checks pass. The interface scan retains only the unchanged `ITransmitStep`/`IReceiveStep` baseline findings in the MAC contract subtree; mesh and new PHY interfaces pass. All three reviewer diagrams rendered and were visually inspected. No sealed source, expected result or fingerprint baseline was changed. Full mesh aggregation, power save and C9 combined-tree release/feature-disabled/fingerprint verification remain pending; this checkpoint does not claim external interoperability or real MIMO accuracy.
+
+Independent final review closed F1–F4: canonical channel requests, malformed envelope admission, switching observation history and grown-CW preservation. It verified all 56 production inputs, the matching library, all 1344 protocol archive hashes and 191 final-boundary hashes, and returned 35 PASS, 11 N/A, no flags/questions, with the later C9 fingerprint gate explicitly unverified. No source-protection approval or exception-ledger entry remains unresolved for H1.
+
+## H2 native mesh A-MSDU
+
+The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h2-amsdu.md) maps all 26 scenarios, each crossed with HT/VHT and metric IDs 1/2. Formation commits one forwarding-unit identity only after complete admission. The recipient validates the complete aggregate before state mutation, admits one mesh identity and delivers every local sibling. Transit retains the whole unit and reconstructs its payload count locally. Lifetimes preserve the last constituent deadline and immutable retry body. HCF records actual completed-PPDU payload counts independently of acknowledgment outcomes. Pending local identities retire through MAC ownership on forwarding-owner stop, crash or isolated deletion.
+
+The final source checkpoint is based on H1 `139c8e1bac44f6a79ca0350b32d88b8b033d5f1c`, with 30-input manifest `39167ad900eecc30e1f0011c8951ea177f23b34b0e0865bcb962de3459a36d90` and debug library `e1ed30eb8c9c035b70eb9c6e457559809cf2d612fa1f9ef99e58826dab6090b3`. Records use `/home/miguel/inet-mesh-h2-unlimited-source-checkpoint/`. A mesh-only unlimited-size sentinel defect was reproduced on the preceding library and corrected without weakening negotiated bounds; the final upper-tier case exercises the documented setting.
+
+The final deduplicated 37-file protocol union executes 262 simulations: 257 protocol PASS, four assertion FAIL and one runtime abort. File verdicts are 33 PASS, three declared FAIL and the known unexpected Block Ack retry failure. All 104 A-MSDU, 34 high-throughput boundary and five airtime configurations pass. The three declared assertion events remain 149187/161849/48880 at 2/2/2.5 seconds. Both retry-control failures retain their parent time/event boundaries. No expectation was changed. Exact inputs and 1718 hashed artifacts use `/home/miguel/inet-mesh-h2-raw/protocol-final/`; earlier failed fixture and development snapshots remain separate.
+
+Final matching-library verification passes 23 unit files and 21 module files, including 108 module simulations; both runners exit zero. The repaired single-protection mock delegates the two H1 interface additions without changing its assertions. All 30 production hashes, 44 test hashes, current/pinned library, features and fingerprint store remain unchanged. The record is `/home/miguel/inet-mesh-h2-unlimited-final-verification/record.json`. This is an assertion-pass result, not ownership-clean validation: the retained TxNavChoice fixture has three previously parent-proven ownership warnings, FrameSequence reports 34 undisposed objects, and two lifetime fixtures report 22/20 ownership warnings. Static source comparison localizes the latter to unchanged receiver sinks; matching parent runtime attribution for those warnings and FrameSequence remains unexecuted and is a C9 obligation.
+
+Scoped architecture, four changed NED/MSG declarations, source protection, mesh interfaces, document links and whitespace checks pass. The MAC interface scan retains only its two unchanged IFrameSequence body findings. All three reviewer diagrams rendered and were visually inspected, including transit TTL validation before duplicate recording. Independent final review clears F1–F3 and returns 34 PASS, 12 N/A, no flags/questions, with the C9 fingerprint gate explicitly unverified. It verified all 30 source inputs, 44 unit/module test hashes and 1718 protocol archive hashes. No new exception or unresolved approval remains. H3, mesh power save and C9 combined-tree verification remain unexecuted. Separately identified shared HT/VHT timing defects require a following shared PHY correction; H2 does not claim to repair them.
+
+Subsequent isolated attribution resolves the retained hygiene question against the older H0a baseline, not the immediate H1 parent. Candidate tree `8953a6fd49e2f600ea8f2bf6a2afd20db94cc72c` with library `96a4dd9f459a10b13e90b08a96a8e67b9172f767ce09405cd291e2a3a6120148` passes both lifetime modules (21 native runs) and the FrameSequence unit. Counts and complete warning-line sequences match final H2 exactly: 22 and 20 ownership warnings, and 34 undisposed objects respectively. Fixtures are unchanged; old index, library, features and store remain intact. `/home/miguel/inet-mesh-c9-h0a-hygiene/record.json` retains loader and comparison proof. This establishes older-baseline fixture hygiene, without describing the campaign as warning-free or claiming an exact H1 runtime comparison.
+
+## T0 shared PHY duration correction
+
+T0 corrects the shared HT/VHT mode authorities: selected DATA symbol intervals, once-per-total-data rounding for HT-mixed/VHT, and HT BCC encoder selection using the net long-GI PHY rate. Fixed signaling/training, HT-greenfield timing, band extension and the VHT encoder-table owner retain their distinct roles. The existing transmitter consumes whole-mode duration, without mesh-side equations or another occupancy timer. The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-t0-phy-timing.md) explains the independent literal table and actual radio fixture.
+
+The four-input source manifest is `bf7f052c3f25a828faf192542b26625faf743dc1914ade9705497c1aa815184b`, with debug library `5472a695a9409dac3a56e53772fcaaea90f26e8ec88c3ff7dcbdd253f9d8b052`, based on H2 `74468283db`. Records use `/home/miguel/inet-mesh-t0-source-checkpoint/`. New literal and updated part-duration units pass; the actual radio-departure fixture verifies 49-symbol SGI raw DATA176.4 microseconds, transmitted residual180 microseconds and complete HT216/VHT220 microseconds. Greenfield3.6-microsecond and encoder-count controls pass. Clean before-fix probes were compiled and executed before any production/header edit, preserving the original failures under `/home/miguel/inet-mesh-t0-raw/parent/`.
+
+Final verification passes 24 unit files and 22 module files across 109 module simulations, both runners exiting zero. All four production inputs, 46 test hashes, pinned/current library, features and fingerprint store remain unchanged; `/home/miguel/inet-mesh-t0-final-verification/record.json` retains selectors, loader proof and raw results. New timing cases have zero ownership/undisposed diagnostics. The full campaign retains 45 ownership warnings and 34 undisposed objects: lifetime22/congestion20/FrameSequence34 match older H0a runtime, while NavChoice3 matches the retained H2 runtime. No new T0 diagnostic sequence appears, and no warning-free claim is made.
+
+The final 37-file protocol union retains 33 PASS, three declared FAIL and the known unexpected retry failure. All 19 mesh files pass, including 104 A-MSDU, five airtime, 16 HT, 64 VHT and 34 boundary configurations. Across 262 invocations, 257 protocol PASS, four assertion FAIL and one runtime abort retain their established verdicts. All 1718 archived artifacts use `/home/miguel/inet-mesh-t0-raw/protocol-final/`. Terminal time/event and failure boundaries match H2; two intermediate express-progress headers differ because of wall-clock sampling. This comparison does not establish full trajectory/fingerprint equality, and corrected SGI occupancy intentionally differs. Final native fingerprint comparison remains C9.
+
+The timing diagram rendered and was visually inspected. Scoped mode architecture, source protection, evidence/reviewer links and whitespace checks pass. Independent final review clears the bounded stage with 27 PASS, 19 N/A, no flags/questions and the C9 fingerprint gate explicitly unverified. It verifies all four production inputs, 46 test hashes and 1718 protocol artifact hashes. No unresolved approval or exception remains.
+
+## H3 native A-MPDU and selective recovery
+
+H3 extends the existing HCF and Block Ack owners with reversible multiple-MPDU preparation, complete admission before commitment, retained original identities and a distinct outgoing PSDU copy. Immediate Compressed Block Ack resolves ordered actual-MPDU error observations; one payload-count observation covers the complete transmitted PPDU, including nested A-MSDUs. Recovery-only BAR/BA supplies no new estimator samples. DATA retry exhaustion and BAR wait exhaustion use separate cleanup-complete terminal facts. The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h3-ampdu.md) explains the exchange, direct scenarios and limits.
+
+Receive validation is atomic for delimiter layout and selective for individual FCS. Native body errors remain higher-layer drops after ordinary MAC acknowledgment. Byte-reconstructed members preserve the receiving mesh role. An opt-in radiotap recorder emits individual member records through the existing recorder owner; sealed packet-core source remains untouched. VHT exact fill uses raw DATA-symbol capacity. Its final-alignment interpretation at the negotiated cap is the explicit model policy above, not an asserted unambiguous IEEE exception. Default SINGLE protection retains its admission rules; configured MULTIPLE uses the existing complete-exchange Duration/NAV calculation before commitment.
+
+The matching frozen unit/module checkpoint has 63 production inputs, manifest `9cbfd0193cf2605c90ab15b18113ca3a764d612d1a6fd26ef48b6e9a87e6bbc1`, and debug library `83d6ec476a10d8691a31afe7bc85df0ae6bbc4f75646693405ac65450c6f3ad6`, based on T0 `2719dc3da5`. It passes 25 unit files and 23 module files across 121 native module runs. All source, 48 selected fixture, pinned/current library, feature and fingerprint-store hashes remain matched. The capture extension passes 12 runs, 24 PCAPs and 40 records, with all 44 PCAP/PSDU artifacts independently rehashed. Known 45 ownership warnings and 34 undisposed-object diagnostics exactly match T0; no new sequence appears. Earlier stale-unit assertion failure and the preceding candidate records remain preserved separately. Exact records: `/home/miguel/inet-mesh-h3-callback-final-verification/record.json`.
+
+The final reconciled 39-file protocol selection has 35 PASS files, three declared FAIL files and the known retry failure. All 21 mesh files pass, including 128 aggregate exchange, 64 limit, nine metric, six path-selection and 104 retained A-MSDU configurations. There are 462 selected final per-file simulations: 457 protocol PASS, four assertion FAIL and one runtime abort. All five retained failure boundaries, causes and stderr exactly match T0. A full-campaign receive-side test adapter error is preserved separately: after changing only that fixture's transmit-mode tag query to actual receive mode, its complete 34-case rerun passes on the unchanged library. The final record explicitly composes the unchanged files and focused rerun, rather than relabeling the failed original campaign. Records: `/home/miguel/inet-mesh-h3-callback-final-protocol/record.json` (2011 archived artifacts) and `/home/miguel/inet-mesh-h3-final-protocol-reconciliation/record.json` (185 rerun artifacts). Two retained protocol diagnostics exactly match T0; this is not an ownership-clean claim.
+
+Direct synchronous callbacks exposed context destruction during completion and repeated BAR-member retirement. The bounded fixes preserve the existing terminal receive-step owner and recheck current member ownership. A compatible pre-fix timeout callback crashes; all 16 corrected callback combinations pass and are repeated in the complete 128-case execution. All four reviewer diagrams rendered and were visually inspected. Scoped architecture, source protection, documentation seals, evidence/reviewer links and whitespace checks pass. Independent final review clears H3 with 36 PASS, 10 N/A, one not verified and zero flags/questions, independently matching all 2196 protocol artifacts and 63 production inputs. The retry assertion timestamp unavailable in express output is explicitly distinguished from its recorded termination endpoint. C9's combined-tree build, lifecycle and fingerprint checks remain unexecuted. No baseline or expected-result replacement is authorized.
+
+## G0 native group DATA policy correction
+
+The [group acknowledgment reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-g0-group-ack.md) separates this existing producer correction from P1's new power policy. H3's multicast sequence, response admission, airtime and retirement already use the receiver address. G0 stamps the fixed-size No Ack field only for native group QoS DATA at the existing pre-FCS hook, including source and relayed frames with power saving disabled.
+
+The exact new fixture fails on H3 at0.05s/event531 on the source's No Ack assertion. G0 passes General/run0/seed0 at0.165s/event888, with all existing delivery/TTL/duplicate checks and one source plus two relay No Ack observations. The parent abort retains one source packet; the candidate has no runtime warning, ownership/undisposed message or stderr. One existing overloaded-virtual compiler warning occurs in both. All4995 tracked source inputs remain identical except the single MAC implementation, and the fixture/feature/store hashes match. Separate pinned debug/loader records and10parent+17candidate raw artifacts are `/home/miguel/inet-mesh-g0-parent/record.json` and `/home/miguel/inet-mesh-g0-candidate/record.json`. No expectation or fingerprint baseline changes.
+
+## P1 power modes and buffered traffic
+
+G0 independently supplies the existing group-DATA No Ack correction. P1 relocates its fixed-size stamping into early preparation while adding its policy. The reconstructed P1 production tree and all 118 final selected fixtures match the original frozen validation inputs exactly; historical records keep their actual H3-parent provenance. Source equality carries that evidence forward without relabeling its executions, and G0 retains its own isolated proof.
+
+MeshPowerSave owns pending indications and explicit delivery opportunities; the MIB owns committed per-peer modes, while HCF retains original packets, deadlines and recovery. Lower activity commits only after the selected individual Null's ACK. Higher activity commits immediately. Synchronous observers may issue newer commands: correlation is installed before publication, group state is committed before per-peer notifications, and post-callback checks prevent an older command from handing off its indication. Existing original and peering Link IDs suffice; no generation table is added. The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-p1-power-modes.md) maps each scenario to direct assertions.
+
+Native bodyless QoS Null has its own SNS5 acknowledgment/recovery namespace and consumes no DATA identity or payload metric sample. Group QoS DATA and Null transmit No Ack policy, including relayed DATA with power saving disabled. TIM snapshots cover live originals across ACs, exclude exact-deadline expiry and retired borrowed storage, and precede variable-length mode/admission calculations. Accepted IFS copies preserve their selected bytes. A shared group barrier releases individual work after actual completion, drop or expiry, then reconsiders every AC without a new arrival. Queue capacity and five-second control waiting use existing HCF ownership.
+
+The frozen checkpoint has 84 production inputs, manifest `899602b7bd2b20f355ef893ea45782bcd47b3b38379ea40fb6bd02bf5b88a52b`, and matching debug library `3aa107eed4d2e85f31a54db70b48e2d52411b16b9195f452a223adc88149e72b`, based on H3 `8971a1e03d`. Root independently matched all 84 source and the original 117 fixture hashes. Nineteen mode configurations and eight final TIM configurations pass, including five reentrant command paths, lost ACK and lost group reception, exact expiry, isolated policy cleanup, real DATA0/Null0 retries, immediate BA/later BAR completion facts, high-AID TIM length before rate choice, and an actual 16us unicast IFS snapshot. The native beacon path uses zero IFS; it does not establish a nonzero-IFS beacon case. Source and development records remain distinct from the final accumulated campaign records.
+
+The frozen 41-file protocol campaign reports 37 PASS, three declared FAIL and the retained unexpected retry failure; all 23 mesh files pass. Across 488 simulations, 483 protocol PASS, four assertion FAIL and one runtime abort retain their verdicts. Its 2441 archived artifacts are under `/home/miguel/inet-mesh-p1-final-protocol/`; all 18 legacy controls match their prior causes, termination endpoints and stderr. The retry assertion position unavailable in express output remains explicitly unknown. One retained undisposed radio signal remains. The old oversized-source ownership warning disappears because the consuming mesh entry point takes ownership before bounded refusal; no diagnostic is suppressed.
+
+Review closed two missing direct assertions with one test-only case: the actual beacon first observes the transmitted retry as that sleeping peer's sole buffered unit, then an awake peer's successor progresses past a sleeping head in the same BE queue. The retry keeps its identity through eventual acknowledgment, and the next TIM clears. The complete eight-case TIM rerun passes on the unchanged library, with 46 artifacts independently rehashed and no runtime diagnostics. Its final 118 fixture hashes match. `/home/miguel/inet-mesh-p1-final-isolated-retry-tim/record.json` composes the unchanged other 40 files with this rerun: 489 simulations, 484 protocol PASS, four assertion FAIL and one known runtime abort. The original campaign and earlier insufficient-oracle raw remain separately preserved.
+
+The matching accumulated campaign passes 27 unit files and 23 module files, covering 27 unit runs and 121 native module runs, both exit0. The corrected literal-wire fixture and the synthetic production-owner namespace unit each actually pass General/run0/seed0. All 84 source, 50 selected fixture, pinned/current library, feature and fingerprint-store hashes remain unchanged; both loader proofs resolve the pinned debug model. Known 45 ownership warnings and 34 undisposed objects exactly match the ordered H3/T0 diagnostics, with no new runtime diagnostic. Compiler warnings remain zero for units and seven for modules. This is not an ownership-clean claim. The capture extension passes 12 rounds, 24 PCAPs and 40 records, with all 44 PCAP/PSDU hashes matched. Records and 1090 raw artifacts: `/home/miguel/inet-mesh-p1-final-verification/record.json`.
+
+Independent final review clears P1 with 36 PASS, 10 N/A, one partially unverified and zero flags/questions. It independently matches all 2441 original protocol, 46 corrected TIM and 1090 unit/module artifact hashes, plus the 118 final fixture hashes. Earlier callback, fallback, identity-domain and coverage findings are closed. Both diagrams rendered and were visually inspected. Scoped architecture, naming, source/document protection, links and whitespace checks pass; the interface scan retains only its unchanged baseline findings.
+
+Production activation is explicitly refused until full service periods exist; these fixtures keep radios physically awake. Actual doze, service-period retrieval, final native fingerprints and combined lifecycle verification remain later stages. No expected result or baseline is replaced.
+
+## R0 radio transition observations
+
+IRadio now declares pure read-only queries for transition duration and a copied effective-mode/active-transition snapshot. Radio derives its answers from its existing initialized switching matrix, target and timer. Unsupported ShortcutRadio and NoiseSource explicitly return unavailable. Unavailable differs from zero duration or supported stable state. Existing timer insertion, signal publication and lifecycle order are unchanged. The snapshot is an observation, not a physical readiness promise.
+
+The matching debug library is bacb1749528b1add98dba78d2916fcc60f65e2dad126a321d92485eed7825e13. Radio_ModeTransitionObservation_1 passes General/run0/seed0 at0.02s/event28, including actual asymmetric2ms/5ms and zero transitions, same-mode no-op despite a9ms configured diagonal, synchronous/deferred observations, exact deadline before its completion event, retained copied values, normal node stop/crash cancellation and restart, and both initialized unsupported providers. Eight retained direct-radio files pass thirteen native runs with their actual native seeds, including interference cases0..5. Their scalar configuration/run/seed assignments, termination times/events, stderr and hygiene match H3. The total is nine module files and fourteen native runs, both scoped runners exit0.
+
+All89 recorded production inputs, nine module fixtures, current/pinned libraries, features and fingerprint store remain matched; all nine loader proofs select pinned debug models. Selected runtime stderr, ownership and undisposed diagnostics are empty. The existing Radio::sendUp compiler overload warning remains separate. Independent review matches39 new-test and217 retained-control artifacts, and clears the API, tests, migration/release notes and proposed commit boundary with26PASS8N/A, zero flags/questions. This is bounded radio evidence, not a project-wide warning-free claim.
+
+Completion record /home/miguel/inet-mesh-r0-completion/record.json preserves the actual earlier b61 execution parent and links the current32b0422 parent through exact source/fixture equality. No build or test is relabeled after the documentation/history-only reconstruction. Original two fixture/setup failures and the inconclusive normalizer output remain separately retained, with actual native/runner verdicts reconciled. The future P2 consumer, combined lifecycle, release/feature-off compilation and native fingerprints remain later stages. No baseline changes.
+
+## R1 receptive transceiver contention
+
+Rx now uses the valid public mode/state pairs: RECEIVER with TX_UNDEFINED, or TRANSCEIVER with TX_IDLE. Effective-mode notifications recompute availability, preventing stale cached idle states from permitting contention during switching. Primary CCA versus whole-band physical-idle selection, NAV, TXNAV and contention blocking remain unchanged. This generic correction is independent of power saving and adds no state or timer.
+
+Ieee80211RxMediumFree_1 passes both contiguous40 and ordinary20 configurations. It proves actual DCF DATA progress, primary-busy deferral, DATA during secondary-only energy, actual-transmission exclusion, both delayed receptive-mode transitions and equal-deadline ordering, and NAV/TXNAV/contention gates. Four retained module files pass 45 native runs; WifiLocalInterframe and WifiLocalInterframeInputs pass 33 and 51 runs. The selected total is five module files/47 runs plus two protocol files/84 runs.
+
+The matching current/archive debug library is3242fd6ef93a0a6e16742a7dfec14631fb32bc2a824309112a2ec86e1c761166; candidate loaders select the current source-tree library whose hash matches that archive. All89 recorded production inputs and seven fixtures remain matched, with Rx.cc the sole production delta from R0. Selected runtime stderr, ownership and undisposed diagnostics are empty. Existing compiler warnings are retained: one new-module, four retained-module and four protocol warning lines; no compiler-clean claim is made.
+
+Both final generated configurations/executable are independently identity-matched to controlled pinned-parent runs, which fail the intended idle-transceiver assertion at1ms/event1 under the earlier bacb library. Earlier one-configuration hash metadata and fixture/setup failures remain separately preserved. Final record /home/miguel/inet-mesh-r1-final/record.json and controlled comparison /home/miguel/inet-mesh-r1-before/controlled-final-same-cwd/record.json preserve exact inputs, loader and before/after hashes. Independent review matches all302 artifacts and returns29PASS17N/A, zero flags/questions, with final C9 fingerprints still unverified. No baseline or declared expectation changes; Further power-policy integration remains a later stage.
+
+## R2 cancellable transmission-start preparation
+
+Tx can retain its existing copy until an admitted start, request final acceptance, and cancel before air without a transmitted/failed callback or NAV effect. All old pending fields detach before the borrowed-copy cancellation callback, so a replacement accepted reentrantly survives. Caller-requested cancellation remains silent. An explicit rejected-preair sequence finish retains live originals; HCF/DCF separate originator cancellation from a recipient response and preserve an unrelated response wait. Existing native callers stay legacy-ready with unchanged ordinary timing and attempt/window updates. P2 supplies the actual radio/power-policy consumer and managed BA/DELBA bookkeeping.
+
+The matching debug library is `3ee6a55f0d91c4a3527a3d040c050af986e30bf7074562da90c6b0dbde2e98a5`. Frozen checkpoint `/home/miguel/inet-mesh-r2-checkpoint/record.json` (SHA `3ba3e7334737221347526ba71477ffc324c3ecd517934e61fa6162983962e0a8`) pins 94 production inputs, eleven changed production files and fifteen changed/new fixtures. All 17 actual ITx callback implementations are explicitly migrated, including the new controlled fixture callback. API migration and an incompatible release note cover external implementors.
+
+Ieee80211TxDeferredStart_1 passes twelve native cases: ordinary zero/16us IFS, exact controlled readiness, refusal, missed deadlines, silent cancellation, replacement reentry and HT aggregate acceptance/refusal. Ieee80211FrameSequenceCancellation_1 passes HCF and DCF cases with a real first grant, injected detached cancellation, preserved ID/SN/retry-map absence/ACK status/lifetime and later actual DATA/ACK using the same original sequence. Recipient cancellation preserves a real unrelated RECEIVE wait. These are direct transport/owner proofs; they do not claim P2 power-policy or BA/action-marker integration. Earlier fixture setup/oracle failures remain preserved.
+
+The complete unit/module campaign passes 27 units/27 native runs and 29 modules/143 native runs, both exits 0. Record `/home/miguel/inet-mesh-r2-final-verification/record.json` (SHA `d33caf897f675fc59c3958d96a36f260d523619982a51dc7342fa1c335cb784a`) retains 1,218 artifacts, 94 source/56 selected/15 checkpoint fixtures, current/pinned library/features/store and 56 pinned loader proofs. All 53 retained files preserve their actual configurations/runs/scalar seeds/termination and ordered runtime diagnostics. Known 45 ownership and 34 undisposed lines match earlier records; the three added controls are clean. Compiler warnings are 0 unit/11 module, with existing signatures and one qualified line-location shift from two callback-adapter lines. Twelve capture rounds/24 PCAPs/40 records and all 44 independent artifact hashes pass.
+
+The protocol union executes 46 files/580 native runs: 575 passes, four retained assertion failures and the known runtime abort. Of the passes, 491 are literal PROTOCOLTEST verdicts and 84 are direct-assertion interframe runs (33+51) with successful native statistics. File results are 42 PASS, three declared failures and the known unexpected WifiBlockAckDataRetry failure; actual runner exit 1 is preserved. All twenty P1/R1 failure/termination/stderr comparisons match. Only the retained retry WirelessSignal undisposed diagnostic remains. Forty-one compiler warning lines have four signatures already present in retained P1/R1 records; counts across differently sized selections are not equated. Record `/home/miguel/inet-mesh-r2-final-protocol/record.json` (SHA `a4eaceeb9c9a16f3b750074cc5acf0f30239e61d663cd486fc3d2c2ceb4f9616`) retains 2,703 artifact hashes, 94 source/77 selected-support fixtures, current/pinned model/features/store and current-library loader proofs. Collector annotation revisions are preserved separately; no fixture or expectation changed.
+
+Independent review rehashes all 1,218+2,703 artifacts, source/fixture/model/loader/capture identities and actual legacy comparisons. Its generic R2 verdict is 32 PASS/14 N/A, zero flags/questions, with one final-series verification item incomplete. Scoped architecture and whitespace checks pass. Stored commit metadata and final C9 gates remain separate.
+
+A preliminary native trajectory campaign found a separate H3 queue-selection cost. Fragmentation, MacNonQos and MsduAggregation complete their native 10s limits and match all nine C1 calculated fingerprints. MacQos reaches the unchanged CPU600 limit at simulation 3.9012s/event 1215488, producing three premature mismatches; this is not a demonstrated full-10s packet trajectory difference. Root stops the remaining fifteen cases after identifying the source-proven full-queue quadratic traversal; the runner's generic cancellation wording is not a user cancellation request. Partial record `/home/miguel/inet-mesh-r2-native-fingerprint/record.json` (SHA `1aa90a4a07a32a2661c1bda4f59ebe884673177f80c21d54e67211f29dd4cd54`) preserves the failure, unchanged source/model/store and all raw evidence. A separately planned lazy-prefix correction is required before P2; neither the incomplete 19-simulation/56-check campaign nor final C9 is claimed passed. No fingerprint, expectation or time-budget replacement is authorized.
+
+## Q0 lazy A-MSDU prefix access
+
+Both BasicMsduAggregationPolicy entry points now share the same lazy prefix evaluator. The queue entry point no longer snapshots the entire tail before testing its first candidate. Selection order, eligibility/threshold hooks, lengths, native-mesh alignment and borrowed-packet ownership are unchanged. Indexed linked-list retrieval still costs quadratically in the inspected prefix; this correction removes dependence on an unrelated tail. A concrete subclass overriding only the vector entry point no longer intercepts queue calls; migration and an incompatible release fragment document overriding the queue entry point too. No queue implementation, persistent state, wire format, event or random draw changes.
+
+The counted real-queue unit reproduces 64 accesses instead of one for a rejected head with 63 followers on the original pinned R2 library. Its original before-edit fixture and failure remain preserved. The final identical fixture also fails that assertion on pinned R2, using a controlled ABI-compatible executable compiled against the current private-helper declarations; no field, vtable or public-signature change is claimed. The paired record is `/home/miguel/inet-mesh-q0-before/final-identical-fixture/record.json` (SHA `799dfdb67574f60c509772bebcd786051c62f0c30b68857cae6de51de355676b`). The corrected new unit covers eighteen internal cases plus empty-vector input in one native run, including ordered queue/vector parity, first rejection, size/count/length boundaries, native alignment, sentinels and unchanged packet ownership. Earlier setup and fixture-cleanup failures are retained; no unrelated PacketQueue cleanup fix is included.
+
+The matching debug library is `2c4454adfd00e6bd280c61b840b2f107ab4e819398f7ea8d26a3e88fded378ca`. Checkpoint `/home/miguel/inet-mesh-q0-checkpoint/record.json` (SHA `16402ac4d647894d6e4bd65fa2a0c4752f0f4c17e5f2069fffc34597081f5a93`) pins 94 production inputs, with exactly two changed files. Four focused units pass. Seven mapped protocol files execute 308 native runs: 306 passes and the unchanged N_Ampdu/Ac_Ampdu declared failures, with runner exit 0 and all seven R2 failure/termination/stderr comparisons equal. Focused runtime hygiene is clean; four existing Radio::sendUp compiler warnings are retained. This is a focused result, not a new global hygiene claim. Record `/home/miguel/inet-mesh-q0-focused/record.json` (SHA `176ff54e1cf32d7d8cb475d8a2473579e5fefe73c0af25f7628179da22255d42`) preserves exact commands, selections, source/fixture/model/features/store identities and 1,170 artifacts.
+
+The official MacQos comparison passes all three stored fingerprints under its original 10s/CPU600/run0/seed0 settings, with 133.091969s runner elapsed time. Its result serialization omits full simulation stdout, so one separate identical-input raw run records actual completion at 10s/event 1640078, 132.200085s wall time, empty stderr and the unchanged `dd36-1076/tplx`, `b703-3ef2/~tNl`, `e07d-2980/~tND` values. Raw record `/home/miguel/inet-mesh-q0-native-raw/record.json` (SHA `f1b280eddbcf4d6d30162bf3b18430d0b7e123c5dbaad636d3796576b8c32880`) and its eighteen artifacts distinguish these two executions. Total final executions are 314: four units, 308 protocol runs, one official native comparison and one raw native run. A separate unquoted-string setup attempt fails before events and is preserved. Wall elapsed time is not presented as a measured CPU percentage.
+
+The setup issue also exposed lost literal expression quotes in the earlier root R2 record's reconstructed argv arrays. The original R2 SDK execution and human log were correct. Immutable record `1aa90a4a07a32a2661c1bda4f59ebe884673177f80c21d54e67211f29dd4cd54` is retained; separate `/home/miguel/inet-mesh-r2-native-fingerprint/argv-erratum.json` (SHA `7585d806dd25021695cccdfb1c7e09708148f24fbf921d8a142ae0e6211656aa`) supplies corrected machine argv whose joins equal all five original logged commands. A joined argv log is not a shell-roundtrippable command. No workload, model, stored fingerprint, expected result or time budget changes.
+
+Independent final review verifies all 1,170+18 artifacts, the before/after oracle, source/fixture/model/loader identities, seven legacy comparisons, native end/flags/fingerprints, subclass migration and commit boundary: 23 PASS/24 N/A, zero flags/questions. Scoped architecture and whitespace checks pass. The recovered CPU-budget completion is established for this workload; no universal speedup or full 19-simulation/56-check C9 result is claimed. P2/P3 integration and the final combined-tree lifecycle/build/feature-isolation/trajectory campaign remain later work.
+
+## P2 awake windows and physical doze
+
+The power owner coordinates real SLEEP/TRANSCEIVER transitions from management-owned beacon timing, advertised windows and independent group-delivery obligations. It owns one future protocol-boundary timer; MeshMac owns a separate coalesced same-time radio continuation. Public switching observations supply the wake lead. Busy or nonreceptive observations invalidate continuous physical-idle evidence synchronously before reconsideration. Deep maintenance uses the declared lowest-peer/ten-local-period policy. Missing or invalid reference timing keeps the receiver awake for reacquisition.
+
+Power-managed HCF admission checks live original membership, peer instance, lifetime, permitted opportunity and physical readiness at actual start. Only acceptance records attempts and transmitted-DATA bounds. Refused copies leave live originals and their sequence/retry/lifetime history intact, without a DATA outcome, NAV effect, airtime sample or PERR. Pending Probe Responses are awake work through the existing copied inventory, while remaining excluded from TIM/More Data/group BUs. Custom role providers require the documented awake-coordination adaptations. Radio/IRadio/Rx and packet-core source are unchanged by P2.
+
+The matching debug library is `3c1dbd78d535319a45189573bc31b1664f55bc7180254f78bf4e3cbfcb65ec15`. Checkpoint `/home/miguel/inet-mesh-p2-corrected-production-checkpoint/record.json` (SHA `51a8bd8a2448adecf3db42ed3f8f78f8b59318eb359781a3b3ed76d018a4e984`) pins 97 production inputs. Root and the independent reviewer verify the source and current/pinned library identities. The three new protocol files pass 30 native runs: MeshAwakeWindow (10), MeshLightSleep (16) and MeshDeepSleep (4), with empty runtime stderr. Direct record `/home/miguel/inet-mesh-p2-development/direct-three-corrected-complete/record.json` has SHA `4a8c219e54d0294d355a9bc4b7544d58e598ca691d4a11b9713e6dfd689f771b`.
+
+Awake-window cases cover actual delayed beacon/Probe Response completion, rolling PostAW and exact endpoints, pending DTIM group drain beyond both timed ends, active/overlapping peers and pending peering, a real DATA/ACK straddle, receiver MoreData/physical-idle completion and interruption independently of virtual NAV, and queued-response wake/expiry. The sleeping-response case injects the management entry, then checks actual response/ACK/window timing; it does not claim radio reception of a request while asleep. Light cases prove repeated real nonzero/zero switching, strict-before own/peer beacon readiness and later ACTIVE delivery. Controlled cancellation cases cover positive IFS, live bare/three-member HT originals, never-air disposal, reentry, peer closure, expiry, BAR opportunity/budget retention and recipient/originator isolation. These owner injections are distinguished from actual RF exchanges. Natural-doze stop/crash/delete cases require conservative real wake and later ordinary delivery. Deep cases cover normal/slowed clocks, invalid-reference reacquisition and a switching lead longer than a beacon period.
+
+Development records preserve the corrected interpretation and actual defects separately. The original-only PostAW exclusion was unsupported; the selected rolling interpretation replaces that oracle, without removing the independent pending-group hold. A queued Probe Response previously lacked its own awake obligation. The same Deep fixture on development model979f exposes an early accepted reference advancing target10 to14 at896.052033356ms/event1452. The corrected model advances10 to20 and then20 to30. Before record SHA `2965f5dd040ec7666b8a827bf52284251674ffd5ebd77012ffe99d129eaddc11` and after record SHA `58e76cc1266aee6a8e53d3b77fde98cf0eccfaff00088db3864ec897c51dedfd` retain exact fixture/source qualifications. These are development comparisons, not a compatible-runtime failure claim against Q0, which lacks the coordinator API. The proposed RTS finding was withdrawn after confirming the supported profile's initialization guard; no RTS support or speculative correction is added.
+
+The final retained unit/module campaign passes 28 units/28 native runs and 29 modules/143 native runs, both exits 0. Record `/home/miguel/inet-mesh-p2-corrected-final-verification/record.json` (SHA `740b928729a5f77e1c5d8aa9dde99b6f4618671214a8fe5d25b04f20c71327c9`) preserves 1,180 raw artifact hashes, 97 source/57 fixture identities, feature/store/current/pinned-library checks and 57 loader cases. All 56 retained R2 file/configuration/run/seed/termination/stderr/ordered-hygiene comparisons match; the added Q0 prefix unit matches its historical result. Known 45 ownership and 34 undisposed diagnostics remain unchanged, with no new diagnostics. Compiler warnings are 0 unit/11 module, retaining the R2 tuples. Twelve capture rounds/24 PCAPs/40 records and 44 independent artifact hashes pass. The reviewer independently reconciles these artifacts and comparisons; this is not a global hygiene-clean claim.
+
+The full protocol campaign executes 49 files/610 native runs: 605 passes (521 literal ProtocolTest verdicts plus 84 direct-assertion interframe runs), four retained assertion failures and one known runtime abort. File results are 45 PASS, three declared failures and the known unexpected WifiBlockAckDataRetry failure. Actual runner exit 1 is preserved. All 23 nonmesh R2 comparisons match counts, failure reasons, assertion endpoints, termination, stderr and diagnostics. Record `/home/miguel/inet-mesh-p2-final-protocol/record.json` (SHA `9cfbaf0bc8a51924823b447a5b79e3fc80a1b488ef7461e0d2cdb4b39e69748f`) retains the exact commands/results, 97 source/82 fixture identities, support-library inputs and 49 current-library loader proofs. Its separate artifact manifest contains 2,801 hashes. Model, features, store and protocol support-library hashes remain unchanged. Forty-four compiler warning lines have the same four signatures as R2; the additional three Radio::sendUp occurrences come with the larger selection, rather than establishing a new warning type.
+
+Independent review reconciles the frozen source, causal direct cases, unit/module and protocol records, loader identities and retained diagnostics. Scoped architecture checks pass. Commit metadata gates are recorded separately. Production activation stays gated until P3 service periods. Final C9 trajectories/build modes/feature isolation, combined lifecycle and C10 examples remain separate, uncompleted work. No baseline, expected result or time budget is replaced.
+
+## R3 recipient member observation
+
+The generic recipient QoS data service exposes a per-invocation borrowed member callback after its existing BA receipt bookkeeping and single duplicate decision, before deleting duplicates or inserting nonduplicates into reordering. Later payload release does not observe the member again. HCF passes an inert concrete callback on bare and aggregate receive paths; direct inert callers pass null, and replacement adapters forward the same callback. Intact A-MSDU observation precedes deaggregation. This mechanism adds no power-period interpretation, Null pipeline, DCF change, duplicate cache or persistent observer.
+
+The service keeps packet ownership during the callback. The callback may copy immutable facts and withdraw existing peer/agreement state through its owners; recursive same-flow receive, immediate agreement replacement and destruction of executing components are outside the borrowed lifetime. Reordering resolves its agreement afresh. Aggregate HCF adopts all returned packets before checking withdrawal, validates again after response-mode selection and suppresses stale BA/upper delivery while disposing undelivered local copies if the flow was withdrawn. The migration guide documents the required signature and forwarding adaptations.
+
+The matching debug library is `959215d6be8e36f719460e47ce6ff2020fffae4c89e2458d05001ad3a58cc2aa`. Checkpoint `/home/miguel/inet-mesh-r3-production-checkpoint/record.json` (SHA `99019e2215f9b818be7376d7158acca8b1224540b6045c3aafbc53336711fe50`) pins 100 source/header inputs, ten focused fixtures and 82 support inputs. Root independently rehashes all 197 combined source/fixture/support/feature/store/current-library/pinned-library paths without drift. The first fresh debug build and scoped architecture checks pass.
+
+Final focused unit/module execution passes one duplicate-removal unit and three modules/23 native cases: reordering (11), Compressed input (2) and the new observer (10), both runner exits zero. Record `/home/miguel/inet-mesh-r3-focused/record.json` (SHA `5c85d77bc426ddb067341c14bfebbc9c1dae419a13fb22fdc5a0e15f4c489967`) preserves its initial unresolved-hygiene status rather than overwriting that evidence. The new observer and both other modules have empty runtime stderr and no ownership/undisposed diagnostics; reordering's native termination and diagnostic tuples exactly match P2. The observer uses real service/duplicate/BA/reorder owners and actual HCF receive entries, including last-member retirement, suppression of stale BA/upper delivery, exact disposal and independent-peer progress. These are accepted-input owner probes, not RF negotiation/reception proof.
+
+The newly selected duplicate unit emits four ownership warnings when its fixture deletes returned packets without taking them from the service. An isolated exact-P2 original-fixture run against the preserved P2 library reproduces all four byte-for-byte at time zero/event one, while passing with no stderr/undisposed objects. Comparison `/home/miguel/inet-mesh-r3-p2-comparison/record.json` (SHA `e51b8c50b60b30b7d2fd3a2665d98753645997d36dfa752a0a5ab030244afdba`) and separate `r3-evidence-amendment.json` (SHA `b69d222df2c3715babaad290263306980e9b7ca4e3e9af7beafbb66029ef5e52`) close attribution as PASS with inherited hygiene. These four newly selected warnings are a distinct P2-proven category, outside the earlier 45-diagnostic selection; this is not an ownership-clean claim. The first isolated support-build failure from a missing generated feature header is preserved separately and supplies no behavioral evidence. No fixture ownership repair or baseline change is included.
+
+Six directly mapped protocol files pass all 143 native runs, runner exit zero: Ac_BlockAck (3), N_CompressedBa (1), WifiDataDelivery (1), WifiDuplicateWithRetry (1), MeshAirtimeMetric (9) and MeshAmpduBlockAck (128). Record `/home/miguel/inet-mesh-r3-final-protocol/record.json` (SHA `648f8628f0102947f2eddc67d7a786142e34d96f6b9b74eab9d58a846d21e7f5`) preserves 729 artifact hashes and six loader proofs. All six P2 count/assertion/termination/stderr/diagnostic comparisons match; the separate `native-tuple-comparison.json` (SHA `2aa52a528a57949fe025c310b5333771f5420a8759fa088a9bd2a383007ec86f`) verifies all 143 configuration/run/iteration/seed-zero tuples and unchanged shared seed authorities. Runtime stderr/ownership/undisposed counts are zero for this selection; three existing Radio::sendUp compiler warnings remain. All frozen inputs, model, features and stored fingerprints stay unchanged.
+
+Independent review reconciles source, direct evidence, focused unit/module controls, parent hygiene attribution and all protocol records. Commit metadata gates are recorded separately. The parent has no callback API, so inability to compile this new observer there is capability absence, not a demonstrated parent runtime failure. Full combined C9 verification and P3 service-period behavior remain separate. No expectation, baseline or time budget is replaced.
+
+## P3 directional mesh service periods
+
+MeshPowerSave owns one current OWNER and RECIPIENT per established peer,
+provisional trigger correlation and a bounded ending cohort. HCF retains
+selection, original lifetime, ordinary recovery, ACK/BA/BAR and actual-start
+ownership. Receiver initiation follows accepted eligible control; the sender
+confirms from its own acknowledgment. Ending instead requires actual local
+response transmission at the recipient and a matching received acknowledgment
+at the owner. Cancelled-before-air and transmitted-but-lost responses remain
+different outcomes. Accepted duplicate/out-of-order payload still carries
+current-period control before upper delivery.
+
+Fresh initiation distinguishes physical awake knowledge from the standard's
+mode/window cases. The selected temporal boundary uses receiver-derived PPDU
+start, preserving a valid frame that completes after its awake window. An
+opposite period alone does not grant a new DEEP-to-DEEP direction. The first
+actual EOSP1 starts freeze the cohort; earlier EOSP0 attempts do not consume
+ending retries. Reversible admission charges nothing, actual repeats share the
+declared allowance, and ordinary retry/lifetime history persists. A bounded
+expiry fallback inherits spent allowance, including a lower cap; matching
+acknowledgment wins before cap-only failure. Local ACTIVE withdraws obsolete
+recipient roles before synchronous mode publication. Group QoS Null remains
+an independent No Ack control, not a buffered group payload or TIM bit.
+
+The corrected debug model is
+`6836d9ea0ab0a1d55c0da7ce3b68cd6b3edc970d6892229d440dd2cdd287d228`.
+Checkpoint `/home/miguel/inet-mesh-p3-corrected-production-checkpoint/record.json`
+(SHA `0aa6a248b52ce18b647c2d9af9c83c0565ba27d89a7f56c723ccfe22d504baaf`)
+pins 167 source inputs, 112 fixtures, 99 support inputs and four feature files,
+with copied input snapshots and matching current/pinned libraries. The fresh
+debug build passes. No source, fixture, feature or fingerprint-store drift
+occurred during the corrected campaigns.
+
+The original full 52-file campaign on model 25e10e4f remains a failure: it starts
+667 of 705 requested runs, with 658 passes, four known assertion failures and
+five aborts. Four new power-fixture aborts skip 38 later runs. Record
+`/home/miguel/inet-mesh-p3-final-protocol/record.json` (SHA
+`b2c7c06eaba941f65b4dde515fc9ea21a4a78084a88d7a4bee3c02cff66a0467`)
+and 2,783 archived artifacts remain unchanged. Private exact-model diagnosis
+shows that intermediate P1/P2 fixtures omitted their earlier mode-only Null
+admission seam. Completing three test-policy overrides preserves the original
+assertions, times, ACK commitment and all non-Null production decisions.
+The More Data failure follows the same blocked mode announcement, not an
+incorrect final-PPDU exclusion. A separate production group-mode regression
+is reproduced and corrected: with the same executable, the old model leaves
+its broadcast command queued without air at 1.4s; the corrected model actually
+transmits, completes and updates the receiver. That causal record is
+`/home/miguel/inet-mesh-p3-group-dev/record.json` (SHA
+`ff5704809e50bd3b9cd0e48539bda26aadde144e3b312aae5eaea33d40f9cb54`).
+
+The corrected eight-file protocol campaign passes all 153 native runs, exit 0:
+47 peer, 20 recovery, 29 HT/VHT and the 57 retained P1/P2 power cases. Runtime
+stderr, ownership and undisposed diagnostics are empty. Record
+`/home/miguel/inet-mesh-p3-corrected-protocol/record.json` (SHA
+`a380aaf3830c39ce0428062fec2c68cec8d6551a11c07c40646007a93cda9baf`)
+retains 712 artifact hashes and eight loader proofs. Protocol support-library
+hashes match before and after. The five P1/P2 files exactly match their prior
+native inputs, outcomes, end times/events, generated assertions and hygiene.
+The 20 recovery and 29 HT/VHT cases match their preceding controls. Peer39 ends at the
+same 0.26s with event 496 rather than 480; association with the newly admitted
+group indication is an inference, while the separate new Peer46 case proves
+its actual air directly. API-only RSPI/deadline checks, controlled collision
+and discard-owner calls, source-only capability-downgrade reachability and
+the structurally excluded unchanged-deadline IFS race are explicitly bounded
+in the reviewer document.
+
+Static include/configuration and disabled-policy analysis excludes the other
+44 files from this small correction. Their 142 unchanged closure inputs and
+fixtures are verified; their historical model 25e10e4f results cover 553 runs:
+548 passes, four known assertion failures and one known abort. All 23 nonmesh
+P2 comparisons and six R3 controls match. The composition record
+`/home/miguel/inet-mesh-p3-corrected-protocol/composition.json` (SHA
+`b0b92fc8ae86517b4df2561ede6683846ee44cde98c4a383e4c59dad8423c5db`)
+therefore covers 52 files/706 runs with 701 passes and five known failure
+outcomes, using explicitly different model identities. This is not a
+same-model 52-file execution; C9 must run the full final union again.
+
+On the corrected model, 29 unit files/29 runs and 31 module files/155 runs pass,
+both exits 0. Record `/home/miguel/inet-mesh-p3-corrected-retained-final/record.json`
+(SHA `3ce9a278a76d665b272bd611b8a34f5481c564ea8d5e568833fda1ce975b6ead`)
+retains 1,447 artifact hashes, all 60 pinned-library loader checks and at least
+one passive live mapping per executable. Native inputs, end boundaries and
+ordered diagnostics exactly match P2/R3: 49 ownership warnings, 34 undisposed
+objects and 11 module compiler warnings are inherited. No global hygiene-clean
+claim is made. Release/feature-disabled builds, combined lifecycle and native
+fingerprint comparisons, examples and upstream integration remain later work.
+No expected result, baseline or time budget is replaced.
+
+## Scenario power-policy control (S0)
+
+The existing power owner now implements ordinary ScenarioManager dispatch for
+`set-mesh-power-mode`. It validates the literal individual peer address, mode,
+enabled/operational owner and established peering before requesting a transition.
+This is configuration integration, with no additional IEEE wire requirement.
+ScenarioManager owns scheduling; the existing policy owns transition completion.
+Lower activity still requires a real acknowledgment. No requested policy is
+automatically reapplied after re-peering.
+
+The fresh debug model is
+`085be6bbfc4bd58b4469d21e6e658c229c3bdbbab91c45d9dba52a630e668a3a`.
+The three new `MeshPowerPolicyControl` cases pass through ordinary dispatch,
+covering acknowledged LIGHT and DEEP requests, lost ACK without false local
+commitment, and subsequent ACTIVE requests. Direct parser rejection checks are
+separately identified; they establish validation before mutation, not dispatcher
+coverage. Retained `MeshPowerModes` (19) and `MeshPeerServicePeriod` (47) cases
+also pass: 69 native passes, exit 0, empty runtime stderr and hygiene diagnostics.
+Both retained controls match corrected P3 native inputs and observations.
+
+Record `/home/miguel/inet-mesh-s0-dev/record.json` (SHA
+`ab0e3b82f6f006e02ae54467bad8b2967d6afbaf18e9f95f7ab571582aeec57f`)
+retains 461 checked artifacts. Checkpoint
+`/home/miguel/inet-mesh-s0-production-checkpoint/record.json` (SHA
+`4bee8cf95d0f63f8c06cd159fe7076e82bcb3821127b7b99bc984cff53e8e23a`)
+freezes 173 source, three fixture, 99 support and four feature inputs, with
+matching current and pinned libraries. The parent lacks the scriptable role;
+that source-level capability gap is not presented as a runtime parent failure.
+See [the reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-s0-policy-control.md).
+Final combined validation and production examples remain separate stages.
+
+## New-source C++ cleanup (L1)
+
+A mechanical pass normalizes 15 new header guards, concatenates 18 namespace
+blocks, removes 81 redundant `virtual` specifiers, adds four destructor
+`override` annotations and renames three local scalar constants. The exact
+26-file transformation excludes existing declarations apart from two introduced
+by this series, generated source and the sealed packet subsystem. Independent
+reconstruction finds no unrelated algorithm or ownership change.
+
+The fresh final debug model is
+`343941e4f100d918aa4957671182443861e9b8d0ce158e0974747bb9401e7e1a`.
+Its A-MPDU and mesh serializer units pass two native runs; the real A-MPDU
+capture module passes all 12. Native inputs, assertion artifacts, end boundaries
+and diagnostics match the retained controls. Earlier broader L1 controls
+(eight unit and 25 module runs) pass on intermediate model cf399; they are
+not relabeled final-model runs. C9 reruns the full final union.
+
+Record `/home/miguel/inet-mesh-l1-dev/record.json` (SHA
+`d00521353bf740972a5d6f2e1e668adc2c895f58616a65a50ec7446092dace99`)
+retains 513 checked artifacts. Exported function/type/vtable/layout signatures
+remain unchanged. One dynamically visible weak function-local constant symbol
+changes spelling in a helper first introduced by this unpublished series;
+this bounded implementation-symbol change is accepted and explicitly recorded.
+The full symbol sets are therefore not identical.
+
+Compiler-matched clang-tidy covers all eight new translation units and the
+two existing owners with new declarations. A follow-up verifies removal of
+the three constant-naming findings. The output remains not clean: inherited
+Tx/Hcf declarations and other recommendations remain visible. Independent
+source triage checks all 18 optional-access sites, bounded serializer products,
+exception paths, intentional `strcmp` use and API-result/order recommendations
+without finding an additional supported runtime defect. No speculative catch,
+new suppression, weakened configuration or baseline replacement is introduced.
+
+## Checked service-period notification type (S1)
+
+An ordinary LIGHT example with normal signal checking aborts on its first
+period outcome at 1.204019501037s/event1941: `type=object` is not a registered
+OMNeT++ class name. The earlier protocol runner disables signal checking, so
+its passing exchanges do not cover this metadata contract. A provisional
+generic `cObject` declaration also fails in the direct checked module probe.
+Both failures and their raw diagnostics remain preserved.
+
+The existing nested `PeriodOutcome` is now registered through
+`Register_Abstract_Class`, matching `IArp::Notification`, and its qualified
+class name is declared in NED. There is no new constructor, payload/state,
+callback ordering or ownership change. The actual class restriction remains
+enabled; unrelated objects are rejected before listener delivery.
+
+Fresh debug model
+`71e21e67a46ca90a9f0142dff2fcce424eb4219229495b9273b6b44185d951ea`
+passes the new module test, General/run0/seed0: all six direction/outcome
+combinations reach the listener, an unrelated object does not, and the prior
+signal-check setting is restored. This creates the real production NED
+component without initializing its dependencies and proves metadata/delivery,
+not RF or lifecycle behavior. The unchanged ordinary LIGHT workload also
+finishes at 6s/event8453 and delivers all ten messages with normal checking.
+Its inherited INI sections and scenario script match the original failed
+workload; this is independent production-path confirmation.
+
+Record `/home/miguel/inet-mesh-s1-final-evidence/record.json` (SHA
+`bd8f48db9e957626e4740dc20c9ed3338d42f4fa4128b5fcf2201c85e6af26b7`)
+retains 46 artifact hashes and links the fresh build and full source/library
+freeze. The module has empty stderr and clean runtime hygiene. Immediate
+post-run loader output was observed only in the author's tool transcript;
+the transparent post-hoc archive-resolution annex identifies its private
+pinned library and makes no historical live-map claim. The earlier record's
+loader wording is preserved and corrected. Final C9 includes the signal test:
+29 unit, 33 module and 53
+protocol files. Execution of that full final union remains separately recorded.
+
+## Final lifecycle and compatibility validation (C9)
+
+The final debug model is
+`71e21e67a46ca90a9f0142dff2fcce424eb4219229495b9273b6b44185d951ea`.
+Checkpoint `/home/miguel/inet-mesh-final-c9-checkpoint/record.json` (SHA
+`39d858d2479043ffd7b786cbe3bda6ff65bc919cff6cb67dfb6ef3d182fa63b8`)
+pins 173 source, 115 selected fixture, 100 support and four feature inputs,
+with matching current/copied inputs and current/pinned libraries. The two
+already-authored C10 NED description edits are comments only; removing
+comments yields the same interpreted declarations as the parent. There is
+no C9 production change or baseline replacement.
+
+New isolated lifecycle coverage exercises four real owners (management,
+forwarding, HWMP and metric) under stop, crash and deletion, using controlled
+dependencies without initializing real HCF/Tx/radio. It preserves intentional
+history and timer objects rather than demanding every map be empty. Three
+new LightSleep cases prove an armed future boundary and queued MAC review
+before policy teardown, harmless continuation, preserved committed MIB state
+and fresh restart. Original cases12–14 retain their timing. A new peer case
+uses actual management retirement/re-peering and a genuine production-stamped
+BA at the API boundary: an old stamp cannot confirm a replacement ending
+role or change the independent peer. This is not a late RF response. Existing
+HT/VHT aggregate closures now inspect committed PHY/rate/power views and their
+retirement while preserving another peer. None claims whole-NIC restart.
+
+The same final model passes 29 unit files/29 native runs and 33 module
+files/168 runs. Record
+`/home/miguel/inet-mesh-final-c9-unit-module/record.json` (SHA
+`eb1809f184dbd84b7344632b25794350ee51d35af7cbdceca07c146b9991b4e7`)
+retains 1,477 checked artifacts. Retained native inputs, observations and
+diagnostics match P2/R3 exactly; the twelve lifecycle cases and signal case
+pass separately. All 62 executables have pinned-library loader proofs and
+at least one passive live mapping, not 197 separate captures. The 49 ownership
+warnings, 34 undisposed objects and 11 module compiler warnings are inherited;
+unit compiler warnings and new-fixture runtime hygiene are empty.
+
+The full 53-file protocol union starts all 713 native runs: 708 PASS,
+four retained assertion failures and one retained abort, runner exit1.
+Record `/home/miguel/inet-mesh-final-c9-protocol/record.json` (SHA
+`bad69a535360bb699e1d154329b5cd5c1e28c300522397a23b7c56069a5c01c2`)
+retains 2,978 artifacts. The exact comparison record
+`/home/miguel/inet-mesh-final-c9-protocol-comparison.json` (SHA
+`810293715c612ca02099da4708dd28eb491341b457ffc1ca7b81794c1c2858d2`)
+finds no differences in retained configuration/run/scenario, assertions,
+end boundaries, ordered diagnostics or stderr against eight corrected P3,
+44 unaffected original P3 and the S0 references. Light0–15 and Peer0–46
+match; appended Light16–18 and Peer47 pass. All 53 loader queries resolve the
+matching model/support libraries and support hashes match before/after.
+Seed0 comes from effective INI authority, not a fabricated printed run field.
+
+The retained failures are `N_Ampdu` (2s/event149187), `Ac_Ampdu`
+(2s/event161849), `Ac_VhtIe` (2.5s/event48880), and
+`WifiBlockAckDataRetry` run0 (deadline at1.023764276562s/event3708).
+The latter's run1 retains the exact-time transmission error at
+1.014105463846s/event2639 and its teardown diagnostic. These remain failures;
+neither declarations, expectations nor time budgets are changed.
+
+Native legacy trajectory validation completes all 19 simulations at their
+original1/10/100s limits, run0/seed0 and CPU limit600s, with all 56 ingredient
+checks PASS. Reconciliation
+`/home/miguel/inet-mesh-final-native-v3-reconciliation/record.json` (SHA
+`aecd3180fb74c7e6f37865a703f99d3a325a751b21b94c23df78a906c705ebcc`)
+matches both stored fingerprints and C1 actual fingerprints, parameters,
+completion times/events and diagnostics. No field difference or extraction
+gap remains. Eighteen SDK command displays differ only in independent option
+order; literal quoted values are retained without shlex reconstruction.
+Passive process/model proof covers seven late simulations, not the earlier
+twelve. The inner runner exits0 with no post-input drift. The outer tool
+session subsequently reports143 after the completed records/stdout; its cause
+is unassigned and preserved separately, without calling it a simulation
+failure or a clean outer-session exit. Earlier interrupted campaigns retain
+their original identities and are not relabeled completed execution.
+
+Fresh main release compilation also passes, including a dependency-aware
+rebuild/relink after S1. Release checkpoint
+`/home/miguel/inet-mesh-final-release-checkpoint/record.json` (SHA
+`5f22f5b6d67c7ab0f79fb022442b753bb0d58957e8be800e1cad7cc971ac06a0`)
+pins library `98e1ee11255d3960ab2222f08a8e7312dd999bd7facb6c972cb1a0b4dfc7f194`.
+This is compilation evidence, not a release-mode behavioral campaign.
+
+In an isolated checkout, disabling Ieee80211 removes its 17-feature dependent
+closure: fourteen formerly enabled features and three already disabled.
+The disabled release build succeeds with its macro absent. After restoring
+the exact original feature state/modes, enabled debug and release builds
+succeed. Record `/home/miguel/inet-mesh-final-feature-boundary-record/record.json`
+(SHA `4f69fe20128d859d4feb00be8fa4d6e4d7f329bf6ca40334550aa2d3ba63329f`)
+retains 110 checked artifacts and all interruption/restoration evidence.
+The off build uses L1; both S1 changes are inside its excluded packages.
+Restored builds use S1 and dependency-verified distinct-inode COW copies of
+1,713 matching objects per mode, then compile all twenty differing generated
+translation units and relink locally. They are qualified incremental builds,
+not independent full recompilations. No disabled-mode simulation runs and
+the main feature state remains unchanged.
+
+An isolated uncommitted merge of S1 with upstream
+`7adc565ce98ced794011bd50c7113b7859f47a3b` also builds and passes the directly
+affected three module files/five native runs. Upstream `SnirInterval_1` uses
+run0–2/seed0–2; the topic duplicate-primary-copy and HT/VHT timing cases use
+run0/seed0. Actual observations, end boundaries and diagnostics match their
+upstream or C9 references exactly. Record
+`/home/miguel/inet-mesh-upstream-integration-evidence/merged-candidate/record.json`
+(SHA `b8648feed5724ecdd3092a54b5516a5e873f1c5fc0d939337bbab18ad8eb37dc`)
+retains the own-build/source/loader proof; no adapter correction or main-branch
+rewrite is required. The remaining C10 changes are examples/documentation
+and test evidence, with final publication reconciliation recorded separately.
+
+## Ordinary-host profiles and user documentation (C10)
+
+Fourteen named configurations use ordinary StandardHost nodes, production
+automatic peering/HWMP/power policy and ScenarioManager, with no custom example
+library or test subclasses. IPv4 endpoints share one subnet, dynamic ARP and
+direct interface routes; IP forwarding is disabled everywhere. Root-level
+production recorders supply separate transmit and good-receive radiotap
+captures, including split native aggregate members. Existing WirelessExamples
+dependencies already cover the package; no feature flag is added.
+
+All fourteen final configurations run in debug, run0/seed0, on the frozen
+model71e21 and finish normally at their declared time limits. Final record
+`/home/miguel/inet-mesh-final-c10-analysis/final-record.json` (SHA
+`cc1f621cf7bf6c5b60db5ab1f26c64fe29a78d84e72ed048b388aa8b968c26fc`)
+and final evidence manifest (SHA
+`3821ca3258a2fbf7ef4c7bb3afe60e583e3be99a6a857bd143b73b49ff1d9916`)
+retain the complete input/command/source/library/feature/store chain, 195 raw
+artifact hashes, 116 original analysis hashes and 122 final-manifest entries.
+Those manifests overlap and are not 433 unique artifacts. Independent review
+redecodes all 88 captures and verifies all 11,280 captured member FCS records;
+no direct endpoint good reception occurs. All final runs have empty warning,
+ownership and undisposed diagnostics.
+
+| Final profiles | Actual bounded result |
+| --- | --- |
+| LineOfdm / DiamondOfdm | 10/10 each; native relay preserves IP TTL32 while mesh TTL31 becomes30. The diamond's ten source DATA frames choose the lower-airtime branch. |
+| FailureAlternate | 60 sent/59 received. IPID21 makes seven relay2 attempts at4.100327120–4.106573120s, reaches the terminal drop at4.106623120268s, and produces one PERR transmission at4.106724120s. Source DATA through relay1 resumes at7.272941032s; recovery is not claimed immediate. |
+| RootPreq / RootRann | 10/10 each, with actual proactive PREQ or RANN relay and unicast confirmation exchanges. |
+| HtNested / VhtNested / both Metric1 controls | 24/24 each; actual three-MPDU/six-MSDU nested PPDUs and positive compressed Block Ack. HT/VHT default metric2 and explicit metric1 signaling are checked separately. |
+| LightRelay / DeepRelay | 10/10 each before ACTIVE restoration at4s; initial ARP is generated while the relay is actually asleep and later group-relayed. Lower-mode Null/peer reception/ACK and subsequent radio sleep are independently correlated. |
+| DtimGroup | 10/10 unicast plus one broadcast UDP received once at each of the two sinks. Actual DTIM group bits, group release, More Data and No Ack policy are checked. |
+| SleepingHtNested / SleepingVhtNested | 24/24 each; source ending PPDUs contain two A-MSDU MPDUs/four MSDUs with EOSP and matching positive compressed Block Ack. |
+
+The exact controlled HT source state is also observed through the public
+`getServicePeriods()` getter before OWNER retirement at1.308272753286s/event2727:
+peer0A-AA-00-00-00-02, ending=true, cap7, spent0, cohort/started{2247,2250},
+retired empty and pending CONFIRMED. The real HCF acknowledgment stack reports
+two acknowledged members. Record
+`/home/miguel/inet-mesh-c10-mpsp-state-view-attempt2/inspection-record.json` is described in
+the local `c10-mpsp-state-view.md` report; its original SHA is
+`078da60c4cfd4ebe966bad5f55dd993e1b4c4c981c245c1a62e4bc5c8886aef6`.
+This private process is deliberately stopped after inspection, not counted as
+a fifteenth completed example or a VHT internal-state snapshot. Its earlier
+debug-on-errors trap occurred before an intentional caught exception; it is
+preserved without attributing a production fault or NED-root causality.
+
+Earlier configuration probes remain distinct. Hidden diamond branches caused
+overlapping ARP group transmissions and zero delivery; the final geometry
+lets the branches hear one another. The initial failure configuration's
+coincidence-guard abort is retained; its explicit warning setting remains,
+with zero such warnings in the final run. A directed UDP broadcast originally
+failed IPv4's unspecified-interface policy, so the group example explicitly
+enables local limited broadcast without enabling IP forwarding. DEEP's missed
+group PREQ is a legitimate skipped peer-beacon case under14.15.5/14.15.8:
+the final example keeps endpoints ACTIVE and places reverse discovery inside
+the relay's own awake window. It demonstrates that chosen rendezvous, not
+guaranteed reception of every peer's group transmission. The original Q0
+prototype is feasibility evidence only and is not relabeled final validation.
+
+The user guide and example README describe fixed PHY/profile selection, metric
+units/estimators/reset rules, finite queues/lifetimes, peer-mode commands,
+DEEP timing policy and the separate meaning of mesh power save versus HT
+SMPS/APSD. They retain open/fixed-channel/native-endpoint and lifecycle limits,
+without IPv6, external interoperability or battery-life-accuracy claims.
+Two existing NED edits change descriptions only. Four PR and two README
+Mermaid diagrams are locally rendered and independently viewed; their blocks
+match the rendered artifacts, with no clipping, render errors or semicolons.

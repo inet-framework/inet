@@ -1,0 +1,3 @@
+IEEE 802.11 transmission cancellation contract
+
+Custom implementations of ITx must implement cancelPendingTransmission(ICallback *). It cancels only the matching callback's accepted IFS wait before transmission starts, without a completion callback or NAV update. Idle, mismatched and on-air requests return false. Custom frame-sequence handlers used with mesh must also support interruption of that canceled TRANSMIT step. The supplied Tx and FrameSequenceHandler implement these operations for safe mesh peer teardown.

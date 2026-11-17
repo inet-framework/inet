@@ -1,0 +1,226 @@
+%description:
+On-demand HWMP over two production A-B-C meshes with metricIDs1/2 and asymmetric
+fixed PHY costs. Two source MSDUs queue/release exactly once; immediate reverse
+traffic uses the already validated path and derived self-precursor admission.
+Malformed whole bodies, external addresses, nonpeer/closed input and own loops
+must not mutate protocol state; a subsequent valid control must process normally.
+
+%file: HwmpDiscovery.cc
+#include "mesh/HwmpTestSupport.h"
+
+class HwmpDiscoveryDriver : public cSimpleModule, public cListener
+{
+    int delivered[6] = {};
+    int originated[6] = {};
+    int replies[6] = {};
+    simtime_t lastControlRx[6];
+    bool relayQueued[6] = {};
+    bool relayReleased[6] = {};
+    bool targetReleased[6] = {};
+    uint32_t reverseMetric[6] = {}, forwardMetric[6] = {};
+    int pathEvents = 0, discoveryEvents = 0;
+    MacAddress unknown = MacAddress("02:00:00:00:10:01");
+    MacAddress malformedOrigin = MacAddress("02:00:00:00:10:02");
+    MacAddress externalOrigin = MacAddress("02:00:00:00:10:03");
+    MacAddress closedOrigin = MacAddress("02:00:00:00:10:04");
+    void source(int from, int to, const char *name) {
+        sendDirect(fixtureMsdu(name,meshMib(to)->address),meshInterface(from)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto name : {"packetSentToUpper","packetReceivedFromLower","packetSentToLower","hwmpTestHandoff","hwmpPathUpdated","hwmpDiscoveryChanged"}) network->subscribe(registerSignal(name),this);
+        const int times[] = {1,5,10,50,60,75,80,95,100,110,120,130,140,160,170};
+        for (int i = 0; i < 15; i++) scheduleAt(SimTime(times[i],SIMTIME_MS),new cMessage("discovery-case",i));
+        for (int i : {2,5}) scheduleAt(SimTime(59900,SIMTIME_US),new cMessage("queue-at-target",400+i));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override {
+        auto owner = check_and_cast<Hwmp *>(source);
+        if (signal == Hwmp::pathUpdatedSignal) {
+            auto change = check_and_cast<Hwmp::PathChange *>(details);
+            ASSERT(change->path == owner->getPathInfo(change->destination));
+            ASSERT(value == owner->findPath(change->destination).has_value()); pathEvents++;
+        }
+        if (signal == Hwmp::discoveryChangedSignal) {
+            auto change = check_and_cast<Hwmp::DiscoveryChange *>(details);
+            ASSERT(value == owner->isDiscoveryActive(change->destination));
+            ASSERT(change->attempts == owner->getDiscoveryAttempts(change->destination));
+            ASSERT(change->nextAttempt == owner->getDiscoveryDeadline(change->destination)); discoveryEvents++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        for (int i = 0; i < 6; i++) {
+            if (source == meshInterface(i)->getSubmodule("mac") && signal == registerSignal("packetSentToUpper")) {
+                ASSERT(i%3 != 1); delivered[i]++;
+                auto addresses = packet->getTag<MacAddressInd>();
+                int expectedSource = std::string(packet->getName()) == "relay-pending" ? i+1 : (std::string(packet->getName()) == "reverse" || std::string(packet->getName()) == "target-pending") ? i+2 : i-2;
+                ASSERT(addresses->getSrcAddress() == meshMib(expectedSource)->address && addresses->getDestAddress() == meshMib(i)->address);
+                ASSERT(packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+            }
+            if (source == meshInterface(i)->getSubmodule("mac") && signal == registerSignal("packetReceivedFromLower")) {
+                auto header = dynamicPtrCast<const Ieee80211MeshActionFrame>(packet->peekAtFront<Ieee80211MacHeader>());
+                if (header) {
+                    lastControlRx[i] = simTime();
+                    if (simTime() < SimTime(95,SIMTIME_MS) && header->getCategory() == MESH_ACTION && header->getMeshAction() == MESH_HWMP_PATH_SELECTION) {
+                        auto body = packet->peekDataAt<Ieee80211HwmpFrame>(header->getChunkLength(),packet->getDataLength()-header->getChunkLength()-B(4));
+                        if (i%3 == 2 && body->getPreqsArraySize() && body->getPreqs(0).getOriginator() == meshMib(i-2)->address)
+                            reverseMetric[i] = Hwmp::addMetric(body->getPreqs(0).getMetric(),outgoingMetric(i,i-1));
+                        if (i%3 == 0 && body->getPrepsArraySize() && body->getPreps(0).target == meshMib(i+2)->address)
+                            forwardMetric[i] = Hwmp::addMetric(body->getPreps(0).metric,outgoingMetric(i,i+1));
+                    }
+                }
+            }
+            if (source != meshManagement(i) || signal != registerSignal("hwmpTestHandoff")) continue;
+            auto body = packet->peekAtFront<Ieee80211HwmpFrame>();
+            for (size_t j = 0; j < body->getPreqsArraySize(); j++) {
+                const auto& preq = body->getPreqs(j);
+                if (preq.getOriginator() == meshMib(i)->address) {
+                    originated[i]++; ASSERT(preq.getHopCount() == 0 && preq.getMetric() == 0);
+                    if (i%3 == 0) {
+                        ASSERT(preq.getTargets(0).flags == 4 && preq.getTargets(0).sequenceNumber == 0);
+                        ASSERT(simTime() == SimTime(60,SIMTIME_MS));
+                    }
+                }
+                else if (preq.getOriginator() == meshMib((i/3)*3)->address && i%3 == 1) {
+                    ASSERT(preq.getHopCount() == 1 && preq.getMetric() == outgoingMetric(i,i-1));
+                    ASSERT(simTime() == lastControlRx[i]);
+                    if (!relayQueued[i]) { relayQueued[i] = true; scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("queue-reverse",200+i)); }
+                }
+            }
+            for (size_t j = 0; j < body->getPrepsArraySize(); j++) {
+                const auto& prep = body->getPreps(j); replies[i]++;
+                if (prep.target == meshMib((i/3)*3+2)->address && i%3 == 2) {
+                    ASSERT(prep.hopCount == 0 && prep.metric == 0 && meshForwarding(i)->getNumPendingPackets() == 1);
+                    scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("released-at-target",500+i));
+                }
+                if (prep.target == meshMib((i/3)*3+2)->address && i%3 == 1) {
+                    ASSERT(prep.hopCount == 1 && prep.metric == outgoingMetric(i,i+1));
+                    ASSERT(simTime() == lastControlRx[i]);
+                    ASSERT(meshForwarding(i)->getNumPendingPackets() == 1);
+                    scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("released-reverse",300+i));
+                }
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() >= 500) {
+            int i = message->getKind()-500;
+            ASSERT(meshForwarding(i)->getNumPendingPackets() == 0 && !hwmp(i)->isDiscoveryActive(meshMib(i-2)->address));
+            targetReleased[i] = true; delete message; return;
+        }
+        if (message->getKind() >= 400) {
+            int i = message->getKind()-400; ASSERT(!hwmp(i)->findPath(meshMib(i-2)->address));
+            source(i,i-2,"target-pending"); delete message; return;
+        }
+        if (message->getKind() >= 300) {
+            int i = message->getKind()-300;
+            ASSERT(meshForwarding(i)->getNumPendingPackets() == 0 && !hwmp(i)->isDiscoveryActive(meshMib(i-1)->address));
+            relayReleased[i] = true; delete message; return;
+        }
+        if (message->getKind() >= 200) {
+            int i = message->getKind()-200;
+            ASSERT(!hwmp(i)->findPath(meshMib(i-1)->address)); source(i,i-1,"relay-pending");
+            scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("queued-reverse",100+i)); delete message; return;
+        }
+        if (message->getKind() >= 100) {
+            ASSERT(meshForwarding(message->getKind()-100)->getNumPendingPackets() == 1); delete message; return;
+        }
+        switch (message->getKind()) {
+            case 0: sendHwmpTest(0,testBody(testPreq(unknown,meshMib(1)->address,1,1)),meshMib(1)->address); break;
+            case 1: meshManagement(0)->openPeer(meshMib(1)->address); meshManagement(3)->openPeer(meshMib(4)->address); break;
+            case 2: meshManagement(1)->openPeer(meshMib(2)->address); meshManagement(4)->openPeer(meshMib(5)->address); break;
+            case 3:
+                ASSERT(!hwmp(1)->getPathInfo(unknown));
+                for (int b : {0,3}) ASSERT(meshMib(b)->isMeshPeerEstablished(meshMib(b+1)->address) && meshMib(b+1)->isMeshPeerEstablished(meshMib(b+2)->address));
+                break;
+            case 4: for (int b : {0,3}) { source(b,b+2,"first"); source(b,b+2,"second"); } break;
+            case 5:
+                for (int b : {0,3}) {
+                    ASSERT(delivered[b+2] == 2 && delivered[b+1] == 0 && originated[b] == 1);
+                    auto reverse = hwmp(b+2)->getPathInfo(meshMib(b)->address);
+                    auto forward = hwmp(b)->getPathInfo(meshMib(b+2)->address);
+                    ASSERT(reverse && reverse->validated && reverse->metric == reverseMetric[b+2]);
+                    ASSERT(forward && forward->validated && forward->metric == forwardMetric[b]);
+                    ASSERT(hwmp(b+1)->getPrecursorExpiry(meshMib(b+2)->address,meshMib(b)->address) > simTime());
+                    ASSERT(hwmp(b+2)->getPrecursorExpiry(meshMib(b+2)->address,meshMib(b+1)->address) > simTime());
+                    ASSERT(hwmp(b)->getPrecursorExpiry(meshMib(b)->address,meshMib(b+1)->address) > simTime());
+                    ASSERT(meshForwarding(b)->getNumPendingPackets() == 0 && !hwmp(b)->isDiscoveryActive(meshMib(b+2)->address));
+                    ASSERT(relayReleased[b+1] && targetReleased[b+2] && delivered[b] == 2);
+                }
+                break;
+            case 6: for (int b : {0,3}) source(b+2,b,"reverse"); break;
+            case 7: for (int b : {0,3}) ASSERT(delivered[b] == 3 && originated[b+2] == 1); break;
+            case 8: {
+                auto body = testBody(testPreq(malformedOrigin,meshMib(1)->address,2,2));
+                HwmpPrep prep; prep.target = unknown; prep.originator = meshMib(0)->address; prep.ttl = 8; prep.lifetime = 100;
+                body->setPrepsArraySize(1); body->setPreps(0,prep); body->addChunkLength(B(33));
+                sendHwmpTest(0,body,meshMib(1)->address,true); break;
+            }
+            case 9: ASSERT(!hwmp(1)->getPathInfo(malformedOrigin) && !hwmp(1)->getPathInfo(unknown));
+                sendHwmpTest(0,testBody(testPreq(malformedOrigin,meshMib(1)->address,3,3)),meshMib(1)->address); break;
+            case 10: {
+                ASSERT(hwmp(1)->getPathInfo(malformedOrigin));
+                auto preq = testPreq(externalOrigin,meshMib(1)->address,4,4); preq.setFlags(64); preq.setOriginatorExternalAddress(unknown);
+                sendHwmpTest(0,testBody(preq),meshMib(1)->address); break;
+            }
+            case 11:
+                ASSERT(!hwmp(1)->getPathInfo(externalOrigin));
+                sendHwmpTest(0,testBody(testPreq(meshMib(1)->address,unknown,5,5)),meshMib(1)->address); break;
+            case 12:
+                ASSERT(!hwmp(1)->getPathInfo(meshMib(1)->address));
+                meshManagement(0)->closePeer(meshMib(1)->address); break;
+            case 13: sendHwmpTest(0,testBody(testPreq(closedOrigin,meshMib(1)->address,6,6)),meshMib(1)->address); break;
+            case 14: ASSERT(!hwmp(1)->getPathInfo(closedOrigin) && pathEvents > 10 && discoveryEvents > 6); emit(registerSignal("hwmpDiscoveryComplete"),1L); break;
+        }
+        delete message;
+    }
+};
+Define_Module(HwmpDiscoveryDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_discovery) {
+    return ProtocolTest("hwmp_discovery")
+        .intercept(tap("radioMedium").from("station[0]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[0]").drop())
+        .intercept(tap("radioMedium").from("station[3]").to("station[5]").drop())
+        .intercept(tap("radioMedium").from("station[5]").to("station[3]").drop())
+        .intercept(tap("radioMedium").filterPacket("ieee80211mac.type == 40").mutate(reconstructMeshMpdu))
+        .once(on("driver").signal("hwmpDiscoveryComplete").assertValue(1).within(0.18));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple HwmpDiscoveryDriver { parameters: @class(::HwmpDiscoveryDriver); @signal[hwmpDiscoveryComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: HwmpDiscoveryDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 6
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "HwmpTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[1].wlan[0].mgmt.suppressOwnPreq = true
+*.station[4].wlan[0].mgmt.suppressOwnPreq = true
+*.station[2].wlan[0].mgmt.suppressOwnPreq = true
+*.station[5].wlan[0].mgmt.suppressOwnPreq = true
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[3..5].wlan[0].pathSelectionMetricId = 2
+*.station[3..5].wlan[0].radio.channelNumber = 3
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[0].wlan[0]":24Mbps,"Test.station[2].wlan[0]":12Mbps}
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.station[4].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[3].wlan[0]":24Mbps,"Test.station[5].wlan[0]":12Mbps}
+*.station[5].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_discovery"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST hwmp_discovery: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_discovery: FAIL

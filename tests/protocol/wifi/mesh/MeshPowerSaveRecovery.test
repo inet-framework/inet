@@ -1,0 +1,418 @@
+%description:
+Two actual EOSP aggregate members lose their immediate BA with N=0. The fixture
+uses the real lifetime owner to expire one member while BAR is pending, then
+allows the real positive BAR response to acknowledge the surviving original.
+Expiry must preserve recovery ambiguity without another DATA error sample.
+
+%file: MeshPowerSaveRecovery.cc
+#include "mesh/MeshServicePeriodSupport.h"
+
+// Supplementary initial-DATA owner proof: select DATA rather than the
+// default automatic initial Null, then restore the complete base planner at
+// actual aggregate start. No state, ACK, opportunity or retry fact is injected.
+class InitialDataPowerFixture : public MeshPowerSave
+{
+  public:
+    bool restoreAutomatic=false;
+    void reviewServicePeriods() override {
+        if (restoreAutomatic) MeshPowerSave::reviewServicePeriods();
+    }
+    bool failedIntent(MacAddress peer) const {
+        auto found=triggers.find(peer);
+        return found!=triggers.end() && found->second.failed && found->second.attempted.empty();
+    }
+    simtime_t awakeEnd(MacAddress peer) const {
+        auto found=awakeUntil.find(peer);
+        return found==awakeUntil.end() ? SIMTIME_ZERO : found->second;
+    }
+};
+Define_Module(InitialDataPowerFixture);
+
+class RecoveryHcfFixture : public Hcf
+{
+  public:
+    void collideEndingRetry(int64_t expectedId) {
+        Enter_Method("collideEndingRetry");
+        auto edcaf=edca->getEdcaf(AC_BE);
+        auto packet=edcaf->getInProgressFrames()->peekFrameToTransmit();
+        ASSERT(packet && packet->getId()==expectedId && std::string(packet->getName())=="mesh-period-ending");
+        ASSERT(edcaf->getRecoveryProcedure()->getRetryCount(packet,packet->peekAtFront<Ieee80211DataHeader>())==1);
+        handleInternalCollision({edcaf});
+    }
+    std::set<int64_t> discardCovered(bool all) {
+        Enter_Method("discardCovered");
+        std::set<int64_t> discarded;
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto owner=edca->getEdcaf(static_cast<AccessCategory>(ac));
+            while (true) {
+                Packet *selected=nullptr;
+                auto frames=owner->getInProgressFrames();
+                for (int i=0;i<frames->getLength();i++) {
+                    auto candidate=frames->getFrames(i);
+                    auto data=dynamicPtrCast<const Ieee80211MeshDataHeader>(candidate->peekAtFront<Ieee80211MacHeader>());
+                    if (data && data->getType()==ST_DATA_WITH_QOS && data->getEosp()) { selected=candidate; break; }
+                }
+                if (!selected) break;
+                discarded.insert(selected->getId());
+                discardMeshAggregate(owner,selected); // Controlled call into the actual disposition owner.
+                if (!all) return discarded;
+            }
+        }
+        return discarded;
+    }
+    void expireOriginal(int64_t id) {
+        Enter_Method("expireOriginal");
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto frames=edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            for (int i=0;i<frames->getLength();i++) {
+                auto packet=frames->getFrames(i);
+                if (packet->getId()!=id) continue;
+                edca->getLifetimeHandler()->forgetFrame(id);
+                edca->getLifetimeHandler()->registerFragments({packet},simTime());
+                expireDataFrames(false); return;
+            }
+        }
+        throw cRuntimeError("Expected retained ending original");
+    }
+    void sendRecipientDelba(MacAddress peer) {
+        Enter_Method("sendRecipientDelba");
+        beginTeardown(peer,0,false,37);
+    }
+    std::set<int64_t> selectedEnding;
+    std::map<int64_t,std::pair<int,uint32_t>> nativeIdentities() const {
+        std::map<int64_t,std::pair<int,uint32_t>> result;
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto frames=edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            for (int i=0;i<frames->getLength();i++) {
+                auto packet=frames->getFrames(i);
+                auto data=dynamicPtrCast<const Ieee80211MeshDataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+                if (data && data->getType()==ST_DATA_WITH_QOS && !data->getAMsduPresent())
+                    result[packet->getId()]={data->getSequenceNumber().get(),
+                        packet->peekDataAt<Ieee80211MeshControl>(data->getChunkLength())->getSequenceNumber()};
+            }
+        }
+        return result;
+    }
+    int ordinaryRetries(int64_t id) const {
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto owner=edca->getEdcaf(static_cast<AccessCategory>(ac));
+            auto frames=owner->getInProgressFrames();
+            for (int i=0;i<frames->getLength();i++) {
+                auto packet=frames->getFrames(i);
+                if (packet->getId()==id) return owner->getRecoveryProcedure()->getRetryCount(packet,packet->peekAtFront<Ieee80211DataHeader>());
+            }
+        }
+        throw cRuntimeError("Expected live original retry state");
+    }
+    int setEndingDeadlines(bool expireAll,bool ending=true) {
+        Enter_Method("setEndingDeadlines");
+        int count=0;
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto frames=edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            for (int i=0;i<frames->getLength();i++) {
+                auto original=frames->getFrames(i);
+                auto data=dynamicPtrCast<const Ieee80211MeshDataHeader>(original->peekAtFront<Ieee80211MacHeader>());
+                if (!data || data->getType()!=ST_DATA_WITH_QOS || data->getEosp()!=ending) continue;
+                selectedEnding.insert(original->getId());
+                // Explicit fixture deadline override through the real owner;
+                // registerFragments is insertion, not a deadline replacement.
+                edca->getLifetimeHandler()->forgetFrame(original->getId());
+                edca->getLifetimeHandler()->registerFragments({original},simTime()+SimTime(expireAll || count==0 ? 2 : 50,SIMTIME_MS));
+                count++;
+            }
+        }
+        scheduleDataLifetimeTimer();
+        return count;
+    }
+    bool recovering(MacAddress peer) const {
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++)
+            if (edca->getEdcaf(static_cast<AccessCategory>(ac))->getRecoveryProcedure()->hasBlockAckRecovery(peer,0)) return true;
+        return false;
+    }
+    int liveEnding() const {
+        int count=0;
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto frames=edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            for (int i=0;i<frames->getLength();i++) {
+                auto data=dynamicPtrCast<const Ieee80211MeshDataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
+                count+=data && data->getType()==ST_DATA_WITH_QOS && data->getEosp();
+            }
+        }
+        return count;
+    }
+    void setNamedDeadline(const char *name,simtime_t deadline) {
+        Enter_Method("setNamedDeadline");
+        for (int ac=0;ac<AC_NUMCATEGORIES;ac++) {
+            auto queue=edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue();
+            for (int i=0;i<queue->getNumPackets();i++) {
+                auto packet=queue->getPacket(i);
+                if (std::string(packet->getName())!=name) continue;
+                edca->getLifetimeHandler()->forgetFrame(packet->getId());
+                edca->getLifetimeHandler()->registerFragments({packet},deadline);
+                return;
+            }
+        }
+        throw cRuntimeError("Named pending fixture source absent");
+    }
+};
+Define_Module(RecoveryHcfFixture);
+
+class RecoveryMacFixture : public Ieee80211MeshMac
+{
+  public:
+    bool releaseBar=false;
+    bool isFrameTransmissionEligible(const Packet *packet,simtime_t start) const override {
+        if (std::string(packet->getName())=="service-sentinel") return false;
+        if (!releaseBar && getContainingNode(this)->getIndex()==1 &&
+                std::string(packet->getName())=="mesh-period-ending") return false;
+        if (!releaseBar && getContainingNode(this)->getIndex()==0 &&
+                dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(packet->peekAtFront<Ieee80211MacHeader>())) return false;
+        return Ieee80211MeshMac::isFrameTransmissionEligible(packet,start);
+    }
+};
+Define_Module(RecoveryMacFixture);
+
+class RecoveryDriver : public ServicePeriodDriver
+{
+    int pendingChecks=0, bars=0, endingNulls=0, triggerAir=0, initiationChecks=0;
+    bool expireAll() const { return par("expireAll"); }
+    bool forceInitial() const { return par("forceInitial"); }
+    RecoveryHcfFixture *hcf() const { return check_and_cast<RecoveryHcfFixture *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")); }
+  protected:
+    bool expectAggregateEosp() const override { return !forceInitial(); }
+    void initialize() override {
+        ServicePeriodDriver::initialize();
+        if (forceInitial()) at(SimTime(50,SIMTIME_MS),20);
+    }
+    void observedAggregate(const Ieee80211Transmission *) override {
+        ASSERT(aggregateAir==1);
+        if (forceInitial()) check_and_cast<InitialDataPowerFixture *>(power(0))->restoreAutomatic=true;
+        ASSERT(hcf()->setEndingDeadlines(expireAll(),!forceInitial())==2);
+        at(simTime()+SimTime(2500,SIMTIME_US),10);
+        at(simTime()+SimTime(3,SIMTIME_MS),11);
+        at(simTime()+SimTime(4,SIMTIME_MS),12);
+        if (forceInitial()) at(simTime()+SimTime(3500,SIMTIME_US),13);
+        if (forceInitial() && expireAll()) at(simTime()+SimTime(5,SIMTIME_MS),14);
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind();
+        if (kind<10 || kind>=100) { ServicePeriodDriver::handleMessage(event); return; }
+        delete event;
+        if (kind==20) {
+            fixturePath(0,1,1,SimTime(2,SIMTIME_S));
+            fixturePrecursor(1,1,0,SimTime(2,SIMTIME_S));
+            auto forwarding=check_and_cast<IMeshForwarding *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("ds"));
+            forwarding->processSourceMsdu(phyMsdu("service-prime",meshMib(1)->address));
+            forwarding->processSourceMsdu(phyMsdu("service-sentinel",meshMib(1)->address));
+            hcf()->setNamedDeadline("service-sentinel",SimTime(320,SIMTIME_MS));
+            return;
+        }
+        if (kind==13) {
+            bool owner=false;
+            for (const auto& period : power(0)->getServicePeriods()) owner|=period.direction==MeshPeriodDirection::OWNER;
+            ASSERT(owner==!expireAll() && triggerAir==0);
+            if (expireAll()) ASSERT(check_and_cast<InitialDataPowerFixture *>(power(0))->failedIntent(meshMib(1)->address));
+            initiationChecks++;
+            return;
+        }
+        if (kind==14) {
+            // A failed sender cannot tell its remote ongoing recipient that
+            // it failed. Explicit real peer teardown closes that asymmetry.
+            meshManagement(0)->closePeer(meshMib(1)->address);
+            meshManagement(1)->closePeer(meshMib(0)->address);
+            return;
+        }
+        if (kind==10) {
+            ASSERT(hcf()->recovering(meshMib(1)->address)==!expireAll());
+            if (!forceInitial()) ASSERT(hcf()->liveEnding()==(expireAll() ? 0 : 1));
+            auto periods=power(0)->getServicePeriods();
+            bool ending=false;
+            for (const auto& period : periods) if (period.direction==MeshPeriodDirection::OWNER) {
+                if (expireAll() || forceInitial()) {
+                    for (auto id : hcf()->selectedEnding) ASSERT(!period.cohort.count(id));
+                }
+                else {
+                    ASSERT(period.ending && period.cap==0 && period.spent==0 && period.cohort==hcf()->selectedEnding);
+                    ending=true;
+                }
+            }
+            ASSERT(ending==(!expireAll() && !forceInitial()));
+            if (expireAll() && !forceInitial()) ASSERT(endingNulls==1);
+            std::cout << "recovery pending samples=" << samples << " failures=" << failures << std::endl;
+            ASSERT(samples==payloadCount() && failures==2);
+            pendingChecks++;
+        }
+        else {
+            int station=kind==11 ? 0 : 1;
+            check_and_cast<RecoveryMacFixture *>(meshInterface(station)->getSubmodule("mac"))->releaseBar=true;
+            check_and_cast<Hcf *>(meshInterface(station)->getSubmodule("mac")->getSubmodule("hcf"))->meshPowerEligibilityChanged();
+        }
+    }
+    void finishAssertions() override {
+        ASSERT(pendingChecks==1 && aggregateAir==1 && !hcf()->recovering(meshMib(1)->address));
+        ASSERT(bars==(expireAll() ? 0 : 1));
+        ASSERT(initiationChecks==(forceInitial() ? 1 : 0));
+    }
+    void receiveSignal(cComponent *source,simsignal_t signal,cObject *object,cObject *details) override {
+        ServicePeriodDriver::receiveSignal(source,signal,object,details);
+        if (signal!=transmissionStartedSignal || from(source,"radio")!=0) return;
+        auto transmission=check_and_cast<const Ieee80211Transmission *>(object);
+        auto packet=transmission->getPacket();
+        if (aggregateAir && std::string(packet->getName())=="mesh-period-ending") endingNulls++;
+        if (std::string(packet->getName())=="mesh-period-trigger") triggerAir++;
+        if (transmission->getTxVector().ampdu || transmission->getTxVector().singleMpdu) return;
+        auto phy=Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        bars+=bool(dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength())));
+    }
+};
+Define_Module(RecoveryDriver);
+
+#include "mesh/MeshPartialTriggerSupport.h"
+#include "mesh/MeshRecoveryBudgetSupport.h"
+#include "mesh/MeshPeriodDisposalSupport.h"
+#include "mesh/MeshLowCapFallbackSupport.h"
+#include "mesh/MeshExpiryLimitSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_power_save_recovery) {
+    ProtocolTest test("mesh_power_save_recovery");
+    auto driver=getSimulation()->getSystemModule()->getSubmodule("driver");
+    bool partial=driver->hasPar("partialInitial") && driver->par("partialInitial").boolValue();
+    if (partial) {
+        test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 25").nth(1).mutate(retainFirstPositiveBaBit));
+        if (driver->par("endingLoss").boolValue()) {
+            test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+                .filterPacket("ieee80211mac.type == 25").nth(1).drop());
+            test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+                .filterPacket("ieee80211mac.type == 25").nth(1).mutate([](Packet *packet) { ASSERT(rewriteReceivedCompressedBa(packet,false)); }));
+        }
+    }
+    else test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 25").nth(1).drop());
+    test.once(on("driver").signal("serviceComplete").assertValue(1).within(1.6));
+    return test;
+}
+Define_ProtocolTest(mesh_power_save_disposal) {
+    ProtocolTest test("mesh_power_save_disposal");
+    test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 25").nth(1).drop());
+    test.once(on("driver").signal("disposalComplete").assertValue(1).within(0.6));
+    return test;
+}
+Define_ProtocolTest(mesh_power_save_lowcap) {
+    ProtocolTest test("mesh_power_save_lowcap");
+    test.once(on("driver").signal("lowcapInitial").assertValue(1).within(0.35));
+    test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 29").nth(1).drop());
+    test.once(on("driver").signal("lowcapRetry").assertValue(1).within(0.4));
+    test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 29").nth(1).drop());
+    test.once(on("driver").signal("lowcapRetry2").assertValue(1).within(0.45));
+    test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 29").nth(1).drop());
+    test.once(on("driver").signal("lowcapFallback").assertValue(1).within(0.5));
+    test.once(on("driver").signal("lowcapComplete").assertValue(1).within(0.6));
+    return test;
+}
+Define_ProtocolTest(mesh_power_save_expiry_limit) {
+    ProtocolTest test("mesh_power_save_expiry_limit");
+    test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 25").nth(1).drop());
+    test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 25").mutate([](Packet *packet) { ASSERT(rewriteReceivedCompressedBa(packet,false)); }));
+    test.once(on("driver").signal("expiryLimitComplete").assertValue(1).within(0.6));
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module RecoveryMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+module RecoveryMacFixture extends Ieee80211MeshMac { parameters: @class(::RecoveryMacFixture); }
+module RecoveryHcfFixture extends Hcf { parameters: @class(::RecoveryHcfFixture); }
+simple InitialDataPowerFixture extends MeshPowerSave { parameters: @class(::InitialDataPowerFixture); }
+simple BudgetPowerObserver extends MeshPowerSave { parameters: @class(::BudgetPowerObserver); @signal[budgetOpeningAck](type=object); }
+simple InvalidPeriodLimitProbe extends MeshPowerSave { parameters: @class(::InvalidPeriodLimitProbe); }
+module BudgetMacFixture extends Ieee80211MeshMac { parameters: @class(::BudgetMacFixture); }
+module LowCapMacFixture extends Ieee80211MeshMac { parameters: @class(::LowCapMacFixture); }
+moduleinterface IRecoveryDriver { parameters: int scenario; }
+simple RecoveryDriver like IRecoveryDriver { parameters: bool expireAll; bool forceInitial; bool endingLoss=false; int scenario=0; int payloadCount=forceInitial ? 2 : 3; bool expectAggregate=true; int expectedFailures=2; bool verifyMetric=true; string expectedSampleOrder=forceInitial ? "00" : "100"; bool requireConfirmed=!(forceInitial && expireAll); @class(::RecoveryDriver); @signal[serviceComplete](type=long); }
+simple PartialInitialDriver like IRecoveryDriver { parameters: bool expireAll=false; bool forceInitial=true; bool partialInitial=true; bool endingLoss; int scenario=0; int payloadCount=2; int expectedMpdus=endingLoss ? 4 : 3; int expectedPpdus=endingLoss ? 3 : 2; bool expectAggregate=true; int expectedFailures=endingLoss ? 2 : 1; bool verifyMetric=true; string expectedSampleOrder=endingLoss ? "1001" : "101"; @class(::PartialInitialDriver); @signal[serviceComplete](type=long); }
+simple RecoveryBudgetDriver like IRecoveryDriver { parameters: int budgetCase=parent.budgetCase; int scenario=0; bool expireAll=false; bool forceInitial=false; bool endingLoss=false; int payloadCount=3; bool verifyMetric=true; string expectedSampleOrder=budgetCase==1 ? "1001" : ""; bool holdRemainder @mutable = false; @class(::RecoveryBudgetDriver); @signal[budgetEndingStarted](type=long); @signal[budgetControlHeld](type=long); @signal[budgetComplete](type=long); }
+simple PeriodDisposalDriver like IRecoveryDriver { parameters: int scenario=0; int payloadCount=3; bool verifyMetric=false; @class(::PeriodDisposalDriver); @signal[disposalComplete](type=long); }
+simple LowCapFallbackDriver like IRecoveryDriver { parameters: int scenario=0; bool holdPayload @mutable = false; @class(::LowCapFallbackDriver); @signal[lowcapInitial](type=long); @signal[lowcapRetry](type=long); @signal[lowcapRetry2](type=long); @signal[lowcapFallback](type=long); @signal[lowcapComplete](type=long); }
+simple ExpiryLimitDriver like IRecoveryDriver { parameters: int scenario=0; int payloadCount=3; bool verifyMetric=false; @class(::ExpiryLimitDriver); @signal[expiryLimitComplete](type=long); }
+network Test extends MeshPairNetwork {
+    parameters: int recoveryCase; int budgetCase=recoveryCase-6; string driverType=recoveryCase==19 ? "ExpiryLimitDriver" : (recoveryCase==17 ? "LowCapFallbackDriver" : (recoveryCase>=15 ? "PeriodDisposalDriver" : (recoveryCase<4 ? "RecoveryDriver" : (recoveryCase<6 ? "PartialInitialDriver" : "RecoveryBudgetDriver"))));
+    submodules: driver: <driverType> like IRecoveryDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=${recoveryCase}==12 ? 6s : 1600ms
+*.recoveryCase=${recoveryCase=0..19}
+*.driver.expireAll=${recoveryCase}<4 && ${recoveryCase}%2==1
+*.driver.forceInitial=${recoveryCase}>=2 && ${recoveryCase}<6
+*.driver.endingLoss=${recoveryCase}==5
+*.numStations=2
+*.radioMedium.typename="RecoveryMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[0].wlan[0].powerSavePolicy.typename="${recoveryCase}"=="6" || ${recoveryCase}>=7 ? "BudgetPowerObserver" : ("${recoveryCase}"=="0" || "${recoveryCase}"=="1" ? "MeshPowerSave" : "InitialDataPowerFixture")
+*.station[1].wlan[0].powerSavePolicy.typename="${recoveryCase}"=="6" || ${recoveryCase}>=7 ? "BudgetPowerObserver" : "MeshPowerSave"
+*.station[*].wlan[0].pathSelection.typename="${recoveryCase}"=="17" ? "MeshFixturePaths" : (${recoveryCase}==0 || ${recoveryCase}==1 || ${recoveryCase}>=6 ? "Hwmp" : "MeshFixturePaths")
+*.station[*].wlan[0].powerSavePolicy.missingAckRetryLimit=${recoveryCase}==17 || ${recoveryCase}==19 ? 100 : (${recoveryCase}>=15 ? 0 : (${recoveryCase}>=10 ? 100 : (${recoveryCase}>=6 && ${recoveryCase}!=8 ? 1 : 0)))
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].recoveryProcedure.shortRetryLimit=${recoveryCase}==17 ? 1 : (${recoveryCase}>=10 ? 2 : 7)
+*.station[*].wlan[0].mac.hcf.edca.edcaf[2].recoveryProcedure.shortRetryLimit=${recoveryCase}==17 ? 4 : (${recoveryCase}>=10 ? 2 : 7)
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit=${recoveryCase}>=10 ? 2 : 7
+*.station[*].wlan[0].phyProfile="ht"
+*.station[*].wlan[0].radio.typename="Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName="5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[*].wlan[0].mac.typename="${recoveryCase}"=="17" ? "LowCapMacFixture" : (${recoveryCase}>=6 && ${recoveryCase}<15 ? "BudgetMacFixture" : "RecoveryMacFixture")
+*.station[*].wlan[0].mac.hcf.typename="RecoveryHcfFixture"
+*.station[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold=65536B
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported=true
+*.station[*].wlan[0].mac.hcf.blockAckVariant="compressed"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename="BasicMpduAggregationPolicy"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily="ht"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs=7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval="long"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth=20MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams=1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=-1bps
+*.station[*].wlan[0].mac.hcf.originatorAckPolicy.blockAckTimeout=500us
+*.station[*].wlan[0].radio.switchingTimes="ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="${recoveryCase}"=="19" ? "mesh_power_save_expiry_limit" : (${recoveryCase}==17 ? "mesh_power_save_lowcap" : (${recoveryCase}>=15 ? "mesh_power_save_disposal" : (${recoveryCase}>=6 ? "mesh_power_save_budget" : "mesh_power_save_recovery")))
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_power_save_recovery: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_save_budget: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_save_disposal: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_save_lowcap: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_save_expiry_limit: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_recovery: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_budget: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_disposal: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_lowcap: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_expiry_limit: FAIL

@@ -50,6 +50,8 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     const physicallayer::IIeee80211Mode *responseAckFrameMode = nullptr;
     const physicallayer::IIeee80211Mode *responseCtsFrameMode = nullptr;
     const physicallayer::IIeee80211Mode *responseBlockAckFrameMode = nullptr;
+    const physicallayer::IIeee80211Mode *selectMeshAckMode(const physicallayer::IIeee80211Mode *eliciting,
+        const Ieee80211RateSetState& rates) const;
 
     // per-receiver unicast data-frame modes, resolved lazily from dataFrameBitratePerReceiver
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> perReceiverDataFrameMode;
@@ -76,6 +78,10 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual bool isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
 
   public:
+    std::pair<const physicallayer::IIeee80211Mode *, const physicallayer::IIeee80211Mode *> computeMeshPeerModes(
+        MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& capabilities) override;
+    physicallayer::Ieee80211TxVector computeResponseTxVector(Packet *elicitingPacket,
+        const physicallayer::IIeee80211Mode *responseMode, ResponseQueryRole role) const override;
     // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
     // time after the PPDU containing the frame that elicited the response, e.g. a CTS in response to an RTS
     // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
@@ -83,7 +89,7 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     // is used to initiate a TXOP.
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ResponseQueryRole role) override;
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role) override;
-    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role) override;
+    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& blockAckReq, ResponseQueryRole role) override;
     virtual const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet,
             const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, bool startsTxop) override;
 

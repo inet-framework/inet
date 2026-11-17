@@ -159,6 +159,9 @@ class INET_API Ieee80211OfdmMode : public Ieee80211ModeBase, public Ieee80211Ofd
 
     virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + signalMode->getDuration() + dataMode->getDuration(dataLength); }
 
+    // PPDU-relative start of the DATA symbol containing this MPDU bit offset.
+    simtime_t getDataSymbolStart(b mpduBitOffset) const;
+
     // Table 18-17—OFDM PHY characteristics
     virtual const simtime_t getSlotTime() const override;
     virtual const simtime_t getSifsTime() const override;

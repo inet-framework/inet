@@ -1,0 +1,5 @@
+Directional airtime metrics for IEEE 802.11 mesh
+
+Mesh interfaces estimate outgoing airtime costs for metric IDs 1 and 2 from actual unicast DATA acknowledgments and ACK timeouts. Costs use the existing PHY/rate selector and initial channel-access timing, with a directional error estimate that resets when a peer relationship ends. Mesh metric requests receive the local outgoing cost. Interrupted exchanges, internal collisions, unsent data and retired-frame callbacks do not become timeout samples. Both production metrics currently model one MSDU per transmission.
+
+Peer-removal notifications follow completed metric and MAC cleanup, including an isolated management stop, so subscribers observe the finished removal.

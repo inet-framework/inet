@@ -24,6 +24,8 @@ class NavRx : public IRx {
     void transmissionStateChanged(physicallayer::IRadio::TransmissionState) override {}
     void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
     bool lowerFrameReceived(Packet *) override { return false; }
+    bool prepareReceivedFrame(Packet *) override { return true; }
+    bool prepareReceivedAmpdu(const Packet *, Ieee80211AmpduLayout&, std::vector<std::unique_ptr<Packet>>&) override { return false; }
 };
 
 class ForwardingTx : public Tx {
@@ -51,6 +53,19 @@ class CompletionTx : public Tx {
         rx = &receiver;
     }
     void replaceChoice(bool choice) { updateLocalNav = choice; }
+    void prepareWait(ITx::ICallback *callback) {
+        Enter_Method("prepareWait");
+        ASSERT(!hasTransmission());
+        frame = new Packet("pending-copy", makeShared<Ieee80211AckFrame>());
+        txCallback = callback;
+        transmitting = false;
+        updateLocalNav = true;
+        if (!endIfsTimer) endIfsTimer = new cMessage("pending-ifs");
+        scheduleAfter(SimTime(16,SIMTIME_US),endIfsTimer);
+    }
+    bool isIfsScheduled() const { return endIfsTimer && endIfsTimer->isScheduled(); }
+    bool hasRetainedFrame() const { return frame != nullptr; }
+    bool hasNavChoice() const { return updateLocalNav; }
   protected:
     void initialize(int) override {}
 };
@@ -60,8 +75,12 @@ class CompletionCallback : public ITx::ICallback {
   public:
     CompletionTx *tx;
     bool replacementChoice;
+    int completions = 0;
     CompletionCallback(CompletionTx *tx, bool choice) : tx(tx), replacementChoice(choice) {}
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        completions++;
         ASSERT(!tx->hasTransmission());
         tx->replaceChoice(replacementChoice);
     }
@@ -112,6 +131,21 @@ tx->prepare(true, &callback);
 tx->radioTransmissionFinished();
 ASSERT(tx->receiver.updates == 1);
 ASSERT(tx->receiver.lastDuration == us(100));
+CompletionCallback otherCallback(tx, false);
+ASSERT(!tx->cancelPendingTransmission(&callback));
+tx->prepareWait(&callback);
+ASSERT(!tx->cancelPendingTransmission(&otherCallback));
+ASSERT(tx->hasTransmission() && tx->isIfsScheduled() && tx->hasRetainedFrame());
+int completions = callback.completions;
+ASSERT(tx->cancelPendingTransmission(&callback));
+ASSERT(!tx->hasTransmission() && !tx->isIfsScheduled() && !tx->hasRetainedFrame() && !tx->hasNavChoice());
+ASSERT(callback.completions == completions && tx->receiver.updates == 1);
+ASSERT(!tx->cancelPendingTransmission(&callback));
+tx->prepare(false, &callback);
+ASSERT(!tx->cancelPendingTransmission(&callback));
+ASSERT(tx->hasTransmission() && tx->hasRetainedFrame());
+tx->radioTransmissionFinished();
+ASSERT(callback.completions == completions + 1 && tx->receiver.updates == 1);
 EV << "Explicit Tx overloads and completed NAV choice passed.\n";
 
 %contains: stdout

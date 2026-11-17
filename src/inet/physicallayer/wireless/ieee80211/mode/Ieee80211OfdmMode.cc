@@ -13,6 +13,17 @@
 namespace inet {
 namespace physicallayer {
 
+simtime_t Ieee80211OfdmMode::getDataSymbolStart(b mpduBitOffset) const
+{
+    // IEEE Std 802.11-2024, 17.3.5, Tables 17-4/17-5: SERVICE precedes the MPDU.
+    if (mpduBitOffset < b(0))
+        throw cRuntimeError("Negative MPDU bit offset");
+    auto symbol = dataMode->getSymbolInterval();
+    auto bitsPerSymbol = std::llround(dataMode->getNetBitrate().get() * symbol.dbl());
+    auto index = (dataMode->getServiceFieldLength() + mpduBitOffset).get<b>() / bitsPerSymbol;
+    return preambleMode->getDuration() + signalMode->getDuration() + index * symbol;
+}
+
 Ieee80211OfdmModeBase::Ieee80211OfdmModeBase(const Ieee80211OfdmModulation *modulation, const Ieee80211OfdmCode *code, Hz channelSpacing, Hz bandwidth) :
     Ieee80211OfdmTimingRelatedParametersBase(channelSpacing),
     modulation(modulation),

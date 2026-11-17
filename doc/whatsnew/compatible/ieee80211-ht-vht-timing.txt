@@ -1,0 +1,5 @@
+Correct HT and VHT short-guard-interval transmission timing
+
+HT and VHT DATA modes now use 3.6-microsecond symbols when short GI is selected. Whole HT-mixed and VHT PPDUs round the complete DATA contribution to four microseconds, while HT greenfield retains its raw symbol duration. Fixed signaling/training intervals and the HT 2.4 GHz extension keep their existing timing.
+
+HT BCC encoder selection now uses the net PHY rate evaluated with long GI, rather than the selected-GI gross bitrate. These corrections can change airtime, contention and simulation trajectories. No configuration or public signature changes are required; stored expectations and fingerprint baselines are unchanged.

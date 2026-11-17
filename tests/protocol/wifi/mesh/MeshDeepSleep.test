@@ -1,0 +1,233 @@
+%description:
+Actual deep sleep with a ten-local-period maintenance cadence and lowest-MAC
+reference, clock-slowing resynchronization, invalid-reference reacquisition,
+and a public switching budget that leaves no useful sleep interval.
+
+%file: MeshDeepSleep.cc
+#include "mesh/MeshDozeSupport.h"
+
+class DeepManagementFixture : public Ieee80211MgmtMesh
+{
+  public:
+    void queueDrift(simtime_t drift) { Enter_Method("queueDrift"); maxClockDrift = drift; }
+};
+Define_Module(DeepManagementFixture);
+
+class DeepMaintenanceFact : public cObject
+{
+  public:
+    const uint64_t before, after, nextOrdinal;
+    DeepMaintenanceFact(uint64_t before,uint64_t after,uint64_t nextOrdinal) :
+        before(before),after(after),nextOrdinal(nextOrdinal) {}
+};
+
+class DeepPowerFixture : public DozePowerFixture
+{
+  public:
+    void beaconReceived(MacAddress peer,bool group,bool individual,simtime_t window) override {
+        auto before=maintenanceOrdinal;
+        auto ordinal=management->getMeshWakeSchedule().ordinal;
+        bool selected=!mib->getMeshPeerPowerStates().empty() && peer==mib->getMeshPeerPowerStates().begin()->first;
+        bool valid=management->getPeerTbtt(peer,simTime()).has_value();
+        MeshPowerSave::beaconReceived(peer,group,individual,window);
+        if (selected && valid && before && before!=maintenanceOrdinal) {
+            DeepMaintenanceFact fact(before,maintenanceOrdinal,ordinal);
+            emit(registerSignal("deepMaintenanceAdvanced"),long(maintenanceOrdinal),&fact);
+        }
+    }
+};
+Define_Module(DeepPowerFixture);
+
+class DeepDriver : public cSimpleModule, public cListener
+{
+    int sleeps = 0, samples = 0, invalidated = 0, reacquired = 0, earlyAdvances = 0;
+    std::vector<simtime_t> references;
+    int64_t initialOffset = 0;
+    IRadio *radio() const { return check_and_cast<IRadio *>(meshInterface(0)->getSubmodule("radio")); }
+    DozePowerFixture *power(int i) const {
+        return check_and_cast<DozePowerFixture *>(meshInterface(i)->getSubmodule("powerSavePolicy"));
+    }
+    void at(simtime_t time, int kind, short priority = 0) {
+        auto event = new cMessage("deep-check", kind); event->setSchedulingPriority(priority); scheduleAt(time,event);
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto signal : {IRadio::radioModeChangedSignal, receptionEndedSignal, Hcf::meshDataAttemptCompletedSignal,
+                registerSignal("deepMaintenanceAdvanced")})
+            network->subscribe(signal,this);
+        at(SimTime(1,SIMTIME_MS),0);
+        at(SimTime(100,SIMTIME_MS),1);
+        at(SimTime(105,SIMTIME_MS),2);
+        at(SimTime(106,SIMTIME_MS),3);
+        at(SimTime(180,SIMTIME_MS),4);
+        at(SimTime(1050,SIMTIME_MS),5);
+        at(SimTime(1075200,SIMTIME_US),6,-100);
+        at(SimTime(1100800,SIMTIME_US),7,-100);
+        at(SimTime(1150,SIMTIME_MS),8);
+        at(SimTime(1250,SIMTIME_MS),9);
+        at(SimTime(2350,SIMTIME_MS),10);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override {
+        if (signal==registerSignal("deepMaintenanceAdvanced") && source==meshInterface(0)->getSubmodule("powerSavePolicy")) {
+            auto fact=check_and_cast<DeepMaintenanceFact *>(details);
+            ASSERT(uint64_t(value)==fact->after);
+            if (fact->nextOrdinal<fact->before) {
+                std::cout << "deep early advance " << fact->before << " -> " << fact->after
+                    << " next=" << fact->nextOrdinal << " t=" << simTime() << std::endl;
+                ASSERT(fact->after==fact->before+10);
+                if (par("scenario").intValue()==3) {
+                    ASSERT(fact->after==uint64_t(20+10*earlyAdvances));
+                    earlyAdvances++;
+                }
+            }
+            return;
+        }
+        if (source == meshInterface(0)->getSubmodule("radio") && signal == IRadio::radioModeChangedSignal
+                && value == IRadio::RADIO_MODE_SLEEP) {
+            for (const auto& entry : meshMib(0)->getMeshPeerPowerStates()) ASSERT(entry.second.local!=MeshPowerMode::ACTIVE);
+            sleeps++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *, cObject *details) override {
+        if (signal == Hcf::meshDataAttemptCompletedSignal) { samples++; return; }
+        if (source != meshInterface(0)->getSubmodule("radio") || signal != receptionEndedSignal) return;
+        auto packet = dynamic_cast<Packet *>(details);
+        if (!packet || packet->hasBitError()) return;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() != ST_BEACON || simTime() < SimTime(1100,SIMTIME_MS)) return;
+        auto beacon = staticPtrCast<const Ieee80211MgmtHeader>(header);
+        if (beacon->getTransmitterAddress() == meshMib(1)->address) {
+            references.push_back(simTime());
+            std::cout << "deep reference " << simTime() << std::endl;
+        }
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind(); delete event;
+        int scenario=par("scenario");
+        if (kind == 0) {
+            for (int i : {1,2}) {
+                meshManagement(0)->openPeer(meshMib(i)->address);
+                meshManagement(i)->openPeer(meshMib(0)->address);
+            }
+        }
+        else if (kind == 1) {
+            ASSERT(meshMib(1)->address < meshMib(2)->address);
+            for (int i : {1,2}) {
+                ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(i)->address));
+                power(0)->requestMode(meshMib(i)->address,MeshPowerMode::DEEP_SLEEP);
+            }
+        }
+        else if (kind == 2 || kind == 3)
+            power(kind-1)->requestMode(meshMib(0)->address,MeshPowerMode::DEEP_SLEEP);
+        else if (kind == 4) {
+            ASSERT(meshManagement(0)->getNeighborOffset(meshMib(1)->address,initialOffset));
+            for (int i : {1,2}) ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(i)->address)->local == MeshPowerMode::DEEP_SLEEP);
+            if (scenario == 3) ASSERT(sleeps == 0);
+            else ASSERT(sleeps > 0);
+        }
+        else if (kind == 5 && scenario == 1)
+            check_and_cast<DeepManagementFixture *>(meshManagement(1))->queueDrift(SimTime(200,SIMTIME_US));
+        else if (kind == 6 && scenario != 3) {
+            // The nonselected peer's beacon cannot itself require a wake.
+            auto state=radio()->getRadioModeState();
+            ASSERT(state && !state->transition && state->mode == IRadio::RADIO_MODE_SLEEP);
+        }
+        else if (kind == 7) {
+            auto state=radio()->getRadioModeState();
+            std::cout << "deep readiness t=" << simTime() << " mode=" << radio()->getRadioMode()
+                << " " << power(0)->describeObligations() << std::endl;
+            ASSERT(state && !state->transition && state->mode == IRadio::RADIO_MODE_TRANSCEIVER);
+        }
+        else if (kind == 8 && scenario == 2) {
+            int64_t offset;
+            ASSERT(!meshManagement(0)->getNeighborOffset(meshMib(1)->address,offset));
+            ASSERT(radio()->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER);
+            invalidated++;
+        }
+        else if (kind == 9 && scenario == 2) {
+            int64_t offset;
+            ASSERT(meshManagement(0)->getNeighborOffset(meshMib(1)->address,offset));
+            reacquired++;
+        }
+        else if (kind == 10) {
+            ASSERT(samples == 0);
+            if (scenario == 3) ASSERT(sleeps == 0 && earlyAdvances>=2);
+            else {
+                ASSERT(sleeps >= 10 && references.size() >= 2);
+                ASSERT(references.front() >= SimTime(1100800,SIMTIME_US) && references.front() < SimTime(1102,SIMTIME_MS));
+                if (scenario < 2) {
+                    auto separation=references[1]-references[0];
+                    ASSERT(separation >= SimTime(1023,SIMTIME_MS) && separation < SimTime(1025,SIMTIME_MS));
+                }
+            }
+            if (scenario == 1) {
+                int64_t offset;
+                ASSERT(meshManagement(0)->getNeighborOffset(meshMib(1)->address,offset) && offset < initialOffset);
+            }
+            if (scenario == 2) ASSERT(invalidated == 1 && reacquired == 1);
+            emit(registerSignal("deepComplete"),1L);
+        }
+    }
+};
+Define_Module(DeepDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_deep_sleep) {
+    ProtocolTest test("mesh_deep_sleep");
+    test.once(on("driver").signal("deepComplete").assertValue(1).within(2.4));
+    if (getSimulation()->getSystemModule()->getSubmodule("driver")->par("scenario").intValue() == 2) {
+        auto changed=std::make_shared<bool>(false);
+        test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 8").mutate([changed](Packet *packet) {
+                if (*changed || simTime() < SimTime(1100,SIMTIME_MS)) return;
+                *changed=true;
+                auto phy=packet->removeAtFront<Chunk>(Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet)->getChunkLength());
+                auto header=packet->removeAtFront<Ieee80211MgmtHeader>();
+                auto body=packet->removeAtFront<Ieee80211BeaconFrame>();
+                auto trailer=packet->removeAtFront<Ieee80211MacTrailer>(B(4));
+                auto config=body->getMeshConfiguration(); config.capability |= 1 << 5; body->setMeshConfiguration(config);
+                Packet bytes("invalid-timing",header); bytes.insertAtBack(body);
+                auto encoded=bytes.peekAllAsBytes()->getBytes(); trailer->setFcs(ethernetFcs(encoded.data(),encoded.size()));
+                packet->insertAtFront(trailer); packet->insertAtFront(body); packet->insertAtFront(header); packet->insertAtFront(phy);
+            }));
+    }
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple DozePowerFixture extends MeshPowerSave { parameters: @class(::DozePowerFixture); }
+simple DeepPowerFixture extends MeshPowerSave { parameters: @class(::DeepPowerFixture); }
+simple DeepManagementFixture extends Ieee80211MgmtMesh { parameters: @class(::DeepManagementFixture); }
+simple DeepDriver { parameters: int scenario; @class(::DeepDriver); @signal[deepComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: DeepDriver; }
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=2400ms
+*.driver.scenario=${scenario=0,1,2,3}
+*.numStations=3
+*.radioMedium.typename="Ieee80211ScalarTapRadioMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="DeepPowerFixture"
+*.station[*].wlan[0].mgmt.typename="DeepManagementFixture"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[2].wlan[0].mgmt.initialTsf=51.2ms
+*.station[*].wlan[0].radio.switchingTimes=${scenario}==3 ? "ms 0 0 0 0 0  0 0 0 0 200  0 0 0 0 0  0 0 0 0 0  0 100 0 0 0" : "ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="mesh_deep_sleep"
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_deep_sleep: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_deep_sleep: FAIL

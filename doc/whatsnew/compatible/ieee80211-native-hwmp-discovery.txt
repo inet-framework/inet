@@ -1,0 +1,7 @@
+On-demand path discovery in native IEEE 802.11 mesh interfaces
+
+Ieee80211MeshInterface now selects HWMP by default. Unresolved native unicast traffic waits in a bounded shared source queue while PREQ/PREP exchanges discover paths using the measured directional airtime costs. Route freshness, lifetimes, precursor admission and packet deadlines govern release; group forwarding remains immediate. The initial profile supports open OFDM meshes without aggregation or power save. Path-error and proactive-root procedures are separate additions.
+
+Queue count, bytes and wait time, discovery retry policy and the finite received-PREQ identity history are configurable. Isolated forwarding and HWMP owner restarts clear volatile state while preserving their node-owned sequence identities and the required per-target PREQ pacing history.
+
+Stopped mesh management also discards late MAC packet deliveries through its normal management drop path. This allows the management owner to stop independently while the MAC is still active; unexpected non-packet inputs and self-messages retain the base lifecycle diagnostics.

@@ -1,0 +1,5 @@
+<movement>
+    <set x="60" y="70"/>
+    <wait t="4"/>
+    <moveto x="20" y="70" t="0.1"/>
+</movement>

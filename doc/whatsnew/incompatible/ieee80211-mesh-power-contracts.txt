@@ -1,0 +1,3 @@
+Mesh management exposes power-mode inventory contracts
+
+External IMeshManagement implementations must provide existing peer Link IDs and the reporting station's assigned AID, and implement early variable management-content preparation. QosAckHandler's protected management/non-QoS Key now separates native mesh Null from ordinary management Sequence Control; subclasses that manipulate it must migrate to the header-based key helper and rebuild. The development migration guide also explains the early TIM versus late timestamp boundary and the borrowed-original acknowledgment and retirement contracts used by the optional power policy.

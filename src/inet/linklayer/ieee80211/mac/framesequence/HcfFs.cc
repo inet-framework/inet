@@ -35,7 +35,7 @@ HcfFs::HcfFs() :
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
+    auto frameToTransmit = qos->blockAckAgreementHandler || qos->prepareNormalAckData ? context->getInProgressFrames()->peekFrameToTransmit() :
         context->getInProgressFrames()->getFrameToTransmit();
     if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 1;

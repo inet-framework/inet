@@ -1,0 +1,3 @@
+Extend IEEE 802.11 aggregation and response roles
+
+Custom aggregation policies, originator data services, Rx implementations and Block Ack response providers must implement the new ordered aggregate preparation contracts. Response-rate and timeout queries now accept the common two-address eliciting header, covering both explicit BAR and implicit-BAR DATA. The development migration guide describes ownership, atomic validation and the corresponding adapter changes.

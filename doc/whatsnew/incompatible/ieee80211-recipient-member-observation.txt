@@ -1,0 +1,3 @@
+Recipient DATA member observation before reordering
+
+IRecipientQosMacDataService implementations and callers now pass an explicit per-invocation callback to dataFrameReceived. It observes each member and its existing duplicate verdict before deletion or reordering, while the recipient service retains ownership. The concrete HCF callback is inert by default. Forwarding adapters must preserve the callback, and callers needing no observation pass nullptr. Borrowed lifetimes and permitted peer/agreement withdrawal are described in the development migration guide.

@@ -48,8 +48,11 @@ class INET_API IFrameSequenceHandler
     virtual void transmissionComplete() = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;
-    // End a response wait after recipient processing. The sequence suppresses failure for retired DATA or management frames.
+    // End a response wait after recipient processing, or a TRANSMIT step whose
+    // Tx wait was explicitly canceled. Retired DATA/management has no failure callback.
     virtual void interruptFrameSequence() = 0;
+    // Finish a detached, never-started TRANSMIT step without retiring live originals.
+    virtual void cancelPendingTransmission() = 0;
 };
 
 } // namespace ieee80211

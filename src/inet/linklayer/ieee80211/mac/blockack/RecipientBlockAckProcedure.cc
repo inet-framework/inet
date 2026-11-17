@@ -48,6 +48,25 @@ void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<const Ieee
     numSentBlockAck++;
 }
 
+void RecipientBlockAckProcedure::processReceivedAmpdu(Packet *elicitingPacket, const Ptr<const Ieee80211DataHeader>& header,
+        RecipientBlockAckAgreement *agreement, simtime_t responseDuration, IProcedureCallback *callback)
+{
+    ASSERT(agreement && agreement->getVariant() == BlockAckVariant::COMPRESSED);
+    auto response = makeShared<Ieee80211CompressedBlockAck>();
+    auto record = agreement->getBlockAckRecord();
+    auto start = record->getWindowStart();
+    BitVector bitmap(0, 64);
+    for (int i = 0; i < 64; i++)
+        bitmap.setBit(i, record->getCompressedAckState(start+i));
+    response->setBlockAckBitmap(bitmap);
+    response->setStartingSequenceNumber(start);
+    response->setReceiverAddress(header->getTransmitterAddress());
+    response->setTransmitterAddress(header->getReceiverAddress());
+    response->setTidInfo(header->getTid());
+    response->setDurationField(responseDuration);
+    callback->transmitControlResponseFrame(new Packet("CompressedBlockAck", response), response, elicitingPacket, header);
+}
+
 //
 // The Basic BlockAck frame contains acknowledgments for the MPDUs of up to 64 previous MSDUs. In the
 // Basic BlockAck frame, the STA acknowledges only the MPDUs starting from the starting sequence control

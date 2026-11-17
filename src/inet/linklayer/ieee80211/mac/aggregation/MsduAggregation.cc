@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -43,11 +44,58 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
     subframeHeader->setSa(sa);
 }
 
+Packet *MsduAggregation::aggregateMeshFrames(std::vector<Packet *> *frames)
+{
+    auto first = frames->front();
+    auto outer = staticPtrCast<Ieee80211MeshDataHeader>(first->peekAtFront<Ieee80211MeshDataHeader>()->dupShared());
+    auto result = new Packet();
+    result->copyTags(*first);
+    std::string name;
+    for (size_t i = 0; i < frames->size(); i++) {
+        auto frame = frames->at(i);
+        auto pending = frame->findTag<Ieee80211MeshAggregationTag>();
+        auto header = frame->popAtFront<Ieee80211MeshDataHeader>();
+        if (!pending || !pending->getPendingSourceIdentity() || header->getAMsduPresent()
+                || header->getAddress3() != outer->getAddress3() || header->getAddress4() != outer->getAddress4()
+                || header->getReceiverAddress() != outer->getReceiverAddress() || header->getTransmitterAddress() != outer->getTransmitterAddress()
+                || header->getTid() != outer->getTid())
+            throw cRuntimeError("Mesh A-MSDU builder requires compatible uncommitted local source frames");
+        auto control = frame->popAtFront<Ieee80211MeshControl>();
+        frame->popAtBack<Ieee80211MacTrailer>(B(4));
+        auto length = frame->getDataLength();
+        if (length > B(2304) || control->getAddressExtensionMode() != 0)
+            throw cRuntimeError("Invalid native mesh source MSDU");
+        auto subframe = makeShared<Ieee80211MeshMsduSubframeHeader>();
+        subframe->setDa(outer->getAddress3());
+        subframe->setSa(outer->getAddress4());
+        subframe->setLength(length.get<B>());
+        result->insertAtBack(subframe);
+        result->insertAtBack(control);
+        result->insertAtBack(frame->peekData());
+        result->copyRegionTags(*frame, frame->getFrontOffset(), result->getBackOffset() - length, length);
+        int padding = (4 - (20 + length.get<B>()) % 4) % 4;
+        if (i + 1 != frames->size() && padding)
+            result->insertAtBack(makeShared<ByteCountChunk>(B(padding)));
+        if (i) name += "+";
+        name += frame->getName();
+        delete frame;
+    }
+    outer->setAMsduPresent(true);
+    outer->setMeshControlPresent(true);
+    result->insertAtFront(outer); // No standalone outer Mesh Control (9.2.4.5.10).
+    result->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    result->addTagIfAbsent<Ieee80211MeshAggregationTag>()->setMsduCount(frames->size());
+    result->setName(name.c_str());
+    return result;
+}
+
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
     EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MSDU.\n";
     auto firstFrame = frames->at(0);
     auto firstHeader = firstFrame->peekAtFront<Ieee80211DataHeader>();
+    if (dynamicPtrCast<const Ieee80211MeshDataHeader>(firstHeader))
+        return aggregateMeshFrames(frames);
     auto tid = firstHeader->getTid();
     auto toDS = firstHeader->getToDS();
     auto fromDS = firstHeader->getFromDS();

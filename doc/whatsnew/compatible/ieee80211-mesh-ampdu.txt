@@ -1,0 +1,7 @@
+Selective HT and VHT mesh MPDU recovery
+
+HT/VHT mesh interfaces can now group native MPDUs, including nested A-MSDUs, into actual A-MPDUs with immediate Compressed Block Ack. Enable the existing Block Ack option and BasicMpduAggregationPolicy to use it. Missing members retain their identities during selective retry; a lost Block Ack can be recovered with BAR without retransmitting data already received. Airtime estimates count one payload total per PPDU and one error outcome per actual MPDU attempt.
+
+The opt-in Ieee80211PcapRecorder records one bare MAC frame per aggregate member, with its individual FCS and a shared radiotap aggregate reference. Ordinary recorder behavior remains available. Fatal delimiter/layout errors reject a complete aggregate, while individual FCS errors are selective. The selected VHT length policy preserves the exact negotiated content edge and permits only final alignment beyond it; spacing delimiters count toward that content edge.
+
+Configured multiple protection uses the existing TXOP Duration/NAV calculation for the complete aggregate and its Block Ack. Admission and reservation checks precede extraction and sequence assignment. Default single protection keeps its existing continuation rules.

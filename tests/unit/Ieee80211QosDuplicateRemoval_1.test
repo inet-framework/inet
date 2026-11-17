@@ -54,7 +54,7 @@ for (bool firstQos : {false, true}) {
     auto deliver = [&](bool qos, bool retry, bool duplicate) {
         auto header = frame(qos, retry);
         auto packet = new Packet("recipient", header);
-        auto result = recipient.dataFrameReceived(packet, header, nullptr);
+        auto result = recipient.dataFrameReceived(packet, header, nullptr, nullptr);
         ASSERT(result.size() == (duplicate ? 0 : 1));
         for (auto delivered : result)
             delete delivered;

@@ -1,0 +1,3 @@
+Wi-Fi contention supports idle transceiver radios
+
+Rx now recognizes idle transceiver mode as available for channel access and treats radio mode switching as busy, including transitions between receptive modes. Existing primary-channel CCA, NAV, TXNAV and contention exclusions still apply. Radio timing and notification order are unchanged.

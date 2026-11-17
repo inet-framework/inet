@@ -12,6 +12,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211TxVector.h"
 
 namespace inet {
 
@@ -19,9 +20,12 @@ namespace physicallayer {
 
 class INET_API Ieee80211Transmission : public TransmissionBase
 {
+    friend class Ieee80211Transmitter;
   protected:
     const IIeee80211Mode *mode;
     const Ieee80211Channel *channel;
+    Ieee80211TxVector txVector;
+    void setTxVector(const Ieee80211TxVector& value) { txVector = value; }
 
   public:
     Ieee80211Transmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel, const IIeee80211Mode *mode, const Ieee80211Channel *channel);
@@ -30,6 +34,7 @@ class INET_API Ieee80211Transmission : public TransmissionBase
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }
+    const Ieee80211TxVector& getTxVector() const { return txVector; }
 };
 
 } // namespace physicallayer

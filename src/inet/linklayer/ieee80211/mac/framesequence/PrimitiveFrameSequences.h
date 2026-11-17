@@ -44,6 +44,18 @@ class INET_API DataFs : public IFrameSequence
     virtual std::string getHistory() const override { return "DATA"; }
 };
 
+class INET_API AmpduFs : public IFrameSequence
+{
+  protected:
+    int firstStep = -1;
+    int step = 0;
+  public:
+    void startSequence(FrameSequenceContext *context, int firstStep) override { this->firstStep = firstStep; step = 0; }
+    IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
+    bool completeStep(FrameSequenceContext *context) override;
+    std::string getHistory() const override { return "A-MPDU CompressedBlockAck"; }
+};
+
 class INET_API ManagementAckFs : public IFrameSequence
 {
   protected:

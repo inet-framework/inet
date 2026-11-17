@@ -59,7 +59,7 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
-    visitSubframes(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()),
+    bool complete = visitSubframes(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()),
             [](const auto&, B, bool) {},
             [&](const auto& mpdu, B offset) {
                 auto frame = new Packet();
@@ -70,6 +70,10 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
                 EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
                 frames->push_back(frame);
             });
+    if (!complete) {
+        for (auto frame : *frames) delete frame;
+        frames->clear(); // A malformed suffix must not release a valid-looking prefix.
+    }
     delete aggregatedFrame;
     EV_TRACE << "Created " << frames->size() << " packets from A-MPDU.\n";
     return frames;

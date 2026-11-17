@@ -32,7 +32,8 @@ TxOpFs::TxOpFs() :
                     new SequentialFs({new OptionalFs(new RtsCtsFs(), OPTIONALFS_PREDICATE(isRtsCtsNeeded)),
                                       new AlternativesFs({new ManagementAckFs(),
                                                           /* TODO DATA + QAP*/},
-                                                         ALTERNATIVESFS_SELECTOR(selectMgmtOrDataQap))})},
+                                                         ALTERNATIVESFS_SELECTOR(selectMgmtOrDataQap))}),
+                    new AmpduFs()},
                    ALTERNATIVESFS_SELECTOR(selectTxOpSequence))
 {
 }
@@ -45,6 +46,8 @@ int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceCont
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
+    if (qos->preparedData && !qos->preparedData->members.empty())
+        return 4;
     if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 2;
     auto frameToTransmit = context->getDataFrameToTransmit();

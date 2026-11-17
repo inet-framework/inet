@@ -17,6 +17,7 @@ namespace ieee80211 {
 class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, public SimpleModule
 {
   protected:
+    int maxMpduCount = 64;
     virtual void initialize() override;
 
   public:

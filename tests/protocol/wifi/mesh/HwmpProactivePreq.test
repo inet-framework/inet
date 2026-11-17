@@ -1,0 +1,142 @@
+%description:
+Production root-relay-leaf proactive PREQ chains with flags0/1 and both metric
+IDs. Flag0 source demand precedes pure lookup; after idle the leaf still has a
+usable root lookup but sends a fresh proactive PREP before DATA. Its sequence
+advances without an ordinary discovery. Flag1 keeps relay/root leaf paths live
+over several lifetimes. Forwarding PREPs never increments the relay's own SN.
+
+%file: HwmpProactivePreq.cc
+#include "mesh/HwmpRootSupport.h"
+class ProactiveDriver : public cSimpleModule, public cListener, public RootFactChecks
+{
+    int received[9] = {}, ordinary[9] = {}, generated[9] = {};
+    uint32_t localSequence[9] = {}, idleLeafSequence = 0;
+    std::optional<simtime_t> lastRoot[9];
+    void source(const char *name) { sourceHwmp(this,2,meshMib(0)->address,name); }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule(); network->subscribe(registerSignal("hwmpTestHandoff"),this); network->subscribe(registerSignal("packetSentToUpper"),this);
+        network->subscribe(Hwmp::rootUpdatedSignal,this);
+        const int times[] = {5,10,50,60,80,250,260,280,300};
+        for (int i = 0; i < 9; i++) scheduleAt(SimTime(times[i],SIMTIME_MS),new cMessage("proactive-case",i));
+        scheduleAt(SimTime(20,SIMTIME_MS),new cMessage("demand-before-invitation",20));
+    }
+    void receiveSignal(cComponent *source, simsignal_t, bool value, cObject *details) override { checkRootFact(source,value,details); }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        for (int i = 0; i < 9; i++) {
+            if (source == meshInterface(i)->getSubmodule("mac") && signal == registerSignal("packetSentToUpper")) received[i]++;
+            if (source != meshManagement(i) || signal != registerSignal("hwmpTestHandoff")) continue;
+            auto body = packet->peekAtFront<Ieee80211HwmpFrame>();
+            for (size_t j = 0; j < body->getPreqsArraySize(); j++) {
+                const auto& preq = body->getPreqs(j); int root = (i/3)*3;
+                if (preq.getOriginator() == meshMib(i)->address) {
+                    if (!preq.getTargets(0).address.isBroadcast()) { ordinary[i]++; localSequence[i] = preq.getOriginatorSequenceNumber(); continue; }
+                    ASSERT(i == root && preq.getFlags() == (root == 3 ? 4 : 0));
+                    ASSERT(preq.getHopCount() == 0 && preq.getMetric() == 0 && preq.getLifetime() == 96);
+                    ASSERT(preq.getTargetsArraySize() == 1 && preq.getTargets(0).flags == 5 && preq.getTargets(0).sequenceNumber == 0);
+                    if (lastRoot[i]) ASSERT(simTime()-*lastRoot[i] >= SimTime(32768,SIMTIME_US)); lastRoot[i] = simTime();
+                }
+                else if (preq.getOriginator() == meshMib(root)->address && i == root+1) {
+                    ASSERT(preq.getHopCount() == 1 && preq.getMetric() == outgoingMetric(i,root));
+                }
+            }
+            for (size_t j = 0; j < body->getPrepsArraySize(); j++) {
+                const auto& prep = body->getPreps(j);
+                if (prep.target == meshMib(i)->address) {
+                    if (i%3 == 0) { localSequence[i] = prep.targetSequenceNumber; continue; }
+                    ASSERT(prep.hopCount == 0 && prep.metric == 0 && prep.lifetime == 96);
+                    ASSERT(rootProbe(i)->responseSent(prep.originator) && rootProbe(i)->invitationSn(prep.originator) == prep.originatorSequenceNumber);
+                    ASSERT(prep.targetSequenceNumber == localSequence[i]+1 && hwmp(i)->getSequenceNumber() == prep.targetSequenceNumber);
+                    localSequence[i] = prep.targetSequenceNumber; generated[i]++;
+                }
+                else ASSERT(hwmp(i)->getSequenceNumber() == localSequence[i]);
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() == 20) { ASSERT(!rootProbe(8)->hasInvitation(meshMib(6)->address)); sourceHwmp(this,8,meshMib(6)->address,"queued-before-invitation"); delete message; return; }
+        switch (message->getKind()) {
+            case 0: for (int root : {0,3,6}) meshManagement(root)->openPeer(meshMib(root+1)->address); rootManagement(6)->holdPreps(true); break;
+            case 1: for (int root : {0,3,6}) meshManagement(root+1)->openPeer(meshMib(root+2)->address); break;
+            case 2:
+                ASSERT(rootProbe(2)->hasInvitation(meshMib(0)->address) && !rootProbe(2)->responseSent(meshMib(0)->address));
+                ASSERT(!hwmp(2)->findPath(meshMib(0)->address) && !hwmp(0)->findPath(meshMib(2)->address) && generated[2] == 0);
+                ASSERT(hwmp(5)->findPath(meshMib(3)->address) && hwmp(3)->findPath(meshMib(5)->address) && generated[5] > 0);
+                ASSERT(!rootProbe(2)->hasLocalRootTimer() && rootProbe(0)->hasLocalRootTimer()); break;
+            case 3: source("flag0-demand"); break;
+            case 4:
+                ASSERT(received[0] == 1 && generated[2] == 1 && ordinary[2] == 0 && rootProbe(2)->groupIdCounter() == 0);
+                ASSERT(hwmp(2)->getPathInfo(meshMib(0)->address)->metric == Hwmp::addMetric(outgoingMetric(1,0),outgoingMetric(2,1)));
+                ASSERT(hwmp(0)->findPath(meshMib(2)->address)); idleLeafSequence = hwmp(2)->getSequenceNumber(); break;
+            case 5:
+                ASSERT(hwmp(2)->findPath(meshMib(0)->address) && !hwmp(0)->findPath(meshMib(2)->address) && !hwmp(1)->findPath(meshMib(2)->address));
+                ASSERT(hwmp(2)->getSequenceNumber() == idleLeafSequence && !rootProbe(2)->responseSent(meshMib(0)->address));
+                ASSERT(hwmp(3)->findPath(meshMib(5)->address) && hwmp(4)->findPath(meshMib(5)->address) && generated[5] >= 6); break;
+            case 6: source("idle-leaf-only"); break;
+            case 7:
+                ASSERT(received[0] == 2 && hwmp(0)->findPath(meshMib(2)->address) && hwmp(1)->findPath(meshMib(2)->address));
+                ASSERT(hwmp(2)->getSequenceNumber() == idleLeafSequence+1 && ordinary[2] == 0 && rootProbe(2)->groupIdCounter() == 0);
+                ASSERT(generated[2] == 2); break;
+            case 8:
+                ASSERT(ordinary[5] == 0 && hwmp(3)->findPath(meshMib(5)->address) && rootEvents > 10);
+                ASSERT(ordinary[8] == 1 && generated[8] == 1 && received[6] == 1 && rootManagement(6)->heldCount() > 0);
+                ASSERT(meshForwarding(8)->getNumPendingPackets() == 0); emit(registerSignal("proactiveComplete"),1L); break;
+        }
+        delete message;
+    }
+};
+Define_Module(ProactiveDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_proactive) {
+    return ProtocolTest("hwmp_proactive")
+        .intercept(tap("radioMedium").from("station[0]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[0]").drop())
+        .intercept(tap("radioMedium").from("station[3]").to("station[5]").drop())
+        .intercept(tap("radioMedium").from("station[5]").to("station[3]").drop())
+        .intercept(tap("radioMedium").from("station[6]").to("station[8]").drop())
+        .intercept(tap("radioMedium").from("station[8]").to("station[6]").drop())
+        .once(on("driver").signal("proactiveComplete").assertValue(1).within(0.31));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple ProactiveDriver { parameters: @class(::ProactiveDriver); @signal[proactiveComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: ProactiveDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 320ms
+*.numStations = 9
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "RootTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].pathSelection.typename = "HwmpRootProbe"
+*.station[*].wlan[0].pathSelectionMetricId = ${metricId=1,2}
+*.station[*].wlan[0].pathSelection.rootInterval = 32.768ms
+*.station[*].wlan[0].pathSelection.activePathToRootTimeout = 98.304ms
+*.station[*].wlan[0].pathSelection.activePathTimeout = 98.304ms
+*.station[0].wlan[0].pathSelection.rootMode = 2
+*.station[3].wlan[0].pathSelection.rootMode = 3
+*.station[6].wlan[0].pathSelection.rootMode = 2
+*.station[3..5].wlan[0].radio.channelNumber = 3
+*.station[6..8].wlan[0].radio.channelNumber = 6
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[0].wlan[0]":24Mbps,"Test.station[2].wlan[0]":12Mbps}
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.station[4].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[3].wlan[0]":24Mbps,"Test.station[5].wlan[0]":12Mbps}
+*.station[5].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_proactive"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..1
+%contains: stdout
+PROTOCOLTEST hwmp_proactive: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_proactive: FAIL

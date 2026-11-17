@@ -1,0 +1,564 @@
+%description:
+Directional outgoing airtime costs from live DATA ACK/timeouts for both metric
+IDs. DroppedACK retry EWMA, terminal timeout, internal collision exclusion,
+reports, compatible rate updates, peer retirement and receive interruption.
+
+%file: MeshAirtimeMetric.cc
+#include "mesh/MeshPhySupport.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+
+class MetricManagement : public Ieee80211MgmtMesh
+{
+    int omitRate = 0;
+  protected:
+    void sendDown(Packet *packet) override {
+        if (omitRate && dynamicPtrCast<const Ieee80211MeshPeeringOpenFrame>(packet->peekAtFront<Chunk>())) {
+            auto open = packet->removeAtFront<Ieee80211MeshPeeringOpenFrame>();
+            std::vector<uint8_t> rates;
+            for (size_t i = 0; i < open->getSupportedRatesArraySize(); i++)
+                if ((open->getSupportedRates(i)&127) != omitRate*2) rates.push_back(open->getSupportedRates(i));
+            auto removed = open->getSupportedRatesArraySize()-rates.size();
+            open->setSupportedRatesArraySize(rates.size());
+            for (size_t i = 0; i < rates.size(); i++) open->setSupportedRates(i,rates[i]);
+            open->setChunkLength(open->getChunkLength()-B(removed));
+            packet->insertAtFront(open);
+        }
+        Ieee80211MgmtMesh::sendDown(packet);
+    }
+  public:
+    void metricReport(MacAddress peer, bool request, uint32_t value = 0) {
+        Enter_Method("metricReport");
+        auto body = makeShared<Ieee80211MeshLinkMetricFrame>();
+        body->setRequest(request); body->setMetric(value); body->setChunkLength(B(7));
+        sendBody(body,ST_ACTION,peer);
+    }
+    void advertise(MacAddress peer, int remove) {
+        Enter_Method("advertise"); omitRate = remove;
+        sendPeering(peer,MESH_PEERING_OPEN); omitRate = 0;
+    }
+};
+Define_Module(MetricManagement);
+
+class RecipientClearProbe : public IRecipientQosMacDataService
+{
+    IRecipientQosMacDataService *delegate;
+  public:
+    std::map<MacAddress,int> completed;
+    explicit RecipientClearProbe(IRecipientQosMacDataService *delegate) : delegate(delegate) {}
+    void clearPeer(MacAddress peer) override { delegate->clearPeer(peer); completed[peer]++; }
+    std::vector<Packet *> retireAgreement(RecipientBlockAckAgreement *agreement, bool reset) override { return delegate->retireAgreement(agreement,reset); }
+    std::vector<Packet *> dataFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, IRecipientBlockAckAgreementHandler *agreements, ICallback *callback, bool interframe) override {
+        return delegate->dataFrameReceived(packet,header,agreements,callback,interframe);
+    }
+    std::vector<Packet *> controlFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, IRecipientBlockAckAgreementHandler *agreements) override {
+        return delegate->controlFrameReceived(packet,header,agreements);
+    }
+    std::vector<Packet *> managementFrameReceived(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        return delegate->managementFrameReceived(packet,header);
+    }
+};
+class MetricHcf : public Hcf
+{
+    std::unique_ptr<RecipientClearProbe> probe;
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            probe = std::make_unique<RecipientClearProbe>(recipientDataService);
+            recipientDataService = probe.get();
+        }
+    }
+  public:
+    int completedClears(MacAddress peer) const {
+        auto it = probe->completed.find(peer); return it == probe->completed.end() ? 0 : it->second;
+    }
+};
+Define_Module(MetricHcf);
+
+class MeshMetricDriver : public cSimpleModule, public cListener, public LifecycleController, public ITx::ICallback
+{
+    struct Sample { std::string name; bool ack; bool terminal; double rate; };
+    std::vector<Sample> samples[3];
+    int reports[3] = {};
+    int collisionCount = 0;
+    int collisionTransmissions = 0;
+    int rejectedInterrupts = 0;
+    int retiredSamples = 0;
+    int withdrawalChecks = 0;
+    bool retiredCloseScheduled = false;
+    bool interruptCloseScheduled = false;
+    const FrameSequenceContext *active[3] = {};
+    const FrameSequenceContext *activeCorrupt = nullptr;
+    int corruptRejects = 0;
+    int corruptSuccesses = 0;
+    int ttlDiscards = 0;
+    int pathDiscards = 0;
+    std::map<MacAddress,int> observedClears[6];
+    AirtimeLinkMetric *metric(int station) { return check_and_cast<AirtimeLinkMetric *>(meshInterface(station)->getSubmodule("linkMetric")); }
+    MetricManagement *management(int station) { return check_and_cast<MetricManagement *>(meshManagement(station)); }
+    void source(int station, const char *name, int tid = 0) {
+        sendDirect(fixtureMsdu(name,meshMib(station^1)->address,tid),meshInterface(station)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+    int count(int pair, const char *name) {
+        int result = 0; for (const auto& sample : samples[pair]) result += sample.name == name; return result;
+    }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+    void injectExhaustedTtl() {
+        fixturePath(1,2,0,SimTime(1)); fixturePath(1,0,0,SimTime(1)); fixturePrecursor(1,2,0,SimTime(1));
+        auto header = makeShared<Ieee80211MeshDataHeader>();
+        header->setType(ST_DATA_WITH_QOS); header->setChunkLength(B(32)); header->setDurationField(SIMTIME_ZERO);
+        header->setFromDS(true); header->setToDS(true); header->setMeshControlPresent(true);
+        header->setTransmitterAddress(meshMib(0)->address); header->setReceiverAddress(meshMib(1)->address);
+        header->setAddress3(meshMib(2)->address); header->setAddress4(meshMib(0)->address);
+        header->setSequenceNumber(SequenceNumberCyclic(900));
+        auto control = makeShared<Ieee80211MeshControl>(); control->setTtl(1); control->setSequenceNumber(900);
+        auto packet = new Packet("ttl-transit-drop",header); packet->insertAtBack(control);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"))->transmitFrame(packet,header,false,this);
+        delete packet;
+    }
+    bool hasQueued(int station, const char *name) {
+        auto edca = meshInterface(station)->getSubmodule("mac")->getSubmodule("hcf")->getSubmodule("edca");
+        for (int ac = 0; ac < 4; ac++) {
+            auto edcaf = edca->getSubmodule("edcaf",ac);
+            auto pending = check_and_cast<queueing::IPacketQueue *>(edcaf->getSubmodule("pendingQueue"));
+            auto frames = check_and_cast<InProgressFrames *>(edcaf->getSubmodule("inProgressFrames"));
+            for (int i = 0; i < pending->getNumPackets(); i++) if (std::string(pending->getPacket(i)->getName()) == name) return true;
+            for (int i = 0; i < frames->getLength(); i++) if (std::string(frames->getFrames(i)->getName()) == name) return true;
+        }
+        return false;
+    }
+    void assertQueuesRetired(int station, MacAddress peer) {
+        auto edca = meshInterface(station)->getSubmodule("mac")->getSubmodule("hcf")->getSubmodule("edca");
+        for (int ac = 0; ac < 4; ac++) {
+            auto edcaf = edca->getSubmodule("edcaf",ac);
+            auto pending = check_and_cast<queueing::IPacketQueue *>(edcaf->getSubmodule("pendingQueue"));
+            auto frames = check_and_cast<InProgressFrames *>(edcaf->getSubmodule("inProgressFrames"));
+            for (int i = 0; i < pending->getNumPackets(); i++) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(pending->getPacket(i)->peekAtFront<Ieee80211MacHeader>());
+                ASSERT(!data || data->getReceiverAddress() != peer);
+            }
+            for (int i = 0; i < frames->getLength(); i++) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
+                ASSERT(!data || data->getReceiverAddress() != peer);
+            }
+        }
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto name : {"meshDataAttemptCompleted","packetSentToLower","packetReceivedFromLower","edcaCollisionDetected",
+                "contentionWindowChanged","frameSequenceStarted","frameSequenceFinished","meshPeerChanged","packetDropped"})
+            network->subscribe(registerSignal(name),this);
+        const int times[] = {5,50,51,70,80,81,95,100,110,112,115,120,130,140,145,150,160,170,180,181,190,200,210,220,230};
+        for (int i = 0; i < 25; i++) scheduleAt(i == 22 ? SimTime(219990,SIMTIME_US) : SimTime(times[i],SIMTIME_MS),new cMessage("metric-case",i));
+        scheduleAt(SimTime(135,SIMTIME_MS),new cMessage("corrupt-arm",102));
+        scheduleAt(SimTime(136,SIMTIME_MS),new cMessage("corrupt-data",103));
+        scheduleAt(SimTime(139,SIMTIME_MS),new cMessage("ttl",104));
+        scheduleAt(SimTime(202,SIMTIME_MS),new cMessage("corrupt-true-timeout-arm",105));
+        scheduleAt(SimTime(203,SIMTIME_MS),new cMessage("corrupt-true-timeout",106));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        Enter_Method_Silent();
+        for (int p = 0; p < 3; p++) if (source == meshInterface(2*p)->getSubmodule("mac")->getSubmodule("hcf")) {
+            if (signal == registerSignal("frameSequenceStarted")) active[p] = check_and_cast<FrameSequenceContext *>(object);
+            if (signal == registerSignal("frameSequenceFinished")) active[p] = nullptr;
+        }
+        if (source == meshInterface(5)->getSubmodule("mac")->getSubmodule("hcf")) {
+            if (signal == registerSignal("frameSequenceStarted")) activeCorrupt = check_and_cast<FrameSequenceContext *>(object);
+            if (signal == registerSignal("frameSequenceFinished")) activeCorrupt = nullptr;
+        }
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (signal == registerSignal("packetDropped")) {
+            if (source == meshInterface(1)->getSubmodule("mac")->getSubmodule("ds") && std::string(packet->getName()) == "ttl-transit-drop") ttlDiscards++;
+            if (source == meshInterface(0)->getSubmodule("mac")->getSubmodule("ds") && std::string(packet->getName()) == "expired-before-tx") pathDiscards++;
+        }
+        if (signal == registerSignal("meshDataAttemptCompleted")) {
+            auto attempt = check_and_cast<MeshDataAttempt *>(details);
+            ASSERT(std::string(packet->getName()) != "ttl-transit-drop");
+            if (source == meshInterface(5)->getSubmodule("mac")->getSubmodule("hcf") && std::string(packet->getName()) == "corrupt-response") {
+                ASSERT(attempt->acknowledged && !attempt->terminalTimeout);
+                ASSERT(attempt->peer == meshMib(4)->address && attempt->mode->getDataMode()->getNetBitrate() == Mbps(6));
+                corruptSuccesses++;
+            }
+            for (int pair = 0; pair < 3; pair++) if (source == meshInterface(pair*2)->getSubmodule("mac")->getSubmodule("hcf")) {
+                ASSERT(attempt->peer == meshMib(pair*2+1)->address);
+                samples[pair].push_back({packet->getName(),attempt->acknowledged,attempt->terminalTimeout,attempt->mode->getDataMode()->getNetBitrate().get()});
+                if (std::string(packet->getName()) == "ewma" && !attempt->acknowledged)
+                    scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("first-error",200+pair));
+                if (std::string(packet->getName()) == "retired" || std::string(packet->getName()) == "interrupted-close") retiredSamples++;
+            }
+        }
+        if (signal == registerSignal("packetSentToLower")) {
+            if (source == meshInterface(0)->getSubmodule("mac") && std::string(packet->getName()) == "collision") collisionTransmissions++;
+            if (source == meshInterface(0)->getSubmodule("mac") && std::string(packet->getName()) == "retired" && !retiredCloseScheduled) {
+                retiredCloseScheduled = true;
+                scheduleAt(simTime()+SimTime(1,SIMTIME_US),new cMessage("retire-onair",100));
+            }
+            for (int pair = 0; pair < 3; pair++) if (source == meshInterface(pair*2)->getSubmodule("mac")) {
+                auto header = dynamicPtrCast<const Ieee80211MeshActionFrame>(packet->peekAtFront<Ieee80211MacHeader>());
+                if (header && header->getCategory() == MESH_ACTION && header->getMeshAction() == MESH_LINK_METRIC_REPORT) {
+                    auto body = packet->peekDataAt<Ieee80211MeshLinkMetricFrame>(header->getChunkLength());
+                    if (!body->getRequest()) { ASSERT(body->getMetric() == metric(pair*2)->getMetric(meshMib(pair*2+1)->address)); reports[pair]++; }
+                }
+            }
+        }
+        if (signal == registerSignal("packetReceivedFromLower") && source == meshInterface(1)->getSubmodule("mac")
+                && std::string(packet->getName()) == "interrupted-close" && !interruptCloseScheduled) {
+            interruptCloseScheduled = true;
+            scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("remote-close",101));
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, intval_t, cObject *) override {
+        if (signal == registerSignal("edcaCollisionDetected") && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) collisionCount++;
+        for (int p = 0; p < 3; p++) if (signal == registerSignal("contentionWindowChanged") && active[p] && active[p]->getNumSteps() >= 2) {
+            auto receive = dynamic_cast<IReceiveStep *>(active[p]->getLastStep());
+            auto transmit = dynamic_cast<TransmitStep *>(active[p]->getStepBeforeLast());
+            if (receive && transmit && std::string(transmit->getFrameToTransmit()->getName()) == "interrupted-close"
+                    && receive->getCompletion() == IFrameSequenceStep::Completion::REJECTED && !receive->getReceivedFrame())
+                rejectedInterrupts++;
+            if (receive && transmit && std::string(transmit->getFrameToTransmit()->getName()) == "corrupt-response"
+                    && receive->getCompletion() == IFrameSequenceStep::Completion::REJECTED && !receive->getReceivedFrame())
+                corruptRejects++;
+        }
+        if (signal == registerSignal("contentionWindowChanged") && activeCorrupt && activeCorrupt->getNumSteps() >= 2) {
+            auto receive = dynamic_cast<IReceiveStep *>(activeCorrupt->getLastStep());
+            auto transmit = dynamic_cast<TransmitStep *>(activeCorrupt->getStepBeforeLast());
+            if (receive && transmit && std::string(transmit->getFrameToTransmit()->getName()) == "corrupt-response"
+                    && receive->getCompletion() == IFrameSequenceStep::Completion::REJECTED && !receive->getReceivedFrame()) corruptRejects++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, uintval_t, cObject *) override {
+        if (signal == registerSignal("edcaCollisionDetected") && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) collisionCount++;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override {
+        if (signal == registerSignal("meshPeerChanged") && !value) {
+            for (int station = 0; station < 6; station++) if (source == meshMib(station)) {
+                auto peer = check_and_cast<Ieee80211Mib::MeshPeerChange *>(details)->peer;
+                ASSERT(!meshMib(station)->isMeshPeerEstablished(peer));
+                ASSERT(metric(station)->getErrorEstimate(peer) == 0);
+                assertQueuesRetired(station,peer);
+                int completed = check_and_cast<MetricHcf *>(meshInterface(station)->getSubmodule("mac")->getSubmodule("hcf"))->completedClears(peer);
+                ASSERT(completed > observedClears[station][peer]); observedClears[station][peer] = completed;
+                withdrawalChecks++;
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int kind = message->getKind();
+        if (kind >= 200) {
+            int station = (kind-200)*2;
+            ASSERT(metric(station)->getErrorEstimate(meshMib(station+1)->address) == 1.0/8);
+            ASSERT(metric(station+1)->getErrorEstimate(meshMib(station)->address) == 0);
+            if (station < 4) {
+                auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(station)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(station+1)->address);
+                ASSERT(timing.overhead == SimTime(station == 0 ? 190500 : 174500,SIMTIME_NS));
+                ASSERT(metric(station)->getMetric(meshMib(station+1)->address) == (station == 0 ? 174 : 58953));
+            }
+        }
+        if (kind == 100) management(0)->closePeer(meshMib(1)->address);
+        if (kind == 101) management(1)->closePeer(meshMib(0)->address);
+        if (kind == 102) emit(registerSignal("metricCorruptStart"),1L);
+        if (kind == 103) {
+            fixturePath(5,4,4,SimTime(1)); fixturePrecursor(4,4,5,SimTime(1));
+            source(5,"corrupt-response");
+        }
+        if (kind == 104) injectExhaustedTtl();
+        if (kind == 105) emit(registerSignal("metricCorruptTimeoutStart"),1L);
+        if (kind == 106) source(4,"corrupt-before-timeout");
+        if (kind == 0) for (int s = 0; s < 6; s += 2) management(s)->openPeer(meshMib(s+1)->address);
+        if (kind == 1) {
+            for (int s = 0; s < 6; s += 2) {
+                ASSERT(meshMib(s)->isMeshPeerEstablished(meshMib(s+1)->address));
+                fixturePath(s,s+1,s+1,SimTime(1)); fixturePrecursor(s+1,s+1,s,SimTime(1));
+                ASSERT(metric(s)->getErrorEstimate(meshMib(s+1)->address) == 0);
+            }
+            emit(registerSignal("metricStart"),1L);
+        }
+        if (kind == 2) for (int s = 0; s < 6; s += 2) source(s,"ewma");
+        if (kind == 3) {
+            for (int pair = 0; pair < 3; pair++) {
+                ASSERT(count(pair,"ewma") == 2 && !samples[pair][0].ack && samples[pair][1].ack);
+                ASSERT(!samples[pair][0].terminal && !samples[pair][1].terminal);
+                ASSERT(metric(pair*2)->getErrorEstimate(meshMib(pair*2+1)->address) == 7.0/64);
+                ASSERT(metric(pair*2+1)->getErrorEstimate(meshMib(pair*2)->address) == 0);
+            }
+            ASSERT(metric(0)->getMetric(meshMib(1)->address) == 171);
+            ASSERT(metric(2)->getMetric(meshMib(3)->address) == 57919);
+            emit(registerSignal("metricEwmaComplete"),1L);
+        }
+        if (kind == 4) emit(registerSignal("metricExhaustStart"),1L);
+        if (kind == 5) for (int s = 0; s < 4; s += 2) source(s,"exhaust");
+        if (kind == 6) {
+            for (int pair = 0; pair < 2; pair++) {
+                ASSERT(count(pair,"exhaust") == 3);
+                int index = 0;
+                for (const auto& sample : samples[pair]) if (sample.name == "exhaust") {
+                    ASSERT(!sample.ack && sample.terminal == (index == 2)); index++;
+                }
+                double expected = 7.0/64;
+                for (int i = 0; i < 3; i++) expected = expected*0.875+0.125;
+                ASSERT(metric(pair*2)->getErrorEstimate(meshMib(pair*2+1)->address) == expected);
+            }
+        }
+        if (kind == 7) for (int s = 1; s < 6; s += 2) management(s)->metricReport(meshMib(s-1)->address,true);
+        if (kind == 8) for (int pair = 0; pair < 3; pair++) ASSERT(reports[pair] == 1);
+        if (kind == 9) management(5)->metricReport(meshMib(4)->address,false,1);
+        if (kind == 10) { ASSERT(metric(4)->getErrorEstimate(meshMib(5)->address) == 7.0/64); management(5)->advertise(meshMib(4)->address,54); }
+        if (kind == 11) {
+            ASSERT(!meshMib(4)->findPeerRateSet(meshMib(5)->address)->supported.legacyRates.count(Mbps(54)));
+            ASSERT(metric(4)->getErrorEstimate(meshMib(5)->address) == 7.0/64);
+            management(5)->advertise(meshMib(4)->address,18);
+            source(0,"collision",7); source(0,"collision",5);
+        }
+        if (kind == 12) {
+            ASSERT(meshMib(4)->isMeshPeerEstablished(meshMib(5)->address));
+            auto rates = meshMib(4)->findPeerRateSet(meshMib(5)->address);
+            ASSERT(!rates->supported.legacyRates.count(Mbps(54)) && rates->supported.legacyRates.count(Mbps(18)));
+            ASSERT(metric(4)->getErrorEstimate(meshMib(5)->address) == 7.0/64);
+            ASSERT(collisionCount >= 1 && collisionTransmissions == 1 && count(0,"collision") == 1);
+        }
+        if (kind == 13) fixturePath(0,1,1,simTime());
+        if (kind == 14) {
+            source(0,"expired-before-tx");
+            ASSERT(corruptRejects > 0 && corruptSuccesses == 1);
+            ASSERT(metric(5)->getErrorEstimate(meshMib(4)->address) == 0);
+            ASSERT(metric(4)->getErrorEstimate(meshMib(5)->address) == 7.0/64);
+        }
+        if (kind == 15) { fixturePath(0,1,1,SimTime(1)); source(0,"retired"); source(0,"retired",7); }
+        if (kind == 16) { ASSERT(retiredSamples == 0); ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 0); management(0)->openPeer(meshMib(1)->address); }
+        if (kind == 17) source(0,"fresh");
+        if (kind == 18) { ASSERT(count(0,"fresh") == 1 && metric(0)->getErrorEstimate(meshMib(1)->address) == 0); emit(registerSignal("metricInterruptStart"),1L); }
+        if (kind == 19) source(0,"interrupted-close");
+        if (kind == 20) { ASSERT(retiredSamples == 0 && rejectedInterrupts > 0); ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 0); }
+        if (kind == 21) management(0)->openPeer(meshMib(1)->address);
+        if (kind == 22) source(0,"stop-pending");
+        if (kind == 23) {
+            ASSERT(hasQueued(0,"stop-pending") && count(0,"stop-pending") == 0);
+            auto operation = new ModuleStopOperation(); LifecycleOperation::StringMap parameters;
+            operation->initialize(management(0),parameters); ASSERT(initiateOperation(operation));
+        }
+        if (kind == 24) {
+            ASSERT(withdrawalChecks >= 5 && retiredSamples == 0 && count(0,"expired-before-tx") == 0 && count(0,"stop-pending") == 0);
+            ASSERT(ttlDiscards == 1 && pathDiscards == 1 && metric(1)->getErrorEstimate(meshMib(0)->address) == 0);
+            ASSERT(count(2,"corrupt-before-timeout") == 2);
+            ASSERT(!samples[2][samples[2].size()-2].ack && samples[2].back().ack);
+            ASSERT(metric(4)->getErrorEstimate(meshMib(5)->address) == 791.0/4096 && metric(5)->getErrorEstimate(meshMib(4)->address) == 0);
+            emit(registerSignal("meshMetricComplete"),1L);
+        }
+        delete message;
+    }
+};
+Define_Module(MeshMetricDriver);
+
+class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
+{
+    std::vector<bool> attempts;
+    int delivered = 0;
+    int payloadCompletions = 0;
+    bool aggregation() const { return par("aggregation"); }
+    AirtimeLinkMetric *metric(int station) { return check_and_cast<AirtimeLinkMetric *>(meshInterface(station)->getSubmodule("linkMetric")); }
+    uint32_t nominal() const { return meshMib(0)->getMeshPhyProfile() == "ht" ? 31654 : 32054; }
+  protected:
+    void initialize() override {
+        getParentModule()->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+        getParentModule()->subscribe(Hcf::meshPayloadTransmittedSignal,this);
+        getParentModule()->subscribe(packetSentToUpperSignal,this);
+        for (int i=0;i<5;i++) scheduleAt(SimTime(i == 0 ? 1 : i == 1 ? 50 : i == 2 ? 75 : i == 3 ? 80 : 100,SIMTIME_MS),new cMessage("high-metric",i));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (!packet || std::string(packet->getName()).find("high-metric-forward") == std::string::npos) return;
+        if (signal == Hcf::meshPayloadTransmittedSignal) {
+            auto payload = check_and_cast<MeshPayloadTransmission *>(details);
+            ASSERT(payload->msduCount == (aggregation() ? 3 : 1));
+            payloadCompletions++;
+            Enter_Method_Silent();
+            scheduleAt(simTime()+SimTime::fromRaw(1),new cMessage("completed-payload-before-ack",6));
+        }
+        if (signal == packetSentToUpperSignal && source == meshInterface(1)->getSubmodule("mac")) delivered++;
+        if (signal == Hcf::meshDataAttemptCompletedSignal) {
+            auto attempt = check_and_cast<MeshDataAttempt *>(details);
+            ASSERT(attempt->mode->getDataMode()->getNetBitrate() == Mbps(65));
+            ASSERT(!attempt->terminalTimeout);
+            attempts.push_back(attempt->acknowledged);
+            if (!attempt->acknowledged) {
+                Enter_Method_Silent();
+                scheduleAt(simTime()+SimTime::fromRaw(1),new cMessage("first-error-estimate",5));
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int step = message->getKind(); delete message;
+        if (step == 0) meshManagement(0)->openPeer(meshMib(1)->address);
+        if (step == 1) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+            ASSERT(timing.overhead == SimTime(meshMib(0)->getMeshPhyProfile() == "ht" ? 190500 : 194500,SIMTIME_NS));
+            ASSERT(timing.rate == Mbps(65));
+            ASSERT(meshMib(0)->getMeshConfiguration().pathSelectionMetricId == 2 && metric(0)->getMetric(meshMib(1)->address) == nominal());
+            emit(registerSignal("highMetricStart"),1L);
+            for (int i=0;i<(aggregation() ? 3 : 1);i++)
+                sendDirect(phyMsdu(("high-metric-forward"+std::to_string(i)).c_str(),meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+        }
+        if (step == 2) {
+            ASSERT(attempts == std::vector<bool>({false,true}) && delivered == (aggregation() ? 3 : 1) && payloadCompletions == 2);
+            ASSERT(metric(0)->getPayloadEstimate(meshMib(1)->address) == (aggregation() ? 47.0/32 : 1));
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+            ASSERT(metric(1)->getErrorEstimate(meshMib(0)->address) == 0 && metric(1)->getMetric(meshMib(0)->address) == nominal());
+            ASSERT(metric(0)->getMetric(meshMib(1)->address) == (aggregation()
+                ? (meshMib(0)->getMeshPhyProfile() == "ht" ? 28714 : 29020)
+                : (meshMib(0)->getMeshPhyProfile() == "ht" ? 35541 : 35990)));
+        }
+        if (step == 3) sendDirect(phyMsdu("high-metric-reverse",meshMib(0)->address),meshInterface(1)->getSubmodule("llc")->gate("lowerLayerOut"));
+        if (step == 4) {
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64 && metric(1)->getErrorEstimate(meshMib(0)->address) == 0);
+            emit(registerSignal("highMetricComplete"),1L);
+        }
+        if (step == 5) ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 1.0/8);
+        if (step == 6) {
+            ASSERT(payloadCompletions == 1 || payloadCompletions == 2);
+            ASSERT(metric(0)->getPayloadEstimate(meshMib(1)->address) == (aggregation() ? (payloadCompletions == 1 ? 5.0/4 : 47.0/32) : 1));
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == (payloadCompletions == 1 ? 0 : 1.0/8));
+            ASSERT(metric(1)->getPayloadEstimate(meshMib(0)->address) == 1);
+        }
+    }
+  public:
+    using cListener::finish;
+};
+Define_Module(MeshHighPhyMetricDriver);
+
+#include "mesh/MeshAmpduMetricSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_airtime_metric) {
+    auto test = ProtocolTest("mesh_airtime_metric");
+    test.once(on("driver").signal("metricStart").assertValue(1).within(0.06));
+    for (int s : {1,3,5}) test.meanwhile(tap("radioMedium").from(("station["+std::to_string(s)+"]").c_str())
+        .to(("station["+std::to_string(s-1)+"]").c_str()).filterPacket("ieee80211mac.type == 29").nth(1).within(0.015).drop());
+    test.once(on("driver").signal("metricEwmaComplete").assertValue(1).within(0.03));
+    test.once(on("driver").signal("metricExhaustStart").assertValue(1).within(0.02));
+    for (int s : {1,3}) test.meanwhile(tap("radioMedium").from(("station["+std::to_string(s)+"]").c_str())
+        .to(("station["+std::to_string(s-1)+"]").c_str()).filterPacket("ieee80211mac.type == 29").within(0.012).drop());
+    test.once(on("driver").signal("metricCorruptStart").assertValue(1).within(0.06));
+    test.meanwhile(tap("radioMedium").from("station[4]").to("station[5]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).corrupt());
+    test.once(on("driver").signal("metricInterruptStart").assertValue(1).within(0.06));
+    test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").within(0.01).drop());
+    test.once(on("driver").signal("metricCorruptTimeoutStart").assertValue(1).within(0.03));
+    test.meanwhile(tap("radioMedium").from("station[5]").to("station[4]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).corrupt());
+    test.once(on("driver").signal("meshMetricComplete").assertValue(1).within(0.04));
+    return test;
+}
+Define_ProtocolTest(mesh_high_phy_airtime_metric) {
+    return ProtocolTest("mesh_high_phy_airtime_metric")
+        .once(on("driver").signal("highMetricStart").assertValue(1).within(0.06))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.015).drop())
+        .once(on("driver").signal("highMetricComplete").assertValue(1).within(0.06));
+}
+Define_ProtocolTest(mesh_ampdu_airtime_metric) {
+    auto injected = std::make_shared<bool>(false);
+    return ProtocolTest("mesh_ampdu_airtime_metric")
+        .meanwhile(tap("radioMedium").from("station[0]").to("station[1]").mutate([injected](Packet *packet) {
+            auto actual = packet->findTag<Ieee80211ModeInd>();
+            if (*injected || !actual || !actual->getTxVector().ampdu || std::string(packet->getName()).find("metric-aggregate") == std::string::npos) return;
+            ASSERT(corruptReceivedAmpduMember(packet,1)); *injected = true;
+        }).within(0.16))
+        .once(on("driver").signal("aggregateMetricComplete").assertValue(1).within(0.16));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module MetricHcf extends Hcf { parameters: @class(::MetricHcf); }
+simple MetricManagement extends Ieee80211MgmtMesh { parameters: @class(::MetricManagement); @lifecycleSupport; }
+simple MeshMetricDriver { parameters: @class(::MeshMetricDriver); @signal[metricStart](type=long); @signal[metricEwmaComplete](type=long); @signal[metricExhaustStart](type=long); @signal[metricCorruptStart](type=long); @signal[metricInterruptStart](type=long); @signal[metricCorruptTimeoutStart](type=long); @signal[meshMetricComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: MeshMetricDriver; }
+simple MeshHighPhyMetricDriver { parameters: @class(::MeshHighPhyMetricDriver); bool aggregation = default(false); @signal[highMetricStart](type=long); @signal[highMetricComplete](type=long); }
+module HighMetricMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+network HtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
+network VhtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
+network HtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
+network VhtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
+module MeshMetricHoldMac extends Ieee80211MeshMac { parameters: @class(::MeshMetricHoldMac); }
+simple MeshAmpduMetricDriver { parameters: bool releaseHold @mutable = default(false); @class(::MeshAmpduMetricDriver); @signal[aggregateMetricComplete](type=long); }
+network HtAmpduTest extends MeshPairNetwork { submodules: driver: MeshAmpduMetricDriver; }
+network VhtAmpduTest extends MeshPairNetwork { submodules: driver: MeshAmpduMetricDriver; }
+
+%inifile: test.ini
+[General]
+network = ${metricNetwork=Test,HtTest,VhtTest,HtAmsduTest,VhtAmsduTest,HtAmpduTest,VhtAmpduTest}
+constraint = ${aggregateMetricId} == 2 || "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest"
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = "${metricNetwork}" == "Test" ? 6 : 2
+*.station[0..1].wlan[0].pathSelectionMetricId = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? ${aggregateMetricId=1,2} : ("${metricNetwork}" == "Test" ? 1 : 2)
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" ? "ht" : "vht")
+*.station[*].wlan[0].radio.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarRadio" : "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "${metricNetwork}" == "Test" ? "5 GHz (20 MHz)" : "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].pathSelection.typename = "${metricNetwork}" == "Test" ? "MeshFixturePaths" : "Hwmp"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "VhtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "BasicMsduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 100
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "BasicMpduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${metricNetwork}" == "Test" ? -1 : 7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = "${metricNetwork}" == "Test" ? -1 : 1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${metricNetwork}" == "Test" ? nan Hz : 20MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "${metricNetwork}" == "Test" ? "auto" : "long"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "MetricManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mgmt.holdingTimeout = 5ms
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].mac.hcf.typename = "MetricHcf"
+*.station[*].wlan[0].mac.typename = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "MeshMetricHoldMac" : "Ieee80211MeshMac"
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].recoveryProcedure.shortRetryLimit = 1
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 3
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMin = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMax = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].aifsn = 2
+*.station[0].wlan[0].mac.hcf.originatorAckPolicy.ackTimeout = 2ms
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].contention.backoffOptimization = false
+*.station[2..3].wlan[0].pathSelectionMetricId = 2
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 24Mbps
+*.station[4].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
+*.station[2..3].wlan[0].radio.channelNumber = 3
+*.station[4..5].wlan[0].radio.channelNumber = 6
+*.radioMedium.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarTapRadioMedium" : "HighMetricMedium"
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.radioMedium.backgroundNoise.power = "${metricNetwork}" == "Test" ? -110dBm : nan W
+*.tester.testName = "${metricNetwork}" == "Test" ? "mesh_airtime_metric" : ("${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "mesh_ampdu_airtime_metric" : "mesh_high_phy_airtime_metric")
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..8
+%contains: stdout
+PROTOCOLTEST mesh_airtime_metric: PASS
+
+%contains-regex: stdout
+PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS
+
+%not-contains: stdout
+PROTOCOLTEST mesh_airtime_metric: FAIL
+
+%not-contains: stdout
+PROTOCOLTEST mesh_high_phy_airtime_metric: FAIL
+
+%contains-regex: stdout
+PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS
+
+%not-contains: stdout
+PROTOCOLTEST mesh_ampdu_airtime_metric: FAIL

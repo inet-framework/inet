@@ -14,12 +14,19 @@
 namespace inet {
 namespace ieee80211 {
 
+struct INET_API MpduAggregationParameters
+{
+    bool vht = false;
+    B minimumStartDistance = B(0);
+};
+
 class INET_API IMpduAggregation
 {
   public:
     virtual ~IMpduAggregation() {}
 
     virtual Packet *aggregateFrames(std::vector<Packet *> *frames) = 0;
+    virtual Packet *aggregateFrames(std::vector<Packet *> *frames, const MpduAggregationParameters& parameters) = 0;
 };
 
 } // namespace ieee80211

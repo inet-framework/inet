@@ -1,0 +1,5 @@
+Mesh peer power modes and buffered traffic policy
+
+Adds committed peer power views, bodyless native QoS Null indications, acknowledgment-based lower-activity transitions, TIM-backed buffering and cross-access-category DTIM group ordering. The policy reuses MAC queue ownership and lifetimes, including drop-new admission and bounded queued control wait. Native Null selects a fixed zero sequence without consuming DATA or management counters; received legal nonzero values remain representable. Production activation stays gated pending the complete service-period engine, and radios remain physically awake in this stage.
+
+Native mesh group QoS Null explicitly advertises No Ack before FCS construction. Receivers do not acknowledge group frames regardless of their received policy field. Direct mesh source admission also takes packet ownership before bounded refusal.

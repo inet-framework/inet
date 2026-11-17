@@ -6,6 +6,7 @@
 
 
 #include <cstring>
+#include <tuple>
 
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
 
@@ -140,6 +141,75 @@ bool isPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         return true;
     return peerHtState && peerHtState->valid &&
         isCompatibleHtMode(mode, peerHtState->negotiatedCapabilities.localTxPeerRx, peerHtState->negotiatedCapabilities.operation);
+}
+
+bool isMeshPeerCompatibleMode(const Ieee80211ModeSet *modes, const Ieee80211PeerPhyCapabilities& local,
+        const Ieee80211PeerPhyCapabilities *peer, const IIeee80211Mode *mode, bool shortGiTransmissionEnabled)
+{
+    if (!modes || !mode || !modes->containsMode(mode))
+        return false;
+    int vhtMcs = mode->getVhtMcsIndex();
+    if (vhtMcs < 0 && mode->getHtMcsIndex() < 0)
+        return true;
+    if (!peer || !local.htPresent || !peer->htPresent)
+        return false;
+    if ((mode->isHtShortGuardInterval() || mode->isVhtShortGuardInterval()) && !shortGiTransmissionEnabled)
+        return false;
+    if (vhtMcs < 0) {
+        // The negotiated Tx direction already uses the peer's Rx GI bits;
+        // our Rx advertisement is independent of this local Tx activation.
+        auto negotiated = negotiateHtCapabilities(local.ht, peer->ht, local.htOperation);
+        return isCompatibleHtMode(mode, negotiated.localTxPeerRx, local.htOperation);
+    }
+    // 2024 10.6.5.8: catalog legality plus directional Tx/Rx MCS/NSS/width/GI.
+    int nss = mode->getDataMode()->getNumberOfSpatialStreams();
+    auto width = mode->getDataMode()->getBandwidth();
+    if (!local.vhtPresent || !peer->vhtPresent || nss < 1 || nss > 8
+            || local.vht.txMcs[nss - 1] < vhtMcs || peer->vht.rxMcs[nss - 1] < vhtMcs
+            || width > local.vhtOperation.width || width > peer->vhtOperation.width
+            || (width == MHz(160) && (!local.vht.width160 || !peer->vht.width160))
+            || (peer->vht.rxHighestRate && mode->getDataMode()->getNetBitrate() > Mbps(peer->vht.rxHighestRate)))
+        return false;
+    if (mode->isVhtShortGuardInterval()) {
+        if (width == MHz(20)) return peer->ht.shortGi20;
+        if (width == MHz(40)) return peer->ht.shortGi40;
+        if (width == MHz(80)) return peer->vht.shortGi80;
+        if (width == MHz(160)) return peer->vht.shortGi160;
+        return false;
+    }
+    return true;
+}
+
+const IIeee80211Mode *selectMeshPeerCompatibleMode(const Ieee80211ModeSet *modes, const Ieee80211PeerPhyCapabilities& local,
+        const Ieee80211PeerPhyCapabilities *peer, const IIeee80211Mode *requested, bool fixed, const MacAddress& address,
+        bool shortGiTransmissionEnabled)
+{
+    if (isMeshPeerCompatibleMode(modes, local, peer, requested, shortGiTransmissionEnabled))
+        return requested;
+    if (fixed)
+        throw cRuntimeError("Configured fixed PHY tuple MCS=%d NSS=%d width=%gMHz GI=%s is incompatible with mesh peer %s",
+            requested->getVhtMcsIndex() >= 0 ? requested->getVhtMcsIndex() : requested->getHtMcsIndex(),
+            requested->getDataMode()->getNumberOfSpatialStreams(), MHz(requested->getDataMode()->getBandwidth()).get(),
+            requested->isHtShortGuardInterval() || requested->isVhtShortGuardInterval() ? "short" : "long", address.str().c_str());
+    const IIeee80211Mode *best = nullptr;
+    auto key = [](const IIeee80211Mode *mode) {
+        return std::make_tuple(mode->getDataMode()->getBandwidth().get(), mode->getDataMode()->getNumberOfSpatialStreams(),
+            static_cast<int>(mode->getModulationClass()), mode->isHtShortGuardInterval() || mode->isVhtShortGuardInterval(),
+            mode->getVhtMcsIndex(), mode->getHtMcsIndex());
+    };
+    for (int i = 0; i < modes->getNumModes(); i++) {
+        auto candidate = modes->getMode(i);
+        if (!isMeshPeerCompatibleMode(modes, local, peer, candidate, shortGiTransmissionEnabled)
+                || candidate->getDataMode()->getNetBitrate() > requested->getDataMode()->getNetBitrate())
+            continue;
+        if (!best || candidate->getDataMode()->getNetBitrate() > best->getDataMode()->getNetBitrate()
+                || (candidate->getDataMode()->getNetBitrate() == best->getDataMode()->getNetBitrate()
+                    && key(candidate) < key(best)))
+            best = candidate;
+    }
+    if (!best)
+        throw cRuntimeError("No legal PHY tuple for mesh peer %s", address.str().c_str());
+    return best;
 }
 
 const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,

@@ -1,0 +1,60 @@
+%description:
+Mesh PHY selection requires legal catalog entries, operating width, directional
+Tx/Rx MCS/NSS and local SGI transmission activation. Local Rx SGI advertisement
+does not authorize or restrict its Tx. Fixed conflicting tuples are diagnosed.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%activity:
+auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+Ieee80211PeerPhyCapabilities local, peer;
+local.htPresent = peer.htPresent = local.vhtPresent = peer.vhtPresent = true;
+local.ht.supportedChannelWidths = peer.ht.supportedChannelWidths = {MHz(20),MHz(40)};
+local.htOperation.operatingChannelWidth = peer.htOperation.operatingChannelWidth = MHz(40);
+local.vhtOperation.width = peer.vhtOperation.width = MHz(160);
+local.vht.width160 = peer.vht.width160 = true;
+local.ht.txRxMcsSetNotEqual = true;
+local.ht.txMcsNss.maxMcsPerNss[0] = local.ht.txMcsNss.maxMcsPerNss[1] = 7;
+for (int mcs=0;mcs<16;mcs++) peer.ht.rxMcsSupported[mcs] = true;
+for (int mcs=0;mcs<8;mcs++) local.ht.rxMcsSupported[mcs] = true;
+local.vht.txMcs[0] = local.vht.txMcs[1] = 7;
+local.vht.rxMcs[0] = 7;
+peer.vht.rxMcs[0] = peer.vht.rxMcs[1] = 7;
+peer.ht.shortGi20 = peer.ht.shortGi40 = peer.vht.shortGi80 = peer.vht.shortGi160 = true;
+MacAddress address("02:00:00:00:00:02");
+int ht = 0, vht = 0;
+for (int i=0;i<modes->getNumModes();i++) {
+    auto mode = modes->getMode(i);
+    if (mode->getDataMode()->getNumberOfSpatialStreams() != 2) continue;
+    if (mode->getHtMcsIndex() != 15 && mode->getVhtMcsIndex() != 7) continue;
+    bool shortGi = mode->isHtShortGuardInterval() || mode->isVhtShortGuardInterval();
+    ASSERT(isMeshPeerCompatibleMode(modes,local,&peer,mode,true));
+    ASSERT(isMeshPeerCompatibleMode(modes,local,&peer,mode,false) == !shortGi);
+    if (shortGi) {
+        bool rejected = false;
+        try { selectMeshPeerCompatibleMode(modes,local,&peer,mode,true,address,false); }
+        catch (const cRuntimeError&) { rejected = true; }
+        ASSERT(rejected);
+        auto allowed = selectMeshPeerCompatibleMode(modes,local,&peer,mode,false,address,false);
+        ASSERT(!allowed->isHtShortGuardInterval() && !allowed->isVhtShortGuardInterval());
+    }
+    auto constrained = peer;
+    constrained.ht.shortGi20 = constrained.ht.shortGi40 = false;
+    constrained.vht.shortGi80 = constrained.vht.shortGi160 = false;
+    ASSERT(isMeshPeerCompatibleMode(modes,local,&constrained,mode,true) == !shortGi);
+    constrained = peer;
+    if (mode->getVhtMcsIndex() >= 0) constrained.vht.rxMcs[1] = -1;
+    else for (int mcs=8;mcs<16;mcs++) constrained.ht.rxMcsSupported[mcs] = false;
+    ASSERT(!isMeshPeerCompatibleMode(modes,local,&constrained,mode,true));
+    if (mode->getVhtMcsIndex() >= 0) vht++; else ht++;
+}
+ASSERT(ht == 4 && vht == 8);
+EV << "Mesh directional PHY selection and independent Tx SGI activation verified.\n";
+
+%contains: stdout
+Mesh directional PHY selection and independent Tx SGI activation verified.

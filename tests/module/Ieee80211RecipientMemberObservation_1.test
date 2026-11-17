@@ -1,0 +1,423 @@
+%description:
+Observe real recipient members after one duplicate decision and receipt update,
+before deletion/reorder insertion. Basic/Compressed gaps, duplicate destruction,
+intact A-MSDU, inert consumers and synchronous clear/retire ownership are direct
+service probes. Bare and aggregate cases enter initialized production HCF; the
+last-member callback withdraws the agreement and verifies exact local cleanup
+and independent peer progress. Accepted inputs/agreements are injected, not
+negotiated or received over RF. Null and service-period policy are not tested.
+
+%extraargs: -r 0..9
+
+%file: RecipientObservation.cc
+#include <functional>
+#include <iostream>
+#include "inet/common/checksum/Checksum.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+
+namespace inet::ieee80211 {
+using namespace inet::physicallayer;
+
+static const MacAddress peer("02:00:00:00:00:02");
+static const MacAddress other("02:00:00:00:00:03");
+static const MacAddress local("02:00:00:00:00:01");
+static std::map<std::string, int> destroyed;
+
+static void appendFcs(Packet *packet) {
+    auto bytes = packet->peekDataAsBytes()->getBytes();
+    auto trailer = makeShared<Ieee80211MacTrailer>();
+    trailer->setFcsMode(FCS_COMPUTED);
+    trailer->setFcs(ethernetFcs(bytes.data(), bytes.size()));
+    packet->insertAtBack(trailer);
+}
+
+class TrackedMember : public Packet {
+  public:
+    TrackedMember(const char *name, const Ptr<const Chunk>& header) : Packet(name, header) {}
+    ~TrackedMember() override { destroyed[getName()]++; }
+};
+
+static Packet *makeData(int sequence, const char *name, bool retry = false, bool qos = true,
+        bool mesh = false, MacAddress transmitter = peer, MacAddress receiver = local, Tid tid = 5) {
+    Ptr<Ieee80211DataHeader> header;
+    if (mesh) {
+        auto native = makeShared<Ieee80211MeshDataHeader>();
+        native->setToDS(true); native->setFromDS(true);
+        native->addChunkLength(B(6));
+        native->setMeshControlPresent(true);
+        native->setAddress4(transmitter);
+        header = native;
+    }
+    else {
+        header = makeShared<Ieee80211DataHeader>();
+        header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
+        if (qos) header->addChunkLength(QOSCONTROL_PART_LENGTH);
+    }
+    header->setTransmitterAddress(transmitter); header->setReceiverAddress(receiver);
+    header->setAddress3(transmitter); header->setTid(tid);
+    header->setSequenceNumber(SequenceNumberCyclic(sequence)); header->setRetry(retry);
+    header->setAckPolicy(mesh ? NORMAL_ACK : BLOCK_ACK);
+    auto packet = new TrackedMember(name, header);
+    if (mesh) {
+        auto control = makeShared<Ieee80211MeshControl>();
+        control->setChunkLength(B(6)); control->setTtl(1);
+        packet->insertAtBack(control);
+    }
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(8, 0x5A)));
+    appendFcs(packet);
+    return packet;
+}
+
+class ObservationAgreements : public RecipientBlockAckAgreementHandler {
+  public:
+    RecipientBlockAckAgreement *accept(MacAddress address, Tid tid, BlockAckVariant variant) {
+        ASSERT(!getAgreement(tid, address));
+        auto agreement = new RecipientBlockAckAgreement(address, tid, SequenceNumberCyclic(100), 8, SIMTIME_ZERO);
+        agreement->setVariant(variant); agreement->addbaResposneSent();
+        blockAckAgreements[{address, tid}] = agreement;
+        return agreement;
+    }
+};
+
+class CountedDuplicate : public QoSDuplicateRemoval {
+  public:
+    int calls = 0;
+    bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+        calls++;
+        return QoSDuplicateRemoval::isDuplicate(header);
+    }
+};
+
+class ObservationReordering : public BlockAckReordering {
+  public:
+    int buffered(MacAddress address, Tid tid) const {
+        auto it = receiveBuffers.find({tid, address});
+        return it == receiveBuffers.end() ? 0 : it->second->getLength();
+    }
+};
+
+class ObservationRecipient : public RecipientQosMacDataService {
+  protected:
+    void initialize() override {
+        RecipientQosMacDataService::initialize();
+        delete duplicateRemoval; duplicateRemoval = new CountedDuplicate();
+        delete blockAckReordering; blockAckReordering = new ObservationReordering();
+    }
+  public:
+    int lookups() const { return static_cast<CountedDuplicate *>(duplicateRemoval)->calls; }
+    int buffered(MacAddress address = peer, Tid tid = 5) const {
+        return static_cast<ObservationReordering *>(blockAckReordering)->buffered(address, tid);
+    }
+};
+Define_Module(ObservationRecipient);
+
+class ObservationHcf : public Hcf {
+  protected:
+    bool inert = false;
+    bool withdrawLast = false;
+    int callbacks = 0;
+    int responses = 0;
+    std::vector<int> observed;
+    std::vector<int> delivered;
+    void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate) override {
+        Enter_Method_Silent();
+        ASSERT(packet->getOwner() == dynamic_cast<cObject *>(recipientDataService));
+        ASSERT(!duplicate);
+        if (inert) {
+            Hcf::recipientMemberReceived(packet, header, duplicate);
+            return;
+        }
+        callbacks++;
+        observed.push_back(header->getSequenceNumber().get());
+        auto agreement = recipientBlockAckAgreementHandler->getAgreement(header->getTid(), header->getTransmitterAddress());
+        ASSERT(agreement && !(agreement->getHighestReceivedSequence() < header->getSequenceNumber()));
+        ASSERT(agreement->getBlockAckRecord()->hasCompleteReceipt(header->getSequenceNumber()));
+        if (withdrawLast && callbacks == 2) {
+            // Existing HCF owner detaches, disposes older held receive state,
+            // and deletes the agreement while the LAST member is borrowed.
+            retireAgreement(peer, 5, false, true);
+            ASSERT(!recipientBlockAckAgreementHandler->getAgreement(5, peer));
+            ASSERT(mib->withdrawMeshPeer(peer));
+        }
+    }
+    void sendUp(const std::vector<Packet *>& packets) override {
+        for (auto packet : packets) {
+            take(packet);
+            delivered.push_back(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            delete packet;
+        }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        if (auto ba = dynamicPtrCast<const Ieee80211CompressedBlockAck>(header)) {
+            ASSERT(ba->getBlockAckBitmap().getBit(0) && ba->getBlockAckBitmap().getBit(1));
+        }
+        else ASSERT(dynamicPtrCast<const Ieee80211AckFrame>(header));
+        responses++;
+        delete packet;
+    }
+    const IIeee80211Mode *htMode() const {
+        for (int i = 0; i < modeSet->getNumModes(); i++) {
+            auto mode = modeSet->getMode(i);
+            if (mode->getHtMcsIndex() == 7 && mode->getDataMode()->getBandwidth() == MHz(20) && !mode->isHtShortGuardInterval())
+                return mode;
+        }
+        throw cRuntimeError("Fixture has no HT20/MCS7 long-GI mode");
+    }
+    Packet *meshMember(int sequence, const char *name, MacAddress transmitter = peer, Tid tid = 5) {
+        auto packet = makeData(sequence, name, false, true, true, transmitter, mib->address, tid);
+        packet->addTag<Ieee80211ModeInd>()->setMode(htMode());
+        return packet;
+    }
+    void bare(Packet *packet) {
+        processLowerFrame(packet, packet->peekAtFront<Ieee80211MacHeader>());
+    }
+  public:
+    void runChecks(int scenario) {
+        Enter_Method("runChecks");
+        auto agreements = new ObservationAgreements();
+        delete recipientBlockAckAgreementHandler;
+        recipientBlockAckAgreementHandler = agreements;
+        ASSERT(mib->mode == Ieee80211Mib::MESH);
+        auto capabilities = mib->getLocalMeshPhyCapabilities();
+        ASSERT(capabilities.htPresent);
+        mib->establishMeshPeer(peer, mib->getLocalRateSet(), capabilities);
+        mib->establishMeshPeer(other, mib->getLocalRateSet(), capabilities);
+        agreements->accept(peer, 5, BlockAckVariant::COMPRESSED);
+        if (scenario == 7) {
+            bare(meshMember(101, "bare-held"));
+            ASSERT(observed == std::vector<int>({101}) && delivered.empty() && responses == 1);
+            bare(meshMember(100, "bare-gap"));
+            ASSERT(observed == std::vector<int>({101, 100}));
+            ASSERT(delivered == std::vector<int>({100, 101}) && responses == 2);
+            // Invoke the actual concrete inert default on a further member.
+            inert = true;
+            bare(meshMember(102, "inert"));
+            ASSERT(callbacks == 2 && delivered == std::vector<int>({100, 101, 102}) && responses == 3);
+            return;
+        }
+        withdrawLast = scenario == 9;
+        if (withdrawLast) {
+            // Held same-flow member must be discarded, while another peer's
+            // held member survives. Suppress only the test observation here.
+            inert = true;
+            bare(meshMember(102, "old-held"));
+            agreements->accept(other, 6, BlockAckVariant::COMPRESSED);
+            bare(meshMember(101, "independent-held", other, 6));
+            inert = false;
+            responses = 0;
+            ASSERT(delivered.empty());
+        }
+        auto first = meshMember(100, "aggregate-first");
+        auto second = meshMember(101, "aggregate-second");
+        auto liveBefore = cMessage::getLiveMessageCount();
+        auto psdu = buildAmpdu({first, second}, false);
+        auto mode = htMode();
+        auto phy = mode->getHeaderMode()->createHeader();
+        phy->setChunkLength(mode->getHeaderMode()->getLength());
+        phy->setLengthField(B(psdu->getDataLength()));
+        psdu->insertAtFront(phy);
+        psdu->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211HtPhy);
+        auto indication = psdu->addTagIfAbsent<Ieee80211ModeInd>();
+        indication->setMode(mode);
+        Ieee80211TxVector vector(mode);
+        vector.format = Ieee80211TxVector::HT_MIXED; vector.ampdu = true;
+        indication->setTxVector(vector);
+        // This is the production aggregate entry, not a copy of its loop.
+        receiveAmpdu(psdu);
+        ASSERT(observed == std::vector<int>({100, 101}) && callbacks == 2);
+        ASSERT(responses == (withdrawLast ? 0 : 1));
+        ASSERT(delivered == (withdrawLast ? std::vector<int>() : std::vector<int>({100, 101})));
+        // The complete envelope, eliciting duplicate and every undelivered
+        // prepared/released member have died. Only old-held is additionally
+        // retired on withdrawal; independent-held must still be live.
+        ASSERT(cMessage::getLiveMessageCount() == liveBefore - (withdrawLast ? 1 : 0));
+        delete first; delete second;
+        if (withdrawLast) {
+            inert = true;
+            bare(meshMember(100, "independent-gap", other, 6));
+            ASSERT(delivered == std::vector<int>({100, 101}) && responses == 1);
+            ASSERT(recipientBlockAckAgreementHandler->getAgreement(6, other));
+        }
+    }
+};
+Define_Module(ObservationHcf);
+
+class RecipientObservationTest : public cSimpleModule, public IRecipientQosMacDataService::ICallback {
+  protected:
+    ObservationRecipient *recipient = nullptr;
+    ObservationAgreements agreements;
+    std::vector<std::pair<int, bool>> facts;
+    std::function<void()> reaction;
+    int expectedLookups = 0;
+    void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate) override {
+        Enter_Method_Silent();
+        ASSERT(packet->getOwner() == recipient);
+        ASSERT(recipient->lookups() == ++expectedLookups);
+        ASSERT(packet->peekAtFront<Ieee80211DataHeader>() == header);
+        auto sequence = header->getSequenceNumber().get();
+        auto agreement = agreements.getAgreement(header->getTid(), header->getTransmitterAddress());
+        if (agreement) {
+            ASSERT(agreement->getHighestReceivedSequence().isSpecified());
+            if (agreement->getVariant() == BlockAckVariant::COMPRESSED)
+                ASSERT(agreement->getBlockAckRecord()->hasCompleteReceipt(header->getSequenceNumber()));
+        }
+        facts.push_back({sequence, duplicate});
+        ASSERT(destroyed[packet->getName()] == 0);
+        if (reaction) reaction();
+    }
+    std::vector<Packet *> receiveMember(Packet *packet, bool observe = true) {
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        auto bytes = packet->peekDataAsBytes()->getBytes();
+        auto result = recipient->dataFrameReceived(packet, header, &agreements, observe ? this : nullptr);
+        for (auto frame : result)
+            if (frame == packet) ASSERT(frame->peekDataAsBytes()->getBytes() == bytes);
+        if (!observe) expectedLookups++;
+        return result;
+    }
+    void consume(std::vector<Packet *> packets, std::initializer_list<int> sequences) {
+        std::vector<int> actual;
+        for (auto packet : packets) {
+            take(packet);
+            actual.push_back(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            delete packet;
+        }
+        ASSERT(actual == std::vector<int>(sequences));
+    }
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        destroyed.clear();
+        int scenario = par("scenario");
+        recipient = check_and_cast<ObservationRecipient *>(getModuleByPath("^.recipient"));
+        if (scenario >= 7)
+            check_and_cast<ObservationHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->runChecks(scenario);
+        else if (scenario == 0) {
+            consume(receiveMember(makeData(10, "non-qos", false, false)), {10});
+            consume(receiveMember(makeData(11, "qos")), {11});
+            consume(receiveMember(makeData(12, "inert", false, true), false), {12});
+            ASSERT(facts.size() == 2 && recipient->lookups() == 3);
+        }
+        else if (scenario == 1 || scenario == 2) {
+            agreements.accept(peer, 5, scenario == 1 ? BlockAckVariant::BASIC : BlockAckVariant::COMPRESSED);
+            reaction = [&]() { ASSERT(recipient->buffered() == (facts.size() == 1 ? 0 : 1)); };
+            consume(receiveMember(makeData(101, "held")), {});
+            consume(receiveMember(makeData(101, "duplicate", true)), {});
+            ASSERT(destroyed["duplicate"] == 1 && recipient->buffered() == 1);
+            consume(receiveMember(makeData(100, "gap")), {100, 101});
+            ASSERT((facts == std::vector<std::pair<int, bool>>({{101, false}, {101, true}, {100, false}})));
+            ASSERT(recipient->buffered() == 0 && destroyed["held"] == 1 && recipient->lookups() == 3);
+        }
+        else if (scenario == 3) {
+            std::vector<Packet *> originals = {makeData(100, "amsdu-a"), makeData(100, "amsdu-b")};
+            MsduAggregation builder;
+            auto packet = builder.aggregateFrames(&originals);
+            packet->popAtBack<Ieee80211MacTrailer>(B(4));
+            auto header = packet->removeAtFront<Ieee80211DataHeader>();
+            header->setSequenceNumber(SequenceNumberCyclic(100));
+            packet->insertAtFront(header);
+            appendFcs(packet);
+            auto frames = receiveMember(packet);
+            ASSERT(facts.size() == 1 && facts.front().first == 100 && frames.size() == 2);
+            for (auto frame : frames) { take(frame); delete frame; }
+        }
+        else if (scenario == 4) {
+            agreements.accept(peer, 5, BlockAckVariant::COMPRESSED);
+            consume(receiveMember(makeData(102, "before-clear-held")), {});
+            reaction = [&]() {
+                ASSERT(recipient->buffered() == 1);
+                recipient->clearPeer(peer);
+                ASSERT(recipient->buffered() == 0 && destroyed["before-clear-held"] == 1);
+            };
+            consume(receiveMember(makeData(100, "clear-current")), {100});
+            reaction = {};
+            // Cache was cleared in the observation; this retry is not a
+            // duplicate, although ordinary reordering now discards it as old.
+            consume(receiveMember(makeData(100, "fresh-after-clear", true)), {});
+            ASSERT(!facts.back().second && recipient->lookups() == 3 && recipient->buffered() == 0);
+        }
+        else if (scenario == 5) {
+            consume(receiveMember(makeData(100, "first")), {100});
+            reaction = [&]() { recipient->clearPeer(peer); };
+            consume(receiveMember(makeData(100, "saved-duplicate", true)), {});
+            ASSERT(facts.back().second && destroyed["saved-duplicate"] == 1);
+            reaction = {};
+            consume(receiveMember(makeData(100, "cache-cleared", true)), {100});
+            ASSERT(!facts.back().second && recipient->lookups() == 3);
+        }
+        else if (scenario == 6) {
+            agreements.accept(peer, 5, BlockAckVariant::COMPRESSED);
+            consume(receiveMember(makeData(102, "retired-held")), {});
+            reaction = [&]() {
+                auto agreement = agreements.detachAgreement(peer, 5);
+                auto released = recipient->retireAgreement(agreement, true);
+                ASSERT(released.empty() && destroyed["retired-held"] == 1);
+                delete agreement;
+            };
+            consume(receiveMember(makeData(101, "retire-current")), {101});
+            ASSERT(facts.size() == 2 && recipient->buffered() == 0);
+        }
+        std::cout << "Recipient member observation scenario " << scenario << " PASS\n";
+        endSimulation();
+    }
+};
+Define_Module(RecipientObservationTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module ObservationRecipient extends RecipientQosMacDataService { parameters: @class(::inet::ieee80211::ObservationRecipient); }
+module ObservationHcf extends Hcf { parameters: @class(::inet::ieee80211::ObservationHcf); }
+simple RecipientObservationTest { parameters: int scenario; @class(::inet::ieee80211::RecipientObservationTest); }
+network RecipientObservationNetwork {
+    submodules:
+        radioMedium: Ieee80211DimensionalRadioMedium;
+        recipient: ObservationRecipient;
+        host: WirelessHost;
+        test: RecipientObservationTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RecipientObservationNetwork
+ned-path = .;../../../../src
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0..9}
+*.host.wlan[0].typename = "Ieee80211MeshInterface"
+*.host.wlan[0].phyProfile = "ht"
+*.host.wlan[0].radio.typename = "Ieee80211DimensionalRadio"
+*.host.wlan[0].mgmt.autoPeer = false
+*.host.wlan[0].mac.hcf.typename = "ObservationHcf"
+*.host.wlan[0].mac.hcf.isBlockAckSupported = true
+*.host.wlan[0].mac.hcf.blockAckVariant = "compressed"
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Recipient member observation scenario

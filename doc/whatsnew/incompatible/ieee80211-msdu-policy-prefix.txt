@@ -1,0 +1,5 @@
+A-MSDU policy selection inspects only the required queue prefix
+
+BasicMsduAggregationPolicy no longer copies every queued pointer before checking aggregation eligibility. A rejected head or short eligible prefix therefore avoids traversing an unrelated queue tail. Selection order, size and minimum thresholds, alignment and borrowed-packet ownership are unchanged.
+
+The queue overload now shares a private lazy evaluator with the vector overload instead of dispatching through it. A subclass overriding only the vector overload must also override the queue overload if its custom selection must apply to queue inputs. Both public signatures and the protected eligibility and threshold hooks remain available.

@@ -1,0 +1,7 @@
+Directional mesh service periods across sleeping links
+
+The native mesh interface can enable powerSave to retrieve buffered traffic through directional mesh service periods. Accepted peer triggers, actual transmitted originals and each endpoint's own acknowledgments govern initiation and ending across ordinary DATA, HT/VHT aggregates and BAR recovery. Awake windows and physical radio readiness remain with their existing management and MAC owners.
+
+MeshPowerSave.missingAckRetryLimit accepts 0..100 and defaults to the model choice 7. An ending episode shares that retransmission allowance across its actual members and its one permitted replacement ending Null; ordinary MAC retry limits and genuine payload-failure reporting remain independent. Failed ending does not claim remote acknowledgment or create a Null payload error sample.
+
+An all-peers ACTIVE mode indication can proceed as a group QoS Null without waiting for unrelated buffered group data. Actual radio readiness and the DTIM delivery rules for group data remain in force.

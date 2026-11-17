@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/Checksum.h"
@@ -17,6 +18,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,7 +37,7 @@ Rx::~Rx()
 {
     if (networkInterface) {
         for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
-                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
+                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal, Ieee80211Radio::primaryCcaChangedSignal})
             networkInterface->unsubscribe(signal, this);
     }
     cancelAndDelete(endNavTimer);
@@ -50,7 +52,7 @@ void Rx::initialize(int stage)
         recipientAckPolicy.reference(this, "recipientAckPolicyModule", *par("recipientAckPolicyModule").stringValue() != '\0');
         networkInterface = getContainingNicModule(this);
         for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
-                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
+                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal, Ieee80211Radio::primaryCcaChangedSignal})
             networkInterface->subscribe(signal, this);
         endNavTimer = new cMessage("NAV");
         endTxnavTimer = new cMessage("endTxnavTimer");
@@ -142,6 +144,60 @@ bool Rx::lowerFrameReceived(Packet *packet)
     }
 }
 
+bool Rx::prepareReceivedFrame(Packet *packet)
+{
+    Enter_Method("prepareReceivedFrame");
+    auto indication = packet->findTag<Ieee80211ModeInd>();
+    if (!indication || !indication->getTxVector().singleMpdu)
+        return true;
+    auto protocol = packet->findTag<PacketProtocolTag>();
+    if (packet->hasBitError() || !protocol || protocol->getProtocol() != &Protocol::ieee80211Mac
+            || protocol->getFrontOffset() != b(0) || protocol->getBackOffset() != b(0)) {
+        packet->setBitError(true);
+        return false;
+    }
+    // singleMpdu describes the received PPDU. Radio has already validated and
+    // removed its envelope before capture; the remaining member includes FCS.
+    return true;
+}
+
+bool Rx::prepareReceivedAmpdu(const Packet *packet, Ieee80211AmpduLayout& layout,
+        std::vector<std::unique_ptr<Packet>>& members)
+{
+    Enter_Method("prepareReceivedAmpdu");
+    members.clear();
+    layout = {};
+    auto actual = packet->findTag<Ieee80211ModeInd>();
+    if (!actual || !actual->getTxVector().ampdu || packet->hasBitError())
+        return false;
+    constexpr int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet, b(-1), flags);
+    bool vht = actual->getTxVector().format == Ieee80211TxVector::VHT;
+    Ieee80211AmpduLayout validated;
+    if (!phy->isCorrect() || !phy->isComplete() || !phy->isProperlyRepresented()
+            || !findAmpdu(packet, phy->getChunkLength(), phy->getLengthField(), vht, validated)
+            || (vht && !isVhtPsduWithinCapacity(phy->getLengthField(), validated, actual->getMode())))
+        return false;
+    std::vector<std::unique_ptr<Packet>> prepared;
+    for (const auto& item : validated.members) {
+        auto offset = phy->getChunkLength()+item.offset;
+        auto trailer = packet->peekDataAt<Ieee80211MacTrailer>(offset+item.length-B(4), B(4), flags);
+        bool correct = trailer->getFcsMode() == FCS_DECLARED_CORRECT ||
+            (trailer->getFcsMode() == FCS_COMPUTED && isAmpduMemberFcsOk(packet, offset, item.length));
+        if (!correct)
+            continue;
+        std::string name = std::string(packet->getName()) + "[" + std::to_string(item.delimiterOffset.get<B>()) + "]";
+        auto member = std::make_unique<Packet>(name.c_str(), packet->peekDataAt(offset,item.length));
+        member->copyTags(*packet);
+        member->copyRegionTags(*packet,packet->getFrontOffset()+offset,b(0),item.length);
+        member->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ieee80211Mac);
+        prepared.push_back(std::move(member));
+    }
+    layout = std::move(validated);
+    members = std::move(prepared);
+    return true;
+}
+
 void Rx::frameTransmitted(simtime_t durationField)
 {
     Enter_Method("frameTransmitted");
@@ -185,8 +241,13 @@ bool Rx::isFcsOk(Packet *packet) const
 void Rx::recomputeMediumFree()
 {
     bool oldContentionFree = contentionFree;
-    // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
-    mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    auto radio = check_and_cast<const IRadio *>(getContainingNicModule(this)->getSubmodule("radio"));
+    auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(radio);
+    bool physicalIdle = physical && physical->hasContiguousAllocation() ? !physical->isPrimaryChannelBusy() : receptionState == IRadio::RECEPTION_STATE_IDLE;
+    auto mode = radio->getRadioMode();
+    bool receptive = (mode == IRadio::RADIO_MODE_RECEIVER && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED) ||
+        (mode == IRadio::RADIO_MODE_TRANSCEIVER && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
+    mediumFree = physicalIdle && receptive && !endNavTimer->isScheduled();
     // IEEE Std 802.11-2024, 10.23.2.2: active TXNAV excludes local contention.
     contentionFree = mediumFree && getTxnavRemaining() == 0 && !contentionBlocked;
     if (contentionFree != oldContentionFree) {
@@ -449,7 +510,16 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value,
             invalidateInterframeHistory();
         else if (value == IRadio::RADIO_MODE_SLEEP || value == IRadio::RADIO_MODE_TRANSMITTER)
             invalidateFutureInterframeHistory();
+        recomputeMediumFree();
     }
+}
+
+void Rx::receiveSignal(cComponent *source, simsignal_t signalID, bool, cObject *)
+{
+    Enter_Method_Silent();
+    if (source->getParentModule() == networkInterface && dynamic_cast<IIeee80211ChannelAccess *>(source)
+            && signalID == Ieee80211Radio::primaryCcaChangedSignal)
+        recomputeMediumFree();
 }
 
 } // namespace ieee80211

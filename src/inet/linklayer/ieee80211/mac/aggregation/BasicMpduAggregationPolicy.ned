@@ -11,12 +11,13 @@ import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 
 //
-// Implements an MPDU aggregation policy that never aggregates frames.
+// Selects a bounded ordered group for one immediate Block Ack exchange.
 //
 simple BasicMpduAggregationPolicy extends SimpleModule like IMpduAggregationPolicy
 {
     parameters:
         @class(BasicMpduAggregationPolicy);
+        int maxMpduCount = default(64); // Further bounded by the negotiated window and transport limits.
         @display("i=block/control");
 }
 
