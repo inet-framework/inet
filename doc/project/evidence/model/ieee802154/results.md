@@ -296,7 +296,7 @@ The first production subunit is the standalone
 [implementation](../../../../../src/inet/linklayer/ieee802154/Ieee802154Address.cc) and a focused
 [unit case](../../../../../tests/unit/Ieee802154Address_1.test). It has no existing MAC, PHY,
 serializer, packet-tag or interface caller. Runtime simulation behavior is not changed by this
-addition; service contracts and production integration remain later work.
+addition. The service-contract subunit is recorded below; production integration remains later work.
 
 The pre-write contract was completed read-only by the implementer and independently validated
 before write authorization. The value owns mode plus complete numeric identity, while parsing
@@ -335,3 +335,56 @@ visibility observation was resolved by making the comparison helper private; ret
 comparison and stream operations have direct behavior assertions. The final debug rebuild and
 focused unit rerun both passed after that change. Review artifact with exact file hashes:
 `/tmp/802154-address-review.md`. No exception-ledger change or sealed-path approval was needed.
+
+## Step-1a MAC service contracts
+
+The bounded M1 facade adds paired, gate-free
+[provider](../../../../../src/inet/linklayer/ieee802154/contract/IIeee802154MacServiceProvider.h)
+and [client](../../../../../src/inet/linklayer/ieee802154/contract/IIeee802154MacServiceClient.h)
+roles with matching NED interfaces. Protocol-local values represent DATA, GET, SET and RESET,
+normal/promiscuous reception and COMM-STATUS. IEEE completion statuses remain separate from
+local admission refusals and cancellation/reset/stop outcomes. This adds declarations and a
+test-local provider; no existing MAC implements the facade yet.
+
+The pre-write contract assigns packet ownership at acceptance, copies borrowed metadata for
+deferred work, detaches pending state before callbacks, and permits inline completion. Request
+IDs remain distinct from repeating MSDU handles and cannot be reused across refusal or lifecycle
+boundaries. RESET is a barrier; client deletion requires cleanup without invoking a dead module.
+The selected facade fixes LegacyTx and DataRate, keeps source identity in the future PIB owner,
+and distinguishes wire-carried Source PAN ID from effective receive context. ACK RSSI's numeric
+interpretation and uint8 representation are explicit local choices for Table 8-31's inconsistent
+type entry. These are contract decisions, not evidence of operational IEEE service behavior.
+
+The test-only [module fixture](../../../../../tests/module/Ieee802154MacServiceContract_1.test)
+is the direct observation boundary for these ownership and callback claims. Production PIB
+mutation, native interface delivery, PHY services and wire exchanges remain later packages.
+
+Validation from the repository root, debug mode, default enabled feature set:
+
+- `make MODE=debug -j8` passed, exit 0 (`/tmp/802154-service-build.log`). This establishes
+  library freshness; existing runtime sources do not include the new facade. The implementer's
+  standalone C++17 syntax check and the module fixture compile exercise the new headers.
+- `MPLCONFIGDIR=/tmp/802154-matplotlib inet_run_module_tests -m debug -f 'Ieee802154MacServiceContract_1\.test'`
+  compiled and executed one case, PASS, exit 0, General run 0. Raw log:
+  `/tmp/802154-service-module.log`; normalized envelope: `/tmp/802154-service-verification.json`.
+- The fixture checks inline completion and reentrancy, borrowed metadata copying, request-ID and
+  MSDU-handle correlation, refusal/acceptance/indication ownership, packet destruction counts,
+  DATA/GET/SET cancellation, stale completion, reset abort ordering, shutdown/crash/restart and
+  client-deletion cleanup. It also exercises typed GET/SET values, unknown GET, separate
+  promiscuous metadata and absent M1 timestamps. These are test-local contract checks.
+- An intermediate assertion run failed because the fixture assumed newly created packets had
+  no owner. OMNeT++ assigns the current module as owner. Corrected assertions check retained
+  caller ownership on refusal and provider-to-client transfer on indication; the final focused
+  rerun passed. Failure artifacts: `/tmp/802154-service-module-owner-failure.log` and `.err`.
+- `opp_nedtool validate src/inet/linklayer/ieee802154/contract/*.ned`, scoped interface,
+  architecture and naming checks, and `git diff --check` passed. NED interfaces declare parameter
+  types only; concrete modules supply defaults and validate the typed binding.
+
+Release compilation, operational MAC/PHY tests and fingerprint campaigns were not run for this
+contract-only subunit. The nine normative protocol checks retain NOT_RUN verdicts.
+
+Independent review of the final seven production declaration files and module fixture found no
+actionable correctness findings: **18 PASS, 8 N/A, 0 FLAG, 0 QUESTION**. The reviewer confirmed
+resolution of the fixture ownership assertion defect and the passing final run. Full checklist
+and exact file hashes: `/tmp/802154-service-review.md`. Production MAC/PIB behavior and
+reset-interruption edge paths remain unverified; no exception-ledger or seal changes were needed.

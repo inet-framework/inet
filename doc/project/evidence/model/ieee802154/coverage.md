@@ -161,5 +161,19 @@ strict parsing, atomic rejection, comparisons, hashing and reserved/group/broadc
 
 This is partial supporting evidence for the address portion of package 1a. It does not execute
 IEEE802154-C-WIRE, prove byte order, or exercise the real interface. The catalog-to-protocol-check
-verdicts above remain NOT_RUN; package 1a service contracts and package 1d integration remain owed.
+verdicts above remain NOT_RUN; package 1d production integration remains owed.
 Commands and limitations are in [results.md](results.md#step-1a-native-address-value).
+
+## Step-1a service-contract evidence
+
+The paired MAC service interfaces have one passing debug
+[module case](../../../../../tests/module/Ieee802154MacServiceContract_1.test) using a test-local
+provider and client. It exercises admission, packet ownership, inline/deferred completion,
+request correlation, cancellation, reset ordering, lifecycle changes and deleted-client cleanup.
+Independent review passed with 18 PASS, 8 N/A, 0 FLAG and 0 QUESTION.
+
+Together with the native value case, this closes package 1a's contract gate. It does not establish
+operational MCPS/MLME support, PIB validation, reset-interruption edge paths, production address
+integration or any of the nine normative protocol checks. Their verdicts remain NOT_RUN.
+Commands, intermediate fixture correction and limits are in
+[results.md](results.md#step-1a-mac-service-contracts).
