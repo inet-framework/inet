@@ -43,45 +43,90 @@ void Ieee80211MgmtBase::initialize(int stage)
         myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
-        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
+        configurationProvider.reference(this, "macModule", true);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        prepareConfiguration();
+        if (isUp())
+            prepareLocalOperation();
+        mib->publishStateChange();
+    }
 }
 
-void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Ieee80211MgmtBase::prepareConfiguration()
 {
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
-        supportedRates = Ieee80211SupportedRatesElement();
-        extendedSupportedRates = Ieee80211ExtendedSupportedRatesElement();
-        int rateIndex = 0;
-        int extendedRateIndex = 0;
-        // Supported Rates carries the legacy OperationalRateSet only. HT/VHT
-        // MCS support is advertised through the corresponding capabilities
-        // elements (IEEE Std 802.11-2024, 9.4.2.3, 9.4.2.54.4, 11.1.4.6).
-        for (const auto *mode : modeSet->getLegacyOperationalModes()) {
-            bool isBasicRate = modeSet->getIsMandatory(mode);
-            double rate = mode->getDataMode()->getNetBitrate().get<Mbps>();
-            if (rateIndex < 8) {
-                supportedRates.rate[rateIndex] = rate;
-                supportedRates.basicRate[rateIndex] = isBasicRate;
-                rateIndex++;
-            }
-            else if (extendedRateIndex < 255) {
-                extendedSupportedRates.rate[extendedRateIndex] = rate;
-                extendedSupportedRates.basicRate[extendedRateIndex] = isBasicRate;
-                extendedRateIndex++;
-            }
-            else
-                throw cRuntimeError("Mode set '%s' contains more than 263 legacy operational rates", modeSet->getName());
+    if (configurationPrepared)
+        return;
+    configurationProvider->prepareLocalCapabilities();
+    modeSet = configurationProvider->getConfiguredModeSet();
+    if (modeSet == nullptr)
+        throw cRuntimeError("Configured IEEE 802.11 mode catalog is unavailable");
+    configurationPrepared = true;
+    supportedRates = Ieee80211SupportedRatesElement();
+    extendedSupportedRates = Ieee80211ExtendedSupportedRatesElement();
+    int rateIndex = 0;
+    int extendedRateIndex = 0;
+    // Supported Rates carries the legacy OperationalRateSet only. HT/VHT
+    // MCS support is advertised through the corresponding capabilities
+    // elements (IEEE Std 802.11-2024, 9.4.2.3, 9.4.2.54.4, 11.1.4.6).
+    for (const auto *mode : modeSet->getLegacyOperationalModes()) {
+        bool isBasicRate = modeSet->getIsMandatory(mode);
+        double rate = mode->getDataMode()->getNetBitrate().get<Mbps>();
+        if (rateIndex < 8) {
+            supportedRates.rate[rateIndex] = rate;
+            supportedRates.basicRate[rateIndex] = isBasicRate;
+            rateIndex++;
         }
-        supportedRates.numRates = rateIndex;
-        extendedSupportedRates.numRates = extendedRateIndex;
-        mib->setLocalRateSet(makeRateSet(supportedRates, extendedRateIndex > 0, extendedSupportedRates));
+        else if (extendedRateIndex < 255) {
+            extendedSupportedRates.rate[extendedRateIndex] = rate;
+            extendedSupportedRates.basicRate[extendedRateIndex] = isBasicRate;
+            extendedRateIndex++;
+        }
+        else
+            throw cRuntimeError("Mode set '%s' contains more than 263 legacy operational rates", modeSet->getName());
     }
+    supportedRates.numRates = rateIndex;
+    extendedSupportedRates.numRates = extendedRateIndex;
+    mib->setLocalRateSet(makeRateSet(supportedRates, extendedRateIndex > 0, extendedSupportedRates));
+}
+
+Ieee80211HtOperation Ieee80211MgmtBase::computeLocalHtOperation(int primaryChannel, const IIeee80211Band *band) const
+{
+    Ieee80211HtOperation operation;
+    operation.primaryChannel = primaryChannel;
+    int offset = mib->par("htSecondaryChannelOffset");
+    if (offset != 0 && offset != 1 && offset != 3)
+        throw cRuntimeError("htSecondaryChannelOffset must be 0, 1, or 3");
+    if (offset != 0 && mib->getLocalHtCapabilities().supportedChannelWidths.count(MHz(40)) == 0)
+        throw cRuntimeError("40 MHz HT operation requires a configured PHY that can operate a 40 MHz channel width");
+    if (offset != 0 && band != nullptr && !band->isHt40OperationSupported(primaryChannel, offset)) {
+        EV_WARN << "Configured 40 MHz HT operation is unsupported on primary channel " << primaryChannel
+                << " in band '" << band->getName() << "'; falling back to 20 MHz BSS operation.\n";
+        offset = 0;
+    }
+    operation.secondaryChannelOffset = offset;
+    operation.operatingChannelWidth = offset != 0 ? MHz(40) : MHz(20);
+    int protection = mib->par("htProtectionMode");
+    if (protection < 0 || protection > 3)
+        throw cRuntimeError("htProtectionMode must be between 0 and 3");
+    operation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protection);
+    bool vhtSupported = false;
+    for (int i = 0; i < modeSet->getNumModes(); i++)
+        vhtSupported |= modeSet->getMode(i)->getModulationClass() == IIeee80211Mode::ModulationClass::VHT;
+    // IEEE Std 802.11-2024, 10.27.3.3 and 11.38.1: preserve the configured RIFS policy.
+    operation.rifsMode = !vhtSupported && (operation.protectionMode == Ieee80211HtProtectionMode::NO_PROTECTION ||
+            operation.protectionMode == Ieee80211HtProtectionMode::TWENTY_MHZ_PROTECTION);
+    const auto& mandatory = modeSet->getHtMcsMandatory();
+    for (int mcs = 0; mcs < 77; mcs++)
+        operation.basicMcsSupported[mcs] = mandatory[mcs] && mib->getLocalHtCapabilities().rxMcsSupported[mcs];
+    return operation;
+}
+
+void Ieee80211MgmtBase::prepareLocalOperation()
+{
+
 }
 
 Ieee80211RateSetState Ieee80211MgmtBase::makeRateSet(const Ieee80211SupportedRatesElement& rates,
@@ -128,13 +173,13 @@ Ieee80211RateSetState Ieee80211MgmtBase::makeRateSet(const Ieee80211SupportedRat
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
 {
-    if (mib->isHtOperationSupported())
-        setHtCapabilities(frame, mib->localHtCapabilities);
+    if (mib->isLocalHtCapable())
+        setHtCapabilities(frame, mib->getLocalHtCapabilities());
 }
 
 void Ieee80211MgmtBase::addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band) const
 {
-    if (mib->isHtOperationSupported())
+    if (mib->isLocalHtCapable())
         setHtOperation(frame, band, mib->getHtOperation());
 }
 
@@ -163,6 +208,7 @@ void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
     }
     else
         throw cRuntimeError("Unknown message");
+    mib->publishStateChange();
 }
 
 void Ieee80211MgmtBase::sendDown(Packet *frame)
@@ -239,11 +285,14 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
 
 void Ieee80211MgmtBase::start()
 {
+    if (configurationPrepared)
+        prepareLocalOperation();
 }
 
 void Ieee80211MgmtBase::stop()
 {
-    mib->clearBssAndAllPeerStates();
+    mib->clearBss();
+    mib->publishStateChange();
 }
 
 } // namespace ieee80211

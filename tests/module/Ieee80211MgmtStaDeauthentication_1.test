@@ -42,11 +42,11 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     void setAssociated(const MacAddress& address, bool cacheAp = true)
     {
         Enter_Method("setAssociated");
-        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(!mib->getBssStationData().isAssociated);
         if (cacheAp)
             ensureAccessPoint(address);
-        mib->bssData.bssid = address;
-        mib->bssStationData.isAssociated = true;
+        mib->commitBss("SSID", address, nullptr, -1, nullptr);
+        mib->setAssociated(true);
         assocAP = AssociatedApInfo();
         assocAP.address = address;
         assocAP.channel = 1;
@@ -60,8 +60,10 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     void installPeerHtState(const MacAddress& address)
     {
         Enter_Method("installPeerHtState");
-        mib->setPrimaryChannel(1);
-        mib->setPeerHtCapabilities(address, mib->localHtCapabilities, mib->getHtOperation());
+        Ieee80211HtOperation operation;
+        operation.primaryChannel = 1;
+        mib->commitBss("SSID", address, nullptr, 1, &operation);
+        mib->setPeerHtCapabilities(address, mib->getLocalHtCapabilities());
     }
 
     void authenticatePeer(const MacAddress& address)
@@ -90,7 +92,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
     bool isPendingAssociationScheduled() const { return assocTimeoutMsg != nullptr && assocTimeoutMsg->isScheduled(); }
     bool isReassociationPending() const { return reassociationInProgress; }
-    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool isAssociated() const { return mib->getBssStationData().isAssociated; }
     bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
     MacAddress getAssociatedAddress() const { return assocAP.address; }
     bool isAuthenticated(const MacAddress& address) const
@@ -131,9 +133,9 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         lastAssociationResult = resultCode;
         lastAssociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified());
         confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
     }
 
     virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
@@ -143,9 +145,9 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         lastReassociationResult = resultCode;
         lastReassociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified());
         confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
-                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
+                (!mib->getBssStationData().isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
     }
 };
 

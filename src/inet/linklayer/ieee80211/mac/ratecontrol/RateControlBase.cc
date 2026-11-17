@@ -19,7 +19,9 @@ simsignal_t RateControlBase::datarateChangedSignal = cComponent::registerSignal(
 
 void RateControlBase::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
+    if (stage == INITSTAGE_LINK_LAYER)
+        resetRateControl();
 }
 
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
@@ -60,15 +62,6 @@ void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, cons
     }
 }
 
-void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        resetRateControl();
-    }
-}
 
 } /* namespace ieee80211 */
 } /* namespace inet */

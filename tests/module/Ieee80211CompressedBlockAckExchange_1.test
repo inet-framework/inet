@@ -88,7 +88,7 @@ class ExchangeHcf : public Hcf {
         auto rates = mib->findPeerRateSet(peer);
         ASSERT(rates && rates->operational.known && !rates->operational.legacyRates.empty());
         auto ht = mib->findPeerHtState(peer);
-        ASSERT(mib->isHtOperationSupported() && ht && ht->valid);
+        ASSERT(mib->isLocalHtCapable() && ht && ht->valid);
     }
   protected:
     void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader,
@@ -269,14 +269,15 @@ class ExchangeHcf : public Hcf {
             auto tid = response->getTid();
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
             ASSERT(agreement && agreement->getIsAddbaResponseReceived());
-            auto generation = mib->findPeerHtState(peer)->generation;
+            auto capabilities = mib->findPeerHtState(peer)->negotiatedCapabilities;
             auto rates = mib->getBssRateSet();
             ASSERT(rates.basic.legacyRates.size() > 1);
             rates.basic.legacyRates.erase(std::prev(rates.basic.legacyRates.end()));
             // Association supplies the initial rates. This rate-only update exercises the production subscriber.
             mib->setBssRateSet(rates);
+            mib->publishStateChange();
             ASSERT(originatorBlockAckAgreementHandler->getAgreement(peer, tid) == agreement);
-            ASSERT(mib->findPeerHtState(peer)->generation == generation);
+            ASSERT(mib->findPeerHtState(peer)->negotiatedCapabilities == capabilities);
             refreshedRates = true;
         }
     }

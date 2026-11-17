@@ -54,7 +54,8 @@ struct Ieee80211HtCapabilities
     bool shortGi40 = false;
     int maxAmpduLengthExponent = 0;
 
-    bool operator==(const Ieee80211HtCapabilities& other) const {
+    bool operator==(const Ieee80211HtCapabilities& other) const
+    {
         return supportedChannelWidths == other.supportedChannelWidths && rxMcsSupported == other.rxMcsSupported &&
                 txMcsSetDefined == other.txMcsSetDefined && txRxMcsSetNotEqual == other.txRxMcsSetNotEqual &&
                 txMaxNss == other.txMaxNss && txUnequalModulation == other.txUnequalModulation &&
@@ -73,7 +74,8 @@ struct Ieee80211HtOperation
     bool rifsMode = false;
     std::array<bool, 77> basicMcsSupported = {};
 
-    bool operator==(const Ieee80211HtOperation& other) const {
+    bool operator==(const Ieee80211HtOperation& other) const
+    {
         return operatingChannelWidth == other.operatingChannelWidth && primaryChannel == other.primaryChannel &&
                 secondaryChannelOffset == other.secondaryChannelOffset && protectionMode == other.protectionMode &&
                 rifsMode == other.rifsMode && basicMcsSupported == other.basicMcsSupported;
@@ -98,16 +100,14 @@ struct Ieee80211NegotiatedHtCapabilities
     Ieee80211HtCapabilities peerAdvertisement;
     Ieee80211HtDirectionalCapabilities localTxPeerRx;
     Ieee80211HtDirectionalCapabilities localRxPeerTx;
-    Ieee80211HtOperation operation;
 };
 
 inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211HtCapabilities& local,
-        const Ieee80211HtCapabilities& peer, const Ieee80211HtOperation& operation)
+        const Ieee80211HtCapabilities& peer)
 {
     Ieee80211NegotiatedHtCapabilities negotiated;
     negotiated.localAdvertisement = local;
     negotiated.peerAdvertisement = peer;
-    negotiated.operation = operation;
     for (const auto& width : local.supportedChannelWidths)
         if (peer.supportedChannelWidths.count(width)) {
             negotiated.localTxPeerRx.supportedChannelWidths.insert(width);

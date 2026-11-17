@@ -44,7 +44,7 @@ Rx::~Rx()
 
 void Rx::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib.reference(this, "mibModule", true);
         recipientAckPolicy.reference(this, "recipientAckPolicyModule", *par("recipientAckPolicyModule").stringValue() != '\0');
@@ -319,7 +319,7 @@ void Rx::observeReceptionStart(const IReception *reception)
     activeReception->rifsPermitted = recipientAckPolicy && modeSet &&
         modeSet->getPhyType() == Ieee80211ModeSet::PhyType::HT &&
         (mib->mode == Ieee80211Mib::INDEPENDENT || mib->mode == Ieee80211Mib::MESH ||
-            (mib->hasPrimaryChannel() && mib->getHtOperation().rifsMode));
+            (mib->hasHtOperation() && mib->getHtOperation().rifsMode));
     if (activeReception->rifsPermitted)
         activeReception->rifs = modeSet->getReferenceMode()->getRifsTime();
     precedingFrame.reset();
@@ -429,10 +429,6 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, c
             if (isCompletedAck(dynamic_cast<const ITransmission *>(obj)))
                 precedingFrame = PrecedingFrame{simTime(), true};
         }
-    }
-    if (signalID == modesetChangedSignal) {
-        invalidateFutureInterframeHistory();
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
     }
 }
 

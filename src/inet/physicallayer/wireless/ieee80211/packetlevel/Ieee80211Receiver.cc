@@ -99,6 +99,11 @@ void Ieee80211Receiver::setChannelNumber(int channelNumber)
         setChannel(new Ieee80211Channel(band, channelNumber));
 }
 
+bool Ieee80211Receiver::isHtShortGuardIntervalSupported(Hz channelWidth) const
+{
+    return isHtChannelWidthSupported(channelWidth) && modeSet->isHtShortGuardIntervalSupported(channelWidth);
+}
+
 bool Ieee80211Receiver::isHtChannelWidthSupported(Hz channelWidth) const
 {
     // The receiver listens around the primary-channel center and cannot yet

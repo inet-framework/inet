@@ -2,8 +2,10 @@
 Check local SIFS evidence through complete physical receptions and production Rx.
 Each run supplies two frames without a Block Ack agreement.
 The receiver accepts FCS independently of the interval result.
+An HT receiver can have a known legacy BSS channel without an HT operation.
+The infrastructure receiver rejects RIFS use without an HT operation.
 
-%extraargs: -r 0..50
+%extraargs: -r 0..51
 
 %file: LocalInputs.cc
 #include "../../LocalInterframeTestSupport.h"
@@ -25,10 +27,9 @@ namespace inet::ieee80211 {
 using namespace physicallayer;
 class LocalInputMac : public Ieee80211Mac {
   public:
-    void reselectModeSet() {
-        Enter_Method("reselectModeSet");
-        modeSet = Ieee80211ModeSet::getModeSet("a");
-        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+    void invalidateHistoryForTest() {
+        Enter_Method("invalidateHistoryForTest");
+        rx->invalidateInterframeHistory();
     }
 };
 Define_Module(LocalInputMac);
@@ -133,8 +134,8 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
     }
     const IIeee80211Mode *dataMode() const {
         bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28 || scenario == 36;
-        auto catalog = Ieee80211ModeSet::getModeSet(scenario < 19 || scenario >= 49 ? "a" : fiveGhz ? "ac" : "n(mixed-2.4Ghz)");
-        if (scenario < 19 || scenario >= 49 || (scenario == 39 && sent == 0) || (scenario == 40 && sent == 1))
+        auto catalog = Ieee80211ModeSet::getModeSet(scenario < 19 || (scenario >= 49 && scenario <= 50) ? "a" : fiveGhz ? "ac" : "n(mixed-2.4Ghz)");
+        if (scenario < 19 || (scenario >= 49 && scenario <= 50) || (scenario == 39 && sent == 0) || (scenario == 40 && sent == 1))
             return catalog->getMode(bps(6000000));
         for (int i = 0; i < catalog->getNumModes(); i++) {
             auto mode = catalog->getMode(i);
@@ -165,7 +166,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
         header->setDurationField(SIMTIME_ZERO);
         header->setSequenceNumber(SequenceNumberCyclic(100 + sent));
-        if (scenario >= 31 && scenario <= 48) {
+        if ((scenario >= 31 && scenario <= 48) || scenario == 51) {
             header->setType(ST_DATA_WITH_QOS);
             header->addChunkLength(QOSCONTROL_PART_LENGTH);
             header->setTid(5);
@@ -175,7 +176,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
             if (scenario == 33 && sent == 1)
                 header->setReceiverAddress(MacAddress("02:00:00:00:00:08"));
         }
-        auto packet = new Packet(busy ? "busy" : scenario >= 31 && scenario <= 48 && sent == 0 ? "rifs-first" : "local-input", header);
+        auto packet = new Packet(busy ? "busy" : ((scenario >= 31 && scenario <= 48) || scenario == 51) && sent == 0 ? "rifs-first" : "local-input", header);
         if (busy) {
             packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
             packet->addTag<SignalPowerReq>()->setPower(W(1e-7));
@@ -276,9 +277,23 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                         gap += boundary == 2 ? -SimTime::fromRaw(1) : SimTime::fromRaw(1);
                 }
             }
-            if (scenario >= 31 && scenario <= 48) {
-                if (scenario == 35 || scenario == 45 || scenario == 48)
-                    check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->setPrimaryChannel(1);
+            if ((scenario >= 31 && scenario <= 48) || scenario == 51) {
+                if (scenario == 35 || scenario == 45 || scenario == 48) {
+                    auto mib = check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"));
+                    Ieee80211HtOperation operation;
+                    operation.primaryChannel = 1;
+                    operation.protectionMode = Ieee80211HtProtectionMode::NONMEMBER_PROTECTION;
+                    mib->commitBss("test", MacAddress::UNSPECIFIED_ADDRESS, nullptr, 1, &operation);
+                    mib->publishStateChange();
+                }
+                if (scenario == 51) {
+                    auto mib = check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"));
+                    mib->mode = Ieee80211Mib::INFRASTRUCTURE;
+                    int channel = receiverRadio->par("channelNumber");
+                    mib->commitBss("legacy", MacAddress::UNSPECIFIED_ADDRESS, nullptr, channel, nullptr);
+                    ASSERT(mib->hasPrimaryChannel() && !mib->hasHtOperation());
+                    mib->publishStateChange();
+                }
                 gap = SimTime(2, SIMTIME_US);
                 if (scenario == 41 || scenario == 43)
                     gap += SimTime(200, SIMTIME_NS);
@@ -293,7 +308,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                 if (scenario == 35 || scenario == 45)
                     check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->mode = Ieee80211Mib::INFRASTRUCTURE;
             }
-            if (scenario >= 49)
+            if ((scenario >= 49 && scenario <= 50))
                 gap = SimTime(16, SIMTIME_US);
             if (scenario == 29 || scenario == 30)
                 sendLocalAck();
@@ -317,7 +332,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         else if (name == "second")
         {
             if (scenario == 50)
-                check_and_cast<LocalInputMac *>(getSimulation()->getModuleByPath("receiver.wlan[0].mac"))->reselectModeSet();
+                check_and_cast<LocalInputMac *>(getSimulation()->getModuleByPath("receiver.wlan[0].mac"))->invalidateHistoryForTest();
             auto receiverRadio = check_and_cast<Ieee80211Radio *>(getSimulation()->getModuleByPath("receiver.wlan[0].radio"));
             if (scenario == 5)
                 receiverRadio->setChannelNumber(receiverRadio->par("channelNumber"));
@@ -442,7 +457,7 @@ sim-time-limit = 10ms
 seed-set = 0
 record-vector-results = false
 record-scalar-results = false
-*.peer.driver.scenario = ${scenario=0..50}
+*.peer.driver.scenario = ${scenario=0..51}
 *.peer.radio.transmitter.typename = "LocalInputTransmitter"
 *.peer.radio.transmitter.scenario = ${scenario}
 *.peer.radio.allowConcurrentTransmissions = true
@@ -462,13 +477,13 @@ record-scalar-results = false
 *.radioMedium.propagation.propagationTime = ${scenario} == 29 || ${scenario} == 30 ? 1us : (${scenario} == 27 || ${scenario} == 28 || ${scenario} == 47 ? 5us : 0s)
 **.wlan[*].agent.typename = ""
 **.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
-**.wlan[*].opMode = ${scenario} < 19 || ${scenario} >= 49 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
+**.wlan[*].opMode = ${scenario} < 19 || (${scenario} >= 49 && ${scenario} <= 50) ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
 **.wlan[*].mac.typename = "LocalInputMac"
-**.wlan[*].mac.qosStation = ${scenario} >= 31 && ${scenario} <= 49
+**.wlan[*].mac.qosStation = (${scenario} >= 31 && ${scenario} <= 49) || ${scenario} == 51
 **.wlan[*].mac.hcf.isBlockAckSupported = false
 **.wlan[*].mib.htProtectionMode = ${scenario} == 35 || ${scenario} == 45 || ${scenario} == 48 ? 1 : 0
 **.wlan[*].mac.rx.typename = "LocalInputRx"
-*.peer.radio.opMode = ${scenario} < 19 || ${scenario} >= 49 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
+*.peer.radio.opMode = ${scenario} < 19 || (${scenario} >= 49 && ${scenario} <= 50) ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
 **.bandName = (${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
 *.peer.radio.transmitter.bitrate = 6Mbps
 *.peer.radio.antenna.mobilityModule = "^.^.mobility"

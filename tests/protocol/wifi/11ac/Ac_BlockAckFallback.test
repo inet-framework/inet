@@ -45,13 +45,13 @@ class BlockAckFallbackAudit : public cSimpleModule, public cListener {
 
     void checkAssociation() const {
         for (auto sta : {sta1, sta2}) {
-            ASSERT(sta->bssStationData.isAssociated);
-            ASSERT(sta->bssData.bssid == ap->address);
-            auto it = ap->bssAccessPointData.stations.find(sta->address);
-            ASSERT(it != ap->bssAccessPointData.stations.end() && it->second == Ieee80211Mib::ASSOCIATED);
+            ASSERT(sta->getBssStationData().isAssociated);
+            ASSERT(sta->getBssData().bssid == ap->address);
+            auto it = ap->getBssAccessPointData().stations.find(sta->address);
+            ASSERT(it != ap->getBssAccessPointData().stations.end() && it->second == Ieee80211Mib::ASSOCIATED);
         }
         for (auto mib : {ap, sta1, sta2})
-            ASSERT(mib->isHtOperationSupported() && mib->localHtCapabilitiesValid);
+            ASSERT(mib->isLocalHtCapable());
         for (auto hcf : hcfs) {
             ASSERT(hcf->par("isBlockAckSupported").boolValue());
             ASSERT(std::string(hcf->par("blockAckVariant").stringValue()) == "compressed");

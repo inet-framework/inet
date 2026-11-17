@@ -1,0 +1,78 @@
+{
+  "unit": {
+    "files": [
+      "Ieee80211HtCapabilities_1.test",
+      "Ieee80211HtMgmtElements_1.test",
+      "Ieee80211HtModeSet_1.test",
+      "Ieee80211MibAssociationId_1.test",
+      "Ieee80211MibBssTeardown_1.test",
+      "Ieee80211MibPeerTeardown_1.test",
+      "Ieee80211MibStateCommit_1.test",
+      "Ieee80211PeerModeSelection_1.test",
+      "Ieee80211ResponseModeSelection_1.test"
+    ],
+    "filter": "(Ieee80211HtCapabilities_1\\.test|Ieee80211HtMgmtElements_1\\.test|Ieee80211HtModeSet_1\\.test|Ieee80211MibAssociationId_1\\.test|Ieee80211MibBssTeardown_1\\.test|Ieee80211MibPeerTeardown_1\\.test|Ieee80211MibStateCommit_1\\.test|Ieee80211PeerModeSelection_1\\.test|Ieee80211ResponseModeSelection_1\\.test)$"
+  },
+  "module": {
+    "files": [
+      "Ieee80211AgentStaReassociation_1.test",
+      "Ieee80211BasicCompatibility_1.test",
+      "Ieee80211BlockAckAssociationReset_1.test",
+      "Ieee80211BlockAckScheduling_1.test",
+      "Ieee80211CompressedBlockAckAdmission_1.test",
+      "Ieee80211CompressedBlockAckExchange_1.test",
+      "Ieee80211CompressedBlockAckOriginator_1.test",
+      "Ieee80211ConfigurationContracts_1.test",
+      "Ieee80211HcfManagementRecovery_1.test",
+      "Ieee80211HcfMultipleProtection_2.test",
+      "Ieee80211HtAntennaRateControl_1.test",
+      "Ieee80211HtAssociation_1.test",
+      "Ieee80211HtCapabilityPreparation_1.test",
+      "Ieee80211MgmtApChannelChange_1.test",
+      "Ieee80211MgmtApGenericRadio_1.test",
+      "Ieee80211MgmtApHcfQueueDrop_1.test",
+      "Ieee80211MgmtApHcfRtsTimeout_1.test",
+      "Ieee80211MgmtApLifecycle_1.test",
+      "Ieee80211MgmtApMalformedHtCap_1.test",
+      "Ieee80211MgmtApQueueDrop_1.test",
+      "Ieee80211MgmtApReassociationSnapshot_1.test",
+      "Ieee80211MgmtApTimeout_1.test",
+      "Ieee80211MgmtRatePublication_1.test",
+      "Ieee80211MgmtStaBeaconUpdate_1.test",
+      "Ieee80211MgmtStaDeauthentication_1.test",
+      "Ieee80211MgmtStaDisassociation_1.test",
+      "Ieee80211MgmtStaDiscovery_1.test",
+      "Ieee80211MgmtStaLifecycle_1.test",
+      "Ieee80211MgmtStaSimplifiedInitialization_1.test",
+      "Ieee80211MgmtStateCommit_1.test",
+      "Ieee80211RecipientNav_1.test",
+      "Ieee80211VhtHtCapabilities_1.test",
+      "Ieee80211VhtHtSupport_1.test"
+    ],
+    "filter": "(Ieee80211AgentStaReassociation_1\\.test|Ieee80211BasicCompatibility_1\\.test|Ieee80211BlockAckAssociationReset_1\\.test|Ieee80211BlockAckScheduling_1\\.test|Ieee80211CompressedBlockAckAdmission_1\\.test|Ieee80211CompressedBlockAckExchange_1\\.test|Ieee80211CompressedBlockAckOriginator_1\\.test|Ieee80211ConfigurationContracts_1\\.test|Ieee80211HcfManagementRecovery_1\\.test|Ieee80211HcfMultipleProtection_2\\.test|Ieee80211HtAntennaRateControl_1\\.test|Ieee80211HtAssociation_1\\.test|Ieee80211HtCapabilityPreparation_1\\.test|Ieee80211MgmtApChannelChange_1\\.test|Ieee80211MgmtApGenericRadio_1\\.test|Ieee80211MgmtApHcfQueueDrop_1\\.test|Ieee80211MgmtApHcfRtsTimeout_1\\.test|Ieee80211MgmtApLifecycle_1\\.test|Ieee80211MgmtApMalformedHtCap_1\\.test|Ieee80211MgmtApQueueDrop_1\\.test|Ieee80211MgmtApReassociationSnapshot_1\\.test|Ieee80211MgmtApTimeout_1\\.test|Ieee80211MgmtRatePublication_1\\.test|Ieee80211MgmtStaBeaconUpdate_1\\.test|Ieee80211MgmtStaDeauthentication_1\\.test|Ieee80211MgmtStaDisassociation_1\\.test|Ieee80211MgmtStaDiscovery_1\\.test|Ieee80211MgmtStaLifecycle_1\\.test|Ieee80211MgmtStaSimplifiedInitialization_1\\.test|Ieee80211MgmtStateCommit_1\\.test|Ieee80211RecipientNav_1\\.test|Ieee80211VhtHtCapabilities_1\\.test|Ieee80211VhtHtSupport_1\\.test)$"
+  },
+  "protocol": {
+    "files": [
+      "11ac/Ac_BlockAckFallback.test",
+      "11n/WifiHtAssociation.test",
+      "common/WifiAssociation.test",
+      "common/WifiDeauth.test",
+      "common/WifiLocalInterframeInputs.test",
+      "common/WifiReassociation.test",
+      "common/WifiRifsPermission.test"
+    ],
+    "working_directory_filter": "^tests/protocol/wifi$",
+    "filter": "(Wifi(HtAssociation|Association|Reassociation|Deauth|RifsPermission|LocalInterframeInputs)|Ac_BlockAckFallback)\\.test$"
+  },
+  "fingerprint": {
+    "working_directory_filter": "^examples/adhoc/qos$",
+    "config_filter": "^Mac(NonQos|Qos)$",
+    "run_number": 0,
+    "sim_time_limit": "10s",
+    "ingredients": [
+      "tplx",
+      "~tNl",
+      "~tND"
+    ]
+  }
+}

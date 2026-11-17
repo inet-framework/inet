@@ -258,7 +258,7 @@ class AssociationResetSta : public Ieee80211MgmtSta {
         header->setTransmitterAddress(peer);
         header->setType(ST_REASSOCIATIONRESPONSE);
         handleReassociationResponseFrame(packet, header);
-        ASSERT(mib->bssStationData.isAssociated == accepted);
+        ASSERT(mib->getBssStationData().isAssociated == accepted);
     }
     void disassociatePeer() {
         Enter_Method("disassociatePeer");
@@ -290,7 +290,7 @@ class AssociationResetTest : public cSimpleModule, public cListener {
         const auto *ht = observed->findPeerHtState(observedPeer);
         if (rates != nullptr) {
             ASSERT(rates != nullptr && rates->operational.known);
-            ASSERT((ht != nullptr) == observed->isHtOperationSupported());
+            ASSERT((ht != nullptr) == observed->isLocalHtCapable());
         }
         else {
             ASSERT(rates == nullptr);
@@ -332,7 +332,7 @@ class AssociationResetTest : public cSimpleModule, public cListener {
         auto sta = check_and_cast<AssociationResetSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
         auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
-        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssStationData().isAssociated);
         ASSERT(ap->response != nullptr && sta->request != nullptr);
         int scenario = par("scenario");
         bool useAp = scenario < 2 || scenario == 4 || scenario == 6 || scenario == 7;
@@ -354,7 +354,7 @@ class AssociationResetTest : public cSimpleModule, public cListener {
         }
         expectPresent = scenario == 0 || scenario == 2 || scenario == 4 || scenario == 6;
         if (scenario == 6) {
-            ASSERT(observed->findPeerHtState(observedPeer) != nullptr || !observed->isHtOperationSupported());
+            ASSERT(observed->findPeerHtState(observedPeer) != nullptr || !observed->isLocalHtCapable());
             hcf->receiveNormalAckFragment(0, true);
             ASSERT(hcf->deliveries == 0);
             ap->reassociate(staMib->address, sta->request);
@@ -381,8 +381,10 @@ class AssociationResetTest : public cSimpleModule, public cListener {
         ASSERT(hcf->hasBoth(hcf->other));
         ASSERT((observed->findPeerRateSet(observedPeer) != nullptr) == expectPresent);
         ASSERT((observed->findPeerHtState(observedPeer) != nullptr) ==
-                (expectPresent && observed->isHtOperationSupported()));
-        if (scenario == 0 || scenario == 4 || scenario == 6)
+                (expectPresent && observed->isLocalHtCapable()));
+        if (scenario == 0 || scenario == 6)
+            ASSERT(notifications == (observed->isLocalHtCapable() ? 1 : 0));
+        if (scenario == 4)
             ASSERT(notifications == 0);
         std::cout << "Block Ack association-reset assertions passed.\n";
         endSimulation();

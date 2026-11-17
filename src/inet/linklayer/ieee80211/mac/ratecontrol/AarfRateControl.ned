@@ -18,6 +18,7 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 simple AarfRateControl extends SimpleModule like IRateControl
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(AarfRateControl);
         double initialRate @unit(bps) = default(-1bps); // -1 means the fastest mandatory rate
         double interval @unit(s) = default(50ms); // The rate (unconditionally) increases after each time interval.

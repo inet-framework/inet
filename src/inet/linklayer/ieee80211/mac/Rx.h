@@ -10,7 +10,7 @@
 
 #include <optional>
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/ModeSetModuleBase.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
@@ -29,7 +29,7 @@ class IStatistics;
 /**
  * The default implementation of IRx.
  */
-class INET_API Rx : public ModeSetListener, public IRx
+class INET_API Rx : public ModeSetModuleBase, public cListener, public IRx
 {
   public:
     static simsignal_t navChangedSignal;
