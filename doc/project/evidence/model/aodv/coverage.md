@@ -4,14 +4,16 @@
 
 The single place that holds the changing state of the AODV workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
-State of the ledger, from a level 1 pass — no build, no run:
+Historical level 1 survey — no build or run in that survey:
 
 - Date: 2026-09-23
 - INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
 - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
 - Target level: 1
 
-No catalog, no feature map and no test exist yet, so the ledger has no statement table and no feature table.
+The historical survey had no catalog, feature map or protocol tests. The selected correction
+effort now adds those artifacts and the bounded evidence below. This does not satisfy the
+exhaustive criteria for a higher achieved level.
 
 ## Achieved level
 
@@ -28,7 +30,7 @@ The exit criterion of level 1 has three parts, and all three hold:
 | Level | State | What it needs |
 | --- | --- | --- |
 | 1, Survey | **reached** | — |
-| 2, Core | not started | the catalogs of RFC 3561 (§5, §6.1, §6.3 to §6.7, §6.11) and RFC 5148 (§5), the feature map, the checks, and a two- or three-hop wireless chain |
+| 2, Core | selected checks in progress | the complete catalogs of RFC 3561 (§5, §6.1, §6.3 to §6.7, §6.11) and RFC 5148 (§5), the feature map, the checks, and a two- or three-hop wireless chain |
 | 3, Edge | not started | the request-validation and duplicate-suppression rules of §6.4 and §6.5, and a unidirectional link (§6.8) |
 | 4, Dynamics | not started | the Hello message interval and local-connectivity check (§6.9, §6.10), the ring-search backoff (§6.3), and the RFC 5148 jitter bound, with a tolerance |
 | 5, Complete | not started | local repair and actions after reboot (both claimed by the model, see [`conformance.md`](conformance.md#part-1--the-claims)), multiple interfaces, subnet aggregation, and the AODV-to-wired gateway |
@@ -38,3 +40,13 @@ The exit criterion of level 1 has three parts, and all three hold:
 | Pass | Date | Level | Scope | Result |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-09-23 | **1, reached** | RFC 3561 and RFC 5148 downloaded; the standards map; the claims of the model | no run; no obsolete claim; one claim (local repair) reads as a refusal but is a claim by the guide's own rule, because the switch already exists |
+| 2, partial | 2026-11-09 | selected corrections | AODV-F-FRESHNESS, selected RREQ/RREP/Hello/RERR host-route cases | eight parent assertion failures become passes, with a passing preparation control and arithmetic unit test. See [results.md](results.md). Broader plan rows remain pending. |
+| 3, partial | 2026-11-09 | selected corrections | AODV-F-LIFETIME, reverse refresh and advertisement duration | five protocol parent failures and four missing configuration rejections become passes. Two protocol parents remain passing controls. Combined selection: 16 protocol and eight module passes. |
+
+## Selected feature evidence
+
+| Feature | Evidence | Limit |
+| --- | --- | --- |
+| AODV-F-FRESHNESS | Eight IPv4 UDP/IP regression cases and the request/reply control pass after correction. | Selected host-route scenarios only. See [reviewer document](../../../../../tests/protocol/aodv/route-freshness.md) for individual assertions. |
+| AODV-F-LIFETIME | Seven protocol cases and four configuration rejection cases pass, including recipient expiry and exact millisecond boundaries. | Controlled IPv4 replay and route-state injection. No independent serialized-byte oracle. See [reviewer document](../../../../../tests/protocol/aodv/route-lifetimes.md). |
+| Other selected features | Not yet established by this correction stage. | Scheduling, attribution, recovery, interface, subnet and repair stages remain assigned in the plan. |
