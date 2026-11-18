@@ -1,0 +1,320 @@
+%description:
+
+CoAP endpoint statistics and signal outcomes (C8): verify requestStarted,
+requestCompleted, requestFailed, requestAborted, requestLatency,
+retransmission, duplicateReceived, malformedReceived, capacityRejected,
+notificationReceived, activeObservations, requestHandled, activeObservers, and
+notificationSent across 2.xx, 4.xx, Block1, Block2, Observe + Block2
+supersession, local observation cache reuse (0 packets / 0 latency samples),
+retry exhaustion, and lifecycle abort.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTester.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class CoapSignalTap : public cListener
+{
+  public:
+    std::map<std::string, long> counts;
+    std::vector<simtime_t> latencies;
+    long lastActiveObs = -1;
+    long lastActiveSrvObs = -1;
+
+    void attach(cModule *mod, const std::vector<const char *>& names) {
+        for (const char *name : names)
+            mod->subscribe(name, this);
+    }
+
+    long getCount(const std::string& name) const {
+        auto it = counts.find(name);
+        return (it == counts.end()) ? 0 : it->second;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override {
+        const char *name = cComponent::getSignalName(signalID);
+        counts[name] += 1;
+        if (strcmp(name, "activeObservations") == 0)
+            lastActiveObs = value;
+        else if (strcmp(name, "activeObservers") == 0)
+            lastActiveSrvObs = value;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {
+        const char *name = cComponent::getSignalName(signalID);
+        counts[name] += 1;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t, cObject *details) override {
+        const char *name = cComponent::getSignalName(signalID);
+        counts[name] += 1;
+        if (strcmp(name, "requestLatency") == 0)
+            latencies.push_back(t);
+    }
+};
+
+class StatClient : public CoapClient
+{
+  public:
+    CoapSignalTap tap;
+
+    uint64_t sendReq(uint8_t method, const std::string& host, int port, const std::string& uri,
+            const std::vector<uint8_t>& body = {}, int cf = -1, bool con = true) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, method, con, uri, body, cf);
+    }
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, -1);
+    }
+
+  protected:
+    virtual void initialize(int stage) override {
+        CoapClient::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            tap.attach(this, {
+                "requestStarted", "requestCompleted", "requestFailed", "requestAborted",
+                "requestLatency", "notificationReceived", "activeObservations",
+                "retransmission", "duplicateReceived", "malformedReceived",
+                "capacityRejected", "packetSent", "packetReceived", "packetSentToLower"
+            });
+        }
+    }
+};
+
+Define_Module(StatClient);
+
+class StatServer : public CoapServer
+{
+  public:
+    CoapSignalTap tap;
+    bool delayNextNum1 = false;
+
+  protected:
+    virtual void initialize(int stage) override {
+        CoapServer::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            tap.attach(this, {
+                "requestHandled", "activeObservers", "notificationSent",
+                "retransmission", "duplicateReceived", "malformedReceived",
+                "capacityRejected", "packetSent", "packetReceived"
+            });
+        }
+    }
+
+    virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
+            const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override {
+        if (delayNextNum1 && header->getCode() == COAP_CODE_GET) {
+            for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
+                const auto& opt = header->getOptions(i);
+                if (opt.getNumber() == COAP_OPT_BLOCK2) {
+                    uint32_t bv = 0;
+                    for (size_t j = 0; j < opt.getValueArraySize(); ++j)
+                        bv = (bv << 8) | opt.getValue(j);
+                    if ((bv >> 4) == 1U) {
+                        delayNextNum1 = false;
+                        simtime_t saved = responseDelay;
+                        responseDelay = 0.25;
+                        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+                        responseDelay = saved;
+                        return;
+                    }
+                }
+            }
+        }
+        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+    }
+};
+
+Define_Module(StatServer);
+
+Define_ProtocolTest(coap_statistics)
+{
+    return ProtocolTest("coap_statistics")
+        // 1. 2.05 GET and 4.04 Not Found GET: each gives +1 started, +1 completed, +1 latency
+        .act(action().at(1.0).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5683, "/small");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(0.5))
+        .act(action().at(1.2).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5683, "/missing");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(0.5))
+        .act(action().after(0.02).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            if (cli.tap.getCount("requestStarted") != 2 || cli.tap.getCount("requestCompleted") != 2
+                    || cli.tap.latencies.size() != 2 || cli.tap.latencies[0] <= 0 || cli.tap.latencies[1] <= 0)
+                throw cRuntimeError("Expected 2 completed logical requests with positive latency samples");
+        }))
+
+        // 2. Multi-block PUT (100B at 32B) and multi-block GET -> 1 started/completed/latency per logical transfer!
+        .act(action().at(1.5).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_PUT, "hostB", 5683, "/obs", std::vector<uint8_t>(100, 'X'), 0);
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().at(2.0).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5683, "/obs");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.02).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            if (cli.tap.getCount("requestStarted") != 4 || cli.tap.getCount("requestCompleted") != 4
+                    || cli.tap.latencies.size() != 4)
+                throw cRuntimeError("Multi-block PUT/GET must record 1 started/completed/latency each");
+        }))
+
+        // 3. Observe /obs (single-block or small initial), then superseded V1 -> V2 (100B) -> only +1 notificationReceived for V2,
+        //    followed by local plain GET cache hit -> 0 packets sent, 0 extra latency samples!
+        .act(action().at(2.5).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.startObs("hostB", 5683, "/obs");
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        .act(action().at(3.0).run<StatServer>("hostB.app[0]", [](StatServer& srv) {
+            srv.delayNextNum1 = true;
+            srv.updateResourceValue("/obs", std::vector<uint8_t>(100, '1'));
+        }))
+        .act(action().at(3.05).run<StatServer>("hostB.app[0]", [](StatServer& srv) {
+            srv.updateResourceValue("/obs", std::vector<uint8_t>(100, '2'));
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        .act(action().after(0.4).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            // 1 initial + 1 V2 (V1 superseded delivered 0!)
+            if (cli.tap.getCount("notificationReceived") != 2 || cli.tap.lastActiveObs != 1)
+                throw cRuntimeError("Expected 2 notifications (initial + V2) and 1 activeObs, got %ld",
+                        cli.tap.getCount("notificationReceived"));
+
+            long txBefore = cli.tap.getCount("packetSentToLower");
+            size_t latBefore = cli.tap.latencies.size();
+            cli.sendReq(COAP_CODE_GET, "hostB", 5683, "/obs");
+            if (cli.tap.getCount("packetSentToLower") != txBefore || cli.tap.latencies.size() != latBefore
+                    || cli.tap.getCount("requestStarted") != 6 || cli.tap.getCount("requestCompleted") != 6)
+                throw cRuntimeError("Local cache-hit GET emitted packet or latency sample unexpectedly");
+        }))
+
+        // 4. Server malformed & duplicate signals + client capacity overflow (/tooBig > 128B)
+        .act(action().at(4.0).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x00, 0x01}, "ShortMalformed");
+            RawCoapMessage r; r.type = 0; r.code = COAP_CODE_GET; r.messageId = 0x5555; r.token = {0x55};
+            r.options.push_back({COAP_OPT_URI_PATH, asciiBytes("small")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(r), "DupReq1");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(r), "DupReq2");
+        }))
+        .act(action().at(4.1).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5683, "/tooBig");
+        }))
+        .once(on("hostA.app[0]").signal("requestFailed").within(1.0))
+
+        // 5. Retry exhaustion on blackholed peer port 5699 (CON -> 1 tx + 4 retransmissions = 5 sends, +1 failed)
+        .act(action().at(4.5).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5699, "/blackhole");
+        }))
+        .once(on("hostA.app[0]").signal("requestFailed").within(100.0))
+
+        // 6. Lifecycle abort on an unfinished CON request (sent right before stop)
+        .act(action().at(110.0).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            cli.sendReq(COAP_CODE_GET, "hostB", 5699, "/abortme");
+        }))
+        .act(action().at(110.05).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *cli = check_and_cast<StatClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(cli, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().at(110.1).run<StatClient>("hostA.app[0]", [](StatClient& cli) {
+            long started = cli.tap.getCount("requestStarted");
+            long completed = cli.tap.getCount("requestCompleted");
+            long failed = cli.tap.getCount("requestFailed");
+            long aborted = cli.tap.getCount("requestAborted");
+            if (started != 9 || completed != 6 || failed != 2 || aborted != 1
+                    || started != completed + failed + aborted)
+                throw cRuntimeError("Outcome balance mismatch: S=%ld C=%ld F=%ld A=%ld",
+                        started, completed, failed, aborted);
+            if (cli.tap.getCount("retransmission") != 4 || cli.tap.getCount("capacityRejected") < 1)
+                throw cRuntimeError("Expected 4 retransmissions and >=1 capacityRejected, got retx=%ld cap=%ld",
+                        cli.tap.getCount("retransmission"), cli.tap.getCount("capacityRejected"));
+        }))
+        .act(action().at(110.1).run<StatServer>("hostB.app[0]", [](StatServer& srv) {
+            if (srv.tap.getCount("duplicateReceived") < 1 || srv.tap.getCount("malformedReceived") < 1
+                    || srv.tap.getCount("requestHandled") < 5 || srv.tap.getCount("notificationSent") < 2)
+                throw cRuntimeError("Server stats incomplete: dup=%ld mal=%ld req=%ld notif=%ld",
+                        srv.tap.getCount("duplicateReceived"), srv.tap.getCount("malformedReceived"),
+                        srv.tap.getCount("requestHandled"), srv.tap.getCount("notificationSent"));
+        }));
+}
+
+%activity:
+EV << "coap_statistics compiled\n";
+
+%file: CoapStatisticsNet.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple StatClient extends CoapClient
+{
+    parameters:
+        @class(StatClient);
+}
+
+simple StatServer extends CoapServer
+{
+    parameters:
+        @class(StatServer);
+}
+
+network CoapStatisticsNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        tester: ProtocolTester { @display("p=80,150"); }
+        hostA: StandardHost { @display("p=250,80"); }
+        hostB: StandardHost { @display("p=450,80"); }
+        hostC: StandardHost { @display("p=350,200"); }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        hostC.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapStatisticsNet
+sim-time-limit = 115s
+seed-set = 0
+**.statistic-recording = true
+*.tester.testName = "coap_statistics"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "StatClient"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 32B
+*.hostA.app[0].maxIncomingBlockSize = 128B
+*.hostA.app[0].stopOperationExtraTime = 0s
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "StatServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 32B
+*.hostB.app[0].resources = xml("<resources><resource path='/small' methods='GET' contentFormat='0' maxAge='60'>ok</resource><resource path='/obs' methods='GET,PUT' contentFormat='0' obs='true' maxAge='200'>init</resource><resource path='/tooBig' methods='GET' contentFormat='0' maxAge='60'>BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB</resource></resources>")
+
+*.hostC.numApps = 1
+*.hostC.app[0].typename = "CoapTestPeer"
+*.hostC.app[0].localPort = 17000
+
+%contains: stdout
+PROTOCOLTEST coap_statistics: PASS

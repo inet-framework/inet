@@ -1,0 +1,153 @@
+%description:
+
+RFC 7252 Sections 3 and 6.4 -- wire message encoding, option delta/length
+13/14 extensions, percent-decoding after splitting Uri-Path/Uri-Query,
+0xFF payload marker omission on empty body, and UDP port 5683 vs non-default
+port dissection boundaries.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapHeaderSerializer.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(coap_message_encoding)
+{
+    std::string longQueryVal(280, 'q');
+    std::string uri1 = "/path%2Fseg/items?k1=a%26b&long=" + longQueryVal;
+
+    return ProtocolTest("coap_message_encoding")
+        // Verify option delta=14 and length=14 roundtrip independently via raw decoder.
+        .act(action().at(0.1).run<CoapClient>("hostA.app[0]", [](CoapClient& client) {
+            auto h = makeShared<CoapHeader>();
+            h->setVersion(1);
+            h->setMessageType(COAP_TYPE_CON);
+            h->setCode(COAP_CODE_POST);
+            h->setMessageId(0xBEEF);
+            h->setTokenArraySize(4);
+            h->setToken(0, 0xAA);
+            h->setToken(1, 0xBB);
+            h->setToken(2, 0xCC);
+            h->setToken(3, 0xDD);
+            addCoapOptionUint(h, COAP_OPT_MAX_AGE, 0);
+            addCoapOptionUint(h, COAP_OPT_URI_PORT, 300);
+            addCoapOptionString(h, COAP_OPT_URI_PATH, std::string(20, 'p')); // length 13
+            addCoapOptionString(h, COAP_OPT_REQUEST_TAG, std::string(300, 'r')); // delta 14, length 14
+            finalizeCoapHeader(h, true);
+
+            MemoryOutputStream out;
+            Chunk::serialize(out, h);
+            std::vector<uint8_t> bytes = out.getData();
+            bytes.push_back('x');
+            bytes.push_back('y');
+
+            RawCoapMessage raw;
+            if (!decodeRawCoap(bytes, raw))
+                throw cRuntimeError("Independent raw CoAP decoder failed on delta/length 14 header");
+            if (raw.version != 1 || raw.type != 0 || raw.code != COAP_CODE_POST || raw.messageId != 0xBEEF)
+                throw cRuntimeError("Fixed header fields mismatch");
+            if (raw.token != std::vector<uint8_t>({0xAA, 0xBB, 0xCC, 0xDD}))
+                throw cRuntimeError("Token mismatch");
+            auto reqTag = getRawOptionStrings(raw, COAP_OPT_REQUEST_TAG);
+            if (reqTag.size() != 1 || reqTag[0].size() != 300)
+                throw cRuntimeError("Option 292 extended delta/length mismatch");
+            auto maxAge = getRawOptionValues(raw, COAP_OPT_MAX_AGE);
+            if (maxAge.size() != 1 || !maxAge[0].empty())
+                throw cRuntimeError("Minimal uint 0 encoding must be 0 bytes");
+            if (!raw.hasPayloadMarker || rawPayloadString(raw) != "xy")
+                throw cRuntimeError("Payload marker / body mismatch");
+        }))
+        // Client app[0] sends NON POST on default port 5683 with percent-encoded '/' and '&' and 280B query, empty body.
+        .once(on("hostA.app[0]").signal("packetSentToLower")
+                  .protocol("coap")
+                  .assertEvent([uri1](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          throw cRuntimeError("Failed to decode outbound CoAP request bytes");
+                      if (raw.version != 1 || raw.type != COAP_TYPE_NON || raw.code != COAP_CODE_POST)
+                          throw cRuntimeError("Unexpected fixed header on client request");
+                      if (raw.token.size() != 8)
+                          throw cRuntimeError("Expected 8-byte token, got %zu", raw.token.size());
+                      if (raw.hasPayloadMarker || !raw.payload.empty())
+                          throw cRuntimeError("Empty body must omit 0xFF payload marker");
+                      auto paths = getRawOptionStrings(raw, COAP_OPT_URI_PATH);
+                      if (paths.size() != 2 || paths[0] != "path/seg" || paths[1] != "items")
+                          throw cRuntimeError("Uri-Path percent split/decode incorrect");
+                      auto queries = getRawOptionStrings(raw, COAP_OPT_URI_QUERY);
+                      if (queries.size() != 2 || queries[0] != "k1=a&b" || queries[1].rfind("long=", 0) != 0 || queries[1].size() < 275)
+                          throw cRuntimeError("Uri-Query percent split/decode or length incorrect");
+                      return true;
+                  })
+                  .within(2.0))
+        // Default port 5683 packet delivered at server app[0] carries PacketProtocolTag = "coap".
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .protocol("coap")
+                  .within(1.0))
+        // Second client app[1] targets non-default port 15683 with coap://hostB:5683/items:
+        // App emits "coap" protocol tag and Uri-Port=5683, while UDP does not auto-dissect port 15683 as CoAP.
+        .once(on("hostA.app[1]").signal("packetSentToLower")
+                  .protocol("coap")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          throw cRuntimeError("Failed to decode request to port 15683");
+                      auto portOpts = getRawOptionValues(raw, COAP_OPT_URI_PORT);
+                      if (portOpts.size() != 1 || coapDecodedUint(portOpts[0]) != 5683U)
+                          throw cRuntimeError("Expected Uri-Port 5683 when explicit port differs from UDP dst port");
+                      if (rawPayloadString(raw) != "body-bytes")
+                          throw cRuntimeError("Expected non-empty payload after 0xFF marker");
+                      return true;
+                  })
+                  .within(2.0))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .protocol("coap")
+                  .within(1.0));
+}
+
+%activity:
+EV << "coap_message_encoding compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 5s
+seed-set = 0
+*.tester.testName = "coap_message_encoding"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "CoapClient"
+*.hostA.app[0].peerAddress = "hostB"
+*.hostA.app[0].peerPort = 5683
+*.hostA.app[0].requestMethod = "POST"
+*.hostA.app[0].confirmable = false
+*.hostA.app[0].requestUri = "/path%2Fseg/items?k1=a%26b&long=qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+*.hostA.app[0].startTime = 1.0s
+
+*.hostA.app[1].typename = "CoapClient"
+*.hostA.app[1].peerAddress = "hostB"
+*.hostA.app[1].peerPort = 15683
+*.hostA.app[1].requestMethod = "GET"
+*.hostA.app[1].confirmable = false
+*.hostA.app[1].requestUri = "coap://hostB:5683/items"
+*.hostA.app[1].requestBody = "body-bytes"
+*.hostA.app[1].startTime = 2.0s
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/items'>ok</resource></resources>")
+
+*.hostB.app[1].typename = "CoapServer"
+*.hostB.app[1].localPort = 15683
+*.hostB.app[1].resources = xml("<resources><resource path='/items'>alt</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_message_encoding: PASS

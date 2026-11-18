@@ -1,0 +1,210 @@
+%description:
+
+RFC 7959 Section 2.6 -- Observe initial registration and unsolicited
+notifications exceeding block size send Block2(NUM=0, M=1) on the Observe
+registration Token, while the client fetches NUM >= 1 via normal GET requests
+with Block2, no Observe option, and a fresh Token distinct from T_obs.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+namespace {
+
+std::vector<uint8_t> makePatternPayload(char a, size_t n1, char b, size_t n2, char c, size_t n3)
+{
+    std::vector<uint8_t> out;
+    out.insert(out.end(), n1, static_cast<uint8_t>(a));
+    out.insert(out.end(), n2, static_cast<uint8_t>(b));
+    out.insert(out.end(), n3, static_cast<uint8_t>(c));
+    return out;
+}
+
+uint32_t encodeB2(uint32_t num, bool more, uint8_t szx)
+{
+    return (num << 4) | (more ? 0x08U : 0U) | (szx & 0x07U);
+}
+
+} // namespace
+
+class ObsBlock2Client : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+    std::vector<RawCoapMessage> txRequests;
+    std::vector<RawCoapMessage> rxResponses;
+    std::vector<uint8_t> regToken;
+
+    uint64_t subscribeLarge(const std::string& host, int port, const std::string& uri, uint8_t szx) {
+        CoapOption b2;
+        b2.setNumber(COAP_OPT_BLOCK2);
+        std::vector<uint8_t> val = coapUintBytes(encodeB2(0, false, szx));
+        b2.setValueArraySize(val.size());
+        for (size_t i = 0; i < val.size(); ++i)
+            b2.setValue(i, val[i]);
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, 0, {b2});
+    }
+
+  protected:
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        RawCoapMessage raw;
+        auto bytes = extractAppCoapWireBytes(packet);
+        if (decodeRawCoap(bytes, raw) && raw.code >= 1 && raw.code <= 31) {
+            txRequests.push_back(raw);
+            if (!getRawOptionValues(raw, COAP_OPT_OBSERVE).empty())
+                regToken = raw.token;
+        }
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+
+    virtual void socketDataArrived(UdpSocket *arrivedSocket, Packet *packet) override {
+        RawCoapMessage raw;
+        if (decodeRawCoap(extractAppCoapWireBytes(packet), raw) && raw.code >= 64)
+            rxResponses.push_back(raw);
+        CoapClient::socketDataArrived(arrivedSocket, packet);
+    }
+
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+Define_Module(ObsBlock2Client);
+
+Define_ProtocolTest(coap_observe_block2)
+{
+    return ProtocolTest("coap_observe_block2")
+        // 1. Register Observe on 150-byte /sensors/History (three 64B SZX=2 blocks)
+        .act(action().at(1.0).run<ObsBlock2Client>("hostA.app[0]", [](ObsBlock2Client& cli) {
+            cli.subscribeLarge("hostB", 5683, "/sensors/History", 2);
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        .act(action().after(0.02).run<ObsBlock2Client>("hostA.app[0]", [](ObsBlock2Client& cli) {
+            auto expected = makePatternPayload('A', 64, 'B', 64, 'C', 22);
+            if (cli.notes.size() != 1 || cli.notes[0].payload != expected)
+                throw cRuntimeError("Expected assembled 150B initial Observe payload");
+            if (cli.txRequests.size() != 3)
+                throw cRuntimeError("Expected 3 GET requests (initial Observe + NUM=1,2), got %zu", cli.txRequests.size());
+            if (getRawOptionValues(cli.txRequests[0], COAP_OPT_OBSERVE).empty())
+                throw cRuntimeError("Initial GET missing Observe option");
+            for (size_t i = 1; i <= 2; ++i) {
+                const auto& req = cli.txRequests[i];
+                if (!getRawOptionValues(req, COAP_OPT_OBSERVE).empty())
+                    throw cRuntimeError("Follow-up Block2 request %zu must omit Observe option", i);
+                if (req.token == cli.regToken)
+                    throw cRuntimeError("Follow-up Block2 request %zu must use fresh token != T_obs", i);
+                auto b2v = getRawOptionValues(req, COAP_OPT_BLOCK2);
+                if (b2v.size() != 1)
+                    throw cRuntimeError("Follow-up Block2 request %zu missing Block2", i);
+                uint32_t bv = coapDecodedUint(b2v[0]);
+                if ((bv >> 4) != i || (bv & 0x07U) != 2U || (bv & 0x08U) != 0U)
+                    throw cRuntimeError("Unexpected Block2 value 0x%x on follow-up %zu", bv, i);
+            }
+            if (cli.rxResponses.empty() || cli.rxResponses[0].token != cli.regToken)
+                throw cRuntimeError("Initial response token mismatch");
+            if (getRawOptionValues(cli.rxResponses[0], COAP_OPT_OBSERVE).empty()
+                    || getRawOptionValues(cli.rxResponses[0], COAP_OPT_ETAG).empty())
+                throw cRuntimeError("Initial Block2 Observe response missing Observe or ETag");
+            auto s2 = getRawOptionValues(cli.rxResponses[0], COAP_OPT_SIZE2);
+            if (s2.empty() || coapDecodedUint(s2[0]) != 150U)
+                throw cRuntimeError("Initial Block2 Observe response missing/invalid Size2");
+        }))
+
+        // 2. Server updates /sensors/History to 150 new octets -> Block2(0, M=1) notification + follow-up GET NUM=1,2
+        .act(action().at(2.0).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/History", makePatternPayload('D', 64, 'E', 64, 'F', 22));
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        .act(action().after(0.02).run<ObsBlock2Client>("hostA.app[0]", [](ObsBlock2Client& cli) {
+            auto expected2 = makePatternPayload('D', 64, 'E', 64, 'F', 22);
+            if (cli.notes.size() != 2 || cli.notes[1].payload != expected2)
+                throw cRuntimeError("Expected assembled 150B updated Observe payload");
+            if (cli.txRequests.size() != 5 || cli.rxResponses.size() < 4)
+                throw cRuntimeError("Expected follow-up requests NUM=1,2 after notification");
+            const auto& notif0 = cli.rxResponses[3];
+            if (notif0.token != cli.regToken || getRawOptionValues(notif0, COAP_OPT_OBSERVE).empty())
+                throw cRuntimeError("Notification block 0 must carry T_obs and Observe");
+            auto nb2 = getRawOptionValues(notif0, COAP_OPT_BLOCK2);
+            if (nb2.size() != 1 || coapDecodedUint(nb2[0]) != encodeB2(0, true, 2))
+                throw cRuntimeError("Notification block 0 missing Block2(0,M=1,SZX=2)");
+            for (size_t i = 3; i <= 4; ++i) {
+                const auto& req = cli.txRequests[i];
+                if (!getRawOptionValues(req, COAP_OPT_OBSERVE).empty() || req.token == cli.regToken)
+                    throw cRuntimeError("Notification follow-up %zu invalid Observe or token", i);
+            }
+        }))
+
+        // 3. Subsequent small update confirms T_obs remained registered after multi-block follow-up
+        .act(action().at(3.0).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/sensors/History", makePatternPayload('G', 20, 'G', 0, 'G', 0));
+        }))
+        .once(on("hostA.app[0]").signal("notificationReceived").within(1.0))
+        .act(action().after(0.02).run<ObsBlock2Client>("hostA.app[0]", [](ObsBlock2Client& cli) {
+            auto expected3 = makePatternPayload('G', 20, 'G', 0, 'G', 0);
+            if (cli.notes.size() != 3 || cli.notes[2].payload != expected3)
+                throw cRuntimeError("Expected third Observe notification on T_obs");
+        }))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getObservers().size() != 1)
+                throw cRuntimeError("Expected 1 active observer retained on server");
+        }));
+}
+
+%activity:
+EV << "coap_observe_block2 compiled\n";
+
+%file: CoapObsBlock2Net.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple ObsBlock2Client extends CoapClient
+{
+    parameters:
+        @class(ObsBlock2Client);
+}
+
+network CoapObsBlock2Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        tester: ProtocolTester { @display("p=80,150"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        hostB: StandardHost { @display("p=450,100"); }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapObsBlock2Net
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_observe_block2"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "ObsBlock2Client"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 64B
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 64B
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/History' methods='GET,PUT' contentFormat='0' obs='true' maxAge='60'>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCC</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_block2: PASS

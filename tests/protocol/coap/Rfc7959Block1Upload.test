@@ -1,0 +1,144 @@
+%description:
+
+RFC 7959 Section 2.1-2.5 -- Atomic Block1 PUT upload (2.31 Continue, Size1,
+atomic visibility against concurrent GET before final M=0 block) and
+8192-block 128 KiB Block1 upload at 16-byte blocks without MID history eviction.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class Block1Client : public CoapClient
+{
+  public:
+    uint64_t putData(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_PUT, true, uri, body, 0);
+    }
+
+    uint64_t getData(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, true, uri, {});
+    }
+};
+
+Define_Module(Block1Client);
+
+Define_ProtocolTest(coap_block1_upload)
+{
+    return ProtocolTest("coap_block1_upload")
+        // 1. Upload 160B in 3x 64B blocks -> verify 2.31 Continue and pre-M=0 GET sees initial value
+        .act(action().at(1.0).run<Block1Client>("hostA.app[0]", [](Block1Client& cli) {
+            cli.putData("hostB", 5683, "/firmware", std::vector<uint8_t>(160, 'F'));
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b1 = 0;
+                      auto b1v = getRawOptionValues(raw, COAP_OPT_BLOCK1);
+                      return raw.code == COAP_CODE_CONTINUE && b1v.size() == 1
+                              && rawDecodeUint(b1v[0], b1) && b1 == 0x0AU; // NUM=0, M=1, SZX=2
+                  }).within(0.5))
+        // Immediately trigger GET /firmware while NUM=1/2 upload proceeds -> MUST still return "init-fw"!
+        .act(action().after(0.0).run<Block1Client>("hostA.app[0]", [](Block1Client& cli) {
+            cli.getData("hostB", 5683, "/firmware");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.5))
+        .act(action().after(0.02).run<Block1Client>("hostA.app[0]", [](Block1Client& cli) {
+            bool sawInit = false;
+            bool sawChanged = false;
+            for (const auto& r : cli.getCompletedResponses()) {
+                if (r.code == COAP_CODE_CONTENT && std::string(r.payload.begin(), r.payload.end()) == "init-fw")
+                    sawInit = true;
+                if (r.code == COAP_CODE_CHANGED)
+                    sawChanged = true;
+            }
+            if (!sawInit || !sawChanged)
+                throw cRuntimeError("Expected atomic pre-commit GET=='init-fw' and final 2.04 Changed");
+            cli.getData("hostB", 5683, "/firmware");
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(0.5))
+        .act(action().after(0.01).run<Block1Client>("hostA.app[0]", [](Block1Client& cli) {
+            if (cli.getCompletedResponses().back().payload != std::vector<uint8_t>(160, 'F'))
+                throw cRuntimeError("Post-commit GET /firmware body mismatch");
+        }))
+        // 2. 8192-block (128 KiB at 16B blocks, SZX=0) upload without MID history eviction
+        .act(action().at(2.0).run<Block1Client>("hostA.app[1]", [](Block1Client& cli) {
+            std::vector<uint8_t> big(131072U);
+            for (size_t i = 0; i < big.size(); ++i)
+                big[i] = static_cast<uint8_t>((i * 13U + 7U) & 0xFFU);
+            cli.putData("hostB", 5684, "/bigfw", big);
+        }))
+        .once(on("hostA.app[1]").signal("requestCompleted").within(12.0))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[1]", [](CoapServer& srv) {
+            const auto& res = srv.getResources().at("bigfw");
+            if (res.payload.size() != 131072U)
+                throw cRuntimeError("Expected 131072 bytes in /bigfw, got %zu", res.payload.size());
+            for (size_t i = 0; i < res.payload.size(); ++i) {
+                if (res.payload[i] != static_cast<uint8_t>((i * 13U + 7U) & 0xFFU))
+                    throw cRuntimeError("Payload corruption at offset %zu", i);
+            }
+        }));
+}
+
+%activity:
+EV << "coap_block1_upload compiled\n";
+
+%file: Block1Client.ned
+import inet.applications.coap.CoapClient;
+
+simple Block1Client extends CoapClient
+{
+    parameters:
+        @class(Block1Client);
+}
+
+%file: resources.xml
+<resources>
+    <resource path="/firmware" contentFormat="0" maxAge="60" methods="GET,PUT">init-fw</resource>
+    <resource path="/bigfw" contentFormat="42" maxAge="60" methods="GET,PUT">empty</resource>
+</resources>
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 16s
+seed-set = 0
+*.tester.testName = "coap_block1_upload"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "Block1Client"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 64B
+
+*.hostA.app[1].typename = "Block1Client"
+*.hostA.app[1].localPort = 16001
+*.hostA.app[1].preferredBlockSize = 16B
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 64B
+*.hostB.app[0].resources = xmldoc("resources.xml")
+
+*.hostB.app[1].typename = "CoapServer"
+*.hostB.app[1].localPort = 5684
+*.hostB.app[1].preferredBlockSize = 16B
+*.hostB.app[1].maxIncomingBlockSize = 262144B
+*.hostB.app[1].resources = xmldoc("resources.xml")
+
+%contains: stdout
+PROTOCOLTEST coap_block1_upload: PASS

@@ -1,0 +1,420 @@
+%description:
+
+RFC 7252 Sections 5.8, 5.9, 5.10 — Server resource methods GET, PUT (create and
+replace, optional Content-Format), POST (append and 4.15 format mismatch), DELETE
+(idempotent and policy-retaining), monotonic ETag across crash reset, and IPv6
+method operation.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "ProtocolTester.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class MethodsClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientResponseRecord> completed;
+
+    uint64_t sendIpv6Method(uint8_t methodCode, const std::string& host, const std::string& uri,
+            const std::vector<uint8_t>& body = {}, int32_t cf = -1) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), 5683,
+                methodCode, true, uri, body, cf);
+    }
+
+  protected:
+    virtual void onRequestCompleted(uint64_t requestId, const CoapPeerEndpoint& peer,
+            const Ptr<const CoapHeader>& responseHeader, const std::vector<uint8_t>& payload) override {
+        CoapClient::onRequestCompleted(requestId, peer, responseHeader, payload);
+        completed.push_back(getCompletedResponses().back());
+    }
+};
+
+Define_Module(MethodsClient);
+
+Define_ProtocolTest(coap_resource_methods)
+{
+    return ProtocolTest("coap_resource_methods")
+        // 1. GET /sensors/temp -> 2.05 Content, 8B ETag, ct=0, Max-Age=30, body="21C"
+        .act(action().at(1.0).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_GET; req.messageId = 0x1001; req.token = {0x01};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "GetTemp");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .capture("tempEtagHex", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ev, raw))
+                          return cValue("");
+                      auto etags = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return cValue(etags.empty() ? "" : bytesToHexString(etags[0]).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto etags = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      auto cts = getRawOptionValues(raw, COAP_OPT_CONTENT_FORMAT);
+                      auto maxAges = getRawOptionValues(raw, COAP_OPT_MAX_AGE);
+                      return raw.type == 2 && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x1001
+                              && rawPayloadString(raw) == "21C"
+                              && etags.size() == 1 && etags[0].size() == 8
+                              && cts.size() == 1 && coapDecodedUint(cts[0]) == 0
+                              && maxAges.size() == 1 && coapDecodedUint(maxAges[0]) == 30;
+                  })
+                  .within(0.5))
+
+        // 2. PUT /sensors/temp (read-only) -> 4.05 Method Not Allowed
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_PUT; req.messageId = 0x1002; req.token = {0x02};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            req.payload = asciiBytes("99C");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PutReadOnly");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_METHOD_NOT_ALLOWED && raw.messageId == 0x1002;
+                  })
+                  .within(0.5))
+
+        // 3. PUT /actuators/new without Content-Format -> 2.01 Created, no Location-*, unspecified CF on GET
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_PUT; req.messageId = 0x1003; req.token = {0x03};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            req.payload = asciiBytes("created");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PutCreateNoCf");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .capture("newEtag1", [](const PacketEvent& ev) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ev, raw))
+                          return cValue("");
+                      auto etags = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return cValue(etags.empty() ? "" : bytesToHexString(etags[0]).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CREATED && raw.messageId == 0x1003
+                              && getRawOptionValues(raw, COAP_OPT_ETAG).size() == 1
+                              && getRawOptionValues(raw, COAP_OPT_LOCATION_PATH).empty()
+                              && getRawOptionValues(raw, COAP_OPT_LOCATION_QUERY).empty();
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_GET; req.messageId = 0x1004; req.token = {0x04};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "GetCreatedNoCf");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT && raw.messageId == 0x1004
+                              && rawPayloadString(raw) == "created"
+                              && getRawOptionValues(raw, COAP_OPT_CONTENT_FORMAT).empty();
+                  })
+                  .within(0.5))
+
+        // 4. Replace PUT /actuators/new with ct=50 -> 2.04 Changed, fresh ETag, then PUT /unknown -> 4.04, PUT /readonly-absent -> 4.05
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_PUT; req.messageId = 0x1005; req.token = {0x05};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            req.options.push_back({COAP_OPT_CONTENT_FORMAT, coapUintBytes(50)});
+            req.payload = asciiBytes("{\"on\":true}");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "PutReplace");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto etags = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return raw.code == COAP_CODE_CHANGED && raw.messageId == 0x1005
+                              && etags.size() == 1
+                              && bytesToHexString(etags[0]) != ctx.get("newEtag1").stringValue();
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage r1;
+            r1.type = 0; r1.code = COAP_CODE_PUT; r1.messageId = 0x1006; r1.token = {0x06};
+            r1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("unconfigured")});
+            r1.payload = asciiBytes("x");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(r1), "PutUnconfigured");
+
+            RawCoapMessage r2;
+            r2.type = 0; r2.code = COAP_CODE_PUT; r2.messageId = 0x1007; r2.token = {0x07};
+            r2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("readonly-absent")});
+            r2.payload = asciiBytes("x");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(r2), "PutNotCreatable");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_NOT_FOUND && raw.messageId == 0x1006;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_METHOD_NOT_ALLOWED && raw.messageId == 0x1007;
+                  })
+                  .within(0.5))
+
+        // 5. POST append (/actuators/log initial="a"): matching CF=0 -> 2.04 "a+b", absent CF -> 2.04 "a+b+c", mismatch CF=50 -> 4.15
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage p1;
+            p1.type = 0; p1.code = COAP_CODE_POST; p1.messageId = 0x1008; p1.token = {0x08};
+            p1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            p1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("log")});
+            p1.options.push_back({COAP_OPT_CONTENT_FORMAT, coapUintBytes(0)});
+            p1.payload = asciiBytes("+b");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p1), "PostAppendCf0");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CHANGED && raw.messageId == 0x1008
+                              && rawPayloadString(raw) == "a+b"
+                              && getRawOptionValues(raw, COAP_OPT_LOCATION_PATH).empty();
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage p2;
+            p2.type = 0; p2.code = COAP_CODE_POST; p2.messageId = 0x1009; p2.token = {0x09};
+            p2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            p2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("log")});
+            p2.payload = asciiBytes("+c");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p2), "PostAppendNoCf");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CHANGED && raw.messageId == 0x1009
+                              && rawPayloadString(raw) == "a+b+c";
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage p3;
+            p3.type = 0; p3.code = COAP_CODE_POST; p3.messageId = 0x100A; p3.token = {0x0A};
+            p3.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            p3.options.push_back({COAP_OPT_URI_PATH, asciiBytes("log")});
+            p3.options.push_back({COAP_OPT_CONTENT_FORMAT, coapUintBytes(50)});
+            p3.payload = asciiBytes("bad");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p3), "PostMismatchCf");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_UNSUPPORTED_CONTENT_FORMAT && raw.messageId == 0x100A;
+                  })
+                  .within(0.5))
+
+        // 6. DELETE /actuators/new twice -> 2.02 both times, GET -> 4.04, then PUT recreate -> 2.01 (policy retained)
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage d1;
+            d1.type = 0; d1.code = COAP_CODE_DELETE; d1.messageId = 0x100B; d1.token = {0x0B};
+            d1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            d1.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(d1), "Delete1");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_DELETED && raw.messageId == 0x100B;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage d2;
+            d2.type = 0; d2.code = COAP_CODE_DELETE; d2.messageId = 0x100C; d2.token = {0x0C};
+            d2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            d2.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(d2), "Delete2");
+
+            RawCoapMessage g;
+            g.type = 0; g.code = COAP_CODE_GET; g.messageId = 0x100D; g.token = {0x0D};
+            g.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            g.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(g), "GetAfterDelete");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_DELETED && raw.messageId == 0x100C;
+                  })
+                  .within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_NOT_FOUND && raw.messageId == 0x100D;
+                  })
+                  .within(0.5))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage p;
+            p.type = 0; p.code = COAP_CODE_PUT; p.messageId = 0x100E; p.token = {0x0E};
+            p.options.push_back({COAP_OPT_URI_PATH, asciiBytes("actuators")});
+            p.options.push_back({COAP_OPT_URI_PATH, asciiBytes("new")});
+            p.payload = asciiBytes("reborn");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(p), "RecreateDeleted");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CREATED && raw.messageId == 0x100E;
+                  })
+                  .within(0.5))
+
+        // 7. Crash & restart server -> monotonic ETag revision does not reuse pre-crash ETag!
+        .act(action().after(0.05).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *srv = check_and_cast<CoapServer *>(lc.getSystemModule()->getSubmodule("hostB")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *crashOp = new ModuleCrashOperation();
+            crashOp->initialize(srv, params);
+            lc.initiateOperation(crashOp);
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(srv, params);
+            lc.initiateOperation(startOp);
+        }))
+        .act(action().after(0.05).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage req;
+            req.type = 0; req.code = COAP_CODE_GET; req.messageId = 0x100F; req.token = {0x0F};
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            req.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(req), "GetAfterCrash");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto etags = getRawOptionValues(raw, COAP_OPT_ETAG);
+                      return raw.code == COAP_CODE_CONTENT && raw.messageId == 0x100F
+                              && etags.size() == 1
+                              && bytesToHexString(etags[0]) != ctx.get("tempEtagHex").stringValue();
+                  })
+                  .within(0.5))
+
+        // 8. IPv6 MethodsClient (at t=3.0s after IPv6 DAD finishes): PUT create + POST append + DELETE
+        .act(action().at(3.0).run<MethodsClient>("host6A.app[0]", [](MethodsClient& cli) {
+            cli.sendIpv6Method(COAP_CODE_PUT, "host6B", "/v6/item", asciiBytes("hi"), 0);
+        }))
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower").within(1.0))
+        .act(action().after(0.05).run<MethodsClient>("host6A.app[0]", [](MethodsClient& cli) {
+            cli.sendIpv6Method(COAP_CODE_POST, "host6B", "/v6/item", asciiBytes("!"), 0);
+        }))
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower").within(1.0))
+        .act(action().after(0.05).run<MethodsClient>("host6A.app[0]", [](MethodsClient& cli) {
+            cli.sendIpv6Method(COAP_CODE_DELETE, "host6B", "/v6/item");
+        }))
+        .once(on("host6A.app[0]").signal("packetReceivedFromLower").within(1.0))
+        .act(action().after(0.05).run<MethodsClient>("host6A.app[0]", [](MethodsClient& cli) {
+            if (cli.completed.size() != 3)
+                throw cRuntimeError("Expected 3 IPv6 responses, got %zu", cli.completed.size());
+            if (cli.completed[0].code != COAP_CODE_CREATED || cli.completed[1].code != COAP_CODE_CHANGED
+                    || std::string(cli.completed[1].payload.begin(), cli.completed[1].payload.end()) != "hi!"
+                    || cli.completed[2].code != COAP_CODE_DELETED)
+                throw cRuntimeError("Unexpected IPv6 method codes/payload");
+        }));
+}
+
+%activity:
+EV << "coap_resource_methods compiled\n";
+
+%file: CoapMethodsDualNet.ned
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple MethodsClient extends inet.applications.coap.CoapClient
+{
+    parameters:
+        @class(MethodsClient);
+}
+
+network CoapMethodsDualNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        v6Configurator: Ipv6FlatNetworkConfigurator { @display("p=80,120"); }
+        tester: ProtocolTester { @display("p=80,190"); }
+        hostA: StandardHost { @display("p=250,60"); }
+        hostB: StandardHost { @display("p=450,60"); }
+        host6A: StandardHost {
+            @display("p=250,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+        host6B: StandardHost {
+            @display("p=450,180");
+            hasIpv4 = false;
+            hasIpv6 = true;
+        }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        host6A.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> host6B.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapMethodsDualNet
+sim-time-limit = 20s
+seed-set = 0
+*.tester.testName = "coap_resource_methods"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/temp' methods='GET' contentFormat='0' maxAge='30'>21C</resource><resource path='/actuators/new' methods='GET,PUT,DELETE' exists='false' creatable='true'/><resource path='/readonly-absent' methods='GET' exists='false' creatable='false'/><resource path='/actuators/log' methods='GET,POST,DELETE' contentFormat='0'>a</resource></resources>")
+
+*.host6A.numApps = 1
+*.host6A.app[0].typename = "MethodsClient"
+*.host6A.app[0].localPort = 16010
+
+*.host6B.numApps = 1
+*.host6B.app[0].typename = "CoapServer"
+*.host6B.app[0].localPort = 5683
+*.host6B.app[0].resources = xml("<resources><resource path='/v6/item' methods='GET,POST,PUT,DELETE' exists='false' creatable='true' contentFormat='0'/></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_resource_methods: PASS

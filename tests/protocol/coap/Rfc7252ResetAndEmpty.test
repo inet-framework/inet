@@ -1,0 +1,158 @@
+%description:
+
+RFC 7252 Sections 4.1, 4.2, 4.3 -- Empty CON ping -> Empty RST, silent ignore
+of Empty NON/ACK/RST, foreign-endpoint/wrong-MID ACK/RST isolation, and valid
+Empty RST immediate cancellation of CON retries.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class ResetTestClient : public CoapClient
+{
+  public:
+    uint64_t sendManualCon(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, true, uri, {});
+    }
+
+    bool triggerPing(const std::string& host, int port) {
+        uint64_t exId = 0;
+        return sendConfirmablePing(CoapPeerEndpoint{L3AddressResolver().resolve(host.c_str()), port}, exId);
+    }
+};
+
+Define_Module(ResetTestClient);
+
+Define_ProtocolTest(coap_reset_and_empty)
+{
+    return ProtocolTest("coap_reset_and_empty")
+        // Scenario 1 (t=0.5s): Empty CON ping (0.00, TKL=0) -> server sends Empty RST with exact MID.
+        .act(action().at(0.5).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage ping;
+            ping.version = 1; ping.type = 0; ping.code = 0; ping.messageId = 0x3301;
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(ping), "EmptyConPing");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 3 && raw.code == 0 && raw.token.empty()
+                              && raw.messageId == 0x3301;
+                  })
+                  .within(0.5))
+
+        // Scenario 2: Empty NON, ACK, RST -> NO response emitted (no reply loops).
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [](CoapTestPeer& peer) {
+            peer.sendRawNow("hostB", 5683, {0x50, 0x00, 0x33, 0x02}, "EmptyNon");
+            peer.sendRawNow("hostB", 5683, {0x60, 0x00, 0x33, 0x03}, "EmptyAck");
+            peer.sendRawNow("hostB", 5683, {0x70, 0x00, 0x33, 0x04}, "EmptyRst");
+        }))
+        .never(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.2))
+
+        // Scenario 3 (t=1.0s): Active CON request on client -> foreign-peer RST, wrong-MID RST, foreign ACK
+        // must NOT stop retry #1; matching RST from right peer/MID cancels retries immediately.
+        .act(action().at(1.0).run<ResetTestClient>("hostA.app[1]", [](ResetTestClient& cli) {
+            cli.sendManualCon("hostB", 5684, "/reset-target");
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peerRight = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      auto *peerForeign = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[2]"));
+                      const auto& last = peerRight->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+
+                      // Foreign peer sends RST with SAME MID, and foreign ACK with SAME MID.
+                      RawCoapMessage rstSameMid;
+                      rstSameMid.type = 3; rstSameMid.code = 0; rstSameMid.messageId = req.messageId;
+                      peerForeign->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(rstSameMid), "ForeignRst");
+                      RawCoapMessage ackSameMid = rstSameMid; ackSameMid.type = 2;
+                      peerForeign->scheduleRawSend(simTime() + 0.05, last.srcAddr.str(), last.srcPort, encodeRawCoap(ackSameMid), "ForeignAck");
+
+                      // Right peer sends WRONG-MID RST.
+                      RawCoapMessage wrongMidRst = rstSameMid;
+                      wrongMidRst.messageId = static_cast<uint16_t>(req.messageId ^ 0x0001U);
+                      peerRight->scheduleRawSend(simTime() + 0.1, last.srcAddr.str(), last.srcPort, encodeRawCoap(wrongMidRst), "WrongMidRst");
+                      return true;
+                  })
+                  .within(0.5))
+        // Retry #1 MUST STILL arrive despite foreign/wrong-MID ACK/RST! Then answer with matching Empty RST!
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peerRight = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peerRight->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      RawCoapMessage validRst;
+                      validRst.type = 3; validRst.code = 0; validRst.messageId = req.messageId;
+                      peerRight->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(validRst), "ValidRst");
+                      return true;
+                  })
+                  .within(3.5))
+        .once(on("hostA.app[1]").signal("requestFailed").within(0.5))
+        .never(on("hostA.app[1]").signal("packetSentToLower").within(8.0))
+
+        // Scenario 4: Client sends Empty CON ping via sendConfirmablePing -> server returns RST, NO retry!
+        .act(action().at(15.0).run<ResetTestClient>("hostA.app[1]", [](ResetTestClient& cli) {
+            if (!cli.triggerPing("hostB", 5683))
+                throw cRuntimeError("Expected triggerPing to succeed");
+        }))
+        .once(on("hostA.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3 && raw.code == 0;
+                  })
+                  .within(0.5))
+        .never(on("hostA.app[1]").signal("packetSentToLower").within(4.0));
+}
+
+%activity:
+EV << "coap_reset_and_empty compiled\n";
+
+%file: ResetTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple ResetTestClient extends CoapClient
+{
+    parameters:
+        @class(ResetTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 25s
+seed-set = 0
+*.tester.testName = "coap_reset_and_empty"
+
+*.hostA.numApps = 2
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[1].typename = "ResetTestClient"
+*.hostA.app[1].localPort = 16001
+
+*.hostB.numApps = 3
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+*.hostB.app[2].typename = "CoapTestPeer"
+*.hostB.app[2].localPort = 5685
+
+%contains: stdout
+PROTOCOLTEST coap_reset_and_empty: PASS
