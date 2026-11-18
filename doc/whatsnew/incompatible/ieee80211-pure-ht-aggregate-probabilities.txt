@@ -1,0 +1,5 @@
+PHY DATA chunk errors
+
+PHY error models now support unconditional DATA corruption through `IErrorModel::computeReceivedData()`. The operation returns existing chunk content with local error flags. Direct interface implementations must supply this operation. The common base uses DATA BER. A model can override the probability calculation through its existing PHY functions.
+
+HT aggregate reception caches the returned chunks. It preserves partial errors without an A-MPDU error-model role or a separate range table. Raw byte input has one DATA outcome because byte conversion removes the original chunk boundaries. Rx still rejects aggregate containers before standalone FCS or MAC header checks. MAC member acceptance remains separate work.

@@ -24,6 +24,7 @@ class INET_API MpduDeaggregation : public IMpduDeaggregation, public cObject
      * Delimiter validity includes chunk flags and member bounds. It does not
      * establish MPDU FCS acceptance. Returns false if a delimiter, bounds, or
      * alignment check fails.
+     * After an invalid delimiter, the search continues at four-octet intervals.
      */
     static bool visitSubframes(const Packet *packet, B offset, B length,
             const std::function<void(const Ptr<const Ieee80211MpduSubframeHeader>&, B, bool)>& visitDelimiter,

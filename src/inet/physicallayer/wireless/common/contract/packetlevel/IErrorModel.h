@@ -27,6 +27,13 @@ class INET_API IErrorModel : public virtual IPrintableObject
     virtual Packet *computeCorruptedPacket(const ISnir *snir) const = 0;
 
     /**
+     * Samples DATA errors once over the supplied chunk structure.
+     * The result has the same length and bytes, with incorrect chunks marked.
+     * The input remains unchanged. All chunks may remain correct.
+     */
+    virtual Ptr<const Chunk> computeReceivedData(const ISnir *snir, const Ptr<const Chunk>& data) const = 0;
+
+    /**
      * Returns the packet error rate based on SNIR, modulation, FEC encoding
      * and any other physical layer characteristics.
      */

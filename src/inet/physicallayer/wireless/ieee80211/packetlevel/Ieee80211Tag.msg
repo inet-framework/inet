@@ -6,10 +6,19 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.common.Units;
 import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
 import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 namespace inet::physicallayer;
+
+// PHY facts only. MAC delimiter and FCS checks still control acceptance.
+class Ieee80211AmpduInd extends TagBase
+{
+    bool headerSuccessful = false;
+    bool aggregation = false;
+    bool contentComplete = false;
+}
 
 //
 // This is an abstract base class that should not be directly added as a tag.

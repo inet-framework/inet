@@ -1,6 +1,6 @@
 %description:
 Check production MPDU extraction from complete and overlong-delimiter aggregates.
-An overlong delimiter stops extraction before an out-of-bounds request.
+Recovery crosses typed MAC header bytes and retains the later bounded member.
 Four seed-zero runs cover both layouts as typed chunks and reconstructed bytes.
 
 %extraargs: -r 0..3
@@ -54,17 +54,15 @@ class WifiMpduDeaggregationDriver : public cSimpleModule
         MpduDeaggregation deaggregator;
         // The production method owns and deletes the input aggregate.
         auto frames = deaggregator.deaggregateFrame(aggregate);
-        ASSERT(frames != nullptr && frames->size() == (recovery ? 1 : 3));
+        ASSERT(frames != nullptr && frames->size() == (recovery ? 2 : 3));
         ASSERT(frames->at(0)->getDataLength() == B(100));
         ASSERT(frames->at(0)->peekAllAsBytes()->getBytes() == first);
         if (!recovery) {
             ASSERT(frames->at(1)->getDataLength() == B(100));
             ASSERT(frames->at(1)->peekAllAsBytes()->getBytes() == middle);
         }
-        if (!recovery) {
-            ASSERT(frames->back()->getDataLength() == B(20));
-            ASSERT(frames->back()->peekAllAsBytes()->getBytes() == last);
-        }
+        ASSERT(frames->back()->getDataLength() == B(20));
+        ASSERT(frames->back()->peekAllAsBytes()->getBytes() == last);
         for (auto frame : *frames)
             delete frame;
         delete frames;

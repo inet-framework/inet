@@ -42,6 +42,7 @@ class INET_API ErrorModelBase : public Module, public IErrorModel
 
     virtual double getScalarSnir(const ISnir *snir) const;
     virtual bool hasProbabilisticError(b length, double ber) const;
+    virtual double computeChunkSuccessRate(const ISnir *snir, b bitLength) const;
 
     virtual Packet *corruptBits(const Packet *packet, double ber, bool& isCorrupted) const;
     virtual Packet *corruptBytes(const Packet *packet, double ber, bool& isCorrupted) const;
@@ -50,6 +51,9 @@ class INET_API ErrorModelBase : public Module, public IErrorModel
 
     virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const;
     virtual Packet *computeCorruptedPacket(const ISnir *snir) const override;
+
+  public:
+    virtual Ptr<const Chunk> computeReceivedData(const ISnir *snir, const Ptr<const Chunk>& data) const override;
 };
 
 } // namespace physicallayer

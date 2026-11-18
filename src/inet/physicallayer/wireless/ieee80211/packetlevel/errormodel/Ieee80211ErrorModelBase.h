@@ -26,6 +26,7 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
   protected:
     virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
+    virtual double computeChunkSuccessRate(const ISnir *snir, b bitLength) const override;
 
     virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const override;
 
