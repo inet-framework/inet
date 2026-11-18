@@ -9,6 +9,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211OfdmSignalField.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211DsssPlcp.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
@@ -55,17 +56,18 @@ Register_Serializer(Ieee80211VhtPhyHeader, Ieee80211VhtPhyHeaderSerializer);
 void Ieee80211FhssPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto fhssPhyHeader = dynamicPtrCast<const Ieee80211FhssPhyHeader>(chunk);
-    stream.writeNBitsOfUint64Be(fhssPhyHeader->getPlw(), 12);
-    stream.writeUint4(fhssPhyHeader->getPsf());
-    stream.writeUint16Be(fhssPhyHeader->getFcs());
+    stream.writeUint16Le((fhssPhyHeader->getPlw() & 0x0fff) | (fhssPhyHeader->getPsf() << 12));
+    stream.writeUint16Le(fhssPhyHeader->getFcs());
 }
 
 const Ptr<Chunk> Ieee80211FhssPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto fhssPhyHeader = makeShared<Ieee80211FhssPhyHeader>();
-    fhssPhyHeader->setPlw(stream.readNBitsToUint64Be(12));
-    fhssPhyHeader->setPsf(stream.readUint4());
-    fhssPhyHeader->setFcs(stream.readUint16Be());
+    auto fields = stream.readUint16Le();
+    fhssPhyHeader->setPlw(fields & 0x0fff);
+    fhssPhyHeader->setPsf(fields >> 12);
+    fhssPhyHeader->setLengthField(B(fields & 0x0fff));
+    fhssPhyHeader->setFcs(stream.readUint16Le());
     fhssPhyHeader->setFcsMode(FCS_COMPUTED);
     return fhssPhyHeader;
 }
@@ -95,7 +97,7 @@ void Ieee80211DsssPhyHeaderSerializer::serializeFields(MemoryOutputStream& strea
     auto dsssPhyHeader = dynamicPtrCast<const Ieee80211DsssPhyHeader>(chunk);
     stream.writeByte(dsssPhyHeader->getSignal());
     stream.writeByte(dsssPhyHeader->getService());
-    stream.writeUint16Le(dsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(dsssPhyHeader->getPlcpLength());
     stream.writeUint16Le(dsssPhyHeader->getFcs());
 }
 
@@ -104,7 +106,12 @@ const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserializeFields(MemoryInput
     auto dsssPhyHeader = makeShared<Ieee80211DsssPhyHeader>();
     dsssPhyHeader->setSignal(stream.readByte());
     dsssPhyHeader->setService(stream.readByte());
-    dsssPhyHeader->setLengthField(B(stream.readUint16Le()));
+    dsssPhyHeader->setPlcpLength(stream.readUint16Le());
+    int octets = decodeIeee80211DsssPsduLength(dsssPhyHeader->getSignal(), dsssPhyHeader->getService(), dsssPhyHeader->getPlcpLength(), false);
+    if (octets < 0)
+        dsssPhyHeader->markIncorrect();
+    else
+        dsssPhyHeader->setLengthField(B(octets));
     dsssPhyHeader->setFcs(stream.readUint16Le());
     dsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return dsssPhyHeader;
@@ -118,7 +125,7 @@ void Ieee80211HrDsssPhyHeaderSerializer::serializeFields(MemoryOutputStream& str
     auto hrDsssPhyHeader = dynamicPtrCast<const Ieee80211HrDsssPhyHeader>(chunk);
     stream.writeByte(hrDsssPhyHeader->getSignal());
     stream.writeByte(hrDsssPhyHeader->getService());
-    stream.writeUint16Le(hrDsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(hrDsssPhyHeader->getPlcpLength());
     stream.writeUint16Le(hrDsssPhyHeader->getFcs());
 }
 
@@ -127,7 +134,12 @@ const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserializeFields(MemoryInp
     auto hrDsssPhyHeader = makeShared<Ieee80211HrDsssPhyHeader>();
     hrDsssPhyHeader->setSignal(stream.readByte());
     hrDsssPhyHeader->setService(stream.readByte());
-    hrDsssPhyHeader->setLengthField(B(stream.readUint16Le()));
+    hrDsssPhyHeader->setPlcpLength(stream.readUint16Le());
+    int octets = decodeIeee80211DsssPsduLength(hrDsssPhyHeader->getSignal(), hrDsssPhyHeader->getService(), hrDsssPhyHeader->getPlcpLength(), true);
+    if (octets < 0)
+        hrDsssPhyHeader->markIncorrect();
+    else
+        hrDsssPhyHeader->setLengthField(B(octets));
     hrDsssPhyHeader->setFcs(stream.readUint16Le());
     hrDsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return hrDsssPhyHeader;
