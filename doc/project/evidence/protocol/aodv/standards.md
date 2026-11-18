@@ -8,7 +8,11 @@ The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
+The current [selected RFC 3561 catalog](../../standard/rfc3561/catalog.md), [feature map](features.md) and [check descriptions](checks.md) cover a bounded verification surface. Its extension scope includes [§9 framing and mandatory-type handling](../../standard/rfc3561/catalog.md#rfc3561-extension) and the [§9.1 Hello Interval extension](../../standard/rfc3561/catalog.md#rfc3561-hello-interval). These selected requirements do not establish an achieved conformance level. Implementation choices and execution evidence remain owned by the [model records](../../model/aodv/coverage.md#current-feature-coverage-2026-11-14); model-specific subnet cooperation is not an additional standard extension assignment.
+
+The following depth targets record the 2026-09-23 survey rather than the scope of the current selected catalog.
+
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). That survey mapped the family, pinned the in-scope set that a level 2 pass would need, and recorded the claims of the model. It wrote no catalog, feature map or test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -23,13 +27,15 @@ What a pass actually reached is not recorded here. It is in [`model/aodv/coverag
 
 | Document | Title | Date | Status | Relation | Downloaded |
 | --- | --- | --- | --- | --- | --- |
-| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [`standards/RFC/rfc3561.txt`](../../../../../../standards/RFC/rfc3561.txt), 2026-09-23 |
-| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [`standards/RFC/rfc5148.txt`](../../../../../../standards/RFC/rfc5148.txt), 2026-09-23 |
+| RFC 3561 | Ad hoc On-Demand Distance Vector (AODV) Routing | July 2003 | Experimental | `base` | [RFC Editor text](https://www.rfc-editor.org/rfc/rfc3561.txt), 2026-09-23 |
+| RFC 5148 | Jitter Considerations in Mobile Ad Hoc Networks (MANETs) | February 2008 | Informational | `companion` (jitter) | [RFC Editor text](https://www.rfc-editor.org/rfc/rfc5148.txt), 2026-09-23 |
 
 Source of the texts:
 
-- `rfc3561.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3561.txt) — <https://www.rfc-editor.org/rfc/rfc3561.txt>, downloaded 2026-09-23.
-- `rfc5148.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5148.txt) — <https://www.rfc-editor.org/rfc/rfc5148.txt>, downloaded 2026-09-23.
+- `standards/RFC/rfc3561.txt` — [RFC 3561 text](https://www.rfc-editor.org/rfc/rfc3561.txt), downloaded 2026-09-23.
+- `standards/RFC/rfc5148.txt` — [RFC 5148 text](https://www.rfc-editor.org/rfc/rfc5148.txt), downloaded 2026-09-23.
+
+The paths above identify the survey's local copies in the separate standards corpus. Links point to the official source texts so they also work without that corpus installed beside the checkout.
 
 Neither document has an `obsoletes`, `obsoleted_by`, `updates` or `updated_by` entry in the register. AODV is the one protocol of this pass whose family carries no later document at all: what RFC 3561 says in 2003 is still the whole of the base text today.
 
@@ -47,7 +53,7 @@ This is not a conflict between the two documents; RFC 5148 fills a gap RFC 3561 
 
 ## In-scope set
 
-The set that a level 2 pass tests against:
+Historical scope recorded on 2026-09-23 for a future level 2 pass. The catalog availability and exclusions in these tables describe that survey date. Current selected extension requirements are linked under [Target level](#target-level); in particular, the historical background-only classification of §9 does not exclude its framing and Hello Interval requirements from the current selected catalog.
 
 | Document | Version | Catalog file |
 | --- | --- | --- |

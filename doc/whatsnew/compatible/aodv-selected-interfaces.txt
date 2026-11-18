@@ -1,0 +1,3 @@
+AODV supports an explicit IPv4 interface selection
+
+The optional interfaces parameter selects exact interface names while retaining one primary discovery identity and shared counters. Control, data, Hello observations and precursor errors follow their learned interfaces. Selected secondary addresses answer requests, and the gateway adapter follows the gateway's actual interface. Empty selection preserves the legacy primary interface.

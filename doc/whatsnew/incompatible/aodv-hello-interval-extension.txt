@@ -1,0 +1,3 @@
+AODV advertises the Hello interval
+
+AODV Hello messages include the RFC 3561 Hello Interval extension. Neighbors maintain independent observation intervals and use the advertised interval when incoming traffic refreshes an armed deadline. Fractional millisecond periods are conservatively rounded upward on the wire. Invalid extensions are rejected before learning or liveness changes.

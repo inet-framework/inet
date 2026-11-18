@@ -1,0 +1,53 @@
+%description:
+AODV Hello Interval LifetimeOverflow initialization boundary. See protocol/aodv/hello-interval-extension.md.
+
+%file: test.ned
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+network AodvHelloIntervalValidation
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvHelloIntervalValidation
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = true
+*.dut.aodv.deletePeriod = 15s
+*.dut.aodv.helloInterval = 3000000s
+*.dut.aodv.allowedHelloLoss = 2
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].bitrate = 1Mbps
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%exitcode: 1
+%contains: test.err
+AODV allowedHelloLoss * helloInterval must fit 1..UINT32_MAX milliseconds
+%not-contains: test.out
+undisposed object:

@@ -1,0 +1,3 @@
+AODV supports bounded local repair
+
+The existing useLocalRepair option now enables one bounded transit-only repair per exact route prefix. Subsequent transit and local packets can share its queues. Fresh repair clears the owner and sends N when the path becomes longer; failure notifies precursors and disposes its queues. The default remains false.

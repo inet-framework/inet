@@ -1,0 +1,3 @@
+AODV receives IPv6 multicast requests after start and restart
+
+The IPv6 AODV socket now joins its control multicast group when starting. Native multicast route requests can reach AODV both initially and after a lifecycle restart; the existing custom IPv6 wire encoding is unchanged.

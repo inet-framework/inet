@@ -1,0 +1,3 @@
+Network protocols can report queued datagram failures
+
+INetfilter now distinguishes silent cancellation from terminal destination-unreachable failure. IPv4 and IPv6 detach a failed queued packet before reporting its native ICMP error and dispose of it once. NextHopForwarding retains silent disposal because it has no IP error protocol. External INetfilter implementations must implement failQueuedDatagram().

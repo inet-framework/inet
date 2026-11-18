@@ -1,0 +1,3 @@
+AODV declares its graceful-stop parameters
+
+AODV now declares stopOperationTimeout and stopOperationExtraTime, which its lifecycle code already reads. Graceful stop can complete socket closure instead of failing with an unknown-parameter error. The defaults follow the application lifecycle convention: a two-second timeout and immediate completion after closure.

@@ -433,7 +433,9 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
     const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
     // route packet
     if (destIE != nullptr) {
-        if (!ipv6Header->getDestAddress().isMulticast())
+        if (!ipv6Header->getDestAddress().isMulticast() && !requestedNextHopAddress.isUnspecified())
+            routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
+        else if (!ipv6Header->getDestAddress().isMulticast())
             fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true);
         else
             fragmentPostRouting(packet, destIE, ipv6Header->getDestAddress().mapToMulticastMacAddress(), true);
@@ -1333,6 +1335,20 @@ void Ipv6::dropQueuedDatagram(const Packet *packet)
         if (iter->packet == packet) {
             delete packet;
             queuedDatagramsForHooks.erase(iter);
+            return;
+        }
+    }
+}
+
+void Ipv6::failQueuedDatagram(const Packet *packet)
+{
+    Enter_Method("failQueuedDatagram()");
+    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); ++iter) {
+        if (iter->packet == packet) {
+            auto datagram = iter->packet;
+            queuedDatagramsForHooks.erase(iter);
+            take(datagram);
+            sendIcmpError(datagram, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
             return;
         }
     }

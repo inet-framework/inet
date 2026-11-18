@@ -8,6 +8,7 @@
 #ifndef __INET_AODVROUTEDATA_H
 #define __INET_AODVROUTEDATA_H
 
+#include <cstdint>
 #include <set>
 
 #include "inet/networklayer/common/L3Address.h"
@@ -17,13 +18,16 @@ namespace aodv {
 
 class INET_API AodvRouteData : public cObject
 {
+  public:
+    using Precursor = std::pair<L3Address, int>;
+
   protected:
-    std::set<L3Address> precursorList;
+    std::set<Precursor> precursorList;
     bool active;
     bool repariable;
     bool beingRepaired;
     bool validDestNum;
-    unsigned int destSeqNum;
+    uint32_t destSeqNum;
     simtime_t lifeTime; // expiration or deletion time of the route
 
   public:
@@ -40,8 +44,8 @@ class INET_API AodvRouteData : public cObject
 
     virtual ~AodvRouteData() {}
 
-    unsigned int getDestSeqNum() const { return destSeqNum; }
-    void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }
+    uint32_t getDestSeqNum() const { return destSeqNum; }
+    void setDestSeqNum(uint32_t destSeqNum) { this->destSeqNum = destSeqNum; }
     bool hasValidDestNum() const { return validDestNum; }
     void setHasValidDestNum(bool hasValidDestNum) { this->validDestNum = hasValidDestNum; }
     bool isBeingRepaired() const { return beingRepaired; }
@@ -52,8 +56,8 @@ class INET_API AodvRouteData : public cObject
     void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
     bool isActive() const { return active; }
     void setIsActive(bool active) { this->active = active; }
-    void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }
-    const std::set<L3Address>& getPrecursorList() const { return precursorList; }
+    void addPrecursor(const L3Address& address, int interfaceId) { precursorList.emplace(address, interfaceId); }
+    const std::set<Precursor>& getPrecursorList() const { return precursorList; }
     virtual std::string str() const;
 };
 

@@ -1,0 +1,5 @@
+AODV recovers after primary-identity changes
+
+AODV now suspends dependent traffic when its primary interface is unavailable
+and runs its existing recovery hold when a usable primary identity returns.
+Changing that identity again cancels the old work and starts a new hold.

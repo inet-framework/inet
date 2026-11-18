@@ -1,0 +1,86 @@
+%description:
+RFC 3561 sections 6.11/6.12: error state, notifications and actual precursor delivery.
+
+%file: Peer.cc
+#include "../../../protocol/aodv/AodvErrorPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvDataSource like IApp
+{
+    parameters:
+        string destinations = default("10.0.0.99");
+        double emitTime @unit(s) = default(0.16s);
+        int localPort = default(12345);
+        string nextHop = default("10.0.0.1");
+        string outputInterface = default("wlan1");
+        @class(::AodvDataSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvErrorPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        @class(::AodvErrorPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1.5s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.peer.forwarding = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.peer.numApps = 2
+*.peer.app[1].typename = "AodvDataSource"
+*.peer.app[0].scenario = "ForeignForward"
+*.peer.numWlanInterfaces = 2
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.peer.app[0].typename = "AodvErrorPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV ForeignForward: PASS

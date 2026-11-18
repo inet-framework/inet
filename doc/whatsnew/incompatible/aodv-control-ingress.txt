@@ -1,0 +1,3 @@
+AODV requires attributable selected control ingress
+
+AODV control received without InterfaceInd, or on an interface outside the configured ad hoc selection, is ignored. Peer-specific failure handling requires stable one-hop IP/MAC bindings and retained output tags; unavailable or ambiguous attribution is diagnosed and does not authorize a route-based guess. See the AODV link metadata migration note.

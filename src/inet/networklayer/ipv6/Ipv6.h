@@ -250,6 +250,7 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *packet) override;
+    virtual void failQueuedDatagram(const Packet *packet) override;
     virtual void reinjectQueuedDatagram(const Packet *packet) override;
 
   protected:

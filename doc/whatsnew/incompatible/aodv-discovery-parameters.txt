@@ -1,0 +1,3 @@
+AODV validates route discovery parameters
+
+AODV rejects invalid TTL ordering, zero rate limits, nonpositive or unrepresentable durations, insufficient retention/advertisement intervals and jitter outside its declared bounds. Configurations with such overrides must be corrected. Explicit positive blacklist overrides remain supported. See the AODV discovery parameter migration note.

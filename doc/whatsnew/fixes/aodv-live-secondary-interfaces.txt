@@ -1,0 +1,5 @@
+AODV handles live secondary-interface changes
+
+AODV now reconciles live changes to selected secondary interfaces, preserves
+route freshness after native route deletion, and rejects delayed control packets
+whose source address no longer belongs to the selected output interface.

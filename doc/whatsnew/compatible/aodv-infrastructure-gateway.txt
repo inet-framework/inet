@@ -1,0 +1,3 @@
+AODV can export independently routed external networks
+
+The opt-in externalSubnets profile advertises an aggregate only while a native non-AODV route covers the whole prefix on the named interface. Route creation, withdrawal, in-place changes and finite IPv6 expiry update availability. Members use the native gateway path and configured return routes; the exporter cannot recursively justify its export with its own learned AODV routes. The legacy gatewayAddress adapter remains available separately.

@@ -1,0 +1,3 @@
+AODV detects Hello neighbor loss independently of route use
+
+Incoming traffic refreshes the attributable immediate sender's Hello deadline. Outgoing data cannot keep a silent neighbor alive. Missing or unstable sender metadata disables this loss detector for the affected interface until restart, while Hello exchange and attributable MAC feedback remain available.

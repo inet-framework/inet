@@ -1,0 +1,3 @@
+AODV received IPv6 subnet routes
+
+Native IPv6 RREPs can install normalized subnet routes. Cache replies and forwarding preserve the advertised prefix, and host and aggregate sequence histories remain independent. This extends INET's existing IPv6 encoding without claiming an independently standardized IPv6 AODV wire format.

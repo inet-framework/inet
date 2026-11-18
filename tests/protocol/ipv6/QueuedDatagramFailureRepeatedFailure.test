@@ -1,0 +1,50 @@
+%description:
+Public netfilter queued failure through native IPV6: RepeatedFailure.
+See queued-datagram-failure.md for ownership, wire error and parent-comparison limits.
+
+%file: Peer.cc
+#include "../../../ipv4/QueuedDatagramFailurePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.StandardHost6;
+import inet.node.ipv6.Router6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+simple QueuedDatagramFailurePeer like IApp
+{
+    parameters:
+        string scenario = default("RepeatedFailure");
+        bool usingIpv6 = default(true);
+        @class(::QueuedDatagramFailurePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network QueuedFailureNetwork
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        hostA: StandardHost6;
+        router: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = QueuedFailureNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 6s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "QueuedDatagramFailurePeer"
+*.hostB.numApps = 0
+**.ipv6.ipv6.sendRedirects = false
+
+%contains: stdout
+QUEUED DATAGRAM FAILURE RepeatedFailure: PASS

@@ -1,0 +1,3 @@
+UDP multicast leave tolerates a removed interface
+
+Leaving a socket multicast group now releases its membership when the associated interface has already been removed. Surviving interfaces still receive their normal leave update, and the socket can join the group on another interface.

@@ -157,6 +157,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *datagram) override;
+    virtual void failQueuedDatagram(const Packet *datagram) override;
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 
   protected:
