@@ -1,0 +1,391 @@
+%description:
+PB94 sections 3-4: bounded adaptive full-dump timing reacts to quiet periods,
+selected-route churn and payload cost. Real UDP injection and remote packet
+reception distinguish periodic dumps from triggered overflow and urgent loss.
+A heterogeneous pair proves receive timeouts need not exceed the local send
+interval when they cover the actual peer's interval.
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+
+simple AdaptiveProbe like IApp
+{
+    parameters:
+        @class(AdaptiveProbe);
+        @display("i=block/app");
+        int scenario = default(0);
+        bool listener = default(false);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+simple AdaptiveObserver
+{
+    parameters:
+        @class(AdaptiveObserver);
+        @display("i=block/control");
+}
+
+network DsdvAdaptiveDumpsNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        observer: AdaptiveObserver;
+        quiet[3]: AdhocHost;
+        churn[3]: AdhocHost;
+        cost[3]: AdhocHost;
+        clamp[3]: AdhocHost;
+        heterogeneous[2]: AdhocHost;
+}
+
+%file: Observer.cc
+#include <array>
+#include <vector>
+#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/routing/dsdv/DsdvHeader_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+
+using namespace inet;
+using namespace inet::dsdv;
+
+namespace DsdvAdaptiveDumps {
+
+class AdaptiveProbe;
+
+class AdaptiveObserver : public SimpleModule, public cListener
+{
+    using cListener::finish;
+  protected:
+    std::array<const char *, 4> names = {"quiet", "churn", "cost", "clamp"};
+    std::array<std::vector<simtime_t>, 4> intervals;
+    std::array<std::vector<simtime_t>, 4> callbackTimes;
+    std::array<std::vector<simtime_t>, 4> periodicTimes;
+    std::array<uint64_t, 4> lastSequence = {};
+    std::array<bool, 4> started = {};
+    std::array<simtime_t, 4> epochs;
+    std::array<cMessage *, 4> scripts = {};
+    std::array<int, 4> phases = {};
+    cMessage *pairTimer = nullptr;
+    int pairPhase = 0;
+    int overflowFragments = 0;
+    bool urgentReceived = false;
+    int pairExpiries = 0;
+
+    cModule *node(int scenario, int index) const
+    {
+        return getParentModule()->getSubmodule(names[scenario], index);
+    }
+
+    void script(int scenario);
+
+    void inspectPair()
+    {
+        for (int i = 0; i < 2; i++) {
+            auto host = getParentModule()->getSubmodule("heterogeneous", i);
+            auto table = check_and_cast<IRoutingTable *>(host->getSubmodule("ipv4")->getSubmodule("routingTable"));
+            auto other = Ipv4Address(0x0a020001U + (1 - i));
+            auto route = table->findBestMatchingRoute(other);
+            ASSERT(route && route->getMetric() == 1 && route->getSource() == host->getSubmodule("app", 0));
+        }
+        if (pairPhase++ == 0)
+            scheduleAt(SimTime(15), pairTimer);
+    }
+
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            getParentModule()->subscribe("fullDumpIntervalSelected", this);
+            getParentModule()->subscribe("invalidationReason", this);
+            for (int i = 0; i < 4; i++)
+                scripts[i] = new cMessage("script", i);
+            pairTimer = new cMessage("pair");
+            scheduleAt(SimTime(3), pairTimer);
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (message == pairTimer)
+            inspectPair();
+        else
+            script(message->getKind());
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t, const SimTime& value, cObject *) override
+    {
+        for (int i = 0; i < 4; i++)
+            if (source == node(i, 0)->getSubmodule("app", 0)) {
+                intervals[i].push_back(value);
+                callbackTimes[i].push_back(simTime());
+            }
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t, const char *value, cObject *) override
+    {
+        if (simTime() >= SimTime(3) && strcmp(value, "expiry") == 0)
+            for (int i = 0; i < 2; i++)
+                if (source == getParentModule()->getSubmodule("heterogeneous", i)->getSubmodule("app", 0))
+                    pairExpiries++;
+    }
+
+    void finish() override
+    {
+        const std::array<std::array<double, 3>, 4> expected = {{{2, 4, 2}, {2, 1, 2}, {2, 2, 4}, {2, 4, 4}}};
+        for (int scenario = 0; scenario < 4; scenario++) {
+            ASSERT(intervals[scenario].size() >= 3 && periodicTimes[scenario].size() >= 3);
+            for (int i = 0; i < 3; i++)
+                ASSERT(intervals[scenario][i] == SimTime(expected[scenario][i]));
+            for (size_t i = 1; i < periodicTimes[scenario].size(); i++)
+                ASSERT(callbackTimes[scenario][i] - callbackTimes[scenario][i - 1] == intervals[scenario][i - 1]);
+            for (size_t i = 0; i < periodicTimes[scenario].size(); i++) {
+                auto delivery = periodicTimes[scenario][i] - callbackTimes[scenario][i];
+                ASSERT(delivery >= SIMTIME_ZERO && delivery < SimTime(.01));
+            }
+        }
+        ASSERT(overflowFragments == 2 && urgentReceived && pairPhase == 2 && pairExpiries == 0);
+        std::cout << "DSDV adaptive dumps PASS: quiet, churn, byte budget, bounds, urgent loss, overflow, heterogeneous peers\n";
+    }
+
+  public:
+    static Ipv4Address address(int scenario, int index)
+    {
+        return Ipv4Address(0x0a010000U + scenario * 256 + index + 1);
+    }
+
+    static DsdvEntry entry(int scenario, int destination, uint64_t sequence, uint32_t metric)
+    {
+        DsdvEntry result;
+        result.destination = address(scenario, destination - 1);
+        result.sequence = sequence;
+        result.metric = metric;
+        return result;
+    }
+
+    void received(int scenario, const Ptr<const DsdvHeader>& header)
+    {
+        Enter_Method("received");
+        if (header->getSender() != address(scenario, 0))
+            return;
+        if (header->getKind() == 1 && header->getSelfSequence() > lastSequence[scenario]) {
+            lastSequence[scenario] = header->getSelfSequence();
+            periodicTimes[scenario].push_back(simTime());
+            // Both packets contain only self in the quiet fixture, so their
+            // equal air durations cancel. This assertion also runs on C2,
+            // before any dependence on the new interval statistic.
+            if (scenario == 0 && periodicTimes[0].size() == 2)
+                ASSERT(periodicTimes[0][1] - periodicTimes[0][0] == SimTime(2));
+            if (!started[scenario]) {
+                started[scenario] = true;
+                epochs[scenario] = simTime();
+                scheduleAt(simTime() + SimTime(scenario == 0 ? 2.1 : .1), scripts[scenario]);
+            }
+        }
+        else if (scenario == 1 && started[scenario] && header->getKind() == 1 &&
+                simTime() > epochs[scenario] + SimTime(.1) && simTime() < epochs[scenario] + SimTime(.2))
+            overflowFragments++;
+        if (scenario == 0 && started[scenario] && header->getKind() == 2) {
+            for (size_t i = 0; i < header->getEntriesArraySize(); i++) {
+                const auto& value = header->getEntries(i);
+                if (value.destination == address(0, 3) && value.metric == UINT32_MAX) {
+                    ASSERT(value.sequence == 11 && simTime() < epochs[0] + SimTime(2.3));
+                    urgentReceived = true;
+                }
+            }
+        }
+    }
+
+    ~AdaptiveObserver() override
+    {
+        for (auto timer : scripts)
+            cancelAndDelete(timer);
+        cancelAndDelete(pairTimer);
+    }
+};
+
+class AdaptiveProbe : public SimpleModule, public UdpSocket::ICallback
+{
+  protected:
+    UdpSocket socket;
+    int scenario = 0;
+    bool listener = false;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            scenario = par("scenario");
+            listener = par("listener");
+            socket.setOutputGate(gate("socketOut"));
+            socket.setCallback(this);
+        }
+        else if (stage == INITSTAGE_APPLICATION_LAYER) {
+            socket.bind(26999);
+            socket.setBroadcast(true);
+            socket.setTimeToLive(1);
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (socket.belongsToSocket(message))
+            socket.processMessage(message);
+        else
+            delete message;
+    }
+
+    void socketDataArrived(UdpSocket *, Packet *packet) override
+    {
+        if (listener) {
+            auto observer = check_and_cast<AdaptiveObserver *>(getParentModule()->getParentModule()->getSubmodule("observer"));
+            observer->received(scenario, packet->peekAtFront<DsdvHeader>());
+        }
+        delete packet;
+    }
+
+    void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
+    void socketClosed(UdpSocket *) override {}
+
+  public:
+    void transmit(const std::vector<DsdvEntry>& entries)
+    {
+        Enter_Method("transmit");
+        auto header = makeShared<DsdvHeader>();
+        header->setKind(2);
+        header->setSender(AdaptiveObserver::address(scenario, 1));
+        header->setEntriesArraySize(entries.size());
+        header->setChunkLength(B(16 + 16 * entries.size()));
+        for (size_t i = 0; i < entries.size(); i++)
+            header->setEntries(i, entries[i]);
+        auto packet = new Packet("controlled adaptive input", header);
+        auto interfaces = check_and_cast<IInterfaceTable *>(getParentModule()->getSubmodule("interfaceTable"));
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+        packet->addTag<L3AddressReq>()->setSrcAddress(AdaptiveObserver::address(scenario, 1));
+        socket.sendTo(packet, Ipv4Address::ALLONES_ADDRESS, 26999);
+    }
+};
+
+void AdaptiveObserver::script(int scenario)
+{
+    auto injector = check_and_cast<AdaptiveProbe *>(node(scenario, 1)->getSubmodule("app", 0));
+    if (scenario == 0) {
+        if (phases[0] == 0) {
+            injector->transmit({entry(0, 4, 10, 1)});
+            scheduleAt(epochs[0] + SimTime(2.2), scripts[0]);
+        }
+        else if (phases[0] == 1) {
+            injector->transmit({entry(0, 4, 11, UINT32_MAX)});
+            scheduleAt(epochs[0] + SimTime(2.3), scripts[0]);
+        }
+        else {
+            ASSERT(urgentReceived);
+            ASSERT(periodicTimes[0].size() == 2);
+        }
+        phases[0]++;
+    }
+    else if (scenario == 1)
+        injector->transmit({entry(scenario, 4, 10, 1), entry(scenario, 5, 10, 1), entry(scenario, 6, 10, 1)});
+    else
+        injector->transmit({entry(scenario, 4, 10, 1), entry(scenario, 5, 10, 1)});
+}
+
+Define_Module(AdaptiveObserver);
+Define_Module(AdaptiveProbe);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvAdaptiveDumpsNetwork
+sim-time-limit = 15.1s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.optimizeRoutes = false
+*.configurator.config = xml("<config><interface hosts='quiet[0]' names='wlan0' address='10.1.0.1' netmask='255.255.255.0'/><interface hosts='quiet[1]' names='wlan0' address='10.1.0.2' netmask='255.255.255.0'/><interface hosts='quiet[2]' names='wlan0' address='10.1.0.3' netmask='255.255.255.0'/><interface hosts='churn[0]' names='wlan0' address='10.1.1.1' netmask='255.255.255.0'/><interface hosts='churn[1]' names='wlan0' address='10.1.1.2' netmask='255.255.255.0'/><interface hosts='churn[2]' names='wlan0' address='10.1.1.3' netmask='255.255.255.0'/><interface hosts='cost[0]' names='wlan0' address='10.1.2.1' netmask='255.255.255.0'/><interface hosts='cost[1]' names='wlan0' address='10.1.2.2' netmask='255.255.255.0'/><interface hosts='cost[2]' names='wlan0' address='10.1.2.3' netmask='255.255.255.0'/><interface hosts='clamp[0]' names='wlan0' address='10.1.3.1' netmask='255.255.255.0'/><interface hosts='clamp[1]' names='wlan0' address='10.1.3.2' netmask='255.255.255.0'/><interface hosts='clamp[2]' names='wlan0' address='10.1.3.3' netmask='255.255.255.0'/><interface hosts='heterogeneous[0]' names='wlan0' address='10.2.0.1' netmask='255.255.255.0'/><interface hosts='heterogeneous[1]' names='wlan0' address='10.2.0.2' netmask='255.255.255.0'/></config>")
+*.*.numApps = 1
+*.quiet[0].app[0].typename = "Dsdv"
+*.churn[0].app[0].typename = "Dsdv"
+*.cost[0].app[0].typename = "Dsdv"
+*.clamp[0].app[0].typename = "Dsdv"
+*.heterogeneous[*].app[0].typename = "Dsdv"
+*.*.app[0].typename = "AdaptiveProbe"
+*.quiet[*].app[0].scenario = 0
+*.churn[*].app[0].scenario = 1
+*.cost[*].app[0].scenario = 2
+*.clamp[*].app[0].scenario = 3
+*.quiet[2].app[0].listener = true
+*.churn[2].app[0].listener = true
+*.cost[2].app[0].listener = true
+*.clamp[2].app[0].listener = true
+*.heterogeneous[0].app[0].fullDumpInterval = 2s
+*.heterogeneous[0].app[0].minFullDumpInterval = 2s
+*.heterogeneous[0].app[0].maxFullDumpInterval = 4s
+*.heterogeneous[0].app[0].neighborTimeout = 1.5s
+*.heterogeneous[0].app[0].routeTimeout = 2s
+*.heterogeneous[1].app[0].fullDumpInterval = 250ms
+*.heterogeneous[1].app[0].minFullDumpInterval = 250ms
+*.heterogeneous[1].app[0].maxFullDumpInterval = 500ms
+*.heterogeneous[1].app[0].neighborTimeout = 6s
+*.heterogeneous[1].app[0].routeTimeout = 6s
+*.cost[0].app[0].fullDumpBitrateBudget = 320bps
+*.clamp[0].app[0].fullDumpBitrateBudget = 128bps
+**.app[0].fullDumpInterval = 1s
+**.app[0].minFullDumpInterval = 500ms
+**.app[0].maxFullDumpInterval = 4s
+**.app[0].adaptiveFullDump = true
+**.app[0].periodicJitter = 0s
+**.app[0].neighborTimeout = 1000s
+**.app[0].routeTimeout = 1000s
+**.app[0].settlingCap = 100ms
+**.app[0].payloadBudget = 48B
+**.ipv4.routingTable.netmaskRoutes = ""
+*.*.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 6000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+*.quiet[0].mobility.initialX = 200m
+*.quiet[1].mobility.initialX = 100m
+*.quiet[2].mobility.initialX = 300m
+*.churn[0].mobility.initialX = 1200m
+*.churn[1].mobility.initialX = 1100m
+*.churn[2].mobility.initialX = 1300m
+*.cost[0].mobility.initialX = 2200m
+*.cost[1].mobility.initialX = 2100m
+*.cost[2].mobility.initialX = 2300m
+*.clamp[0].mobility.initialX = 3200m
+*.clamp[1].mobility.initialX = 3100m
+*.clamp[2].mobility.initialX = 3300m
+*.heterogeneous[0].mobility.initialX = 4200m
+*.heterogeneous[1].mobility.initialX = 4300m
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV adaptive dumps PASS: quiet, churn, byte budget, bounds, urgent loss, overflow, heterogeneous peers

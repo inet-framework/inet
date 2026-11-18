@@ -1,0 +1,28 @@
+%description:
+Reject a zero adaptive payload bitrate budget during the real DSDV
+initialization path instead of dividing by it at the first periodic dump.
+
+%file: test.ned
+import inet.node.dsdv.DsdvRouter;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+network DsdvAdaptiveInvalidNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: DsdvRouter;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvAdaptiveInvalidNetwork
+sim-time-limit = 1ms
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.dsdv.adaptiveFullDump = true
+*.host.dsdv.fullDumpBitrateBudget = 0bps
+
+%exitcode: 1
+%postrun-command: rg '<!>' test.out test.err > adaptive-error.out || true
+%contains: adaptive-error.out
+DSDV adaptive intervals require 0 < minimum <= initial <= maximum and a positive finite bitrate budget

@@ -5,13 +5,12 @@
 //
 
 //
-// Chunk fillers for the routing-protocol control packets: AODV, BGPv4, PIM, RIP, DSDV.
+// Chunk fillers for the routing-protocol control packets: AODV, BGPv4, PIM, RIP.
 //
 
 #include "../ChunkFillers.h"
 #include "inet/routing/aodv/AodvControlPackets_m.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
-#include "inet/routing/dsdv/DsdvHello_m.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/rip/RipPacket_m.h"
 
@@ -646,17 +645,6 @@ void addFillers_routing(std::vector<ChunkFiller>& fillers)
         p->setEntry(0, e0);
         p->setEntry(1, e1);
         measureAndSetChunkLength(c);
-    }});
-
-    // ===================== DSDV =====================
-    fillers.push_back({"inet::DsdvHello", "", [](Chunk *c) {
-        auto p = check_and_cast<DsdvHello *>(c);
-        FillValues v;
-        p->setSrcAddress(v.ipv4());
-        p->setSequencenumber(v.u32());
-        p->setNextAddress(v.ipv4());
-        p->setHopdistance((int)v.u32());
-        measureAndSetChunkLength(c); // DsdvHello.msg declares no chunkLength default
     }});
 }
 

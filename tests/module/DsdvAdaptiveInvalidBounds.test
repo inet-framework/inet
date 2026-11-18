@@ -1,0 +1,29 @@
+%description:
+Reject an adaptive minimum above the initial full-dump interval during the real
+DSDV initialization path, before any protocol timer is scheduled.
+
+%file: test.ned
+import inet.node.dsdv.DsdvRouter;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+network DsdvAdaptiveInvalidNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: DsdvRouter;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvAdaptiveInvalidNetwork
+sim-time-limit = 1ms
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.dsdv.adaptiveFullDump = true
+*.host.dsdv.fullDumpInterval = 5s
+*.host.dsdv.minFullDumpInterval = 6s
+
+%exitcode: 1
+%postrun-command: rg '<!>' test.out test.err > adaptive-error.out || true
+%contains: adaptive-error.out
+DSDV adaptive intervals require 0 < minimum <= initial <= maximum and a positive finite bitrate budget

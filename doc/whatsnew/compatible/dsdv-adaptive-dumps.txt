@@ -1,0 +1,3 @@
+Optional adaptive DSDV full-dump intervals
+
+DSDV can now lengthen periodic full-dump intervals during quiet periods and shorten them after substantial route changes, within configured bounds and a best-effort payload bitrate target. Enable adaptiveFullDump to use the policy; fixed periodic timing remains available when adaptation is disabled. Urgent route updates remain immediate, and receiver timeouts must still cover the sending peers' update gaps.

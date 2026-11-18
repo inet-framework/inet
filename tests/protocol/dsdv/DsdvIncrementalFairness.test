@@ -1,0 +1,280 @@
+%description:
+PB94 section 4: spare incremental space rotates fairly among sequence-only
+changes. Real UDP injection and a silent radio neighbor observe the production
+DSDV sender. Required changes retain priority, zero spare space carries no
+optional entry, and a full dump resets rotation.
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+
+simple FairnessApp like IApp
+{
+    parameters:
+        @class(FairnessApp);
+        @display("i=block/app");
+        string role = default("injector");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+network DsdvIncrementalFairnessNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        router: AdhocHost;
+        injector: AdhocHost;
+        receiver: AdhocHost;
+}
+
+%file: FairnessApp.cc
+#include <set>
+#include <vector>
+#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/routing/dsdv/DsdvHeader_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+
+using namespace inet;
+using namespace inet::dsdv;
+
+namespace DsdvIncrementalFairness {
+
+class FairnessApp : public SimpleModule, public UdpSocket::ICallback
+{
+  protected:
+    UdpSocket socket;
+    cMessage *scriptTimer = nullptr;
+    bool receiver = false;
+    bool started = false;
+    bool zeroSpareSeen = false;
+    bool resetSeen = false;
+    int step = 0;
+    int resetFullFragments = 0;
+    simtime_t epoch;
+    std::vector<int> rotation;
+    std::vector<double> offsets = {.01, .1, .2, .25, .3, .35, .4, .5, .6, .7};
+
+    static DsdvEntry entry(int destination, uint64_t sequence, uint32_t metric)
+    {
+        DsdvEntry result;
+        result.destination = Ipv4Address(0x0a000000U + destination);
+        result.sequence = sequence;
+        result.metric = metric;
+        return result;
+    }
+
+    FairnessApp *injector() const
+    {
+        auto network = getParentModule()->getParentModule();
+        return check_and_cast<FairnessApp *>(network->getSubmodule("injector")->getSubmodule("app", 0));
+    }
+
+    void advanceScript()
+    {
+        auto transmitter = injector();
+        switch (step) {
+            case 0:
+                transmitter->transmit({entry(4, 10, 1), entry(5, 10, 1), entry(6, 10, 1), entry(7, 10, 1)});
+                break;
+            case 1:
+                transmitter->transmit({entry(4, 12, 1), entry(5, 12, 1), entry(6, 12, 1)});
+                break;
+            case 2:
+                transmitter->transmit({entry(7, 12, 2)});
+                break;
+            case 3:
+            case 4:
+                transmitter->transmit({entry(7, 11, UINT32_MAX)});
+                break;
+            case 5:
+                ASSERT(rotation == std::vector<int>({4, 5, 6}));
+                transmitter->transmit({entry(8, 10, 1)});
+                break;
+            case 6:
+                ASSERT(zeroSpareSeen);
+                transmitter->transmit({entry(9, 10, 1)});
+                break;
+            case 7:
+                ASSERT(resetFullFragments == 4);
+                transmitter->transmit({entry(4, 14, 1), entry(5, 14, 1), entry(6, 14, 1)});
+                break;
+            case 8:
+                transmitter->transmit({entry(7, 14, 1)});
+                break;
+            case 9:
+                ASSERT(resetSeen);
+                std::cout << "DSDV incremental fairness PASS: rotation, required priority, zero space, full reset\n";
+                break;
+        }
+        if (++step < int(offsets.size()))
+            scheduleAt(epoch + SimTime(offsets[step]), scriptTimer);
+    }
+
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            receiver = strcmp(par("role").stringValue(), "receiver") == 0;
+            scriptTimer = new cMessage("scriptTimer");
+            socket.setOutputGate(gate("socketOut"));
+            socket.setCallback(this);
+        }
+        else if (stage == INITSTAGE_APPLICATION_LAYER) {
+            socket.bind(26999);
+            socket.setBroadcast(true);
+            socket.setTimeToLive(1);
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (message == scriptTimer)
+            advanceScript();
+        else if (socket.belongsToSocket(message))
+            socket.processMessage(message);
+        else
+            delete message;
+    }
+
+    void socketDataArrived(UdpSocket *, Packet *packet) override
+    {
+        auto header = packet->peekAtFront<DsdvHeader>();
+        if (receiver && header->getSender() == Ipv4Address("10.0.0.1")) {
+            ASSERT(header->getChunkLength() <= B(48));
+            std::set<Ipv4Address> destinations;
+            for (size_t i = 0; i < header->getEntriesArraySize(); i++)
+                ASSERT(destinations.insert(header->getEntries(i).destination).second);
+            if (!started && header->getKind() == 1 && header->getSelfSequence() >= 2) {
+                started = true;
+                epoch = simTime();
+                scheduleAt(epoch + SimTime(offsets[0]), scriptTimer);
+            }
+            if (started && header->getKind() == 2) {
+                bool changed = false;
+                bool eighth = false;
+                int optional = 0;
+                uint64_t optionalSequence = 0;
+                for (size_t i = 0; i < header->getEntriesArraySize(); i++) {
+                    const auto& value = header->getEntries(i);
+                    int destination = value.destination.getInt() & 255;
+                    if (destination == 7)
+                        changed = true;
+                    if (destination == 8)
+                        eighth = true;
+                    if (destination >= 4 && destination <= 6) {
+                        ASSERT(optional == 0);
+                        optional = destination;
+                        optionalSequence = value.sequence;
+                    }
+                }
+                if (optionalSequence == 12) {
+                    ASSERT(changed && header->getEntriesArraySize() == 2);
+                    rotation.push_back(optional);
+                }
+                if (eighth) {
+                    ASSERT(changed && optional == 0 && header->getEntriesArraySize() == 2);
+                    zeroSpareSeen = true;
+                }
+                if (optionalSequence == 14) {
+                    ASSERT(changed && optional == 4 && !resetSeen);
+                    resetSeen = true;
+                }
+            }
+            if (started && header->getKind() == 1 && simTime() > epoch + SimTime(.4) &&
+                    simTime() < epoch + SimTime(.5))
+                resetFullFragments++;
+        }
+        delete packet;
+    }
+
+    void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
+    void socketClosed(UdpSocket *) override {}
+
+    void finish() override
+    {
+        if (receiver)
+            ASSERT(started && step == int(offsets.size()) && zeroSpareSeen && resetSeen);
+    }
+
+  public:
+    void transmit(const std::vector<DsdvEntry>& entries)
+    {
+        Enter_Method("transmit");
+        auto header = makeShared<DsdvHeader>();
+        header->setKind(2);
+        header->setSender(Ipv4Address("10.0.0.2"));
+        header->setEntriesArraySize(entries.size());
+        header->setChunkLength(B(16 + 16 * entries.size()));
+        for (size_t i = 0; i < entries.size(); i++)
+            header->setEntries(i, entries[i]);
+        auto packet = new Packet("controlled DSDV update", header);
+        auto interfaces = check_and_cast<IInterfaceTable *>(getParentModule()->getSubmodule("interfaceTable"));
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+        packet->addTag<L3AddressReq>()->setSrcAddress(Ipv4Address("10.0.0.2"));
+        socket.sendTo(packet, Ipv4Address::ALLONES_ADDRESS, 26999);
+    }
+
+    ~FairnessApp() override { cancelAndDelete(scriptTimer); }
+};
+
+Define_Module(FairnessApp);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvIncrementalFairnessNetwork
+sim-time-limit = 102s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='router' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='injector' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='receiver' names='wlan0' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.*.numApps = 1
+*.router.app[0].typename = "Dsdv"
+*.router.app[0].fullDumpInterval = 100s
+*.router.app[0].periodicJitter = 0s
+*.router.app[0].neighborTimeout = 1000s
+*.router.app[0].routeTimeout = 1000s
+*.router.app[0].settlingCap = 20ms
+*.router.app[0].payloadBudget = 48B
+*.injector.app[0].typename = "FairnessApp"
+*.injector.app[0].role = "injector"
+*.receiver.app[0].typename = "FairnessApp"
+*.receiver.app[0].role = "receiver"
+**.ipv4.routingTable.netmaskRoutes = ""
+*.*.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+*.injector.mobility.initialX = 100m
+*.router.mobility.initialX = 200m
+*.receiver.mobility.initialX = 300m
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV incremental fairness PASS: rotation, required priority, zero space, full reset

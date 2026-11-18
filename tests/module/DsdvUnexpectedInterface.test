@@ -1,0 +1,47 @@
+%description:
+The host-only profile still rejects a second active non-loopback interface.
+Gateway support must not silently relax this existing configuration boundary.
+
+%file: test.ned
+import inet.node.dsdv.DsdvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+network DsdvUnexpectedInterfaceNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host: DsdvRouter;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvUnexpectedInterfaceNetwork
+sim-time-limit = 1ms
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.numEthInterfaces = 1
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='host' names='eth0' address='10.1.0.1' netmask='255.255.255.0'/></config>")
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%exitcode: 1
+%postrun-command: rg '<!>' test.out test.err > interface-error.out || true
+%contains: interface-error.out
+DSDV permits only its ad hoc interface and the configured base-station uplink

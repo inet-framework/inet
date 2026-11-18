@@ -1,0 +1,3 @@
+DSDV IPv4 host routing
+
+DSDV now uses an independent Perkins/Bhagwat (SIGCOMM 1994) IPv4 host-routing implementation with a versioned UDP profile, full and incremental updates, bounded settling, expiry and retained sequence floors. Its configuration and attachment have changed; see the migration guide. Modeling choices and direct evidence are recorded under doc/project/evidence/model/dsdv/.
