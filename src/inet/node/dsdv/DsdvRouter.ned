@@ -23,11 +23,11 @@ import inet.routing.dsdv.Dsdv;
 module DsdvRouter extends AdhocHost
 {
     submodules:
-        dsdv: Dsdv {
+        dsdv: <default("Dsdv")> like inet.applications.contract.IApp {
             @display("p=825,226");
         }
     connections:
-        dsdv.ipOut --> tn.in++;
-        dsdv.ipIn <-- tn.out++;
+        dsdv.socketOut --> at.in++;
+        dsdv.socketIn <-- at.out++;
 }
 

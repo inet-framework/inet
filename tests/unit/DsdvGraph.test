@@ -1,0 +1,116 @@
+%description:
+PB94-SELECT/LOSS external algorithm oracle: independent graph distances and
+successor acyclicity after every delivery on disconnected, pair, line, diamond
+and cyclic graphs. Partition/rejoin, startup loss, duplicates and stale replay.
+
+%includes:
+#include "inet/routing/dsdv/DsdvTable.h"
+#include <queue>
+using namespace inet;
+using namespace inet::dsdv;
+
+%global:
+static Ipv4Address address(int node) { return Ipv4Address(0x0a000001U + node); }
+static DsdvHeader message(const DsdvTable& table, const std::vector<DsdvEntry>& entries)
+{
+    DsdvHeader header;
+    header.setSender(table.getSelf().current.destination);
+    header.setSelfSequence(table.getSelf().current.sequence);
+    header.setChunkLength(B(16+16*entries.size())); header.setEntriesArraySize(entries.size());
+    for (size_t i=0; i<entries.size(); i++) header.setEntries(i,entries[i]);
+    return header;
+}
+static void checkNoCycles(const std::vector<DsdvTable>& nodes)
+{
+    for (size_t destination=0; destination<nodes.size(); destination++)
+        for (size_t source=0; source<nodes.size(); source++) {
+            std::set<int> visited;
+            int current = source;
+            while (current != int(destination)) {
+                ASSERT(visited.insert(current).second);
+                auto it = nodes[current].getRouteEntries().find(address(destination));
+                if (it == nodes[current].getRouteEntries().end() || !DsdvTable::isFinite(it->second.current)) break;
+                int next = it->second.successor.getInt() - address(0).getInt();
+                ASSERT(next >= 0 && next < int(nodes.size()));
+                current = next;
+            }
+        }
+}
+static void checkDistances(const std::vector<DsdvTable>& nodes, const std::vector<std::vector<int>>& edges)
+{
+    for (size_t source=0; source<nodes.size(); source++) {
+        std::vector<int> distance(nodes.size(),-1); distance[source]=0;
+        std::queue<int> pending; pending.push(source);
+        while (!pending.empty()) {
+            int node=pending.front(); pending.pop();
+            for (size_t next=0; next<nodes.size(); next++)
+                if (edges[node][next] && distance[next]<0) {
+                    distance[next]=distance[node]+1; pending.push(next);
+                }
+        }
+        for (size_t destination=0; destination<nodes.size(); destination++) {
+            auto it=nodes[source].getRouteEntries().find(address(destination));
+            if (distance[destination]<0)
+                ASSERT(it==nodes[source].getRouteEntries().end() || !DsdvTable::isFinite(it->second.current));
+            else {
+                ASSERT(it!=nodes[source].getRouteEntries().end());
+                ASSERT(it->second.current.metric==uint32_t(distance[destination]));
+            }
+        }
+    }
+}
+static void runGraph(std::vector<std::vector<int>> edges, bool partition)
+{
+    size_t size=edges.size(); std::vector<DsdvTable> nodes(size);
+    for (size_t i=0; i<size; i++) {
+        nodes[i].configure(address(i),.1,2,3); nodes[i].start(0);
+        nodes[i].prepare(true,2,0); // Every startup broadcast collides and is lost.
+    }
+    std::vector<DsdvHeader> old;
+    double now=0;
+    auto rounds = [&](int count) {
+        for (int round=0; round<count; round++) {
+            now+=.5;
+            for (size_t sender=0; sender<size; sender++) {
+                nodes[sender].advanceSelf();
+                auto advertisement=nodes[sender].prepare(true,2,now);
+                // Reverse full-fragment delivery; replay duplicates immediately.
+                for (auto fragment=advertisement.datagrams.rbegin(); fragment!=advertisement.datagrams.rend(); ++fragment) {
+                    auto header=message(nodes[sender],*fragment);
+                    if (old.size()<size*size) old.push_back(header);
+                    for (size_t receiver=0; receiver<size; receiver++) if (edges[sender][receiver]) {
+                        nodes[receiver].receive(header,now); checkNoCycles(nodes);
+                        nodes[receiver].receive(header,now); checkNoCycles(nodes);
+                    }
+                }
+            }
+            for (auto& node:nodes) { node.expire(now); checkNoCycles(nodes); }
+        }
+    };
+    rounds(20); checkDistances(nodes,edges);
+    if (partition) {
+        auto original=edges;
+        for (size_t i=0; i<size; i++) edges[0][i]=edges[i][0]=0;
+        rounds(20); checkDistances(nodes,edges);
+        // Replay old traffic only over extant links; old finite floors cannot return.
+        for (const auto& header:old) {
+            int sender=header.getSender().getInt()-address(0).getInt();
+            for (size_t receiver=0; receiver<size; receiver++) if (edges[sender][receiver]) {
+                nodes[receiver].receive(header,now); checkNoCycles(nodes);
+            }
+        }
+        checkDistances(nodes,edges);
+        edges=original; rounds(30); checkDistances(nodes,edges);
+    }
+}
+
+%activity:
+runGraph({{0}},false);
+runGraph({{0,1},{1,0}},true);
+runGraph({{0,1,0,0},{1,0,1,0},{0,1,0,1},{0,0,1,0}},true);
+runGraph({{0,1,1,0},{1,0,0,1},{1,0,0,1},{0,1,1,0}},true);
+runGraph({{0,1,1},{1,0,1},{1,1,0}},true);
+EV << "DSDV graph PASS\n";
+
+%contains: stdout
+DSDV graph PASS
