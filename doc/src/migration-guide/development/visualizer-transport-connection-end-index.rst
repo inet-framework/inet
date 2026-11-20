@@ -17,3 +17,9 @@ otherwise; add the parameter and take the color and the letter from
 and :cpp:`TransportConnectionOsgVisualization` require the index as their
 last parameter, and the constructor of :cpp:`TransportConnectionVisualization`
 has a new last parameter ``index`` with the default -1.
+
+Pass the index that
+:cpp:`TransportConnectionVisualizerBase::getFreeConnectionIndex()` returns: it
+is the lowest index that no displayed connection has. The index -1 is ignored
+when an index is chosen, so a subclass that passes -1 can give a new connection
+the color of a displayed one after a deletion.

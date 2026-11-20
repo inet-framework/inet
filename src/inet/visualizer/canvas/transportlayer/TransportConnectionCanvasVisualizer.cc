@@ -71,7 +71,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionCanvasVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
-    int index = connectionVisualizations.size();
+    int index = getFreeConnectionIndex();
     auto sourceFigure = createConnectionEndFigure(tcpConnection, index);
     auto destinationFigure = createConnectionEndFigure(tcpConnection, index);
     return new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1, index);

@@ -55,7 +55,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpCon
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionOsgVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
-    int index = connectionVisualizations.size();
+    int index = getFreeConnectionIndex();
     auto sourceNode = createConnectionEndNode(tcpConnection, index);
     auto destinationNode = createConnectionEndNode(tcpConnection, index);
     return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1, index);
