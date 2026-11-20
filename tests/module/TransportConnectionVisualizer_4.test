@@ -1,0 +1,140 @@
+%description:
+
+The transport connection visualizer shows the letters while two displayed Transmission
+Control Protocol (TCP) connections have the same color. The color set has 2 colors. The
+client opens connections A, B and C to the server at t=0s, which get the indices 0, 1
+and 2, so C has the color of A and the letter B. Each connection sends 1000 bytes; B
+then closes, and it is deleted when its TIME-WAIT state ends, twice the maximum segment
+lifetime (msl = 1s) after the close. A and C stay open. The fake graphical user
+interface (GUI) of Cmdenv enables the visualizer. Each connection has an icon at both of
+its end nodes, so the checker counts 6 icons with 3 pairs of color and letter at t=1s,
+and 4 icons with 2 pairs at t=3s, when A and C have the same color; the letters are
+visible both times.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
+simple IconCounter
+{
+    @class(::inet::IconCounter);
+}
+
+network Test
+{
+    submodules:
+        visualizer: IntegratedCanvasVisualizer;
+        configurator: Ipv4NetworkConfigurator;
+        counter: IconCounter;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%file: IconCounter.cc
+
+#include <set>
+#include <string>
+
+#include <omnetpp.h>
+
+using namespace omnetpp;
+
+namespace inet {
+
+class IconCounter : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(1, new cMessage("count"));
+        scheduleAt(3, new cMessage("count"));
+    }
+    virtual void collectIcons(cFigure *figure, int& count, int& visibleLetters, std::set<std::string>& colorsAndLetters)
+    {
+        if (!strcmp(figure->getName(), "transportConnection")) {
+            auto color = check_and_cast<cIconFigure *>(figure->getFigure(0))->getTintColor();
+            auto label = check_and_cast<cLabelFigure *>(figure->getFigure(1));
+            auto letter = label->getText();
+            if (label->isVisible())
+                visibleLetters++;
+            colorsAndLetters.insert(std::to_string(color.red) + "," + std::to_string(color.green) + "," + std::to_string(color.blue) + " " + letter);
+            count++;
+        }
+        for (int i = 0; i < figure->getNumFigures(); i++)
+            collectIcons(figure->getFigure(i), count, visibleLetters, colorsAndLetters);
+    }
+    virtual int countConnections(cModule *tcp)
+    {
+        int count = 0;
+        for (cModule::SubmoduleIterator it(tcp); !it.end(); ++it)
+            if (!strcmp((*it)->getModuleType()->getName(), "TcpConnection"))
+                count++;
+        return count;
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        EV_INFO << "client connections at t=" << simTime() << ": " << countConnections(getModuleByPath("^.client.tcp")) << endl;
+        int count = 0;
+        int visibleLetters = 0;
+        std::set<std::string> colorsAndLetters;
+        collectIcons(getSystemModule()->getCanvas()->getRootFigure(), count, visibleLetters, colorsAndLetters);
+        EV_INFO << "transport connection icons at t=" << simTime() << ": " << count << ", with " << colorsAndLetters.size() << " different pairs of color and letter, " << visibleLetters << " visible letters" << endl;
+    }
+};
+
+Define_Module(IconCounter);
+
+} // namespace inet
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 4s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-fake-gui = true
+*.counter.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.visualizer.transportConnectionVisualizer.displayTransportConnections = true
+*.visualizer.transportConnectionVisualizer.iconColor = "red blue"
+**.tcp.msl = 1s
+
+*.client.numApps = 3
+*.client.app[*].typename = "TcpSessionApp"
+*.client.app[*].connectAddress = "server"
+*.client.app[*].connectPort = 1000
+*.client.app[*].tOpen = 0s
+*.client.app[*].tSend = 0s
+*.client.app[*].sendBytes = 1000B
+*.client.app[1].tClose = 0s
+*.client.app[0].tClose = 10s
+*.client.app[2].tClose = 10s
+
+*.server.numApps = 1
+*.server.app[0].typename = "TcpSinkApp"
+*.server.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+client connections at t=1: 3
+transport connection icons at t=1: 6, with 3 different pairs of color and letter, 6 visible letters
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+client connections at t=3: 2
+transport connection icons at t=3: 4, with 2 different pairs of color and letter, 4 visible letters
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

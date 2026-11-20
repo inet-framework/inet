@@ -27,7 +27,7 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
         LabeledIconFigure *destinationFigure = nullptr;
 
       public:
-        TransportConnectionCanvasVisualization(LabeledIconFigure *sourceFigure, LabeledIconFigure *destinationFigure, int sourceModuleId, int destinationModuleId, int count);
+        TransportConnectionCanvasVisualization(LabeledIconFigure *sourceFigure, LabeledIconFigure *destinationFigure, int sourceModuleId, int destinationModuleId, int count, int index);
         virtual ~TransportConnectionCanvasVisualization();
     };
 
@@ -39,10 +39,15 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
   protected:
     virtual void initialize(int stage) override;
 
-    virtual LabeledIconFigure *createConnectionEndFigure(tcp::TcpConnection *connectionVisualization) const;
+    virtual LabeledIconFigure *createConnectionEndFigure(tcp::TcpConnection *connectionVisualization, int index) const;
     virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
+    /**
+     * Returns true if a displayed connection has an index that the color set
+     * cannot tell apart from a lower one, that is, its letter is needed.
+     */
+    virtual bool isConnectionColorReused() const;
     virtual void setConnectionLabelsVisible(bool visible);
 };
 

@@ -6,6 +6,7 @@
 
 
 #include <algorithm>
+#include <set>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -18,10 +19,11 @@ namespace inet {
 
 namespace visualizer {
 
-TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count) :
+TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count, int index) :
     sourceModuleId(sourceModuleId),
     destinationModuleId(destinationModuleId),
-    count(count)
+    count(count),
+    index(index)
 {
 }
 
@@ -108,6 +110,17 @@ void TransportConnectionVisualizerBase::removeAllConnectionVisualizations()
         delete it;
     }
     connectionIdToVisualization.clear();
+}
+
+int TransportConnectionVisualizerBase::getFreeConnectionIndex() const
+{
+    std::set<int> indices;
+    for (auto connectionVisualization : connectionVisualizations)
+        indices.insert(connectionVisualization->index);
+    int index = 0;
+    while (indices.find(index) != indices.end())
+        index++;
+    return index;
 }
 
 void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
