@@ -22,6 +22,12 @@ TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::Tra
 {
 }
 
+TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::~TransportConnectionCanvasVisualization()
+{
+    delete sourceFigure;
+    delete destinationFigure;
+}
+
 void TransportConnectionCanvasVisualizer::initialize(int stage)
 {
     TransportConnectionVisualizerBase::initialize(stage);
