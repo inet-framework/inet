@@ -16,8 +16,8 @@ namespace visualizer {
 
 Define_Module(TransportConnectionOsgVisualizer);
 
-TransportConnectionOsgVisualizer::TransportConnectionOsgVisualization::TransportConnectionOsgVisualization(osg::Node *sourceNode, osg::Node *destinationNode, int sourceModuleId, int destinationModuleId, int count) :
-    TransportConnectionVisualization(sourceModuleId, destinationModuleId, count),
+TransportConnectionOsgVisualizer::TransportConnectionOsgVisualization::TransportConnectionOsgVisualization(osg::Node *sourceNode, osg::Node *destinationNode, int sourceModuleId, int destinationModuleId, int count, int index) :
+    TransportConnectionVisualization(sourceModuleId, destinationModuleId, count, index),
     sourceNode(sourceNode),
     destinationNode(destinationNode)
 {
@@ -32,7 +32,7 @@ void TransportConnectionOsgVisualizer::initialize(int stage)
     }
 }
 
-osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpConnection *tcpConnection) const
+osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpConnection *tcpConnection, int index) const
 {
     auto image = inet::osg::createImageFromResource(icon);
     auto texture = new osg::Texture2D();
@@ -44,7 +44,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpCon
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    auto color = iconColorSet.getColor(connectionVisualizations.size());
+    auto color = iconColorSet.getColor(index);
     auto colorArray = new osg::Vec4Array();
     colorArray->push_back(osg::Vec4((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1));
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
@@ -55,9 +55,10 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpCon
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionOsgVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
-    auto sourceNode = createConnectionEndNode(tcpConnection);
-    auto destinationNode = createConnectionEndNode(tcpConnection);
-    return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
+    int index = connectionVisualizations.size();
+    auto sourceNode = createConnectionEndNode(tcpConnection, index);
+    auto destinationNode = createConnectionEndNode(tcpConnection, index);
+    return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1, index);
 }
 
 void TransportConnectionOsgVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)

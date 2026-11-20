@@ -18,10 +18,11 @@ namespace inet {
 
 namespace visualizer {
 
-TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count) :
+TransportConnectionVisualizerBase::TransportConnectionVisualization::TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count, int index) :
     sourceModuleId(sourceModuleId),
     destinationModuleId(destinationModuleId),
-    count(count)
+    count(count),
+    index(index)
 {
 }
 
