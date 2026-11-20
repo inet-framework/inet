@@ -21,8 +21,8 @@ About the visualizer
 The :ned:`TransportConnectionVisualizer` module (also part of
 :ned:`IntegratedCanvasVisualizer`) displays color-coded icons above the two
 endpoints of an active, established transport layer level connection.
-The icons will appear when the connection is established; they are not
-removed when it is closed. Naturally, there can be multiple connections open at
+The icons will appear when the connection is established and disappear
+when it is closed. Naturally, there can be multiple connections open at
 a node, thus there can be multiple icons. Icons have the same color at
 both ends of the connection. In addition to colors, letter codes (A, B,
 AA, etc.) may also be displayed to help in identifying connections. Note
