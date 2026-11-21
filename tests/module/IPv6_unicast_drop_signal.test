@@ -1,0 +1,106 @@
+%description:
+Tests that a router emits packetDropped when it discards a forwarded unicast
+datagram and reports it with an ICMPv6 error.
+
+NClientsEth example network is used (cli -- r1 -- r2 -- r3 -- srv).
+The client sends three UDP datagrams, each discarded by a router:
+- to 2001:db8::1, which no router has a route for: r1 emits NO_ROUTE_FOUND;
+- to srv with hop limit 1: r1 emits HOP_LIMIT_REACHED;
+- to srv with 1400 bytes of payload, while r2's interface toward r3 has an MTU of 1280:
+  r2 emits OTHER_PACKET_DROP.
+A listener logs every packetDropped emitted by an Ipv6 module.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: DropSignalListener.ned
+simple DropSignalListener
+{
+    @class(::inet::DropSignalListener);
+}
+
+network DropSignalNetwork extends inet.examples.ipv6.nclients.NClientsEth
+{
+    submodules:
+        dropSignalListener: DropSignalListener;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: DropSignalListener.cc
+#include "inet/common/INETDefs.h"
+#include "inet/common/Simsignals.h"
+#include "inet/networklayer/ipv6/Ipv6.h"
+
+namespace inet {
+
+class DropSignalListener : public cSimpleModule, public cListener
+{
+  protected:
+    virtual void initialize() override
+    {
+        getSystemModule()->subscribe(packetDroppedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (dynamic_cast<Ipv6 *>(source) == nullptr)
+            return;
+        auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+        EV_INFO << "packetDropped at " << source->getFullPath()
+                << ", reason " << cEnum::get("inet::PacketDropReason")->getStringFor(packetDropDetails->getReason()) << endl;
+    }
+};
+
+Define_Module(DropSignalListener);
+
+} // namespace inet
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../examples;../../../../src
+network = DropSignalNetwork
+sim-time-limit = 15s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+*.n = 1
+
+**.cli[*].numApps = 3
+**.cli[*].app[*].typename = "UdpBasicApp"
+**.cli[*].app[*].destPort = 1000
+**.cli[*].app[2].messageLength = 1400B
+**.cli[*].app[*].messageLength = 64B
+**.cli[*].app[*].startTime = 10s
+**.cli[*].app[*].stopTime = 11s
+**.cli[*].app[*].sendInterval = 10s
+**.cli[*].app[0].destAddresses = "2001:db8::1"
+**.cli[*].app[1].destAddresses = "srv"
+**.cli[*].app[1].timeToLive = 1
+**.cli[*].app[2].destAddresses = "srv"
+
+*.r2.eth[1].*.mtu = 1280B
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+packetDropped at DropSignalNetwork.r1.ipv6.ipv6, reason NO_ROUTE_FOUND
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+packetDropped at DropSignalNetwork.r1.ipv6.ipv6, reason HOP_LIMIT_REACHED
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+packetDropped at DropSignalNetwork.r2.ipv6.ipv6, reason OTHER_PACKET_DROP
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
