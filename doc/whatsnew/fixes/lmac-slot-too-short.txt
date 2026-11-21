@@ -1,0 +1,3 @@
+LMac drops a data frame that does not fit in its slot
+
+LMac sent a data frame in its slot without a check that the frame ends before the next slot, which belongs to another node. When the frame was longer than the rest of the slot, the next slot started while the frame was still on the air, and LMac stopped the simulation with "I am still sending a message, while a new slot is starting!". LMac now drops such a frame with the packet drop reason PACKET_TOO_BIG and sends only its control frame. A simulation in which each data frame fits in the slot gives the same results as before. In the showcase wireless/sensornetwork, the runs of StatisticLMac with a slot of 10 ms and 20 ms now end normally.

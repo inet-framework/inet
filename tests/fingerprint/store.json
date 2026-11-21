@@ -53237,10 +53237,10 @@
   "config": "StatisticLMac",
   "run_number": 0,
   "sim_time_limit": "25s",
-  "test_result": "ERROR",
+  "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "0000-0000",
-  "timestamp": 1792678270.2752526,
+  "fingerprint": "c509-2fa4",
+  "timestamp": 1795296524.545024,
   "itervars": "$repetition==0"
  },
  {
@@ -53249,10 +53249,10 @@
   "config": "StatisticLMac",
   "run_number": 0,
   "sim_time_limit": "25s",
-  "test_result": "ERROR",
+  "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "0000-0000",
-  "timestamp": 1792678270.275492,
+  "fingerprint": "198c-84cf",
+  "timestamp": 1795296524.5455081,
   "itervars": "$repetition==0"
  },
  {

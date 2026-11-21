@@ -415,6 +415,19 @@ void LMac::handleSelfMessage(cMessage *msg)
                     currentTxFrame = dequeuePacket();
                     encapsulate(currentTxFrame);
                 }
+                // the data frame starts controlDuration after the control frame and must end before the next slot,
+                // which belongs to another node; a frame that does not fit is dropped, and only the control frame is sent
+                // (the 16 bits of overhead are those of controlDuration)
+                if (!SETUP_PHASE && currentTxFrame != nullptr && wakeup->isScheduled()) {
+                    simtime_t dataEnd = simTime() + controlDuration + (double)(currentTxFrame->getBitLength() + 16) / bitrate;
+                    if (dataEnd >= wakeup->getArrivalTime()) {
+                        EV_WARN << "The data frame would end at " << dataEnd << ", after the start of the next slot at "
+                                << wakeup->getArrivalTime() << ", dropping it.\n";
+                        PacketDropDetails details;
+                        details.setReason(PACKET_TOO_BIG);
+                        dropCurrentTxFrame(details);
+                    }
+                }
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacControlFrame>();

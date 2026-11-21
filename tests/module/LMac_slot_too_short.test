@@ -1,0 +1,89 @@
+%description:
+Tests that LMac drops a data frame that does not fit in its slot, and that the
+simulation goes on.
+
+host1 sends a UDP datagram of 10 bytes to host2 each second. At 19200 bps the
+data frame takes about 17 ms on the air, and LMac sends it controlDuration
+after its control frame, so it cannot end inside a slot of 10 ms. The next
+slot belongs to another node.
+
+LMac must drop such a frame with the reason PACKET_TOO_BIG and send only the
+control frame. If it sends the frame, the next slot starts while the frame is
+still on the air, and LMac stops the simulation with "I am still sending a
+message, while a new slot is starting!".
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+network LMacSlotTooShort
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: WirelessHost {
+            @display("p=100,100");
+        }
+        host2: WirelessHost {
+            @display("p=200,100");
+        }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = LMacSlotTooShort
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.arp.typename = "GlobalArp"
+**.maxTransmissionDuration = 100ms
+**.wlan[*].typename = "WirelessInterface"
+**.wlan[*].radio.typename = "ApskScalarRadio"
+**.radio.centerFrequency = 2.45GHz
+**.radio.bandwidth = 2.8MHz
+**.radio.transmitter.bitrate = 19200 bps
+**.radio.transmitter.headerLength = 8b
+**.radio.transmitter.preambleDuration = 0.0001s
+**.radio.transmitter.power = 2.24mW
+**.radio.receiver.energyDetection = -90dBm
+**.radio.receiver.sensitivity = -100dBm
+**.radio.receiver.snirThreshold = -8dB
+*.radioMedium.backgroundNoise.power = -110dBm
+**.wlan[*].mac.typename = "LMac"
+**.wlan[*].mac.headerLength = 8b
+**.wlan[*].mac.slotDuration = 10ms
+**.wlan[*].mac.numSlots = 8
+**.wlan[*].mac.reservedMobileSlots = 0
+**.wlan[*].queue.typename = "DropTailQueue"
+**.wlan[*].queue.packetCapacity = 10
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].destAddresses = "host2"
+**.host1.app[0].destPort = 1000
+**.host1.app[0].messageLength = 10B
+**.host1.app[0].startTime = 1s
+**.host1.app[0].sendInterval = 1s
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpSink"
+**.host2.app[0].localPort = 1000
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+I am still sending a message, while a new slot is starting!
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+LMacSlotTooShort\.host1\.wlan\[0\]\.mac: The data frame would end at [0-9.e-]+, after the start of the next slot at [0-9.e-]+, dropping it\.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+LMacSlotTooShort.host2.app[0]: received 0 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
