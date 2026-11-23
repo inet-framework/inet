@@ -1,0 +1,63 @@
+%description:
+A router sends no Router Advertisement while its link-local address is tentative: RFC 4861
+Section 6.2.2 forbids Router Advertisements on an interface that is not an advertising
+interface, which needs an assigned unicast address, and RFC 4862 Section 5.4 does not count
+a tentative address as assigned.
+
+Topology: router -- host
+
+The router's Router Advertisement interval is 30-70 ms, shorter than its Duplicate Address
+Detection (DAD) for the link-local address. Only the router's Neighbour Discovery logs, so
+no "Create and send RA invoked!" line may come before its "DAD completed for address fe80"
+line, and at least one must come after it.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network TentativeRouterAdvertisementTest
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        router.ethg++ <--> ethline <--> host.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TentativeRouterAdvertisementTest
+ned-path = .;../../../../src
+sim-time-limit = 3s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.router.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
+**.router.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+
+**.router.ipv6.neighbourDiscovery.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+DAD completed for address fe80::[0-9a-f:]+ on eth0, address is unique[\s\S]*Create and send RA invoked!
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: stdout
+Create and send RA invoked![\s\S]*DAD completed for address fe80
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------
