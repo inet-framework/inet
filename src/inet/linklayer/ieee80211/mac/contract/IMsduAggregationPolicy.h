@@ -20,6 +20,9 @@ class INET_API IMsduAggregationPolicy
     virtual ~IMsduAggregationPolicy() {}
 
     virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *queue) = 0;
+    // Ordered, borrowed candidates support reversible multi-MPDU preparation.
+    // The returned vector owns no packets; the policy retains grouping thresholds.
+    virtual std::vector<Packet *> *computeAggregateFrames(const std::vector<Packet *>& candidates) = 0;
 };
 
 } // namespace ieee80211

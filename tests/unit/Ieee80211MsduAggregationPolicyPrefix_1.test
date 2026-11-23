@@ -1,0 +1,202 @@
+%description:
+Count actual indexed PacketQueue retrievals during BasicMsduAggregationPolicy
+selection. Compare queue/vector results, protected-hook order and borrowed
+packet ownership without replacing the production eligibility predicates.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/queueing/queue/PacketQueue.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::queueing;
+
+namespace Ieee80211MsduAggregationPolicyPrefix_1 {
+class CountedQueue : public PacketQueue {
+  public:
+    mutable std::vector<int> indices;
+    Packet *getPacket(int index) const override {
+        indices.push_back(index);
+        return PacketQueue::getPacket(index);
+    }
+    void clearForNextCase() {
+        Enter_Method("clearForNextCase");
+        queue.clear();
+    }
+};
+Define_Module(CountedQueue);
+
+class PrefixPolicy : public BasicMsduAggregationPolicy {
+  public:
+    std::vector<int64_t> visited;
+    std::vector<int64_t> lengths;
+    std::vector<std::pair<int, int>> thresholds;
+    void configure(int maximum, int count, int length, bool qos) {
+        maxAMsduSize = B(maximum);
+        subframeNumThreshold = count;
+        aggregationLengthThreshold = length;
+        qOsCheck = qos;
+        visited.clear(); lengths.clear(); thresholds.clear();
+    }
+  protected:
+    bool isEligible(Packet *packet, const Ptr<const Ieee80211DataHeader>& header,
+            const Ptr<const Ieee80211MacTrailer>& trailer,
+            const Ptr<const Ieee80211DataHeader>& first, b length) override {
+        visited.push_back(packet->getId());
+        lengths.push_back(length.get<b>());
+        return BasicMsduAggregationPolicy::isEligible(packet, header, trailer, first, length);
+    }
+    bool isAggregationPossible(int count, int length) override {
+        thresholds.emplace_back(count, length);
+        return BasicMsduAggregationPolicy::isAggregationPossible(count, length);
+    }
+};
+Define_Module(PrefixPolicy);
+
+static Packet *makeCandidate(bool mesh = false, int payload = 20, int tid = 0, bool qos = true)
+{
+    Ptr<Ieee80211DataHeader> header;
+    if (mesh) {
+        auto native = makeShared<Ieee80211MeshDataHeader>();
+        native->setToDS(true); native->setFromDS(true);
+        native->setMeshControlPresent(true);
+        native->setAddress3(MacAddress("02:00:00:00:00:03"));
+        native->setAddress4(MacAddress("02:00:00:00:00:04"));
+        header = native;
+    }
+    else
+        header = makeShared<Ieee80211DataHeader>();
+    header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
+    header->setChunkLength(B(mesh ? 32 : qos ? 26 : 24));
+    header->setTid(tid);
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+    header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+    auto packet = new Packet("candidate", header);
+    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(payload, 0x5a)));
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    if (mesh)
+        packet->addTag<Ieee80211MeshAggregationTag>()->setPendingSourceIdentity(true);
+    return packet;
+}
+}
+
+%file: TestNetwork.ned
+import inet.queueing.queue.PacketQueue;
+import inet.linklayer.ieee80211.mac.aggregation.BasicMsduAggregationPolicy;
+simple CountedQueue extends PacketQueue {
+    parameters:
+        @class(CountedQueue);
+}
+simple PrefixPolicy extends BasicMsduAggregationPolicy {
+    parameters:
+        @class(PrefixPolicy);
+}
+network TestNetwork {
+    submodules:
+        test: Test;
+        queue: CountedQueue;
+        policy: PrefixPolicy;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+seed-set = 0
+**.statistic-recording = false
+
+%activity:
+auto queue = check_and_cast<CountedQueue *>(getParentModule()->getSubmodule("queue"));
+auto policy = check_and_cast<PrefixPolicy *>(getParentModule()->getSubmodule("policy"));
+int cases = 0;
+auto check = [&](const char *name, std::vector<Packet *> packets, size_t inspected,
+        size_t selected, int maximum = 1000, int minCount = -1, int minLength = -1,
+        bool qos = true) {
+    ASSERT(queue->isEmpty());
+    struct Snapshot { cObject *owner; Ptr<const Chunk> data; int64_t id, treeId; };
+    std::vector<Snapshot> snapshots;
+    for (auto packet : packets) {
+        queue->pushPacket(packet, nullptr);
+        snapshots.push_back({packet->getOwner(), packet->peekData(), packet->getId(), packet->getTreeId()});
+    }
+    policy->configure(maximum, minCount, minLength, qos);
+    queue->indices.clear();
+    std::unique_ptr<std::vector<Packet *>> fromQueue(policy->computeAggregateFrames(queue));
+    EV << "prefix case=" << name << " candidates=" << packets.size()
+       << " accesses=" << queue->indices.size() << " expected=" << inspected << "\n";
+    ASSERT(queue->indices.size() == inspected);
+    for (size_t i = 0; i < inspected; i++)
+        ASSERT(queue->indices[i] == int(i));
+    auto visited = policy->visited;
+    auto lengths = policy->lengths;
+    auto thresholds = policy->thresholds;
+    policy->configure(maximum, minCount, minLength, qos);
+    std::unique_ptr<std::vector<Packet *>> fromVector(policy->computeAggregateFrames(packets));
+    ASSERT(policy->visited == visited && policy->lengths == lengths && policy->thresholds == thresholds);
+    ASSERT(bool(fromQueue) == (selected != 0) && bool(fromVector) == bool(fromQueue));
+    if (fromQueue) {
+        ASSERT(fromQueue->size() == selected && *fromQueue == *fromVector);
+        for (size_t i = 0; i < selected; i++)
+            ASSERT(fromQueue->at(i) == packets[i]);
+    }
+    // Reaching the configured minimum must not stop an otherwise eligible prefix.
+    if (selected > 1) {
+        bool mesh = bool(dynamicPtrCast<const Ieee80211MeshDataHeader>(packets.front()->peekAtFront<Ieee80211DataHeader>()));
+        // Ordinary candidates contribute 20+14 B. Native candidates contribute
+        // 11+14 B, with three alignment octets before each subsequent member.
+        int length = mesh ? 25 + 28 * (selected - 1) : 34 * selected;
+        ASSERT(thresholds == (std::vector<std::pair<int, int>>{{int(selected), length}}));
+    }
+    ASSERT(queue->getNumPackets() == int(packets.size()));
+    for (size_t i = 0; i < packets.size(); i++) {
+        auto packet = packets[i];
+        ASSERT(queue->PacketQueue::getPacket(int(i)) == packet);
+        ASSERT(packet->getOwner() == snapshots[i].owner && packet->peekData() == snapshots[i].data);
+        ASSERT(packet->getId() == snapshots[i].id && packet->getTreeId() == snapshots[i].treeId);
+    }
+    fromQueue.reset(); fromVector.reset();
+    queue->clearForNextCase();
+    cases++;
+};
+auto candidates = [](size_t count, bool mesh = false, int payload = 20) {
+    std::vector<Packet *> packets;
+    for (size_t i = 0; i < count; i++)
+        packets.push_back(makeCandidate(mesh, payload));
+    return packets;
+};
+auto rejectedHead = candidates(64);
+delete rejectedHead[0]; rejectedHead[0] = makeCandidate(false, 20, 0, false);
+check("head-rejection-long-tail", rejectedHead, 1, 0);
+for (size_t count : {size_t(3), size_t(64)}) {
+    auto mixed = candidates(count);
+    delete mixed[2]; mixed[2] = makeCandidate(false, 20, 1);
+    check("tid-rejection", mixed, 3, 2);
+    check("size-rejection", candidates(count), 3, 2, 100);
+}
+check("all-eligible-past-minimum", candidates(5), 5, 5, 1000, 2, 68);
+check("minimum-count-refusal", candidates(5), 3, 0, 100, 3);
+check("minimum-length-exact", candidates(2), 2, 2, 68, -1, 68);
+check("minimum-length-refusal", candidates(2), 2, 0, 68, -1, 69);
+check("single-not-aggregate", candidates(1), 1, 0);
+check("ordinary-qos-check-disabled", {makeCandidate(false, 20, 0, false), makeCandidate(false, 20, 0, false)}, 2, 2, 1000, -1, -1, false);
+check("ordinary-existing-minus-one-size", candidates(3), 1, 0, -1);
+check("mesh-aligned-size-exact", candidates(5, true, 11), 3, 2, 53);
+check("mesh-minimum-count-refusal", candidates(5, true, 11), 3, 0, 53, 3);
+check("mesh-minimum-length-refusal", candidates(5, true, 11), 3, 0, 53, -1, 54);
+check("mesh-unlimited", candidates(5, true, 11), 5, 5, -1);
+auto mixedRole = candidates(4, true, 11);
+delete mixedRole[2]; mixedRole[2] = makeCandidate();
+check("mesh-ordinary-mismatch", mixedRole, 3, 2);
+auto management = candidates(8);
+delete management[0]; management[0] = new Packet("management", makeShared<Ieee80211MgmtHeader>());
+check("non-data-head", management, 1, 0);
+policy->configure(1000, -1, -1, true);
+std::unique_ptr<std::vector<Packet *>> empty(policy->computeAggregateFrames(std::vector<Packet *>{}));
+ASSERT(!empty && policy->visited.empty() && policy->thresholds.empty());
+ASSERT(cases == 18 && queue->isEmpty());
+EV << "Lazy A-MSDU policy prefix: 18 queue/vector cases and empty-vector control passed.\n";
+
+%contains: stdout
+Lazy A-MSDU policy prefix: 18 queue/vector cases and empty-vector control passed.

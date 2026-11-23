@@ -70,6 +70,8 @@ class BlockAckRequestProbeMac : public Ieee80211Mac, public ITx::ICallback
         else
             Ieee80211Mac::handleLowerPacket(frame);
     }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
         if (responseAck) {
             responseAcknowledged = true;
@@ -95,6 +97,8 @@ class BlockAckRequestProbeStimulus : public cSimpleModule, public ITx::ICallback
         check_and_cast<BlockAckRequestProbeHcf *>(station->getSubmodule("mac")->getSubmodule("hcf"))
             ->sendProbeRequest(SimTime(par("timeout").doubleValue()), this);
     }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
 };
 namespace request_probe_stimulus_registration { Define_Module(::inet::protocoltest::BlockAckRequestProbeStimulus); }

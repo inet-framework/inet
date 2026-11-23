@@ -82,14 +82,14 @@ catch (const cRuntimeError&) {
 ASSERT(rejected);
 
 const auto *mappedBand = Ieee80211CompliantBands::getBand("5 GHz (mapped 20 MHz)");
-ASSERT(mappedBand->getNumChannels() == 4);
-for (int index = 0; index < 4; index++) {
+ASSERT(mappedBand->getNumChannels() == 8);
+for (int index = 0; index < 8; index++) {
     int standardChannel = 36 + 4 * index;
     ASSERT(mappedBand->getStandardChannelNumber(index) == standardChannel);
     ASSERT(mappedBand->getChannelIndex(standardChannel) == index);
     ASSERT(mappedBand->getCenterFrequency(index) == MHz(5180 + 20 * index));
 }
-for (int index : {-1, 4}) {
+for (int index : {-1, 8}) {
     rejected = false;
     try {
         mappedBand->getStandardChannelNumber(index);
@@ -109,7 +109,7 @@ for (int index : {-1, 4}) {
 }
 rejected = false;
 try {
-    mappedBand->getChannelIndex(52);
+    mappedBand->getChannelIndex(68);
 }
 catch (const cRuntimeError&) {
     rejected = true;

@@ -71,6 +71,11 @@ TxopProcedure::ProtectionMechanism TxopProcedure::selectProtectionMechanism(Acce
     return configuredProtectionMechanism;
 }
 
+simtime_t TxopProcedure::getDefaultTxopLimit(AccessCategory ac)
+{
+    return getTxopLimit(modeSet->getPhyType(), ac).get<s>();
+}
+
 simtime_t TxopProcedure::getStart() const
 {
     return start;

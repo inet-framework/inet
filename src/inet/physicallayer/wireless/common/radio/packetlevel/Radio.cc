@@ -116,6 +116,27 @@ std::ostream& Radio::printToStream(std::ostream& stream, int level, int evFlags)
     return stream;
 }
 
+std::optional<simtime_t> Radio::getRadioModeSwitchingTime(RadioMode from, RadioMode to) const
+{
+    if (!initialized() || from < RADIO_MODE_OFF || from >= RADIO_MODE_SWITCHING
+            || to < RADIO_MODE_OFF || to >= RADIO_MODE_SWITCHING)
+        return std::nullopt;
+    return from == to ? SIMTIME_ZERO : switchingTimes[from][to];
+}
+
+std::optional<IRadio::RadioModeState> Radio::getRadioModeState() const
+{
+    if (!initialized())
+        return std::nullopt;
+    if (radioMode == RADIO_MODE_SWITCHING) {
+        // startRadioModeSwitch publishes SWITCHING before scheduling the timer.
+        if (!switchTimer->isScheduled())
+            return std::nullopt;
+        return RadioModeState{radioMode, RadioModeTransition{nextRadioMode, switchTimer->getArrivalTime()}};
+    }
+    return RadioModeState{radioMode, std::nullopt};
+}
+
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
     Enter_Method("setRadioMode");

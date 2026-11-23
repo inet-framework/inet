@@ -1,0 +1,7 @@
+HT and VHT transport for native mesh
+
+Ieee80211MeshInterface supports opt-in HT and VHT profiles with negotiated directional capabilities, fixed PHY tuples, contiguous 20/40/80/160 MHz allocations and same-width non-HT duplicate ACKs. The VHT profile uses a single-member PSDU with a computed member FCS; captures expose the actual MPDU and PHY metadata in both directions. Existing OFDM configuration remains the default.
+
+Wide contention uses the primary channel and admits a wider transmission only after its secondary channels have been idle for PIFS. A refused width retains the queued frame and current contention window without recording a failed DATA attempt. Radio switching, startup and wake discard unobserved idle history.
+
+The selected profile requires a dimensional medium with interference observation, fixed channel allocation and a compatible unprotected neighborhood. Multi-MPDU aggregation, native A-MSDU, protection exchanges and adaptive rate control remain outside this profile.

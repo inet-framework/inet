@@ -56,7 +56,10 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
         const auto& id = entry.first;
         auto agreement = agreements->getAgreement(id.first, id.second);
         // INET BAR policy defers a short group only for DATA within that group's window.
-        if ((int)entry.second.size() < blockAckReqThreshold && data &&
+        bool implicitBarRecovery = std::any_of(entry.second.begin(), entry.second.end(), [](Packet *p) {
+            return p->peekAtFront<Ieee80211DataHeader>()->getAckPolicy() == NORMAL_ACK;
+        });
+        if (!implicitBarRecovery && (int)entry.second.size() < blockAckReqThreshold && data &&
             data->getReceiverAddress() == id.first && data->getTid() == id.second &&
             agreement->containsSequence(frames->getCandidateSequenceNumber(candidate)))
             continue;
@@ -87,7 +90,11 @@ AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<con
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
     if (agreement->getIsAddbaResponseReceived() && header->getAMsduPresent() && !agreement->isAMsduPermitted())
-        throw cRuntimeError("A-MSDU is not permitted by both ADDBA flags");
+        throw cRuntimeError("A-MSDU is not permitted by the ADDBA response");
+    // Explicit native aggregation uses the implicit BAR exchange owner. A
+    // standalone mesh MPDU remains Normal Ack, including lower-family fallback.
+    if (dynamicPtrCast<const Ieee80211MeshDataHeader>(header))
+        return AckPolicy::NORMAL_ACK;
     if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(packet, header)) {
         if (checkAgreementPolicy(header, agreement))
             return AckPolicy::BLOCK_ACK;
@@ -122,9 +129,9 @@ simtime_t OriginatorQosAckPolicy::getAckTimeout(Packet *packet, const Ptr<const 
     return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : ackTimeout;
 }
 
-simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
+simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& eliciting) const
 {
-    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : blockAckTimeout;
+    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, eliciting, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : blockAckTimeout;
 }
 
 } /* namespace ieee80211 */

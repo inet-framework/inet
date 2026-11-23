@@ -161,27 +161,27 @@ void InProgressFrames::dropFrame(Packet *packet)
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
     droppedFrames.push_back(packet);
+    if (originalRetired)
+        originalRetired(packet);
     emit(packetDequeuedSignal, packet);
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
-    for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
-        auto frame = *it;
+    // A typed retirement callback may synchronously retire another original.
+    // Snapshot identities, then recheck live membership before every borrow.
+    auto originals = inProgressFrames;
+    for (auto frame : originals) {
+        if (!containsFrame(frame))
+            continue;
         auto header = frame->peekAtFront<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
             auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber().get(), dataheader->getFragmentNumber())))) != 0) {
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
-                it = inProgressFrames.erase(it);
-                droppedFrames.push_back(frame);
-                emit(packetDequeuedSignal, frame);
+                dropFrame(frame);
             }
-            else
-                it++;
         }
-        else
-            it++;
     }
 }
 

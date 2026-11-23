@@ -1,0 +1,82 @@
+%description:
+Synthetic production-owner proof of separate SNS5 QoS Null identity domains.
+DATA0/Null0 share RA/TID/wire SC but cannot erase each other's retry or BAR
+covered-original state. MMPDU0/Null0 ACK state remains independent through
+adoption, transmission, missing ACK, retry, ACK and disposal. This is an owner
+contract test, separate from live policy/radio integration.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+class NamespaceCw : public IRecoveryProcedure::ICwCalculator {
+  public:
+    int getCw() override { return 0; }
+    void resetCw() override {}
+    void incrementCw() override {}
+};
+class NamespaceRecovery : public QosRecoveryProcedure {
+  public:
+    void configure(ICwCalculator *cw) { cwCalculator=cw;rtsThreshold=65536; }
+    void seed(const Ptr<const Ieee80211DataHeader>& header) { incrementCounter(header,shortRetryCounter); }
+    int count(const Ptr<const Ieee80211DataHeader>& header) const {
+        auto it=shortRetryCounter.find(getRetryKey(header));return it==shortRetryCounter.end()?0:it->second;
+    }
+};
+
+%activity:
+MacAddress peer("02:00:00:00:00:02");
+auto data=makeShared<Ieee80211MeshDataHeader>();
+data->setReceiverAddress(peer);data->setSequenceNumber(SequenceNumberCyclic(0));data->setTid(0);
+auto null=makeShared<Ieee80211MeshDataHeader>();
+null->setType(ST_QOS_NULL);null->setReceiverAddress(peer);null->setSequenceNumber(SequenceNumberCyclic(0));null->setTid(0);
+auto management=makeShared<Ieee80211MgmtHeader>();
+management->setType(ST_ACTION);management->setReceiverAddress(peer);management->setSequenceNumber(SequenceNumberCyclic(0));
+Packet dataPacket("DATA0",data),nullPacket("Null0",null);
+NamespaceCw cw;
+NamespaceRecovery recovery;
+recovery.configure(&cw);
+recovery.seed(data);recovery.seed(null);
+ASSERT(recovery.count(data)==1&&recovery.count(null)==1);
+recovery.beginBlockAckRecovery(peer,0,{&dataPacket});
+recovery.dropFrame(null);
+ASSERT(recovery.count(data)==1&&recovery.count(null)==0&&recovery.hasBlockAckRecovery(peer,0));
+auto covered=recovery.finishBlockAckRecovery(peer,0);
+ASSERT(covered==std::set<int64_t>{dataPacket.getId()});
+recovery.seed(null);
+recovery.ackFrameReceived(&nullPacket,null);
+ASSERT(recovery.count(data)==1&&recovery.count(null)==0);
+recovery.dropFrame(data);
+ASSERT(recovery.count(data)==0);
+
+QosAckHandler acknowledgments;
+auto ack=makeShared<Ieee80211AckFrame>();
+acknowledgments.frameGotInProgress(management);
+acknowledgments.processTransmittedDataOrMgmtFrame(management);
+acknowledgments.frameGotInProgress(null);
+acknowledgments.processTransmittedDataOrMgmtFrame(null);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+acknowledgments.processFailedFrame(null);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(null)==QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED);
+acknowledgments.processTransmittedDataOrMgmtFrame(null);
+acknowledgments.processReceivedAck(ack,null);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(null)==QosAckHandler::Status::NORMAL_ACK_ARRIVED);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+acknowledgments.dropFrame(null);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+acknowledgments.processFailedFrame(management);
+acknowledgments.frameGotInProgress(null);
+acknowledgments.dropFrame(null);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED);
+acknowledgments.dropFrame(management);
+ASSERT(acknowledgments.getMgmtOrNonQoSAckStatus(management)==QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+std::cout<<"mesh power identity namespaces: PASS"<<std::endl;
+
+%contains: stdout
+mesh power identity namespaces: PASS

@@ -1,0 +1,176 @@
+%description:
+ScenarioManager dispatches individual mesh power requests to the production
+policy. Mode commitment remains with the existing acknowledged Null owner.
+
+%file: MeshPowerPolicyControl.cc
+#include "mesh/MeshServicePeriodSupport.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+
+class ScenarioHoldMac : public Ieee80211MeshMac
+{
+  public:
+    bool holdNull = false;
+    bool isFrameTransmissionEligible(const Packet *packet, simtime_t start) const override {
+        if (holdNull && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_QOS_NULL) return false;
+        return Ieee80211MeshMac::isFrameTransmissionEligible(packet, start);
+    }
+};
+Define_Module(ScenarioHoldMac);
+
+class ScenarioPowerDriver : public cSimpleModule, public cListener, public LifecycleController
+{
+    int nullAir = 0, responseAir = 0;
+    bool held = false;
+    int scenario() const { return par("scenario"); }
+    MeshPowerSave *power(int i) const { return check_and_cast<MeshPowerSave *>(meshInterface(i)->getSubmodule("powerSavePolicy")); }
+    ScenarioHoldMac *mac() const { return check_and_cast<ScenarioHoldMac *>(meshInterface(0)->getSubmodule("mac")); }
+    Hcf *hcf() const { return check_and_cast<Hcf *>(mac()->getSubmodule("hcf")); }
+    void at(int ms, int kind) { scheduleAt(SimTime(ms, SIMTIME_MS), new cMessage("scenario-power-check", kind)); }
+    std::vector<int64_t> buffered() const {
+        std::vector<int64_t> ids;
+        for (const auto& frame : hcf()->getMeshBufferedFrames()) ids.push_back(frame.id);
+        std::sort(ids.begin(), ids.end());
+        return ids;
+    }
+    void reject(MeshPowerSave *target, const char *tag, const char *peer, const char *mode) {
+        auto oldMode = power(0)->getRequestedMode(meshMib(1)->address);
+        auto oldIds = buffered();
+        cXMLElement node(tag);
+        if (peer) node.setAttribute("peer", peer);
+        if (mode) node.setAttribute("mode", mode);
+        bool failed = false;
+        try { target->processCommand(node); }
+        catch (cRuntimeError&) { failed = true; }
+        ASSERT(failed && oldMode == power(0)->getRequestedMode(meshMib(1)->address) && oldIds == buffered());
+    }
+    void invalidInputs() {
+        const char *valid = "0A-AA-00-00-00-02";
+        reject(power(0), "unknown", valid, "active");
+        reject(power(0), "set-mesh-power-mode", nullptr, "active");
+        reject(power(0), "set-mesh-power-mode", "", "active");
+        reject(power(0), "set-mesh-power-mode", "invalid", "active");
+        reject(power(0), "set-mesh-power-mode", "01-00-00-00-00-01", "active");
+        reject(power(0), "set-mesh-power-mode", "00-00-00-00-00-00", "active");
+        reject(power(0), "set-mesh-power-mode", valid, nullptr);
+        reject(power(0), "set-mesh-power-mode", valid, "");
+        reject(power(0), "set-mesh-power-mode", valid, "LIGHT_SLEEP");
+        reject(power(0), "set-mesh-power-mode", "0A-AA-00-00-00-03", "active");
+        reject(power(2), "set-mesh-power-mode", valid, "active");
+    }
+  protected:
+    void initialize() override {
+        meshInterface(0)->getSubmodule("radio")->subscribe(transmissionStartedSignal, this);
+        meshInterface(0)->getSubmodule("radio")->subscribe(transmissionEndedSignal, this);
+        meshInterface(1)->getSubmodule("radio")->subscribe(transmissionStartedSignal, this);
+        at(1, 0); at(55, 1); at(80, 2); at(121, 3); at(130, 4); at(180, 5);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto tx = dynamic_cast<const Ieee80211Transmission *>(object);
+        if (!tx) return;
+        if (source == meshInterface(1)->getSubmodule("radio")) {
+            auto packet = tx->getPacket();
+            auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+            if (simTime() >= SimTime(60, SIMTIME_MS)
+                    && packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength())->getType() == ST_ACK) responseAir++;
+            return;
+        }
+        if (std::string(tx->getPacket()->getName()) != "mesh-power-mode") return;
+        if (signal == transmissionStartedSignal) nullAir++;
+        else if (scenario() == 1 && !held) { held = true; mac()->holdNull = true; }
+    }
+    void handleMessage(cMessage *event) override {
+        int kind = event->getKind(); delete event;
+        auto peer = meshMib(1)->address;
+        if (kind == 0) {
+            ASSERT(peer == MacAddress("0A-AA-00-00-00-02"));
+            meshManagement(0)->openPeer(peer);
+            meshManagement(1)->openPeer(meshMib(0)->address);
+        }
+        else if (kind == 1) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(peer) && power(0)->isEnabled() && !power(2)->isEnabled());
+            emit(registerSignal("scenarioStart"), 1L);
+        }
+        else if (kind == 2) {
+            auto state = meshMib(0)->findMeshPeerPowerState(peer);
+            auto expected = scenario() == 2 ? MeshPowerMode::DEEP_SLEEP : MeshPowerMode::LIGHT_SLEEP;
+            ASSERT(nullAir >= 1 && responseAir >= 1 && power(0)->getRequestedMode(peer) == expected);
+            if (scenario() == 1) ASSERT(held && nullAir == 1);
+            ASSERT(state->local == (scenario() == 1 ? MeshPowerMode::ACTIVE : expected));
+            ASSERT(meshMib(1)->findMeshPeerPowerState(meshMib(0)->address)->remote == expected);
+            invalidInputs();
+        }
+        else if (kind == 3) ASSERT(meshMib(0)->findMeshPeerPowerState(peer)->local == MeshPowerMode::ACTIVE);
+        else if (kind == 4) { mac()->holdNull = false; hcf()->meshPowerEligibilityChanged(); }
+        else {
+            ASSERT(power(0)->getRequestedMode(peer) == MeshPowerMode::ACTIVE && nullAir >= 2);
+            auto operation = new ModuleStopOperation(); LifecycleOperation::StringMap parameters;
+            operation->initialize(power(0), parameters); ASSERT(initiateOperation(operation));
+            reject(power(0), "set-mesh-power-mode", "0A-AA-00-00-00-02", "active");
+            emit(registerSignal("scenarioComplete"), 1L);
+        }
+    }
+};
+Define_Module(ScenarioPowerDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_power_scenario) {
+    ProtocolTest test("mesh_power_scenario");
+    test.once(on("driver").signal("scenarioStart").assertValue(1).within(0.06));
+    if ((int)getSimulation()->getSystemModule()->par("scenario") == 1)
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).drop());
+    test.once(on("driver").signal("scenarioComplete").assertValue(1).within(0.2));
+    return test;
+}
+}
+
+%file: scenario0.xml
+<scenario><at t="0.06"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="light-sleep"/></at><at t="0.12"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="active"/></at></scenario>
+%file: scenario1.xml
+<scenario><at t="0.06"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="light-sleep"/></at><at t="0.12"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="active"/></at></scenario>
+%file: scenario2.xml
+<scenario><at t="0.06"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="deep-sleep"/></at><at t="0.12"><set-mesh-power-mode module="station[0].wlan[0].powerSavePolicy" peer="0A-AA-00-00-00-02" mode="active"/></at></scenario>
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+module ScenarioHoldMac extends Ieee80211MeshMac { parameters: @class(::ScenarioHoldMac); }
+simple ScenarioPowerDriver { parameters: int scenario; @class(::ScenarioPowerDriver); @signal[scenarioStart](type=long); @signal[scenarioComplete](type=long); }
+network Test extends MeshPairNetwork {
+    parameters: int scenario;
+    submodules:
+        scenarioManager: ScenarioManager;
+        driver: ScenarioPowerDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+*.scenario=${scenario=0..2}
+*.driver.scenario=${scenario}
+*.numStations=3
+*.scenarioManager.script=xmldoc("scenario${scenario}.xml")
+*.radioMedium.typename="Ieee80211ScalarTapRadioMedium"
+*.station[0].wlan[0].address="0A-AA-00-00-00-01"
+*.station[1].wlan[0].address="0A-AA-00-00-00-02"
+*.station[2].wlan[0].address="0A-AA-00-00-00-03"
+*.station[2].wlan[0].powerSave=false
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].mac.typename="ScenarioHoldMac"
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].pathSelection.typename="MeshFixturePaths"
+*.station[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold=65536B
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=6Mbps
+*.station[*].wlan[0].radio.switchingTimes="ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="mesh_power_scenario"
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_power_scenario: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_power_scenario: FAIL

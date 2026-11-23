@@ -1,0 +1,3 @@
+IEEE 802.11 mesh frame formats
+
+Added typed mesh peering, HWMP path-selection and link-metric action bodies, Mesh Control, and mesh beacon elements with serializers and packet inspection support. Malformed element lengths and target counts are reported as invalid packet content. These formats provide the byte boundary for mesh operation; they do not by themselves enable mesh peering or multihop delivery.

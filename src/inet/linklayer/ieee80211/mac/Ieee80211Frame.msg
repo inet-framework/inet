@@ -84,6 +84,7 @@ enum Ieee80211FrameType
     // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
     ST_DATA_WITH_QOS = 0x28;
+    ST_QOS_NULL = 0x2c;
     //Feedback frame for multicast tramsmission
     ST_LBMS_REQUEST = 0x30;
     ST_LBMS_REPORT = 0x31;
@@ -123,8 +124,8 @@ class Ieee80211MacHeader extends FieldsChunk
     bool fromDS;
     bool moreFragments;
     bool retry;
-    bool powerMgmt = false; // unused
-    bool moreData = false; // unused
+    bool powerMgmt = false; // Power Management field, interpreted by the receiving role
+    bool moreData = false; // Buffered delivery indication
     bool protectedFrame = false; // unused
     bool order = false; // unused
     simtime_t durationField = -1; // "duration" in the Duration/ID field (-1=no duration)
@@ -215,6 +216,36 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     uint8_t tid @bit(4);              // optional field, exists when type == ST_DATA_WITH_QOS
     bool eosp = false; // End of Service Period subfield (bit 4 of QoS Control), exists when type == ST_DATA_WITH_QOS
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
+    uint8_t qosControlHigh = 0; // role-dependent QoS Control bits 8--15 (Table 9-10)
+}
+
+// Explicit mesh context is necessary: Table 9-10 gives the same QoS bits
+// different meanings in nonmesh BSSs. Address roles alone are insufficient.
+class Ieee80211MeshDataHeader extends Ieee80211DataHeader
+{
+    type = ST_DATA_WITH_QOS;
+    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
+}
+
+cplusplus(Ieee80211MeshDataHeader) {{
+    bool getMeshControlPresent() const { return (getQosControlHigh() & 1) != 0; }
+    void setMeshControlPresent(bool value) { setQosControlHigh((getQosControlHigh() & ~1) | value); }
+    bool getMeshPowerSaveLevel() const { return (getQosControlHigh() & 2) != 0; }
+    void setMeshPowerSaveLevel(bool value) { setQosControlHigh((getQosControlHigh() & ~2) | (value ? 2 : 0)); }
+    bool getRspi() const { return (getQosControlHigh() & 4) != 0; }
+    void setRspi(bool value) { setQosControlHigh((getQosControlHigh() & ~4) | (value ? 4 : 0)); }
+}}
+
+// IEEE Std 802.11-2024, 9.2.4.8.3. Located in the frame body, not the MAC header.
+class Ieee80211MeshControl extends FieldsChunk
+{
+    chunkLength = B(6);
+    uint8_t addressExtensionMode = 0;
+    uint8_t ttl = 0;
+    uint32_t sequenceNumber = 0;
+    MacAddress address4; // AE = 1
+    MacAddress address5; // AE = 2
+    MacAddress address6; // AE = 2
 }
 
 //TODO this can be introduced when the SNAP header
@@ -261,10 +292,18 @@ class Ieee80211MsduSubframeHeader extends FieldsChunk
     int length;
 }
 
+// IEEE Std 802.11-2024, Figure 9-124: the following Mesh Control is separate.
+// Unlike Basic A-MSDU, the MSDU Length is little-endian and excludes Mesh Control.
+class Ieee80211MeshMsduSubframeHeader extends Ieee80211MsduSubframeHeader
+{
+}
+
 class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
     chunkLength = LENGTH_A_MPDU_SUBFRAME_HEADER;
     int length;
+    bool eof = false;
+    bool vht = false;
 }
 
 //

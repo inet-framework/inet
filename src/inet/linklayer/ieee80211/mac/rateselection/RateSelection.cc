@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -203,7 +204,7 @@ void RateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211Ma
 void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
 {
     ASSERT(mode != nullptr);
-    packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+    packet->addTagIfAbsent<Ieee80211ModeReq>()->setTxVector(getMpduTxVector(mode, header));
 }
 
 void RateSelection::emitDatarateSelected(cComponent *emitter, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)

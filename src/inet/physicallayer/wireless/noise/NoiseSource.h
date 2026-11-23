@@ -47,6 +47,8 @@ class INET_API NoiseSource : public SimpleModule, public virtual IRadio
     virtual const cGate *getRadioGate() const override { return radioIn; }
 
     virtual RadioMode getRadioMode() const override { return RADIO_MODE_TRANSMITTER; }
+    std::optional<simtime_t> getRadioModeSwitchingTime(RadioMode from, RadioMode to) const override { return std::nullopt; }
+    std::optional<RadioModeState> getRadioModeState() const override { return std::nullopt; }
     virtual void setRadioMode(RadioMode radioMode) override { throw cRuntimeError("Invalid operation"); }
 
     virtual ReceptionState getReceptionState() const override { return RECEPTION_STATE_UNDEFINED; }

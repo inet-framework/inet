@@ -1,0 +1,272 @@
+%description:
+Observe actual radio mode changes without changing timer or signal ordering.
+Asymmetric sleep/wake durations, zero and idempotent changes, initialization,
+synchronous publication, deferred snapshots, deadline-before-completion and
+stop/crash cancellation all use the existing production owners. Initialized
+ShortcutRadio and NoiseSource explicitly report observation unavailable.
+
+%file: test.cc
+#include <iostream>
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace Radio_ModeTransitionObservation_1 {
+
+class ObservedRadio : public Ieee80211Radio
+{
+  public:
+    bool checkedInitialization = false;
+  protected:
+    void initialize(int stage) override {
+        ASSERT(!getRadioModeState());
+        ASSERT(!getRadioModeSwitchingTime(RADIO_MODE_SLEEP, RADIO_MODE_TRANSCEIVER));
+        Ieee80211Radio::initialize(stage);
+        ASSERT(!getRadioModeState());
+        ASSERT(!getRadioModeSwitchingTime(RADIO_MODE_SLEEP, RADIO_MODE_TRANSCEIVER));
+        if (stage == INITSTAGE_LAST) checkedInitialization = true;
+    }
+};
+Define_Module(ObservedRadio);
+
+class Probe : public cSimpleModule, public cListener, public LifecycleController
+{
+    opp_component_ptr<cModule> radioModule;
+    IRadio *radio = nullptr;
+    cMessage *deferred = nullptr;
+    bool running = false;
+    bool deadlineObserved = false;
+    bool sleepPublicationBeforeStateUpdate = false;
+    bool zeroPublicationBeforeStateUpdate = false;
+    int initializationSignals = 0;
+    int deferredActive = 0;
+    int deferredStable = 0;
+    IRadio::RadioMode expectedTarget = IRadio::RADIO_MODE_OFF;
+    simtime_t expectedEnd;
+    std::optional<IRadio::RadioModeState> retainedSnapshot;
+    std::vector<IRadio::RadioMode> modes;
+
+    void at(int ms, int kind) { scheduleAt(SimTime(ms, SIMTIME_MS), new cMessage("mode-probe", kind)); }
+    void command(IRadio::RadioMode target, simtime_t end) {
+        expectedTarget = target; expectedEnd = end;
+        radio->setRadioMode(target);
+    }
+    void lifecycle(LifecycleOperation *operation) {
+        LifecycleOperation::StringMap parameters;
+        operation->initialize(radioModule->getParentModule(), parameters);
+        initiateOperation(operation);
+    }
+    void stable(IRadio::RadioMode mode) {
+        auto state = radio->getRadioModeState();
+        ASSERT(state && state->mode == mode && !state->transition);
+    }
+    void unsupported(IRadio *provider) {
+        ASSERT(!provider->getRadioModeState());
+        ASSERT(!provider->getRadioModeSwitchingTime(IRadio::RADIO_MODE_OFF, IRadio::RADIO_MODE_RECEIVER));
+        ASSERT(!provider->getRadioModeSwitchingTime(IRadio::RADIO_MODE_RECEIVER, IRadio::RADIO_MODE_RECEIVER));
+    }
+
+  protected:
+    using cListener::receiveSignal;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL) {
+            radioModule = getModuleByPath("^.a.radio");
+            radio = check_and_cast<IRadio *>(radioModule.get());
+            radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+            deferred = new cMessage("deferred copied observation");
+        }
+        if (stage == INITSTAGE_LAST) {
+            // Insert this event before the later command inserts switchTimer.
+            at(3, 30);
+            for (int ms : {0, 1, 4, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20}) at(ms, ms);
+            scheduleAt(SimTime(10100, SIMTIME_US), new cMessage("idempotent", 101));
+        }
+    }
+    void receiveSignal(cComponent *, simsignal_t, long value, cObject *) override {
+        Enter_Method_Silent();
+        auto mode = static_cast<IRadio::RadioMode>(value);
+        auto state = radio->getRadioModeState();
+        if (!running) {
+            ASSERT(!state);
+            ASSERT(!radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_SLEEP, IRadio::RADIO_MODE_TRANSCEIVER));
+            ++initializationSignals;
+            return;
+        }
+        modes.push_back(mode);
+        if (mode == IRadio::RADIO_MODE_SWITCHING) {
+            ASSERT(!state); // Existing signal precedes scheduling switchTimer.
+        }
+        else {
+            ASSERT(state && state->mode == mode && !state->transition);
+            if (simTime() == SimTime(3, SIMTIME_MS)) {
+                ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
+                sleepPublicationBeforeStateUpdate = true;
+            }
+            if (simTime() == SimTime(10, SIMTIME_MS)) {
+                ASSERT(radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_IDLE);
+                zeroPublicationBeforeStateUpdate = true;
+            }
+        }
+        // A signal consumer schedules/coalesces a continuation; it does not
+        // issue a mode command or infer Tx/Rx readiness reentrantly here.
+        if (!deferred->isScheduled()) scheduleAt(simTime(), deferred);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message == deferred) {
+            auto state = radio->getRadioModeState();
+            ASSERT(state);
+            if (state->mode == IRadio::RADIO_MODE_SWITCHING) {
+                ASSERT(state->transition && state->transition->targetMode == expectedTarget);
+                ASSERT(state->transition->endTime == expectedEnd && expectedEnd > simTime());
+                if (simTime() == SimTime(1, SIMTIME_MS)) retainedSnapshot = state;
+                ++deferredActive;
+            }
+            else {
+                ASSERT(!state->transition);
+                if (state->mode == IRadio::RADIO_MODE_SLEEP)
+                    ASSERT(radio->getReceptionState() == IRadio::RECEPTION_STATE_UNDEFINED);
+                if (simTime() == SimTime(10, SIMTIME_MS))
+                    ASSERT(radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_UNDEFINED);
+                ++deferredStable;
+            }
+            return;
+        }
+        int kind = message->getKind(); delete message;
+        if (kind == 0) {
+            running = true;
+            ASSERT(check_and_cast<ObservedRadio *>(radioModule.get())->checkedInitialization);
+            // OperationalBase's initial start and Radio's physical-stage
+            // initialization both publish the initial mode, in existing order.
+            ASSERT(initializationSignals == 2);
+            stable(IRadio::RADIO_MODE_TRANSCEIVER);
+            ASSERT(radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_TRANSCEIVER, IRadio::RADIO_MODE_SLEEP) == SimTime(2, SIMTIME_MS));
+            ASSERT(radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_SLEEP, IRadio::RADIO_MODE_TRANSCEIVER) == SimTime(5, SIMTIME_MS));
+            ASSERT(radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_TRANSCEIVER, IRadio::RADIO_MODE_RECEIVER) == SIMTIME_ZERO);
+            ASSERT(radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_RECEIVER, IRadio::RADIO_MODE_RECEIVER) == SIMTIME_ZERO);
+            ASSERT(!radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_SWITCHING, IRadio::RADIO_MODE_RECEIVER));
+            ASSERT(!radio->getRadioModeSwitchingTime(IRadio::RADIO_MODE_RECEIVER, IRadio::RADIO_MODE_SWITCHING));
+            ASSERT(!radio->getRadioModeSwitchingTime(static_cast<IRadio::RadioMode>(-1), IRadio::RADIO_MODE_RECEIVER));
+            unsupported(check_and_cast<IRadio *>(getModuleByPath("^.noise")));
+            unsupported(check_and_cast<IRadio *>(getModuleByPath("^.shortcut.wlan[0].radio")));
+        }
+        else if (kind == 1) command(IRadio::RADIO_MODE_SLEEP, SimTime(3, SIMTIME_MS));
+        else if (kind == 30) {
+            auto state = radio->getRadioModeState();
+            ASSERT(state && state->mode == IRadio::RADIO_MODE_SWITCHING && state->transition);
+            ASSERT(state->transition->targetMode == IRadio::RADIO_MODE_SLEEP && state->transition->endTime == simTime());
+            ASSERT(modes.size() == 1); // Actual completion event has not run.
+            deadlineObserved = true;
+        }
+        else if (kind == 4) {
+            ASSERT(deadlineObserved); stable(IRadio::RADIO_MODE_SLEEP);
+            ASSERT(retainedSnapshot && retainedSnapshot->mode == IRadio::RADIO_MODE_SWITCHING);
+            ASSERT(retainedSnapshot->transition->targetMode == IRadio::RADIO_MODE_SLEEP);
+            ASSERT(retainedSnapshot->transition->endTime == SimTime(3, SIMTIME_MS));
+            command(IRadio::RADIO_MODE_TRANSCEIVER, SimTime(9, SIMTIME_MS));
+        }
+        else if (kind == 10) {
+            stable(IRadio::RADIO_MODE_TRANSCEIVER);
+            auto before = modes.size();
+            command(IRadio::RADIO_MODE_RECEIVER, simTime());
+            stable(IRadio::RADIO_MODE_RECEIVER);
+            ASSERT(modes.size() == before + 1 && modes.back() == IRadio::RADIO_MODE_RECEIVER);
+        }
+        else if (kind == 101) {
+            auto before = modes.size();
+            command(IRadio::RADIO_MODE_RECEIVER, simTime());
+            stable(IRadio::RADIO_MODE_RECEIVER);
+            ASSERT(modes.size() == before); // Configured diagonal9ms is ignored by the actual no-op.
+        }
+        else if (kind == 11) command(IRadio::RADIO_MODE_SLEEP, SimTime(13, SIMTIME_MS));
+        else if (kind == 12) { lifecycle(new ModuleStopOperation()); stable(IRadio::RADIO_MODE_OFF); }
+        else if (kind == 13) stable(IRadio::RADIO_MODE_OFF);
+        else if (kind == 14) { lifecycle(new ModuleStartOperation()); stable(IRadio::RADIO_MODE_TRANSCEIVER); }
+        else if (kind == 15) command(IRadio::RADIO_MODE_SLEEP, SimTime(17, SIMTIME_MS));
+        else if (kind == 16) { lifecycle(new ModuleCrashOperation()); stable(IRadio::RADIO_MODE_OFF); }
+        else if (kind == 18) stable(IRadio::RADIO_MODE_OFF);
+        else if (kind == 19) { lifecycle(new ModuleStartOperation()); stable(IRadio::RADIO_MODE_TRANSCEIVER); }
+        else {
+            const std::vector<IRadio::RadioMode> expected = {IRadio::RADIO_MODE_SWITCHING, IRadio::RADIO_MODE_SLEEP,
+                IRadio::RADIO_MODE_SWITCHING, IRadio::RADIO_MODE_TRANSCEIVER, IRadio::RADIO_MODE_RECEIVER,
+                IRadio::RADIO_MODE_SWITCHING, IRadio::RADIO_MODE_OFF, IRadio::RADIO_MODE_TRANSCEIVER,
+                IRadio::RADIO_MODE_SWITCHING, IRadio::RADIO_MODE_OFF, IRadio::RADIO_MODE_TRANSCEIVER};
+            ASSERT(modes == expected && deferredActive == 4 && deferredStable == 7);
+            ASSERT(deadlineObserved && sleepPublicationBeforeStateUpdate && zeroPublicationBeforeStateUpdate);
+            std::cout << "R0 radio transition observation: PASS\n";
+            endSimulation();
+        }
+    }
+    ~Probe() override {
+        if (radioModule) radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
+        cancelAndDelete(deferred);
+    }
+};
+Define_Module(Probe);
+}
+
+%file: test.ned
+import inet.mobility.static.StationaryMobility;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+
+module ObservedRadio extends Ieee80211ScalarRadio { parameters: @class(ObservedRadio); }
+module RadioNode {
+    parameters: @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: ObservedRadio { parameters: antenna.mobilityModule = absPath("^.mobility"); }
+    connections allowunconnected:
+}
+simple Probe { parameters: @class(Probe); }
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        probe: Probe;
+        a: RadioNode;
+        noise: NoiseSource;
+        shortcut: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 21ms
+seed-set = 0
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+**.scalar-recording = false
+**.vector-recording = false
+*.a.radio.initialRadioMode = "transceiver"
+# Rows/columns OFF,SLEEP,RX,TX,TRX. Diagonal9ms deliberately contrasts with a no-op.
+*.a.radio.switchingTimes = "ms 9 0 0 0 0  0 9 0 0 5  0 2 9 0 0  0 0 0 9 0  0 2 0 0 9"
+*.a.radio.bandName = "5 GHz (20 MHz)"
+*.a.radio.channelNumber = 0
+*.a.radio.transmitter.power = 1mW
+*.a.radio.transmitter.bitrate = 6Mbps
+*.noise.radioMediumModule = "^.radioMedium"
+*.noise.sleepInterval = 1s
+*.noise.transmitter.duration = 1ms
+*.noise.transmitter.centerFrequency = 5GHz
+*.noise.transmitter.bandwidth = 20MHz
+*.noise.transmitter.power = 1mW
+*.shortcut.numApps = 0
+*.shortcut.hasIpv6 = false
+*.shortcut.wlan[*].typename = "AckingWirelessInterface"
+*.shortcut.wlan[*].radio.typename = "ShortcutRadio"
+*.shortcut.wlan[*].bitrate = 1Mbps
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+R0 radio transition observation: PASS
+
+%not-contains: stdout
+Error:

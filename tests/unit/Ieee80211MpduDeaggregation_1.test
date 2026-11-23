@@ -96,6 +96,12 @@ bool refusedEncoding = false;
 try { overflow.peekAllAsBytes(); }
 catch (const cRuntimeError&) { refusedEncoding = true; }
 ASSERT(refusedEncoding);
+auto partial = new Packet("valid-prefix-malformed-suffix");
+appendMember(*partial,20);
+partial->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0,0,0,0}));
+MpduDeaggregation deaggregation;
+std::unique_ptr<std::vector<Packet *>> noPrefix(deaggregation.deaggregateFrame(partial));
+ASSERT(noPrefix->empty());
 EV << "MPDU traversal checks passed\n";
 
 %contains: stdout

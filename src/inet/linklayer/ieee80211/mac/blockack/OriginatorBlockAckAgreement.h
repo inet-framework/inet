@@ -77,8 +77,9 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
     virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
     virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
-    // IEEE Std 802.11-2024, 10.25.2 defines ADDBA negotiation; INET requires both flags before A-MSDU aggregation.
-    bool isAMsduPermitted() const { return isAMsduSupported && responseAMsduSupported; }
+    // IEEE Std 802.11-2024, 10.11: the recipient's ADDBA Response grants
+    // A-MSDU permission. The request does not grant receiver permission.
+    bool isAMsduPermitted() const { return responseAMsduSupported; }
     int getDialogToken() const { return dialogToken; }
     void setDialogToken(int token) { dialogToken = token; }
     void setResponseAMsduSupported(bool value) { responseAMsduSupported = value; }

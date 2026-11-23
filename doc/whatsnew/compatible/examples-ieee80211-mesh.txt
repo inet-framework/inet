@@ -1,0 +1,3 @@
+IEEE 802.11 mesh examples
+
+Added ordinary-host IPv4 examples for native HWMP mesh forwarding, airtime path selection, link failure, proactive roots, HT/VHT nested aggregation and LIGHT/DEEP peer power saving. ScenarioManager scripts select peer modes; separate transmit and good-receive captures support frame inspection. The user guide explains configuration, estimator units, timing and profile limits.

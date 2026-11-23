@@ -1,0 +1,3 @@
+Radio mode transition observation API
+
+IRadio now requires read-only getRadioModeSwitchingTime() and getRadioModeState() implementations. Packet-level Radio reports initialized switching durations and copied active target/absolute completion state; ShortcutRadio and NoiseSource explicitly report unavailable. External implementations must add both overrides and rebuild dependent libraries. Unavailable differs from zero duration or a supported stable state. Existing radio commands, timer insertion, signal ordering and physical behavior are unchanged.

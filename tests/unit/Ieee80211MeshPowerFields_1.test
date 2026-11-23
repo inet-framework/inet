@@ -1,0 +1,184 @@
+%description:
+Independent IEEE Std 802.11-2024 QoS Null octets: individual DS11 header32/FCS4
+and group DS01 header26/FCS4, PM bit12, Mesh PSL bit9, RSPI bit10, EOSP and
+individual Normal Ack and group No Ack. Typed encoders must match the valid-transmit
+literal MPDUs; decoding
+starts afresh from those literals. Receive-only reserved PM0/PSL1 and group
+RSPI1 remain format-valid and retain
+the received field. This is a wire-format proof, not power-policy ignore,
+producer integration, ACK completion or MPSP state-machine evidence.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+// Exact source spans are retained in audit/hwmp-implementation/p1-qos-null-wire-handoff.md:
+// IEEE2024 Table9-3/9.3.2.1 (DS/address/bodyless layout), Table9-10 (QoS bits),
+// 9.2.4.1.1/Figure9-3 (PM), 9.2.4.5.12 (RSPI), 9.2.4.9 (FCS).
+// Table9-10 mesh row PDF675 @3115710:3117559 and Table9-13 PDF677
+// @3124619:3131039: group QoS Null uses No Ack (01), individual Normal Ack (00).
+// RX10.3.2.11 @7922099:7924087 does not mandate rejection solely for group00;
+// this fixture selects canonical group Tx bits and makes no such rejection claim.
+// A3=peer/A4=local for individual, A3=local for group is the selected local-link
+// model completion; this fixture does not label it a QoS-Null-specific SHALL.
+struct WireCase {
+    const char *name;
+    bool group;
+    bool pm;
+    bool psl;
+    bool rspi;
+    bool eosp;
+    std::vector<uint8_t> bytes;
+};
+
+// Independently fixed little-endian IEEE CRC32 octets, checked below without
+// using an INET checksum or serialization helper as the expected-value oracle.
+static const std::vector<WireCase> cases = {
+    {"individual-active", false,false,false,false,true, {
+        0xc8,0x03,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2,
+        0x30,0x12, 2,0,0,0,0,1, 0x10,0x00, 0x00,0xb4,0xbf,0x0d}},
+    {"individual-light", false,true,false,false,true, {
+        0xc8,0x13,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2,
+        0x30,0x12, 2,0,0,0,0,1, 0x10,0x00, 0x10,0x39,0xc1,0xe3}},
+    {"individual-deep", false,true,true,false,true, {
+        0xc8,0x13,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2,
+        0x30,0x12, 2,0,0,0,0,1, 0x10,0x02, 0x3c,0x58,0xcf,0x0d}},
+    {"individual-rspi", false,true,false,true,false, {
+        0xc8,0x13,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2,
+        0x30,0x12, 2,0,0,0,0,1, 0x00,0x04, 0x58,0xef,0x6e,0xae}},
+    {"individual-reserved-psl", false,false,true,false,true, {
+        0xc8,0x03,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2,
+        0x30,0x12, 2,0,0,0,0,1, 0x10,0x02, 0x2c,0xd5,0xb1,0xe3}},
+    {"group-active", true,false,false,false,true, {
+        0xc8,0x02,0,0, 0xff,0xff,0xff,0xff,0xff,0xff, 2,0,0,0,0,1,
+        2,0,0,0,0,1, 0x30,0x12, 0x30,0x00, 0x65,0x0e,0xd8,0x6d}},
+    {"group-deep", true,true,true,false,true, {
+        0xc8,0x12,0,0, 0xff,0xff,0xff,0xff,0xff,0xff, 2,0,0,0,0,1,
+        2,0,0,0,0,1, 0x30,0x12, 0x30,0x02, 0x27,0x48,0xc1,0xdb}},
+    {"group-reserved-rspi", true,false,false,true,true, {
+        0xc8,0x02,0,0, 0xff,0xff,0xff,0xff,0xff,0xff, 2,0,0,0,0,1,
+        2,0,0,0,0,1, 0x30,0x12, 0x30,0x04, 0x7c,0xca,0xb5,0x6a}}
+};
+
+static void checkLiteralCrc(const std::vector<uint8_t>& bytes)
+{
+    uint32_t crc = 0xffffffff;
+    for (size_t i = 0; i < bytes.size() - 4; i++) {
+        crc ^= bytes[i];
+        for (int bit = 0; bit < 8; bit++)
+            crc = (crc >> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    }
+    crc ^= 0xffffffff;
+    for (int i = 0; i < 4; i++)
+        ASSERT(bytes[bytes.size() - 4 + i] == ((crc >> (8 * i)) & 0xff));
+}
+
+static uint32_t trailerField(const std::vector<uint8_t>& bytes)
+{
+    // Ieee80211MacTrailer stores the four wire octets as a big-endian integer.
+    // The literal CRC octets above are independently checked as little-endian CRC32.
+    uint32_t value = 0;
+    for (size_t i = bytes.size() - 4; i < bytes.size(); i++)
+        value = (value << 8) | bytes[i];
+    return value;
+}
+
+static void appendTrailer(Packet& packet, const std::vector<uint8_t>& bytes)
+{
+    auto trailer = makeShared<Ieee80211MacTrailer>();
+    trailer->setFcsMode(FCS_COMPUTED);
+    trailer->setFcs(trailerField(bytes));
+    packet.insertAtBack(trailer);
+}
+
+%activity:
+for (const auto& c : cases) {
+    const auto headerLength = c.group ? B(26) : B(32);
+    ASSERT(c.bytes.size() == (c.group ? 30u : 36u));
+    checkLiteralCrc(c.bytes);
+
+    auto header = makeShared<Ieee80211MeshDataHeader>();
+    header->setType(ST_QOS_NULL);
+    header->setChunkLength(headerLength);
+    header->setDurationField(SIMTIME_ZERO);
+    header->setToDS(!c.group);
+    header->setFromDS(true);
+    header->setReceiverAddress(c.group ? MacAddress::BROADCAST_ADDRESS : MacAddress("02:00:00:00:00:02"));
+    header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+    header->setAddress3(MacAddress(c.group ? "02:00:00:00:00:01" : "02:00:00:00:00:02"));
+    header->setAddress4(MacAddress("02:00:00:00:00:01"));
+    header->setSequenceNumber(SequenceNumberCyclic(0x123));
+    header->setFragmentNumber(0);
+    header->setTid(0);
+    header->setAckPolicy(c.group ? NO_ACK : NORMAL_ACK);
+    header->setEosp(c.eosp);
+    header->setAMsduPresent(false);
+    header->setMeshControlPresent(false);
+    header->setPowerMgmt(c.pm);
+    header->setMeshPowerSaveLevel(c.psl);
+    header->setRspi(c.rspi);
+    // The two reserved combinations are receive-only probes, not valid Tx modes.
+    if (!(!c.pm && c.psl) && !(c.group && c.rspi)) {
+        Packet output(c.name, header);
+        appendTrailer(output, c.bytes);
+        ASSERT(output.getDataLength() == headerLength + B(4));
+        ASSERT(output.peekAllAsBytes()->getBytes() == c.bytes);
+    }
+
+    // The decoder sees fresh independent literal bytes, never the encoder output.
+    Packet input(c.name, makeShared<BytesChunk>(c.bytes));
+    auto fcs = input.popAtBack<Ieee80211MacTrailer>(B(4));
+    ASSERT(fcs->isCorrect() && fcs->isComplete() && fcs->getFcsMode() == FCS_COMPUTED);
+    ASSERT(fcs->getFcs() == trailerField(c.bytes));
+    auto decoded = input.popAtFront<Ieee80211MeshDataHeader>(headerLength);
+    ASSERT(decoded->isCorrect() && decoded->isComplete());
+    ASSERT(decoded->getType() == ST_QOS_NULL && decoded->getChunkLength() == headerLength);
+    ASSERT(decoded->getToDS() == !c.group && decoded->getFromDS());
+    ASSERT(decoded->getReceiverAddress() == header->getReceiverAddress());
+    ASSERT(decoded->getTransmitterAddress() == MacAddress("02:00:00:00:00:01"));
+    ASSERT(decoded->getAddress3() == header->getAddress3());
+    if (!c.group)
+        ASSERT(decoded->getAddress4() == MacAddress("02:00:00:00:00:01"));
+    ASSERT(decoded->getSequenceNumber().get() == 0x123 && decoded->getFragmentNumber() == 0);
+    ASSERT(decoded->getDurationField() == SIMTIME_ZERO && decoded->getTid() == 0);
+    ASSERT(decoded->getAckPolicy() == (c.group ? NO_ACK : NORMAL_ACK) && decoded->getEosp() == c.eosp);
+    ASSERT(decoded->getPowerMgmt() == c.pm && decoded->getMeshPowerSaveLevel() == c.psl);
+    ASSERT(decoded->getRspi() == c.rspi);
+    ASSERT(decoded->getQosControlHigh() == (c.psl ? 2 : 0) + (c.rspi ? 4 : 0));
+    ASSERT(!decoded->getMeshControlPresent() && !decoded->getAMsduPresent());
+    ASSERT(input.getDataLength() == b(0)); // no payload or standalone Mesh Control
+}
+
+// Ordinary QoS Data retains its zero default PM/EOSP/high-QoS fields.
+const std::vector<uint8_t> ordinary = {
+    0x88,0,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,3,
+    0x30,0x12, 0,0, 0x3f,0xdd,0x9e,0xb8};
+checkLiteralCrc(ordinary);
+auto ordinaryHeader = makeShared<Ieee80211DataHeader>();
+ordinaryHeader->setType(ST_DATA_WITH_QOS);
+ordinaryHeader->setChunkLength(B(26));
+ordinaryHeader->setDurationField(SIMTIME_ZERO);
+ordinaryHeader->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+ordinaryHeader->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+ordinaryHeader->setAddress3(MacAddress("02:00:00:00:00:03"));
+ordinaryHeader->setSequenceNumber(SequenceNumberCyclic(0x123));
+Packet ordinaryOutput("ordinary-default", ordinaryHeader);
+appendTrailer(ordinaryOutput, ordinary);
+ASSERT(ordinaryOutput.peekAllAsBytes()->getBytes() == ordinary);
+Packet ordinaryInput("ordinary-literal", makeShared<BytesChunk>(ordinary));
+ordinaryInput.popAtBack<Ieee80211MacTrailer>(B(4));
+auto ordinaryDecoded = ordinaryInput.popAtFront<Ieee80211DataHeader>(B(26));
+ASSERT(ordinaryDecoded->isCorrect() && ordinaryDecoded->isComplete());
+ASSERT(!ordinaryDecoded->getPowerMgmt() && !ordinaryDecoded->getEosp());
+ASSERT(ordinaryDecoded->getQosControlHigh() == 0 && !ordinaryDecoded->getAMsduPresent());
+ASSERT(ordinaryInput.getDataLength() == b(0));
+
+EV << "Mesh power fields: eight literal bodyless QoS Null MPDUs and ordinary defaults passed.\n";
+
+%contains: stdout
+Mesh power fields: eight literal bodyless QoS Null MPDUs and ordinary defaults passed.

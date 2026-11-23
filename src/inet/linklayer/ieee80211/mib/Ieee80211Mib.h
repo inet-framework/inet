@@ -11,7 +11,11 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211VhtCapabilities.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211RateSet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPowerMode.h"
 
 namespace inet {
 
@@ -25,9 +29,17 @@ namespace ieee80211 {
 class INET_API Ieee80211Mib : public SimpleModule
 {
   public:
-    // Emitted after a committed rate, HT capability, or channel-operation change.
+    // Emitted after a committed rate, HT/VHT capability, or channel-operation change.
     // The value is true. There are no details or ownership transfers.
     static simsignal_t rateStateChangedSignal;
+    // Committed mesh eligibility; details identify the peer, listeners query current state.
+    static simsignal_t meshPeerChangedSignal;
+    static simsignal_t meshPowerModeChangedSignal;
+    class INET_API MeshPeerChange : public cObject {
+      public:
+        MacAddress peer;
+        explicit MeshPeerChange(MacAddress peer) : peer(peer) {}
+    };
 
     enum Mode {
         INFRASTRUCTURE,
@@ -94,6 +106,14 @@ class INET_API Ieee80211Mib : public SimpleModule
     Ieee80211RateSetState localRateSet;
     Ieee80211RateSetState bssRateSet;
     std::map<MacAddress, Ieee80211RateSetState> peerRateSets;
+    std::string meshId;
+    MeshConfiguration meshConfiguration;
+    std::string meshPhyProfile = "ofdm";
+    bool meshShortGuardIntervalTransmissionEnabled = true;
+    Ieee80211PeerPhyCapabilities localMeshPhy;
+    std::map<MacAddress, Ieee80211PeerPhyCapabilities> meshPeerPhy;
+    std::map<MacAddress, MeshPeerPowerState> meshPeerPower;
+    std::string describeMeshPhy() const;
     bool updateBssAndPeerRateSets(const Ieee80211RateSetState& bssRateSet,
             const MacAddress& peerAddress, const Ieee80211RateSetState& peerRateSet);
     bool updatePeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
@@ -146,6 +166,31 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearBssRateSet();
     void removePeerRateSet(const MacAddress& address);
     void clearPeerRateSets();
+    void configureMeshProfile(const std::string& id, const MeshConfiguration& configuration);
+    void setMeshForwarding(bool enabled);
+    bool isMeshForwarding() const { return (meshConfiguration.capability & 8) != 0; }
+    const std::string& getMeshId() const { return meshId; }
+    const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
+    bool isMeshPeerEstablished(MacAddress peer) const;
+    const std::map<MacAddress, MeshPeerPowerState>& getMeshPeerPowerStates() const { return meshPeerPower; }
+    const MeshPeerPowerState *findMeshPeerPowerState(MacAddress peer) const;
+    void commitMeshLocalPowerMode(MacAddress peer, MeshPowerMode mode);
+    void commitMeshLocalActiveForAllPeers();
+    void commitMeshRemotePowerMode(MacAddress peer, MeshPowerMode mode);
+    MeshPowerMode getMeshNonpeerPowerMode() const;
+    bool getMeshGroupPowerSaveLevel() const;
+    void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates);
+    void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& phy);
+    void configureMeshPhyCapabilities(const std::string& profile, const physicallayer::Ieee80211ModeSet *modes,
+            const physicallayer::Ieee80211Channel *channel, int spatialStreams);
+    const std::string& getMeshPhyProfile() const { return meshPhyProfile; }
+    bool isMeshShortGuardIntervalTransmissionEnabled() const { return meshShortGuardIntervalTransmissionEnabled; }
+    const Ieee80211PeerPhyCapabilities& getLocalMeshPhyCapabilities() const { return localMeshPhy; }
+    const Ieee80211PeerPhyCapabilities *findMeshPeerPhyCapabilities(MacAddress peer) const;
+    // Withdrawal is silent. The management owner publishes after its metric
+    // and MAC cleanup completes, using the returned local changed result.
+    bool withdrawMeshPeer(MacAddress peer);
+    void publishMeshPeerRemoval(MacAddress peer);
 };
 
 } // namespace ieee80211

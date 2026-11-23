@@ -1,0 +1,504 @@
+%description:
+Isolated management, forwarding, HWMP and metric lifecycle.
+Twelve native cases vary owner0..3 and operation0..2 (stop/start, crash/start,
+delete). All lifecycle calls target only the selected owner. A controlled HCF
+dependency never initializes channel access, Tx or a radio. No whole-NIC,
+power-save activation, wake continuation, HT/VHT or MPSP claim is made.
+
+%extraargs: -r 0..11
+
+%file: MeshLifecycleTest.cc
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/linklayer/ieee80211/IIeee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
+#include "inet/linklayer/ieee80211/mesh/hwmp/Hwmp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtMesh.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace mesh_lifecycle_test {
+static MacAddress local() { return MacAddress("02:00:00:00:00:01"); }
+static MacAddress peer() { return MacAddress("02:00:00:00:00:02"); }
+static MacAddress other() { return MacAddress("02:00:00:00:00:03"); }
+static MacAddress discovered() { return MacAddress("02:00:00:00:00:04"); }
+static MacAddress unresolved() { return MacAddress("02:00:00:00:00:05"); }
+static int managementTimers = 0, forwardingTimers = 0, hwmpTimers = 0, hwmpSignals = 0, metricSignals = 0;
+static int deletedQueued = 0;
+
+class QueuedMsdu : public Packet {
+  public:
+    explicit QueuedMsdu(const char *name) : Packet(name, makeShared<BytesChunk>(std::vector<uint8_t>{0x7e,0x7e,3,1,2,3,4})) {
+        addTag<MacAddressReq>()->setDestAddress(unresolved());
+        addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
+    }
+    ~QueuedMsdu() override { ++deletedQueued; }
+};
+
+// This module supplies dependencies only. Its Hcf base is required by HWMP's
+// concrete ModuleRefByPar<Hcf>; no production HCF initialization is called.
+class Providers : public Hcf, public IIeee80211Mac, public IMeshDataMac,
+        public IMeshForwarding, public IMeshPathSelection, public IMeshLinkMetric,
+        public IMeshManagement {
+  public:
+    Ieee80211Mib *fixtureMib = nullptr;
+    std::vector<Packet *> held;
+    Ptr<const Ieee80211MeshPeeringOpenFrame> lastOpen;
+    Ptr<const Ieee80211MeshPeeringConfirmFrame> lastConfirm;
+    Ptr<const Ieee80211BeaconFrame> lastBeacon;
+    std::set<MacAddress> pending;
+    int handoffs = 0, sourceWithdrawals = 0, discoveryCancels = 0;
+    int discoveryFailures = 0, associationResets = 0, metricResets = 0;
+    int kind() const { return getParentModule()->par("ownerKind"); }
+    void hold(Packet *packet) {
+        Enter_Method("controlled hold"); take(packet); ++handoffs;
+        if (auto confirm = dynamicPtrCast<const Ieee80211MeshPeeringConfirmFrame>(packet->peekAtFront<Chunk>())) lastConfirm = confirm;
+        else if (auto open = dynamicPtrCast<const Ieee80211MeshPeeringOpenFrame>(packet->peekAtFront<Chunk>())) lastOpen = open;
+        if (auto beacon = dynamicPtrCast<const Ieee80211BeaconFrame>(packet->peekAtFront<Chunk>())) lastBeacon = beacon;
+        held.push_back(packet);
+    }
+    void samples() {
+        Enter_Method("controlled estimator samples");
+        MeshDataAttempt attempt(peer(), &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, false, false);
+        MeshPayloadTransmission payload(peer(), 3);
+        emit(meshDataAttemptCompletedSignal, static_cast<cObject *>(nullptr), &attempt);
+        emit(meshPayloadTransmittedSignal, static_cast<cObject *>(nullptr), &payload);
+    }
+    void resetPeerAssociationContext(const MacAddress& address) override {
+        Enter_Method("controlled peer reset"); ++associationResets;
+        ASSERT(!fixtureMib->isMeshPeerEstablished(address));
+        ASSERT(!fixtureMib->findPeerRateSet(address));
+        ASSERT(!fixtureMib->findMeshPeerPhyCapabilities(address));
+        ASSERT(!fixtureMib->findMeshPeerPowerState(address));
+    }
+    void sendMeshData(Packet *packet) override { hold(packet); }
+    void deliverMeshMsdu(Packet *packet, MacAddress, MacAddress, int) override { hold(packet); }
+    void discardPendingMeshSources() override {
+        Enter_Method("controlled source withdrawal");
+        auto it = held.begin();
+        while (it != held.end()) {
+            auto metadata = (*it)->findTag<Ieee80211MeshAggregationTag>();
+            if (metadata && metadata->getPendingSourceIdentity()) {
+                Packet *packet = *it; it = held.erase(it); ++sourceWithdrawals; delete packet;
+            }
+            else ++it;
+        }
+    }
+    void processSourceMsdu(Packet *) override { throw cRuntimeError("Unexpected provider source processing"); }
+    void processDataFrame(Packet *, const Ptr<const Ieee80211DataHeader>&) override { throw cRuntimeError("Unexpected provider receive processing"); }
+    void finalizeSourceFrame(Packet *) override { throw cRuntimeError("Unexpected provider identity commitment"); }
+    bool isSourceActive() const override { return true; }
+    void pathAvailable(MacAddress) override { ++handoffs; }
+    void discoveryFailed(MacAddress destination) override { ++discoveryFailures; pending.erase(destination); }
+    bool hasPendingSource(MacAddress destination) override { return pending.count(destination); }
+    std::optional<MeshPath> findPath(MacAddress) const override { return std::nullopt; }
+    simtime_t getPrecursorExpiry(MacAddress, MacAddress) const override { return SIMTIME_ZERO; }
+    void refreshPath(MacAddress) override {}
+    void refreshPrecursor(MacAddress, MacAddress) override {}
+    void startDiscovery(MacAddress destination) override { pending.insert(destination); }
+    void sourcePathNeeded(MacAddress) override {}
+    void cancelDiscovery(MacAddress destination) override {
+        ++discoveryCancels; pending.erase(destination);
+        if (auto owner = dynamic_cast<MeshForwarding *>(getParentModule()->getSubmodule("forwarding"))) {
+            ASSERT(owner->getNumPendingPackets() == 0);
+            ASSERT(owner->getPendingBytes() == b(0));
+            ASSERT(!owner->isSourceActive());
+        }
+    }
+    void processHwmp(const Ptr<const Ieee80211HwmpFrame>&, MacAddress, MacAddress) override { throw cRuntimeError("Unexpected provider path input"); }
+    void reportUnknownTransit(MacAddress, MacAddress) override { throw cRuntimeError("Unexpected provider transit"); }
+    uint32_t getMetric(MacAddress) override { return 10; }
+    void resetPeer(MacAddress) override { ++metricResets; }
+    void resetAggregation(MacAddress) override {}
+    bool supportsPeerRates(MacAddress, const Ieee80211RateSetState&) override { return true; }
+    MeshLinkTiming getMeshLinkTiming(MacAddress) override {
+        auto mode = &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz;
+        return {Mbps(6), SimTime(100,SIMTIME_US), mode, mode};
+    }
+    MeshLinkTiming previewMeshLinkTiming(MacAddress address, const Ieee80211RateSetState&, const Ieee80211PeerPhyCapabilities&) override { return getMeshLinkTiming(address); }
+    std::vector<MeshBufferedFrame> getMeshBufferedFrames() const override { return {}; }
+    void meshPowerEligibilityChanged() override { throw cRuntimeError("Power excluded from lifecycle test"); }
+    void withdrawMeshPowerControl(int64_t) override { throw cRuntimeError("Power excluded from lifecycle test"); }
+    simtime_t getGroupDeliveryIdleTime() const override { throw cRuntimeError("Power excluded from lifecycle test"); }
+    void prepareManagementTransmission(Packet *, simtime_t, const IIeee80211Mode *) override { throw cRuntimeError("No physical management exchange in this test"); }
+    void managementTransmissionComplete(const Packet *) override { throw cRuntimeError("No physical management exchange in this test"); }
+    bool isBeaconPending() const override { return false; }
+    bool isMeshManagementActive() const override { return true; }
+    simtime_t getNextTbtt() const override { return SIMTIME_ZERO; }
+    // Signature-only adapters for currently visible P2 additions. No wake
+    // schedule is fabricated; any use makes this power-excluding test fail.
+    MeshWakeSchedule getMeshWakeSchedule() const override { throw cRuntimeError("Wake excluded from lifecycle test"); }
+    std::optional<simtime_t> getPeerTbtt(MacAddress, simtime_t) const override { throw cRuntimeError("Wake excluded from lifecycle test"); }
+    simtime_t getOwnTbtt(uint64_t) const override { throw cRuntimeError("Wake excluded from lifecycle test"); }
+    uint16_t getLocalLinkId(MacAddress) const override { return 1; }
+    uint16_t getPeerLinkId(MacAddress) const override { return 77; }
+    uint16_t getLocalAid(MacAddress) const override { return 1; }
+    void prepareManagementContent(Packet *) override { throw cRuntimeError("Unexpected beacon finalization"); }
+    void sendHwmp(const Ptr<Ieee80211HwmpFrame>&, MacAddress) override { ++handoffs; }
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL) {
+            fixtureMib = check_and_cast<Ieee80211Mib *>(getParentModule()->getSubmodule("mib"));
+            fixtureMib->address = local(); fixtureMib->mode = Ieee80211Mib::MESH;
+            MeshConfiguration configuration; configuration.pathSelectionMetricId = 2;
+            fixtureMib->configureMeshProfile("lifecycle-test", configuration);
+            fixtureMib->setMeshForwarding(true);
+        }
+        if (stage == INITSTAGE_PHYSICAL_LAYER) {
+            modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+            Ieee80211RateSetState rates;
+            rates.supported.known = rates.operational.known = rates.basic.known = true;
+            for (auto mode : modeSet->getLegacyOperationalModes()) {
+                auto rate = mode->getDataMode()->getNetBitrate();
+                rates.supported.legacyRates.insert(rate); rates.operational.legacyRates.insert(rate);
+                if (modeSet->getIsMandatory(mode)) rates.basic.legacyRates.insert(rate);
+            }
+            fixtureMib->setLocalRateSet(rates);
+            getParentModule()->emit(modesetChangedSignal, modeSet);
+            if (kind() != 0) fixtureMib->establishMeshPeer(peer(), rates);
+        }
+    }
+    void handleMessage(cMessage *) override { throw cRuntimeError("Controlled HCF cannot run an exchange"); }
+  public:
+    ~Providers() override { for (auto packet : held) delete packet; }
+};
+Define_Module(Providers);
+
+class Management : public Ieee80211MgmtMesh {
+  protected:
+    void sendDown(Packet *packet) override {
+        check_and_cast<Providers *>(getParentModule()->getSubmodule("providers"))->hold(packet);
+    }
+    void handleTimer(cMessage *message) override { ++managementTimers; Ieee80211MgmtMesh::handleTimer(message); }
+  public:
+    cMessage *peerTimer(MacAddress address) const { return peers.at(address).timer; }
+    bool beaconScheduled() const { return beaconTimer->isScheduled(); }
+    bool allIdle() {
+        for (const auto& entry : peers)
+            if (entry.second.state != IDLE || entry.second.timer->isScheduled() || entry.second.localLinkId || entry.second.peerLinkId) return false;
+        return neighbors.empty() && !isBeaconPending() && !beaconTimer->isScheduled()
+            && !myIface->isSubscribed(modesetChangedSignal,this) && !myIface->isSubscribed(packetDroppedSignal,this);
+    }
+    void establishThroughPeering() {
+        Enter_Method("fixture peering inputs"); openPeer(peer());
+        auto provider = check_and_cast<Providers *>(getParentModule()->getSubmodule("providers"));
+        ASSERT(provider->lastOpen);
+        auto open = staticPtrCast<Ieee80211MeshPeeringOpenFrame>(provider->lastOpen->dupShared());
+        auto peering = open->getMeshPeering(); peering.localLinkId = 77;
+        peering.peerLinkIdPresent = false; open->setMeshPeering(peering);
+        receiveFixture(open, MESH_PEERING_OPEN);
+        ASSERT(provider->lastConfirm);
+        auto confirm = staticPtrCast<Ieee80211MeshPeeringConfirmFrame>(provider->lastConfirm->dupShared());
+        peering = confirm->getMeshPeering(); peering.localLinkId = 77;
+        peering.peerLinkIdPresent = true; peering.peerLinkId = getLocalLinkId(peer());
+        confirm->setMeshPeering(peering); confirm->setAssociationId(9);
+        receiveFixture(confirm, MESH_PEERING_CONFIRM);
+        ASSERT(getPeerState(peer()) == ESTAB && mib->isMeshPeerEstablished(peer()));
+        openPeer(other()); ASSERT(getPeerState(other()) == OPN_SNT);
+    }
+    void receiveFixture(const Ptr<Ieee80211MeshFrame>& body, int action) {
+        auto header = makeShared<Ieee80211MeshActionFrame>();
+        header->setCategory(MESH_SELF_PROTECTED_ACTION); header->setMeshAction(action);
+        header->setTransmitterAddress(peer()); header->setReceiverAddress(mib->address);
+        auto packet = new Packet("fixture-peering", body); packet->insertAtFront(header);
+        processManagement(packet); // Real dispatch/profile/peering-state path.
+    }
+};
+Define_Module(Management);
+
+class Forwarding : public MeshForwarding {
+  protected:
+    void handleMessageWhenUp(cMessage *message) override { ++forwardingTimers; MeshForwarding::handleMessageWhenUp(message); }
+  public:
+    cMessage *expiryTimer() const { return pendingExpiryTimer; }
+    uint32_t sequence() const { return nextSequence; }
+    bool clean() const { return pending.empty() && pendingBytes == b(0) && recentFrames.empty() && !pendingExpiryTimer->isScheduled(); }
+    void seed() {
+        Enter_Method("fixture source inputs");
+        auto group = new Packet("group-source", makeShared<BytesChunk>(std::vector<uint8_t>{0x7e,0x7e,3,1,2,3,4}));
+        group->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+        group->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
+        processSourceMsdu(group);
+        processSourceMsdu(new QueuedMsdu("queued-one")); processSourceMsdu(new QueuedMsdu("queued-two"));
+        ASSERT(getNumPendingPackets() == 2 && getPendingBytes() == B(14));
+        ASSERT(pendingExpiryTimer->isScheduled() && !recentFrames.empty());
+        auto controlled = new Packet("controlled-uncommitted-source", makeShared<BytesChunk>(std::vector<uint8_t>{0}));
+        controlled->addTag<Ieee80211MeshAggregationTag>()->setPendingSourceIdentity(true);
+        check_and_cast<Providers *>(getParentModule()->getSubmodule("providers"))->hold(controlled);
+    }
+};
+Define_Module(Forwarding);
+
+class PathSelection : public Hwmp {
+  protected:
+    void handleMessageWhenUp(cMessage *message) override { ++hwmpTimers; Hwmp::handleMessageWhenUp(message); }
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override {
+        ++hwmpSignals; Hwmp::receiveSignal(source,signal,value,details);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        ++hwmpSignals; Hwmp::receiveSignal(source,signal,object,details);
+    }
+  public:
+    cMessage *discoveryTimer() const { return discoveries.at(unresolved()).timer; }
+    bool clean() {
+        if (!paths.empty() || !selfPrecursors.empty() || !seen.empty() || !pendingErrors.empty()) return false;
+        if (pathExpiryTimer->isScheduled() || perrTimer->isScheduled() || rootWorkTimer->isScheduled() || (rootOriginTimer && rootOriginTimer->isScheduled())) return false;
+        for (const auto& entry : discoveries)
+            if (entry.second.attempts || entry.second.sourceDue || entry.second.timer->isScheduled()) return false;
+        if (mib->isSubscribed(Ieee80211Mib::meshPeerChangedSignal,this)
+                || hcf->isSubscribed(Hcf::meshDataAttemptCompletedSignal,this)
+                || hcf->isSubscribed(Hcf::meshTerminalRecoverySignal,this)) return false;
+        return true;
+    }
+    void seed() {
+        Enter_Method("fixture HWMP inputs");
+        ASSERT(mib->isSubscribed(Ieee80211Mib::meshPeerChangedSignal,this));
+        ASSERT(hcf->isSubscribed(Hcf::meshDataAttemptCompletedSignal,this));
+        ASSERT(hcf->isSubscribed(Hcf::meshTerminalRecoverySignal,this));
+        HwmpPreq preq; preq.setTtl(3); preq.setHopCount(0); preq.setDiscoveryId(7);
+        preq.setOriginator(discovered()); preq.setOriginatorSequenceNumber(9);
+        preq.setLifetime(100); preq.setMetric(10); preq.setTargetsArraySize(1);
+        HwmpPreqTarget target; target.address = local(); target.flags = 4; preq.setTargets(0,target);
+        auto body = makeShared<Ieee80211HwmpFrame>(); body->setPreqsArraySize(1); body->setPreqs(0,preq); body->setChunkLength(B(39));
+        ASSERT(mib->isMeshPeerEstablished(peer()));
+        ASSERT(!body->isIncorrect() && !body->isIncomplete());
+        processHwmp(body, peer(), MacAddress::BROADCAST_ADDRESS);
+        ASSERT(getSeenIdentityCount() > 0);
+        ASSERT(findPath(discovered()));
+        auto provider = check_and_cast<Providers *>(getParentModule()->getSubmodule("providers"));
+        provider->pending.insert(unresolved()); startDiscovery(unresolved());
+        ASSERT(isDiscoveryActive(unresolved()) && discoveryTimer()->isScheduled());
+        ASSERT(rootOriginTimer && rootOriginTimer->isScheduled());
+    }
+};
+Define_Module(PathSelection);
+
+class Metric : public AirtimeLinkMetric {
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        ++metricSignals; AirtimeLinkMetric::receiveSignal(source,signal,object,details);
+    }
+};
+Define_Module(Metric);
+
+class Driver : public cSimpleModule, public LifecycleController {
+    cMessage *step = nullptr;
+    int phase = 0, quietCalls = 0, quietHandoffs = 0, destroyedBefore = 0, expectedWithdrawals = 0;
+    cMessage *retainedTimer = nullptr;
+    uint32_t retainedSequence = 0;
+    uint16_t retainedLink = 0;
+    int kind() const { return getParentModule()->getSubmodule("nic")->par("ownerKind"); }
+    int operation() const { return par("operation"); }
+    cModule *nic() const { return getParentModule()->getSubmodule("nic"); }
+    Providers *providers() const { return check_and_cast<Providers *>(nic()->getSubmodule("providers")); }
+    Ieee80211Mib *mib() const { return check_and_cast<Ieee80211Mib *>(nic()->getSubmodule("mib")); }
+    cModule *owner() const { return nic()->getSubmodule(kind()==0?"management":kind()==1?"forwarding":kind()==2?"pathSelection":"metric"); }
+    int calls() const { return kind()==0?managementTimers:kind()==1?forwardingTimers:kind()==2?hwmpTimers+hwmpSignals:metricSignals; }
+    void lifecycle(bool start, bool crash=false) {
+        auto op = start ? static_cast<LifecycleOperation *>(new ModuleStartOperation()) : crash ? static_cast<LifecycleOperation *>(new ModuleCrashOperation()) : static_cast<LifecycleOperation *>(new ModuleStopOperation());
+        LifecycleOperation::StringMap parameters; op->initialize(owner(),parameters);
+        ASSERT(initiateOperation(op));
+    }
+    void seed() {
+        if (kind()==0) {
+            auto management = check_and_cast<Management *>(owner()); management->establishThroughPeering();
+            if (retainedTimer) ASSERT(management->peerTimer(other()) == retainedTimer && management->getLocalLinkId(peer()) != retainedLink);
+            retainedTimer = management->peerTimer(other()); retainedLink = management->getLocalLinkId(peer());
+            ASSERT(retainedTimer->isScheduled() && management->beaconScheduled());
+        }
+        else if (kind()==1) {
+            auto forwarding = check_and_cast<Forwarding *>(owner());
+            if (retainedTimer) ASSERT(forwarding->expiryTimer() == retainedTimer && forwarding->sequence() == retainedSequence);
+            destroyedBefore = deletedQueued; forwarding->seed(); ++expectedWithdrawals;
+            retainedTimer = forwarding->expiryTimer(); retainedSequence = forwarding->sequence();
+        }
+        else if (kind()==2) {
+            auto paths = check_and_cast<PathSelection *>(owner());
+            if (retainedTimer) ASSERT(paths->discoveryTimer() == retainedTimer && paths->getSequenceNumber() == retainedSequence);
+            paths->seed(); retainedTimer = paths->discoveryTimer(); retainedSequence = paths->getSequenceNumber();
+        }
+        else {
+            auto metric = check_and_cast<Metric *>(owner());
+            ASSERT(metric->getErrorEstimate(peer())==0 && metric->getPayloadEstimate(peer())==1);
+            int before = metricSignals; providers()->samples();
+            ASSERT(metricSignals==before+2 && metric->getErrorEstimate(peer())==0.125 && metric->getPayloadEstimate(peer())==1.25);
+        }
+    }
+    void clean() {
+        if (kind()==0) {
+            auto management = check_and_cast<Management *>(owner());
+            ASSERT(!management->isMeshManagementActive() && management->allIdle() && management->getNextTbtt()==SIMTIME_ZERO);
+            ASSERT(!mib()->isMeshPeerEstablished(peer()) && !mib()->findPeerRateSet(peer()) && !mib()->findMeshPeerPhyCapabilities(peer()) && !mib()->findMeshPeerPowerState(peer()));
+            ASSERT(providers()->associationResets>0);
+        }
+        else if (kind()==1) {
+            auto forwarding = check_and_cast<Forwarding *>(owner());
+            ASSERT(!forwarding->isSourceActive() && forwarding->clean() && forwarding->sequence()==retainedSequence);
+            ASSERT(deletedQueued==destroyedBefore+2 && providers()->sourceWithdrawals==expectedWithdrawals);
+        }
+        else if (kind()==2) {
+            auto paths = check_and_cast<PathSelection *>(owner());
+            ASSERT(paths->clean() && !paths->findPath(discovered()) && !paths->isDiscoveryActive(unresolved()));
+            ASSERT(paths->getSequenceNumber()==retainedSequence && providers()->discoveryFailures>0);
+        }
+        else {
+            auto metric = check_and_cast<Metric *>(owner());
+            ASSERT(metric->getErrorEstimate(peer())==0 && metric->getPayloadEstimate(peer())==1);
+            ASSERT(!providers()->isSubscribed(Hcf::meshDataAttemptCompletedSignal,metric));
+            ASSERT(!providers()->isSubscribed(Hcf::meshPayloadTransmittedSignal,metric));
+        }
+    }
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage==INITSTAGE_LAST) { step=new cMessage("lifecycle-stage"); scheduleAt(SimTime(1,SIMTIME_MS),step); }
+    }
+    void handleMessage(cMessage *message) override {
+        ASSERT(message==step);
+        if (phase==0) { seed(); phase=1; scheduleAt(SimTime(2,SIMTIME_MS),step); return; }
+        if (phase==1) {
+            if (operation()==2) {
+                // Active management deletion does not imply peer retirement.
+                if (kind()==0) { lifecycle(false); clean(); }
+                owner()->deleteModule();
+                if (kind()==1) ASSERT(deletedQueued==destroyedBefore+2 && providers()->sourceWithdrawals==expectedWithdrawals);
+            }
+            else { lifecycle(false,operation()==1); clean(); }
+            quietCalls=calls(); quietHandoffs=providers()->handoffs;
+            phase=2; scheduleAt(SimTime(80,SIMTIME_MS),step); return;
+        }
+        if (phase==2) {
+            ASSERT(calls()==quietCalls && providers()->handoffs==quietHandoffs);
+            if (kind()==2 || kind()==3) { providers()->samples(); ASSERT(calls()==quietCalls); }
+            if (operation()!=2) {
+                clean();
+                if (kind()==0) {
+                    ASSERT(providers()->lastBeacon);
+                    auto header=makeShared<Ieee80211MgmtHeader>(); header->setType(ST_BEACON);
+                    auto late=new Packet("late-beacon-completion",providers()->lastBeacon);
+                    late->insertAtFront(header); late->insertAtBack(makeShared<Ieee80211MacTrailer>());
+                    auto management=check_and_cast<Management *>(owner());
+                    management->prepareManagementTransmission(late,SIMTIME_ZERO,&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+                    management->managementTransmissionComplete(late); delete late;
+                    ASSERT(management->allIdle() && providers()->handoffs==quietHandoffs);
+                }
+                if (kind()==1) { check_and_cast<Forwarding *>(owner())->pathAvailable(unresolved()); ASSERT(providers()->handoffs==quietHandoffs); }
+                if (kind()==2) { check_and_cast<PathSelection *>(owner())->startDiscovery(unresolved()); ASSERT(providers()->handoffs==quietHandoffs); }
+                lifecycle(true); seed(); lifecycle(false); clean();
+                quietCalls=calls(); quietHandoffs=providers()->handoffs;
+            }
+            else ASSERT(owner()==nullptr);
+            phase=3; scheduleAt(SimTime(250,SIMTIME_MS),step); return;
+        }
+        ASSERT(calls()==quietCalls && providers()->handoffs==quietHandoffs);
+        if (operation()!=2) { clean(); owner()->deleteModule(); }
+        if (kind()==2 || kind()==3) { providers()->samples(); ASSERT(calls()==quietCalls); }
+        recordScalar("isolatedLifecycleCompleted",1);
+        EV << "isolated lifecycle test: PASS owner=" << kind() << " operation=" << operation() << "\n";
+        delete step; step=nullptr; endSimulation();
+    }
+  public:
+    ~Driver() override { cancelAndDelete(step); }
+};
+Define_Module(Driver);
+} // namespace mesh_lifecycle_test
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.networklayer.common.NetworkInterface;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+import inet.linklayer.ieee80211.mesh.MeshForwarding;
+import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
+import inet.linklayer.ieee80211.mesh.hwmp.Hwmp;
+simple LifecycleProviders extends SimpleModule {
+    parameters:
+        @class(::mesh_lifecycle_test::Providers);
+        @signal[meshDataAttemptCompleted](type=inet::Packet);
+        @signal[meshPayloadTransmitted](type=inet::Packet);
+        @signal[meshTerminalRecovery](type=inet::Packet);
+}
+simple LifecycleManagement extends Ieee80211MgmtMesh { parameters: @class(::mesh_lifecycle_test::Management); @lifecycleSupport; }
+simple LifecycleForwarding extends MeshForwarding { parameters: @class(::mesh_lifecycle_test::Forwarding); }
+simple LifecycleHwmp extends Hwmp { parameters: @class(::mesh_lifecycle_test::PathSelection); }
+simple LifecycleMetric extends AirtimeLinkMetric { parameters: @class(::mesh_lifecycle_test::Metric); }
+simple LifecycleDriver extends SimpleModule { parameters: int operation; @class(::mesh_lifecycle_test::Driver); }
+module LifecycleNic extends NetworkInterface {
+    parameters:
+        int ownerKind;
+        string interfaceTableModule = "^.interfaceTable";
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+    submodules:
+        mib: Ieee80211Mib;
+        providers: LifecycleProviders;
+        management: LifecycleManagement if ownerKind==0 {
+            parameters:
+                interfaceTableModule="^.^.interfaceTable"; mibModule="^.mib"; macModule="^.providers";
+                linkMetricModule="^.providers"; linkTimingModule="^.providers"; pathSelectionModule=""; meshPowerSaveModule="";
+                meshId="lifecycle-test"; pathSelectionMetricId=2; autoPeer=false; beaconInterval=20.48ms;
+        }
+        forwarding: LifecycleForwarding if ownerKind==1 {
+            parameters: macModule="^.providers"; mibModule="^.mib"; pathSelectionModule="^.providers"; maxPendingWait=10ms;
+        }
+        pathSelection: LifecycleHwmp if ownerKind==2 {
+            parameters:
+                mibModule="^.mib"; managementModule="^.providers"; metricModule="^.providers";
+                forwardingModule="^.providers"; hcfModule="^.providers";
+                preqMinInterval=2.048ms; netDiameterTraversalTime=5.12ms;
+                activePathTimeout=102.4ms; rootMode=2; rootInterval=20.48ms;
+        }
+        metric: LifecycleMetric if ownerKind==3 { parameters: mibModule="^.mib"; hcfModule="^.providers"; }
+    connections allowunconnected:
+}
+network MeshLifecycleTest {
+    parameters: @networkNode;
+    submodules:
+        interfaceTable: InterfaceTable;
+        nic: LifecycleNic;
+        driver: LifecycleDriver;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MeshLifecycleTest
+seed-set = 0
+sim-time-limit = 300ms
+cmdenv-express-mode = false
+*.nic.ownerKind = ${owner=0,1,2,3}
+*.driver.operation = ${operation=0,1,2}
+**.vector-recording = false
+
+%contains: stdout
+isolated lifecycle test: PASS
+
+%not-contains: stdout
+it doesn't own
+
+%not-contains: stdout
+undisposed object:
+
+%not-contains: stderr
+Error:
+
+%not-contains: stderr
+it doesn't own
+
+%not-contains: stderr
+undisposed object:

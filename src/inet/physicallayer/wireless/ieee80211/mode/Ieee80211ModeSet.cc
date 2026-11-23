@@ -169,7 +169,31 @@ std::vector<Ieee80211ModeSet::Entry> Ieee80211ModeSet::appendHtModeEntries(std::
     return entries;
 }
 
-const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
+std::vector<Ieee80211ModeSet::Entry> Ieee80211ModeSet::getCompleteVhtModeEntries(const Ieee80211ModeSet& legacy)
+{
+    std::vector<Entry> result;
+    for (const auto& entry : legacy.entries) {
+        if (auto vht = dynamic_cast<const Ieee80211VhtMode *>(entry.mode)) {
+            // IEEE Std 802.11-2024,21.1.1 and VHT MCS tables (includingTable21-50): ac excludes
+            // the ten invalid width/NSS/MCS tuples, including80MHz/NSS6/MCS9.
+            // Reuse those legal MCS objects; a nonnull raw table object alone
+            // does not establish legality. Both GIs use the same legal tuples.
+            auto mcs = vht->getDataMode()->getModulationAndCodingScheme();
+            for (auto guard : {Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT}) {
+                auto mode = Ieee80211VhtCompliantModes::getCompliantMode(mcs, Ieee80211VhtMode::BAND_5GHZ,
+                    Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, guard);
+                bool mandatory = guard == Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG
+                    && mode->getDataMode()->getNumberOfSpatialStreams() == 1 && mode->getVhtMcsIndex() <= 7;
+                result.push_back({mandatory, mode});
+            }
+        }
+        else
+            result.push_back(entry);
+    }
+    return result;
+}
+
+const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { auto result = new std::vector<Ieee80211ModeSet> {
     Ieee80211ModeSet("a", {
         { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode9MbpsCS20MHz, true },
@@ -560,7 +584,15 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode12MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz, true },
-    }, true), Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::VHT, true),}; });
+    }, true), Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::VHT, true),};
+    // Build the legacy registry first: getModeSet() here would recursively
+    // initialize the same DelayedInitializer. The legacy ac catalog stays intact.
+    const auto& legacy = result->back();
+    auto completeEntries = getCompleteVhtModeEntries(legacy);
+    auto reference = legacy.referenceMode;
+    result->emplace_back("ac-complete", completeEntries, reference, PhyType::VHT, true);
+    return result;
+});
 
 Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
         PhyType phyType, bool htOperationSupported) :

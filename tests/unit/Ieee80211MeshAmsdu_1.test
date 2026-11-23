@@ -1,0 +1,130 @@
+%description:
+Independent native Mesh A-MSDU bytes use little-endian MSDU Length and a
+per-subframe Mesh Control. Basic encoding stays big-endian. Whole-body validation
+rejects truncation, endpoint/identity mismatch and forbidden final padding.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%activity:
+// Literal Figure9-124 subframes: payload3/pad1, payload4/no final pad.
+std::vector<uint8_t> body = {
+    2,0,0,0,0,2, 2,0,0,0,0,1, 3,0, 0,3,0x78,0x56,0x34,0x12, 0x7e,0x7e,3, 0,
+    2,0,0,0,0,2, 2,0,0,0,0,1, 4,0, 0,3,0x78,0x56,0x34,0x12, 0x7e,0x7e,3,0xab};
+std::vector<uint8_t> bytes = {
+    0x88,3,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1, 2,0,0,0,0,2, 0,0,
+    2,0,0,0,0,1, 0x80,1};
+bytes.insert(bytes.end(),body.begin(),body.end()); bytes.insert(bytes.end(),4,0);
+auto parse = [](const std::vector<uint8_t>& value) {
+    Packet packet("literal",makeShared<BytesChunk>(value));
+    auto header = packet.peekAtFront<Ieee80211MeshDataHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    std::vector<Ieee80211MeshAmsduPart> parts;
+    return parseMeshAmsdu(&packet,header,parts);
+};
+ASSERT(parse(bytes));
+Packet literal("literal",makeShared<BytesChunk>(bytes));
+auto outer = literal.peekAtFront<Ieee80211MeshDataHeader>();
+std::vector<Ieee80211MeshAmsduPart> parts;
+ASSERT(parseMeshAmsdu(&literal,outer,parts) && parts.size() == 2);
+ASSERT(parts[0].payloadOffset == B(52) && parts[0].payloadLength == B(3));
+ASSERT(parts[1].payloadOffset == B(76) && parts[1].payloadLength == B(4));
+ASSERT(parts[0].control->getSequenceNumber() == 0x12345678);
+auto mesh = makeShared<Ieee80211MeshMsduSubframeHeader>();
+mesh->setDa(MacAddress("02:00:00:00:00:02")); mesh->setSa(MacAddress("02:00:00:00:00:01")); mesh->setLength(3);
+Packet encoded("mesh",mesh);
+auto encodedBytes = encoded.peekAtFront<BytesChunk>()->getBytes();
+ASSERT(encodedBytes == std::vector<uint8_t>(body.begin(),body.begin()+14));
+auto basic = makeShared<Ieee80211MsduSubframeHeader>();
+basic->setDa(mesh->getDa()); basic->setSa(mesh->getSa()); basic->setLength(3);
+Packet ordinary("basic",basic);
+auto basicBytes = ordinary.peekAtFront<BytesChunk>()->getBytes();
+ASSERT(basicBytes[12] == 0 && basicBytes[13] == 3);
+for (size_t length=32;length<bytes.size();length++) {
+    auto truncated = bytes; truncated.erase(truncated.begin()+length-4,truncated.end()-4);
+    if (length != 59) ASSERT(!parse(truncated)); // A complete first subframe alone is valid without its nonfinal pad.
+}
+auto bad = bytes; bad[44] = 1; bad[45] = 8; ASSERT(!parse(bad));
+bad = bytes; bad[46] = 3; ASSERT(!parse(bad));
+bad = bytes; bad[56+5] = 3; ASSERT(!parse(bad));
+bad = bytes; bad[72] ^= 1; ASSERT(!parse(bad));
+bad = bytes; bad.insert(bad.end()-4,0); ASSERT(!parse(bad));
+MsduDeaggregation decoder;
+literal.popAtFront<Ieee80211MeshDataHeader>();
+literal.insertAtFront(outer); // Explicit caller role, as supplied by MeshMac after raw capture.
+std::unique_ptr<std::vector<Packet *>> siblings(decoder.deaggregateFrame(literal.dup()));
+ASSERT(siblings->size() == 2);
+for (auto sibling : *siblings) {
+    auto header = sibling->peekAtFront<Ieee80211MeshDataHeader>();
+    ASSERT(!header->getAMsduPresent() && header->getAddress3() == outer->getAddress3() && header->getAddress4() == outer->getAddress4());
+    ASSERT(sibling->peekDataAt<Ieee80211MeshControl>(B(32))->getSequenceNumber() == 0x12345678);
+    delete sibling;
+}
+auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+Ieee80211PeerPhyCapabilities receiver; receiver.htPresent = receiver.vhtPresent = true;
+receiver.ht.maxAmsduLength = 7935; receiver.vht.maxMpduLength = 7991;
+for (int i=0;i<modes->getNumModes();i++) {
+    auto mode = modes->getMode(i);
+    if (mode->getHtMcsIndex() >= 0) ASSERT(meshAmsduBodyLimit(receiver,mode) == B(7935));
+    if (mode->getVhtMcsIndex() >= 0) ASSERT(meshAmsduBodyLimit(receiver,mode) == B(7955));
+}
+auto legacy = modes->getMode(Mbps(24));
+ASSERT(meshAmsduBodyLimit(receiver,legacy) == B(4059));
+auto nonHtProbe = [&](int bodyLength) {
+    Packet packet("non-HT-limit",outer);
+    packet.insertAtBack(makeShared<ByteCountChunk>(B(bodyLength)));
+    packet.insertAtBack(makeShared<Ieee80211MacTrailer>());
+    return meshAmsduFitsTransport(&packet,outer,receiver,legacy);
+};
+ASSERT(nonHtProbe(4059) && !nonHtProbe(4060));
+receiver.ht.maxAmsduLength = 3839;
+ASSERT(meshAmsduBodyLimit(receiver,legacy) == B(3839));
+ASSERT(nonHtProbe(3839) && !nonHtProbe(3840));
+receiver.ht.maxAmsduLength = 7935;
+const IIeee80211Mode *slow = nullptr;
+for (int i=0;i<modes->getNumModes();i++) {
+    auto mode = modes->getMode(i);
+    if (mode->getHtMcsIndex() == 0 && mode->getDataMode()->getBandwidth() == MHz(20) && !mode->isHtShortGuardInterval()) slow = mode;
+}
+ASSERT(slow);
+int last = 36;
+while (slow->getDuration(B(last+1)) <= SimTime(5484,SIMTIME_US)) last++;
+ASSERT(slow->getDuration(B(last)) == SimTime(5484,SIMTIME_US));
+auto durationProbe = [&](int length) {
+    Packet packet("duration-boundary",outer);
+    packet.insertAtBack(makeShared<ByteCountChunk>(B(length-36)));
+    packet.insertAtBack(makeShared<Ieee80211MacTrailer>());
+    return meshAmsduFitsTransport(&packet,outer,receiver,slow);
+};
+ASSERT(durationProbe(last) && !durationProbe(last+1));
+std::vector<Packet *> pending;
+for (int i=0;i<3;i++) {
+    auto header = staticPtrCast<Ieee80211MeshDataHeader>(outer->dupShared()); header->setAMsduPresent(false);
+    auto frame = new Packet(("source"+std::to_string(i)).c_str(),header);
+    auto control = makeShared<Ieee80211MeshControl>(); control->setTtl(3);
+    frame->insertAtBack(control);
+    frame->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(7+i,0x7e)));
+    frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    frame->addTag<Ieee80211MeshAggregationTag>()->setPendingSourceIdentity(true);
+    pending.push_back(frame);
+}
+MsduAggregation builder;
+std::unique_ptr<Packet> formed(builder.aggregateFrames(&pending));
+auto formedHeader = formed->peekAtFront<Ieee80211MeshDataHeader>();
+ASSERT(parseMeshAmsdu(formed.get(),formedHeader,parts) && parts.size() == 3);
+ASSERT(formed->getTag<Ieee80211MeshAggregationTag>()->getPendingSourceIdentity());
+ASSERT(formed->getTag<Ieee80211MeshAggregationTag>()->getMsduCount() == 3);
+ASSERT(formed->getDataLength() == B(121)); // 32+28+28+29+4, final no padding.
+EV << "Mesh A-MSDU literal bytes, atomic validation and transport limits verified.\n";
+
+%contains: stdout
+Mesh A-MSDU literal bytes, atomic validation and transport limits verified.

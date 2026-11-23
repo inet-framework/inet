@@ -1,0 +1,3 @@
+Mesh service-period outcomes work with signal checking enabled
+
+The mesh power policy declared its outcome signal with an unregistered type name, causing ordinary simulations to stop when signal checking validated a period outcome. Register the existing notification class and declare its exact type so normal checking accepts period outcomes and rejects unrelated objects without changing period state or notification ownership.

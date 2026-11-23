@@ -14,12 +14,40 @@
 namespace inet {
 namespace ieee80211 {
 
+void FrameSequenceHandler::cancelPendingTransmission()
+{
+    ASSERT(isSequenceRunning());
+    ASSERT(dynamic_cast<ITransmitStep *>(context->getLastStep()));
+    context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+    finishFrameSequence();
+}
+
 void FrameSequenceHandler::interruptFrameSequence()
 {
     ASSERT(isSequenceRunning());
+    if (auto transmit = dynamic_cast<ITransmitStep *>(context->getLastStep())) {
+        if (dynamic_cast<AggregateTransmitStep *>(transmit)) {
+            context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+            finishFrameSequence();
+            return;
+        }
+        auto frame = transmit->getFrameToTransmit();
+        ASSERT(dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(frame->peekAtFront<Ieee80211MacHeader>()));
+        ASSERT(!context->getInProgressFrames()->containsFrame(frame));
+        context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+        finishFrameSequence();
+        return;
+    }
     ASSERT(dynamic_cast<IReceiveStep *>(context->getLastStep()));
     context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
     auto outgoing = check_and_cast<ITransmitStep *>(context->getStepBeforeLast())->getFrameToTransmit();
+    if (auto aggregate = dynamic_cast<AggregateTransmitStep *>(context->getStepBeforeLast())) {
+        bool live = std::any_of(aggregate->members.begin(), aggregate->members.end(), [this](Packet *p) {
+            return context->getInProgressFrames()->containsFrame(p);
+        });
+        if (live) abortFrameSequence(); else finishFrameSequence();
+        return;
+    }
     // Retirement removes DATA and management frames from the queue before this transition.
     // Control exchanges retain their ordinary failure path through the recovery callback.
     bool retired = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(outgoing->peekAtFront<Ieee80211MacHeader>()) &&
@@ -35,6 +63,7 @@ void FrameSequenceHandler::handleStartRxTimeout()
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE:
+            lastStep->setCompletion(IFrameSequenceStep::Completion::EXPIRED);
             abortFrameSequence();
             break;
         case IFrameSequenceStep::Type::TRANSMIT:
@@ -173,7 +202,8 @@ void FrameSequenceHandler::abortFrameSequence()
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep *>(dynamic_cast<IReceiveStep *>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
-    auto header = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
+    auto aggregate = dynamic_cast<AggregateTransmitStep *>(failedTxStep);
+    auto header = aggregate ? aggregate->members.front()->peekAtFront<Ieee80211MacHeader>() : frameToTransmit->peekAtFront<Ieee80211MacHeader>();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))

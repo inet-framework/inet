@@ -90,6 +90,7 @@ class INET_API Rx : public ModeSetListener, public IRx
     void attachInterframeResult(Packet *packet, bool accepted);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details) override;
 
   public:
     Rx();
@@ -101,6 +102,9 @@ class INET_API Rx : public ModeSetListener, public IRx
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;
+    bool prepareReceivedFrame(Packet *packet) override;
+    bool prepareReceivedAmpdu(const Packet *packet, Ieee80211AmpduLayout& layout,
+        std::vector<std::unique_ptr<Packet>>& members) override;
     virtual void invalidateInterframeHistory() override;
     virtual void frameTransmitted(simtime_t durationField) override;
     virtual simtime_t getTxnavRemaining() const override;

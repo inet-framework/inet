@@ -105,6 +105,8 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     virtual bool isInternalCollision();
     void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
     bool hasEligibleFrames() const;
+    // Nominal initial access delay, independent of current CW and random backoff.
+    simtime_t getInitialContentionDelay() const { return ifs + slotTime * (cwMin / 2.0); }
     virtual AccessCategory getAccessCategory() { return ac; }
 };
 

@@ -1,0 +1,5 @@
+Mesh awake coordination owner roles
+
+Custom IMeshManagement providers must supply copied wake schedules and convert own/peer beacon deadlines through their existing timing authority. Custom IMeshPowerBuffer providers must expose the PHY-default group-delivery idle duration. IMeshPowerSave providers implement awake review, radio-observation, received-beacon/group and actual timing/PPDU-completion notifications. The new IMeshRadioControl role exposes public observations and requests a deferred MAC review without transferring radio ownership.
+
+These are explicit pure contracts. Custom physically-awake intermediate power fixtures should override coordinator review and received awake-window facts consistently. The concrete MAC completion overload retains legacy delegation; its start argument is an actual PPDU fact, not a rescheduled transmission time. Concrete adaptation instructions are in the development migration guide.

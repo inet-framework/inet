@@ -73,7 +73,7 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     auto module = dynamic_cast<cModule *>(queue);
     auto head = queue->canPullPacket(module ? module->gate("out") : nullptr);
     if (allowAggregation && selected == head && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(selected))) {
-        std::unique_ptr<std::vector<Packet *>> proposed(aMsduAggregationPolicy->computeAggregateFrames(queue));
+        std::unique_ptr<std::vector<Packet *>> proposed(selectAggregationSources(queue, selected));
         bool valid = proposed && !proposed->empty() && proposed->front() == selected;
         std::set<Packet *> unique;
         if (proposed) {
@@ -107,12 +107,95 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     return result;
 }
 
+std::vector<std::unique_ptr<PreparedQosData>> OriginatorQosMacDataService::prepareFrames(
+        queueing::IPacketQueue *queue, bool allowMsduAggregation, int maxMembers, B memberLimit)
+{
+    Enter_Method("prepareFrames");
+    if (expireFrames)
+        expireFrames();
+    std::vector<std::unique_ptr<PreparedQosData>> result;
+    if (!aMpduAggregationPolicy || maxMembers < 1)
+        return result;
+    std::vector<Packet *> remaining;
+    Ptr<const Ieee80211DataHeader> first;
+    for (int i=0;i<queue->getNumPackets();i++) {
+        auto packet = queue->getPacket(i);
+        if (extractionEligible && !extractionEligible(packet))
+            continue;
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!header || header->getType() != ST_DATA_WITH_QOS)
+            break;
+        if (!first)
+            first = header;
+        if (header->getReceiverAddress() != first->getReceiverAddress() || header->getTid() != first->getTid())
+            break;
+        remaining.push_back(packet);
+    }
+    while (!remaining.empty() && result.size() < size_t(maxMembers)) {
+        auto preparation = std::make_unique<PreparedQosData>();
+        preparation->queue = queue;
+        std::vector<Packet *> sources{remaining.front()};
+        if (allowMsduAggregation && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(remaining.front()))) {
+            std::unique_ptr<std::vector<Packet *>> group(aMsduAggregationPolicy->computeAggregateFrames(remaining));
+            bool valid = group && group->size() > 1 && group->size() <= remaining.size();
+            if (valid)
+                for (size_t i=0;i<group->size();i++)
+                    valid &= group->at(i) == remaining[i] && (!aMsduPermitted || aMsduPermitted(group->at(i)));
+            if (valid) {
+                std::vector<Packet *> copies;
+                for (auto packet : *group)
+                    copies.push_back(packet->dup());
+                std::unique_ptr<Packet> preview(aMsduAggregation->aggregateFrames(&copies));
+                if (preview->getDataLength() <= memberLimit && (!aMsduPermitted || aMsduPermitted(preview.get()))) {
+                    sources = *group;
+                    preparation->aggregate = true;
+                    preparation->setPacket(preview.release());
+                }
+            }
+        }
+        if (!preparation->packet)
+            preparation->setPacket(remaining.front()->dup());
+        if (preparation->packet->getDataLength() > memberLimit)
+            break;
+        for (auto source : sources)
+            preparation->sourceIds.push_back(source->getId());
+        preparation->sequenceOffset = result.size();
+        auto header = preparation->packet->removeAtFront<Ieee80211DataHeader>();
+        header->setSequenceNumber(getNextSequenceNumber(header->getReceiverAddress(),header->getTid()) + preparation->sequenceOffset);
+        preparation->packet->insertAtFront(header);
+        result.push_back(std::move(preparation));
+        remaining.erase(remaining.begin(),remaining.begin()+sources.size());
+    }
+    std::vector<Packet *> candidates;
+    for (const auto& preparation : result)
+        candidates.push_back(preparation->packet.get());
+    auto selected = selectAmpduFrames(candidates);
+    // Selection is an ordered prefix. No extraction or identity is consumed.
+    result.resize(selected.size());
+    return result;
+}
+
+std::vector<Packet *> OriginatorQosMacDataService::selectAmpduFrames(const std::vector<Packet *>& candidates)
+{
+    Enter_Method("selectAmpduFrames");
+    if (!aMpduAggregationPolicy || candidates.empty())
+        return {};
+    auto input = candidates;
+    std::unique_ptr<std::vector<Packet *>> selected(aMpduAggregationPolicy->computeAggregateFrames(&input));
+    if (!selected || selected->empty() || selected->size() > candidates.size())
+        return {};
+    for (size_t i=0;i<selected->size();i++)
+        if (selected->at(i) != candidates[i])
+            throw cRuntimeError("MPDU aggregation policy must return an ordered candidate prefix");
+    return *selected;
+}
+
 bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& preparation, simtime_t start) const
 {
     if (!preparation.packet || !preparation.queue || preparation.sourceIds.empty())
         return false;
     auto header = preparation.packet->peekAtFront<Ieee80211DataHeader>();
-    if (header->getSequenceNumber() != getNextSequenceNumber(header->getReceiverAddress(), header->getTid()))
+    if (header->getSequenceNumber() != getNextSequenceNumber(header->getReceiverAddress(), header->getTid()) + preparation.sequenceOffset)
         return false;
     for (auto id : preparation.sourceIds) {
         Packet *source = nullptr;
@@ -131,6 +214,15 @@ bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& prep
     return true;
 }
 
+Packet *OriginatorQosMacDataService::buildAmpdu(const std::vector<Packet *>& members, const MpduAggregationParameters& parameters)
+{
+    Enter_Method("buildAmpdu");
+    ASSERT(aMpduAggregation && !members.empty());
+    std::vector<Packet *> copies;
+    for (auto member : members) copies.push_back(member->dup());
+    return aMpduAggregation->aggregateFrames(&copies,parameters);
+}
+
 Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& preparation)
 {
     Enter_Method("commitPreparedFrame");
@@ -138,15 +230,21 @@ Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& prepar
         return nullptr;
     std::vector<Packet *> sources;
     std::vector<int64_t> trackedIds;
-    simtime_t deadline = SIMTIME_MAX;
+    bool meshAggregate = preparation.aggregate && dynamicPtrCast<const Ieee80211MeshDataHeader>(preparation.packet->peekAtFront<Ieee80211DataHeader>()) != nullptr;
+    simtime_t deadline = meshAggregate ? SIMTIME_ZERO : SIMTIME_MAX;
     for (auto id : preparation.sourceIds) {
         for (int i = 0; i < preparation.queue->getNumPackets(); i++) {
             auto source = preparation.queue->getPacket(i);
             if (source->getId() == id) {
                 sources.push_back(source);
-                if (lifetimeHandler && lifetimeHandler->getDeadline(source) != SIMTIME_MAX) {
-                    trackedIds.push_back(id);
-                    deadline = lifetimeHandler->getDeadline(source);
+                if (lifetimeHandler) {
+                    auto sourceDeadline = lifetimeHandler->getDeadline(source);
+                    if (sourceDeadline != SIMTIME_MAX)
+                        trackedIds.push_back(id);
+                    if (meshAggregate)
+                        deadline = std::max(deadline, sourceDeadline);
+                    else if (sourceDeadline != SIMTIME_MAX)
+                        deadline = sourceDeadline;
                 }
                 break;
             }
@@ -175,7 +273,7 @@ Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& prepar
     auto packet = preparation.releasePacket();
     take(packet);
     if (lifetimeHandler) {
-        if (preparation.aggregate) {
+        if (preparation.aggregate && !dynamicPtrCast<const Ieee80211MeshDataHeader>(packet->peekAtFront<Ieee80211DataHeader>())) {
             auto edca = check_and_cast<Edca *>(getParentModule()->getSubmodule("edca"));
             lifetimeHandler->registerFrame(packet, edca->classifyFrame(packet->peekAtFront<Ieee80211DataHeader>()));
         }
@@ -186,21 +284,23 @@ Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& prepar
     assignSequenceNumber(header);
     packet->insertAtFront(header);
     packet->addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(nextDataAllocationIndex++);
+    if (finalizeSourceFrame)
+        finalizeSourceFrame(packet);
     if (preparation.aggregate)
         emit(packetAggregatedSignal, packet);
     return packet;
 }
 
-Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected)
+std::vector<Packet *> *OriginatorQosMacDataService::selectAggregationSources(queueing::IPacketQueue *queue, Packet *selected)
 {
-    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
+    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(queue);
     if (subframes) {
         bool valid = !subframes->empty() && subframes->front() == selected;
         std::set<Packet *> unique;
         for (auto frame : *subframes) {
             bool present = false;
-            for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
-                if (pendingQueue->getPacket(i) == frame) {
+            for (int i = 0; i < queue->getNumPackets(); i++) {
+                if (queue->getPacket(i) == frame) {
                     present = true;
                     break;
                 }
@@ -214,9 +314,29 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
             return nullptr;
         }
     }
+    // The configured policy owns grouping/user limits. The production permission
+    // callback also checks the complete nested bytes against selected peer/PHY limits.
+    if (subframes && dynamicPtrCast<const Ieee80211MeshDataHeader>(selected->peekAtFront<Ieee80211DataHeader>()) && aMsduPermitted) {
+        std::vector<Packet *> copies;
+        for (auto frame : *subframes) copies.push_back(frame->dup());
+        std::unique_ptr<Packet> preview(aMsduAggregation->aggregateFrames(&copies));
+        if (aMsduPermitted(preview.get())) return subframes;
+        // A shortened prefix may violate the policy's minimum count/length.
+        // Preserve its accepted grouping contract and fall back to one MSDU.
+        delete subframes;
+        return nullptr;
+    }
+    return subframes;
+}
+
+Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected)
+{
+    auto subframes = selectAggregationSources(pendingQueue, selected);
     if (subframes) {
         std::vector<int64_t> sourceIds;
         AccessCategory ac = AC_BE;
+        bool mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(subframes->front()->peekAtFront<Ieee80211DataHeader>()) != nullptr;
+        simtime_t deadline = SIMTIME_ZERO;
         if (lifetimeHandler) {
             auto header = subframes->front()->peekAtFront<Ieee80211DataHeader>();
             ac = check_and_cast<Edca *>(getParentModule()->getSubmodule("edca"))->classifyFrame(header);
@@ -225,8 +345,11 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
             pendingQueue->removePacket(subframe);
             take(subframe);
             // qOsCheck can permit non-QoS sources that have no lifetime entry.
-            if (lifetimeHandler && lifetimeHandler->getDeadline(subframe) != SIMTIME_MAX)
-                sourceIds.push_back(subframe->getId());
+            if (lifetimeHandler) {
+                deadline = std::max(deadline, lifetimeHandler->getDeadline(subframe));
+                if (lifetimeHandler->getDeadline(subframe) != SIMTIME_MAX)
+                    sourceIds.push_back(subframe->getId());
+            }
         }
         if (lifetimeHandler)
             lifetimeHandler->prepareFrameReplacement(sourceIds);
@@ -234,7 +357,10 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
         if (lifetimeHandler) {
             // IEEE Std 802.11-2024, 10.23.2.12.1: each addition restarts the A-MSDU timer.
             // This builder adds all constituents at the current simulation time.
-            lifetimeHandler->registerFrame(aggregatedFrame, ac);
+            if (mesh)
+                lifetimeHandler->registerFragments({aggregatedFrame}, deadline);
+            else
+                lifetimeHandler->registerFrame(aggregatedFrame, ac);
         }
         emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
@@ -306,8 +432,13 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             assignSequenceNumber(header);
             packet->insertAtFront(header);
         }
-        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        // Native SNS5 Null is control, independent of DATA allocation/window
+        // ordering as well as wire sequence and mesh-MSDU identity.
+        if (data && !(data->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(data)))
             packet->addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(nextDataAllocationIndex++);
+        if (finalizeSourceFrame)
+            finalizeSourceFrame(packet);
 //        if (msduIntegrityAndProtection)
 //            frame = protectMsduIfNeeded(frame);
         std::vector<Packet *> *fragments = nullptr;

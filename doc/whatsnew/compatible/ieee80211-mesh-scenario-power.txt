@@ -1,0 +1,3 @@
+Scenario commands for mesh peer power modes
+
+ScenarioManager scripts can request active, light-sleep or deep-sleep for an established mesh peer by sending set-mesh-power-mode to the interface's enabled powerSavePolicy module. The command uses the existing mode-transition and acknowledgment behavior; it does not enable power saving or retain requests for a later peering.

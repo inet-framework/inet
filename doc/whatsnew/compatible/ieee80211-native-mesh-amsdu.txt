@@ -1,0 +1,7 @@
+Native mesh A-MSDU formation and intact forwarding
+
+HT/VHT mesh interfaces can opt into native A-MSDU formation with the existing MSDU aggregation policy. Each constituent carries its mesh endpoints, little-endian MSDU Length and Mesh Control, while one committed aggregate consumes one mesh sequence number. Transit units retain their identities and complete retry payloads.
+
+Reception validates the whole aggregate before duplicate admission, forwarding or constituent delivery. Negotiated size limits, PPDU duration, TXOP admission and aggregate lifetime are checked in their owning paths. Mandatory standalone non-HT reception remains available to an HT-capable receiver independently of its local formation policy; local aggregate transmission uses HT/VHT.
+
+The directional airtime estimator now samples payload MSDUs once per completed PPDU, including retries, independently of ACK outcomes. Metric ID 2 uses the resulting aggregation estimate; metric ID 1 keeps its standard n=1 calculation. Aggregation-limit changes reset that estimate without erasing the error estimate when the effective PHY tuple stays unchanged.

@@ -78,7 +78,7 @@ class RecipientReorderingTest : public cSimpleModule {
 
     std::vector<Packet *> receive(Packet *packet) {
         auto header = packet->peekAtFront<Ieee80211DataHeader>();
-        return recipient->dataFrameReceived(packet, header, &agreements);
+        return recipient->dataFrameReceived(packet, header, &agreements, nullptr);
     }
 
     std::vector<Packet *> receiveBar(int start, MacAddress transmitter, Tid tid = 5, int fragment = 0) {

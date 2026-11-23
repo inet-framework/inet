@@ -8,6 +8,7 @@ import inet.common.INETDefs;
 import inet.physicallayer.wireless.common.base.packetlevel.TransmissionBase;
 import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
 import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Tag;
 
 cplusplus {{
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
@@ -21,4 +22,5 @@ class Ieee80211Transmission extends TransmissionBase
     @descriptor(readonly);
     const IIeee80211Mode *mode;
     const Ieee80211Channel *channel;
+    Ieee80211TxVector txVector;
 }

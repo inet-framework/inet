@@ -76,6 +76,15 @@ enum Ieee80211RadiotapVhtBit
     RADIOTAP_VHT_FLAG_SHORT_GUARD_INTERVAL = 0x04;
 }
 
+// https://radiotap.org/fields/A-MPDU%20status.html
+enum Ieee80211RadiotapAmpduFlag
+{
+    RADIOTAP_AMPDU_LAST_KNOWN = 0x0004;
+    RADIOTAP_AMPDU_IS_LAST = 0x0008;
+    RADIOTAP_AMPDU_DELIMITER_CRC_KNOWN = 0x0020;
+    RADIOTAP_AMPDU_EOF_KNOWN = 0x0080;
+}
+
 //
 // The Radiotap header, which comes before the IEEE 802.11 frame in a capture
 // record of link type 127 (LINKTYPE_IEEE802_11_RADIOTAP). The header contains
