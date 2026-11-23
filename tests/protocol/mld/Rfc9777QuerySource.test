@@ -9,13 +9,6 @@ the program steps below map onto its expected observations. Step 1 is observatio
 source of observation 3. The other observations are in Rfc9777QueryEncapsulation.test and
 Rfc9777QueryChecksum.test.
 
-Defect: the Query of R leaves from its global address, 2001:db8:1::1. Mldv2::sendToIPv6 gives
-the IPv6 layer the destination, the interface and the Hop Limit, and no source address
-(src/inet/networklayer/icmpv6/Mldv2.cc:1420-1430), so IPv6 takes the global address of the
-interface. RFC 9777 sections 5.1.14 and 7.6.2 send every Query from a link-local address of
-fe80::/64. This test FAILS, and the failure is deliberately NOT declared expected: the model
-has the mechanism, and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"

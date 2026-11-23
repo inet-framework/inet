@@ -182,6 +182,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
         GroupToRouterDataMap groups;
         RouterState state;
         cMessage *generalQueryTimer;
+        bool waitsForLinkLocalAddress = false; // the querier starts when the interface has a tested link-local address
 
         RouterInterfaceData(Mldv2 *owner, NetworkInterface *ie);
         virtual ~RouterInterfaceData();
@@ -266,6 +267,10 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
     virtual void handleStartOperation(LifecycleOperation *operation) override {}
     virtual void handleStopOperation(LifecycleOperation *operation) override;
+    // the Reports and Dones that wait for a tested link-local address of their interface
+    std::map<int, std::vector<Packet *>> heldMessages;
+    virtual void sendHeldMessages(NetworkInterface *ie);
+    virtual void deleteHeldMessages(int interfaceId);
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

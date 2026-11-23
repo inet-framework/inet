@@ -11,13 +11,6 @@ the program steps below map onto its expected observations. The guards are obser
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
 section 9.11; Rfc9777StartRepeated.test checks the default itself.
 
-Defect: every MLD message leaves from a global address; the Hop Limit is 1. Mldv2::sendToIPv6
-gives the IPv6 layer the destination, the interface and the Hop Limit, and no source address
-(src/inet/networklayer/icmpv6/Mldv2.cc:1420-1430), so IPv6 takes the global address of the
-interface. The guard of R fails at its first Query, at the start. This test FAILS, and the
-failure is deliberately NOT declared expected: the model has the mechanism, and the mechanism
-does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
