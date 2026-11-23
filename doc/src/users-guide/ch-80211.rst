@@ -918,9 +918,11 @@ mode; the interface does not set it. Set :par:`bandName` on the radio for
 
 :par:`channelNumber` is an index into the band, from 0. In the 2.4 GHz band
 index 0 is 2412 MHz and index 13 is 2484 MHz, so the index is the channel
-number of the standard minus one. The arithmetic bands (``"5 GHz"``,
-``"5.9 GHz"``) count channels from the start of the band in steps of the
-channel spacing. Radios on different channels do not hear each other in the
+number of the standard minus one. In ``"5 GHz"``, indices 0 to 199 have
+centers 5005 to 6000 MHz (``5000 + 5 * (index + 1)`` MHz, following
+IEEE Std 802.11-2024 Equation (17-27) for ``n_ch = 1..200``, so index 35 is
+5180 MHz), while ``"5.9 GHz"`` steps in 10 MHz increments from 5860 MHz.
+Radios on different channels do not hear each other in the
 scalar model. Only the dimensional model computes the partial overlap of
 adjacent channels.
 

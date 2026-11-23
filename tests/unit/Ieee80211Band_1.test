@@ -1,6 +1,6 @@
 %description:
-Verify explicit IEEE 802.11 standards channel-number mappings and rejection of
-bands without a representable mapping.
+Verify IEEE 802.11 band center frequencies, explicit standards channel-number
+mappings, and rejection of bands without a representable mapping.
 
 %includes:
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
@@ -121,6 +121,37 @@ ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(44), 1))
 ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(48), 3));
 ASSERT(!mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(40), 1));
 ASSERT(!mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(44), 3));
+
+// IEEE Std 802.11-2024, Clause 17.3.8.4.2, Equation (17-27) and
+// Clause 19.3.15.3, Equation (19-88): center = 5000 + 5 * n_ch MHz
+// for n_ch = 1..200 (0-based channelIndex i maps to n_ch = i + 1).
+const auto *band5GHz = Ieee80211CompliantBands::getBand("5 GHz");
+ASSERT(band5GHz->getNumChannels() == 200);
+ASSERT(band5GHz->getSpacing() == MHz(5));
+ASSERT(band5GHz->getCenterFrequency(0) == MHz(5005));
+ASSERT(band5GHz->getCenterFrequency(4) == MHz(5025));
+ASSERT(band5GHz->getCenterFrequency(35) == MHz(5180));
+ASSERT(band5GHz->getCenterFrequency(35) == mappedBand->getCenterFrequency(0));
+ASSERT(band5GHz->getCenterFrequency(39) == mappedBand->getCenterFrequency(1));
+ASSERT(band5GHz->getCenterFrequency(199) == MHz(6000));
+for (int index = 0; index < band5GHz->getNumChannels(); index++)
+    ASSERT(band5GHz->getCenterFrequency(index) == MHz(5000 + 5 * (index + 1)));
+
+for (int index : {-1, 200}) {
+    rejected = false;
+    try {
+        band5GHz->getCenterFrequency(index);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+}
+
+const auto *band5_9GHz = Ieee80211CompliantBands::getBand("5.9 GHz");
+ASSERT(band5_9GHz->getNumChannels() == 7);
+for (int index = 0; index < band5_9GHz->getNumChannels(); index++)
+    ASSERT(band5_9GHz->getCenterFrequency(index) == MHz(5860 + 10 * index));
 
 EV << "IEEE 802.11 band channel mapping checks passed.\n";
 

@@ -1,0 +1,3 @@
+IEEE 802.11 "5 GHz" band center frequencies align to the 5 MHz grid
+
+Ieee80211CompliantBands::band5GHz previously placed channel centers at 5002.5 + 5 * i MHz (2.5 MHz off the IEEE 802.11 5 MHz grid). It now uses start = MHz(5002.5) so channel indices 0..199 have centers 5000 + 5 * (i + 1) MHz (5005..6000 MHz, matching IEEE Std 802.11-2024 Equation (17-27) for n_ch = 1..200). Simulations using the "5 GHz" band shift carrier frequencies by +2.5 MHz, which slightly increases free-space path loss and lowers SNIR (no INET wireless fingerprints moved).

@@ -129,7 +129,9 @@ const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 });
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), 200);
+// IEEE Std 802.11-2024, Clause 17.3.8.4.2, Equation (17-27) (and Clause 19.3.15.3, Equation (19-88)):
+// center(i) = 5000 + 5 * (i + 1) MHz for n_ch = i + 1 in 1..200 (5005..6000 MHz).
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", MHz(5002.5), MHz(5), 200);
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), 25);
 
