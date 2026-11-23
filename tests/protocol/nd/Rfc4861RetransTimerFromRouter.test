@@ -11,15 +11,10 @@ observation 2, and steps 3 and 4 observation 3.
 The router sets AdvRetransTimer through NdRouterVariables of NdChecks.h, because the model has
 no parameter for it.
 
-Defect: address resolution waits the node constant RETRANS_TIMER between two solicitations,
-"_getRetransTimer()" (src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:695, 713; the
-constant is set at src/inet/networklayer/ipv6/Ipv6InterfaceData.cc:193), and not the
-RetransTimer variable that the host copies from the advertisement
-(Ipv6NeighbourDiscovery.cc:1525). RFC 4861 section 6.3.4: "The RetransTimer variable SHOULD be
-copied from the Retrans Timer field, if the received value is non-zero." Observations 1 and 2
-hold; observation 3 fails: the solicitations come 1 s apart. This test FAILS, and the failure
-is deliberately NOT declared expected: the model has the mechanism, and the mechanism does the
-wrong thing, which is a defect. See results.md.
+The host copies the Retrans Timer, in milliseconds (RFC 4861 section 4.2), into its RetransTimer
+variable, and address resolution waits that variable between two solicitations. RFC 4861 section
+6.3.4: "The RetransTimer variable SHOULD be copied from the Retrans Timer field, if the received
+value is non-zero." All three observations hold.
 
 %includes:
 #include "ProtocolTest.h"
