@@ -1,0 +1,210 @@
+%description:
+Origin availability follows the current external default. Replacing it with an
+ad hoc default revokes capability; restoring the wired route re-enables it.
+Unchanged availability does not advance the origin sequence or send an update.
+A50-byte v2 sender observes real UDP output for two-entry fairness and overflow.
+
+%file: test.ned
+import inet.routing.dsdv.Dsdv;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple OriginProbe extends Dsdv { parameters: @class(OriginProbe); }
+network DsdvGatewayOriginNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host: AdhocHost;
+    connections allowunconnected:
+}
+
+%file: Probe.cc
+#include "inet/routing/dsdv/Dsdv.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include <set>
+using namespace inet;
+using namespace inet::dsdv;
+namespace DsdvGatewayOrigin {
+class OriginProbe : public Dsdv
+{
+    cMessage *probeTimer=nullptr;
+    int step=0;
+    int packets=0,fullDumps=0,bytes=0;
+    int beforePackets=0,beforeDumps=0,beforeBytes=0;
+    uint64_t sequence=0;
+    std::vector<int> rotation;
+    bool zeroSpare=false;
+    std::vector<simtime_t> times={.1,.11,.12,.13,.2,.21,.3,.31,.4,.41,.5,.6,.65,.7,.75,.8,.81};
+    DsdvEntry entry(int destination,uint64_t seq,uint32_t metric) {
+        DsdvEntry value; value.destination=Ipv4Address(0x0a000000U+destination); value.sequence=seq; value.metric=metric;
+        return value;
+    }
+    void inject(std::vector<DsdvEntry> entries) {
+        auto header=makeShared<DsdvHeader>(); header->setVersion(2); header->setSender(Ipv4Address("10.0.0.2"));
+        header->setEntriesArraySize(entries.size()); header->setChunkLength(B(16+17*entries.size()));
+        for (size_t i=0;i<entries.size();i++) header->setEntries(i,entries[i]);
+        auto packet=new Packet("controlled v2 input",header);
+        packet->addTag<InterfaceInd>()->setInterfaceId(routingInterface->getInterfaceId());
+        packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address("10.0.0.2"));
+        packet->addTag<L4PortInd>()->setSrcPort(controlPort);
+        socketDataArrived(&socket,packet);
+    }
+    void addDefault(NetworkInterface *interface) {
+        auto route=routingTable->createRoute(); route->setDestination(Ipv4Address()); route->setPrefixLength(0);
+        route->setInterface(interface); route->setMetric(1); route->setSourceType(IRoute::MANUAL);
+        routingTable->addRoute(route);
+    }
+    void probe() {
+        switch (step) {
+            case 0:
+                ASSERT(capacity==2 && isBaseStation() && !table.getSelf().current.defaultCapability);
+                externalInterface->setCarrier(true);
+                sequence=table.getSelf().current.sequence;
+                addDefault(externalInterface);
+                ASSERT(!table.getSelf().current.defaultCapability && reconciliationTimer->isScheduled());
+                break;
+            case 1:
+                ASSERT(table.getSelf().current.defaultCapability && table.getSelf().current.sequence==sequence+2);
+                ASSERT(routingTable->getDefaultRoute()->getSource()!=this);
+                sequence=table.getSelf().current.sequence;
+                break;
+            case 2:
+                beforePackets=packets;
+                routingTable->getDefaultRoute()->setMetric(2);
+                routingTable->getDefaultRoute()->setMetric(3);
+                ASSERT(reconciliationTimer->isScheduled());
+                break;
+            case 3:
+                ASSERT(table.getSelf().current.sequence==sequence && table.getSelf().current.defaultCapability);
+                ASSERT(packets==beforePackets);
+                break;
+            case 4:
+                addDefault(routingInterface);
+                ASSERT(table.getSelf().current.defaultCapability);
+                break;
+            case 5:
+                ASSERT(!table.getSelf().current.defaultCapability && table.getSelf().current.sequence==sequence+2);
+                sequence=table.getSelf().current.sequence;
+                break;
+            case 6: addDefault(externalInterface); break;
+            case 7:
+                ASSERT(table.getSelf().current.defaultCapability && table.getSelf().current.sequence==sequence+2);
+                break;
+            case 8:
+                beforePackets=packets; beforeDumps=fullDumps; beforeBytes=bytes;
+                inject({entry(4,10,1),entry(5,10,1),entry(6,10,1),entry(7,10,1)});
+                break;
+            case 9:
+                ASSERT(fullDumps==beforeDumps+1 && packets==beforePackets+3 && bytes==beforeBytes+133);
+                ASSERT(table.getBaseline().size()==5);
+                break;
+            case 10: inject({entry(4,12,1),entry(5,12,1),entry(6,12,1)}); break;
+            case 11: inject({entry(7,12,2)}); break;
+            case 12:
+            case 13: inject({entry(7,11,UINT32_MAX)}); break;
+            case 14:
+                ASSERT(rotation==std::vector<int>({4,5,6}));
+                break;
+            case 15: inject({entry(8,10,1)}); break;
+            case 16:
+                ASSERT(zeroSpare);
+                std::cout << "DSDV origin module PASS: selected default, unchanged availability, 50B v2 fairness and overflow\n";
+                break;
+        }
+        if (++step<int(times.size())) scheduleAt(times[step],probeTimer);
+    }
+  protected:
+    using Dsdv::receiveSignal;
+    void initialize(int stage) override {
+        Dsdv::initialize(stage);
+        if (stage==INITSTAGE_LOCAL) {
+            subscribe("controlPacketSent",this); subscribe("fullDumpSent",this); subscribe("controlBytes",this);
+        }
+        if (stage==INITSTAGE_LAST) {
+            getParentModule()->getSubmodule("udp")->subscribe(packetSentToLowerSignal,this);
+            probeTimer=new cMessage("probeTimer"); scheduleAt(times[0],probeTimer);
+        }
+    }
+    void handleMessageWhenUp(cMessage *message) override {
+        if (message==probeTimer) probe(); else Dsdv::handleMessageWhenUp(message);
+    }
+    void receiveSignal(cComponent *,simsignal_t signal,intval_t value,cObject *) override {
+        if (signal==registerSignal("controlPacketSent")) packets++;
+        else if (signal==registerSignal("fullDumpSent")) fullDumps++;
+        else if (signal==registerSignal("controlBytes")) bytes+=value;
+    }
+    void receiveSignal(cComponent *source,simsignal_t signal,cObject *value,cObject *details) override {
+        if (signal!=packetSentToLowerSignal) { Dsdv::receiveSignal(source,signal,value,details); return; }
+        auto packet=check_and_cast<Packet *>(value);
+        auto header=packet->peekDataAt<DsdvHeader>(B(8));
+        ASSERT(header->getVersion()==2 && header->getChunkLength()<=B(50));
+        std::set<Ipv4Address> destinations;
+        for (size_t i=0;i<header->getEntriesArraySize();i++) ASSERT(destinations.insert(header->getEntries(i).destination).second);
+        if (header->getKind()!=2 || simTime()<SimTime(.6)) return;
+        int optional=0; bool required=false,extra=false;
+        for (size_t i=0;i<header->getEntriesArraySize();i++) {
+            const auto& item=header->getEntries(i);
+            int destination=item.destination.getInt()&255;
+            if (destination==7 && item.sequence==12) required=true;
+            if (destination==8) extra=true;
+            if (destination>=4 && destination<=6 && item.sequence==12) { ASSERT(optional==0); optional=destination; }
+        }
+        if (simTime()<SimTime(.75)) {
+            ASSERT(required && optional!=0 && header->getEntriesArraySize()==2);
+            rotation.push_back(optional);
+        }
+        else if (simTime()>=SimTime(.8)) {
+            ASSERT(required && extra && optional==0 && header->getEntriesArraySize()==2);
+            zeroSpare=true;
+        }
+    }
+    void finish() override { ASSERT(step==int(times.size())); }
+  public:
+    ~OriginProbe() override { cancelAndDelete(probeTimer); }
+};
+Define_Module(OriginProbe);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvGatewayOriginNetwork
+sim-time-limit = 1s
+seed-set = 0
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.numApps = 1
+*.host.numEthInterfaces = 1
+*.host.app[0].typename = "OriginProbe"
+*.host.app[0].baseStationAddress = "10.0.0.1"
+*.host.app[0].externalInterface = "eth0"
+*.host.app[0].payloadBudget = 50B
+*.host.app[0].fullDumpInterval = 100s
+*.host.app[0].periodicJitter = 0s
+*.host.app[0].settlingCap = 20ms
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='host' names='eth0' address='10.1.0.1' netmask='255.255.255.0'/></config>")
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV origin module PASS: selected default, unchanged availability, 50B v2 fairness and overflow

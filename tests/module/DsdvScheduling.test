@@ -1,0 +1,278 @@
+%description:
+DSDV production callback scheduling: forwarding changes immediately while a
+periodic full dump preserves the settling view; deadlines do not slide.
+Baseline-equal corrections and corrections during settling submit immediately.
+Required overflow emits a bounded full dump in one event; malformed datagrams
+leave state and clocks unchanged. Callback-level input is controlled explicitly.
+
+%file: test.ned
+import inet.routing.dsdv.Dsdv;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple DsdvSchedulingProbe extends Dsdv { parameters: @class(DsdvSchedulingProbe); }
+simple DsdvArpProbe { parameters: @class(DsdvArpProbe); @display("i=block/app"); }
+network DsdvSchedulingNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        arpProbe: DsdvArpProbe;
+        host: AdhocHost;
+}
+
+%file: Probe.cc
+#include "inet/routing/dsdv/Dsdv.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+using namespace inet;
+using namespace inet::dsdv;
+namespace DsdvScheduling {
+class DsdvArpProbe : public SimpleModule, public IArp
+{
+  public:
+    L3Address getL3AddressFor(const MacAddress& mac) const override {
+        if (mac == MacAddress("02:00:00:00:00:02")) return Ipv4Address("10.0.0.2");
+        if (mac == MacAddress("02:00:00:00:00:03")) return Ipv4Address("10.0.0.3");
+        return Ipv4Address();
+    }
+    MacAddress resolveL3Address(const L3Address&,const NetworkInterface *) override { return MacAddress(); }
+    void sendArpProbe(const NetworkInterface *,MacAddress,Ipv4Address) override {}
+};
+Define_Module(DsdvArpProbe);
+class DsdvSchedulingProbe : public Dsdv
+{
+    cMessage *probeTimer=nullptr;
+    int step=0;
+    int packets=0, fullDumps=0, accepted=0, rejected=0;
+    int beforePackets=0, beforeDumps=0;
+    int remoteWithdrawals=0;
+    std::vector<simtime_t> times={.1,.11,.2,.3,.31,.35,.4,.450001,.48,.5,.500001,.55,.56,.560001,.6,.7,.71,.9,.900001,1,1.2,1.3,1.31,1.4,1.41,1.5,1.51,1.6,1.61,1.7,1.71,1.8};
+    Ipv4Address destination=Ipv4Address("10.0.0.4");
+    DsdvEntry entry(int node,uint64_t sequence,uint32_t metric) {
+        DsdvEntry value; value.destination=Ipv4Address(0x0a000000U+node);
+        value.sequence=sequence; value.metric=metric; return value;
+    }
+    void inject(std::vector<DsdvEntry> entries,int version=1,int sender=2) {
+        auto header=makeShared<DsdvHeader>(); header->setSender(Ipv4Address(0x0a000000U+sender));
+        header->setVersion(version); header->setEntriesArraySize(entries.size());
+        header->setChunkLength(B(16+16*entries.size()));
+        for (size_t i=0;i<entries.size();i++) header->setEntries(i,entries[i]);
+        auto packet=new Packet("controlled input",header);
+        packet->addTag<InterfaceInd>()->setInterfaceId(routingInterface->getInterfaceId());
+        packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(0x0a000000U+sender));
+        packet->addTag<L4PortInd>()->setSrcPort(controlPort);
+        socketDataArrived(&socket,packet);
+    }
+    void hint(cComponent *source,const MacAddress& receiver,bool network=true,const Protocol *protocol=&Protocol::ipv4) {
+        Packet packet("borrowed failed frame");
+        packet.addTag<MacAddressReq>()->setDestAddress(receiver);
+        if (network) {
+            auto header=makeShared<Ipv4Header>(); header->setDestAddress(Ipv4Address("10.0.0.5"));
+            auto tag=packet.addTag<NetworkProtocolInd>(); tag->setProtocol(protocol); tag->setNetworkProtocolHeader(header);
+        }
+        Dsdv::receiveSignal(source,linkBrokenSignal,&packet,nullptr);
+        ASSERT(packet.findTag<MacAddressReq>() && packet.getName()==std::string("borrowed failed frame"));
+    }
+    void forcePeriodic() { cancelEvent(periodicTimer); scheduleAt(simTime()+SimTime(.000001),periodicTimer); }
+    void probe() {
+        switch (step) {
+            case 0: inject({entry(4,10,1)}); break;
+            case 1: forcePeriodic(); break;
+            case 2:
+                inject({entry(4,12,3)});
+                ASSERT(table.getRouteEntries().at(destination).current.metric==4);
+                ASSERT(routingTable->findBestMatchingRoute(destination)->getMetric()==4);
+                ASSERT(advertisementTimer->getArrivalTime()==SimTime(.45));
+                break;
+            case 3: forcePeriodic(); break;
+            case 4:
+                ASSERT(table.getRouteEntries().at(destination).advertised.sequence==10);
+                ASSERT(table.getRouteEntries().at(destination).advertised.metric==2);
+                break;
+            case 5: inject({entry(4,12,1)}); ASSERT(advertisementTimer->getArrivalTime()==SimTime(.45)); break;
+            case 6: inject({entry(4,14,1)}); ASSERT(advertisementTimer->getArrivalTime()==SimTime(.45)); break;
+            case 7:
+                ASSERT(table.getRouteEntries().at(destination).advertised.sequence==14);
+                ASSERT(!advertisementTimer->isScheduled());
+                break;
+            case 8: forcePeriodic(); break;
+            case 9:
+                beforePackets=packets; inject({entry(4,13,UINT32_MAX)});
+                ASSERT(advertisementTimer->getArrivalTime()==simTime());
+                break;
+            case 10: ASSERT(packets==beforePackets+1 && !advertisementTimer->isScheduled()); break;
+            case 11:
+                inject({entry(4,16,3)});
+                ASSERT(advertisementTimer->getArrivalTime()>simTime());
+                break;
+            case 12: inject({entry(4,15,UINT32_MAX)}); ASSERT(advertisementTimer->getArrivalTime()==simTime()); break;
+            case 13: ASSERT(table.getRouteEntries().at(destination).advertised.sequence==16); break;
+            case 14: inject({entry(4,18,3)}); ASSERT(!advertisementTimer->isScheduled()); break;
+            case 15: forcePeriodic(); break;
+            case 16: ASSERT(table.getRouteEntries().at(destination).advertised.sequence==18); break;
+            case 17:
+                beforePackets=packets; beforeDumps=fullDumps;
+                inject({entry(6,2,1),entry(7,2,1),entry(8,2,1)});
+                break;
+            case 18:
+                ASSERT(fullDumps==beforeDumps+1 && packets==beforePackets+3);
+                ASSERT(!advertisementTimer->isScheduled());
+                break;
+            case 19: {
+                auto refreshed=table.getRouteEntries().at(destination).refreshed;
+                auto expiry=expiryTimer->getArrivalTime(); int beforeAccepted=accepted;
+                inject({entry(4,20,1)},99);
+                inject({entry(4,20,1),entry(4,20,1)});
+                ASSERT(rejected==2 && accepted==beforeAccepted);
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==18);
+                ASSERT(table.getRouteEntries().at(destination).refreshed==refreshed);
+                ASSERT(expiryTimer->getArrivalTime()==expiry);
+                break;
+            }
+            case 20:
+                inject({entry(4,19,UINT32_MAX)});
+                ASSERT(remoteWithdrawals==1);
+                ASSERT(routingTable->findBestMatchingRoute(destination)==nullptr);
+                std::cout << "DSDV scheduling PASS: forwarding, full-view damping, deadlines, correction, overflow, atomic rejection\n";
+                break;
+            case 21: {
+                inject({entry(4,20,1),entry(5,20,1)});
+                inject({entry(5,22,2),entry(9,20,1)},1,3);
+                MacAddress oldReceiver("02:00:00:00:00:02");
+                hint(this,oldReceiver); // Not emitted under the selected interface.
+                hint(routingInterface,oldReceiver,false);
+                hint(routingInterface,oldReceiver,true,&Protocol::ipv6);
+                hint(routingInterface,MacAddress::BROADCAST_ADDRESS);
+                hint(routingInterface,MacAddress("02:00:00:00:00:99"));
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==20);
+                hint(routingInterface,oldReceiver);
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==21);
+                ASSERT(routingTable->findBestMatchingRoute(destination)==nullptr);
+                ASSERT(table.getRouteEntries().at(Ipv4Address("10.0.0.5")).current.sequence==22);
+                ASSERT(table.getRouteEntries().at(Ipv4Address("10.0.0.5")).successor==Ipv4Address("10.0.0.3"));
+                ASSERT(routingTable->findBestMatchingRoute(Ipv4Address("10.0.0.9"))!=nullptr);
+                ASSERT(advertisementTimer->getArrivalTime()==simTime());
+                hint(routingInterface,oldReceiver);
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==21);
+                break;
+            }
+            case 22:
+                ASSERT(table.getRouteEntries().at(destination).advertised.sequence==21);
+                break;
+            case 23: {
+                suspend(false);
+                auto sequence=table.getRouteEntries().at(Ipv4Address("10.0.0.5")).current.sequence;
+                hint(routingInterface,MacAddress("02:00:00:00:00:03"));
+                ASSERT(table.getRouteEntries().at(Ipv4Address("10.0.0.5")).current.sequence==sequence);
+                ASSERT(!periodicTimer->isScheduled() && !advertisementTimer->isScheduled() && !expiryTimer->isScheduled());
+                start();
+                ASSERT(active && startupDump && advertisementTimer->getArrivalTime()==simTime());
+                break;
+            }
+            case 24:
+                ASSERT(!startupDump);
+                std::cout << "DSDV MAC feedback module PASS: hint filtering, failed receiver, repeat safety, restart\n";
+                break;
+            case 25: forcePeriodic(); break;
+            case 26: ASSERT(currentPeriod==SimTime(200)); break;
+            case 27:
+                inject({entry(10,2,1),entry(11,2,1)});
+                forcePeriodic();
+                break;
+            case 28: ASSERT(currentPeriod==SimTime(100)); break;
+            case 29: forcePeriodic(); break;
+            case 30:
+                ASSERT(currentPeriod==SimTime(200));
+                suspend(false);
+                start();
+                ASSERT(currentPeriod==period && table.consumeSignificantChanges()==0);
+                break;
+            case 31:
+                ASSERT(active && !startupDump);
+                std::cout << "DSDV adaptive scheduling module PASS: quiet growth, churn reduction, restart reset\n";
+                break;
+        }
+        if (++step<int(times.size())) scheduleAt(times[step],probeTimer);
+    }
+  protected:
+    void initialize(int stage) override {
+        Dsdv::initialize(stage);
+        if (stage==INITSTAGE_LOCAL) {
+            subscribe("controlPacketSent",this); subscribe("fullDumpSent",this);
+            subscribe("updateAccepted",this); subscribe("updateRejected",this);
+            subscribe("invalidationReason",this);
+        }
+        if (stage==INITSTAGE_LAST) { probeTimer=new cMessage("probeTimer"); scheduleAt(times[0],probeTimer); }
+    }
+    void handleMessageWhenUp(cMessage *message) override {
+        if (message==probeTimer) probe(); else Dsdv::handleMessageWhenUp(message);
+    }
+    void receiveSignal(cComponent *,simsignal_t signal,intval_t,cObject *) override {
+        if (signal==registerSignal("controlPacketSent")) packets++;
+        else if (signal==registerSignal("fullDumpSent")) fullDumps++;
+        else if (signal==registerSignal("updateAccepted")) accepted++;
+        else if (signal==registerSignal("updateRejected")) rejected++;
+    }
+    void receiveSignal(cComponent *,simsignal_t,const char *value,cObject *) override {
+        if (strcmp(value,"remoteWithdrawal")==0) remoteWithdrawals++;
+    }
+    void finish() override { ASSERT(step==int(times.size())); }
+  public:
+    ~DsdvSchedulingProbe() override { cancelAndDelete(probeTimer); }
+};
+Define_Module(DsdvSchedulingProbe);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvSchedulingNetwork
+sim-time-limit = 2s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.numApps = 1
+*.host.app[0].typename = "DsdvSchedulingProbe"
+*.host.app[0].fullDumpInterval = 100s
+*.host.app[0].adaptiveFullDump = true
+*.host.app[0].periodicJitter = 0s
+*.host.app[0].neighborTimeout = 10s
+*.host.app[0].routeTimeout = 12s
+*.host.app[0].settlingCap = 1s
+*.host.app[0].payloadBudget = 48B
+*.host.app[0].useMacFailureFeedback = true
+*.host.app[0].arpModule = "DsdvSchedulingNetwork.arpProbe"
+*.host.ipv4.routingTable.netmaskRoutes = ""
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.host.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV scheduling PASS: forwarding, full-view damping, deadlines, correction, overflow, atomic rejection
+%contains: stdout
+DSDV MAC feedback module PASS: hint filtering, failed receiver, repeat safety, restart
+%contains: stdout
+DSDV adaptive scheduling module PASS: quiet growth, churn reduction, restart reset

@@ -1,0 +1,65 @@
+# DSDV optional model behavior
+
+> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [source scope and version-1 wire profile](../../protocol/dsdv/standards.md), [statement catalog](../../standard/perkins1994/catalog.md)
+
+This document defines the model choices for optional DSDV behavior. The statement catalog owns the paper's routing requirements; these choices specify how the model connects them to its surrounding modules. Test execution and measured support belong in the [coverage ledger](coverage.md) and [results](results.md), not here.
+
+## MAC failure feedback
+
+Enabling `useMacFailureFeedback` makes `Dsdv` subscribe to the existing node-level `linkBrokenSignal` and resolve `arpModule` through `IArp`. Otherwise, it retains silence-based neighbor detection without resolving an ARP dependency for this option. Parameter declarations and defaults belong to [Dsdv.ned](../../../../../src/inet/routing/dsdv/Dsdv.ned).
+
+A usable hint is a failed unicast IPv4 frame emitted by a module within the configured ad hoc interface. The handler reads the borrowed packet's retained `MacAddressReq` receiver and `NetworkProtocolInd` header. It uses `IArp::getL3AddressFor` to find the failed receiver's IPv4 identity without initiating another resolution. This profile assumes ordinary local ARP and one ad hoc IPv4 identity per neighbor MAC. Inactive modules, unrelated interfaces, non-IPv4 frames, group receivers and absent or unresolved metadata do not cause route invalidation; the existing timeouts remain active.
+
+The table removes that neighbor's liveness record and invalidates each finite route whose current successor is the failed receiver. Each withdrawal advances its even destination sequence once to odd infinity and becomes immediately eligible for advertisement. Repeated hints do not repeatedly increment an already-invalid route. The adapter removes the corresponding owned IPv4 routes and schedules the existing advertisement callback without settling delay. It does not infer the failed receiver from a fresh route lookup for the packet's final destination, because that route may have switched successors while the frame was queued.
+
+This is an optional heuristic. AckingMac emits a hint after an acknowledgment timeout, and ad hoc DCF emits one after retry exhaustion. Other producers can give hints for causes such as local contention; receipt of the signal is not proof that the physical link is permanently broken. The option changes neither MAC retry policy nor the [version-1 UDP encoding](../../protocol/dsdv/standards.md#version-1-wire-profile-engineering-choices).
+
+Subscriptions remain available across stop/start. While DSDV is inactive, failure hints have no effect; normal startup and retained withdrawal floors govern recovery. No failed packet or borrowed route pointer is retained beyond its callback.
+
+## Adaptive periodic full dumps
+
+Enabling `adaptiveFullDump` adjusts periodic scheduling from the initial `fullDumpInterval`, within the configured interval bounds and bitrate target. The declarations and defaults of these settings belong to [Dsdv.ned](../../../../../src/inet/routing/dsdv/Dsdv.ned). Intervals and budget must be finite and positive, with minimum <= initial <= maximum. This is an engineering policy for the paper's qualitative suggestions, not a formula specified by the paper or a measurement of channel occupancy.
+
+The table counts significant selected-route transitions: newly reachable destinations, finite-to-infinite withdrawals and metric or successor changes. Count one transition once even when several conditions change. Duplicate updates, same-path sequence refreshes, periodic self-sequence advances and corrective resends without a selected-route change do not count. The counter saturates at the entry capacity K of one outgoing datagram; a zero limit disables collection. Startup resets the history after initializing the table, while later neighbor discovery belongs to the first observation window.
+
+At each periodic callback, advance the self sequence once and submit the complete full dump. Let C be the accumulated change count and B the sum of the encoded DSDV payload bytes in its fragments. Choose the next interval in three steps:
+
+1. Propose 2 × I for C = 0, I / 2 for C >= K, or I otherwise.
+2. Raise the proposal to at least 8 × B / fullDumpBitrateBudget, then clamp it to the configured minimum and maximum using representable simulation times.
+3. Store that interval, clear the consumed history and schedule the existing periodic timer at the selected interval plus its usual jitter draw.
+
+The threshold K counts transition events, not necessarily distinct destinations or the exact next incremental size. As a configured arithmetic example, choose I = 1 s, minimum 0.5 s, maximum 4 s, K = 2, B = 80 bytes and a 11200 bps budget. The result is 2 s for C = 0 and 0.5 s for C = 2. Changing that example's budget to 320 bps raises either proposal to at least 2 s; a 128 bps budget requests 5 s, but the 4 s maximum takes precedence. These example settings are not a list of parameter defaults. The target can be exceeded.
+
+The bitrate target covers periodic DSDV payload bytes only. It excludes UDP/IP headers, radio airtime and triggered traffic. Urgent updates, corrections and required-entry overflow dumps use the existing advertisement path; sending them does not reset the periodic timer or advance the self sequence. Preparing a dump consumes dissemination state, so byte accounting uses the submitted fragments rather than preparing a second copy. `fullDumpIntervalSelected` records the selected interval once per adaptive periodic callback. The disabled path uses neither the new statistic nor another random draw or timer.
+
+Receiver liveness depends on peer sending intervals, not the receiver's own interval. In a loss-free fixture, its neighbor timeout should exceed the largest peer periodic interval plus peer jitter and a delivery allowance; its route timeout must also allow the relevant settling delay. Include fixed-period peers in that calculation. The model retains positive-timeout validation but does not reject a receiver whose own full-dump interval exceeds its receive timeout. It cannot derive a network-wide timing bound from local parameters, and losses or unbounded latency can still cause expiry.
+
+An illustrative heterogeneous fixture uses A with initial/minimum 2 s, maximum 4 s, neighbor timeout 1.5 s and route timeout 2 s; B uses initial/minimum 0.25 s, maximum 0.5 s and both timeouts 6 s. With zero jitter, a 0.1 s settling cap and delivery allowance below 0.05 s, each receiver's timeouts cover its peer's gap. A's receive timeout can legitimately be shorter than A's own sending interval. This is a configuration oracle, not a claim that this scenario has been executed.
+
+Stop, crash and ad hoc interface loss cancel the existing timers. Restart resets the selected interval to `fullDumpInterval` and clears adaptation history while preserving the protocol's retained sequence floors. No performance improvement is implied by enabling the policy; delivery, convergence and total control traffic require their own measurements.
+
+## Base-station default reachability
+
+The gateway profile uses one configured `baseStationAddress` shared by the domain. Its value is the station's stable ad hoc IPv4 host identity. A station with that identity may name one distinct `externalInterface`; ordinary routers retain one active non-loopback interface. The gateway setting is optional, and its parameter declarations and defaults belong to [Dsdv.ned](../../../../../src/inet/routing/dsdv/Dsdv.ned). There is no gateway election, arbitrary-prefix propagation or domain-wide detection of inconsistent identities. The external interface never carries DSDV control or contributes imported destinations to the DSDV table.
+
+The station offers default capability while IPv4 forwarding is enabled, the named uplink is up with carrier and a usable IPv4 address, and the routing table's current non-DSDV default uses that uplink. The existing IPv4 table replaces a default when another is inserted, so this profile reuses `getDefaultRoute()` and does not introduce preference ranking. A missing external default means unavailable service, not failure to participate as an ordinary host router. This observes modeled interface and route availability, not the health of a remote Internet destination.
+
+Route deletion notifications can occur inside an IPv4 table iteration and before a replacement default is inserted. A coalesced reconciliation event runs after the notifying call finishes, then reevaluates external availability and foreign-default suppression. It retains no borrowed route pointer and ignores notifications caused by its own projection. The gateway profile alone creates this event and its route subscriptions; host-only operation retains its existing event path. Suspension cancels the event, and startup recomputes availability before sending its startup dump.
+
+### Version-2 encoding
+
+Version 2 uses the [version-1 fixed header and field order](../../protocol/dsdv/standards.md#version-1-wire-profile-engineering-choices), with header version 2 and the same 16-byte header length. Each entry appends one flags byte after the existing destination, sequence and metric, giving 17 bytes per entry. Bit 0 means the destination offers default capability; bits 1–7 must be zero. A capable entry must be finite and identify the configured base station. Its destination remains the station's host address, never `0.0.0.0`.
+
+The serializers support both versions, while each receiver accepts only its configured domain profile: host-only modules use version 1 and configured gateway domains use version 2. Unknown versions, reserved flags, capability on an infinite route, wrong capability origins, duplicate destinations and invalid lengths are rejected before route or liveness state changes. Version 1 cannot encode true capability; serialization rejects such an attempt rather than silently omitting the flag. The sender header remains liveness only and cannot refresh or overwrite an omitted destination's capability.
+
+The effective datagram capacity is `min(UINT16_MAX, floor((payload budget - 16) / entry size))`, after reserving IPv4/UDP overhead against interface MTU as for version 1. At least one entry must fit. For a configured version-2 payload budget, 32 bytes cannot hold an entry, 33 bytes hold one, and 50 bytes hold two. Both versions retain the original metric, parity and checked finite-run sequence limits.
+
+### Capability freshness and forwarding
+
+The origin flag is immutable for an even destination sequence. Each computed availability transition advances the station's self sequence by two once and makes its complete tuple urgent. Unchanged notifications cause no advertisement or sequence churn. Initial startup establishes capability before the startup dump; a restart uses the existing even-sequence advance with the recomputed flag, without a second advance for that same transition.
+
+Receivers carry the flag with its accepted sequence, metric and successor. An equal-sequence candidate with conflicting capability is ignored without refreshing that destination, although packet-level sender liveness still applies. An accepted capability transition in either direction is immediately advertised as one complete tuple, bypassing settling even when metric is unchanged. Capability differences from the full-dump baseline are required incremental entries. If adaptation is enabled, count a complete selected-tuple transition once even when both path and capability change. Ordinary finite path changes with unchanged capability retain their existing settling behavior.
+
+A mobile node installs at most one owned `/0` using the current finite route to the configured origin while capability is true. It derives that projection from the host route rather than creating an independent default sequence space. A foreign default suppresses the DSDV default; replacing or removing it is reevaluated after the route notification completes. The base station never installs a DSDV default back into the ad hoc domain. More-specific host routes remain preferred, and connected ad hoc subnet routes keep an unavailable internal host from falling through to the external default. The acceptance profile uses a common ad hoc subnet, separate wired prefixes and explicit external return routes, without global ARP or proxy ARP.
+
+An uplink-only failure clears capability but leaves the finite base-station host route intact. Loss of the wireless successor, expiry or suspension invalidates the corresponding non-self route with odd infinity and clears its capability. Accepted newer finite information carries capability afresh; retained sequence floors prevent older service advertisements from reviving a withdrawn default. Reconciliation and lifecycle cleanup remove only DSDV-owned routes, preserving the station's wired default and unrelated routes. These rules do not provide safe simultaneous-gateway selection or remote-health detection.

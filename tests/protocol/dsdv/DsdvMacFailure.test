@@ -1,0 +1,229 @@
+%description:
+PB94 section 3: a real MAC delivery failure withdraws routes through the failed
+next hop before neighbor expiry. Two AckingMac lines compare feedback enabled
+and disabled; a separate ad hoc DCF line exercises retry-limit integration.
+An unaffected neighbor receives the odd-sequence infinity advertisement.
+
+%file: test.ned
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+
+simple MacFailureObserver { parameters: @class(MacFailureObserver); @display("i=block/control"); }
+
+network DsdvMacFailureNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        observer: MacFailureObserver;
+        enabled[4]: AdhocHost;
+        disabled[4]: AdhocHost;
+        dcf[4]: AdhocHost;
+}
+
+%file: Observer.cc
+#include <array>
+#include "inet/common/SimpleModule.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/routing/dsdv/DsdvHeader_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+
+using namespace inet;
+using namespace inet::dsdv;
+
+namespace DsdvMacFailure {
+
+class MacFailureObserver : public SimpleModule, public cListener
+{
+    using cListener::finish;
+  protected:
+    cMessage *timer = nullptr;
+    int step = 0;
+    std::array<int, 3> failures = {};
+    std::array<int, 3> withdrawals = {};
+    std::array<const char *, 3> groups = {"enabled", "disabled", "dcf"};
+
+    cModule *node(int group, int index) const
+    {
+        return getParentModule()->getSubmodule(groups[group], index);
+    }
+
+    IRoutingTable *routes(int group, int index) const
+    {
+        return check_and_cast<IRoutingTable *>(node(group, index)->getSubmodule("ipv4")->getSubmodule("routingTable"));
+    }
+
+    Ipv4Address address(int group, int index) const
+    {
+        return Ipv4Address(0x0a000100U + group * 256 + index + 1);
+    }
+
+    void inspect()
+    {
+        if (step == 0) {
+            for (int group = 0; group < 3; group++) {
+                auto route = routes(group, 1)->findBestMatchingRoute(address(group, 3));
+                ASSERT(route && route->getMetric() == 2);
+                ASSERT(route->getNextHopAsGeneric() == address(group, 2));
+            }
+            scheduleAt(SimTime(3.6), timer);
+        }
+        else if (step == 1) {
+            for (int group = 0; group < 3; group++) {
+                ASSERT(failures[group] > 0);
+                auto route = routes(group, 1)->findBestMatchingRoute(address(group, 3));
+                if (group == 1)
+                    ASSERT(route != nullptr);
+                else {
+                    ASSERT(route == nullptr);
+                    ASSERT(routes(group, 1)->findBestMatchingRoute(address(group, 2)) == nullptr);
+                    ASSERT(withdrawals[group] > 0);
+                }
+                ASSERT(routes(group, 1)->findBestMatchingRoute(address(group, 0)) != nullptr);
+            }
+            scheduleAt(SimTime(12), timer);
+        }
+        else {
+            ASSERT(routes(1, 1)->findBestMatchingRoute(address(1, 3)) == nullptr);
+            std::cout << "DSDV MAC failure PASS: Acking and DCF early withdrawals, timeout-only control, observer reception\n";
+        }
+        step++;
+    }
+
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            getParentModule()->subscribe("linkBroken", this);
+            getParentModule()->subscribe("packetSentToUpper", this);
+            timer = new cMessage("inspect");
+            scheduleAt(SimTime(2.5), timer);
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        ASSERT(message == timer);
+        inspect();
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *) override
+    {
+        auto packet = dynamic_cast<Packet *>(value);
+        if (!packet)
+            return;
+        for (int group = 0; group < 3; group++) {
+            if (signal == registerSignal("linkBroken")) {
+                std::string routerPath = node(group, 1)->getFullPath() + ".wlan[0].";
+                if (source->getFullPath().find(routerPath) == 0 && simTime() >= SimTime(3))
+                    failures[group]++;
+            }
+            else if (signal == registerSignal("packetSentToUpper") && source == node(group, 0)->getSubmodule("udp")) {
+                auto port = packet->findTag<L4PortInd>();
+                if (!port || port->getDestPort() != 26999)
+                    continue;
+                auto header = packet->peekAtFront<DsdvHeader>();
+                if (header->getSender() != address(group, 1) || simTime() < SimTime(3))
+                    continue;
+                for (size_t i = 0; i < header->getEntriesArraySize(); i++) {
+                    const auto& entry = header->getEntries(i);
+                    if (entry.destination == address(group, 3) && entry.metric == UINT32_MAX) {
+                        ASSERT(entry.sequence % 2 == 1);
+                        withdrawals[group]++;
+                    }
+                }
+            }
+        }
+    }
+
+    void finish() override { ASSERT(step == 3); }
+
+  public:
+    ~MacFailureObserver() override { cancelAndDelete(timer); }
+};
+
+Define_Module(MacFailureObserver);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvMacFailureNetwork
+sim-time-limit = 12.1s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.optimizeRoutes = false
+*.configurator.config = xml("<config><interface hosts='enabled[0]' names='wlan0' address='10.0.1.1' netmask='255.255.255.0'/><interface hosts='enabled[1]' names='wlan0' address='10.0.1.2' netmask='255.255.255.0'/><interface hosts='enabled[2]' names='wlan0' address='10.0.1.3' netmask='255.255.255.0'/><interface hosts='enabled[3]' names='wlan0' address='10.0.1.4' netmask='255.255.255.0'/><interface hosts='disabled[0]' names='wlan0' address='10.0.2.1' netmask='255.255.255.0'/><interface hosts='disabled[1]' names='wlan0' address='10.0.2.2' netmask='255.255.255.0'/><interface hosts='disabled[2]' names='wlan0' address='10.0.2.3' netmask='255.255.255.0'/><interface hosts='disabled[3]' names='wlan0' address='10.0.2.4' netmask='255.255.255.0'/><interface hosts='dcf[0]' names='wlan0' address='10.0.3.1' netmask='255.255.255.0'/><interface hosts='dcf[1]' names='wlan0' address='10.0.3.2' netmask='255.255.255.0'/><interface hosts='dcf[2]' names='wlan0' address='10.0.3.3' netmask='255.255.255.0'/><interface hosts='dcf[3]' names='wlan0' address='10.0.3.4' netmask='255.255.255.0'/></config>")
+*.enabled[1].numApps = 2
+*.disabled[1].numApps = 2
+*.dcf[1].numApps = 2
+*.*.numApps = 1
+*.*.app[0].typename = "Dsdv"
+*.*.app[1].typename = "PingApp"
+*.enabled[1].app[1].destAddr = "10.0.1.4"
+*.disabled[1].app[1].destAddr = "10.0.2.4"
+*.dcf[1].app[1].destAddr = "10.0.3.4"
+**.app[1].startTime = 1.5s
+**.app[1].sendInterval = 200ms
+*.disabled[*].app[0].useMacFailureFeedback = false
+*.disabled[*].app[0].arpModule = "missingArpDependency"
+**.app[0].useMacFailureFeedback = true
+**.app[0].fullDumpInterval = 200ms
+**.app[0].periodicJitter = 20ms
+**.app[0].neighborTimeout = 8s
+**.app[0].routeTimeout = 10s
+**.app[0].settlingCap = 50ms
+**.app[0].payloadBudget = 128B
+**.ipv4.routingTable.netmaskRoutes = ""
+*.enabled[2].mobility.typename = "TurtleMobility"
+*.disabled[2].mobility.typename = "TurtleMobility"
+*.dcf[2].mobility.typename = "TurtleMobility"
+*.*.mobility.typename = "StationaryMobility"
+*.enabled[2].mobility.turtleScript = xml("<movement><set x='300' y='100'/><wait t='3'/><moveto x='300' y='500' t='0.1'/><wait t='10'/></movement>")
+*.disabled[2].mobility.turtleScript = xml("<movement><set x='1300' y='100'/><wait t='3'/><moveto x='1300' y='500' t='0.1'/><wait t='10'/></movement>")
+*.dcf[2].mobility.turtleScript = xml("<movement><set x='2300' y='100'/><wait t='3'/><moveto x='2300' y='500' t='0.1'/><wait t='10'/></movement>")
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 3000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+*.enabled[0].mobility.initialX = 100m
+*.enabled[1].mobility.initialX = 200m
+*.enabled[2].mobility.initialX = 300m
+*.enabled[3].mobility.initialX = 400m
+*.disabled[0].mobility.initialX = 1100m
+*.disabled[1].mobility.initialX = 1200m
+*.disabled[2].mobility.initialX = 1300m
+*.disabled[3].mobility.initialX = 1400m
+*.dcf[0].mobility.initialX = 2100m
+*.dcf[1].mobility.initialX = 2200m
+*.dcf[2].mobility.initialX = 2300m
+*.dcf[3].mobility.initialX = 2400m
+*.dcf[*].wlan[*].typename = "Ieee80211Interface"
+*.dcf[*].wlan[*].radio.typename = "Ieee80211Radio"
+*.dcf[*].wlan[*].radio.signalAnalogRepresentation = "unitDisk"
+*.dcf[*].wlan[*].mac.qosStation = false
+*.dcf[*].wlan[*].radio.transmitter.bitrate = 2Mbps
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.analogModel.interferenceRange = 110m
+**.wlan[*].radio.transmitter.analogModel.detectionRange = 110m
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].mac.ackTimeout = 50ms
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
+%contains: stdout
+DSDV MAC failure PASS: Acking and DCF early withdrawals, timeout-only control, observer reception
