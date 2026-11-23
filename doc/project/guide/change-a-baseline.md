@@ -105,7 +105,7 @@ The lists with a reason for each line stay in the commits. The report of the gat
 
 The statistical baseline is in the `statistics` repository, and the chart baseline is in the `media` repository. `inet.opp` pins one commit of each ([TR-BASELINE-PIN](../rule/testing.md#tr-baseline-pin)). Steps 1 to 3 apply as they are. The other steps change as follows.
 
-### Get the checkouts and the candidate values
+### Get the checkouts and record the values
 
 ```bash
 opp_checkout_test_baselines                 # statistics/ and media/ at the pins of this commit
@@ -115,7 +115,7 @@ opp_run_chart_tests -m release -w '<showcase-directory-regex>'
 
 A test and an update never move a checkout. They give a warning when a checkout is not at its pin.
 
-Record the candidate values in the CI environment. When the statistical or the chart tests of a pull request fail, the run uploads the artifact `statistical-candidates` or `chart-candidates`: the new files of the failed tests, `baseline-changes.txt` with the computed list for the record, and `environment.txt` with the versions. The local copy of the CI job gives the same files. Values from a developer machine can differ in the last digit, and such a baseline fails in CI ([TR-BASELINE-DELIBERATE](../rule/testing.md#tr-baseline-deliberate)). The update commands change only the files of the tests that move:
+Record the new values on your machine. The update commands change only the files of the tests that move:
 
 ```bash
 opp_update_statistical_test_results -m release -w '<simulation-directory-regex>' -c '<config-regex>'

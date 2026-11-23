@@ -148,35 +148,8 @@ jobs:
           echo "::group::Running chart tests"
           # INET's inet.opp gives the baseline folder (media) and the filter showcases; --no-build
           # keeps the test from a new build of INET, because the disk reclaim removed the objects
-          set +e
-          opp_run_chart_tests --load $INET_ROOT -p inet -m $MODE --no-build --result-file "$RUNNER_TEMP/chart.json"
-          status=$?
-          set -e
+          opp_run_chart_tests --load $INET_ROOT -p inet -m $MODE --no-build
           echo "::endgroup::"
-
-          if [ "$status" -ne 0 ]; then
-            echo "::group::Making the candidate baseline files"
-            # the candidates are evidence for the author, not a baseline: see doc/project/guide/change-a-baseline.md
-            cd $INET_ROOT
-            python3 _scripts/github/baseline-candidates.py chart "$RUNNER_TEMP/chart.json" "$GITHUB_WORKSPACE/candidates" \
-              --update "opp_update_chart_test_results --load $INET_ROOT -p inet -m $MODE --no-build" > "$RUNNER_TEMP/candidates.txt" 2>&1 || true
-            cat "$RUNNER_TEMP/candidates.txt"
-            echo "::endgroup::"
-            {
-              echo "## The chart tests fail"
-              echo
-              echo "If the change moves these results on purpose, the artifact \`chart-candidates\` holds the new files, recorded"
-              echo "in this CI environment, with \`baseline-changes.txt\` and \`environment.txt\`. Leave out the files of the tests"
-              echo "that fail at the parent commit too, commit the rest to the baseline repository with the record, and move"
-              echo "the pin in the commit that causes the change. The procedure is in doc/project/guide/change-a-baseline.md."
-              echo
-              echo '```'
-              sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/candidates.txt" | grep -E '^(error|warning)|need a candidate|candidate file' || true
-              cat "$GITHUB_WORKSPACE/candidates/baseline-changes.txt" 2>/dev/null || true
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
-          exit "$status"
       - uses: actions/upload-artifact@v7
         if: always() # even if the test failed, of course
         with:
@@ -184,12 +157,6 @@ jobs:
           path: |
             ${{ github.workspace }}/inet/media/**/*-new.png
             ${{ github.workspace }}/inet/media/**/*-diff.png
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: chart-candidates
-          path: ${{ github.workspace }}/candidates
           if-no-files-found: ignore
 
   status:
@@ -223,7 +190,7 @@ jobs:
           elif [ "$TESTS" = success ]; then
             state=success; text="the chart tests pass"
           elif [ "$TESTS" = failure ]; then
-            state=failure; text="the chart tests fail; the run has the candidate baseline files"
+            state=failure; text="the chart tests fail"
           else
             state=error; text="the chart tests did not end: $TESTS"
           fi

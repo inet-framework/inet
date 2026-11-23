@@ -154,7 +154,7 @@ A fingerprint in `tests/fingerprint/store.json`, a statistical baseline, a chart
 
 The defence continues in the commit message: the commit that moves the values states which behavior moved and why the new values are right ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
 
-The statistical and chart baselines are in other repositories. There, the proposal is a branch or a pull request of the baseline repository. Its commits are candidates until the maintainer approves them in that place, apart from the approval of the source change. Candidate values come from the CI environment: the artifact of a CI run, or the local copy of the CI job. Values from a developer machine can differ in the last digit, and such a baseline fails in CI.
+The statistical and chart baselines are in other repositories. There, the proposal is a branch or a pull request of the baseline repository. Its commits are candidates until the maintainer approves them in that place, apart from the approval of the source change. The author records the values with the update commands, on their own machine.
 
 *Enforced at T5 for explicit approval; T4 for review of the message against the moved values; T3 for a baseline-only commit that gives no reason.*
 
