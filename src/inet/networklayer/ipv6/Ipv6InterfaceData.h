@@ -419,6 +419,9 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  indicates that the router is not to be used as a default router.
          *
          *  Default: 3 * MaxRtrAdvInterval
+         *
+         *  A negative value means the default; getAdvDefaultLifetime() computes it
+         *  from the current MaxRtrAdvInterval.
          */
         simtime_t advDefaultLifetime; // integer seconds in ND rfc but for MIPv6 really need better granularity
 
@@ -661,7 +664,12 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     int getAdvReachableTime() const { return rtrVars.advReachableTime; }
     int getAdvRetransTimer() const { return rtrVars.advRetransTimer; }
     short getAdvCurHopLimit() const { return rtrVars.advCurHopLimit; }
-    simtime_t getAdvDefaultLifetime() const { return rtrVars.advDefaultLifetime; }
+    /**
+     * Returns AdvDefaultLifetime. Unless setAdvDefaultLifetime() was given a
+     * nonnegative value, this is the RFC 4861 default 3 * MaxRtrAdvInterval,
+     * rounded up to whole seconds, the unit of the Router Lifetime field.
+     */
+    simtime_t getAdvDefaultLifetime() const;
     /************Setters for Router Configuration Variables********************/
     virtual void setAdvSendAdvertisements(bool d) { rtrVars.advSendAdvertisements = d; }
     virtual void setMaxRtrAdvInterval(simtime_t d) { rtrVars.maxRtrAdvInterval = d; }
