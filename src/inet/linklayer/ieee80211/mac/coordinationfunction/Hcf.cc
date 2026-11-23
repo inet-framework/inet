@@ -2131,13 +2131,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             packet->insertAtFront(updated);
         }
         else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
-            auto pendingPacket = dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
+            auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
+            // IEEE Std 802.11-2024, 9.2.5.2(a)(9)(i): the final group frame advertises zero Duration/ID.
+            // HcfFs ends the group sequence after this frame. A zero-limit exchange also has no successor.
+            bool finalDataOrMgmt = dataOrMgmt && (dataOrMgmt->getReceiverAddress().isMulticast() || txop->getLimit() == 0);
+            auto pendingPacket = finalDataOrMgmt || dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
                 channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
-            if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header) && txop->getLimit() == 0) {
-                // The zero-limit frame sequence ends after this exchange; it has no successor reservation.
-                pendingPacket = nullptr;
-            }
-            else if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
+            if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
                 // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
                 pendingPacket = nullptr;
             }
