@@ -21,9 +21,10 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
     const bool isReceptionPossible_;
     const bool isReceptionAttempted_;
     const bool isReceptionSuccessful_;
+    const std::vector<ErrorRegion> errorRegions;
 
   public:
-    ReceptionDecision(const IReception *reception, IRadioSignal::SignalPart part, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful);
+    ReceptionDecision(const IReception *reception, IRadioSignal::SignalPart part, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful, const std::vector<ErrorRegion>& errorRegions = {});
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
@@ -33,6 +34,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
     virtual bool isReceptionPossible() const override { return isReceptionPossible_; }
     virtual bool isReceptionAttempted() const override { return isReceptionAttempted_; }
     virtual bool isReceptionSuccessful() const override { return isReceptionSuccessful_; }
+    virtual const std::vector<ErrorRegion>& getErrorRegions() const override { return errorRegions; }
 };
 
 } // namespace physicallayer

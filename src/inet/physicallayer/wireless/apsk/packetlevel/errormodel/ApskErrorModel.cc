@@ -48,6 +48,15 @@ double ApskErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::S
     }
 }
 
+double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const
+{
+    Enter_Method("computeBitErrorRate");
+    checkRegionPart(part);
+    auto apskTransmission = check_and_cast<const ApskTransmission *>(snir->getReception()->getTransmission());
+    auto modulation = check_and_cast<const ApskModulationBase *>(apskTransmission->getModulation());
+    return modulation->calculateBER(getScalarSnir(snir, startTime, endTime), apskTransmission->getBandwidth(), apskTransmission->getBitrate());
+}
+
 double ApskErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computeBitErrorRate");

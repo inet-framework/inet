@@ -1,0 +1,61 @@
+%description:
+Check the region error rates of the error model base with the fixed bit error
+rate of StochasticErrorModel, without a network or a reception. The bit error
+rate of a region is the fixed rate, and the rate of a region is
+1 - (1 - BER)^length. A long region with many expected errors has a rate of 1,
+but it keeps its bit error rate. Only the header part and the data part have
+regions.
+
+%includes:
+#include <cmath>
+#include "inet/physicallayer/wireless/common/errormodel/packetlevel/StochasticErrorModel.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+class FixedBitErrorRateModel : public StochasticErrorModel
+{
+  public:
+    FixedBitErrorRateModel(double ber, CorruptionMode mode) { bitErrorRate = ber; corruptionMode = mode; }
+};
+
+static bool isRefused(std::function<void()> f)
+{
+    try { f(); }
+    catch (const cRuntimeError&) { return true; }
+    return false;
+}
+
+%activity:
+auto header = IRadioSignal::SIGNAL_PART_HEADER;
+auto data = IRadioSignal::SIGNAL_PART_DATA;
+FixedBitErrorRateModel model(1e-3, ErrorModelBase::CorruptionMode::CM_CHUNK);
+// 1. the rate of a region follows its length
+for (int bits : {1, 8, 1000}) {
+    double expected = 1 - std::pow(1 - 1e-3, bits);
+    ASSERT(std::fabs(model.computePacketErrorRate(nullptr, data, b(bits), 0, 1) - expected) < 1e-12);
+    ASSERT(std::fabs(model.computePacketErrorRate(nullptr, header, b(bits), 0, 1) - expected) < 1e-12);
+    ASSERT(model.computeBitErrorRate(nullptr, data, b(bits), 0, 1) == 1e-3);
+    ASSERT(model.computeBitErrorRate(nullptr, header, b(bits), 0, 1) == 1e-3);
+}
+// 2. the limits of the bit error rate give the limits of the region rate
+FixedBitErrorRateModel zero(0, ErrorModelBase::CorruptionMode::CM_CHUNK);
+FixedBitErrorRateModel one(1, ErrorModelBase::CorruptionMode::CM_CHUNK);
+ASSERT(zero.computePacketErrorRate(nullptr, data, b(100), 0, 1) == 0);
+ASSERT(one.computePacketErrorRate(nullptr, data, b(100), 0, 1) == 1);
+ASSERT(zero.computePacketErrorRate(nullptr, data, b(0), 0, 0) == 0);
+ASSERT(one.computePacketErrorRate(nullptr, data, b(0), 0, 0) == 0);
+// 3. a region with about 40 expected errors has a rate of 1 and keeps its bit error rate
+FixedBitErrorRateModel high(5e-3, ErrorModelBase::CorruptionMode::CM_CHUNK);
+ASSERT(high.computePacketErrorRate(nullptr, data, b(8000), 0, 1) == 1);
+ASSERT(high.computeBitErrorRate(nullptr, data, b(8000), 0, 1) == 5e-3);
+// 4. the preamble and the whole signal have no regions
+ASSERT(isRefused([&] { model.computePacketErrorRate(nullptr, IRadioSignal::SIGNAL_PART_PREAMBLE, b(8), 0, 1); }));
+ASSERT(isRefused([&] { model.computePacketErrorRate(nullptr, IRadioSignal::SIGNAL_PART_WHOLE, b(8), 0, 1); }));
+ASSERT(isRefused([&] { model.computeBitErrorRate(nullptr, IRadioSignal::SIGNAL_PART_PREAMBLE, b(8), 0, 1); }));
+ASSERT(isRefused([&] { model.computeBitErrorRate(nullptr, IRadioSignal::SIGNAL_PART_WHOLE, b(8), 0, 1); }));
+EV << "region error rate checks passed\n";
+
+%contains: stdout
+region error rate checks passed
