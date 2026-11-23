@@ -9,17 +9,6 @@ the program steps below map onto its expected observations. Step 1 is observatio
 and 3 are observation 2 (each within 16 s of the one before), step 4 waits for the fourth
 advertisement, and steps 5 and 6 are observation 3.
 
-Defect: createRaTimer (src/inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.cc:1639) sets the
-first timer of an advertising interface to a random value between MinRtrAdvInterval and
-MaxRtrAdvInterval, 198 to 600 s, without the cap of MAX_INITIAL_RTR_ADVERT_INTERVAL that
-sendPeriodicRa applies only to the later ones; and an answer to a solicitation does not restart
-the timer. RFC 4861 section 6.2.4: "For the first few advertisements [...] if the randomly
-chosen interval is greater than MAX_INITIAL_RTR_ADVERT_INTERVAL, the timer SHOULD be set to
-MAX_INITIAL_RTR_ADVERT_INTERVAL instead." Observation 1 holds; observation 2 fails; observation
-3 has no verdict. This test FAILS, and the failure is deliberately NOT declared expected: the
-model has the mechanism, and the mechanism does the wrong thing, which is a defect. See
-results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
