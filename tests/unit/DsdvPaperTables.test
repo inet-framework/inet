@@ -1,0 +1,56 @@
+%description:
+External oracle: Perkins/Bhagwat SIGCOMM 1994 section 4 Tables 1-4, read from
+the original paper. Reconstruct MH4's initial and updated forwarding/advertised
+tables, including MH1's newer, longer route through MH6 and metric priority.
+Header identity replaces the paper example's sender-first entry convention.
+
+%includes:
+#include "inet/routing/dsdv/DsdvTable.h"
+using namespace inet;
+using namespace inet::dsdv;
+
+%global:
+static DsdvEntry e(int destination,uint64_t sequence,uint32_t metric)
+{
+    DsdvEntry entry; entry.destination=Ipv4Address(0x0a000000U+destination);
+    entry.sequence=sequence; entry.metric=metric; return entry;
+}
+static DsdvHeader h(int sender,uint64_t sequence,std::vector<DsdvEntry> entries)
+{
+    DsdvHeader header; header.setSender(Ipv4Address(0x0a000000U+sender)); header.setSelfSequence(sequence);
+    header.setEntriesArraySize(entries.size()); header.setChunkLength(B(16+16*entries.size()));
+    for (size_t i=0;i<entries.size();i++) header.setEntries(i,entries[i]);
+    return header;
+}
+
+%activity:
+DsdvTable table; table.configure(Ipv4Address("10.0.0.4"),1,20,30); table.start(0);
+for (int i=0;i<355;i++) table.advanceSelf();
+table.receive(h(2,128,{e(1,406,1),e(2,128,0),e(3,564,1)}),0);
+table.receive(h(6,76,{e(5,392,1),e(6,76,0),e(7,128,1),e(8,50,2)}),0);
+uint32_t initialMetrics[]={2,1,2,0,2,1,2,3};
+uint64_t initialSequences[]={406,128,564,710,392,76,128,50};
+auto initial=table.prepare(true,8,0);
+ASSERT(initial.datagrams.size()==1 && initial.datagrams[0].size()==8);
+for (size_t i=0;i<8;i++) {
+    ASSERT(initial.datagrams[0][i].metric==initialMetrics[i]);
+    ASSERT(initial.datagrams[0][i].sequence==initialSequences[i]);
+}
+for (int i=0;i<55;i++) table.advanceSelf();
+table.receive(h(2,238,{e(2,238,0),e(3,674,1)}),8);
+table.receive(h(6,186,{e(1,516,2),e(5,502,1),e(6,186,0),e(7,238,1),e(8,160,2)}),8);
+const auto& mh1=table.getRouteEntries().at(Ipv4Address("10.0.0.1"));
+ASSERT(mh1.current.sequence==516 && mh1.current.metric==3 && mh1.successor==Ipv4Address("10.0.0.6"));
+auto incremental=table.prepare(false,2,8);
+ASSERT(!incremental.full && incremental.datagrams.size()==1);
+ASSERT(incremental.datagrams[0][0].destination==Ipv4Address("10.0.0.1"));
+ASSERT(incremental.datagrams[0][0].metric==3 && incremental.datagrams[0][0].sequence==516);
+auto full=table.prepare(true,8,8);
+for (size_t i=0;i<8;i++) {
+    ASSERT(full.datagrams[0][i].metric==(i==0?3:initialMetrics[i]));
+    ASSERT(full.datagrams[0][i].sequence==initialSequences[i]+110);
+}
+std::cout << "DSDV paper Tables 1-4 PASS\n";
+
+%contains: stdout
+DSDV paper Tables 1-4 PASS

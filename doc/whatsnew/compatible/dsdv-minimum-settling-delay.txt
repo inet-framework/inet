@@ -1,0 +1,3 @@
+DSDV minimum settling delay
+
+DSDV deferred route advertisements now have a configurable 10 ms minimum settling delay (minSettlingDelay). Urgent advertisements remain immediate. This changes DSDV simulation trajectories and fingerprints.

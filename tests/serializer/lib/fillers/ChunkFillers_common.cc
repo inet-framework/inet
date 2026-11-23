@@ -23,7 +23,6 @@
 #include "inet/protocolelement/checksum/header/ChecksumHeader_m.h"
 #include "inet/protocolelement/fragmentation/header/FragmentNumberHeader_m.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
-#include "inet/routing/dsdv/DsdvHello_m.h"
 #ifdef INET_WITH_VOIPSTREAM
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #endif
@@ -264,19 +263,6 @@ void addFillers_common(std::vector<ChunkFiller>& fillers)
         setChunkLength(c, B(32)); // 28 B fixed (VOICE) + 4 B of '?' padding
     }});
 #endif
-
-    // --- DsdvHello: a small DSDV routing payload, always exactly 16 B on the wire
-    // (4 x Ipv4Address/uint32 fields), but the .msg gives it no fixed chunkLength
-    // default -- measure it from the serializer.
-    fillers.push_back({"inet::DsdvHello", "", [](Chunk *c) {
-        auto p = check_and_cast<DsdvHello *>(c);
-        FillValues v;
-        p->setSrcAddress(v.ipv4());
-        p->setSequencenumber(v.u32());
-        p->setNextAddress(v.ipv4());
-        p->setHopdistance((int)v.u32());
-        measureAndSetChunkLength(c);
-    }});
 }
 
 } // namespace inet
