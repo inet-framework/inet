@@ -63,7 +63,7 @@ class INET_API BindingUpdateList : public SimpleModule
 
         /* Cookie values used in the Home Test Init and Care-of Test Init
            messages. */
-        int cookieHoTI, cookieCoTI;
+        uint64_t cookieHoTI, cookieCoTI;
 
         /* Home and care-of keygen tokens received from the correspondent
            node.*/
@@ -120,7 +120,7 @@ class INET_API BindingUpdateList : public SimpleModule
      * Sets HoTI and/or CoTI values (transmission time, etc.) for the BUL entry.
      */
     virtual void addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa,
-            simtime_t sentTime, int cookie, bool isHoTI); // BU for HoTI/CoTI
+            simtime_t sentTime, uint64_t cookie, bool isHoTI); // BU for HoTI/CoTI
 
     /**
      * Returns the BUL entry for a certain destination address.

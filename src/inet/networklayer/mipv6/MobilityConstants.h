@@ -17,9 +17,7 @@ namespace inet {
 constexpr int UNDEFINED_TOKEN           = 0;
 constexpr int UNDEFINED_COOKIE          = 0;
 constexpr int UNDEFINED_BIND_AUTH_DATA  = 0;
-constexpr int HO_COOKIE                 = 11;
 constexpr int HO_TOKEN                  = 1101;
-constexpr int CO_COOKIE                 = 21;
 constexpr int CO_TOKEN                  = 2101;
 
 // Amount of seconds before BUL expiry that indicate that a binding will shortly expire
