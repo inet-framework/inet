@@ -1,0 +1,134 @@
+%description:
+Tests that a care-of address formed at a handover undergoes Duplicate Address
+Detection (DAD) before it is used, as required by RFC 4862 Section 5.4, and that
+the Mobile Node does not register it with its Home Agent until that DAD passes.
+
+The Mobile Node boots on its home link (where it has only a link-local address,
+so the home address is verified through the single-address path), then moves to
+the foreign network. On arrival its interface already holds a link-local address
+and the home address, so address autoconfiguration takes the multi-address path.
+Before this test was added, that path assigned the care-of address as permanent
+and started no DAD for it, and the Binding Update advertised an address whose
+uniqueness on the visited link had never been tested.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+**.neighbourDiscovery.cmdenv-log-level = trace
+**.mipv6.cmdenv-log-level = trace
+**.app[*].cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.Mipv6Network
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+num-rngs = 3
+seed-set = 1
+**.mobility.rng-0 = 2
+
+# number of MNs and CNs
+*.total_mn = 1
+*.total_cn = 1
+
+**.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+**.neighbourDiscovery.detectL2Movement = false   # legacy: detect movement from periodic RAs only
+
+# channel physical parameters
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+
+# access point
+**.wlan*.mgmt.numAuthSteps = 4
+
+# ALL APs common parameters
+**.AP*.wlan*.mgmt.beaconInterval = 0.1s
+
+# Access Point parameters
+**.AP_Home.wlan*.mgmt.ssid = "HOME"
+**.AP_Home.wlan*.address = "10:AA:00:00:00:01"
+**.AP_Home.eth[0].address = "10:AE:00:00:00:02"
+**.AP_Home.eth[0].duplexMode = true
+
+**.AP_1.wlan*.mgmt.ssid = "AP1"
+**.AP_1.wlan*.address = "10:AA:00:00:A1:01"
+**.AP_1.eth[0].address = "10:AE:00:00:A1:02"
+**.AP_1.eth[0].duplexMode = true
+
+# mobility
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+
+**.MN[0].mobility.typename = "RectangleMobility"
+**.MN[0].mobility.constraintAreaMinX = 180m
+**.MN[0].mobility.constraintAreaMinY = 170m
+**.MN[0].mobility.constraintAreaMaxX = 630m
+**.MN[0].mobility.constraintAreaMaxY = 180m
+**.MN[0].mobility.startPos = 0
+**.MN[0].mobility.speed = 10mps
+**.MN*.mobility.updateInterval = 0.1s
+
+# No apps needed - we just test the handover signaling
+**.MN*.numApps = 0
+**.CN*.numApps = 0
+
+# ip settings
+**.forwarding = false
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+**.eth*.duplexMode = true
+
+# analog model
+**.analogModel.ignorePartialInterference = true
+
+# wireless channels
+**.AP_Home.wlan*.radio.channelNumber = 1
+**.AP_1.wlan*.radio.channelNumber = 2
+**.MN*.wlan*.radio.channelNumber = 0
+
+# wireless configuration
+**.wlan*.agent.activeScan = true
+**.wlan*.agent.defaultSsid = ""
+**.wlan*.agent.channelsToScan = "1 2"
+**.wlan*.agent.probeDelay = 0.1s
+**.wlan*.agent.minChannelTime = 0.15s
+**.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.agent.authenticationTimeout = 5s
+**.wlan*.agent.associationTimeout = 5s
+
+# nic settings
+**.wlan*.bitrate = 2Mbps
+**.wlan*.mac.dcf.channelAccess.cwMin = 7
+**.radio.transmitter.power = 2.0mW
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 850m
+**.constraintAreaMaxY = 850m
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6Network.MN[0].ipv6.neighbourDiscovery: Starting DAD for tentative global address aaaa:1:66:0:8aa:ff:fe00:8
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6Network.MN[0].ipv6.neighbourDiscovery: DAD completed for address aaaa:1:66:0:8aa:ff:fe00:8 on wlan0, address is unique
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6Network.MN[0].ipv6.mipv6: Initiating Mobile Ipv6 protocol...
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6Network.Home_Agent.ipv6.mipv6: BU validation passed
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
