@@ -55,9 +55,12 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpCon
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionOsgVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
+    // the end nodes take the same index, because the visualization is added only after this function
     auto sourceNode = createConnectionEndNode(tcpConnection);
     auto destinationNode = createConnectionEndNode(tcpConnection);
-    return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
+    auto connectionVisualization = new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
+    connectionVisualization->index = connectionVisualizations.size();
+    return connectionVisualization;
 }
 
 void TransportConnectionOsgVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)

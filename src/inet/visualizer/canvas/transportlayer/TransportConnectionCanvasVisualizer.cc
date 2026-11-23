@@ -71,9 +71,12 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
 
 const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionCanvasVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
+    // the end figures take the same index, because the visualization is added only after this function
     auto sourceFigure = createConnectionEndFigure(tcpConnection);
     auto destinationFigure = createConnectionEndFigure(tcpConnection);
-    return new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1);
+    auto connectionVisualization = new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1);
+    connectionVisualization->index = connectionVisualizations.size();
+    return connectionVisualization;
 }
 
 void TransportConnectionCanvasVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
@@ -90,7 +93,7 @@ void TransportConnectionCanvasVisualizer::addConnectionVisualization(const Trans
         auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
         destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds(), placementHint, placementPriority);
     }
-    setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
+    setConnectionLabelsVisible(isConnectionColorReused());
 }
 
 void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
@@ -107,7 +110,15 @@ void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const Tr
         auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
         destinationVisualization->removeAnnotation(connectionCanvasVisualization->destinationFigure);
     }
-    setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
+    setConnectionLabelsVisible(isConnectionColorReused());
+}
+
+bool TransportConnectionCanvasVisualizer::isConnectionColorReused() const
+{
+    for (auto connectionVisualization : connectionVisualizations)
+        if (connectionVisualization->index >= (int)iconColorSet.getSize())
+            return true;
+    return false;
 }
 
 void TransportConnectionCanvasVisualizer::setConnectionLabelsVisible(bool visible)

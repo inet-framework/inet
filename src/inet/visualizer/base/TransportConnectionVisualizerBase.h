@@ -34,6 +34,7 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
         int sourceModuleId = -1;
         int destinationModuleId = -1;
         int count = -1;
+        int index = -1; // selects the color and the letter
 
       public:
         TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count);

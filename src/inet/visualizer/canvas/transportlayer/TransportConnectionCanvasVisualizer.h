@@ -43,6 +43,12 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
     virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
+    /**
+     * Returns true if a displayed connection has an index at or above the
+     * number of colors, so its color is also the color of a lower index; the
+     * letters are shown then.
+     */
+    virtual bool isConnectionColorReused() const;
     virtual void setConnectionLabelsVisible(bool visible);
 };
 
