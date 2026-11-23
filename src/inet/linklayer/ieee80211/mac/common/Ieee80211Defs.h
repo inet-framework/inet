@@ -28,7 +28,6 @@ struct SequenceNumberCyclic
 
   private:
     SequenceNumber modulo4096(SequenceNumber value) const { ASSERT(value != -1); return (value % 4096 + 4096) % 4096; } // always returns positive result
-    SequenceNumber distance4096(SequenceNumber other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
 
   public:
     SequenceNumberCyclic() : value(-1) {}
@@ -36,6 +35,8 @@ struct SequenceNumberCyclic
     SequenceNumberCyclic(const SequenceNumberCyclic& other) : value(other.value) { ASSERT(other.value != -1); }
 
     SequenceNumber get() const { ASSERT(value != -1); return value; }
+
+    SequenceNumber forwardDistanceFrom(const SequenceNumberCyclic& start) const { return (get() - start.get() + 4096) % 4096; }
 
     bool isSpecified() const { return value != -1; }
 
@@ -49,8 +50,7 @@ struct SequenceNumberCyclic
     SequenceNumberCyclic operator+(int other) const { ASSERT(value != -1); SequenceNumberCyclic result; result.value = modulo4096(value + other); return result; }
 
     bool operator<(const SequenceNumberCyclic& other) const {
-        ASSERT(value != -1 && other.value != -1);
-        SequenceNumber d = (other.value - value + 4096) % 4096;
+        SequenceNumber d = other.forwardDistanceFrom(*this);
         return 0 < d && d < 2048;
     }
 

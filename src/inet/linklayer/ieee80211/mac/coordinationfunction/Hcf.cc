@@ -1125,7 +1125,7 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (recipientBlockAckAgreementHandler) {
         // IEEE Std 802.11-2024, 11.5.4: valid Block Ack traffic without an agreement requires DELBA.
         // Reject malformed DATA and unsupported BAR fields before this recovery path.
-        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header); data && !data->getReceiverAddress().isMulticast()) {
             auto agreement = data->getType() == ST_DATA_WITH_QOS ?
                 recipientBlockAckAgreementHandler->getAgreement(data->getTid(), data->getTransmitterAddress()) : nullptr;
             if (agreement && (data->getTid() < 0 || data->getTid() > 15 || !data->getSequenceNumber().isSpecified())) {
@@ -1174,7 +1174,7 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
+        if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler && !dataHeader->getReceiverAddress().isMulticast())
             recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler, interframe));
     }

@@ -32,6 +32,9 @@ void QoSDuplicateRemoval::clearPeer(MacAddress peer)
 
 bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
+    // IEEE Std 802.11-2024, Table 10-6, RC2/RR1: omit group QoS entries in the modeled non-DMG case.
+    if (header->getType() == ST_DATA_WITH_QOS && header->getReceiverAddress().isMulticast())
+        return false;
     SequenceControlField seqVal(header->getSequenceNumber().get(), header->getFragmentNumber());
     bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO hack

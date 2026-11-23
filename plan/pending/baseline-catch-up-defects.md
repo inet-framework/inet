@@ -115,6 +115,43 @@ bands and the unmapped standard-channel rejection of `"5 GHz"` unchanged.
 - Write [Arithmetic 5 GHz band centers](../../tests/protocol/wifi/5ghz-band-centers.md) beside the protocol test
   with the executed before/after comparison and reproducible commands.
 
+### Basic Block Ack bitmap, BD-29 and BD-30
+
+The maintainer approved implementation of this repair on 2026-11-23.
+
+Commit `BD-29/30`, “ieee80211: fix: false acknowledgments in the Basic Block Ack bitmap”.
+Adapt the receipt boundary from `5eb3f31938` for current Basic agreements. Seed the boundary from ADDBA and
+advance it when Basic receipt history is retired, including receive-window advances that release no complete
+MSDU. The bitmap uses cyclic ordering for old positions and exact sequence and fragment receipts otherwise.
+See IEEE Std 802.11e-2005, 9.10.3.
+
+- Add [Ieee80211BlockAckRecord_1.test](../../tests/unit/Ieee80211BlockAckRecord_1.test) for an empty record,
+  a missing sequence across wrap, fragment-specific receipts, and retirement. Current master returns true
+  for an in-range position in the empty record and can mistake the hole at 4094 for an old position.
+- Add [WifiBasicBlockAckMissingData.test](../../tests/protocol/wifi/common/WifiBasicBlockAckMissingData.test).
+  A station negotiates a Basic agreement with the AP, loses its first Block Ack policy DATA at the AP,
+  and requests feedback after one MPDU. Check the AP's actual bitmap and the station's retry of the
+  original sequence and TID. The empty record on the parent falsely acknowledges the missing DATA.
+  Repeat with an out-of-window group frame in place of the missing unicast. Its sequence must leave the
+  individual agreement untouched, so the bitmap still leaves the missing bit clear and the sender retries.
+  Repeat with a group frame bearing the same sequence and fragment as the missing unicast. Check that the
+  reply to the first received unicast retry sets the receipt bit.
+- Extend [Ieee80211BlockAckReordering_1.test](../../tests/module/Ieee80211BlockAckReordering_1.test)
+  with cases 11–17. In cases 11–13, drive successive BARs, one BAR exactly half a cycle past the last delivered receipt,
+  and DATA beyond the receive window. Keep a live sequence partially received and check its positive and
+  missing fragment bits in the Basic response. Check that a stale BAR leaves the current window intact.
+  In case 14, receive fragment 0 at sequence 4095 and use three forward BARs to advance the window through
+  a full cycle without new DATA. Check that the old receipt no longer sets fragment 0's bit when 4095 is reused.
+  In cases 15–16, deliver a broadcast from the same peer and TID as an active Basic or Compressed agreement.
+  The broadcast must reach ordinary delivery and leave the individual window and its receipts intact.
+  Follow a broadcast with a matching first unicast retry and then a duplicate of that retry. Deliver the
+  first retry once with either agreement and without an agreement (case 17).
+- Build INET in debug mode and select these files with the unit and Wi-Fi protocol runners. Check the
+  existing Compressed record and exchange tests as controls. The air-interface test covers an empty
+  receiver record. The unit test covers sequence wrap and receipt retirement.
+- Write [Basic Block Ack receipt reporting](../../tests/protocol/wifi/basic-blockack-receipts.md) beside
+  the protocol test. Record the exact parent and repaired runs and their outcomes.
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair

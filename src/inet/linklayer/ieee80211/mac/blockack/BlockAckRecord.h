@@ -24,13 +24,14 @@ class INET_API BlockAckRecord
   protected:
     MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
     Tid tid = -1;
+    SequenceNumberCyclic basicReceiptStart;
     std::map<SequenceControlField, bool> acknowledgmentState;
     SequenceNumberCyclic windowStart;
     int windowSize = 64; // Sequence positions; the Compressed profile permits 1..64.
     std::set<SequenceNumber> completeReceipts;
 
   public:
-    BlockAckRecord(MacAddress originatorAddress, Tid tid);
+    BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber);
     virtual ~BlockAckRecord() {}
 
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
