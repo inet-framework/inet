@@ -1,0 +1,342 @@
+%description:
+The region error rates of each error model agree with its rate of the whole
+signal. At a constant SNIR, the product of the success rates of the regions of
+the header and the data must be equal to the success rate of the whole signal,
+for each division of the parts into regions. Then a receiver that decides the
+regions separately keeps the reception probability of a receiver that decides
+the whole signal with one draw.
+
+Each radio receives one frame. At the end of the reception, a checker computes
+the rates of the error model of the receiver with an SNIR that has one value at
+all times. For 141 SNIR values from -20 dB to 50 dB, it divides the header and
+the data into 1, 2, and 7 regions, and compares the product with the rate of the
+whole signal. It also checks that the two region rates agree: the region rate is
+1 - (1 - bit error rate)^length. It prints the number of differences, and
+whether some of the values gave a rate that is not 0 or 1.
+
+The receivers: an APSK radio with its modulation model, and one with the
+stochastic model and a fixed packet error rate, both with a preamble; an IEEE
+802.15.4 radio, whose packet does not hold the header; and an IEEE 802.11 radio.
+The runs change the mode and the error model of the IEEE 802.11 radio:
+
+Run 0: DSSS at 1 Mbps, NIST.
+Run 1: HR/DSSS at 11 Mbps, NIST.
+Run 2: ERP-OFDM at 54 Mbps, NIST.
+Run 3: ERP-OFDM at 6 Mbps, Yans.
+Run 4: HT at 65 Mbps, NIST.
+Run 5: HT at 65 Mbps, Yans.
+Run 6: VHT at 693.3 Mbps, NIST.
+Run 7: ERP-OFDM at 54 Mbps, the BER table model.
+
+The stochastic model with a fixed bit error rate has no run: its rate of the
+whole signal reads a bit model that a flat transmission does not have.
+
+%file: test.cc
+#include <cmath>
+
+#include "inet/common/INETMath.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskTransmission.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee802154/packetlevel/Ieee802154Transmission.h"
+
+namespace RegionErrorRates_2 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Hands one packet of three chunks to the radio at the given time.
+class TestSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(par("startTime"), new cMessage("start")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto packet = new Packet(getParentModule()->getName());
+        for (int i = 0; i < 3; i++)
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(par("chunkLength").intValue()), i + 1));
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        send(packet, "out");
+        delete msg;
+    }
+};
+
+Define_Module(TestSource);
+
+// An SNIR that has one value at all times of a reception.
+class FixedSnir : public ISnir
+{
+  protected:
+    const IReception *reception;
+    double value;
+
+  public:
+    FixedSnir(const IReception *reception, double value) : reception(reception), value(value) {}
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "FixedSnir"; }
+    virtual const IReception *getReception() const override { return reception; }
+    virtual const INoise *getNoise() const override { return nullptr; }
+    virtual double getMin() const override { return value; }
+    virtual double getMax() const override { return value; }
+    virtual double getMean() const override { return value; }
+    virtual double getMin(simtime_t startTime, simtime_t endTime) const override { return value; }
+    virtual double getMax(simtime_t startTime, simtime_t endTime) const override { return value; }
+    virtual double getMean(simtime_t startTime, simtime_t endTime) const override { return value; }
+};
+
+// Compares the region rates of the error model of the radio with its rate of the whole signal.
+class RateChecker : public cSimpleModule, public cListener
+{
+  protected:
+    int numDifferences = 0;
+
+  protected:
+    virtual void initialize() override { getModuleByPath("^.radio")->subscribe(receptionEndedSignal, this); }
+    virtual void handleMessage(cMessage *msg) override { delete msg; }
+
+    void addDifference(const char *text, double snir, int numRegions, double value, double expected)
+    {
+        if (numDifferences++ < 3)
+            std::cout << par("label").stdstringValue() << ": " << text << " differs at " << math::fraction2dB(snir) << " dB with " << numRegions << " regions: " << value << " and " << expected << std::endl;
+    }
+
+    // Returns the product of the success rates of the regions of a part of length bits, which is divided into numRegions regions.
+    double computePartSuccessRate(const IErrorModel *errorModel, const ISnir *snir, IRadioSignal::SignalPart part, int length, int numRegions)
+    {
+        auto reception = snir->getReception();
+        simtime_t partStartTime = reception->getStartTime(part);
+        simtime_t partDuration = reception->getDuration(part);
+        double successRate = 1;
+        for (int i = 0; i < numRegions; i++) {
+            int startBit = (int64_t)length * i / numRegions;
+            int endBit = (int64_t)length * (i + 1) / numRegions;
+            if (startBit == endBit)
+                continue;
+            simtime_t startTime = partStartTime + partDuration * ((double)startBit / length);
+            simtime_t endTime = partStartTime + partDuration * ((double)endBit / length);
+            double rate = errorModel->computePacketErrorRate(snir, part, b(endBit - startBit), startTime, endTime);
+            double bitErrorRate = errorModel->computeBitErrorRate(snir, part, b(endBit - startBit), startTime, endTime);
+            double rateOfBits = 1 - std::pow(1 - bitErrorRate, endBit - startBit);
+            if (!(std::fabs(rate - rateOfBits) <= 1e-9))
+                addDifference("the region rate", snir->getMin(), numRegions, rate, rateOfBits);
+            successRate *= 1 - rate;
+        }
+        return successRate;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto reception = check_and_cast<const IReception *>(object);
+        auto transmission = reception->getTransmission();
+        auto errorModel = check_and_cast<const FlatReceiverBase *>(reception->getReceiverRadio()->getReceiver())->getErrorModel();
+        // the number of content bits of the header and the data
+        int headerLength, dataLength;
+        if (auto apskTransmission = dynamic_cast<const ApskTransmission *>(transmission)) {
+            headerLength = apskTransmission->getHeaderLength().get<b>();
+            dataLength = apskTransmission->getDataLength().get<b>();
+        }
+        else if (auto ieee802154Transmission = dynamic_cast<const Ieee802154Transmission *>(transmission)) {
+            headerLength = ieee802154Transmission->getHeaderLength().get<b>();
+            dataLength = ieee802154Transmission->getDataLength().get<b>();
+        }
+        else {
+            auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+            headerLength = phyHeader->getChunkLength().get<b>();
+            dataLength = b(phyHeader->getLengthField()).get<b>();
+        }
+        int numValues = 0;
+        int numValuesBetween = 0;
+        for (int i = -40; i <= 100; i++) {
+            FixedSnir snir(reception, math::dB2fraction(i / 2.0));
+            // the BER table model can give a value above 1
+            double wholeSuccessRate = 1 - std::min(1.0, errorModel->computePacketErrorRate(&snir, IRadioSignal::SIGNAL_PART_WHOLE));
+            numValues++;
+            if (0.001 < wholeSuccessRate && wholeSuccessRate < 0.999)
+                numValuesBetween++;
+            for (int numRegions : {1, 2, 7}) {
+                double successRate = computePartSuccessRate(errorModel, &snir, IRadioSignal::SIGNAL_PART_HEADER, headerLength, numRegions) *
+                                     computePartSuccessRate(errorModel, &snir, IRadioSignal::SIGNAL_PART_DATA, dataLength, numRegions);
+                bool isEqual = std::fabs(successRate - wholeSuccessRate) <= 1e-9 && (wholeSuccessRate < 1e-9 || std::fabs(successRate / wholeSuccessRate - 1) <= 1e-6);
+                if (!isEqual)
+                    addDifference("the success rate", snir.getMin(), numRegions, successRate, wholeSuccessRate);
+            }
+        }
+        std::cout << par("label").stdstringValue() << ": " << numDifferences << " differences at " << numValues << " SNIR values, " << (numValuesBetween > 0 ? "some" : "none") << " with a rate between 0 and 1" << std::endl;
+    }
+};
+
+Define_Module(RateChecker);
+
+} // namespace RegionErrorRates_2
+
+%file: test.ned
+
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee802154.packetlevel.Ieee802154NarrowbandScalarRadioMedium;
+
+simple TestSource
+{
+    @class(TestSource);
+    double startTime @unit(s);
+    int chunkLength @unit(B);
+    gates:
+        output out;
+}
+
+simple RateChecker
+{
+    @class(RateChecker);
+    string label;
+    gates:
+        input in;
+}
+
+module SenderNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: <> like IRadio;
+        source: TestSource;
+    connections allowunconnected:
+        source.out --> radio.upperLayerIn;
+}
+
+module ReceiverNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: StationaryMobility;
+        radio: <> like IRadio;
+        checker: RateChecker;
+    connections allowunconnected:
+        radio.upperLayerOut --> checker.in;
+}
+
+network Test
+{
+    submodules:
+        apskMedium: ScalarRadioMedium;
+        ieee802154Medium: Ieee802154NarrowbandScalarRadioMedium;
+        ieee80211Medium: Ieee80211ScalarRadioMedium;
+        apskSender: SenderNode;
+        apskReceiver: ReceiverNode;
+        apskStochasticSender: SenderNode;
+        apskStochasticReceiver: ReceiverNode;
+        ieee802154Sender: SenderNode;
+        ieee802154Receiver: ReceiverNode;
+        ieee80211Sender: SenderNode;
+        ieee80211Receiver: ReceiverNode;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 50ms
+ned-path = .;../../../../src
+
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.*Sender.mobility.initialX = 480m
+*.*Receiver.mobility.initialX = 500m
+
+**.radio.antenna.mobilityModule = "^.^.mobility"
+*.*Sender.radio.initialRadioMode = "transmitter"
+*.*Receiver.radio.initialRadioMode = "receiver"
+*.*Medium.backgroundNoise.power = -110dBm
+
+# the APSK radios, with the modulation model and with the stochastic model
+*.apsk*.radio.typename = "ApskScalarRadio"
+*.apsk*.radio.radioMediumModule = "apskMedium"
+*.apsk*.radio.centerFrequency = 2.4GHz
+*.apsk*.radio.bandwidth = 2MHz
+*.apsk*.radio.transmitter.bitrate = 2Mbps
+*.apsk*.radio.transmitter.modulation = "BPSK"
+*.apsk*.radio.transmitter.preambleDuration = 100us
+*.apsk*.radio.transmitter.headerLength = 96b
+*.apsk*.radio.transmitter.power = 10mW
+*.apsk*.radio.receiver.energyDetection = -90dBm
+*.apsk*.radio.receiver.sensitivity = -85dBm
+*.apsk*.radio.receiver.snirThreshold = 10dB
+*.apskStochasticReceiver.radio.receiver.errorModel.typename = "StochasticErrorModel"
+*.apskStochasticReceiver.radio.receiver.errorModel.packetErrorRate = 0.3
+# the receiver also reports the bit and symbol error rates of each reception
+*.apskStochasticReceiver.radio.receiver.errorModel.bitErrorRate = 0.001
+*.apskStochasticReceiver.radio.receiver.errorModel.symbolErrorRate = 0.001
+*.apskSender.source.startTime = 0s
+*.apskStochasticSender.source.startTime = 20ms
+*.apsk*.source.chunkLength = 500B
+*.apskReceiver.checker.label = "apsk"
+*.apskStochasticReceiver.checker.label = "apsk stochastic"
+
+# the IEEE 802.15.4 radios
+*.ieee802154*.radio.typename = "Ieee802154NarrowbandScalarRadio"
+*.ieee802154*.radio.radioMediumModule = "ieee802154Medium"
+*.ieee802154Sender.source.startTime = 0s
+*.ieee802154Sender.source.chunkLength = 30B
+*.ieee802154Receiver.checker.label = "ieee802154"
+
+# the IEEE 802.11 radios, with the variants of the runs
+*.ieee80211*.radio.typename = "Ieee80211ScalarRadio"
+*.ieee80211*.radio.radioMediumModule = "ieee80211Medium"
+*.ieee80211*.radio.opMode = ${opMode="b", "b", "g(erp)", "g(erp)", "n(mixed-2.4Ghz)", "n(mixed-2.4Ghz)", "ac", "g(erp)" ! run}
+*.ieee80211*.radio.transmitter.bitrate = ${bitrate=1Mbps, 11Mbps, 54Mbps, 6Mbps, 65Mbps, 65Mbps, 693.3Mbps, 54Mbps ! run}
+*.ieee80211*.radio.bandName = ${band="2.4 GHz", "2.4 GHz", "2.4 GHz", "2.4 GHz", "2.4 GHz", "2.4 GHz", "5 GHz (mapped 20 MHz)", "2.4 GHz" ! run}
+*.ieee80211*.radio.antenna.numAntennas = ${antennas=1, 1, 1, 1, 1, 1, 8, 1 ! run}
+*.ieee80211*.radio.receiver.errorModel.typename = ${model="Ieee80211NistErrorModel", "Ieee80211NistErrorModel", "Ieee80211NistErrorModel", "Ieee80211YansErrorModel", "Ieee80211NistErrorModel", "Ieee80211YansErrorModel", "Ieee80211NistErrorModel", "Ieee80211BerTableErrorModel" ! run}
+*.ieee80211*.radio.receiver.errorModel.berTableFile = "../../../statistical/files/per_table_80211g_Trivellato.dat"
+*.ieee80211*.radio.receiver.errorModel.opMode = "g(erp)"
+*.ieee80211*.radio.channelNumber = 0
+*.ieee80211*.radio.transmitter.power = 100mW
+*.ieee80211Sender.source.startTime = 0s
+*.ieee80211Sender.source.chunkLength = 100B
+*.ieee80211Receiver.checker.label = "ieee80211 run ${run=0..7}"
+
+%extraargs: -r 0..7
+
+%contains: stdout
+apsk: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+apsk stochastic: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee802154: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 0: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 1: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 2: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 3: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 4: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 5: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 6: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+%contains: stdout
+ieee80211 run 7: 0 differences at 141 SNIR values, some with a rate between 0 and 1
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
