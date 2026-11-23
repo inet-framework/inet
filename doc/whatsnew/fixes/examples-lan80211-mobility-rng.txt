@@ -1,0 +1,3 @@
+Independent host mobility in the lan80211 examples
+
+In the lan80211 examples, host movement now uses a separate random stream from Wi-Fi backoff. Changing the traffic no longer changes which random numbers the mobility model draws. With the same seed as in an earlier INET version, Ping1, TwoHosts, and Streaming1 can produce different host paths, link breaks, and traffic results.

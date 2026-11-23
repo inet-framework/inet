@@ -198,6 +198,23 @@ In the parent, a first-seen retry of sequence 101 can create the receipt that ma
 - Build `MODE=debug` for the module fixture and `MODE=release` for the statistical comparisons. Run from the INET worktree root with the [module and statistical commands and filters](../../tests/protocol/wifi/compressed-blockack-retry-receipts.md#verification).
 - Record case 19 and the baseline comparison in [Compressed retries after a reorder gap](../../tests/protocol/wifi/compressed-blockack-retry-receipts.md).
 
+### LAN mobility random stream, BD-31
+
+The maintainer approved implementation and the scoped baseline refresh on 2026-11-23.
+
+Commit `BD-31`, “examples: fix: isolate lan80211 mobility from Wi-Fi backoff”.
+Give the moving hosts RNG 1 in all three `lan80211` INI files. Wi-Fi backoff continues to draw from RNG 0.
+Re-record the run-0 fingerprints and statistics for `TwoHosts`, `Streaming1` and `Ping1` in the same change.
+
+- Automate the paired 100 s FTP `TwoHosts` run in
+  [Lan80211MobilityIndependence_1.test](../../tests/module/Lan80211MobilityIndependence_1.test).
+  At seed 0, vary TCP window scaling and check that both hosts keep their waypoint coordinates and change times
+  even though the sink receives different amounts of data. The original runs diverge at 68.74 s. The fixed
+  runs agree on all 101 logged waypoints.
+- Check the run-0 baselines for the three configurations against the original and refreshed expectations. Use
+  `tplx`, `~tND` and `~tNl` for fingerprints and release mode for statistics. Smoke-test `NHosts`, `Streaming2` and
+  `Ping2` with four hosts.
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair

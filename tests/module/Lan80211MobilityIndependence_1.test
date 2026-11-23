@@ -1,0 +1,62 @@
+%description:
+Run the two-host LAN 802.11 FTP example twice at seed 0. TCP window scaling
+changes the traffic while both hosts must follow the same mobility trajectory.
+
+%testprog: python3 check-mobility.py
+
+%file: check-mobility.py
+from itertools import zip_longest
+from pathlib import Path
+import re
+import subprocess
+
+root = Path.cwd().parents[3]
+example = root / "examples/wireless/lan80211"
+waypoint = re.compile(
+    r"^Lan80211\.host\[([01])\]\.mobility: "
+    r"(?:current target position|new target position|reached current target position) = .*",
+    re.MULTILINE,
+)
+sink_bytes = re.compile(r'^scalar\s+Lan80211\.host\[0\]\.app\[0\]\s+bytesRcvd\s+(\d+)$', re.MULTILINE)
+
+
+def run(scaling):
+    scalar_file = Path.cwd() / f"ftp-{scaling}.sca"
+    result = subprocess.run(
+        [
+            str(root / "bin/inet"), "--debug", "-u", "Cmdenv",
+            "-f", "omnetpp-ftp.ini", "-c", "TwoHosts", "-r", "0",
+            "--seed-set=0", "--cmdenv-express-mode=false", "--cmdenv-log-prefix=%m: ",
+            "--cmdenv-log-level=off", "--**.mobility.cmdenv-log-level=info",
+            f"--**.tcp.windowScalingSupport={scaling}",
+            f"--output-scalar-file={scalar_file}", "--record-vector-results=false",
+        ],
+        cwd=example, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+    )
+    log = Path(f"ftp-{scaling}.log")
+    log.write_text(result.stdout)
+    if result.returncode != 0:
+        raise RuntimeError(f"FTP run with window scaling {scaling} exited {result.returncode}. See {log}")
+    trajectories = {host: [] for host in ("0", "1")}
+    for match in waypoint.finditer(result.stdout):
+        trajectories[match[1]].append(match[0])
+    if any(len(points) < 2 for points in trajectories.values()):
+        raise RuntimeError(f"Missing mobility trajectory with window scaling {scaling}. See {log}")
+    received = sink_bytes.search(scalar_file.read_text())
+    if not received or int(received[1]) == 0:
+        raise RuntimeError(f"FTP sink received no data with window scaling {scaling}")
+    return trajectories, int(received[1])
+
+
+enabled, enabled_bytes = run("true")
+disabled, disabled_bytes = run("false")
+if enabled_bytes == disabled_bytes:
+    raise RuntimeError("Window scaling must exercise two different FTP traffic outcomes")
+for host in enabled:
+    for first, second in zip_longest(enabled[host], disabled[host]):
+        if first != second:
+            raise RuntimeError(f"Host {host} mobility differs between FTP runs:\n{first}\n{second}")
+print("LAN 802.11 mobility trajectories agree for both hosts.")
+
+%contains: stdout
+LAN 802.11 mobility trajectories agree for both hosts.
