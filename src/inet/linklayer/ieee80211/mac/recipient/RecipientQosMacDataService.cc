@@ -57,14 +57,14 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
-    // IEEE Std 802.11-2024, 10.25.1: these agreements apply to QoS DATA, which carries a TID.
-    if (blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
-        auto agreement = blockAckAgreementHandler->getAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress());
-        if (agreement) {
-            agreement->recordReceived(dataHeader);
-            if (agreement->getVariant() == BlockAckVariant::COMPRESSED)
-                agreement->getBlockAckRecord()->compressedFrameReceived(dataHeader);
-        }
+    // IEEE Std 802.11-2024, Table 10-5: group QoS DATA uses a different sequence space from unicast QoS DATA.
+    auto agreement = blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS &&
+        !dataHeader->getReceiverAddress().isMulticast() ?
+        blockAckAgreementHandler->getAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress()) : nullptr;
+    if (agreement) {
+        agreement->recordReceived(dataHeader);
+        if (agreement->getVariant() == BlockAckVariant::COMPRESSED)
+            agreement->getBlockAckRecord()->compressedFrameReceived(dataHeader);
     }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
@@ -76,13 +76,8 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         return std::vector<Packet *>();
     }
     BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
-    if (blockAckReordering && blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
-        Tid tid = dataHeader->getTid();
-        MacAddress originatorAddr = dataHeader->getTransmitterAddress();
-        RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
-        if (agreement)
-            frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe);
-    }
+    if (blockAckReordering && agreement)
+        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe);
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
         for (auto it : frames) {

@@ -52,7 +52,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     int getWindowSize() const { return std::min(bufferSize, 64); }
     static int computeSequenceDistance(SequenceNumberCyclic start, SequenceNumberCyclic sequence)
     {
-        return (sequence.get() - start.get() + 4096) % 4096;
+        return sequence.forwardDistanceFrom(start);
     }
     bool containsSequence(SequenceNumberCyclic sequence) const
     {

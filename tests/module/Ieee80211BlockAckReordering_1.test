@@ -5,13 +5,18 @@ Check fragment capacity, complete gap release, cyclic delivery, and BAR before D
 Check window movement, incomplete-unit disposal, peer/TID isolation, and A-MSDU order.
 The fixture supplies agreements; it does not test ADDBA negotiation.
 Compressed cases check gap release, cyclic delivery, peer/TID isolation, and receipt retention through the production recipient service.
+Basic bitmap cases check that BAR and DATA window advances retire receipt history even when no complete MSDU is delivered.
+The sequence reuse case checks that a retired fragment receipt cannot set a bit in the next sequence cycle.
+Group QoS data uses a separate sequence space and must leave individual Basic and Compressed agreements untouched.
+An equal group sequence must not suppress the first received unicast retry, with or without an agreement.
 
-%extraargs: -r 0..10
+%extraargs: -r 0..17
 
 %file: RecipientReordering.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 
 namespace inet::ieee80211 {
@@ -49,6 +54,11 @@ class ReorderingAgreements : public RecipientBlockAckAgreementHandler {
     }
 };
 
+class BasicBitmapBuilder : public RecipientBlockAckProcedure {
+  public:
+    using RecipientBlockAckProcedure::buildBlockAck;
+};
+
 class RecipientReorderingTest : public cSimpleModule {
   protected:
     ReorderingRecipient *recipient = nullptr;
@@ -58,18 +68,20 @@ class RecipientReorderingTest : public cSimpleModule {
     const MacAddress receiver = MacAddress("02:00:00:00:00:01");
 
     Packet *makeData(int sequence, const char *name, int fragment = 0, bool more = false,
-            MacAddress transmitter = MacAddress("02:00:00:00:00:02"), Tid tid = 5) {
+            MacAddress transmitter = MacAddress("02:00:00:00:00:02"), Tid tid = 5,
+            bool group = false, bool retry = false, AckPolicy ackPolicy = BLOCK_ACK) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->addChunkLength(QOSCONTROL_PART_LENGTH);
         header->setTransmitterAddress(transmitter);
-        header->setReceiverAddress(receiver);
+        header->setReceiverAddress(group ? MacAddress::BROADCAST_ADDRESS : receiver);
         header->setAddress3(transmitter);
         header->setTid(tid);
-        header->setAckPolicy(BLOCK_ACK);
+        header->setAckPolicy(group ? NO_ACK : ackPolicy);
         header->setSequenceNumber(SequenceNumberCyclic(sequence));
         header->setFragmentNumber(fragment);
         header->setMoreFragments(more);
+        header->setRetry(retry);
         auto packet = new Packet(name, header);
         packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
@@ -116,6 +128,19 @@ class RecipientReorderingTest : public cSimpleModule {
                   << " positions=" << buffer->getLength() << "\n";
         ASSERT(buffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(start));
         ASSERT(buffer->getLength() == length);
+    }
+
+    void checkBasicReceipt(int start, int offset, bool firstFragmentReceived) {
+        auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+        bar->setTransmitterAddress(peer);
+        bar->setReceiverAddress(receiver);
+        bar->setTidInfo(5);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(start));
+        BasicBitmapBuilder builder;
+        auto reply = dynamicPtrCast<const Ieee80211BasicBlockAck>(builder.buildBlockAck(bar, agreements.getAgreement(5, peer)));
+        ASSERT(reply->getStartingSequenceNumber() == SequenceNumberCyclic(start));
+        ASSERT(reply->getBlockAckBitmap(offset).getBit(0) == firstFragmentReceived);
+        ASSERT(!reply->getBlockAckBitmap(offset).getBit(1));
     }
 
     Packet *makeAggregate(int sequence, const char *first, const char *second) {
@@ -253,6 +278,79 @@ class RecipientReorderingTest : public cSimpleModule {
                 ASSERT(!agreements.getAgreement(5, otherPeer)->getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(100)));
                 ASSERT(!agreements.getAgreement(6, peer)->getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(100)));
                 break;
+            case 11: // Successive BARs move the window past half the sequence space without delivery.
+                agreements.accept(peer, 5, 0, 64);
+                checkDelivery(receiveBar(2000, peer), {});
+                checkDelivery(receiveBar(2050, peer), {});
+                checkDelivery(receive(makeData(2050, "fragmented-frag0", 0, true)), {});
+                checkDelivery(receiveBar(2000, peer), {}); // A stale BAR cannot undo the advance.
+                checkWindow(2050, 1, peer);
+                checkBasicReceipt(2050, 0, true);
+                checkDelivery(receive(makeData(2050, "fragmented-frag1", 1)), {"fragmented"});
+                break;
+            case 12: // An accepted advance can be exactly half a cycle from the last delivered receipt.
+                agreements.accept(peer, 5, 0, 64);
+                checkDelivery(receive(makeData(0, "first")), {"first"});
+                checkDelivery(receiveBar(2048, peer), {});
+                checkDelivery(receive(makeData(2049, "fragmented-frag0", 0, true)), {});
+                checkWindow(2048, 1, peer);
+                checkBasicReceipt(2048, 1, true);
+                break;
+            case 13: // DATA can also advance the receive window without delivery.
+                agreements.accept(peer, 5, 0, 64);
+                checkDelivery(receive(makeData(2047, "preceding-frag0", 0, true)), {});
+                checkDelivery(receive(makeData(2050, "fragmented-frag0", 0, true)), {});
+                checkWindow(1987, 2, peer);
+                checkBasicReceipt(1987, 63, true);
+                break;
+            case 14: { // A retired receipt must not survive reuse of its sequence number.
+                SequenceNumberCyclic start(4095);
+                agreements.accept(peer, 5, start.get(), 64);
+                checkDelivery(receive(makeData(start.get(), "old-frag0", 0, true)), {});
+                checkBasicReceipt(start.get(), 0, true);
+                checkDelivery(receiveBar((start + 2000).get(), peer), {});
+                checkDelivery(receiveBar((start + 4000).get(), peer), {});
+                checkDelivery(receiveBar(start.get(), peer), {});
+                checkWindow(start.get(), 0, peer);
+                checkBasicReceipt(start.get(), 0, false);
+                break;
+            }
+            case 15:
+            case 16: {
+                const bool basic = scenario == 15;
+                agreements.accept(peer, 5, 0, 64, basic ? BlockAckVariant::BASIC : BlockAckVariant::COMPRESSED);
+                auto agreement = agreements.getAgreement(5, peer);
+                auto record = agreement->getBlockAckRecord();
+                checkDelivery(receive(makeData(0, "unicast-0")), {"unicast-0"});
+                checkWindow(1, 0, peer);
+                checkDelivery(receive(makeData(66, "broadcast-66", 0, false, peer, 5, true)), {"broadcast-66"});
+                checkWindow(1, 0, peer);
+                ASSERT(agreement->getHighestReceivedSequence() == SequenceNumberCyclic(0));
+                if (basic)
+                    checkBasicReceipt(1, 0, false);
+                else {
+                    ASSERT(record->getWindowStart() == SequenceNumberCyclic(0));
+                    ASSERT(!record->hasCompleteReceipt(SequenceNumberCyclic(66)));
+                    ASSERT(!record->getCompressedAckState(SequenceNumberCyclic(1)));
+                }
+                checkDelivery(receive(makeData(1, "broadcast-1", 0, false, peer, 5, true)), {"broadcast-1"});
+                checkWindow(1, 0, peer);
+                checkDelivery(receive(makeData(1, "unicast-retry-1", 0, false, peer, 5, false, true)), {"unicast-retry-1"});
+                checkWindow(2, 0, peer);
+                checkDelivery(receive(makeData(1, "duplicate-1", 0, false, peer, 5, false, true)), {});
+                checkWindow(2, 0, peer);
+                if (basic)
+                    checkBasicReceipt(1, 0, true);
+                else
+                    ASSERT(record->getCompressedAckState(SequenceNumberCyclic(1)));
+                break;
+            }
+            case 17:
+                checkDelivery(receive(makeData(1, "broadcast-1", 0, false, peer, 5, true)), {"broadcast-1"});
+                checkDelivery(receive(makeData(1, "unicast-retry-1", 0, false, peer, 5, false, true, NORMAL_ACK)), {"unicast-retry-1"});
+                checkDelivery(receive(makeData(1, "duplicate-1", 0, false, peer, 5, false, true, NORMAL_ACK)), {});
+                ASSERT(recipient->getReordering()->getBufferCount() == 0);
+                break;
             default:
                 throw cRuntimeError("Unknown recipient scenario");
         }
@@ -296,7 +394,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.test.scenario = ${scenario=0..10}
+*.test.scenario = ${scenario=0..17}
 
 %contains: stdout
 Recipient reordering checks passed.

@@ -1,0 +1,138 @@
+%description:
+IEEE Std 802.11e-2005, 9.10.3: missing DATA in the retained range is unacknowledged.
+The AP receives a Basic BAR before the first Block Ack policy DATA arrives.
+The AP's actual bitmap leaves the missing bit clear and the station retries the same DATA.
+Repeat with a same-TID group frame in place of the missing unicast to check sequence-space isolation.
+Repeat with the group and unicast sequence numbers equal and check the reply to the first received unicast retry.
+
+%extraargs: -r 0..2
+
+%file: BasicBlockAckMissingData.cc
+#include <optional>
+
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+
+static ProtocolTest missingDataTest(const char *name, std::optional<int> groupSequenceOffset)
+{
+    auto test = ProtocolTest(name);
+    auto firstData = tap("radioMedium").from("sta1").to("ap")
+        .filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3").nth(1);
+    if (groupSequenceOffset)
+        firstData.mutate([offset = *groupSequenceOffset](Packet *packet) {
+            std::vector<Ptr<Chunk>> prefix;
+            while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+                prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+            auto header = packet->removeAtFront<Ieee80211DataHeader>();
+            header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+            header->setAckPolicy(NO_ACK);
+            header->setSequenceNumber(header->getSequenceNumber() + offset);
+            packet->insertAtFront(header);
+            for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+                packet->insertAtFront(*it);
+        }).describe("deliver group DATA instead of the first unicast DATA");
+    else
+        firstData.drop().describe("lose the first Block Ack policy DATA at the AP");
+    test.intercept(firstData)
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
+            .capture("sequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .capture("tid", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getTid());
+            })
+            .assertEvent([](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getFragmentNumber() == 0 && !data->getMoreFragments() && !data->getRetry();
+            })
+            .describe("the first standalone DATA under the accepted Basic agreement").within(1.05));
+    if (groupSequenceOffset)
+        test.once(on("ap.wlan[0].mac.hcf").signal("packetReceivedFromPeer")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([offset = *groupSequenceOffset](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getReceiverAddress().isBroadcast() && data->getAckPolicy() == NO_ACK &&
+                    data->getTid() == c.get("tid").intValue() &&
+                    data->getSequenceNumber() == SequenceNumberCyclic(c.get("sequence").intValue()) + offset;
+            })
+            .describe("the AP receives the group frame with the independent sequence").within(0.01));
+    test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 24")
+            .assertEvent([](const MatchContext& c) {
+                auto bar = c.event.packet->peekAtFront<Ieee80211BasicBlockAckReq>();
+                return bar->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                    bar->getTidInfo() == c.get("tid").intValue();
+            })
+            .describe("the BAR starts at the missing DATA sequence").within(0.02))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 25")
+            .assertEvent([](const MatchContext& c) {
+                auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                return ba->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                    ba->getTidInfo() == c.get("tid").intValue();
+            })
+            .describe("the AP replies for the same sequence and TID").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 25")
+            .assertEvent([](const MatchContext& c) {
+                auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                return !ba->getBlockAckBitmap(0).getBit(0);
+            })
+            .describe("the received Basic Block Ack leaves the missing fragment bit clear").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 40")
+            .assertEvent([](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getSequenceNumber().get() == c.get("sequence").intValue() &&
+                    data->getTid() == c.get("tid").intValue() && data->getRetry();
+            })
+            .describe("the station retransmits the missing DATA").within(0.02));
+    if (groupSequenceOffset == 0)
+        test.once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 25")
+            .assertEvent([](const MatchContext& c) {
+                auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                return ba->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                    ba->getTidInfo() == c.get("tid").intValue() && ba->getBlockAckBitmap(0).getBit(0);
+            })
+            .describe("the first received unicast retry is acknowledged after the matching broadcast").within(0.02));
+    return test;
+}
+
+Define_ProtocolTest(wifi_basic_block_ack_missing_data)
+{
+    return missingDataTest("wifi_basic_block_ack_missing_data", std::nullopt);
+}
+
+Define_ProtocolTest(wifi_basic_block_ack_group_isolation)
+{
+    return missingDataTest("wifi_basic_block_ack_group_isolation", 66);
+}
+
+Define_ProtocolTest(wifi_basic_block_ack_matching_group_retry)
+{
+    return missingDataTest("wifi_basic_block_ack_matching_group_retry", 0);
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${testName="wifi_basic_block_ack_missing_data","wifi_basic_block_ack_group_isolation","wifi_basic_block_ack_matching_group_retry"}
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.02s
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_block_ack_missing_data: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_block_ack_group_isolation: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_block_ack_matching_group_retry: PASS

@@ -128,6 +128,10 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::advanceReceiveBuffer(Reci
     releaseReceiveBuffer(agreement, receiveBuffer, releasedFrames);
     receiveBuffer->dropFramesUntil(startingSequenceNumber);
     receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
+    // IEEE Std 802.11e-2005, 9.10.3: retire Basic receipts before the new window
+    // even when advancing the window releases no complete MSDU.
+    if (agreement->getVariant() == BlockAckVariant::BASIC)
+        agreement->getBlockAckRecord()->removeAckStates(startingSequenceNumber);
     return releasedFrames;
 }
 

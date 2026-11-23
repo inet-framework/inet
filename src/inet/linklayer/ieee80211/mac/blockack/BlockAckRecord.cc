@@ -12,9 +12,10 @@
 namespace inet {
 namespace ieee80211 {
 
-BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
+BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber) :
     originatorAddress(originatorAddress),
-    tid(tid)
+    tid(tid),
+    basicReceiptStart(startingSequenceNumber)
 {
 }
 
@@ -27,30 +28,27 @@ void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHe
 
 bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber)
 {
-    // The status of MPDUs that are considered “old” and prior to the sequence number
-    // range for which the receiver maintains status shall be reported as successfully
-    // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    if (containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber))) {
-        return true;
-    }
-    else if (acknowledgmentState.size() == 0) {
-        return true; // TODO old?
-    }
-    else {
-        auto earliest = acknowledgmentState.begin();
-        return SequenceNumberCyclic(earliest->first.getSequenceNumber()) > sequenceNumber; // old = true
-    }
+    // IEEE Std 802.11e-2005, 9.10.3: report old MPDUs as received and use
+    // the actual fragment receipt for positions in the retained range.
+    return sequenceNumber < basicReceiptStart ||
+           containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber));
 }
 
 void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 {
+    auto advance = sequenceNumber.forwardDistanceFrom(basicReceiptStart);
+    // An accepted forward receive-window move can reach half a cycle from the
+    // last delivered receipt, which precedes the next expected sequence by one.
+    if (advance == 0 || advance > 2048)
+        return;
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
-        if (SequenceNumberCyclic(it->first.getSequenceNumber()) < sequenceNumber)
+        if (SequenceNumberCyclic(it->first.getSequenceNumber()).forwardDistanceFrom(basicReceiptStart) < advance)
             it = acknowledgmentState.erase(it);
         else
             it++;
     }
+    basicReceiptStart = sequenceNumber;
 }
 
 void BlockAckRecord::initializeCompressedWindow(SequenceNumberCyclic start, int size)
@@ -68,7 +66,7 @@ void BlockAckRecord::advanceCompressedWindow(SequenceNumberCyclic start)
         return;
     windowStart = start;
     for (auto it = completeReceipts.begin(); it != completeReceipts.end();) {
-        auto distance = (*it - windowStart.get() + 4096) % 4096;
+        auto distance = SequenceNumberCyclic(*it).forwardDistanceFrom(windowStart);
         if (distance >= windowSize && distance != 4095)
             it = completeReceipts.erase(it);
         else
