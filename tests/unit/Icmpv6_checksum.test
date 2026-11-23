@@ -1,0 +1,79 @@
+%description:
+Checks that the ICMPv6 checksum covers the IPv6 pseudo-header that RFC 4443 Section 2.3
+requires, and that verifyChecksum() accepts what insertChecksum() wrote.
+
+The message is the Neighbour Solicitation (NS) that RFC 4862 Duplicate Address Detection
+(DAD) sends: source the unspecified address, destination the solicited-node multicast
+address of the tentative target. The expected value is external to INET -- it is what
+Wireshark computes for that frame -- so the test cannot agree with a wrong implementation
+of its own.
+
+Changing only the source address changes the checksum, which is the property the
+pseudo-header exists for: without it the same message would hash the same from every host.
+
+%includes:
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+
+using namespace inet;
+
+%global:
+
+static Ptr<Ipv6NeighbourSolicitation> makeNeighbourSolicitation()
+{
+    auto ns = makeShared<Ipv6NeighbourSolicitation>();
+    ns->setTargetAddress(Ipv6Address("fe80::8aa:ff:fe00:2"));
+    return ns;
+}
+
+%activity:
+
+Ipv6Address destAddress("ff02::1:ff00:2"); // the solicited-node multicast address of the target
+Ipv6Address otherAddress("fe80::8aa:ff:fe00:9");
+
+// the DAD case: the source address is unspecified
+auto ns = makeNeighbourSolicitation();
+Packet packet("NeighbourSolicitation");
+Icmpv6::insertChecksum(CHECKSUM_COMPUTED, Ipv6Address::UNSPECIFIED_ADDRESS, destAddress, ns, &packet);
+EV << "message length: " << ns->getChunkLength() << endl;
+EV << "checksum: " << std::hex << ns->getChksum() << std::dec << endl;
+
+// the same message, as a receiver sees it, passes verification
+packet.insertAtFront(ns);
+auto addressInd = packet.addTag<L3AddressInd>();
+addressInd->setSrcAddress(Ipv6Address::UNSPECIFIED_ADDRESS);
+addressInd->setDestAddress(destAddress);
+EV << "verified: " << Icmpv6::verifyChecksum(&packet) << endl;
+
+// the same message sent from a different source has a different checksum
+auto ns2 = makeNeighbourSolicitation();
+Packet packet2("NeighbourSolicitation");
+Icmpv6::insertChecksum(CHECKSUM_COMPUTED, otherAddress, destAddress, ns2, &packet2);
+EV << "checksum from another source: " << std::hex << ns2->getChksum() << std::dec << endl;
+
+// a message the source address of which the receiver disagrees about is rejected
+packet2.insertAtFront(ns2);
+auto addressInd2 = packet2.addTag<L3AddressInd>();
+addressInd2->setSrcAddress(Ipv6Address::UNSPECIFIED_ADDRESS);
+addressInd2->setDestAddress(destAddress);
+EV << "verified with the wrong source: " << Icmpv6::verifyChecksum(&packet2) << endl;
+
+// the declared modes keep writing their recognizable placeholders
+auto ns3 = makeNeighbourSolicitation();
+Packet packet3("NeighbourSolicitation");
+Icmpv6::insertChecksum(CHECKSUM_DECLARED_CORRECT, ns3, &packet3);
+EV << "declared correct: " << std::hex << ns3->getChksum() << std::dec << endl;
+Icmpv6::insertChecksum(CHECKSUM_DECLARED_INCORRECT, ns3, &packet3);
+EV << "declared incorrect: " << std::hex << ns3->getChksum() << std::dec << endl;
+
+%contains: stdout
+message length: 24 B
+checksum: 7479
+verified: 1
+checksum from another source: 6e45
+verified with the wrong source: 0
+declared correct: c00d
+declared incorrect: baad
