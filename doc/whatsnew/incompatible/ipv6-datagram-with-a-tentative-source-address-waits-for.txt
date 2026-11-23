@@ -1,0 +1,11 @@
+A datagram with a tentative source address waits for Duplicate Address Detection
+
+Ipv6 held a datagram whose source address was still tentative, that is,
+still under Duplicate Address Detection (DAD), only when Ipv6 had chosen the
+source address itself. A datagram whose sender had set the source address,
+for example an ICMPv6 (Internet Control Message Protocol for IPv6) Echo Reply
+to a multicast Echo Request, left with the tentative source address. Such a
+datagram is now held until DAD completes as well, unless Optimistic DAD is
+enabled. Neighbor Discovery messages are not held: Neighbor Discovery chooses
+their source addresses itself. This changes the time at which these datagrams
+leave a node during DAD.
