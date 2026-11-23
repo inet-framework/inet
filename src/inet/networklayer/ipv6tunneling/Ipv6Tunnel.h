@@ -28,6 +28,12 @@ namespace inet {
  */
 class INET_API Ipv6Tunnel : public LayeredProtocolBase
 {
+  public:
+    /** The tunnel entry point: the outer source address this tunnel encapsulates with. */
+    const Ipv6Address& getSource() const { return source; }
+    /** The tunnel exit point: the outer destination address this tunnel encapsulates toward. */
+    const Ipv6Address& getDestination() const { return destination; }
+
   protected:
     opp_component_ptr<NetworkInterface> networkInterface;
 
