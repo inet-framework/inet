@@ -9,8 +9,12 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
 
@@ -32,7 +36,17 @@ void Ipv6Tunnel::initialize(int stage)
 void Ipv6Tunnel::configureNetworkInterface()
 {
     networkInterface = getContainingNicModule(this);
-    networkInterface->setMtu(par("mtu"));
+    // RFC 2473 Section 7.1 (b): an original packet of up to the IPv6 minimum
+    // link MTU is encapsulated whatever the tunnel MTU, and the tunnel packet is
+    // fragmented. So the interface accepts packets of up to that size, and
+    // handleUpperPacket() asks Ipv6 to fragment the tunnel packet to the Path MTU
+    // to the exit point: the tunnel MTU plus the tunnel header (Section 6.7).
+    int mtu = par("mtu");
+    // a fragment carries the tunnel header, a Fragment Header and at least 8 bytes of payload
+    if (mtu < IPv6_FRAGMENT_HEADER_LENGTH.get<B>() + 8)
+        throw cRuntimeError("Tunnel mtu %d B is too small to carry a fragment", mtu);
+    tunnelPathMtu = mtu + IPv6_HEADER_BYTES.get<B>();
+    networkInterface->setMtu(std::max(mtu, IPv6_MIN_MTU));
     networkInterface->setPointToPoint(true);
 }
 
@@ -50,6 +64,7 @@ void Ipv6Tunnel::handleUpperPacket(Packet *packet)
     addresses->setSrcAddress(source); // the tunnel entry point (RFC 2473)
     addresses->setDestAddress(destination);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+    packet->addTag<FragmentationReq>()->setMtu(tunnelPathMtu);
     auto req = packet->addTag<DispatchProtocolReq>();
     req->setProtocol(&Protocol::ipv6);
     req->setServicePrimitive(SP_REQUEST);

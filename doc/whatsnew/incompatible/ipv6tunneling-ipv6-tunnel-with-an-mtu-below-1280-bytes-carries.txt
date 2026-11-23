@@ -1,0 +1,17 @@
+An IPv6 tunnel with an mtu below 1280 bytes carries packets of up to 1280 bytes
+
+An Ipv6TunnelInterface whose mtu parameter was below 1280 bytes refused every
+forwarded packet larger than the tunnel mtu with an ICMPv6 (Internet Control
+Message Protocol for IPv6) Packet Too Big that reported the tunnel mtu, for
+example 1200. RFC 8201 (Path MTU Discovery for IPv6) does not let a source
+lower its path MTU (maximum transmission unit) below 1280 bytes, so packets
+between the tunnel mtu and 1280 bytes never got through. As RFC 2473 (Generic
+Packet Tunneling in IPv6) Section 7.1 requires, the tunnel now accepts packets
+of up to 1280 bytes, and the entry point fragments the tunnel packet to the
+tunnel mtu plus the 40-byte tunnel header, which is the Path MTU to the exit
+point (Section 6.7). The interface MTU of such a tunnel is 1280 bytes, so a
+node that sends its own packets into the tunnel fragments them to 1280 bytes,
+and the tunnel fragments the resulting tunnel packets. FragmentationReq has a
+new mtu field, through which a sender asks Ipv6 for fragments smaller than
+the MTU of the outgoing interface. The results of simulations that configure
+a tunnel mtu below 1280 bytes change.

@@ -1,0 +1,135 @@
+%description:
+Tests that a tunnel whose mtu is below the IPv6 minimum link MTU (1280 bytes)
+still carries a packet of up to 1280 bytes (RFC 2473 Section 7.1 (b)).
+
+Topology: hostA --- borderA --- transit --- borderB --- hostB. borderA routes
+traffic for hostB's prefix into an Ipv6TunnelInterface whose exit point is
+borderB, and borderB decapsulates it. The transit-borderB link has an MTU of
+1240 bytes, so the Path MTU to the exit point is 1240 bytes and the tunnel mtu
+is 1200 bytes (RFC 2473 Section 6.7).
+
+hostA sends 1200-byte UDP payloads, so each inner packet is 1248 bytes: larger
+than the tunnel mtu, but not larger than 1280 bytes. borderA must encapsulate
+it and fragment the 1288-byte tunnel packet to 1240 bytes, not refuse it with
+an ICMPv6 Packet Too Big, and not send it unfragmented to the 1240-byte link.
+
+borderA also sends 1300-byte UDP payloads of its own. Its IPv6 layer fragments
+each 1348-byte inner packet to the 1280-byte interface MTU of the tunnel, and
+the tunnel fragments each resulting tunnel packet to 1240 bytes.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelMtuTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost6;
+        borderA: Router6;
+        transit: Router6;
+        borderB: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> borderA.ethg++;
+        borderA.ethg++ <--> ethline <--> transit.ethg++;
+        transit.ethg++ <--> ethline <--> borderB.ethg++;
+        borderB.ethg++ <--> ethline <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelMtuTestNetwork
+ned-path = ../../../../src;.
+sim-time-limit = 3s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.addStaticRoutes = false
+**.configurator.config = xml("<config> \
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::a'/> \
+    <interface hosts='borderA' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='borderA' names='eth1' address='2001:db8:2::1'/> \
+    <interface hosts='transit' names='eth0' address='2001:db8:2::2'/> \
+    <interface hosts='transit' names='eth1' address='2001:db8:3::1'/> \
+    <interface hosts='borderB' names='eth0' address='2001:db8:3::2'/> \
+    <interface hosts='borderB' names='eth1' address='2001:db8:4::1'/> \
+    <interface hosts='hostB' names='eth0' address='2001:db8:4::b'/> \
+    <route hosts='hostA' destination='::' prefixLength='0' gateway='2001:db8:1::1' interface='eth0'/> \
+    <route hosts='hostB' destination='::' prefixLength='0' gateway='2001:db8:4::1' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:1::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:2::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderA' destination='::' prefixLength='0' gateway='2001:db8:2::2' interface='eth1'/> \
+    <route hosts='borderA' destination='2001:db8:4::' prefixLength='64' interface='tun0'/> \
+    <route hosts='transit' destination='2001:db8:2::' prefixLength='64' interface='eth0'/> \
+    <route hosts='transit' destination='2001:db8:3::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderB' destination='2001:db8:3::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderB' destination='2001:db8:4::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderB' destination='::' prefixLength='0' gateway='2001:db8:3::1' interface='eth0'/> \
+  </config>")
+
+*.transit.eth[1].mac.mtu = 1240B
+*.borderB.eth[0].mac.mtu = 1240B
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.neighbourDiscovery.hostBootupTime = 0s
+**.neighbourDiscovery.routerBootupTime = 0s
+
+*.borderA.numTunInterfaces = 1
+*.borderA.tun[0].typename = "Ipv6TunnelInterface"
+*.borderA.tun[0].source = "2001:db8:2::1"
+*.borderA.tun[0].destination = "2001:db8:3::2"
+*.borderA.tun[0].mtu = 1200B
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "2001:db8:4::b"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 1200B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].sendInterval = 0.5s
+*.hostA.app[0].stopTime = 2.9s
+
+*.borderA.hasUdp = true
+*.borderA.numApps = 1
+*.borderA.app[0].typename = "UdpBasicApp"
+*.borderA.app[0].localAddress = "2001:db8:2::1"
+*.borderA.app[0].destAddresses = "2001:db8:4::b"
+*.borderA.app[0].destPort = 5001
+*.borderA.app[0].messageLength = 1300B
+*.borderA.app[0].startTime = 1.1s
+*.borderA.app[0].sendInterval = 0.5s
+*.borderA.app[0].stopTime = 2.9s
+
+*.hostB.numApps = 2
+*.hostB.app[*].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].localPort = 5001
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelMtuTestNetwork.hostB.app[0]: received 4 packets
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6TunnelMtuTestNetwork.hostB.app[1]: received 4 packets
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Packet Too Big
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
