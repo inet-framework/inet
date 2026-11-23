@@ -13,6 +13,7 @@ An equal group sequence must not suppress the first received unicast retry, with
 %extraargs: -r 0..17
 
 %file: RecipientReordering.cc
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
@@ -57,6 +58,16 @@ class ReorderingAgreements : public RecipientBlockAckAgreementHandler {
 class BasicBitmapBuilder : public RecipientBlockAckProcedure {
   public:
     using RecipientBlockAckProcedure::buildBlockAck;
+};
+
+class DuplicateDropProbe : public cListener {
+  public:
+    std::vector<std::string> packets;
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *details) override {
+        auto drop = check_and_cast<PacketDropDetails *>(details);
+        ASSERT(drop->getReason() == DUPLICATE_DETECTED);
+        packets.push_back(check_and_cast<Packet *>(object)->getName());
+    }
 };
 
 class RecipientReorderingTest : public cSimpleModule {
@@ -317,6 +328,8 @@ class RecipientReorderingTest : public cSimpleModule {
             }
             case 15:
             case 16: {
+                DuplicateDropProbe drops;
+                recipient->subscribe(packetDroppedSignal, &drops);
                 const bool basic = scenario == 15;
                 agreements.accept(peer, 5, 0, 64, basic ? BlockAckVariant::BASIC : BlockAckVariant::COMPRESSED);
                 auto agreement = agreements.getAgreement(5, peer);
@@ -337,20 +350,39 @@ class RecipientReorderingTest : public cSimpleModule {
                 checkWindow(1, 0, peer);
                 checkDelivery(receive(makeData(1, "unicast-retry-1", 0, false, peer, 5, false, true)), {"unicast-retry-1"});
                 checkWindow(2, 0, peer);
+                ASSERT(drops.packets.empty());
                 checkDelivery(receive(makeData(1, "duplicate-1", 0, false, peer, 5, false, true)), {});
+                ASSERT(drops.packets == std::vector<std::string>{"duplicate-1"});
                 checkWindow(2, 0, peer);
                 if (basic)
                     checkBasicReceipt(1, 0, true);
                 else
                     ASSERT(record->getCompressedAckState(SequenceNumberCyclic(1)));
+                checkDelivery(receive(makeData(3, "buffered-3")), {});
+                checkDelivery(receive(makeData(3, "duplicate-buffered-3", 0, false, peer, 5, false, true)), {});
+                ASSERT((drops.packets == std::vector<std::string>{"duplicate-1", "duplicate-buffered-3"}));
+                checkDelivery(receive(makeData(2, "unicast-2")), {"unicast-2", "buffered-3"});
+                recipient->unsubscribe(packetDroppedSignal, &drops);
                 break;
             }
-            case 17:
+            case 17: {
+                DuplicateDropProbe drops;
+                recipient->subscribe(packetDroppedSignal, &drops);
                 checkDelivery(receive(makeData(1, "broadcast-1", 0, false, peer, 5, true)), {"broadcast-1"});
                 checkDelivery(receive(makeData(1, "unicast-retry-1", 0, false, peer, 5, false, true, NORMAL_ACK)), {"unicast-retry-1"});
                 checkDelivery(receive(makeData(1, "duplicate-1", 0, false, peer, 5, false, true, NORMAL_ACK)), {});
+                ASSERT(drops.packets == std::vector<std::string>{"duplicate-1"});
                 ASSERT(recipient->getReordering()->getBufferCount() == 0);
+                drops.packets.clear();
+                // Reuse the cached sequence as the start of a fresh agreement.
+                agreements.accept(peer, 5, 1, 64);
+                checkDelivery(receive(makeData(1, "agreement-retry-1", 0, false, peer, 5, false, true)), {"agreement-retry-1"});
+                checkWindow(2, 0, peer);
+                checkBasicReceipt(1, 0, true);
+                ASSERT(drops.packets.empty());
+                recipient->unsubscribe(packetDroppedSignal, &drops);
                 break;
+            }
             default:
                 throw cRuntimeError("Unknown recipient scenario");
         }

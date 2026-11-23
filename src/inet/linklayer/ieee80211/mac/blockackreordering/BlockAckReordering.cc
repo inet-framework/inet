@@ -52,6 +52,11 @@ void BlockAckReordering::clearPeer(MacAddress peer)
 
 BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe)
 {
+    return processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, {});
+}
+
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, const std::function<void(Packet *)>& onDuplicate)
+{
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto windowStart = receiveBuffer->getNextExpectedSequenceNumber();
@@ -60,6 +65,13 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
     // IEEE Std 802.11-2024, 10.25.6.6.2.1(b,c): advance for newer DATA beyond the window; discard older DATA.
     // The shared reorder service also retains Basic fragment reassembly as an INET compatibility choice.
     if (!(windowStart <= sequenceNumber)) {
+        if (onDuplicate && dataHeader->getRetry()) {
+            auto record = agreement->getBlockAckRecord();
+            bool received = agreement->getVariant() == BlockAckVariant::BASIC ?
+                record->hasBasicReceipt(sequenceNumber, dataHeader->getFragmentNumber()) : record->hasCompleteReceipt(sequenceNumber);
+            if (received)
+                onDuplicate(dataPacket);
+        }
         delete dataPacket;
         return releasedFrames;
     }
@@ -84,8 +96,17 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
         releaseReceiveBuffer(agreement, receiveBuffer, consecutiveFrames);
         releasedFrames.insert(releasedFrames.end(), consecutiveFrames.begin(), consecutiveFrames.end());
     }
-    else
+    else {
+        if (onDuplicate && dataHeader->getRetry()) {
+            const auto& buffer = receiveBuffer->getBuffer();
+            auto entry = buffer.find(sequenceNumber.get());
+            if (entry != buffer.end() && std::any_of(entry->second.begin(), entry->second.end(), [&](Packet *fragment) {
+                    return fragment->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber() == dataHeader->getFragmentNumber();
+                }))
+                onDuplicate(dataPacket);
+        }
         delete dataPacket;
+    }
     return releasedFrames;
 }
 

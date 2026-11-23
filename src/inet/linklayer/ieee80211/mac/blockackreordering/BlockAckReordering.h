@@ -8,6 +8,8 @@
 #ifndef __INET_BLOCKACKREORDERING_H
 #define __INET_BLOCKACKREORDERING_H
 
+#include <functional>
+
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/ReceiveBuffer.h"
 
@@ -55,6 +57,7 @@ class INET_API BlockAckReordering
 
     void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
     ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe = false);
+    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, const std::function<void(Packet *)>& onDuplicate);
     ReleasedFrames processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 

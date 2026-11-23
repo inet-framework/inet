@@ -152,6 +152,19 @@ See IEEE Std 802.11e-2005, 9.10.3.
 - Write [Basic Block Ack receipt reporting](../../tests/protocol/wifi/basic-blockack-receipts.md) beside
   the protocol test. Record the exact parent and repaired runs and their outcomes.
 
+### Block Ack duplicate-drop reporting
+
+The maintainer approved the six failing run-0 statistical baseline refreshes on 2026-11-24.
+
+Commit `BA-REPORT`, “ieee80211: fix: report duplicate retries from the Block Ack receive window”.
+Implement IEEE Std 802.11-2024, Table 10-6, RC9/RR4. The receive window handles duplicate
+filtering under an agreement and the recipient reports confirmed retry drops. Extend
+`Ieee80211BlockAckReordering_1` cases 15 and 16 to check the signal for both buffered and
+previously delivered duplicates. Reuse the matching-sequence over-the-air test and the
+[reviewer evidence](../../tests/protocol/wifi/basic-blockack-receipts.md).
+Extend case 17 to leave a matching unicast entry in the ordinary cache before accepting
+a Basic agreement. The first in-window retry must be delivered and emit no duplicate drop.
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair
