@@ -1,0 +1,148 @@
+%description:
+A Proxy Mobile IPv6 (PMIPv6, RFC 5213) local mobility anchor (LMA) refuses a Proxy Binding
+Update (PBU) whose timestamp is older than that of the last one it accepted for the same mobile
+node (RFC 5213 Section 5.5, rule 8).
+
+The mobile node attaches to mag1 at 0.8 s and to mag2 at 3.5 s. The backhaul link of mag1 has
+a 1.4 s delay, so mag1's PBU, which waits for address resolution of the LMA (one round trip)
+and then travels 1.4 s, reaches the LMA at 5.0 s, after mag2's PBU. Accepting it would re-point
+the node's home network prefix into the tunnel toward mag1, where the node no longer is, and the
+correspondent node's echo requests would be lost from then on. The LMA answers it with
+TIMESTAMP_LOWER_THAN_PREV_ACCEPTED and keeps the binding at mag2.
+
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import inet.node.pmipv6.LocalMobilityAnchor;
+import inet.node.pmipv6.MobileAccessGateway;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+channel Backhaul extends ned.DatarateChannel
+{
+    datarate = 100Mbps;
+}
+
+network Test
+{
+    parameters:
+        **.ipv6.configurator.networkConfiguratorModule = "configurator";
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        lma: LocalMobilityAnchor;
+        cn: StandardHost6;
+        mag1: MobileAccessGateway;
+        mag2: MobileAccessGateway;
+        mn: StandardHost6 {
+            numWlanInterfaces = 1;
+        }
+    connections allowunconnected:
+        cn.ethg++ <--> Backhaul { delay = 0.1us; } <--> lma.ethg++;
+        mag1.ethg++ <--> Backhaul { delay = 1.4s; } <--> lma.ethg++;
+        mag2.ethg++ <--> Backhaul { delay = 0.1us; } <--> lma.ethg++;
+}
+
+%file: config.xml
+<config>
+    <interface hosts="lma"  towards="cn"   address="2001:db8:ff::1"/>
+    <interface hosts="lma"  towards="mag1" address="2001:db8:0:1::1"/>
+    <interface hosts="mag1" towards="lma"  address="2001:db8:0:1::2"/>
+    <interface hosts="lma"  towards="mag2" address="2001:db8:0:2::1"/>
+    <interface hosts="mag2" towards="lma"  address="2001:db8:0:2::2"/>
+</config>
+
+%file: movement.xml
+<movement>
+    <set x="300" y="400"/>
+    <set speed="100"/>
+    <wait t="1"/>
+    <moveto x="550" y="400"/>
+    <wait t="100"/>
+</movement>
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 20s
+cpu-time-limit = 60s
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%t %N: "
+**.lma.ipv6.pmipv6.cmdenv-log-level = info
+**.cn.app[0].cmdenv-log-level = info
+**.cmdenv-log-level = off
+seed-set = 1
+num-rngs = 3
+**.mobility.rng-0 = 2
+
+*.configurator.config = xmldoc("config.xml")
+*.configurator.assignAddressesToHosts = false
+
+*.mag1.ipv6.pmipv6.localMobilityAnchorAddress = "2001:db8:0:1::1"
+*.mag2.ipv6.pmipv6.localMobilityAnchorAddress = "2001:db8:0:2::1"
+*.mag*.ipv6.pmipv6.mobileNodeProfiles = xml("<mobileNodes><mobileNode id='mn1@example.com' homeNetworkPrefix='2001:db8:1::' prefixLength='64'/></mobileNodes>")
+
+*.mag*.numWlanInterfaces = 1
+*.mn.wlan*.address = "0A:AA:00:00:00:0B"
+*.mn.forwarding = false
+*.cn.forwarding = false
+*.cn.numApps = 1
+*.cn.app[0].typename = "PingApp"
+*.cn.app[0].destAddr = "2001:db8:1:0:8aa:ff:fe00:b"
+*.cn.app[0].startTime = 4s
+*.cn.app[0].sendInterval = 0.5s
+*.cn.app[0].printPing = true
+**.mgmt.numChannels = 5
+**.mag*.wlan*.mgmt.beaconInterval = 0.1s
+*.mag1.wlan*.mgmt.ssid = "MAG1"
+*.mag1.wlan*.radio.channelNumber = 0
+*.mag2.wlan*.mgmt.ssid = "MAG2"
+*.mag2.wlan*.radio.channelNumber = 1
+*.mn.wlan*.agent.channelsToScan = "0 1"
+*.mn.wlan*.agent.probeDelay = 0.1s
+*.mn.wlan*.agent.minChannelTime = 0.15s
+*.mn.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.bitrate = 2Mbps
+
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+**.radio.transmitter.power = 2.0mW
+**.analogModel.ignorePartialInterference = true
+
+*.mag*.mobility.typename = "StationaryMobility"
+*.mag*.mobility.initFromDisplayString = false
+*.mag1.mobility.initialX = 250m
+*.mag1.mobility.initialY = 260m
+*.mag2.mobility.initialX = 550m
+*.mag2.mobility.initialY = 260m
+*.mn.mobility.typename = "TurtleMobility"
+*.mn.mobility.turtleScript = xmldoc("movement.xml")
+*.mn.mobility.updateInterval = 0.1s
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 800m
+**.constraintAreaMaxY = 500m
+
+%#--------------------------------------------------------------------------------------------------------------
+%# mag1's PBU arrives after mag2's and is refused
+%contains: stdout
+LMA received Proxy Binding Update from MAG 2001:db8:0:2::2 for MN 'mn1@example.com' prefix 2001:db8:1::/64 lifetime 3600s
+%contains: stdout
+LMA rejecting Proxy Binding Update for MN 'mn1@example.com' from MAG 2001:db8:0:1::2: its timestamp is older than the last one accepted
+%#--------------------------------------------------------------------------------------------------------------
+%# the prefix is never re-pointed toward mag1
+%not-contains: stdout
+toward MAG 2001:db8:0:1::2
+%#--------------------------------------------------------------------------------------------------------------
+%# the echo replies keep arriving after mag1's PBU (on master 3 of 33 arrive)
+%contains-regex: stdout
+sent: 33 +received: (2[5-9]|3[0-3]) 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
