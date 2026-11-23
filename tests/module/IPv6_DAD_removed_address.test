@@ -11,7 +11,7 @@ The first Prefix Information option assigns aaaa:0:65:0:8aa:ff:fe00:2 tentative
 and starts its DAD. The second one takes the path written for a Mobile IPv6
 handover: it records aaaa:0:65:0:8aa:ff:fe00:2 as the old care-of address and
 restarts DAD on the link-local address. At this seed the link-local DAD
-completes first, at 4.394819062416 s, and removes aaaa:0:65:0:8aa:ff:fe00:2. The
+completes first, at 3.251638560328 s, and removes aaaa:0:65:0:8aa:ff:fe00:2. The
 DAD of the removed address must not complete after that.
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ record-vector-results = false
 ned-path = ../../../../src
 network = DadRemovedAddressNetwork
 sim-time-limit = 10s
-seed-set = 0
+seed-set = 1
 cmdenv-express-mode = false
 cmdenv-log-prefix = "[%t] %C: "
 
@@ -56,7 +56,7 @@ cmdenv-log-prefix = "[%t] %C: "
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-[4.394819062416] (Ipv6NeighbourDiscovery)DadRemovedAddressNetwork.host.ipv6.neighbourDiscovery: DAD completed for address fe80::8aa:ff:fe00:2 on eth0, address is unique
+[3.251638560328] (Ipv6NeighbourDiscovery)DadRemovedAddressNetwork.host.ipv6.neighbourDiscovery: DAD completed for address fe80::8aa:ff:fe00:2 on eth0, address is unique
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 DAD completed for address aaaa:0:65:0:8aa:ff:fe00:2 on eth0
