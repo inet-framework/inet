@@ -535,7 +535,8 @@ A zero limit permits the initial exchange and its existing RTS/CTS and immediate
 
 With Block Ack support enabled, active Compressed agreements use the admission described in :ref:`ug:sec:80211:blockack`. Basic and traffic outside those agreements retain their existing admission policy. Those retained paths can exceed DATA exchange bounds. All paths use shared TXNAV. Basic Block Ack admission and BAR forecasts remain outside the Compressed correction.
 
-All single protection paths classify group frames before the current-frame ACK equation. With Block Ack support disabled, the current one-frame group sequence advertises zero. With support enabled, its legacy forecast can reserve a queued successor that the sequence cannot transmit. This limit applies to group management and non-QoS DATA too.
+Under single protection, HCF sends one group-addressed Data or Management frame per TXOP.
+The frame advertises zero Duration/ID with either setting of Block Ack support.
 
 Multiple protection in an EDCA TXOP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

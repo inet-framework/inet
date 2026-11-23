@@ -221,6 +221,25 @@ Re-record the run-0 fingerprints and statistics for `TwoHosts`, `Streaming1` and
   `tplx`, `~tND` and `~tNl` for fingerprints and release mode for statistics. Smoke-test `NHosts`, `Streaming2` and
   `Ping2` with four hosts.
 
+### Group-frame Duration/ID, BD-25
+
+The maintainer requested implementation on 2026-11-23.
+
+Commit `BD-25`, “ieee80211: fix: stop reserving a successor for single-protection group frames”.
+Apply IEEE Std 802.11-2024, 9.2.5.2 a) 9), to HCF's one-frame group sequence. Follow the
+existing Block Ack-disabled forecast and omit the successor in the Block Ack-enabled path.
+Keep the Duration/ID equation in single protection.
+
+- Add [WifiSingleProtectionGroupDuration.test](../../tests/protocol/wifi/common/WifiSingleProtectionGroupDuration.test).
+  Send group DATA with an already extracted successor, a positive TXOP limit, and single
+  protection. Observe the transmitted headers and verify that each group frame ends its TXOP
+  with zero Duration/ID. Use the model's fragmentation path to make the successor available.
+  The legacy forecast can reserve it even though the group sequence ends. Run without Block
+  Ack and with the Basic and Compressed profiles as separate cases.
+- Run the same fixture before and after the fix with the debug Wi-Fi protocol runner and
+  rerun `Ieee80211SingleProtectionGroup_1` as a control for the protection equation.
+  Record the comparison in [Group-frame Duration/ID](../../tests/protocol/wifi/single-protection-group-duration.md).
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair
@@ -548,14 +567,15 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 - **Place:** the Duration/ID of a group frame that is not the final fragment. From the commit message of `c493ce2aa9`
   (step 35).
-- **Fault:** the Duration/ID still includes the legacy estimate of a successor (the pending frame and its ACK). The
-  commit message of `c493ce2aa9` says: "With Block Ack support on, that legacy estimate can still reserve an unused
-  successor." Then other stations defer for a frame that does not come. Not checked by experiment; the code of the
-  group branch is unchanged on master.
+- **Fault:** with Block Ack support enabled, the legacy Duration/ID calculation can include an already extracted
+  successor even when the group frame ends the TXOP. The regression reproduces a 96 µs reservation for a frame
+  that transmits in a later TXOP.
 - **Baselines:** none.
-- **Repair:** first find the clause of IEEE Std 802.11-2024 for this case. Then remove the estimate when the model
-  does not send that successor.
-- **Check:** with Block Ack support on, the Duration/ID of a group frame covers only the frames that follow.
+- **Repair:** apply IEEE Std 802.11-2024, 9.2.5.2 a) 9), by omitting the successor from the single-protection
+  estimate when HCF ends the TXOP after the group frame.
+- **Check:** the two group MPDUs each advertise zero Duration/ID in their own TXOPs with Block Ack disabled
+  and with Basic or Compressed support enabled.
+  [Regression evidence](../../tests/protocol/wifi/single-protection-group-duration.md).
 
 #### BD-26: a TXOP limit of 0 permits one frame exchange, also for the fragments of one MSDU
 

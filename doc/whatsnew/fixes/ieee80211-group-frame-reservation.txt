@@ -1,0 +1,4 @@
+Group frames stop reserving airtime past their TXOP
+
+Group-addressed frames that end an IEEE 802.11 single-protection TXOP now advertise zero
+Duration/ID with Block Ack support enabled, even when another frame is ready for a later TXOP.
