@@ -1,0 +1,176 @@
+%description:
+Verify 802.11a on-air carrier frequencies for the arithmetic "5 GHz" band at
+channels 0 (5005 MHz), 35 (5180 MHz, interoperating on air with a passive
+"5 GHz (mapped 20 MHz)" index 0 receiver), and 199 (6000 MHz) per IEEE Std
+802.11-2024 Clause 17.3.8.4.2 Eq. (17-27) and Clause 19.3.15.3 Eq. (19-88).
+[Required]
+
+%extraargs: -r 0..2
+
+%file: A_5ghzBandCenters.cc
+
+#include "ProtocolTest.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+class FiveGhzBandCentersAudit : public cSimpleModule, public cListener
+{
+    cModule *radio = nullptr;
+    cModule *mappedRadio = nullptr;
+    cModule *sink = nullptr;
+    bool carrierChecked = false;
+    bool dataCarrierChecked = false;
+    bool delivered = false;
+    bool crossBandReceived = false;
+    bool expectCrossBand = false;
+    int expectedChannelIndex = -1;
+    Hz expectedFreq = Hz(NaN);
+
+  protected:
+    void initialize() override {
+        expectedChannelIndex = par("expectedChannelIndex");
+        expectedFreq = Hz(par("expectedCenterFrequency").doubleValue());
+        expectCrossBand = par("expectCrossBand");
+        radio = getModuleByPath("^.sta1.wlan[0].radio");
+        radio->subscribe(transmissionStartedSignal, this);
+        mappedRadio = getModuleByPath("^.mappedListener.wlan[0].radio");
+        mappedRadio->subscribe(packetSentToUpperSignal, this);
+        sink = getModuleByPath("^.sta2.app[0]");
+        sink->subscribe(packetReceivedSignal, this);
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t, cObject *value, cObject *) override {
+        if (source == sink) {
+            delivered = true;
+            emit(registerSignal("testPayloadDelivered"), 1L);
+            return;
+        }
+        if (source == mappedRadio) {
+            auto packet = check_and_cast<Packet *>(value);
+            auto mac = packet->peekAtFront<Ieee80211MacHeader>();
+            if (mac->getType() == ST_DATA && !crossBandReceived) {
+                crossBandReceived = true;
+                if (expectCrossBand)
+                    emit(registerSignal("testCrossBandMatched"), 1L);
+                else
+                    throw cRuntimeError("Unexpected cross-band DATA reception on 5180 MHz");
+            }
+            return;
+        }
+        auto transmission = dynamic_cast<const Ieee80211Transmission *>(value);
+        if (!transmission)
+            return;
+        auto channel = transmission->getChannel();
+        ASSERT(channel != nullptr);
+        auto analog = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
+        if (!carrierChecked) {
+            ASSERT(strcmp(channel->getBand()->getName(), "5 GHz") == 0);
+            ASSERT(channel->getChannelNumber() == expectedChannelIndex);
+            if (channel->getCenterFrequency() != expectedFreq || analog->getCenterFrequency() != expectedFreq)
+                throw cRuntimeError("5 GHz carrier frequency mismatch: expected %s, channel=%s, analog=%s",
+                        expectedFreq.str().c_str(), channel->getCenterFrequency().str().c_str(),
+                        analog->getCenterFrequency().str().c_str());
+            carrierChecked = true;
+            emit(registerSignal("testCarrierChecked"), 1L);
+        }
+        if (!dataCarrierChecked) {
+            auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+            auto mac = transmission->getPacket()->peekAt<Ieee80211MacHeader>(phy->getChunkLength());
+            if (mac->getType() == ST_DATA) {
+                ASSERT(channel->getCenterFrequency() == expectedFreq);
+                ASSERT(analog->getCenterFrequency() == expectedFreq);
+                dataCarrierChecked = true;
+                emit(registerSignal("testDataCarrierChecked"), 1L);
+                if (!expectCrossBand)
+                    emit(registerSignal("testCrossBandMatched"), 1L);
+            }
+        }
+    }
+
+    void finish() override {
+        ASSERT(carrierChecked && dataCarrierChecked && delivered);
+        ASSERT(crossBandReceived == expectCrossBand);
+    }
+};
+
+Define_Module(FiveGhzBandCentersAudit);
+
+Define_ProtocolTest(wifi_11a_5ghz_band_centers)
+{
+    return ProtocolTest("wifi_11a_5ghz_band_centers")
+        .once(on("audit").signal("testCarrierChecked").assertValue(1).within(1.0))
+        .once(on("audit").signal("testDataCarrierChecked").assertValue(1).within(2.0))
+        .once(on("audit").signal("testCrossBandMatched").assertValue(1).within(0.5))
+        .once(on("audit").signal("testPayloadDelivered").assertValue(1).within(0.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%file: A_5ghzBandCenters.ned
+
+@namespace(inet::protocoltest);
+
+import inet.node.inet.WirelessHost;
+import inet.protocoltest.wifi.WifiInfraNetwork;
+
+simple FiveGhzBandCentersAudit
+{
+    parameters:
+        double expectedCenterFrequency @unit(Hz);
+        int expectedChannelIndex;
+        bool expectCrossBand;
+        @class(FiveGhzBandCentersAudit);
+        @signal[testCarrierChecked](type=long);
+        @signal[testDataCarrierChecked](type=long);
+        @signal[testCrossBandMatched](type=long);
+        @signal[testPayloadDelivered](type=long);
+}
+
+network FiveGhzBandCentersNetwork extends WifiInfraNetwork
+{
+    submodules:
+        mappedListener: WirelessHost {
+            @display("p=300,260");
+        }
+        audit: FiveGhzBandCentersAudit;
+}
+
+%inifile: test.ini
+
+[General]
+network = FiveGhzBandCentersNetwork
+*.tester.testName = "wifi_11a_5ghz_band_centers"
+*.audit.expectedChannelIndex = ${scenario=0,1,2} == 0 ? 0 : (${scenario} == 1 ? 35 : 199)
+*.audit.expectedCenterFrequency = ${scenario} == 0 ? 5005MHz : (${scenario} == 1 ? 5180MHz : 6000MHz)
+*.audit.expectCrossBand = ${scenario} == 1
+*.sta*.wlan[*].radio.bandName = "5 GHz"
+*.sta*.wlan[*].radio.channelNumber = ${scenario} == 0 ? 0 : (${scenario} == 1 ? 35 : 199)
+*.sta*.wlan[*].agent.channelsToScan = ${scenario} == 0 ? "0" : (${scenario} == 1 ? "35" : "199")
+*.ap.wlan[*].radio.bandName = "5 GHz"
+*.ap.wlan[*].radio.channelNumber = ${scenario} == 0 ? 0 : (${scenario} == 1 ? 35 : 199)
+*.mappedListener.ipv4.arp.typename = "GlobalArp"
+*.mappedListener.wlan[*].opMode = "a"
+*.mappedListener.wlan[*].mac.qosStation = false
+*.mappedListener.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.mappedListener.wlan[*].agent.typename = ""
+*.mappedListener.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.mappedListener.wlan[*].radio.channelNumber = 0
+*.sta1.app[0].sendInterval = 100s
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11a_5ghz_band_centers: PASS
+%not-contains: stdout
+PROTOCOLTEST wifi_11a_5ghz_band_centers: FAIL

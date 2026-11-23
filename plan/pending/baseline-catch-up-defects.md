@@ -80,6 +80,41 @@ These entries share a cause or a place, so one change can repair each group:
 The commit entries of each change ([PR-SERIES-PLAN](../../doc/project/rule/pull-request.md#pr-series-plan)) go into
 this plan when the maintainer approves that change.
 
+### Arithmetic 5 GHz band centers, BD-28
+
+The maintainer requested implementation of this repair on 2026-11-23.
+
+Commit `BD-28`, “ieee80211: fix: align 5 GHz arithmetic band centers to 5 MHz grid”.
+Update `Ieee80211CompliantBands::band5GHz` in
+[Ieee80211Band.cc](../../src/inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.cc) to pass `start = MHz(5002.5)`
+so `Ieee80211ArithmeticalBand::getCenterFrequency(channelIndex)` produces `5000 + 5 * (channelIndex + 1)` MHz
+(`5005..6000` MHz for indices `0..199`), following IEEE Std 802.11-2024 Clause 17.3.8.4.2 Equation (17-27) and
+Clause 19.3.15.3 Equation (19-88) for `n_ch = 1..200` with 0-based `channelIndex = n_ch - 1`. Keep all other
+bands and the unmapped standard-channel rejection of `"5 GHz"` unchanged.
+
+- Extend [Ieee80211Band_1.test](../../tests/unit/Ieee80211Band_1.test) to assert all 200 center frequencies
+  (`5005..6000` MHz), index `35` matching `"5 GHz (mapped 20 MHz)"` index `0` at `5180` MHz, out-of-bounds
+  rejection (`-1`, `200`), and preserved `"5.9 GHz"` centers (`5860..5920` MHz). Before the fix, index `0` fails
+  at `5002.5 MHz != 5005 MHz`.
+- Add [A_5ghzBandCenters.test](../../tests/protocol/wifi/11a/A_5ghzBandCenters.test).
+  An 802.11a infrastructure network (`ap`, `sta1`, `sta2`) runs on `"5 GHz"` channels `0` (`5005` MHz), `35`
+  (`5180` MHz), and `199` (`6000` MHz) beside a passive ad-hoc `"5 GHz (mapped 20 MHz)"` index `0` listener
+  (`5180` MHz). Check on-air `Ieee80211Channel` and `INarrowbandSignalAnalogModel` carrier frequencies on both
+  initial management and `ST_DATA` transmissions, UDP delivery at `sta2`, and cross-band reception on `5180` MHz
+  only in Run 1. On parent `0cb56f4a6f`, Runs 0 and 2 fail on the `2.5` MHz carrier mismatch (`5.0025` and
+  `5.9975` GHz) and Run 1 fails with a scalar partial-interference error between `5.1775` GHz and `5.18` GHz.
+- Re-record the moved `minSnir:histogram` statistical baselines for `showcases/wireless/multiradio` and
+  `examples/wireless/nic` `Ieee80211MacV2X` in `inet-framework/statistics#5` and update the `inet.opp` pin.
+- Build both `MODE=debug` and `MODE=release` (`make -j$(nproc) MODE=debug` and `make -j$(nproc) MODE=release`) and run:
+  `opp_run_unit_tests --load . -p inet -m debug --no-build -f 'Ieee80211Band_1\.test'`,
+  `opp_run_protocol_tests --load . -p inet -m debug --no-build -w '^tests/protocol/wifi$' -f '/(A_5ghzBandCenters|A_5ghz)\.test$'`,
+  and `opp_run_protocol_tests --load . -p inet -m release --no-build -w '^tests/protocol/wifi$' -f '/A_5ghzBandCenters\.test$'`.
+  Coverage limits: `A_5ghzBandCenters.test` exercises scalar-medium 802.11a OFDM transmissions on channels `0`,
+  `35`, and `199`; `Ieee80211Band_1.test` checks all 200 indices; `"5 GHz"` intentionally retains no
+  standard-channel mapping for HT management and provides no regulatory-domain model.
+- Write [Arithmetic 5 GHz band centers](../../tests/protocol/wifi/5ghz-band-centers.md) beside the protocol test
+  with the executed before/after comparison and reproducible commands.
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair
@@ -447,10 +482,13 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   i at 5002.5 + 5i MHz (start + spacing/2 + spacing * i). IEEE Std 802.11-2024 equation (17-27) puts the centers at
   5000 + 5 * nch MHz. So every center of this band is 2.5 MHz off the grid. Users: `showcases/wireless/multiradio`,
   `examples/wireless/nic`, `tests/module/Ieee80211BeaconSchedule_1.test`.
-- **Baselines:** none hold a value of the defect alone. A repair can move the results of the users, because the path
-  loss depends on the frequency.
-- **Repair:** centers at 5000 + 5 * nch MHz. Decide the numbers of the channels with the maintainer.
-- **Check:** a unit test of the center frequency of some channels.
+- **Baselines:** `showcases/wireless/multiradio` (`General`) and `examples/wireless/nic` (`Ieee80211MacV2X`) move by
+  ~0.10% in `minSnir:histogram` due to the `+2.5 MHz` carrier shift; wireless fingerprints do not move.
+- **Repair:** set `start = MHz(5002.5)` so 0-based `channelIndex = i` maps to `n_ch = i + 1` (`5000 + 5 * (i + 1)`
+  MHz, `5005..6000` MHz for `i = 0..199`), matching `band2_4GHz`'s zero-based convention.
+- **Check:** [Ieee80211Band_1.test](../../tests/unit/Ieee80211Band_1.test) and
+  [A_5ghzBandCenters.test](../../tests/protocol/wifi/11a/A_5ghzBandCenters.test)
+  ([Arithmetic 5 GHz band centers](../../tests/protocol/wifi/5ghz-band-centers.md)).
 
 #### BD-29: `BlockAckRecord::getAckState()` reports a missing MPDU as received across the wrap of the sequence number
 

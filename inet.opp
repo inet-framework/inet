@@ -39,7 +39,7 @@ SimulationProject(
         "smoke":       {"defaults": {"run_number": 0}},
         "sanitizer":   {"defaults": {"run_number": 0}},
         "statistical": {"defaults": {"run_number": 0, "mode": "release"},
-                        "baseline": {"repository": "inet-framework/statistics", "ref": "77d03c0a7acc9b6a309ceb6aae7c31dd35457404", "folder": "statistics"}},
+                        "baseline": {"repository": "inet-framework/statistics", "ref": "0111aff9c9e2cc6caf986155ea2107da2e3048d7", "folder": "statistics"}},
         "speed":       {"defaults": {"run_number": 0}, "store": "tests/speed/store.json"},
         "fingerprint": {"store": "tests/fingerprint/store.json", "defaults": {"stored_only": True, "select_fingerprint": "shortest",
                         "ingredients_list": ["tplx", "~tNl", "~tND"], "cpu_time_limit": "600s"}},
