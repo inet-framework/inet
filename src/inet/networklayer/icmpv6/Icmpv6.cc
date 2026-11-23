@@ -21,6 +21,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
@@ -138,10 +139,25 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
         errorInd->setOriginalPacket(packet); // ownership transfer, no dup needed
 
-        // Peek at the quoted IPv6 header to determine the transport protocol
+        // Peek at the quoted IPv6 header and its extension headers to determine the
+        // transport protocol (RFC 4443 Section 2.4 (d))
         const auto& bogusIpv6Header = packet->peekAtFront<Ipv6Header>();
-        int transportProtocol = bogusIpv6Header->getProtocolId();
-        if (transportProtocol == IP_PROT_IPv6_ICMP) {
+        b offset = bogusIpv6Header->getChunkLength();
+        int transportProtocol = skipIpv6ExtensionHeaders(packet, offset, bogusIpv6Header->getProtocolId());
+        if (transportProtocol == IP_PROT_NONE) {
+            // a fragment other than the first, or a quote that ends inside the extension
+            // headers: the transport protocol cannot be told, so the error is dropped
+            EV_WARN << "The quoted packet does not contain its upper-layer header, packet dropped\n";
+            delete indication;
+        }
+        else if (transportProtocol == IP_PROT_IPv6 && offset > bogusIpv6Header->getChunkLength()) {
+            // a tunnel packet behind extension headers, e.g. a fragmented one: IPv6 does
+            // not relay errors about tunnel packets to the original source, and passing
+            // this one on would stop the run there, so it stays dropped
+            EV_WARN << "Error about a tunnel packet with extension headers is not relayed, packet dropped\n";
+            delete indication;
+        }
+        else if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
             errorOut(indication);
         }

@@ -316,17 +316,23 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
     l3Ind->setDestAddress(ipv6Header->getDestAddress());
     originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 
+    // Pop the quoted extension headers too (e.g. the Fragment header of a first fragment,
+    // or a Type-2 Routing Header inserted by route optimization), so that the transport
+    // protocol receives its own header at the front (RFC 4443 Section 2.4 (d)).
+    b offset = b(0);
+    IpProtocolId upperLayerProtocol = skipIpv6ExtensionHeaders(originalPacket, offset, ipv6Header->getProtocolId());
+    if (upperLayerProtocol != IP_PROT_NONE && offset > b(0))
+        originalPacket->popAtFront(offset);
+
     // Dispatch the same Indication to the appropriate transport protocol.
     // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
-    // The offending packet may begin with an IPv6 extension header (e.g. a Type-2
-    // Routing Header inserted by route optimization), which is not a registered
-    // transport protocol; in that case the error cannot be delivered to a transport,
-    // so discard it -- the protocol recovers on its own (e.g. via retransmission).
-    auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(ipv6Header->getProtocolId());
+    // When the quoted packet does not contain the upper-layer header, the error cannot
+    // be delivered to a transport, so discard it -- the protocol recovers on its own
+    // (e.g. via retransmission).
+    auto protocol = upperLayerProtocol == IP_PROT_NONE ? nullptr : ProtocolGroup::getIpProtocolGroup()->findProtocol(upperLayerProtocol);
     if (protocol == nullptr) {
-        EV_WARN << "ICMPv6 error indication for a packet whose leading header ("
-                << ipv6Header->getProtocolId() << ") is not a registered transport protocol "
-                << "(e.g. an IPv6 extension header); discarding\n";
+        EV_WARN << "ICMPv6 error indication for a packet whose upper-layer header ("
+                << upperLayerProtocol << ") is missing or not a registered transport protocol; discarding\n";
         delete indication;
         return;
     }
