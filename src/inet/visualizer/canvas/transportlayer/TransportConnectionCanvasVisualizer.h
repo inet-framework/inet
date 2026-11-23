@@ -28,6 +28,7 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
 
       public:
         TransportConnectionCanvasVisualization(LabeledIconFigure *sourceFigure, LabeledIconFigure *destinationFigure, int sourceModuleId, int destinationModuleId, int count);
+        virtual ~TransportConnectionCanvasVisualization();
     };
 
   protected:

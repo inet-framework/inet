@@ -1,0 +1,3 @@
+The transport connection icons are deleted with their visualization
+
+TransportConnectionCanvasVisualizer did not delete the two icon figures of a connection visualization, so a simulation that displays transport connections reported each icon as an undisposed object at its end. The visualization now deletes its figures. Simulation results do not change.

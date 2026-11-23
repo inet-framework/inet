@@ -1,0 +1,123 @@
+%description:
+
+The canvas transport connection visualizer survives the deletion of a network node that
+displays a transport connection icon. The client opens one Transmission Control
+Protocol (TCP) connection to the server, which stays open. A ScenarioManager deletes the
+client at t=1.5s; the network node visualizer deletes the visualization of the client,
+which holds the client's icon. The fake graphical user interface (GUI) of Cmdenv enables
+the visualizer. The checker counts 2 icons on the canvas at t=1s and 1, the server's, at
+t=1.8s, and the test fails if the simulation crashes or reports an undisposed object
+when the network is deleted.
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
+simple IconCounter
+{
+    @class(::inet::IconCounter);
+}
+
+network Test
+{
+    submodules:
+        visualizer: IntegratedCanvasVisualizer;
+        configurator: Ipv4NetworkConfigurator;
+        counter: IconCounter;
+        scenarioManager: ScenarioManager;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%file: IconCounter.cc
+
+#include <omnetpp.h>
+
+using namespace omnetpp;
+
+namespace inet {
+
+class IconCounter : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(1, new cMessage("count"));
+        scheduleAt(1.8, new cMessage("count"));
+    }
+    virtual int countIcons(cFigure *figure)
+    {
+        int count = !strcmp(figure->getName(), "transportConnection") ? 1 : 0;
+        for (int i = 0; i < figure->getNumFigures(); i++)
+            count += countIcons(figure->getFigure(i));
+        return count;
+    }
+    virtual int countConnections(cModule *tcp)
+    {
+        int count = 0;
+        for (cModule::SubmoduleIterator it(tcp); !it.end(); ++it)
+            if (!strcmp((*it)->getModuleType()->getName(), "TcpConnection"))
+                count++;
+        return count;
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        if (auto tcp = findModuleByPath("^.client.tcp"))
+            EV_INFO << "client connections at t=" << simTime() << ": " << countConnections(tcp) << endl;
+        EV_INFO << "transport connection icons at t=" << simTime() << ": " << countIcons(getSystemModule()->getCanvas()->getRootFigure()) << endl;
+    }
+};
+
+Define_Module(IconCounter);
+
+} // namespace inet
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 2s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-fake-gui = true
+*.counter.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.visualizer.transportConnectionVisualizer.displayTransportConnections = true
+*.scenarioManager.script = xml("<scenario><at t='1.5'><delete-module module='client'/></at></scenario>")
+
+*.client.numApps = 1
+*.client.app[*].typename = "TcpSessionApp"
+*.client.app[*].connectAddress = "server"
+*.client.app[*].connectPort = 1000
+*.client.app[*].tOpen = 0s
+*.client.app[*].tSend = 0s
+*.client.app[*].sendBytes = 1000B
+*.client.app[0].tClose = 10s
+
+*.server.numApps = 1
+*.server.app[0].typename = "TcpSinkApp"
+*.server.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+client connections at t=1: 1
+transport connection icons at t=1: 2
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+transport connection icons at t=1.8: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
