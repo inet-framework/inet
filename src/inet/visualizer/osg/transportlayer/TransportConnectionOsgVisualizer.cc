@@ -34,6 +34,7 @@ void TransportConnectionOsgVisualizer::initialize(int stage)
 
 osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpConnection *tcpConnection) const
 {
+    int index = getFreeConnectionIndex();
     auto image = inet::osg::createImageFromResource(icon);
     auto texture = new osg::Texture2D();
     texture->setImage(image);
@@ -44,7 +45,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpCon
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    auto color = iconColorSet.getColor(connectionVisualizations.size());
+    auto color = iconColorSet.getColor(index);
     auto colorArray = new osg::Vec4Array();
     colorArray->push_back(osg::Vec4((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1));
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
@@ -59,7 +60,7 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
     auto sourceNode = createConnectionEndNode(tcpConnection);
     auto destinationNode = createConnectionEndNode(tcpConnection);
     auto connectionVisualization = new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
-    connectionVisualization->index = connectionVisualizations.size();
+    connectionVisualization->index = getFreeConnectionIndex();
     return connectionVisualization;
 }
 

@@ -43,6 +43,7 @@ void TransportConnectionCanvasVisualizer::initialize(int stage)
 LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigure(tcp::TcpConnection *tcpConnection) const
 {
 #ifdef INET_WITH_TCP_INET
+    int index = getFreeConnectionIndex();
     std::string icon(this->icon);
     auto labeledIconFigure = new LabeledIconFigure("transportConnection");
     labeledIconFigure->setTags((std::string("transport_connection ") + tags).c_str());
@@ -52,7 +53,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents a transport connection between two network nodes");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
-    iconFigure->setTintColor(iconColorSet.getColor(connectionVisualizations.size()));
+    iconFigure->setTintColor(iconColorSet.getColor(index));
     iconFigure->setTintAmount(1);
     auto labelFigure = labeledIconFigure->getLabelFigure();
     labelFigure->setTooltip("This label represents a transport connection between two network nodes");
@@ -60,7 +61,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
     char label[2];
-    label[0] = 'A' + (char)(connectionVisualizations.size() / iconColorSet.getSize());
+    label[0] = 'A' + (char)(index / iconColorSet.getSize());
     label[1] = '\0';
     labelFigure->setText(label);
     return labeledIconFigure;
@@ -75,7 +76,7 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
     auto sourceFigure = createConnectionEndFigure(tcpConnection);
     auto destinationFigure = createConnectionEndFigure(tcpConnection);
     auto connectionVisualization = new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1);
-    connectionVisualization->index = connectionVisualizations.size();
+    connectionVisualization->index = getFreeConnectionIndex();
     return connectionVisualization;
 }
 

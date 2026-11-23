@@ -34,7 +34,7 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
         int sourceModuleId = -1;
         int destinationModuleId = -1;
         int count = -1;
-        int index = -1; // selects the color and the letter
+        int index = -1; // selects the color and the letter, unique among the displayed connections
 
       public:
         TransportConnectionVisualization(int sourceModuleId, int destinationModuleId, int count);
@@ -72,6 +72,11 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization);
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization);
     virtual void removeAllConnectionVisualizations();
+
+    /**
+     * Returns the lowest index that no displayed connection has.
+     */
+    virtual int getFreeConnectionIndex() const;
 
   public:
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
