@@ -33,7 +33,7 @@ simple MobilityVisualizerBase extends VisualizerBase
 
         bool displayOrientations = default(false); // Display a 3D cone indicating the current orientation, disabled by default
         double orientationPieRadius = default(32); // On-screen radius of the orientation cone, in pixels
-        double orientationPieSize = default(0.2); // Angular half-width of the orientation cone as a fraction of a full circle; must be in the open interval (0, 0.5)
+        double orientationPieSize = default(0.2); // Full opening angle of the orientation cone as a fraction of a full circle (the half-angle is pi*orientationPieSize radians); must be in the open interval (0, 0.5)
         double orientationPieOpacity = default(0.25); // Opacity of the orientation cone
         string orientationLineColor = default("black"); // Orientation line color, black by default
         string orientationLineStyle = default("solid"); // Orientation line style (solid, dashed, dotted)

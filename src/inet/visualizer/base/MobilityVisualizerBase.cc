@@ -44,7 +44,7 @@ void MobilityVisualizerBase::initialize(int stage)
         displayOrientations = par("displayOrientations");
         orientationPieRadius = par("orientationPieRadius");
         orientationPieSize = par("orientationPieSize");
-        // orientationPieSize is the orientation cone's half-angle as a fraction of a full circle; the
+        // orientationPieSize is the orientation cone's full opening angle as a fraction of a full circle; the
         // canvas visualizer uses tan(pi*orientationPieSize) for the cone radius, which is only finite
         // and positive for sizes in the open interval (0, 0.5)
         if (orientationPieSize <= 0 || orientationPieSize >= 0.5)
