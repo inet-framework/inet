@@ -15,6 +15,20 @@ namespace inet {
 
 Register_Class(FingerprintCalculator);
 
+cModule *FingerprintCalculator::findContainingNode(const cModule *module)
+{
+    for (cModule *current = const_cast<cModule *>(module); current != nullptr; current = current->getParentModule()) {
+        int id = current->getId();
+        if (id >= (int)networkNodeFlags.size())
+            networkNodeFlags.resize(id + 1, 0);
+        if (networkNodeFlags[id] == 0)
+            networkNodeFlags[id] = isNetworkNode(current) ? 2 : 1;
+        if (networkNodeFlags[id] == 2)
+            return current;
+    }
+    return nullptr;
+}
+
 void FingerprintCalculator::parseIngredients(const char *s)
 {
     cSingleFingerprintCalculator::parseIngredients(s);

@@ -28,8 +28,15 @@ class INET_API FingerprintCalculator : public cSingleFingerprintCalculator
   protected:
     bool networkCommunicationFilter = false;
     bool packetUpdateFilter = false;
+    // the result of isNetworkNode() for each module by module ID: 0 is not known yet, 1 is false, 2 is true;
+    // the calculator asks it for each packet event, and cModule::getProperties() is a NED lookup each time;
+    // a module ID is unique in a run, and Envir creates the calculator again for each run
+    std::vector<uint8_t> networkNodeFlags;
 
   protected:
+    // the same as inet::findContainingNode(), but it remembers the result of isNetworkNode() for each module
+    cModule *findContainingNode(const cModule *module);
+
     virtual void parseIngredients(const char *s) override;
     virtual cSingleFingerprintCalculator::FingerprintIngredient validateIngredient(char ch) override;
     virtual bool addEventIngredient(cEvent *event, cSingleFingerprintCalculator::FingerprintIngredient ingredient) override;
