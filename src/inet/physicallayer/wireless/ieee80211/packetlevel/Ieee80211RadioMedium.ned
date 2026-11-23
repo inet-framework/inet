@@ -26,5 +26,6 @@ module Ieee80211RadioMedium extends RadioMedium
         mediumLimitCache.centerFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
+        mediumLimitCache.maxTransmissionDuration = default(35ms); // covers full-size frames at DSSS 1 Mbps up to the 4095 B HR-DSSS max PSDU (~32.95 ms)
 }
 
