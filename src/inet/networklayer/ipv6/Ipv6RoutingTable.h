@@ -426,6 +426,12 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     void setMipv6Support(bool value) { mipv6Support = value; }
 
     /**
+     * Returns the interface on which the provided address is on-link with respect
+     * to the prefix advertisement list, or nullptr if it is on-link on none.
+     */
+    NetworkInterface *findOnLinkInterface(const Ipv6Address& address);
+
+    /**
      * Checks whether the provided address is an on-link address
      * with respect to the prefix advertisement list.
      */

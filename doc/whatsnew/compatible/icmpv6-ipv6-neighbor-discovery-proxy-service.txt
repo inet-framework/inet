@@ -1,0 +1,8 @@
+IPv6 Neighbor Discovery proxy service
+
+Ipv6NeighbourDiscovery can answer Neighbor Solicitations for an address the
+node does not hold, as a proxy in the sense of RFC 4861 Section 7.2.4. The
+C++ methods addProxyAddress() and removeProxyAddress() start and stop the
+service for an address on an interface. While it runs, the node is a member
+of the address's solicited-node multicast group and answers solicitations
+with its own link-layer address and a cleared Override flag.

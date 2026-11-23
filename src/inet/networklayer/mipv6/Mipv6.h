@@ -637,6 +637,27 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     void handleBCExpiry(cMessage *msg);
 
 //
+// Helper functions for intercepting packets on the home link (RFC 6275, Section 10.4.1)
+//
+    /**
+     * Makes this home agent answer Neighbor Solicitations for the mobile node's home
+     * address on the home link, so that on-link hosts reach the mobile node while it is
+     * away. For a binding that did not exist before, also multicasts a Neighbor
+     * Advertisement onto the home link on the mobile node's behalf, which takes the
+     * address over from neighbours that still cache the mobile node's own link-layer
+     * address. Does nothing if the home address is on-link on no interface.
+     */
+    void startInterceptingForHomeAddress(const Ipv6Address& HoA, bool existingBinding);
+
+    /**
+     * Stops answering Neighbor Solicitations for the mobile node's home address. Called
+     * when the binding is de-registered or expires, after which the mobile node defends
+     * its own address again. Withdrawn by address rather than by interface, so that a
+     * home link whose advertised prefixes changed meanwhile still leaves nothing behind.
+     */
+    void stopInterceptingForHomeAddress(const Ipv6Address& HoA);
+
+//
 // Helper functions for token expiry
 //
     /**
