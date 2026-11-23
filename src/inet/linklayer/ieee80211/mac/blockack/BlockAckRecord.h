@@ -36,6 +36,7 @@ class INET_API BlockAckRecord
 
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
+    bool hasBasicReceipt(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber) const;
     void removeAckStates(SequenceNumberCyclic sequenceNumber);
     void initializeCompressedWindow(SequenceNumberCyclic start, int size);
     void compressedFrameReceived(const Ptr<const Ieee80211DataHeader>& header);

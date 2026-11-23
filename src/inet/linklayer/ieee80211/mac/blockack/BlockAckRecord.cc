@@ -30,8 +30,12 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
 {
     // IEEE Std 802.11e-2005, 9.10.3: report old MPDUs as received and use
     // the actual fragment receipt for positions in the retained range.
-    return sequenceNumber < basicReceiptStart ||
-           containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber));
+    return sequenceNumber < basicReceiptStart || hasBasicReceipt(sequenceNumber, fragmentNumber);
+}
+
+bool BlockAckRecord::hasBasicReceipt(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber) const
+{
+    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber));
 }
 
 void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)

@@ -67,17 +67,21 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
             agreement->getBlockAckRecord()->compressedFrameReceived(dataHeader);
     }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
-        EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
+    auto reportDuplicate = [this](Packet *packet) {
+        EV_WARN << "Dropping duplicate packet " << *packet << ".\n";
         PacketDropDetails details;
         details.setReason(DUPLICATE_DETECTED);
-        emit(packetDroppedSignal, dataPacket, &details);
+        emit(packetDroppedSignal, packet, &details);
+    };
+    // IEEE Std 802.11-2024, Table 10-6, RC9/RR4: the receive window handles duplicates under an agreement.
+    if (!agreement && duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
+        reportDuplicate(dataPacket);
         delete dataPacket;
         return std::vector<Packet *>();
     }
     BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
     if (blockAckReordering && agreement)
-        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe);
+        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, reportDuplicate);
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
         for (auto it : frames) {

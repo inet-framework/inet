@@ -66,9 +66,15 @@ The recipient bypasses the individual agreement for group traffic, including rec
 tracking, reordering, and inactivity updates. Basic and Compressed window logic use the
 same forward distance calculation while retaining their own policies.
 
+IEEE Std 802.11-2024, Table 10-6, RC2/RR1 and RC9/RR4 govern duplicate filtering here.
 The modeled non-DMG QoS receiver omits group entries from the ordinary duplicate cache
-under IEEE Std 802.11-2024, Table 10-6, RC2/RR1. A group frame therefore cannot make an
-unrelated unicast retry look like a second received copy.
+and lets the Block Ack receive window detect duplicates for agreement traffic. A group
+frame therefore cannot make an unrelated unicast retry look like a second received copy.
+
+The Block Ack receive window now reports a duplicate retry when it can match the exact
+fragment in the reorder buffer or in retained receive history. The recipient emits its
+existing duplicate-drop signal once before the packet is discarded. A stale sequence
+whose receipt history has been retired does not count as a confirmed duplicate.
 
 ## Verification
 
@@ -110,6 +116,15 @@ the initial clear bit but failed on the next reply. The receiver had discarded t
 unicast retry as a duplicate of the broadcast. The revised run observes the positive bit
 for that retry. All 18 recipient module runs pass, including the duplicate and no-agreement
 controls.
+
+The duplicate-drop assertions in runs 15 and 16 check one signal for a retry of a delivered
+unicast and one for a retry of a buffered unicast. The matching broadcast and the first
+received unicast retry emit no duplicate-drop event.
+
+Run 17 first delivers unicast sequence 1 outside any agreement, then verifies that the
+ordinary cache drops its duplicate. Next it opens a fresh Basic agreement starting at
+sequence 1. The first in-window retry of sequence 1 is delivered and sets its Basic
+receipt bit. It emits no duplicate-drop event despite the matching ordinary cache entry.
 
 From the worktree root, load `.envrc`, build the debug model, and use the focused selectors:
 
@@ -161,3 +176,10 @@ On 2026-11-23, the maintainer approved the original nine entries. The debug run
 passed all nine selected configurations after the receive-window advancement
 correction. Its results refer to the 10 ms radio-medium default in the original
 parent. See `ai-logs/basic-blockack-bitmap/fingerprint-publication.log`.
+
+The receive-window reporting change has a separate statistics pin. The maintainer approved
+updating the six failing release-mode run-0 cases on 2026-11-24. These are
+`MacQosWithBlockAck`, `MixedTraffic`, `HCFfragblockack`, `OnlyPacketSizeHCFfragblockack`,
+`PacketSizeHCFfragblockack`, and `ThresholdHCFfragblockack`. The differences measure
+discarded frames. For example, the 100-byte `PacketSizeHCFfragblockack` case reports
+1,358 duplicate retries where the cache-based baseline recorded 1.
