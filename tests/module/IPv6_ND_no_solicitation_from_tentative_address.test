@@ -1,0 +1,71 @@
+%description:
+A host sends no address-resolution Neighbor Solicitation from a tentative address: RFC 4861
+Section 7.2.2 takes the source from the addresses assigned to the interface, RFC 4862
+Section 5.4 does not count a tentative address as assigned, and RFC 4429 Section 3.2 forbids
+an Optimistic address as the source of a Neighbor Solicitation. With no address assigned
+yet, address resolution waits for Duplicate Address Detection (DAD) to complete.
+
+Topology: router -- host
+
+The host uses Optimistic DAD and pings the router's link-local address from t=0, so its only
+address, the link-local one, is tentative when the first ping needs address resolution. Only
+the host's Neighbour Discovery and network-layer dispatcher log. No Neighbor Solicitation
+from the host's link-local address to the router's solicited-node address may come before
+the host's "DAD completed" line, and one must come after it. The packet printer colours the
+fields, so the patterns allow other characters between them.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network TentativeSolicitationTest
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        router.ethg++ <--> ethline <--> host.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = TentativeSolicitationTest
+ned-path = .;../../../../src
+sim-time-limit = 3s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.neighbourDiscovery.optimisticDad = true
+**.host.numApps = 1
+**.host.app[0].typename = "PingApp"
+**.host.app[0].destAddr = "fe80::8aa:ff:fe00:1"
+**.host.app[0].startTime = 0s
+**.host.app[0].sendInterval = 0.2s
+
+**.host.ipv6.neighbourDiscovery.cmdenv-log-level = info
+**.host.nl.cmdenv-log-level = trace
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+DAD completed for address fe80::8aa:ff:fe00:2 on eth0, address is unique[\s\S]*NeighbourSolicitation[^,]*, [^,]*sourceAddress[^,]*= fe80::8aa:ff:fe00:2, [^,]*destinationAddress[^,]*= ff02::1:ff00:1,
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: stdout
+NeighbourSolicitation[^,]*, [^,]*sourceAddress[^,]*= fe80::8aa:ff:fe00:2, [^,]*destinationAddress[^,]*= ff02::1:ff00:1,[\s\S]*DAD completed for address fe80::8aa:ff:fe00:2
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------
