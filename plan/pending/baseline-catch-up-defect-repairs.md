@@ -454,7 +454,8 @@ reviewer document ([TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-
 baseline.
 
 **Gate B** approved by the maintainer on 2026-11-24 ("yes"). The debug fingerprints of the landing run in the image
-of the CI at `4e65771abb`, whose sources equal C3.
+of the CI at `4e65771abb`, whose sources equal C3. Result: 1847 runs, 1846 PASS and 1 expected ERROR, in 12 min 28 s
+(`runs/r1-landing/` of the folder of D10). R1 is ready to land.
 
 ## 7. Verification
 
