@@ -55,8 +55,6 @@ static bool isSorted(const Ipv6AddressVector& v)
 
 Mldv2::~Mldv2()
 {
-    while (!heldMessages.empty())
-        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
 
@@ -172,8 +170,6 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == interfaceIpv6ConfigChangedSignal) {
         ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface());
-        if (hasValidLinkLocalAddress(ie))
-            sendHeldMessages(ie);
         // once a valid link-local address is available, a node SHOULD report every group that it
         // listens to again (RFC 9777 section 5.2.14)
         if (hasValidLinkLocalAddress(ie) && interfacesReportedFromUnspecifiedAddress.erase(ie->getInterfaceId()))
@@ -201,7 +197,6 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
             deleteRouterInterfaceData(interfaceId);
-            deleteHeldMessages(interfaceId);
             interfacesReportedFromUnspecifiedAddress.erase(interfaceId);
         }
     }
@@ -465,29 +460,6 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
 // --- Lifecycle ---
 
-void Mldv2::sendHeldMessages(NetworkInterface *ie)
-{
-    auto it = heldMessages.find(ie->getInterfaceId());
-    if (it == heldMessages.end())
-        return;
-    std::vector<Packet *> messages = it->second;
-    heldMessages.erase(it);
-    for (auto msg : messages) {
-        msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
-        send(msg, "ipOut");
-    }
-}
-
-void Mldv2::deleteHeldMessages(int interfaceId)
-{
-    auto it = heldMessages.find(interfaceId);
-    if (it == heldMessages.end())
-        return;
-    for (auto msg : it->second)
-        delete msg;
-    heldMessages.erase(it);
-}
-
 // a Report of every group that the node listens to on the interface: in MLDv1 mode an MLDv1
 // Report for each group, else one Current-State Report
 void Mldv2::sendReports(NetworkInterface *ie)
@@ -508,8 +480,6 @@ void Mldv2::sendReports(NetworkInterface *ie)
 void Mldv2::handleStopOperation(LifecycleOperation *operation)
 {
     interfacesReportedFromUnspecifiedAddress.clear();
-    while (!heldMessages.empty())
-        deleteHeldMessages(heldMessages.begin()->first);
     // Clear per-interface state and cancel timers. Signal subscriptions are NOT
     // removed here: like Mldv1/Igmpv2, MLD subscribes once in initialize() and
     // keeps the subscription for the module's lifetime, so a stop/start cycle does
@@ -523,8 +493,6 @@ void Mldv2::handleStopOperation(LifecycleOperation *operation)
 void Mldv2::handleCrashOperation(LifecycleOperation *operation)
 {
     interfacesReportedFromUnspecifiedAddress.clear();
-    while (!heldMessages.empty())
-        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
     while (!routerData.empty())
@@ -1222,7 +1190,7 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
         if (!interfaceData->olderVersionPresent) {
             EV_INFO << "Received older-version (MLDv1) General Query on interface '"
                     << ie->getInterfaceName() << "': entering MLDv1 compatibility.\n";
-            cancelHostTimers(interfaceData, true);
+            cancelHostTimers(interfaceData);
         }
         else
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
@@ -1409,15 +1377,14 @@ void Mldv2::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to MLDv2.\n";
     interfaceData->olderVersionPresent = false;
-    cancelHostTimers(interfaceData, false);
+    cancelHostTimers(interfaceData);
     for (auto& elem : interfaceData->groups)
         elem.second->lastReporter = false;
 }
 
 // RFC 9777 section 8.2.1: a change of the Host Compatibility Mode cancels all pending responses
-// and retransmission timers of the interface. The Reports of the old mode that wait for the
-// link-local address are pending too, so they are deleted.
-void Mldv2::cancelHostTimers(HostInterfaceData *interfaceData, bool mldv1Mode)
+// and retransmission timers of the interface.
+void Mldv2::cancelHostTimers(HostInterfaceData *interfaceData)
 {
     cancelEvent(interfaceData->generalQueryTimer);
     for (auto& elem : interfaceData->groups) {
@@ -1428,19 +1395,6 @@ void Mldv2::cancelHostTimers(HostInterfaceData *interfaceData, bool mldv1Mode)
         group->filterModeChangeCount = 0;
         group->sourceChangeCounts.clear();
         cancelEvent(group->olderVersionReportTimer);
-    }
-    auto it = heldMessages.find(interfaceData->ie->getInterfaceId());
-    if (it != heldMessages.end()) {
-        std::vector<Packet *>& messages = it->second;
-        for (auto msgIt = messages.begin(); msgIt != messages.end(); ) {
-            bool mldv2Report = (*msgIt)->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLDv2_REPORT;
-            if (mldv2Report == mldv1Mode) {
-                delete *msgIt;
-                msgIt = messages.erase(msgIt);
-            }
-            else
-                ++msgIt;
-        }
     }
 }
 
