@@ -517,6 +517,19 @@ image of the CI (D6).
 `tests/protocol/tcp/parameter/send/TcpMaxPersistTimeout*.test`, in debug mode; all fingerprints in release mode in the
 editor; the statistical tests of the moved folders in the image of the CI.
 
+**Gate A** approved by the maintainer on 2026-11-24 ("both agreed"): (A) and (ii).
+
+**State (2026-11-24).** C6 is written, not committed: the field `persistOverride` of `TcpAlgorithmBaseState.msg`,
+set by `startPersistTimer()`, cleared when the timer becomes a zero-window probe; `processWindowUpdate()` cancels only
+a probe timer, and stops an override timer when the held data left. The 12 module tests `tcp_sws_1` to `tcp_sws_4`,
+`tcp_persist_*`, `tcp_window_update_read_1` and `tcp_wnd_update_data_1` pass in debug mode; `tcp_sws_4` failed before
+C6. The three protocol tests `Rfc9293SwsOverride`, `Rfc9293SwsOverridePeerData` and `Rfc9293SwsOverrideWindowUpdate`
+are written, but the editor can not run protocol tests on this branch: `inet.opp` of master names the defaults of the
+protocol runner `suite_folders`, `lib_folder` and `lib_name`, and the runner of omnet-julia takes `suite_per_subfolder`,
+`library_folder` and `library_name`. The commit `4d3705af84` of `inet-julia` renames them; it is not on master, and
+the editor reads the description of a project only when it opens the project. The worktree has all features except
+the two OSG features, because the OMNeT++ of this machine has no OSG.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
