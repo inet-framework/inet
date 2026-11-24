@@ -4,6 +4,6 @@ A network interface module that was deleted other than through InterfaceTable::d
 
 The modules that listen to the interface signals of a node, for example the node configurators, the routing tables, IGMP, MLD, RIP, OSPF, EIGRP, PIM, MRP and DhcpClient, now ignore the interfaces of other interface tables in the node. Interface ids of different tables can be equal, so before, the deletion of an interface of a nested table could remove the state of an interface of the node.
 
-InterfaceTable no longer stops the simulation with "getIndex(): Gate is not member of a gate vector" when an interface is connected to scalar ifIn and ifOut gates. A scalar gate counts as index -1 in the check that the two gates have the same index.
+InterfaceTable no longer stops the simulation with "getIndex(): Gate is not member of a gate vector" when an interface is connected to scalar ifIn and ifOut gates. A scalar gate counts as index -1 in the check that the two gates have the same index, so two scalar gates pass, and a scalar gate with an element of a gate vector, for example ifIn with ifOut[0], fails with a gate index mismatch error.
 
 This change requires the modification of C++ code that implements IInterfaceTable outside INET. IInterfaceRegistrationListener has the new method handleUnregisterInterface() with an empty default body, so other listeners compile as before.

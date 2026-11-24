@@ -10,7 +10,7 @@ This is a new feature release in the INET 4.x branch. Its central theme is confo
 
 Many of these changes alter simulation results on purpose. The entry "Simulation results that change, and why" lists the models whose results change, and the reasons. The changes that need a change of a model or of C++ code are backward incompatible changes below, and the migration guide in the INET documentation describes them.
 
-This release contains contributions from Miguel González-López: the HT support, the Block Ack and channel access work, the rate state of the MIB and the corrections of the frames of the IEEE 802.11 model, the PCAPng corrections and the Radiotap capture of pull request #1130, and fixes in QUIC, Ethernet and queueing. Afshin Zanganeh contributed the vector recovery of IEEE 802.1CB. Many thanks to both of them.
+This release contains contributions from Miguel González-López: the HT support, the Block Ack and channel access work, the rate state of the MIB and the corrections of the frames of the IEEE 802.11 model, most of the IEEE 802.11 protocol tests, the PCAPng corrections, pull request #1130, on which the Radiotap capture is based, fixes in QUIC, Ethernet and queueing, and many of the rules and review guides for contributors. Afshin Zanganeh contributed the vector recovery of IEEE 802.1CB. Many thanks to both of them.
 
 Requires OMNeT++ 6.4 or later. The CI tests this release with OMNeT++ 6.5 on Ubuntu 26.04 with clang 21.
 

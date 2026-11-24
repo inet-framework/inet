@@ -1,6 +1,6 @@
 New test suites: protocol tests, serializer tests and code coverage
 
-The protocol tests grew from 13 files to about 1300. The framework in tests/protocol/lib (ProtocolTester, PacketTap, TapRadioMedium, TcpTestApp, declarative expectations, and the guide AUTHORING.md) runs a protocol in a small scenario and checks its packets against the standard. Each folder of tests/protocol is a suite: arp, dhcp, element, ethernet, frer, igmp, ipsec, ipv4, ipv6, mld, mpls, nd, quic, rip, tcp (674 tests, with the tests of the RFCs and the packetdrill tests), udp, vlan and wifi (with a conformance matrix of IEEE 802.11). opp_run_protocol_tests runs them. A test of a feature that INET does not implement has the expected result FAIL. bin/inet_run_packetdrill runs one packetdrill script of the inet-gpl project; it needs INETGPL_ROOT.
+The protocol tests grew from 13 files to about 1300. The framework in tests/protocol/lib (ProtocolTester, PacketTap, TapRadioMedium, TcpTestApp, declarative expectations, and the guide AUTHORING.md) runs a protocol in a small scenario and checks its packets against the standard. The suites are folders of tests/protocol: arp, dhcp, element, ethernet, frer, igmp, ipsec, ipv4, ipv6, mld, mpls, nd, quic, rip, tcp (674 tests, with the tests of the RFCs and the packetdrill tests), udp, vlan and wifi (with a conformance matrix of IEEE 802.11). opp_run_protocol_tests runs them. A test of a feature that INET does not implement has the expected result FAIL. bin/inet_run_packetdrill runs one packetdrill script of the inet-gpl project; it needs INETGPL_ROOT.
 
 The serializer tests in tests/serializer, which bin/inet_run_serializer_tests runs, send each registered chunk type through its serializer, compare a corpus of PCAP captures byte for byte, and compare the fields with an independent decoder (tshark). tests/serializer/REMAINING_GAPS.md lists the known gaps.
 
@@ -8,4 +8,4 @@ make MODE=coverage builds INET for code coverage, and opp_export_coverage and op
 
 Each test category now has its own GitHub workflow, and each workflow runs opp_repl commands. The feature test runs as opp_run_feature_tests, and tests/features/featuretest is removed. The CI runs on Ubuntu 26.04 with clang 21.
 
-The IEEE 802.11 management tests were contributed by Miguel González-López.
+Most of the IEEE 802.11 protocol tests, also the management tests, were contributed by Miguel González-López.

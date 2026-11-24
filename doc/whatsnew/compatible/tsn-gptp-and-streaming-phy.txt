@@ -4,4 +4,4 @@ The gPTP serializer now writes and reads the Announce message and the originTime
 
 gPTP now sends the Follow_Up when the Sync is completely transmitted, not when its transmission starts, and it takes the packets from the transmissionEnded signals. So gPTP and cut-through switching can be on together; before, the run stopped with "Returning an incomplete chunk is not allowed" (issue #1100). The fingerprints of gPTP simulations change, but the accuracy of the synchronization does not.
 
-TsnSwitch and TsnDevice use EthernetStreamingPhyLayer when hasTimeSynchronization is true, and EthernetStreamThroughPhyLayer when hasCutthroughSwitching is true; TsnClock always uses EthernetStreamingPhyLayer. A model no longer sets the typename of the transmitter and the receiver for gPTP itself.
+TsnSwitch uses EthernetStreamingPhyLayer when hasTimeSynchronization is true, and EthernetStreamThroughPhyLayer when hasCutthroughSwitching is true. TsnDevice uses EthernetStreamingPhyLayer when hasTimeSynchronization or hasCutthroughSwitching is true, and TsnClock always uses it. A model no longer sets the typename of the transmitter and the receiver for gPTP itself.
