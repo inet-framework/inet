@@ -25,6 +25,7 @@ class INET_API BlockAckRecord
     MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
     Tid tid = -1;
     SequenceNumberCyclic basicReceiptStart;
+    // Presence records reception. The value marks eligibility for a Basic bitmap bit.
     std::map<SequenceControlField, bool> acknowledgmentState;
     SequenceNumberCyclic windowStart;
     int windowSize = 64; // Sequence positions; the Compressed profile permits 1..64.
@@ -35,6 +36,7 @@ class INET_API BlockAckRecord
     virtual ~BlockAckRecord() {}
 
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
+    void normalAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
     bool hasBasicReceipt(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber) const;
     void removeAckStates(SequenceNumberCyclic sequenceNumber);

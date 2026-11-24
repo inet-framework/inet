@@ -165,6 +165,23 @@ previously delivered duplicates. Reuse the matching-sequence over-the-air test a
 Extend case 17 to leave a matching unicast entry in the ordinary cache before accepting
 a Basic agreement. The first in-window retry must be delivered and emit no duplicate drop.
 
+### Basic Normal Ack retry reporting
+
+Commit `BA-BASIC-NORMAL-ACK`, “ieee80211: fix: count Normal Ack retries under Basic Block Ack”.
+Depends on `BA-REPORT`. The Basic receipt record and reordering service retain evidence
+of received Normal Ack fragments while keeping their bitmap bits clear. In the parent
+the delivered sequence 100 leaves no receipt at the duplicate check, so its retry
+is discarded without a signal.
+
+- Add case 18 to [Ieee80211BlockAckReordering_1](../../tests/module/Ieee80211BlockAckReordering_1.test).
+  An unseen fragment emits no duplicate signal. A repeat of the delivered Normal Ack fragment
+  emits one. The Basic bitmap bit remains clear.
+- Verify the approved release-mode `MixedTraffic` run-0 result. The receiver counts
+  the retry of `Large-12`, raising the duplicate count from 12 to 13. The five other
+  focused statistical comparisons retain their expectations.
+- Build `MODE=debug` for the module fixture and `MODE=release` for the statistical comparisons. Run from the INET worktree root with the [module and statistical commands and filters](../../tests/protocol/wifi/basic-blockack-normal-ack-retries.md#verification).
+- Record case 18 and the baseline comparison in [Basic Normal Ack retry reporting](../../tests/protocol/wifi/basic-blockack-normal-ack-retries.md).
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair

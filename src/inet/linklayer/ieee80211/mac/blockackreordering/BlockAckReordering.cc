@@ -82,9 +82,13 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
     // This allows the recipient to delete the Block Ack if the originator does not switch
     // back to using Block Ack.
     if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
-        if (dataHeader->getAckPolicy() == BLOCK_ACK && agreement->getVariant() == BlockAckVariant::BASIC)
-            agreement->blockAckPolicyFrameReceived(dataHeader);
         auto record = agreement->getBlockAckRecord();
+        if (agreement->getVariant() == BlockAckVariant::BASIC) {
+            if (dataHeader->getAckPolicy() == BLOCK_ACK)
+                agreement->blockAckPolicyFrameReceived(dataHeader);
+            else if (dataHeader->getAckPolicy() == NORMAL_ACK)
+                record->normalAckPolicyFrameReceived(dataHeader);
+        }
         // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2)(v) and 10.25.6.6.1: release the complete prefix in order.
         if (agreement->getVariant() == BlockAckVariant::COMPRESSED && insideWindow && windowStart < sequenceNumber &&
             interframe && record->hasCompleteReceipt(record->getWindowStart() - 1)) {
