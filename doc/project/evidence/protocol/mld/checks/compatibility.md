@@ -29,7 +29,7 @@ RFC 9777 §8.1 and §8.2.1: a Query of 24 octets is an MLDv1 Query; an MLDv1 Gen
 2. On L1, from A, within 10 milliseconds of the start of listening, an MLDv1 Multicast Listener Report for G: ICMPv6 type 131, 24 octets, Multicast Address G, IPv6 destination G (RFC9777-VER-1, COMPL-1, COMPL-4, COMPL-9, GEN-7, REP-41, RFC2710-NODE-10, NODE-17).
 3. A second MLDv1 Report for G from A, at most 1 second after the first (RFC2710-NODE-14, NODE-22).
 4. After the General Query of 156.25 seconds, and within its Maximum Response Delay, an MLDv1 Report for G from A that does not leave at the instant of the Query (RFC2710-NODE-13, NODE-20, NODE-22).
-5. No Version 2 Report leaves A in the window (RFC9777-COMPL-9).
+5. From the first MLDv1 Query that A receives, no Version 2 Report leaves A in the window (RFC9777-COMPL-9). Before it, A is in MLDv2 mode (RFC 9777 §8.2.1), and the Reports of its start can be Version 2 Reports.
 
 ## Report suppression in MLDv1 mode
 

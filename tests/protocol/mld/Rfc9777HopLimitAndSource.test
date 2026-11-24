@@ -46,24 +46,41 @@ static std::set<Ipv6Address> querySourceSet(const Packet *p)
     return out;
 }
 static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
+// A Report may leave from the unspecified address while its sender has no valid link-local
+// address (RFC9777-REP-34): before the first MLD message of the sender from that address.
+static std::map<std::string, bool> linkLocalUsed;
+static bool isBadMessage(const std::string& node, const Packet *p)
+{
+    if (mldOf(p) == nullptr)
+        return false;
+    if (hopLimitOf(p) != 1)
+        return true;
+    if (srcOf(p).isLinkLocal()) {
+        linkLocalUsed[node] = true;
+        return false;
+    }
+    bool report = isV2Report(p) || isV1Report(p) || isV1Done(p);
+    return !(report && srcOf(p).isUnspecified() && !linkLocalUsed[node]);
+}
 
 Define_ProtocolTestProgram()
 {
+    linkLocalUsed.clear();
     return ProtocolTest("rfc9777_hop_limit_and_source")
         // Expected observation: every MLD message of router Hop Limit 1 and a link-local source address.
         .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return mldOf(p) != nullptr && !(hopLimitOf(p) == 1 && srcOf(p).isLinkLocal()); })
-                  .describe("an MLD message of router that does not have Hop Limit 1 and a link-local source address (RFC9777-GEN-2, GEN-3)")
+                  .filterEvent([](const MatchContext& c) { return isBadMessage("router", c.event.packet); })
+                  .describe("an MLD message of router that does not have Hop Limit 1 and a link-local source address, other than a Report from the unspecified address before its first MLD message from the link-local address (RFC9777-GEN-2, GEN-3, REP-34)")
                   .within(40.0)))
         // Expected observation: every MLD message of hostA Hop Limit 1 and a link-local source address.
         .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return mldOf(p) != nullptr && !(hopLimitOf(p) == 1 && srcOf(p).isLinkLocal()); })
-                  .describe("an MLD message of hostA that does not have Hop Limit 1 and a link-local source address (RFC9777-GEN-2, GEN-3)")
+                  .filterEvent([](const MatchContext& c) { return isBadMessage("hostA", c.event.packet); })
+                  .describe("an MLD message of hostA that does not have Hop Limit 1 and a link-local source address, other than a Report from the unspecified address before its first MLD message from the link-local address (RFC9777-GEN-2, GEN-3, REP-34)")
                   .within(40.0)))
         // Expected observation: every MLD message of hostB Hop Limit 1 and a link-local source address.
         .meanwhile(never(on("hostB.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return mldOf(p) != nullptr && !(hopLimitOf(p) == 1 && srcOf(p).isLinkLocal()); })
-                  .describe("an MLD message of hostB that does not have Hop Limit 1 and a link-local source address (RFC9777-GEN-2, GEN-3)")
+                  .filterEvent([](const MatchContext& c) { return isBadMessage("hostB", c.event.packet); })
+                  .describe("an MLD message of hostB that does not have Hop Limit 1 and a link-local source address, other than a Report from the unspecified address before its first MLD message from the link-local address (RFC9777-GEN-2, GEN-3, REP-34)")
                   .within(40.0)))
         // Expected observation 1: a Report of A and a Query of R.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
