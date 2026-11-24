@@ -463,6 +463,60 @@ branch was rebased onto it with no conflict. C3 is the same patch, and it change
 fingerprint results of C3 hold on the new base. `check-pull-request.sh` passes on the rebased series. Master moves
 to the head of the branch by a fast-forward.
 
+#### R2: the override timer of the sender SWS avoidance (BD-21, BD-23), prepared 2026-11-24
+
+**Re-check.** Master `08e3648c36` changes no TCP file after `d8a58564ee`. `TcpAlgorithmBase::processWindowUpdate()`
+(`TcpAlgorithmBase.cc:1006-1026`) still treats each segment with SEG.ACK = SND.UNA, an open window and nothing in
+flight as a window update: it cancels the persist timer, and `sendData()` starts it again with a full RTO
+(`:724-729`, `startPersistTimer()` at `:751-757`). The persist timer has two roles: the zero-window probe of RFC 9293
+section 3.8.6.1, and the override timeout of rule (4) of section 3.8.6.2.1 (`processPersistTimer()`, `:503-513`).
+
+**The fault, shown.** The new module test `tests/module/tcp_sws_4.test` has the setup of `tcp_sws_2.test`, and the
+server also sends 100 bytes every 0.3 s with the same window of 500 bytes. In debug mode on `08e3648c36` it fails:
+the client holds 500 bytes from 1.207 s, each segment of the server cancels and starts the timer again ("The window
+update opens the window: cancelling the PERSIST timer"), and the 500 bytes leave only at 5.053 s, one RTO after the
+last segment of the server at 4.051 s. `tcp_sws_2.test` passes as the control. A server that never stops sending
+holds the data for ever, as in `examples/inet/bulktransfer` `inet_inet_2b` (BD-21).
+
+**Design questions for gate A.**
+
+1. *How the override timer survives a segment that updates no window (BD-21).* (A) The persist timer gets its role
+   when it starts: the override role when the window is open, the probe role when it is zero. `processWindowUpdate()`
+   cancels the timer only in the probe role; in the override role it lets `sendData()` decide, and stops the timer
+   when the held data leaves. (B) The connection keeps the window of the segment before this one, and
+   `processWindowUpdate()` acts only when the window changed; R7 (BD-4) needs the same value. The assistant
+   recommends (A): it stays in the algorithm and changes no processing of the connection; R7 makes its own choice.
+2. *The override interval (BD-23).* RFC 9293: "The override timeout should be in the range 0.1 - 1.0 seconds." Now it
+   is the RTO, at least 1 s in `~Tcp` and growing with the RTO. (i) The RTO, held in the range 0.1 s to 1.0 s, in
+   both `~Tcp` and `~LinuxTcp`. (ii) The same in `~Tcp`, and a new parameter that keeps the RTO, set by `~LinuxTcp`,
+   because Linux sends such a segment from its probe timer, whose interval is the RTO (`tcp_probe_timer()`), D7.
+   The assistant recommends (ii), by rule 6 of [baseline-catch-up-defects.md](baseline-catch-up-defects.md) §2.
+
+**Commits** (with the recommended answers).
+
+- **C6: `tcp: fix: a segment that updates no window keeps the override timer of the SWS avoidance running`** (BD-21).
+  `TcpAlgorithmBase.cc`, and a state field for the role of the persist timer. Protocol gap: RFC 9293 section
+  3.8.6.2.1, rule (4), asks for a timeout that forces the transmission; the restart at each segment of the peer
+  prevents it. Tests: `tests/module/tcp_sws_4.test` (new, fails before C6), and the new protocol test
+  `tests/protocol/tcp/rfc/Rfc9293SwsOverrideTimeout.test` with three cases: a hold with no traffic of the peer (the
+  override expires), a hold while the peer sends data with the same window (the override expires at the same time),
+  and a window update that opens the window to a full segment (the held data leaves at once). Expected before C6:
+  the second case fails, as `tcp_sws_4.test` does. Reviewer document: `tests/protocol/tcp/sws-override-timer.md`.
+- **C7: `tcp: add: a parameter for the override timeout of Linux, the RTO, set by LinuxTcp`** (BD-23). `Tcp.ned`,
+  `LinuxTcp.ned`, the read of the parameter; no result moves, because `~Tcp` still uses the RTO here.
+- **C8: `tcp: change: the override timeout of the sender SWS avoidance is the RTO held in 0.1 s to 1.0 s (RFC 9293)`**
+  (BD-23). `startPersistTimer()` in the override role. The protocol test gets a fourth case: with an RTO above 1 s,
+  the override comes after 1.0 s in `~Tcp` and after the RTO in `~LinuxTcp`. Whatsnew entries for C6 and C8.
+
+**Expected baselines.** `examples/inet/bulktransfer` `inet_inet_2b`, whose flow from the server to client1 stops at
+11.27 s on master, and each TCP run with held data and peer traffic (C6) or with an RTO above 1 s while data is held
+(C8). The runs of the gate find them. Each moved value gets its line of attribution, and the re-record runs in the
+image of the CI (D6).
+
+**Checks.** The module tests `tcp_sws_1` to `tcp_sws_4` and `tcp_persist_*`, the new protocol test and
+`tests/protocol/tcp/parameter/send/TcpMaxPersistTimeout*.test`, in debug mode; all fingerprints in release mode in the
+editor; the statistical tests of the moved folders in the image of the CI.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
