@@ -3,3 +3,4 @@ Block Ack receive windows report duplicate retries
 Wi-Fi duplicate-drop statistics now count retries that the Block Ack receive window identifies
 as duplicates using retained receipts or buffered fragments. Measurements that previously counted
 only the ordinary duplicate cache can report more drops even when packet delivery is unchanged.
+Basic agreements also count retries of retained Normal Ack frames.

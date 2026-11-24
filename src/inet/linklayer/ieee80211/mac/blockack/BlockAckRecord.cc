@@ -26,11 +26,17 @@ void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHe
     acknowledgmentState[SequenceControlField(sequenceNumber.get(), fragmentNumber)] = true;
 }
 
+void BlockAckRecord::normalAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
+{
+    acknowledgmentState.try_emplace(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()), false);
+}
+
 bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber)
 {
     // IEEE Std 802.11e-2005, 9.10.3: report old MPDUs as received and use
     // the actual fragment receipt for positions in the retained range.
-    return sequenceNumber < basicReceiptStart || hasBasicReceipt(sequenceNumber, fragmentNumber);
+    auto receipt = acknowledgmentState.find(SequenceControlField(sequenceNumber.get(), fragmentNumber));
+    return sequenceNumber < basicReceiptStart || (receipt != acknowledgmentState.end() && receipt->second);
 }
 
 bool BlockAckRecord::hasBasicReceipt(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber) const

@@ -114,8 +114,8 @@ module cases also check group delivery and unchanged agreement state.
 On the previous PR revision, the matching-sequence over-the-air run passed the check for
 the initial clear bit but failed on the next reply. The receiver had discarded the first
 unicast retry as a duplicate of the broadcast. The revised run observes the positive bit
-for that retry. All 18 recipient module runs pass, including the duplicate and no-agreement
-controls.
+for that retry. The receive-window reporting stage selected 18 recipient module runs, including
+the duplicate and no-agreement controls.
 
 The duplicate-drop assertions in runs 15 and 16 check one signal for a retry of a delivered
 unicast and one for a retry of a buffered unicast. The matching broadcast and the first

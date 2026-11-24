@@ -10,7 +10,7 @@ The sequence reuse case checks that a retired fragment receipt cannot set a bit 
 Group QoS data uses a separate sequence space and must leave individual Basic and Compressed agreements untouched.
 An equal group sequence must not suppress the first received unicast retry, with or without an agreement.
 
-%extraargs: -r 0..17
+%extraargs: -r 0..18
 
 %file: RecipientReordering.cc
 #include "inet/common/Simsignals.h"
@@ -383,6 +383,21 @@ class RecipientReorderingTest : public cSimpleModule {
                 recipient->unsubscribe(packetDroppedSignal, &drops);
                 break;
             }
+            case 18: { // A lost Normal Ack leaves a duplicate of the delivered fragment.
+                DuplicateDropProbe drops;
+                recipient->subscribe(packetDroppedSignal, &drops);
+                agreements.accept(peer, 5, 100, 4);
+                checkDelivery(receive(makeData(100, "normal-original", 0, false, peer, 5, false, false, NORMAL_ACK)), {"normal-original"});
+                checkWindow(101, 0, peer);
+                checkBasicReceipt(100, 0, false);
+                checkDelivery(receive(makeData(100, "unseen-fragment", 1, false, peer, 5, false, true, NORMAL_ACK)), {});
+                ASSERT(drops.packets.empty());
+                checkDelivery(receive(makeData(100, "normal-retry", 0, false, peer, 5, false, true, NORMAL_ACK)), {});
+                ASSERT(drops.packets == std::vector<std::string>{"normal-retry"});
+                checkBasicReceipt(100, 0, false);
+                recipient->unsubscribe(packetDroppedSignal, &drops);
+                break;
+            }
             default:
                 throw cRuntimeError("Unknown recipient scenario");
         }
@@ -426,7 +441,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.test.scenario = ${scenario=0..17}
+*.test.scenario = ${scenario=0..18}
 
 %contains: stdout
 Recipient reordering checks passed.
