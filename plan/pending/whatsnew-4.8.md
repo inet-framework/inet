@@ -32,15 +32,15 @@ The owner chose D-1 to D-3 on 2026-11-24.
 
 1. [x] Audit. Five agents read the commits of `src/` (transport, link and physical layers, network layer and routing, common and queueing) and the commits outside `src/` (examples, showcases, tests, build, user documentation). Each one reports the user-visible changes without an entry, the entries that a later commit made wrong, and the commits that moved a fingerprint or statistical baseline. No commit.
 2. [x] Themes. Choose the themes from the entries and the audit, and write the list into this plan. Commit: the plan.
-3. [ ] Themed entries, one commit for each list: incompatible, compatible, fixes. Each commit removes the small files of its list and adds the themed files.
-4. [ ] The entry of the changed results (D-5). Commit.
-5. [ ] The introduction in `WHATSNEW` (D-3, D-6, D-7). Commit.
-6. [ ] Check. `whatsnew.py check`; a trial `whatsnew.py release` in a scratch clone, compared with the 4.7 section; a reviewer agent that compares the themed text with the 159 old entries and with the audit; `check-pull-request.sh` on the branch.
-7. [ ] Move this plan to `plan/done/`. Commit.
+3. [x] Themed entries, one commit for each list: incompatible, compatible, fixes. Each commit removes the small files of its list and adds the themed files.
+4. [x] The entry of the changed results (D-5). It went into the commit of the incompatible list, because it is one of its files.
+5. [x] The introduction in `WHATSNEW` (D-3, D-6, D-7). Commit.
+6. [x] Check. `whatsnew.py check`; a trial `whatsnew.py release` in a scratch clone, compared with the 4.7 section; a reviewer agent that compares the themed text with the 159 old entries and with the audit; `check-pull-request.sh` on the branch.
+7. [x] Move this plan to `plan/done/`. Commit.
 
 ## Audit results (step 1)
 
-Six read-only agents wrote their reports to `/var/tmp/claude-whatsnew48/audit-{A..F}.md` (outside the repository). A to E found 63 gaps, F listed the baseline moves of about 190 commits in 10 model areas. I checked a sample of each report against the tree. The facts that change the plan:
+Six read-only agents wrote their reports to `audit/whatsnew-4.8/audit-{A..F}.md` of the main checkout (`audit/` is not in git), with the common brief `brief-common.md` and the author of each old entry `entry-authors.tsv`. A to E found 63 gaps, F listed the baseline moves of about 190 commits in 10 model areas. I checked a sample of each report against the tree. The facts that change the plan:
 
 - No entry describes OSPFv3, the HT associations of IEEE 802.11, the 802.11 frames on the wire (management, Block Ack Request, A-MPDU), the new protocol elements, the log formatting option, the serializers and dissectors of many protocols, gPTP, the new test suites, the new examples and showcases, or the documentation website.
 - `incompatible/ipsec-ah-and-esp-corrections.txt` says that both new gates `ipIn` and `ipOut` connect to the dispatcher. `IPsec.ned` says that `ipIn` is not used.
@@ -49,6 +49,8 @@ Six read-only agents wrote their reports to `/var/tmp/claude-whatsnew48/audit-{A
 - Credits: the work of Miguel González-López is the source of all IEEE 802.11 entries except the rate control per receiver, the per-station rate statistics, the VHT mode queries, the part durations and the responses outside an exchange. It is also the source of the PCAPng link type and capture limit entries, of PR #1130 (Radiotap capture, which our commits redesigned), of the QUIC STREAM payload fix and of the fragment FCS fix. The QUIC entry about unknown frames came to him only through a format commit, and it is not his work. Afshin Zanganeh is the source of the vector recovery.
 
 ## Themes (step 2)
+
+The implementation gave 42 themes, not 37: 29 incompatible, 8 compatible and 5 fixes. Two old entries moved to another theme than the first list said (D-8).
 
 The tool orders each list by file name, so the order below is the order of the release. "Gap" names a gap of an audit report, for example B-G3.
 
@@ -62,7 +64,7 @@ Backward incompatible changes:
 | `dhcp-address-conflict-detection.txt` | dhcp-client-checks-granted-address, dhcp-seven-defects |
 | `ethernet-csma-cd-and-ethertypes.txt` | ethernet-half-duplex-attempt-limit, ethernet-csma-cd-medium-access-delay, ethernet-csma-cd-retry-limit-drops, ethernet-ethertype-rendering, ethernet-frames-without-fcs, ethernet-switches-forward-unknown-ethertypes |
 | `ieee80211-block-ack.txt` | ieee80211-immediate-compressed-block-ack, -basic-block-ack-selection, -block-ack-agreement-lifecycle, -basic-block-ack-transfer-completion, -block-ack-delivery-order, -block-ack-wire-types, -bounded-mpdu-deaggregation, -block-ack-data-retry, -qos-data-preview, -reversible-data-preparation |
-| `ieee80211-channel-access.txt` | ieee80211-single-protection-and-shared-txnav, -multiple-protection, -recipient-responses-keep-local-nav, -local-interframe, -radio-commands-wait-for-accepted-frame, -management-recovery-per-edcaf, -qos-data-lifetime, -retry-counters-per-receiver, -response-outside-frame-exchange, B-G5, B-G6 |
+| `ieee80211-channel-access.txt` | ieee80211-single-protection-and-shared-txnav, -multiple-protection, -recipient-responses-keep-local-nav, -local-interframe, -radio-commands-wait-for-accepted-frame, -management-recovery-per-edcaf, -qos-data-lifetime, -retry-counters-per-receiver, B-G5, B-G6 |
 | `ieee80211-frames-on-the-wire.txt` | ieee80211-wire-and-reception-corrections, B-G1, B-G2, B-G8 |
 | `ieee80211-ht-support.txt` | ieee80211-ac-interfaces-expose-ht-support, -mapped-5ghz-channels, -signal-extension, -rifs-permission, -phy-mode-response-rate-properties, -vht-mode-queries, -response-queries-caller-role, B-G3, B-G4 |
 | `ieee80211-rates-per-receiver.txt` | ieee80211-rate-control-per-receiver, -per-receiver-data-frame-rates, -per-station-rate-statistics, -mib-rate-state, -mib-commit-operations, -management-publishes-rate-state, B-G7 |
@@ -92,7 +94,7 @@ Backward compatible changes:
 | --- | --- |
 | `configurator-declared-lans.txt` | configurator-declared-lans |
 | `doc-documentation-and-website.txt` | E-G10, E-G11, E-G12 |
-| `examples-new-and-repaired-examples.txt` | E-G1, E-G2, E-G3, E-G4 |
+| `examples-new-and-repaired-examples.txt` | examples-europe-map-equirectangular, E-G1, E-G2, E-G3, E-G4 |
 | `packet-api-additions.txt` | packet-region-tag-removal-by-type, packet-type-aware-field-serializers, networklayer-host-name-of-mac-address, D-G3, C-G9 |
 | `redundancy-vector-recovery.txt` | redundancy-vector-recovery, redundancy-vector-sequence-recovery |
 | `serializer-captured-packets.txt` | C-G7 except RIP, A-G9, A-G10, B-G12, B-G13 |
@@ -103,13 +105,35 @@ Bug fixes:
 
 | File | Old entries and gaps |
 | --- | --- |
-| `common-other-fixes.txt` | packet-chunk-flags, visualizer-packet-drop-animation-uses-the-dy-parameter, examples-europe-map-equirectangular, D-G4, D-G7, D-G8, C-G10, B-G19 (the msg properties) |
-| `ieee80211-fixes.txt` | ieee80211-5ghz-band-centers, -ht-mode-band-and-preamble, -ht-vht-part-durations, -max-transmission-duration, B-G9 |
+| `common-other-fixes.txt` | packet-chunk-flags, visualizer-packet-drop-animation-uses-the-dy-parameter, D-G4, D-G7, D-G8, C-G10, B-G19 (the msg properties) |
+| `ieee80211-fixes.txt` | ieee80211-5ghz-band-centers, -ht-mode-band-and-preamble, -ht-vht-part-durations, -max-transmission-duration, -response-outside-frame-exchange, B-G9 |
 | `linklayer-fixes.txt` | ethernet-frame-bit-error-discarded, ethernet-static-mac-table-entries-do-not-age, ieee8021q-user-priority-passed-down, linklayer-relay-keeps-vlan-tag, linklayer-relay-upper-layer-vlan-tag, linklayer-relay-vlan-lookup, mrp-relay-multicast-forwarding, lmac-slot-too-short, ackingmac-incorrect-header, B-G14, B-G17 |
 | `physicallayer-fixes.txt` | dielectricobstacleloss-loss-exponent, physicallayer-error-model-initialization, physicallayer-separate-parts-late-interferer, B-G18, the part decision count of B-G19 |
 | `tcp-fixes.txt` | the 10 tcp- fix entries, tcp-negative-timer-checks, tcp-tcpspoof-dest-address, A-G3, A-G4 |
 
 Left out: D-G11 (`@bit`, `FunctionBase::printStructure()`), the print and log details of B-G19, the `bin/inet_start_jekyll_server` question of E (a file, not a change), and the GitHub workflows of E-G9 that only a maintainer sees.
+
+## Decisions during the implementation
+
+- **D-8 Two moves.** The response that no frame exchange waits for moved to `ieee80211-fixes.txt`, because it is not the work of Miguel González-López, and the channel access theme then credits him for all of its content. The Europe map moved to the examples theme, because it is about an example image.
+- **D-9 One line for each paragraph of the introduction.** The release tool writes the entries with one line for each paragraph, so the introduction follows them, and not the wrapped lines of the older sections.
+- **D-10 The heading stays "INET-4.7.x (in development)".** The tool replaces it at the release, and the convention names the version in development after the last release (the README gives "INET-4.8.x (in development)" after 4.8).
+- **D-11 Credits.** Miguel González-López is named in the five IEEE 802.11 themes, the IEEE 802.11 fixes, the PCAP, QUIC and queueing themes, the link layer fixes, the test suites and the introduction. The introduction also names his protocol tests and his rules and review guides for contributors, which no entry describes. Afshin Zanganeh is named in the vector recovery and the introduction.
+
+## Results of the check (step 6)
+
+- `whatsnew.py check` passes. `check-pull-request.sh --base origin/master --head HEAD` passes all six series gates; the description gate did not run, because there is no pull request.
+- A trial `whatsnew.py release "INET-4.8 (December 2026) — feature release" --next "INET-4.8.x (in development)"` in a temporary worktree gave one 4.8 section with the introduction and the three lists (42 entries), and moved the 39 migration guide sections into `4.8/`. The worktree was removed.
+- The coverage review (`audit/whatsnew-4.8/review-coverage.md`) found lost facts in 88 of the 159 old entries, about 35 of them minor. The commit 099d0d355a puts back the facts that a user needs; it leaves out background, RFC quotes and some method names of the old text.
+- The fact review (`audit/whatsnew-4.8/review-facts.md`) found five wrong claims and one wrong credit, all corrected in 099d0d355a.
+- The preview has 584 lines and about 18000 words; the old one had 1069 lines and about 20000 words, without the 63 gaps.
+
+## Open points for the release
+
+- Write the release month in the heading of `whatsnew.py release`, and check that the CI sentence of the introduction (OMNeT++ 6.5, Ubuntu 26.04, clang 21) is still true. The workflows use `ubuntu-latest` and the `omnetpp-6.x` branch.
+- Pull requests that land before the release add their own entry files; they do not join a theme by themselves.
+- Some incompatible changes have no section in the migration guide (RR-BREAK-MIGRATE): GenericAppMsgReq, the radio and path loss C++ interfaces other than the SNIR, `IInterfaceTable::removeInterface()`, the `Forwarding` routes, `IRateControl::getRate()`, `Icmpv6::sendErrorMessage()`, the removed RTP modules, and the new TCP defaults with LegacyTcp.
+- `bin/inet_start_jekyll_server` is still in the tree, although the Jekyll build is gone.
 
 ## Verification
 
