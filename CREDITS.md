@@ -7,13 +7,13 @@
 - Rudolf Hornig (build system, website, maintenance)
 - Zoltan Bojthe (VoIPStream, TCP_lwIP, IPv4, etc; maintenance)
 
-## The following people have contributed to the INET Framework (2.6 and before):
+## The following people have contributed to the INET Framework:
 
 - Adam Malik (IGMPv3)
 - Adriano (SimpleVoIP)
 - Ahmed Ayadi (RTP)
 - Alberto Cortes (SCTP)
-- Alfonso Ariza Quintana (MANET protocols, IEEE 802.11)
+- Alfonso Ariza Quintana (MANET protocols, IEEE 802.11, 802.11ac VHT)
 - Alvaro Torres Cortes (TraCI)
 - Amre El-Hoiydi (CSMA)
 - Andras Babos (OSPFv2)
@@ -30,53 +30,73 @@
 - Christoph Sommer (TraCI, DYMO-FAU, etc.)
 - Damien Piguet (ProbabilisticBroadcast, WiseRoute)
 - Daniel Willkomm (Mobility, Flood, CSMA)
+- Daniel Zeitler (MRP)
 - David Eckhoff (TraCI)
 - Dimitris Kotsakos (ProbabilisticBroadcast)
 - Dirk Holzhausen (IPSuite)
+- Ekaterina Volodina (QUIC)
 - Emin Ilker Cetinbas (mobility)
+- Enkhtuvshin Janchivnyambuu (gPTP)
 - Eric Wu (IPv6, IEEE 802.11)
 - Erwin Paul Rathgeb (SCTP)
 - Falko Dressler (TraCI)
 - Faqir Zarrar Yousaf (Mobile IPv6)
 - Felix Schmidt-Eisenlohr (path loss)
-- Florian Meier (IEEE 802.15.4)
-- George Alyfantis (ProbabilisticBroadcast)
+- Felix Weinrank (traffic generator)
+- Florian Kauer, formerly Meier (IEEE 802.15.4)
 - Georg Lutz (RandomWPMobility)
+- George Alyfantis (ProbabilisticBroadcast)
+- Giovanni Nardini (BGP)
 - Hakim Adhari (SCTP)
 - Helene Lageber (BGP)
+- Henning Puttnies (gPTP)
 - Ingmar Baumgart (IPv4, fixes)
-- Irene Ruengeler (SCTP, SCTP apps, serializers)
+- Irene Ruengeler (SCTP, SCTP apps, serializers, Packetdrill)
 - Isabel Dietrich (StaticGridMobility)
+- Jan Bloudicek (EIGRP)
+- Jan Peter Drees (XMAC)
+- Jan Zavrel (EIGRP)
 - Jerome Rousselot (802.15.4 UWB-IR, CSMA, WiseRoute)
+- Joaquim Oller (XMAC)
 - Jochen Reber (IPSuite's IPv4)
 - Johnny Lai (UDPVideoStream, PingApp)
+- Juan Luis Garrote Molinero (RSTP)
 - Juan-Carlos Cano (TCP Vegas/Westwood)
 - Juan-Carlos Maureira (DHCP)
-- Juan Luis Garrote Molinero (RSTP)
 - Karl Wessel (MiXiM mapping classes)
 - Klaus Wehrle (IPSuite)
 - Konrad Polys (SUIPathLoss)
 - Kristjan V. Jonsson (HttpTools)
 - Krzysztof Grochla (SUIPathLoss)
 - Luca Bedogni (TraCI)
+- Lukas Galbicka (OSPFv3)
 - Lukas Hluze (Ieee80211Mac)
-- Marcel Steine (CSMA)
-- Marcin Kosiba (ChiangMobility, GaussMarkovMobility)
+- Mani Amoozadeh (BGP, OSPF, RIP)
 - Marc Loebbers (CSMA, ConstSpeedMobility, SnrEval)
+- Marcel Marek (IPsec, OSPFv3, DCTCP, RED marker)
+- Marcel Steine (CSMA)
+- Marcell Juhasz (serializers)
+- Marcin Bosk (HTB scheduler)
+- Marcin Kosiba (ChiangMobility, GaussMarkovMobility)
 - Maria Fernandez (TCP Vegas/Westwood)
 - Martin Becke (SCTP, netperfmeter)
-- Matthias Oppitz (RTP)
-- Mathias Bohge (VoIPStream)
-- Michael Tuexen (SCTP, ExtInterface)
-- Mohamed Louizi (DYMO-FAU)
 - Martin Renwanz (VoIPStream)
+- Mathias Bohge (VoIPStream)
+- Matthias Oppitz (RTP)
+- Michael Tuexen (SCTP, ExtInterface, Packetdrill)
+- Miguel González-López (IEEE 802.11, protocol testing, development tooling)
+- Mihaly Palenik (instrument figures)
+- Mohamed Louizi (DYMO-FAU)
+- Mohammad HabibAllah (TCP ECN)
 - Oliver Graute (path loss)
+- Peter Danielis (gPTP)
 - Peterpaul Klein Haneveld (TractorMobility)
 - Pietro Manzoni (TCP Vegas/Westwood)
+- Raphael Riebl (IEEE 802.11p, antenna, path loss)
 - Robin Seggelmann (SCTP)
 - Sorin Cocorada (IEEE 802.11)
 - Steffen Sroka (mobility)
-- Steve Woon (IEEE 801.11)
+- Steve Woon (IEEE 802.11)
 - Tamas Borbely (DiffServ, RIP, PIM, IPv4, etc.)
 - Thomas Dreibholz (SCTP, SCTP apps, TCPDump, PCAP)
 - Thomas Reschka (TCP SACK)
@@ -87,7 +107,8 @@
 - Verena Kahmann (IPSuite's TCPModule)
 - Veronika Rybova (PIM-SM, PIM-DM)
 - Vincent Oberle (IPv4)
-- Vladimir Vesely (IGMPv3, PIM-SM, PIM-DM)
+- Vit Rek (EIGRP)
+- Vladimir Vesely (IGMPv3, PIM-SM, PIM-DM, EIGRP)
 - Vojtech Janota (MPLS, LDP, RSVP-TE, TED)
 - Volker Boehm (IPSuite's TCPModule)
 - Wei Yang Ng (IPv6)
@@ -111,14 +132,20 @@
 - TDR Group, University of Duisburg-Essen, Germany.
 - Hamburg University of Applied Sciences (HAW Hamburg), Germany.
 - Universitaet Paderborn, Germany.
+- University of Rostock, Germany.
+- Technical University of Munich (TUM), Germany.
+- Technische Hochschule Ingolstadt, Germany.
 - Communications Network Laboratory, University of Athens, Greece.
 - Budapest University Technology and Economics, Hungary.
 - Laboratory for Dependable Systems, Reykjavik University, Iceland.
 - University of Pisa, Italy.
 - Eindhoven University of Technology, the Netherlands.
 - Simula Research Laboratory, Norway.
+- University of Oslo, Norway.
 - Universita della Svizzera Italiana, Lugano, Switzerland.
 - Universidad de Malaga, Spain.
+- Universidade da Coruna, Spain.
+- University of California, Davis, USA.
 
 ## Origin Story
 

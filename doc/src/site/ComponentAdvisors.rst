@@ -95,7 +95,7 @@ developers/maintainers by advising them.
    * - PPP
      -
    * - 802.11
-     - `Alfonso Ariza Quintana <https://github.com/aarizaq>`__
+     - `Miguel González-López <https://github.com/mgonzalezlopezudc>`__, `Alfonso Ariza Quintana <https://github.com/aarizaq>`__
    * - 802.15.4
      - `Laura Marie Feeney <https://github.com/>`__
    * - IEEE 802.1d (STP, RSTP, etc.)
