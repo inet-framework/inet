@@ -1,0 +1,179 @@
+%description:
+Exercise Basic Block Ack DATA continuations in an infrastructure BSS with non-HT peers.
+Check the complete RTS/CTS/DATA exchange against the TXOP deadline and TXNAV.
+
+%extraargs: -r 0..3
+
+%file: BasicTxopAdmission.cc
+#include <iostream>
+
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+
+class BasicTxopAdmissionHcf : public Hcf
+{
+  private:
+    simtime_t currentGrant = -1;
+    simtime_t exchangeBudget = SIMTIME_ZERO;
+    simtime_t rtsStart = SIMTIME_ZERO;
+    int dataInGrant = 0;
+    int basicData = 0;
+    int basicReplies = 0;
+    int continuedBasicData = 0;
+    int refusedBasicData = 0;
+    bool checkExchange = false;
+
+  protected:
+    using cListener::finish;
+
+    bool transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        if (!getParentModule()->getParentModule()->getParentModule()->isName("sta1"))
+            return Hcf::transmitFrame(packet, ifs);
+        auto context = frameSequenceHandler->getContext();
+        auto txop = context->getQoSContext()->txopProcedure;
+        if (txop->getStart() != currentGrant) {
+            currentGrant = txop->getStart();
+            dataInGrant = 0;
+            checkExchange = false;
+        }
+        auto rts = dynamic_cast<RtsTransmitStep *>(context->getLastStep());
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(
+            (rts ? rts->getProtectedFrame() : packet)->peekAtFront<Ieee80211MacHeader>());
+        bool basic = data && data->getAckPolicy() == BLOCK_ACK;
+        bool continuation = dataInGrant > 0;
+        auto budget = rx->getTxnavRemaining();
+        if (!Hcf::transmitFrame(packet, ifs)) {
+            if (basic && continuation) {
+                if (checkExchange)
+                    throw cRuntimeError("The continuation was refused after its RTS had been submitted");
+                refusedBasicData++;
+            }
+            return false;
+        }
+        if (rts && basic && continuation) {
+            checkExchange = true;
+            exchangeBudget = budget;
+            rtsStart = simTime() + ifs;
+        }
+        if (data && !rts)
+            dataInGrant++;
+        if (basic && !rts) {
+            basicData++;
+            if (continuation) {
+                continuedBasicData++;
+                auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                auto start = simTime() + ifs;
+                auto end = start + mode->getDuration(packet->getDataLength());
+                if (end > currentGrant + txop->getLimit())
+                    throw cRuntimeError("Basic DATA continuation ends %s after the TXOP deadline",
+                        (end - currentGrant - txop->getLimit()).str().c_str());
+                if (end - (checkExchange ? rtsStart : start) >= (checkExchange ? exchangeBudget : budget))
+                    throw cRuntimeError("Basic DATA continuation exceeds the TXNAV budget");
+            }
+            checkExchange = false;
+        }
+        return true;
+    }
+
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override
+    {
+        if (dynamicPtrCast<const Ieee80211BasicBlockAck>(packet->peekAtFront<Ieee80211MacHeader>()))
+            basicReplies++;
+        Hcf::originatorProcessReceivedFrame(packet, request);
+    }
+
+    void finish() override
+    {
+        if (!getParentModule()->getParentModule()->getParentModule()->isName("sta1"))
+            return;
+        std::cout << "Basic TXOP admission: DATA=" << basicData << " replies=" << basicReplies
+                  << " continued=" << continuedBasicData << " refused=" << refusedBasicData << "\n";
+        if (basicData == 0 || basicReplies == 0 || refusedBasicData == 0)
+            throw cRuntimeError("Expected Basic DATA, feedback, and a refused continuation");
+        if ((continuedBasicData > 0) != par("expectContinuation").boolValue())
+            throw cRuntimeError("Unexpected result for admitted Basic DATA continuations");
+    }
+};
+Define_Module(BasicTxopAdmissionHcf);
+
+} // namespace inet::ieee80211
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module BasicTxopAdmissionHcf extends Hcf
+{
+    parameters:
+        bool expectContinuation;
+        @class(::inet::ieee80211::BasicTxopAdmissionHcf);
+}
+
+network BasicTxopAdmissionNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta1: WirelessHost;
+        sta2: WirelessHost;
+}
+
+%inifile: test.ini
+[General]
+network = BasicTxopAdmissionNetwork
+sim-time-limit = 1.2s
+seed-set = 0
+cmdenv-express-mode = true
+cmdenv-stop-batch-on-error = false
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.sta1.numApps = 1
+*.sta1.app[0].typename = "UdpBasicApp"
+*.sta1.app[0].destAddresses = "sta2"
+*.sta1.app[0].destPort = 1000
+*.sta1.app[0].messageLength = 700B
+*.sta1.app[0].startTime = 1s
+*.sta1.app[0].stopTime = 1.00295s
+*.sta1.app[0].sendInterval = 100us
+*.sta2.numApps = 1
+*.sta2.app[0].typename = "UdpSink"
+*.sta2.app[0].localPort = 1000
+*.sta*.ipv4.arp.typename = "GlobalArp"
+**.wlan[*].opMode = "g(erp)"
+**.wlan[*].bitrate = 24Mbps
+**.bandName = "2.4 GHz"
+**.wlan[*].classifier.typename = "QosClassifier"
+**.wlan[*].mac.qosStation = true
+*.sta1.wlan[*].mac.hcf.typename = "BasicTxopAdmissionHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.originatorAckPolicy.blockAckReqThreshold = 5
+**.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${fragmentation=2346B,2346B,300B,300B}
+**.rtsPolicy.rtsThreshold = ${rts=500B,4096B,4096B,100B ! fragmentation}
+**.txopProcedure.protectionMechanism = ${protection="multiple","multiple","single","single" ! fragmentation}
+**.txopProcedure.txopLimit = ${limit=1024us,1024us,300us,3000us ! fragmentation}
+*.sta1.wlan[*].mac.hcf.expectContinuation = ${continues=true,true,true,false ! fragmentation}
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Basic TXOP admission:
