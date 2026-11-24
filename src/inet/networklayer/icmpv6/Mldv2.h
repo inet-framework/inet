@@ -282,6 +282,10 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     std::map<int, std::vector<Packet *>> heldMessages;
     virtual void sendHeldMessages(NetworkInterface *ie);
     virtual void deleteHeldMessages(int interfaceId);
+    // the interfaces that sent a Report or a Done from the unspecified address, before their
+    // link-local address was valid; each reports its groups again once it is
+    std::set<int> interfacesReportedFromUnspecifiedAddress;
+    virtual void sendReports(NetworkInterface *ie);
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -322,6 +326,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
     virtual void sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& dest);
 
     virtual void processHostGeneralQueryTimer(cMessage *msg);
+    virtual void sendCurrentStateReport(HostInterfaceData *interfaceData);
     virtual void processHostGroupQueryTimer(cMessage *msg);
     virtual void processHostStateChangeTimer(cMessage *msg);
     virtual void processHostOlderVersionTimer(cMessage *msg);
