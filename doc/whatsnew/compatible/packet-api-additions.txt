@@ -1,0 +1,9 @@
+Packet API: region tags by type, type-aware field serializers, CRC-32/MPEG-2 and other additions
+
+The removeTagsWherePresent() method of SharingRegionTagSet removed the region tags of each type in the given range, and not only the tags of the requested type. It now removes only the requested type, as its documentation states, and so do Chunk::removeTagsWherePresent() and Packet::removeRegionTagsWherePresent(). clearTags() has an optional predicate that selects the tags to clear. Inside INET, this changes ResidenceTimeMeasurer: at the end of a measurement, the FlowTag and the PacketEventTag of the packet now stay.
+
+FieldsChunkSerializer has two new protected hooks, serializeFields() and deserializeFields(). deserializeFields() gets the chunk type that was requested from ChunkSerializerRegistry, so a serializer for several chunk types can create the requested type. The old hooks serialize(stream, chunk) and deserialize(stream) are deprecated but still work, so existing serializers need no change. See the migration guide.
+
+The checksum library has crc32_mpeg2(), and ChecksumType has the values CHECKSUM_CRC32_ISO_HDLC (7) and CHECKSUM_CRC32_MPEG2 (8), so ChecksumInserter and ChecksumChecker can use these CRCs through their checksumType parameter. The old values keep their numbers.
+
+L3AddressResolver::getHostNameWithMacAddress() gives the host that owns a MAC address, by its path relative to the network, or the MAC address string if no host owns it. Ipv4Header and Ipv6Header have the computed fields dscp and ecn, so the inspectors and the packet filters can read them. L3Address, Ipv6Address and clocktime_t fields can be edited in Qtenv, and the message files of projects outside the inet namespace, for example Simu5G, can use the INET address types.
