@@ -532,6 +532,15 @@ protocol runner `suite_folders`, `lib_folder` and `lib_name`, and the runner of 
 the editor reads the description of a project only when it opens the project. The worktree has all features except
 the two OSG features, because the OMNeT++ of this machine has no OSG.
 
+**The runner of the protocol tests (2026-11-24).** The keys of master are right: they are the keywords of
+`get_opp_test_tasks` of `opp_repl` (`opp_repl/test/opp.py:212`), which the workflow "Test: protocol" reads, and the
+message of `4d3705af84` was wrong in that point. The maintainer approved a repair of the editor in place of a change of
+INET ("yes"): omnet-julia `0d35ce9a6`, on `main` and not pushed, translates the three names of `opp_repl` in
+`get_kind_opp_test_tasks`, with a test of a description as INET master writes it. Its checks, the smaller set that the
+maintainer chose ("the smaller set"): `OmnetLegacyTest test_legacy` and `OmnetIdeTest test_ide`, 160 parts, 6242 pass,
+0 fail, 0 error, 134 marked broken. `4d3705af84` left `inet-julia`, and its three plan commits above it were written
+again. The running editor needs a restart to load `0d35ce9a6`; then the protocol tests of R2 run in it.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
