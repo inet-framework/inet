@@ -230,7 +230,12 @@ No sealed file changes. No consumer outside INET changes.
    pin in `inet.opp` ([change-a-baseline.md](../../doc/project/guide/change-a-baseline.md)).
 7. **Document.** Write the reviewer document beside the protocol test and the whatsnew entry.
 8. **Gates.** Run "Before every push" of [run-the-gates.md](../../doc/project/guide/run-the-gates.md). Run
-   `check-baseline-attribution.sh plan` and `run` in the job copy of the CI.
+   `check-baseline-attribution.sh plan` and `run` in the job copy of the CI. Run all stored fingerprints as the
+   workflow "Test: fingerprint" runs them: in the image of the CI, with `opp_featuretool enable all`, in release and in
+   debug mode (`runs/fingerprints-in-ci-image.sh` of the folder of D10). Each run must pass, except a run that a marker
+   declares as expected. The runs in the editor use the features of the worktree and this machine (clang 23), so they
+   focus the work but do not decide a gate (added 2026-11-24, after the maintainer asked: "all should pass otherwise
+   how can we create a PR?").
 9. **Gate B.** Open the reviewer document, the moved values and the commits of the change in tabs. Ask the
    maintainer: "Do you approve the result of R<n>?" After the approval, mark the change done in this plan, write the
    repair commit into [baseline-catch-up-defects.md](baseline-catch-up-defects.md), and commit both as
@@ -392,6 +397,31 @@ a protocol behavior, and C4 leaves R1 if it does.
 `tcp_sack_old_ack_1` and `tcp_limited_transmit_sack_1`. Run all 5784 stored fingerprints in release mode once at the
 base and once after C5, as two task groups of the editor; both must pass. A run of the fingerprints after each commit
 is not necessary: if the run after C5 moves, the runs of C3 and C4 alone find the commit.
+
+**Gate A** approved by the maintainer on 2026-11-24 ("yes to both": the design, and the two fingerprint runs).
+
+**Result of the checks (2026-11-24).** The commits are C3 `6f3eb8a25c`, C4 `74882daa4e` and C5 `38958b1fb8`.
+
+- The 14 module tests pass in debug mode.
+- The fingerprints in the editor, release mode, default features of the worktree: the base gives 1776 PASS, 1 expected
+  ERROR and 70 ERROR; after C5, 1769 PASS, 7 FAIL, 1 expected ERROR and the same 70 ERROR. The 70 runs need the
+  features `TcpLwip` and `VoipStream`, which the worktree did not enable and the CI enables; they can not start here.
+  The 1847 runs check the 5784 stored fingerprints.
+- Two runs of the 11 configurations of the 7 failures find the cause. Without C4, only `examples/inet/shutdownrestart`
+  `TCP` run 0 fails. Without C5, the other 6 fail: `examples/inet/bulktransfer` `inet__inet`, `inet_inet_2a` and
+  `inet_inet_2b`, `examples/inet/nclients/filetransfer.ini` `Filetransfer` run 0, and `examples/inet/tcpclientserver`
+  `inet-newreno` and `inet-reno` run 6. So C4 (BD-6) moves 6 runs and C5 (BD-9) moves 1 run. C3 moves none.
+- BD-6 moves results as the risk of the preparation said. BD-9 moves results in the case that the message of C5 names:
+  `shutdownrestart` sends Telnet keystrokes, segments of 1 byte, and then `isLost(snd_una + 1)` and `isLost(snd_una)`
+  count different SACKed bytes. The entry of BD-9 said that the results are the same; that is wrong for segments of 1
+  byte.
+- A stop of the task of `tools/prun.sh` stopped the client of podman, but not its container; `podman stop` stopped it.
+
+**Proposed revision ([PLR-REVISION](../../doc/project/rule/planning.md#plr-revision)), waiting for the maintainer.**
+R1 keeps only C3 (BD-5, BD-13, BD-16) and moves no result. BD-6 and BD-9 leave R1 and become the changes R20 and R21,
+each with the whole cycle of §6.1: the attribution of each moved fingerprint and statistic to the mechanism, the
+re-record in the image of the CI, and a protocol test and its reviewer document, because each changes a protocol
+behavior. C4 and C5 stay on the branch after C3 until their changes are prepared.
 
 ## 7. Verification
 
