@@ -4,21 +4,21 @@
 
 Step 7 artifact of the standards test workflow for the MLD level 2 pass. This is the first document of the pass that may name the simulation model and reference code, and it does both: the verdicts of the run, the class of every failure, and where the model implements, or fails to implement, each checked behavior. The MLD checks are the twins of the IGMP checks, so most gaps have a twin in [`igmp/results.md`](../igmp/results.md#the-model-gaps), and each gap below that has one names it.
 
-The level 2 pass ran on 2026-09-24 at `29aed12310` (src `5c4f41c600`): 47 tests, 21 PASS, 25 FAIL, 1 FAIL declared expected, and seventeen gaps. The repairs of 2026-09-25 to 2026-09-28, on `topic/standards-tests-igmp-mld-level2-fixes`, repaired all seventeen; the run below is theirs. Each gap keeps its description of the code of the level 2 run, and says how it was repaired.
+The level 2 pass ran on 2026-09-24 at `29aed12310` (src `5c4f41c600`): 47 tests, 21 PASS, 25 FAIL, 1 FAIL declared expected, and seventeen gaps. The repairs of 2026-09-25 to 2026-09-28, on `topic/standards-tests-igmp-mld-level2-fixes`, repaired all seventeen. On 2026-11-24, `topic/standards-tests-nd-gap9-fixes` repaired the Reports before the link-local address, the second half of ND gap 9, with one more check and one more test; the run below is of that branch. Each gap keeps its description of the code of the level 2 run, and says how it was repaired.
 
 ## Run record
 
-- Date: 2026-11-24 13:02 +0100
-- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `be4358b879`, tree clean
-- Trees: src `eccbaa8cc5`, tests/protocol `52575bcb65`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8
 - Platform: Ubuntu 26.04.1 LTS, in a container of the image of the CI job, Linux 7.0.0-43-generic x86_64
 - Command: `opp_run_protocol_tests -m debug -w '^tests/protocol/mld$'`
-- Suite: 47 tests, 47 PASS, so the suite reports PASS
+- Suite: 48 tests, 48 PASS, so the suite reports PASS
 
-The `src/` tree of the level 2 run, `5c4f41c600`, is the tree of `origin/master` at `7772a7e4ef`: the pass changed no source file. The repairs change `Mldv2`, `Mldv1`, `Icmpv6`, `Ipv6`, `Ipv6InterfaceData` and the IPv6 extension headers for MLD; the IGMP half of the branch changes `Igmpv3`, `Ipv4` and `Ipv4InterfaceData`.
+The `src/` tree of the level 2 run, `5c4f41c600`, is the tree of `origin/master` at `7772a7e4ef`: the pass changed no source file. The repairs change `Mldv2`, `Mldv1`, `Icmpv6`, `Ipv6`, `Ipv6InterfaceData` and the IPv6 extension headers for MLD; the IGMP half of the branch changes `Igmpv3`, `Ipv4` and `Ipv4InterfaceData`. The repair of 2026-11-24 changes `Mldv1`, `Mldv2` and `Ipv6`.
 
 ## Verdicts
 
@@ -45,6 +45,7 @@ One row per test. The check sections are in [`checks/`](../../protocol/mld/check
 | `Rfc9777ExcludeChange` | [Change inside EXCLUDE mode](../../protocol/mld/checks/listener-reports.md#change-inside-exclude-mode) | PASS | — |
 | `Rfc9777ChangeDuringRepetitions` | [A change during the repetitions](../../protocol/mld/checks/listener-reports.md#a-change-during-the-repetitions) | PASS | repaired, [gap 8](#gap-8-defect--a-second-change-replaces-the-pending-records-instead-of-a-merge) |
 | `Rfc9777ChangeDuringRepetitionsTail` | [A change during the repetitions](../../protocol/mld/checks/listener-reports.md#a-change-during-the-repetitions) | PASS | — |
+| `Rfc9777ReportBeforeLinkLocal` | [A start of listening before the link-local address is tested](../../protocol/mld/checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested) | PASS | repaired, [ND gap 9](../nd/results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | `Rfc9777GeneralQueryResponse` | [Response to a General Query](../../protocol/mld/checks/query-response.md#response-to-a-general-query) | PASS | — |
 | `Rfc9777GeneralQueryNoState` | [Response to a General Query](../../protocol/mld/checks/query-response.md#response-to-a-general-query) | PASS | repaired, [gap 11](#gap-11-defect--an-answer-to-a-query-holds-a-record-that-the-standard-leaves-out) |
 | `Rfc9777AddressSpecificResponse` | [Response to a Multicast Address Specific Query](../../protocol/mld/checks/query-response.md#response-to-a-multicast-address-specific-query) | PASS | — |
@@ -74,7 +75,7 @@ One row per test. The check sections are in [`checks/`](../../protocol/mld/check
 | `Rfc9777ModeChangeCancels` | [A mode change cancels the pending reports](../../protocol/mld/checks/compatibility.md#a-mode-change-cancels-the-pending-reports) | PASS | repaired, [gap 10](#gap-10-defect--the-mldv1-mode-keeps-the-pending-mldv2-retransmissions) |
 | `Rfc9777BlockInV1Mode` | [A BLOCK record for an address in MLDv1 mode](../../protocol/mld/checks/compatibility.md#a-block-record-for-an-address-in-mldv1-mode) | PASS | repaired, [gap 16](#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query) |
 
-All 47 tests pass. In the level 2 run, 21 of the 47 tests passed, and the seventeen gaps below held every failure.
+All 48 tests pass. In the level 2 run, 21 of the 47 tests passed, and the seventeen gaps below held every failure.
 
 ## The class of every failure
 
@@ -102,7 +103,7 @@ The shapes of the defects are the IGMP shapes — a field never filled (gap 1), 
 - **Statements**: RFC9777-GEN-2, REP-34 (every MLDv2 message, and every Report, from a link-local address); QRY-26, RQRY-10 (every Query from a link-local address of fe80::/64).
 - **The code**: `Mldv2::sendToIPv6` gives the IPv6 layer the destination, the interface and the Hop Limit, and no source address ([`Mldv2.cc:1420-1430`](../../../../../src/inet/networklayer/icmpv6/Mldv2.cc)), so IPv6 takes the global address of the interface. The MLDv1 module has the same shape: its Reports and Queries in the runs leave from global addresses too.
 - **Scope**: every MLD message of every node with a global address. A receiver that checks the source, as RFC 9777 §6.2 and §7.4 require (level 3), drops every Query and every Report.
-- **Repaired** on 2026-09-25 (`ec344eb024`, `1123b706e2` and `ee66255774`): both modules give the tested link-local address as the source. Before the address is tested the querier waits, a Query is not sent, and a Report or a Done waits in the module: the IPv6 layer of the model replaces an unspecified source, which RFC 3810 §5.2.13 would use. `Ipv6InterfaceData` now emits `interfaceIpv6ConfigChanged` when an address becomes tentative or valid. A test repair comes first (`57f4849f4d`).
+- **Repaired** on 2026-09-25 (`ec344eb024`, `1123b706e2` and `ee66255774`): both modules give the tested link-local address as the source. Before the address is tested the querier waits, a Query is not sent, and a Report or a Done waits in the module: the IPv6 layer of the model replaces an unspecified source, which RFC 3810 §5.2.13 would use. `Ipv6InterfaceData` now emits `interfaceIpv6ConfigChanged` when an address becomes tentative or valid. A test repair comes first (`57f4849f4d`). Since 2026-11-24 (`5e36e5e1b6` for MLDv1, `5ff01865c2` for MLDv2), a Report or a Done does not wait: it leaves from the unspecified address while the link-local address is not valid, as RFC 3590 §4 and RFC 9777 §5.2.14 say, `Ipv6` keeps that source, a router discards such a message (RFC9777-REP-37), and the node reports its groups again once the address is valid (RFC9777-REP-39).
 
 ### Gap 3 (defect) — an MLD message carries no Router Alert option
 

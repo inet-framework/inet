@@ -6,9 +6,9 @@ Step 8 artifact of the standards test workflow. Part 1 records what the model in
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-11-24 15:29 +0100
-- INET: branch `topic/standards-tests-nd-level2-fixes`, commit `c6203cda4e`, tree clean
-- Trees: src `b2a954843f`, tests/protocol `29b879d27e`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8
@@ -78,7 +78,7 @@ A feature is `claimed` when the claims of part 1 cover its governing source docu
 | --- | --- | --- | --- | --- |
 | [ND-F-MESSAGE-FORMAT](../../protocol/nd/features.md#nd-f-message-format) | mandatory | yes | supported | `confirmed` |
 | [ND-F-OPTIONS](../../protocol/nd/features.md#nd-f-options) | mandatory | yes | supported | `confirmed` |
-| [ND-F-MULTICAST-GROUPS](../../protocol/nd/features.md#nd-f-multicast-groups) | mandatory | yes | partial | `partial` — RFC4861-AR-4: the Report of the solicited-node group comes after the solicitation, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation); RFC4861-AR-5 is owed, HOST-8 is level 3 |
+| [ND-F-MULTICAST-GROUPS](../../protocol/nd/features.md#nd-f-multicast-groups) | mandatory | yes | partial | `partial` — no core check fails since the repair of [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation); RFC4861-AR-5 is owed, HOST-8 is level 3 |
 | [ND-F-ROUTER-SOLICITATION](../../protocol/nd/features.md#nd-f-router-solicitation) | optional | yes | partial | `partial` — the random delay of RFC4861-HOST-47 is level 4 |
 | [ND-F-ROUTER-ADVERTISEMENT](../../protocol/nd/features.md#nd-f-router-advertisement) | mandatory | yes | partial | `partial` — no core check fails since the repairs of gaps 2 and 5; RFC4861-ADV-1 is owed |
 | [ND-F-ADVERTISEMENT-TIMING](../../protocol/nd/features.md#nd-f-advertisement-timing) | mandatory | yes | supported | `confirmed` — since the repairs of gaps 5 and 6 |
@@ -95,12 +95,12 @@ A feature is `claimed` when the claims of part 1 cover its governing source docu
 | [ND-F-ROUTER-ROLE-CHANGE](../../protocol/nd/features.md#nd-f-router-role-change) | optional | yes | untested | `unverified` — owed at level 2 |
 | [ND-F-ROUTER-CONSISTENCY](../../protocol/nd/features.md#nd-f-router-consistency) | optional | yes | untested | `unverified` — owed at level 2 |
 | [ND-F-LINK-LOCAL-ADDRESS](../../protocol/nd/features.md#nd-f-link-local-address) | mandatory | yes | partial | `partial` — no core check fails; the infinite lifetime of RFC4862-LL-7 is level 4 |
-| [ND-F-DUPLICATE-ADDRESS-DETECTION](../../protocol/nd/features.md#nd-f-duplicate-address-detection) | mandatory | yes | partial | `partial` — RFC4862-DAD-11: the Report of the solicited-node group comes after the solicitation, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation); no other core check fails since the repair of gap 10; RFC4862-DAD-20, DAD-21 are owed |
+| [ND-F-DUPLICATE-ADDRESS-DETECTION](../../protocol/nd/features.md#nd-f-duplicate-address-detection) | mandatory | yes | partial | `partial` — no core check fails since the repairs of gap 10 and [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation); RFC4862-DAD-20, DAD-21 are owed |
 | [ND-F-STATELESS-AUTOCONFIGURATION](../../protocol/nd/features.md#nd-f-stateless-autoconfiguration) | mandatory | yes | partial | `partial` — no core check fails; the two-hour rule, RFC4862-GLOB-12, GLOB-13, GLOB-15, is owed |
 | [ND-F-ADDRESS-LIFETIME](../../protocol/nd/features.md#nd-f-address-lifetime) | mandatory | yes | partial | `partial` — no core check fails since the repair of gap 11; RFC4862-GLOB-16, GLOB-18 are owed, GLOB-24 is a later level |
 | [ND-F-NO-FRAGMENTATION](../../protocol/nd/features.md#nd-f-no-fragmentation) | mandatory | yes | partial | `partial` — the sender half holds; the receiver half, RFC6980-FRAG-2 to FRAG-6, is level 3 |
 
-Five features are `confirmed`, thirteen `partial` and five `unverified`. The matrix follows the run after the repairs of 2026-09-25; no `partial` verdict holds a failing core check any more. In the level 2 run, four features were `confirmed`, twelve `partial`, one `declined` and one `defect`.
+Five features are `confirmed`, thirteen `partial` and five `unverified`. The matrix follows the run after the repairs of 2026-09-25 and of the second half of gap 9 on 2026-11-24; no `partial` verdict holds a failing core check any more. In the level 2 run, four features were `confirmed`, twelve `partial`, one `declined` and one `defect`.
 
 ### How to read the matrix
 

@@ -6,17 +6,17 @@ The single place that holds the changing state of the ND workflow. Every other a
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
-State of the ledger, from the run after the repairs of 2026-09-25 (the level 2 run of 2026-09-24 was at `8f78f1a73c`, src `5c4f41c600`, with 22 PASS and 15 FAIL):
+State of the ledger, from the run after the repairs of 2026-09-25 and of the second half of gap 9 on 2026-11-24 (the level 2 run of 2026-09-24 was at `8f78f1a73c`, src `5c4f41c600`, with 22 PASS and 15 FAIL):
 
-- Date: 2026-11-24 15:29 +0100
-- INET: branch `topic/standards-tests-nd-level2-fixes`, commit `c6203cda4e`, tree clean
-- Trees: src `b2a954843f`, tests/protocol `29b879d27e`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8
 - Platform: Ubuntu 26.04.1 LTS, in a container of the image of the CI job, Linux 7.0.0-43-generic x86_64
 - Command: `opp_run_protocol_tests -m debug -w '^tests/protocol/nd$'`
-- Suite: 37 tests, 36 PASS, 1 FAIL (unexpected), 0 FAIL (expected), so the suite reports FAIL
+- Suite: 37 tests, 37 PASS, so the suite reports PASS
 - Target level: 2
 
 The analysis of every failure of the level 2 run, and the repair of each gap, is in [`results.md`](results.md#the-model-gaps).
@@ -342,9 +342,9 @@ A verdict belongs to the test. Where a test fails at a later observation and the
 | [RFC4861-AR-1](../../standard/rfc4861/catalog.md#rfc4861-ar-1) | selected | [On-link neighbor reached directly](../../protocol/nd/checks/on-link.md#on-link-neighbor-reached-directly) | `Rfc4861OnLinkNeighbor` | PASS | — |
 | [RFC4861-AR-2](../../standard/rfc4861/catalog.md#rfc4861-ar-2) | covered | [Neighbor Solicitation and Advertisement fields](../../protocol/nd/checks/address-resolution.md#neighbor-solicitation-and-advertisement-fields) | `Rfc4861NsNaFields` | PASS | — |
 | [RFC4861-AR-3](../../standard/rfc4861/catalog.md#rfc4861-ar-3) | later | — | — | — | level 4: state inside the node |
-| [RFC4861-AR-4](../../standard/rfc4861/catalog.md#rfc4861-ar-4) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | FAIL | fails: [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
+| [RFC4861-AR-4](../../standard/rfc4861/catalog.md#rfc4861-ar-4) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | PASS | repaired, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC4861-AR-5](../../standard/rfc4861/catalog.md#rfc4861-ar-5) | owed | — | — | — | a later level 2 pass: an address with an interface identifier of its own, which has its own solicited-node group, and the removal of an address |
-| [RFC4861-AR-6](../../standard/rfc4861/catalog.md#rfc4861-ar-6) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | FAIL | fails: [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
+| [RFC4861-AR-6](../../standard/rfc4861/catalog.md#rfc4861-ar-6) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | PASS | repaired, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC4861-AR-7](../../standard/rfc4861/catalog.md#rfc4861-ar-7) | owed | — | — | — | a later level 2 pass: an address with an interface identifier of its own, which has its own solicited-node group, and the removal of an address |
 | [RFC4861-AR-8](../../standard/rfc4861/catalog.md#rfc4861-ar-8) | selected | [Address resolution of a host](../../protocol/nd/checks/address-resolution.md#address-resolution-of-a-host) | `Rfc4861AddressResolutionHost` | PASS | — |
 | [RFC4861-AR-9](../../standard/rfc4861/catalog.md#rfc4861-ar-9) | selected | [Address resolution of a host](../../protocol/nd/checks/address-resolution.md#address-resolution-of-a-host) | `Rfc4861AddressResolutionHost` | PASS | — |
@@ -479,12 +479,12 @@ A verdict belongs to the test. Where a test fails at a later observation and the
 | [RFC4862-DAD-8](../../standard/rfc4862/catalog.md#rfc4862-dad-8) | later | — | — | — | level 3: needs a crafted message |
 | [RFC4862-DAD-9](../../standard/rfc4862/catalog.md#rfc4862-dad-9) | selected | [Link-local address and its Duplicate Address Detection](../../protocol/nd/checks/autoconfiguration.md#link-local-address-and-its-duplicate-address-detection) | `Rfc4862LinkLocalDad` | PASS | — |
 | [RFC4862-DAD-10](../../standard/rfc4862/catalog.md#rfc4862-dad-10) | later | — | — | — | level 3: needs a crafted message |
-| [RFC4862-DAD-11](../../standard/rfc4862/catalog.md#rfc4862-dad-11) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | FAIL | fails: [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
+| [RFC4862-DAD-11](../../standard/rfc4862/catalog.md#rfc4862-dad-11) | selected | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | PASS | repaired, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC4862-DAD-12](../../standard/rfc4862/catalog.md#rfc4862-dad-12) | selected | [Link-local address and its Duplicate Address Detection](../../protocol/nd/checks/autoconfiguration.md#link-local-address-and-its-duplicate-address-detection) | `Rfc4862LinkLocalDad` | PASS | — |
 | [RFC4862-DAD-13](../../standard/rfc4862/catalog.md#rfc4862-dad-13) | selected | [Link-local address and its Duplicate Address Detection](../../protocol/nd/checks/autoconfiguration.md#link-local-address-and-its-duplicate-address-detection) | `Rfc4862LinkLocalDad` | PASS | — |
 | [RFC4862-DAD-14](../../standard/rfc4862/catalog.md#rfc4862-dad-14) | later | — | — | — | level 4: a statistical test of the random delay; a check above tests the bound where one exists |
 | [RFC4862-DAD-15](../../standard/rfc4862/catalog.md#rfc4862-dad-15) | later | — | — | — | level 4: a statistical test of the random delay; a check above tests the bound where one exists |
-| [RFC4862-DAD-16](../../standard/rfc4862/catalog.md#rfc4862-dad-16) | covered | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | FAIL | not reached: [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) keeps the test from the observation |
+| [RFC4862-DAD-16](../../standard/rfc4862/catalog.md#rfc4862-dad-16) | covered | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | `Rfc4862GroupsBeforeDad` | PASS | repaired, [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC4862-DAD-17](../../standard/rfc4862/catalog.md#rfc4862-dad-17) | owed | — | — | — | a later level 2 pass: two nodes that test one address at the same time, or a node that sees its own solicitation, and a duplicate global address |
 | [RFC4862-DAD-18](../../standard/rfc4862/catalog.md#rfc4862-dad-18) | covered | [Address resolution of a host](../../protocol/nd/checks/address-resolution.md#address-resolution-of-a-host) | `Rfc4861AddressResolutionHost` | PASS | — |
 | [RFC4862-DAD-19](../../standard/rfc4862/catalog.md#rfc4862-dad-19) | owed | — | — | — | a later level 2 pass: two nodes that test one address at the same time, or a node that sees its own solicitation, and a duplicate global address |
@@ -587,7 +587,7 @@ The rule of the guide, per feature: `supported` when every core check ran and pa
 | --- | --- | --- | --- |
 | [ND-F-MESSAGE-FORMAT](../../protocol/nd/features.md#nd-f-message-format) | mandatory | supported | — |
 | [ND-F-OPTIONS](../../protocol/nd/features.md#nd-f-options) | mandatory | supported | — |
-| [ND-F-MULTICAST-GROUPS](../../protocol/nd/features.md#nd-f-multicast-groups) | mandatory | partial | RFC4861-AR-4 fails ([gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation)); RFC4861-AR-5 is `owed`; RFC4861-HOST-8 is `later` |
+| [ND-F-MULTICAST-GROUPS](../../protocol/nd/features.md#nd-f-multicast-groups) | mandatory | partial | RFC4861-AR-5 is `owed`; RFC4861-HOST-8 is `later`; RFC4861-AR-4 passes since the repair of [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [ND-F-ROUTER-SOLICITATION](../../protocol/nd/features.md#nd-f-router-solicitation) | optional | partial | RFC4861-HOST-47 is `later` |
 | [ND-F-ROUTER-ADVERTISEMENT](../../protocol/nd/features.md#nd-f-router-advertisement) | mandatory | partial | RFC4861-ADV-1 is `owed` |
 | [ND-F-ADVERTISEMENT-TIMING](../../protocol/nd/features.md#nd-f-advertisement-timing) | mandatory | supported | — |
@@ -604,7 +604,7 @@ The rule of the guide, per feature: `supported` when every core check ran and pa
 | [ND-F-ROUTER-ROLE-CHANGE](../../protocol/nd/features.md#nd-f-router-role-change) | optional | untested | RFC4861-ADV-25, ADV-27, ADV-28 are `owed` |
 | [ND-F-ROUTER-CONSISTENCY](../../protocol/nd/features.md#nd-f-router-consistency) | optional | untested | RFC4861-ADV-42, ADV-43 are `owed` |
 | [ND-F-LINK-LOCAL-ADDRESS](../../protocol/nd/features.md#nd-f-link-local-address) | mandatory | partial | RFC4862-LL-7 is `later` |
-| [ND-F-DUPLICATE-ADDRESS-DETECTION](../../protocol/nd/features.md#nd-f-duplicate-address-detection) | mandatory | partial | RFC4862-DAD-11 fails ([gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation)); RFC4862-DAD-20, DAD-21 are `owed` |
+| [ND-F-DUPLICATE-ADDRESS-DETECTION](../../protocol/nd/features.md#nd-f-duplicate-address-detection) | mandatory | partial | RFC4862-DAD-20, DAD-21 are `owed`; RFC4862-DAD-11 passes since the repair of [gap 9](results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [ND-F-STATELESS-AUTOCONFIGURATION](../../protocol/nd/features.md#nd-f-stateless-autoconfiguration) | mandatory | partial | RFC4862-GLOB-12, GLOB-13, GLOB-15 are `owed`; RFC4862-GLOB-6, GLOB-7, GLOB-9 are `later` |
 | [ND-F-ADDRESS-LIFETIME](../../protocol/nd/features.md#nd-f-address-lifetime) | mandatory | partial | RFC4862-GLOB-16, GLOB-18 are `owed`; RFC4862-GLOB-24 is `later` |
 | [ND-F-NO-FRAGMENTATION](../../protocol/nd/features.md#nd-f-no-fragmentation) | mandatory | partial | RFC6980-FRAG-2, FRAG-3, FRAG-4, FRAG-5, FRAG-6 are `later` |
