@@ -159,10 +159,6 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_NETWORK_LAYER; }
     virtual void handleStartOperation(LifecycleOperation *operation) override {}
     virtual void handleStopOperation(LifecycleOperation *operation) override;
-    // the Reports and Dones that wait for a tested link-local address of their interface
-    std::map<int, std::vector<Packet *>> heldMessages;
-    virtual void sendHeldMessages(NetworkInterface *ie);
-    virtual void deleteHeldMessages(int interfaceId);
     // the interfaces that sent a Report or a Done from the unspecified address, before their
     // link-local address was valid; each reports its groups again once it is
     std::set<int> interfacesReportedFromUnspecifiedAddress;
