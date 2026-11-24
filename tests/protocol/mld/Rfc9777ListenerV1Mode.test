@@ -7,8 +7,8 @@ NODE-20, NODE-22 from
 doc/project/evidence/standard/rfc9777/catalog.md and
 doc/project/evidence/standard/rfc2710/catalog.md. The English procedure is in
 doc/project/evidence/protocol/mld/checks/compatibility.md#listener-in-mldv1-mode;
-the program steps below map onto its expected observations. The guard is observation 5; steps 1
-and 2 are observations 1 and 2, and steps 3 and 4 observation 4. Observation 3 is in
+the program steps below map onto its expected observations. The first guard records the MLDv1
+Queries that A receives, and the second guard is observation 5; steps 1 and 2 are observations 1 and 2, and steps 3 and 4 observation 4. Observation 3 is in
 Rfc9777ListenerV1ModeRepeat.test.
 
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777
@@ -53,14 +53,22 @@ static std::set<Ipv6Address> querySourceSet(const Packet *p)
 }
 static bool isFwd(const Packet *p, const Ipv6Address& s) { return isDatagram(p, s, G); }
 static simtime_t tq;
+// A is in MLDv1 mode from the first MLDv1 Query that it receives (RFC 9777 section 8.2.1).
+static bool v1QueryHeard;
 
 Define_ProtocolTestProgram()
 {
+    v1QueryHeard = false;
     return ProtocolTest("rfc9777_listener_v1_mode")
-        // Expected observation 5: no Version 2 Report of A.
+        // The first MLDv1 Query that A receives; the recorder never matches.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterEvent([](const MatchContext& c) { if (isV1Query(c.event.packet)) v1QueryHeard = true; return false; })
+                  .describe("a recorder of the MLDv1 Queries that A receives; it never matches")
+                  .within(200.0)))
+        // Expected observation 5: no Version 2 Report of A after it receives the first MLDv1 Query.
         .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
-                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; (void)p; return isV2Report(p); })
-                  .describe("a Version 2 Report of A (RFC9777-COMPL-9)")
+                  .filterEvent([](const MatchContext& c) { return v1QueryHeard && isV2Report(c.event.packet); })
+                  .describe("a Version 2 Report of A after its first MLDv1 Query (RFC9777-COMPL-9)")
                   .within(200.0)))
         // Expected observation 1: an MLDv1 Query of R.
         .once(on("router.eth[0].mac").signal("packetSentToLower")

@@ -86,7 +86,7 @@ The checks use the defaults of RFC 9777 §9:
 | --- | --- | --- |
 | [Multicast Listener Report encapsulation](checks/message-format.md#multicast-listener-report-encapsulation) | `checks/message-format.md` | RFC9777-GEN-1, GEN-6, REP-2, REP-4, REP-7, REP-40, GEN-2, GEN-3, REP-15, REP-34, REP-19; covers RFC9777-REP-1, REP-5, REP-8, REP-11, REP-13, REP-14, REP-10) |
 | [Multicast Listener Query encapsulation](checks/message-format.md#multicast-listener-query-encapsulation) | `checks/message-format.md` | RFC9777-GEN-5, QRY-2, QRY-4, QRY-7, QRY-8, QRY-10, QRY-13, QRY-15, QRY-17, QRY-23, QRY-28, TIMER-5, VER-1, QRY-22, QRY-26, RQRY-10; covers RFC9777-QRY-1, QRY-5, QRY-19 |
-| [Router Alert on every message](checks/message-format.md#router-alert-on-every-message) | `checks/message-format.md` | RFC9777-GEN-4; covers RFC9777-GEN-2, GEN-3 |
+| [Router Alert on every message](checks/message-format.md#router-alert-on-every-message) | `checks/message-format.md` | RFC9777-GEN-4; covers RFC9777-GEN-2, GEN-3, REP-34 |
 | [Timer relations in the Query](checks/message-format.md#timer-relations-in-the-query) | `checks/message-format.md` | RFC9777-TIMER-3; should not), TIMER-6), TIMER-20; covers RFC9777-TIMER-2 |
 | [Start of listening reported at once](checks/listener-reports.md#start-of-listening-reported-at-once) | `checks/listener-reports.md` | RFC9777-LSN-3, LSN-5, LSN-6, LSN-10, REP-9, REP-11, REP-12, REP-25, REP-27, LSN-23); covers RFC9777-LSN-1, LSN-2, LSN-7, RQ-10 |
 | [Start of listening repeated](checks/listener-reports.md#start-of-listening-repeated) | `checks/listener-reports.md` | RFC9777-LSN-13, LSN-18, TIMER-15, LTIM-12), LTIM-16); covers RFC9777-LSN-19, LTIM-13, TIMER-2 |

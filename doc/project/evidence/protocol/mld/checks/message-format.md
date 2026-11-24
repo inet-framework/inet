@@ -63,11 +63,11 @@ RFC 9777 §5.1 and §9: a General Query of MLDv2 has type 130, is at least 28 oc
 
 ## Router Alert on every message
 
-Checks: **RFC9777-GEN-4** (must); covers **RFC9777-GEN-2**, **GEN-3** (must).
+Checks: **RFC9777-GEN-4** (must); covers **RFC9777-GEN-2**, **GEN-3**, **REP-34** (must).
 
 ### Requirement
 
-RFC 9777 §5: every MLDv2 message is sent from a link-local address, with Hop Limit 1 and an IPv6 Router Alert option in a Hop-by-Hop Options header.
+RFC 9777 §5: every MLDv2 message is sent from a link-local address, with Hop Limit 1 and an IPv6 Router Alert option in a Hop-by-Hop Options header. A Report can leave from the unspecified address while the interface has no valid link-local address yet (§5, §5.2.14).
 
 ### Scenario constants
 
@@ -84,7 +84,7 @@ RFC 9777 §5: every MLDv2 message is sent from a link-local address, with Hop Li
 
 1. On L1, from A, a Report, and from R, a Query. This confirms the stimulus.
 2. Every MLD message on L1 carries a Hop-by-Hop Options header with a Router Alert option (RFC9777-GEN-4).
-3. Every MLD message on L1 has Hop Limit 1 and a link-local source address (RFC9777-GEN-2, GEN-3).
+3. Every MLD message on L1 has Hop Limit 1 and a link-local source address, except a Report that leaves before the link-local address of its sender is valid, which can leave from the unspecified address (RFC9777-GEN-2, GEN-3, REP-34). The link-local address of a sender is valid from its first MLD message from that address on.
 
 ## Timer relations in the Query
 
