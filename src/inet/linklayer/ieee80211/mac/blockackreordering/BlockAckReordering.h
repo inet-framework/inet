@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (ordered receive-window release interface)
+//
 
 
 #ifndef __INET_BLOCKACKREORDERING_H

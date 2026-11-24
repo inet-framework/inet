@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (frame preview and adoption of prepared frames)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"

@@ -4,6 +4,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (HT management elements and DSSS channel advertisement)
+//
 
 //
 // Required for MacAddress declarations

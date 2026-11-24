@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack agreement lifecycle and negotiation interfaces)
+//
 
 
 #ifndef __INET_ORIGINATORBLOCKACKAGREEMENTHANDLER_H

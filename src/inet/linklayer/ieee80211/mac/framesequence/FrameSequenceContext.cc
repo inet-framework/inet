@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack context and frame-sequence completion on transmit refusal)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"

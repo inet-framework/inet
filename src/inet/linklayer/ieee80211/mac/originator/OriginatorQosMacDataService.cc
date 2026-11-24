@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (QoS data preparation and selective extraction)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"

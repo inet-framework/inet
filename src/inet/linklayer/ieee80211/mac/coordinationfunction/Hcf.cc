@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack, TXOP protection, and QoS recovery)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

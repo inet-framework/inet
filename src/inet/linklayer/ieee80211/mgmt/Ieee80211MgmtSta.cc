@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (station association and HT negotiation)
+//
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"

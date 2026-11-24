@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack action dispatch and reordered QoS data delivery)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"

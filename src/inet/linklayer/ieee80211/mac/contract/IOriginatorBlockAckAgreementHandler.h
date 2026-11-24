@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack setup and teardown state and interfaces)
+//
 
 
 #ifndef __INET_IORIGINATORBLOCKACKAGREEMENTHANDLER_H

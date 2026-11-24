@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (operational HT capability, rate, and timing interfaces)
+//
 
 
 #ifndef __INET_IEEE80211MODESET_H

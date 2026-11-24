@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Compressed Block Ack receipt state and agreement lifecycle)
+//
 
 
 #ifndef __INET_RECIPIENTBLOCKACKAGREEMENT_H

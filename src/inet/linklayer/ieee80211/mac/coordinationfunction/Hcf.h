@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack, TXOP protection, and QoS data lifetime interfaces)
+//
 
 
 #ifndef __INET_HCF_H

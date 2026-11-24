@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (filters for terminal frame transmission outcomes)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/common/ResultFilters.h"

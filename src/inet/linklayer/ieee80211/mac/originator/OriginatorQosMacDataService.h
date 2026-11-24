@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (QoS data preview, preparation, and selective extraction interfaces)
+//
 
 
 #ifndef __INET_ORIGINATORQOSMACDATASERVICE_H

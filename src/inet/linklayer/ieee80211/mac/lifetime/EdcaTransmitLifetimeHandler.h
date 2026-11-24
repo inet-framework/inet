@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (QoS data lifetime state and interfaces)
+//
 
 
 #ifndef __INET_EDCATRANSMITLIFETIMEHANDLER_H

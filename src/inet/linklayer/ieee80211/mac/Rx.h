@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (local interframe timing and TXOP reservation interfaces)
+//
 
 
 #ifndef __INET_RX_H

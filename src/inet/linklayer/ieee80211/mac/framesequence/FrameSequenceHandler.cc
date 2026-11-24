@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (frame-sequence startup, interruption, and transmit refusal handling)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"

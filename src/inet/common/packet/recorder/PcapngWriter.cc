@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (capture length limits, per-link-type interfaces, and interface numbering across files)
+//
 
 
 #include "inet/common/packet/recorder/PcapngWriter.h"

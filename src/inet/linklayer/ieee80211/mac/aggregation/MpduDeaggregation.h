@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (bounded A-MPDU subframe traversal interface)
+//
 
 
 #ifndef __INET_MPDUDEAGGREGATION_H

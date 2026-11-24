@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (local interframe timing and TXOP reservation state)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/Rx.h"

@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (association, HT capability, and operational rate state)
+//
 
 
 #ifndef __INET_IEEE80211MIB_H

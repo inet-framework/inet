@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (transmit window operations and fragment allocation order)
+//
 
 
 #ifndef __INET_ORIGINATORBLOCKACKAGREEMENT_H

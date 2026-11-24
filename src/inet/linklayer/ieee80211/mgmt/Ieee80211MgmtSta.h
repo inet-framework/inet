@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (station association transactions and HT negotiation state)
+//
 
 
 #ifndef __INET_IEEE80211MGMTSTA_H

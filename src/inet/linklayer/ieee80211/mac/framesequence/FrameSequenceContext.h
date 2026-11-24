@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Block Ack context and frame-sequence completion interfaces)
+//
 
 
 #ifndef __INET_FRAMESEQUENCECONTEXT_H
