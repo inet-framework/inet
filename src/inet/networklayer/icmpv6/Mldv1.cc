@@ -551,7 +551,8 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     // section 3, RFC 9777 section 5)
     msg->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(createIpv6RouterAlertHeader(IPv6_ROUTER_ALERT_MLD));
     // every MLD message from a link-local address (RFC 2710 section 3, RFC 9777 section 5). While
-    // the interface has no tested one, a Query is not sent, and a Report or a Done waits for it
+    // the interface has no valid one, a Query is not sent, and a Report or a Done leaves from the
+    // unspecified address (RFC 3590 section 4)
     if (hasValidLinkLocalAddress(ie))
         msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
     else if (msg->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLD_QUERY) {
@@ -560,11 +561,8 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
         return;
     }
     else {
-        // RFC 3810 section 5.2.13 sends it from the unspecified address, which the IPv6 layer of
-        // the model replaces with its preferred address; so it waits for the link-local address
-        EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet, holding the message.\n";
-        heldMessages[ie->getInterfaceId()].push_back(msg);
-        return;
+        EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet, sending from the unspecified address.\n";
+        interfacesReportedFromUnspecifiedAddress.insert(ie->getInterfaceId());
     }
     send(msg, "ipOut");
 }

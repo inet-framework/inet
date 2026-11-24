@@ -1,0 +1,3 @@
+An MLD Report leaves before the link-local address is tested
+
+An MLDv1 node held every Report and Done until Duplicate Address Detection had tested its link-local address, and sent them from that address. So the Report for the solicited-node group of a tentative address left after the Neighbor Solicitation of the detection, but RFC 4862 section 5.4.2 joins the group before the solicitation. The node now sends such a Report or Done from the unspecified address (RFC 3590 section 4), and once its link-local address is valid, it sends a new Report for each group. A router or a host discards a Report or a Done from the unspecified address.
