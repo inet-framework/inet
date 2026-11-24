@@ -1,0 +1,7 @@
+QUIC closes a connection on an unknown frame type, pads the Initial datagram of a server, and reads complete STREAM payloads
+
+A frame of a type that the model does not know threw a cRuntimeError, so a peer could stop a run with one frame. RFC 9000 section 12.4 makes it a connection error of type FRAME_ENCODING_ERROR, and the model now sends CONNECTION_CLOSE with that code. The frame and packet loops stop when a connection error occurs. A server now expands a datagram that carries an ack-eliciting Initial packet to at least 1200 octets, as RFC 9000 section 14.1 requires; the client always did this. The results of the QUIC examples and showcases change.
+
+The QUIC receiver consumed only the first chunk of a STREAM payload and read the next chunk as a frame header, which stopped the run with a conversion error. It now consumes the declared byte count. The receive callbacks of quicapp now account for the complete payload, so the bytesReceived statistic of the applications that receive composite payloads changes.
+
+The STREAM payload fix was contributed by Miguel González-López.

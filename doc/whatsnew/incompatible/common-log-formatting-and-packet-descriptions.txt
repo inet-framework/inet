@@ -1,0 +1,7 @@
+An option for the formatting of the log, and shorter packet descriptions
+
+The new per-run configuration option inet-log-formatting selects whether the log output of INET and the printed objects contain ANSI escape sequences for bold, faint and colored text. The values are true, false and auto (write them without quotes), and the default is auto. With auto, the sequences appear in graphical user interfaces, and elsewhere only when the standard output is a terminal and cmdenv-redirect-output is off. Before, the sequences were always on. The columns of PacketPrinter obey the option too.
+
+So the Cmdenv output that goes to a file or to a pipe is now plain text. A script that needs the escape sequences in such output must set inet-log-formatting = true. Fingerprints do not change.
+
+Packet::str() now describes the data of the packet: its length, the short class names of at most five chunks, and the popped lengths, for example "100 B: ApplicationPacket  (19 B header popped from 119 B packet)". Before, it gave "(100 B) (inet::SequenceChunk) length = 119 B". A log line that prints a packet with EV << packet therefore changes. The Qtenv inspectors of Packet and Chunk have new labels and groups, and a SequenceChunk opens in the children mode. The field names do not change, so packet filter expressions work as before.

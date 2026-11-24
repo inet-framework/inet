@@ -1,0 +1,17 @@
+IPv4, IPv6, ICMP, ARP and UDP follow the RFCs more closely
+
+A peer can no longer stop a simulation with one packet. An ICMP or ICMPv6 message of an unknown type is now discarded with a packetDropped signal, as RFC 1122 section 3.2.2 and RFC 4443 section 2.4(b) require; before, it threw "Unknown ICMP type". Icmpv6 drops an error report about a protocol that nothing on the node registered, as Icmp does for IPv4; before, the MessageDispatcher stopped the run. Arp discards a packet with an operation that the model does not implement, or with a hardware or protocol space other than Ethernet and IPv4, as RFC 826 states; the two RARP operations still throw, because INET does not implement RARP.
+
+Icmp and Icmpv6 no longer report an error about a datagram that arrived in a link-layer broadcast or multicast frame, as RFC 1122 section 3.2.2 and RFC 4443 section 2.4(e) require. They read the MacAddressInd tag of the frame for this. Such simulations send fewer ICMP messages.
+
+Ipv4 now drops each datagram whose header checksum is wrong, as RFC 1122 section 3.2.1.2 requires; before, it dropped it only when the header was also incorrect. The IPv4 reassembly key has the protocol, as RFC 791 states, so fragments of two datagrams with the same identification but with different protocols no longer reassemble into one datagram.
+
+IPv6 fills in three length fields that it left wrong. A Packet Too Big message carries the MTU of the outgoing interface, as RFC 4443 section 3.2 requires; before, it carried 0. Each fragment of a fragmented datagram carries its own Payload Length; before, it carried that of the whole datagram. Reassembly writes the Payload Length of the reassembled datagram, as RFC 8200 section 3 requires; before, a reassembled datagram was cut silently to the length of its first fragment, or the run stopped, and an atomic fragment also stopped the run.
+
+When an interface goes down or loses its carrier, Ipv6RoutingTable now keeps the static (MANUAL) and the own advertised prefix (OWN_ADV_PREFIX) routes of the interface aside, and adds them again when the interface is up with a carrier. Before, it deleted them for good, so after a link failure a router had no route to the network of that link.
+
+PacketDropReason has the new value PACKET_TOO_BIG, with the result filter packetDropReasonIsPacketTooBig, for a datagram that is larger than the MTU of the next link and may not be fragmented. Ipv4 and Mpls report it for a datagram with the Don't Fragment flag; before, they reported OTHER_PACKET_DROP. Ipv4 records the new statistic packetDropPacketTooBig, and its packetDropUndefined no longer counts these drops, for example in examples/inet/tcp_pmtud and examples/quic/dplpmtud. A PacketDropVisualizer label that shows the reason now shows 16 or PACKET_TOO_BIG.
+
+The Udp module emitted packetReceivedFromLower twice for each received datagram. It now emits the signal once, as the other protocol modules do. No statistic changes, but a listener of the signal now gets the correct count.
+
+These corrections change the packets on the wire, the trajectories and the fingerprints of the affected simulations.

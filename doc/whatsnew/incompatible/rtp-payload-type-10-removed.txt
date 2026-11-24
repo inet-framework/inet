@@ -1,0 +1,3 @@
+The RTP modules for payload type 10 and sample-based audio are removed
+
+The NED types RTPAVProfilePayload10Sender, RTPAVProfilePayload10Receiver, RTPAVProfileSampleBasedAudioSender and RTPAVProfileSampleBasedAudioReceiver are removed. They never compiled, and RtpProfile could not find them, so a session with payload type 10 never worked. A NED file that names one of them now fails at load. The examples use payload type 32.

@@ -1,0 +1,13 @@
+IEEE 802.11 rates for each receiver, and the rate state of the MIB
+
+IEEE 802.11 rate control now selects and adapts the transmission rate separately for each peer. Before, a rate control kept one adaptive state for the module, so the feedback of all peers gave one rate. The getRate() method of the IRateControl C++ interface, which AarfRateControl and OnoeRateControl implement, therefore takes the MAC address of the receiver. A rate control outside INET does not compile until its getRate() takes the new argument; a model that only configures a rate control is not affected. Group-addressed frames, which get no acknowledgement and therefore no feedback, now take a mandatory rate.
+
+RateSelection and QosRateSelection have the new parameter dataFrameBitratePerReceiver, a map from the module path of a peer interface to a bitrate, which gives the rate of the unicast data frames for each peer. It is empty by default. The datarateChanged signal of the rate controls now carries the name of the receiving station, and the new statistic dataratePerStation records one data rate vector for each peer; the datarateSelected signal of Dcf and Hcf carries it too. The aggregate datarateChanged statistic records other values now: the rate control reports no rate when the mode set changes, and it reports one when it first sees a station.
+
+The Management Information Base (MIB) now stores the supported, basic and operational rate sets of the local station, of the BSS and of each peer, and a rate set can be unknown or a known empty set. Full and simplified management fill these records from the advertisements and the accepted associations, and they clear them at a departure, at the loss of an association and at a stop. The new signal rateStateChanged reports a committed change of a rate, of the HT capabilities or of the channel operation; a listener queries the MIB for the new state. The MIB commits related changes together, before one notification, and management rejects rates that are not finite numbers. The built-in rate selectors keep their behavior.
+
+Ieee80211Mac has the new signal frameTransmissionOutcome and the new statistics frameTransmissionOutcome, frameAcked, frameRetryLimitReached and frameDroppedBeforeTx. DCF and HCF emit the signal for a management frame when it is acknowledged, when it reaches the retry limit, or when it is dropped from the queue. The results of each IEEE 802.11 simulation have these statistics.
+
+These changes can change the statistical results of simulations with an adaptive rate control, where a station sends to several peers or sends group-addressed traffic. See the migration guide for the MIB.
+
+The rate state of the MIB and the frame outcome statistics were contributed by Miguel González-López.

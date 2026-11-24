@@ -1,0 +1,11 @@
+The request of the generic TCP applications is a region tag
+
+GenericAppMsg is removed. TcpBasicClientApp, TelnetApp, TcpGenericServerApp and TcpGenericServerThread now send an opaque payload of the requested length, and they attach the request to it as the region tag GenericAppMsgReq, with the fields requestLength, expectedReplyLength, replyDelay and serverClose. Before, the request was a serialized chunk of 17 bytes at the start of the data.
+
+A request can therefore be shorter than 17 bytes, for example a TelnetApp keystroke of 1 byte. The false header bytes are no longer on the wire, so the packet data fingerprints (~tND) of these applications change. A transport that does not carry region tags, for example an emulated network interface, also does not carry the request, and TcpGenericServerApp then stops with an error.
+
+This change requires the modification of C++ code that creates or reads GenericAppMsg: use the GenericAppMsgReq tag instead. GenericAppMsgSerializer is removed.
+
+TcpLwip now supports the node lifecycle. A shutdown, a crash or a restart deletes its connections and creates the lwIP stack again; before, each of these operations stopped the simulation. TcpLwip also carries region tags, for example the creation time tag of the end-to-end delay statistics and GenericAppMsgReq, between two simulated endpoints. Emulation still loses them.
+
+The sendScript of TcpSessionApp accepts the new keyword eor, which ends a record (MSG_EOR). The new parameter packetData fills the sent data with one byte value in the "bytecount" and "bytestream" modes.

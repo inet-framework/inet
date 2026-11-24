@@ -1,0 +1,25 @@
+The tests and the Python tools of INET run with opp_repl
+
+The Python package in python/inet no longer has its own copy of the simulation and test framework of opp_repl, and bin/ no longer has the tools that used it. Use the commands of opp_repl, as the GitHub workflows do. Install opp_repl with pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git" (the GitHub workflows use its branch github_ci). Each tool has an opp_repl command that takes its place directly, so there are no aliases:
+
+  inet_run_<kind>_tests            -> opp_run_<kind>_tests, for all, chart, feature, module, packet, protocol,
+                                      queueing, release, sanitizer, smoke, speed, statistical, unit and validation
+  inet_run_simulations             -> opp_run_simulations
+  inet_build_project               -> opp_build_project
+  inet_python_repl                 -> opp_repl
+  inet_run_self_tests              -> opp_repl_self_test
+  inet_diffcharts                  -> opp_diff_charts
+  inet_run_fingerprint_tests       -> opp_run_fingerprint_tests
+  inet_update_correct_fingerprints -> opp_update_fingerprint_test_results
+
+The new project description inet.opp at the root of the repository tells the opp_repl commands how to build and test INET, and the commands find it by themselves. It also pins one commit of each repository that holds the statistical baselines (inet-framework/statistics) and the chart baselines (inet-framework/media). opp_checkout_test_baselines checks out the pinned commits into the folders statistics and media.
+
+The fingerprint baseline is now only tests/fingerprint/store.json, and opp_run_fingerprint_tests checks it. The CSV files tests/fingerprint/*.csv, the fingerprinttest script with bin/inet_fingerprinttest, and the smoke test script with bin/inet_smoketest are removed. The store holds all former CSV fingerprints, and also the run-0 fingerprints of the ingredients tplx, ~tNl and ~tND of each concrete configuration that runs without user input. The CI checks these three ingredients, as before:
+
+  ./fingerprinttest -m <regex>                -> opp_run_fingerprint_tests -f <regex>
+  ./fingerprinttest -f tplx                   -> opp_run_fingerprint_tests --ingredients tplx
+  ./fingerprinttest -a <opp_run arguments>    -> opp_run_fingerprint_tests --append-args <opp_run arguments>
+  ./fingerprinttest -n 4 -i 0                 -> opp_run_fingerprint_tests --split-count 4 --split-index 0
+  mv examples.csv.UPDATED examples.csv        -> opp_update_fingerprint_test_results -f <regex>
+
+The new bin/inet_run_serializer_tests runs opp_run_opp_tests in tests/serializer. The Python package keeps inet.scave, which the chart scripts import, inet.test.validation, which opp_run_validation_tests calls, and inet.test.core4inet, the reference delays of Core4INET. A Python program that imported inet.common, inet.simulation, inet.project or another test module imports from opp_repl now. inet.documentation and python/requirements.txt are removed too: doc/src/build builds the documentation, and doc/src/build --serve also serves it at http://localhost:8000/. See the migration guide.

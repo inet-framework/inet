@@ -1,0 +1,13 @@
+MPLS: Ethernet links, the reserved labels, fragmentation and the TTL of RFC 3032
+
+An MPLS router with an Ethernet interface no longer stops the simulation at the first ARP packet: a packet of another protocol than MPLS and IPv4 goes to the network layer. A labeled packet goes through the Ethernet encapsulation with the EtherType 0x8847. A LIB entry holds no next hop, so the frame goes to the broadcast address of the link.
+
+An LSR now pops the label 0 (IPv4 Explicit NULL) at the bottom of the stack and forwards the datagram by its IPv4 header, and it pops the stack where a swap would give the label 3 (Implicit NULL), as RFC 3032 section 2.1 states. The LIB allocates labels from 16, after the reserved values; before, RSVP-TE and LDP got labels from 1.
+
+An LSR compares the length of a labeled packet with the MTU of the outgoing interface, as RFC 3032 section 3 states. It fragments an IPv4 datagram with the DF bit clear, and each fragment carries the label stack. For a datagram with the DF bit set, it sends an ICMP Destination Unreachable message whose Next-Hop MTU is the MTU minus the label stack. The new Mpls parameter icmpModule names the ICMP module.
+
+The TTL follows RFC 3032 section 2.4 and the Uniform Model of RFC 3443. A pushed label stack entry copies the TTL of the entry below it, or of the IPv4 header; before, the TTL of each entry was 0. Each LSR decrements the TTL, a pop that empties the stack writes the TTL into the IPv4 header, and an LSR discards a labeled packet whose outgoing TTL is zero, with a packetDropped signal.
+
+The peers parameter of RsvpTe, MplsRouterBase and LinkStateRouting is now "auto" by default: the peers are the directly connected neighbours that run RSVP-TE (or link-state routing), found in the TED. A list of interface names works as before. A simulation that leaves peers unset sent no RSVP-TE hellos before, and it sends them to each neighbour now; for example, the LSP of examples/mpls/net37 is now signaled.
+
+These corrections change the trajectories and the fingerprints of MPLS simulations.

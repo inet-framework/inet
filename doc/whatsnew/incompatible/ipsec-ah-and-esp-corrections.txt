@@ -1,4 +1,4 @@
-IPsec corrections to the AH and ESP packets
+IPsec: the AH and ESP packets of the RFCs, and more of RFC 4301
 
 The first packet of an SA now carries the Sequence Number 1, as RFC 4302 and RFC 4303 state; before, it carried 0. The C++ method SecurityAssociation::getAndIncSeqNum() is now incrementAndGetSeqNum(), and returns the incremented value.
 
@@ -16,4 +16,4 @@ An SA can now have a hard lifetime (RFC 4301 section 4.4.2.1): the new elements 
 
 An SA can now have a set of DSCP values, the new DSCP element of a SecurityAssociation (RFC 4301 section 4.4.2.1). Of the SAs of one policy, the sender uses the first whose set holds the DSCP of the packet, so that classes of traffic can have SAs of their own. Before, the first matching SA carried every packet.
 
-An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with the new DummyPacketInterval element of a SecurityAssociation: ESP packets with Next Header 59 and an empty payload, to the peer of the last packet that the SA protected. The receiver discards them without an error. For this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and IPv6 network layers connect to their dispatcher.
+An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with the new DummyPacketInterval element of a SecurityAssociation: ESP packets with Next Header 59 and an empty payload, to the peer of the last packet that the SA protected. The receiver discards them without an error. For this, the IPsec module has the new output gate ipOut, which the IPv4 and IPv6 network layers connect to their dispatcher; its new input gate ipIn is not used.
