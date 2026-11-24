@@ -94,6 +94,7 @@ The checks use the defaults of RFC 9777 §9:
 | [Source list change](checks/listener-reports.md#source-list-change) | `checks/listener-reports.md` | RFC9777-LSN-8, LSN-12, LTIM-19, REP-30, REP-31, LSN-25, LTIM-17, LTIM-18), LTIM-14); covers RFC9777-REP-29 |
 | [Change inside EXCLUDE mode](checks/listener-reports.md#change-inside-exclude-mode) | `checks/listener-reports.md` | RFC9777-LSN-9 |
 | [A change during the repetitions](checks/listener-reports.md#a-change-during-the-repetitions) | `checks/listener-reports.md` | RFC9777-LSN-14, LSN-15, LSN-16, LSN-17, LSN-24) |
+| [A start of listening before the link-local address is tested](checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested) | `checks/listener-reports.md` | RFC9777-REP-34, REP-37, REP-39 |
 | [Response to a General Query](checks/query-response.md#response-to-a-general-query) | `checks/query-response.md` | RFC9777-LQRY-2, LQRY-4, LQRY-6, LTIM-1, LTIM-2, REP-20, REP-21, REP-22, REP-23, LTIM-5; covers RFC9777-LQRY-3), LTIM-3, RQ-9, LTIM-4) |
 | [Response to a Multicast Address Specific Query](checks/query-response.md#response-to-a-multicast-address-specific-query) | `checks/query-response.md` | RFC9777-LQRY-7, LTIM-6 |
 | [Response to a Multicast Address and Source Specific Query](checks/query-response.md#response-to-a-multicast-address-and-source-specific-query) | `checks/query-response.md` | RFC9777-LTIM-7, LTIM-8, LTIM-10; covers RFC9777-LTIM-11 |
@@ -125,7 +126,7 @@ Level 2 asks for a core check of every mandatory feature, and the checks above g
 
 **SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9777-REP-24, REP-28, RREP-2, RREP-3, COMPL-12 to COMPL-14, COMPR-10, COMPR-11.
 
-**State inside a node**, the toolset of level 4: a variable or a notation that no message shows (RFC9777-RQ-1, RQ-5, RQ-6, RREP-4, RST-10, RST-16, RST-19, RFC2710-TIMER-4), and a warning or a log entry (RFC9777-COMPR-6, COMPR-8, COMPR-9).
+**State inside a node**, the toolset of level 4: a variable or a notation that no message shows (RFC9777-RQ-1, RQ-5, RQ-6, RREP-4, RST-10, RST-16, RST-19, RFC2710-TIMER-4), and the listening state that a node keeps after a router discards its Report (RFC9777-REP-38), and a warning or a log entry (RFC9777-COMPR-6, COMPR-8, COMPR-9).
 
 **A permission that no observation can fail**: a router may forward excluded sources onto a transit link (RFC9777-FWD-2); a host may let an MLDv1 Report suppress its own Version 2 Report (RFC9777-COMPL-15).
 
@@ -134,7 +135,6 @@ Level 2 asks for a core check of every mandatory feature, and the checks above g
 - systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the querier (RFC9777-TIMER-1, QRY-14, QRY-16, RFC2710-TIMER-1);
 - a second router that hears a Query with the S flag set (RFC9777-QRY-12, RQRY-5);
 - many sources or many addresses, beyond the size of one message (RFC9777-QRY-18, REP-43 to REP-45);
-- a node that reports before it has a link-local address (RFC9777-REP-37 to REP-39);
 - a change that allows and blocks sources at once (RFC9777-REP-32), and a filter-mode change followed by a source change within the repetitions (LSN-20, LSN-21);
 - two specific Queries for one address within one Maximum Response Delay, or a Query that meets a pending response (RFC9777-LQRY-5, LQRY-8, LQRY-9, RFC2710-NODE-23), and a stop of listening in the Delaying Listener state (RFC2710-NODE-18);
 - a node that hears an MLDv1 Query for an address it does not listen to (RFC2710-NODE-5), and the scope rules of MLDv1 for reserved, node-local and link-local addresses (RFC2710-NODE-25, NODE-26);
