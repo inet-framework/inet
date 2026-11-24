@@ -251,10 +251,14 @@ void Mldv1::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             configureInterface(ie);
     }
     else if (signalID == interfaceIpv6ConfigChangedSignal) {
-        // a router interface that waited for a tested link-local address starts its querier
         ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface());
         if (hasValidLinkLocalAddress(ie))
             sendHeldMessages(ie);
+        // once a valid link-local address is available, a node SHOULD report every group that it
+        // listens to again (RFC 3590 section 4)
+        if (hasValidLinkLocalAddress(ie) && interfacesReportedFromUnspecifiedAddress.erase(ie->getInterfaceId()))
+            sendReports(ie);
+        // a router interface that waited for a tested link-local address starts its querier
         auto it = routerData.find(ie->getInterfaceId());
         if (it != routerData.end() && it->second->waitsForLinkLocalAddress && hasValidLinkLocalAddress(ie)) {
             it->second->waitsForLinkLocalAddress = false;
@@ -270,6 +274,7 @@ void Mldv1::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             deleteHostInterfaceData(interfaceId);
             deleteRouterInterfaceData(interfaceId);    // mirror Igmpv2: also free router state + General-Query timer
             deleteHeldMessages(interfaceId);
+            interfacesReportedFromUnspecifiedAddress.erase(interfaceId);
         }
     }
 }
@@ -564,6 +569,15 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     send(msg, "ipOut");
 }
 
+// a Report for each group that the node listens to on the interface
+void Mldv1::sendReports(NetworkInterface *ie)
+{
+    for (auto& elem : getHostInterfaceData(ie)->groups) {
+        sendReport(ie, elem.second);
+        elem.second->flag = true;
+    }
+}
+
 // --- Lifecycle ---
 
 void Mldv1::sendHeldMessages(NetworkInterface *ie)
@@ -591,6 +605,7 @@ void Mldv1::deleteHeldMessages(int interfaceId)
 
 void Mldv1::handleStopOperation(LifecycleOperation *operation)
 {
+    interfacesReportedFromUnspecifiedAddress.clear();
     while (!heldMessages.empty())
         deleteHeldMessages(heldMessages.begin()->first);
     // Clear per-interface host state and cancel timers. Signal subscriptions are
@@ -605,6 +620,7 @@ void Mldv1::handleStopOperation(LifecycleOperation *operation)
 
 void Mldv1::handleCrashOperation(LifecycleOperation *operation)
 {
+    interfacesReportedFromUnspecifiedAddress.clear();
     while (!heldMessages.empty())
         deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())

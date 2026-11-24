@@ -8,6 +8,7 @@
 #define __INET_MLDV1_H
 
 #include <map>
+#include <set>
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
@@ -162,6 +163,10 @@ class INET_API Mldv1 : public OperationalBase, public cListener
     std::map<int, std::vector<Packet *>> heldMessages;
     virtual void sendHeldMessages(NetworkInterface *ie);
     virtual void deleteHeldMessages(int interfaceId);
+    // the interfaces that sent a Report or a Done from the unspecified address, before their
+    // link-local address was valid; each reports its groups again once it is
+    std::set<int> interfacesReportedFromUnspecifiedAddress;
+    virtual void sendReports(NetworkInterface *ie);
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual ~Mldv1();

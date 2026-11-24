@@ -171,10 +171,14 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
     else if (signalID == interfaceIpv6ConfigChangedSignal) {
-        // a router interface that waited for a tested link-local address starts its querier
         ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface());
         if (hasValidLinkLocalAddress(ie))
             sendHeldMessages(ie);
+        // once a valid link-local address is available, a node SHOULD report every group that it
+        // listens to again (RFC 9777 section 5.2.14)
+        if (hasValidLinkLocalAddress(ie) && interfacesReportedFromUnspecifiedAddress.erase(ie->getInterfaceId()))
+            sendReports(ie);
+        // a router interface that waited for a tested link-local address starts its querier
         auto it = routerData.find(ie->getInterfaceId());
         if (it != routerData.end() && it->second->waitsForLinkLocalAddress && hasValidLinkLocalAddress(ie)) {
             RouterInterfaceData *data = it->second;
@@ -198,6 +202,7 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             deleteHostInterfaceData(interfaceId);
             deleteRouterInterfaceData(interfaceId);
             deleteHeldMessages(interfaceId);
+            interfacesReportedFromUnspecifiedAddress.erase(interfaceId);
         }
     }
 }
@@ -483,8 +488,26 @@ void Mldv2::deleteHeldMessages(int interfaceId)
     heldMessages.erase(it);
 }
 
+// a Report of every group that the node listens to on the interface: in MLDv1 mode an MLDv1
+// Report for each group, else one Current-State Report
+void Mldv2::sendReports(NetworkInterface *ie)
+{
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    if (!interfaceData->olderVersionPresent) {
+        sendCurrentStateReport(interfaceData);
+        return;
+    }
+    for (auto& elem : interfaceData->groups) {
+        if (elem.second->filter == MLDV2_FM_INCLUDE && elem.second->sourceAddressList.empty())
+            continue;
+        sendOlderVersionReport(ie, elem.second->groupAddr);
+        elem.second->lastReporter = true;
+    }
+}
+
 void Mldv2::handleStopOperation(LifecycleOperation *operation)
 {
+    interfacesReportedFromUnspecifiedAddress.clear();
     while (!heldMessages.empty())
         deleteHeldMessages(heldMessages.begin()->first);
     // Clear per-interface state and cancel timers. Signal subscriptions are NOT
@@ -499,6 +522,7 @@ void Mldv2::handleStopOperation(LifecycleOperation *operation)
 
 void Mldv2::handleCrashOperation(LifecycleOperation *operation)
 {
+    interfacesReportedFromUnspecifiedAddress.clear();
     while (!heldMessages.empty())
         deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
@@ -641,10 +665,15 @@ void Mldv2::processRexmtTimer(cMessage *msg)
 void Mldv2::processHostGeneralQueryTimer(cMessage *msg)
 {
     HostInterfaceData *interfaceData = (HostInterfaceData *)msg->getContextPointer();
+    EV_INFO << "Response timer to a General Query on interface '" << interfaceData->ie->getInterfaceName() << "' has expired.\n";
+    sendCurrentStateReport(interfaceData);
+}
+
+// a Current-State Report with a record for each group that has listening state on the interface
+void Mldv2::sendCurrentStateReport(HostInterfaceData *interfaceData)
+{
     NetworkInterface *ie = interfaceData->ie;
     ASSERT(ie);
-
-    EV_INFO << "Response timer to a General Query on interface '" << ie->getInterfaceName() << "' has expired.\n";
 
     Packet *outPacket = new Packet("Mldv2 report");
     const auto& report = makeShared<Mldv2Report>();
