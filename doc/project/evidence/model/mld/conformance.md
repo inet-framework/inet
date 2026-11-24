@@ -6,9 +6,9 @@ Step 8 artifact of the standards test workflow. Part 1 records what the model in
 
 Run record of the ledger state that part 2 comes from:
 
-- Date: 2026-11-24 13:02 +0100
-- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `be4358b879`, tree clean
-- Trees: src `eccbaa8cc5`, tests/protocol `52575bcb65`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8

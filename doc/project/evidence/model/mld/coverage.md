@@ -8,15 +8,15 @@ The single place that holds the changing state of the MLD workflow. Every other 
 
 State of the ledger, from the run after the repairs of 2026-09-25 to 2026-09-28 (the level 2 run of 2026-09-24 is in the [pass log](#pass-log)):
 
-- Date: 2026-11-24 13:02 +0100
-- INET: branch `topic/standards-tests-igmp-mld-level2-fixes`, commit `be4358b879`, tree clean
-- Trees: src `eccbaa8cc5`, tests/protocol `52575bcb65`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8
 - Platform: Ubuntu 26.04.1 LTS, in a container of the image of the CI job, Linux 7.0.0-43-generic x86_64
 - Command: `opp_run_protocol_tests -m debug -w '^tests/protocol/mld$'`
-- Suite: 47 tests, 47 PASS, so the suite reports PASS
+- Suite: 48 tests, 48 PASS, so the suite reports PASS
 - Target level: 2
 
 The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
@@ -37,10 +37,10 @@ A verdict belongs to the test. Where a test fails at a later observation and the
 
 | Status | RFC 9777 | RFC 2710 | Together |
 | --- | --- | --- | --- |
-| `selected` | 157 | 20 | 177 |
+| `selected` | 159 | 20 | 179 |
 | `covered` | 68 | 34 | 102 |
-| `owed` | 38 | 20 | 58 |
-| `later` | 42 | 7 | 49 |
+| `owed` | 35 | 20 | 55 |
+| `later` | 43 | 7 | 50 |
 | `no check` | 2 | 0 | 2 |
 | all | 307 | 81 | 388 |
 
@@ -119,12 +119,12 @@ A verdict belongs to the test. Where a test fails at a later observation and the
 | [RFC9777-REP-31](../../standard/rfc9777/catalog.md#rfc9777-rep-31) | selected | [Source list change](../../protocol/mld/checks/listener-reports.md#source-list-change) | `Rfc9777SourceListChange` | PASS | — |
 | [RFC9777-REP-32](../../standard/rfc9777/catalog.md#rfc9777-rep-32) | owed | — | — | — | a later level 2 pass: a change that allows and blocks sources at once, and a filter-mode change followed by a source change within the repetitions |
 | [RFC9777-REP-33](../../standard/rfc9777/catalog.md#rfc9777-rep-33) | later | — | — | — | level 3: needs a crafted message |
-| [RFC9777-REP-34](../../standard/rfc9777/catalog.md#rfc9777-rep-34) | selected | [Multicast Listener Report encapsulation](../../protocol/mld/checks/message-format.md#multicast-listener-report-encapsulation) | `Rfc9777ReportSource` | PASS | repaired, [gap 2](results.md#gap-2-defect--an-mld-message-leaves-from-a-global-address) |
+| [RFC9777-REP-34](../../standard/rfc9777/catalog.md#rfc9777-rep-34) | selected | [Multicast Listener Report encapsulation](../../protocol/mld/checks/message-format.md#multicast-listener-report-encapsulation), [A start of listening before the link-local address is tested](../../protocol/mld/checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested) | `Rfc9777ReportSource`, `Rfc9777ReportBeforeLinkLocal` | PASS | repaired, [gap 2](results.md#gap-2-defect--an-mld-message-leaves-from-a-global-address) and [ND gap 9](../nd/results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC9777-REP-35](../../standard/rfc9777/catalog.md#rfc9777-rep-35) | later | — | — | — | level 3: needs a crafted message |
 | [RFC9777-REP-36](../../standard/rfc9777/catalog.md#rfc9777-rep-36) | later | — | — | — | level 3: needs a crafted message |
-| [RFC9777-REP-37](../../standard/rfc9777/catalog.md#rfc9777-rep-37) | owed | — | — | — | a later level 2 pass: a node that reports before it has a link-local address |
-| [RFC9777-REP-38](../../standard/rfc9777/catalog.md#rfc9777-rep-38) | owed | — | — | — | a later level 2 pass: a node that reports before it has a link-local address |
-| [RFC9777-REP-39](../../standard/rfc9777/catalog.md#rfc9777-rep-39) | owed | — | — | — | a later level 2 pass: a node that reports before it has a link-local address |
+| [RFC9777-REP-37](../../standard/rfc9777/catalog.md#rfc9777-rep-37) | selected | [A start of listening before the link-local address is tested](../../protocol/mld/checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested) | `Rfc9777ReportBeforeLinkLocal` | PASS | repaired, [ND gap 9](../nd/results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
+| [RFC9777-REP-38](../../standard/rfc9777/catalog.md#rfc9777-rep-38) | later | — | — | — | level 4: state inside the node |
+| [RFC9777-REP-39](../../standard/rfc9777/catalog.md#rfc9777-rep-39) | selected | [A start of listening before the link-local address is tested](../../protocol/mld/checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested) | `Rfc9777ReportBeforeLinkLocal` | PASS | repaired, [ND gap 9](../nd/results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | [RFC9777-REP-40](../../standard/rfc9777/catalog.md#rfc9777-rep-40) | selected | [Multicast Listener Report encapsulation](../../protocol/mld/checks/message-format.md#multicast-listener-report-encapsulation) | `Rfc9777ReportEncapsulation` | PASS | — |
 | [RFC9777-REP-41](../../standard/rfc9777/catalog.md#rfc9777-rep-41) | selected | [Listener in MLDv1 mode](../../protocol/mld/checks/compatibility.md#listener-in-mldv1-mode) | `Rfc9777ListenerV1Mode` | PASS | — |
 | [RFC9777-REP-42](../../standard/rfc9777/catalog.md#rfc9777-rep-42) | later | — | — | — | level 3: needs a crafted message |
@@ -444,7 +444,7 @@ A verdict belongs to the test. Where a test fails at a later observation and the
 
 ## The coverage debt: the checks this pass owes
 
-Fifty-eight statements that the model claims have no check yet. Each needs a normal exchange only, in a larger mockup or with a second path of messages, so each is level 2 work for a later pass. The closing list of [`checks.md`](../../protocol/mld/checks.md#statements-this-pass-wrote-no-check-for) holds the same needs in the words of the standard.
+Fifty-five statements that the model claims have no check yet. Each needs a normal exchange only, in a larger mockup or with a second path of messages, so each is level 2 work for a later pass. The closing list of [`checks.md`](../../protocol/mld/checks.md#statements-this-pass-wrote-no-check-for) holds the same needs in the words of the standard.
 
 | What the check needs | Statements |
 | --- | --- |
@@ -452,7 +452,6 @@ Fifty-eight statements that the model claims have no check yet. Each needs a nor
 | systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the querier | RFC9777-QRY-14, QRY-16, TIMER-1, RFC2710-TIMER-1 |
 | many sources or many addresses, beyond the size of one message | RFC9777-QRY-18, REP-43, REP-44, REP-45 |
 | a change that allows and blocks sources at once, and a filter-mode change followed by a source change within the repetitions | RFC9777-REP-32, LSN-20, LSN-21 |
-| a node that reports before it has a link-local address | RFC9777-REP-37, REP-38, REP-39 |
 | two specific Queries for one address within one Maximum Response Delay, or a Query that meets a pending response, and a stop of listening in the Delaying Listener state | RFC9777-LQRY-5, LQRY-8, LQRY-9, RFC2710-NODE-18, NODE-23 |
 | a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state of the router | RFC9777-LTIM-9, RST-12, RST-30, RST-31, RST-32, RST-33, RST-34, RST-35, RST-36, FWD-6, FWD-7, RREP-18, RREP-24, RREP-25, RREP-26, RSW-2 |
 | a run longer than the Multicast Address Listening Interval with an INCLUDE-mode listener that answers the Queries | RFC9777-RST-24 |
@@ -500,7 +499,7 @@ The exit criterion of level 2 has two halves, and both hold:
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 9777 §5 to §9 and of the node and router state diagrams of RFC 2710 §5 to §7, 388 entries; the feature map has 20 features and places every entry |
-| Every mandatory feature has a core check that ran and has a verdict | holds | the 19 mandatory features have core checks that ran: 47 tests, 47 PASS |
+| Every mandatory feature has a core check that ran and has a verdict | holds | the 19 mandatory features have core checks that ran: 48 tests, 48 PASS |
 
 The verdict of MLD-F-MESSAGE-VALIDATION comes from its one core statement on the normal path, RFC2710-NODE-2; its other statements need a crafted message, level 3.
 
@@ -509,9 +508,9 @@ A level is a measure of how deeply the pass looked, not of how well the model di
 | Level | State | What it needs |
 | --- | --- | --- |
 | 1, Survey | **reached** | — |
-| 2, Core | **reached** | the 58 `owed` statements are the debt of the level; see [the coverage debt](#the-coverage-debt-the-checks-this-pass-owes); and a repair of gap 16 for the statements that the older-host checks do not reach |
+| 2, Core | **reached** | the 55 `owed` statements are the debt of the level; see [the coverage debt](#the-coverage-debt-the-checks-this-pass-owes); and a repair of gap 16 for the statements that the older-host checks do not reach |
 | 3, Edge | not started | the catalog half holds; the checks need crafted messages: the validation of every message, the unknown types |
-| 4, Dynamics | partial | the delays and intervals with a bound have a check with a stated window, but the random halves and the state inside a node (RFC9777-RQ-1, RQ-5, RQ-6, RST-10, RST-16, RST-19) have no test |
+| 4, Dynamics | partial | the delays and intervals with a bound have a check with a stated window, but the random halves and the state inside a node (RFC9777-RQ-1, RQ-5, RQ-6, RST-10, RST-16, RST-19, REP-38) have no test |
 | 5, Complete | not started | RFC 4604, the SSM-aware behavior, and the other documents of the register |
 
 Per feature, the level reached is level 2 for the nineteen features with a core check that ran, and level 1 for MLD-F-SSM-AWARE, whose checks are level 5.
@@ -523,6 +522,7 @@ Per feature, the level reached is level 2 for the nineteen features with a core 
 | 1 | 2026-09-23 | **1, reached** | RFC 9777 and RFC 2710 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 3810, claimed at `Mldv2.ned:12`); one RFC 9777 formula change found relative to the model's default (Multicast Address Listening Interval, shared with the same gap in IGMP); the `Mldv2.ned` "Parity gaps" comment found stale on all three of its own points, not the one already known; `Mldv1` still crashes on an unrecognized message type where `Mldv2` already discards it silently |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 9777 (307) and RFC 2710 (81); 20 features; 32 checks; 47 tests; the conformance matrix | 21 PASS, 26 FAIL, one of them declared expected; seventeen gaps of the model, sixteen defects and one missing feature; 58 statements owed |
 | 2, repairs | 2026-09-25 to 2026-09-28 | **2, reached** | the seventeen gaps repaired on `topic/standards-tests-igmp-mld-level2-fixes`; five tests with a wrong premise repaired | 47 PASS; no gap left; 58 statements owed; 8 features supported, 11 partial |
+| 2, repairs | 2026-11-24 | **2, reached** | the Reports before the link-local address repaired on `topic/standards-tests-nd-gap9-fixes`, with [ND gap 9](../nd/results.md#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation); one more check and one more test; two checks that asked more than RFC 9777 corrected | 48 PASS; 55 statements owed; RFC9777-REP-37 and REP-39 selected, REP-38 later |
 
 The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
 

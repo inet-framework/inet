@@ -4,21 +4,21 @@
 
 Step 7 artifact of the standards test workflow for the ND level 2 pass. This is the first document of the pass that may name the simulation model and reference code, and it does both: the verdicts of the run, the class of every failure, and where the model implements, or fails to implement, each checked behavior.
 
-The level 2 pass ran on 2026-09-24 at `8f78f1a73c` (src `5c4f41c600`): 37 tests, 22 PASS, 15 FAIL, none declared expected, and eleven gaps. The repairs of 2026-09-25, on `topic/standards-tests-nd-level2-fixes`, repaired ten of them; the run below is theirs. Since 2026-10-28 the branch is built on the IGMP and MLD repairs, which carry the join of the solicited-node groups, the first half of gap 9; the second half stays open. Each gap keeps its description of the code of the level 2 run, and says how it was repaired.
+The level 2 pass ran on 2026-09-24 at `8f78f1a73c` (src `5c4f41c600`): 37 tests, 22 PASS, 15 FAIL, none declared expected, and eleven gaps. The repairs of 2026-09-25, on `topic/standards-tests-nd-level2-fixes`, repaired ten of them; the run below is theirs. Since 2026-10-28 the branch is built on the IGMP and MLD repairs, which carry the join of the solicited-node groups, the first half of gap 9. The second half was repaired on 2026-11-24, on `topic/standards-tests-nd-gap9-fixes`, and the run below is of that branch. Each gap keeps its description of the code of the level 2 run, and says how it was repaired.
 
 ## Run record
 
-- Date: 2026-11-24 15:29 +0100
-- INET: branch `topic/standards-tests-nd-level2-fixes`, commit `c6203cda4e`, tree clean
-- Trees: src `b2a954843f`, tests/protocol `29b879d27e`
+- Date: 2026-11-24 21:47 +0100
+- INET: branch `topic/standards-tests-nd-gap9-fixes`, commit `efc9302250`, tree clean
+- Trees: src `dbdf560a7b`, tests/protocol `9d4c3200e0`
 - OMNeT++: 6.5.0, commit `a2a6c68a91`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 21.1.8
 - Platform: Ubuntu 26.04.1 LTS, in a container of the image of the CI job, Linux 7.0.0-43-generic x86_64
 - Command: `opp_run_protocol_tests -m debug -w '^tests/protocol/nd$'`
-- Suite: 37 tests, 36 PASS, 1 FAIL (unexpected), 0 FAIL (expected), so the suite reports FAIL
+- Suite: 37 tests, 37 PASS, so the suite reports PASS
 
-The `src/` tree of the level 2 run, `5c4f41c600`, is the tree of `origin/master` at `7772a7e4ef`: the pass changed no source file. The repairs change `Ipv6`, `Ipv6InterfaceData`, `Ipv6RoutingTable`, `Ipv6NeighbourDiscovery`, the ICMPv6 serializer and message definitions, and `Ipv6NetworkConfigurator`.
+The `src/` tree of the level 2 run, `5c4f41c600`, is the tree of `origin/master` at `7772a7e4ef`: the pass changed no source file. The repairs change `Ipv6`, `Ipv6InterfaceData`, `Ipv6RoutingTable`, `Ipv6NeighbourDiscovery`, the ICMPv6 serializer and message definitions, and `Ipv6NetworkConfigurator`; the repair of the second half of gap 9 changes `Ipv6`, `Mldv1` and `Mldv2`.
 
 ## Verdicts
 
@@ -61,10 +61,10 @@ One row per test. The check sections are in [`checks/`](../../protocol/nd/checks
 | `Rfc4862DuplicateLinkLocal` | [Duplicate link-local address](../../protocol/nd/checks/autoconfiguration.md#duplicate-link-local-address) | PASS | — |
 | `Rfc4862AutonomousFlagClear` | [Prefix with the Autonomous flag clear](../../protocol/nd/checks/autoconfiguration.md#prefix-with-the-autonomous-flag-clear) | PASS | — |
 | `Rfc4862AddressLifetime` | [Address after its valid lifetime](../../protocol/nd/checks/autoconfiguration.md#address-after-its-valid-lifetime) | PASS | repaired, [gap 11](#gap-11-defect--an-expired-address-stays-in-use) |
-| `Rfc4862GroupsBeforeDad` | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | FAIL at observation 2 | defect, [gap 9](#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
+| `Rfc4862GroupsBeforeDad` | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | PASS | repaired, [gap 9](#gap-9-defect--a-node-reports-its-solicited-node-group-after-the-solicitation) |
 | `Rfc4861AllRoutersGroup` | [All-routers group of a router](../../protocol/nd/checks/multicast.md#all-routers-group-of-a-router) | PASS | — |
 
-36 of the 37 tests pass; `Rfc4862GroupsBeforeDad` fails, gap 9. In the level 2 run, router discovery passed 6 of its 11 tests, the parameters from the router 0 of 4, on-link determination 4 of 4, address resolution 4 of 4, Redirect 3 of 6, address autoconfiguration 4 of 6, and the multicast groups 1 of 2. Every failure was a defect, and the eleven gaps below hold them all.
+All 37 tests pass. In the level 2 run, router discovery passed 6 of its 11 tests, the parameters from the router 0 of 4, on-link determination 4 of 4, address resolution 4 of 4, Redirect 3 of 6, address autoconfiguration 4 of 6, and the multicast groups 1 of 2. Every failure was a defect, and the eleven gaps below hold them all.
 
 ## The class of every failure
 
@@ -142,12 +142,13 @@ The shapes of the defects: a default of the wrong value (gaps 1 and 2), a value 
 
 ### Gap 9 (defect) — a node reports its solicited-node group after the solicitation
 
-- **Test**: `Rfc4862GroupsBeforeDad`, observation 2. In the level 2 run, host A sent no MLD Report for ff02::1:ff00:a, before or after its solicitation. Now A sends the Report after its solicitation for its link-local address.
+- **Test**: `Rfc4862GroupsBeforeDad`, observation 2. In the level 2 run, host A sent no MLD Report for ff02::1:ff00:a, before or after its solicitation. Since the repair of 2026-11-24, A sends the Report from the unspecified address before its solicitation for its link-local address.
 - **Statements**: RFC4862-DAD-11, RFC4861-AR-4, AR-6.
 - **The code** of the level 2 run: a node accepts a packet to a solicited-node address by matching the address against its own addresses ([`Ipv6InterfaceData.cc:375`](../../../../../src/inet/networklayer/ipv6/Ipv6InterfaceData.cc)), and never joins the group with `joinMulticastGroup`, so MLD never reports it. The router joins ff02::2 with that function, and MLD reports that group (`Rfc4861AllRoutersGroup` passes).
 - **Scope**: every solicited-node group of every node. A switch that snoops MLD would drop the solicitations of address resolution and of Duplicate Address Detection.
 - **Partly repaired** by `ipv6: fix: an interface joins its solicited-node groups` of `topic/standards-tests-igmp-mld-level2-fixes`, on which this branch is built since 2026-10-28: an interface joins the solicited-node group of each unicast address when it gets the address, and leaves it with the last address of the group. This branch repaired the same on 2026-09-25, and does not repeat it now.
-- **Open**: the IGMP and MLD repairs hold every MLD message until the interface has a tested link-local address (`heldMessages` of `Mldv1` and `Mldv2`), because `Ipv6` gives a datagram from the unspecified address the preferred address of the interface. So the Report for the group of a tentative address leaves after the solicitation of Duplicate Address Detection. RFC 9777 section 5.2.14, and RFC 3590 for MLDv1, send that Report from the unspecified address. A repair needs that source in `Ipv6` and in MLD, and routers that ignore a Report from the unspecified address.
+- **The second half**: the IGMP and MLD repairs held every MLD message until the interface had a tested link-local address (`heldMessages` of `Mldv1` and `Mldv2`), because `Ipv6` gave a datagram from the unspecified address the preferred address of the interface. So the Report for the group of a tentative address left after the solicitation of Duplicate Address Detection. RFC 9777 section 5.2.14, and RFC 3590 for MLDv1, send that Report from the unspecified address.
+- **Repaired** on 2026-11-24 (`5e36e5e1b6` for MLDv1, `5ff01865c2` for MLDv2), on `topic/standards-tests-nd-gap9-fixes`: `Ipv6::fragmentPostRouting` keeps the unspecified source of an MLD Report or Done, a router does not forward a datagram from the unspecified address (RFC 4291 section 2.5.2), an MLD node discards a Report or a Done from that address, and a node sends such a message at once, from the unspecified address while its link-local address is not valid, and reports its groups again once it is. The commits before them move nothing.
 
 ### Gap 10 (defect) — a router does not test its configured address
 
