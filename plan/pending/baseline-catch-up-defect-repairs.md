@@ -185,9 +185,14 @@ The assistant proposed these decisions. The maintainer approved them with the pl
   and the scan of a long log. The assistant writes each repair, each test and each record, and checks each result of a
   subagent. The `simulation-domain-expert` agent reviews the reasoning against the RFC of each TCP change that is not
   easy.
-- **D10. The files of the view.** The workflow, the table of the defects and the script that opens the view again
-  are in `plan/evidence/baseline-catch-up-defect-repairs/` and go into git with the plan changes, as D6 of
-  [ieee80211-chart-baseline-evolution.md](ieee80211-chart-baseline-evolution.md) decided for its workflow.
+- **D10. Only the plan goes into git.** The plan is the record of the work: each step updates it. The evidence stays
+  outside git: the files of the view (§9.3), the logs of the runs in the image of the CI, and the outputs of
+  experiments. Their folder is `/home/projectured/workspace/ghci-baseline-catch-up/evidence/defect-repairs/`, beside
+  the evidence of the catch-up, which is outside git too. Changed on 2026-11-24 by the maintainer: "I think we should
+  not commit into the repository the evidence, that's just too much noise. It's enough if we have the plan to begin
+  with and each step we update the plan as we go." No project rule asked for the evidence in git; the first text
+  followed D6 of [ieee80211-chart-baseline-evolution.md](ieee80211-chart-baseline-evolution.md). The plan commits of
+  that day were written again without the files, so no commit of this plan holds them.
 
 ## 5. Affected components and compatibility
 
@@ -251,7 +256,7 @@ No sealed file changes. No consumer outside INET changes.
      as repaired by `d69fc0eaff`.
   5. Make the view of §9 and save its files. **Done 2026-11-24.**
   - **C1: `plan: add: repair the defects of the baseline catch-up that are new since v4.7.0 or easy, outside IEEE 802.11`.**
-    This plan and the files of the view. No dependency.
+    This plan. No dependency.
   - **C2: `plan: change: the defects of the baseline catch-up after the check of 2026-11-24`.** The corrections of
     §2.4 and the closure of BD-40. Depends on C1.
 - [ ] **Step 1. R1: TCP text and code with no result change (BD-5, BD-13, BD-16, BD-6, BD-9).** Check: the
@@ -438,7 +443,8 @@ and `tests/protocol/quic/`. Step 3 of §6.1 names the exact files.
 1. The scope is §2.2: BD-31 is out as an 802.11 entry; BD-33 is out because its 802.11 part is repaired and the rest
    needs a decision; BD-24 and BD-39 are in as easy entries.
 2. The order is D4, with R1 as the first change.
-3. D2 and D10 hold: the plan and the files of the view go into git, also on master.
+3. D2 holds: the plan goes into git, also on master. D10 changed on the same day: the files of the view stay
+   outside git.
 
 **Approval scope:** an approval of this plan covers step 0 and the cycle of §6.1 for each change up to its gate A. The
 code of each change needs gate A, and its landing needs gate B. The approval does not cover a push, a change of a
@@ -479,12 +485,11 @@ assistant draws the charts again after each change of the table.
 
 ### 9.3 The files
 
-`plan/evidence/baseline-catch-up-defect-repairs/` holds:
+The folder of D10, `/home/projectured/workspace/ghci-baseline-catch-up/evidence/defect-repairs/`, outside git,
+holds:
 
 - `workflow.pred`: the workflow.
 - `defects.pred`: the table of the defects. The charts come from it, so no other file keeps the progress.
 - `ide-session.jl`: the code that opens the four tabs of §9.1 again after a restart of the editor, and defines the
-  helpers of §9.2. The assistant passes its text to one `execute_julia_code` call.
-
-Before step 0, these files are in the main checkout. After step 0, they are in the worktree, and `ide-session.jl`
-names the paths of the worktree.
+  helpers of §9.2. The assistant passes its text to one `execute_julia_code` call. It reads the plan from the
+  worktree and the two other files from this folder.
