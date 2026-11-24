@@ -169,3 +169,37 @@ RFC 9777 §6.1: a further change of the same state before the repetitions end se
 ### Notes
 
 - The random interval allows the repetition of the first Report to come before 10.3 seconds. Then S1 has been in two Reports before the change, and the Report at 10.3 seconds holds S2 alone. The check counts the Reports that held S1 before 10.3 seconds, and reads observations 2 and 3 with that count: S1 belongs in a Report while fewer than two Reports have held it.
+
+## A start of listening before the link-local address is tested
+
+Checks: **RFC9777-REP-34** (must), **REP-37** (description), **REP-39** (should).
+
+### Requirement
+
+RFC 9777 §5.2.14: a Report leaves from a valid link-local address, or from the unspecified address if the interface has no valid link-local address yet. A router discards a Report from the unspecified address and takes no action on its contents. Once a valid link-local address is available, the node should send new Reports for all addresses that it listens to on the interface. RFC 4862 §5.4: an address is tentative, so not valid, until Duplicate Address Detection ends; the Neighbor Solicitation of the detection leaves after a random delay of up to 1 second, and the detection ends 1 second (RetransTimer, RFC 4861 §10) after it.
+
+### Scenario constants
+
+- The link with a source. S1 sends to G.
+- R is up at the start with its link-local address: it skips Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 §5.1), so its first General Query leaves at the start. Its Query Response Interval is 1 second (Maximum Response Code 1000), so A answers that Query before its own link-local address is tested. The second startup General Query of R leaves at 31.25 seconds.
+- A listens to G and H from the start. Its Robustness Variable is 1, so it sends each State-Change Report once.
+- Observation lasts 30 seconds from the start, before the second startup General Query of R.
+
+### Procedure
+
+1. Build the link with a source, and let R, A, B and S1 come up at the start.
+2. From the start, let A listen to G and H.
+3. Observe the Neighbor Solicitations of A, the Reports of A and the datagrams of S1 on L1.
+
+### Expected observations
+
+1. On L1, from A, the Neighbor Solicitation of the detection of its link-local address. The detection ends 1 second after it. This confirms the stimulus.
+2. Before the detection ends, a Report of A with a record for G leaves from the unspecified address (RFC9777-REP-34).
+3. Until the first Report of A from its link-local address with a record for G, no datagram of S1 to G arrives on L1 (RFC9777-REP-37).
+4. After the detection ends, a Report of A from its link-local address holds records for G and H (RFC9777-REP-39).
+5. From 1 second after the Report of observation 4 on, every datagram of S1 to G arrives on L1. This shows that R acts on the Reports of A from its link-local address, so that observation 3 is not empty.
+
+### Notes
+
+- With a Query Response Interval of 1 second, the answer of A to the first General Query leaves before the detection ends, so from the unspecified address too. A has no other reason to send a Report before the second startup General Query: its Robustness Variable of 1 sends each State-Change Report once. So the Report of observation 4 is the new Report of RFC9777-REP-39.
+- RFC9777-REP-38, the listening state that A keeps after its Report is discarded, is state inside a node.
