@@ -352,11 +352,12 @@ No sealed file changes. No consumer outside INET changes.
   names remains, and the fingerprints do not change.
   - `tests: change: the tests and examples use initialWindow and tcpEcnMode` (no result moves).
   - `tcp: remove: the parameters increasedIWEnabled and ecnWillingness` (D-120 of 2026-10-15).
-- [ ] **Step 20. R20: the lower limit of the ssthresh after a timeout (BD-6).** The commit `74882daa4e` exists. It
-  moves 6 fingerprint runs (§6.3, R1). The cycle of §6.1 explains each moved value, writes a protocol test of the
+- [ ] **Step 20. R20: the lower limit of the ssthresh after a timeout (BD-6).** The first attempt, the commit
+  `74882daa4e`, is the patch `patches/0020-*.patch` of the folder of D10. It moves 6 fingerprint runs (§6.3, R1). The cycle of §6.1 explains each moved value, writes a protocol test of the
   ssthresh after a timeout with the TS option on each segment, and re-records the fingerprints and the statistics.
   - `tcp: change: the ssthresh after a timeout takes the lower limit 2*SMSS with the effective MSS (RFC 5681)`.
-- [ ] **Step 21. R21: step (2) of RFC 6675 at SND.UNA (BD-9).** The commit `38958b1fb8` exists. It moves the run 0 of
+- [ ] **Step 21. R21: step (2) of RFC 6675 at SND.UNA (BD-9).** The first attempt, the commit `38958b1fb8`, is the
+  patch `patches/0021-*.patch` of the folder of D10. It moves the run 0 of
   `examples/inet/shutdownrestart` `TCP`, whose Telnet segments are 1 byte long. The cycle of §6.1 explains the move,
   writes a protocol test with a segment of 1 byte at SND.UNA, and re-records.
   - `tcp: change: step (2) of RFC 6675 tests IsLost(HighACK + 1) at SND.UNA`.
@@ -434,7 +435,8 @@ is not necessary: if the run after C5 moves, the runs of C3 and C4 alone find th
 R1 keeps only C3 (BD-5, BD-13, BD-16) and moves no result. BD-6 and BD-9 leave R1 and become the changes R20 and R21,
 each with the whole cycle of §6.1: the attribution of each moved fingerprint and statistic to the mechanism, the
 re-record in the image of the CI, and a protocol test and its reviewer document, because each changes a protocol
-behavior. C4 and C5 stay on the branch after C3 until their changes are prepared.
+behavior. C4 and C5 left the branch on the same day, so that R1 lands alone; they are the patches `patches/0020-*.patch` and
+`patches/0021-*.patch` of the folder of D10, the first attempts of R20 and R21.
 
 **The check of the gate (2026-11-24).** In the image of the CI, with all features, release mode, at C3
 `6f3eb8a25c`: 1847 runs, 1846 PASS and 1 ERROR that a marker declares as expected (`tests/fingerprint`
