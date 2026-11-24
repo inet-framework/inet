@@ -1,0 +1,134 @@
+%description:
+Computed Echo and Packet Too Big traverse real IPv6/Ethernet stacks. Final wire
+addresses independently validate pseudoheader checksums and the complete1280B error.
+
+%file: ComputedIcmpCheck.cc
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include <algorithm>
+#include <vector>
+namespace inet::protocoltest {
+class ComputedIcmpCheck : public cSimpleModule,public cListener {
+    cModule *aMac=nullptr,*bMac=nullptr,*rMac=nullptr;
+    int originalCount=0,echoRequest=0,echoReply=0,ptb=0,forwarded=0,pongs=0;
+    int checksumChecks=0,errorLength=0,quoteLength=0,advertisedMtu=0;
+    std::vector<uint8_t> original,request;
+    static std::vector<uint8_t> ipv6Bytes(const Packet& packet){
+        for(b offset=b(0);offset<packet.getDataLength();){
+            auto chunk=packet.peekDataAt<Chunk>(offset);
+            if(auto h=dynamicPtrCast<const Ipv6Header>(chunk)){
+                B length=B(40)+h->getPayloadLength();
+                return packet.peekDataAt<BytesChunk>(offset,length)->getBytes();
+            }
+            offset+=chunk->getChunkLength();
+        }
+        return {};
+    }
+    static uint16_t word(const std::vector<uint8_t>& bytes,size_t i){return (bytes[i]<<8)|bytes[i+1];}
+    static bool validChecksum(const std::vector<uint8_t>& ip){
+        uint32_t sum=0;for(size_t i=8;i<40;i+=2)sum+=word(ip,i);
+        uint32_t length=ip.size()-40;sum+=(length>>16)+(length&0xffff)+58;
+        for(size_t i=40;i<ip.size();i+=2)sum+=uint16_t(ip[i]<<8)|(i+1<ip.size()?ip[i+1]:0);
+        while(sum>>16)sum=(sum&0xffff)+(sum>>16);
+        return sum==0xffff;
+    }
+  protected:
+    int numInitStages()const override{return NUM_INIT_STAGES;}
+    void initialize(int stage)override {
+        if(stage!=INITSTAGE_LAST)return;
+        auto root=getParentModule();aMac=root->getSubmodule("hostA")->getSubmodule("eth",0)->getSubmodule("mac");bMac=root->getSubmodule("hostB")->getSubmodule("eth",0)->getSubmodule("mac");rMac=root->getSubmodule("router")->getSubmodule("eth",1)->getSubmodule("mac");
+        aMac->subscribe("packetSentToLower",this);aMac->subscribe("packetReceivedFromLower",this);
+        bMac->subscribe("packetReceivedFromLower",this);rMac->subscribe("packetSentToLower",this);
+        root->getSubmodule("hostA")->getSubmodule("app",0)->subscribe("pingRxSeq",this);
+    }
+    void receiveSignal(cComponent*,simsignal_t signal,long,cObject*)override {ASSERT(signal==registerSignal("pingRxSeq"));pongs++;}
+    void receiveSignal(cComponent*source,simsignal_t signal,cObject*object,cObject*)override {
+        auto packet=dynamic_cast<Packet*>(object);if(!packet)return;
+        auto ip=ipv6Bytes(*packet);if(ip.empty())return;
+        bool sent=signal==registerSignal("packetSentToLower");
+        if(source==rMac&&sent&&(ip[6]==17||ip[6]==44)){forwarded++;return;}
+        if(source==aMac&&sent&&ip[6]==17&&word(ip,42)==5000){ASSERT(ip.size()==1500&&ip[7]==64);original=ip;originalCount++;return;}
+        if(ip[6]!=58||ip.size()<48)return;
+        int type=ip[40];
+        if(type==128&&source==aMac&&sent){request=ip;return;}
+        if(type==128&&source==bMac&&!sent){
+            bool checksum=validChecksum(ip);checksumChecks++;echoRequest++;
+            ASSERT(checksum&&ip[41]==0&&request.size()==ip.size());
+            ASSERT(std::equal(ip.begin()+8,ip.begin()+40,request.begin()+8));
+            ASSERT(std::equal(ip.begin()+40,ip.end(),request.begin()+40));
+        }
+        if(type==129&&source==aMac&&!sent){
+            bool checksum=validChecksum(ip);checksumChecks++;echoReply++;
+            ASSERT(checksum&&ip[41]==0&&request.size()==ip.size());
+            ASSERT(std::equal(ip.begin()+8,ip.begin()+24,request.begin()+24));
+            ASSERT(std::equal(ip.begin()+24,ip.begin()+40,request.begin()+8));
+            ASSERT(std::equal(ip.begin()+44,ip.end(),request.begin()+44));
+        }
+        if(type==2&&source==aMac&&!sent){
+            bool checksum=validChecksum(ip);checksumChecks++;ptb++;
+            errorLength=ip.size();quoteLength=ip.size()-48;advertisedMtu=(ip[44]<<24)|(ip[45]<<16)|(ip[46]<<8)|ip[47];
+            ASSERT(checksum&&ip[41]==0&&errorLength==1280&&quoteLength==1232&&advertisedMtu==1280);
+            ASSERT(original.size()==1500&&std::equal(ip.begin()+24,ip.begin()+40,original.begin()+8));
+            auto expected=original;expected[7]=63;
+            ASSERT(std::equal(ip.begin()+48,ip.end(),expected.begin()));
+        }
+    }
+    void finish()override {
+        std::cout<<"computed-icmp original="<<originalCount<<" echoRequest="<<echoRequest<<" echoReply="<<echoReply<<" pongs="<<pongs<<" ptb="<<ptb<<" checksumChecks="<<checksumChecks<<" errorBytes="<<errorLength<<" quoteBytes="<<quoteLength<<" mtu="<<advertisedMtu<<" forwardedOversize="<<forwarded<<std::endl;
+        ASSERT(originalCount==1&&echoRequest==1&&echoReply==1&&pongs==1&&ptb==1&&checksumChecks==3&&forwarded==0);
+        std::cout<<"Computed IPv6 Echo and bounded Packet Too Big wire delivery verified\n";
+    }
+};
+Define_Module(ComputedIcmpCheck);
+}
+
+%file: test.ned
+@namespace(inet::protocoltest);
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+simple ComputedIcmpCheck {}
+network ComputedIcmpNetwork {
+    submodules:
+        configurator:Ipv6FlatNetworkConfigurator;
+        hostA:StandardHost6;
+        router:Router6;
+        hostB:StandardHost6;
+        check:ComputedIcmpCheck;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network=ComputedIcmpNetwork
+sim-time-limit=10s
+seed-set=0
+**.vector-recording=false
+**.scalar-recording=false
+**.checksumMode="computed"
+*.hostA.numApps=2
+*.hostA.app[0].typename="PingApp"
+*.hostA.app[0].destAddr="hostB"
+*.hostA.app[0].startTime=5s
+*.hostA.app[0].count=1
+*.hostA.app[0].packetSize=56B
+*.hostA.app[1].typename="UdpBasicApp"
+*.hostA.app[1].destAddresses="hostB"
+*.hostA.app[1].destPort=5000
+*.hostA.app[1].localPort=4000
+*.hostA.app[1].messageLength=1452B
+*.hostA.app[1].timeToLive=64
+*.hostA.app[1].startTime=5.5s
+*.hostA.app[1].sendInterval=10s
+*.hostB.numApps=1
+*.hostB.app[0].typename="UdpSink"
+*.hostB.app[0].localPort=5000
+*.router.eth[1].mac.mtu=1280B
+
+%contains: stdout
+Computed IPv6 Echo and bounded Packet Too Big wire delivery verified

@@ -15,6 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/networklayer/contract/INetfilter.h"
 
 namespace inet {
 
@@ -26,7 +27,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener
+class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrationListener, public NetfilterBase::HookBase
 {
   public:
     /**
@@ -50,6 +51,12 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0);
 
     static bool verifyChecksum(const Packet *packet);
+
+    virtual Result datagramPreRoutingHook(Packet *) override { return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *packet) override;
+    virtual Result datagramLocalInHook(Packet *) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *) override { return ACCEPT; }
 
   protected:
     // internal helper functions

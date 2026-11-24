@@ -1,0 +1,451 @@
+
+
+
+
+
+
+Internet Engineering Task Force (IETF)                   P. Thubert, Ed.
+Request for Comments: 8025                                         Cisco
+Updates: 4944                                                  R. Cragie
+Category: Standards Track                                            ARM
+ISSN: 2070-1721                                            November 2016
+
+
+               IPv6 over Low-Power Wireless Personal Area
+                   Network (6LoWPAN) Paging Dispatch
+
+Abstract
+
+   This specification updates RFC 4944 to introduce a new context switch
+   mechanism for IPv6 over Low-Power Wireless Personal Area Network
+   (6LoWPAN) compression, expressed in terms of Pages and signaled by a
+   new Paging Dispatch.
+
+Status of This Memo
+
+   This is an Internet Standards Track document.
+
+   This document is a product of the Internet Engineering Task Force
+   (IETF).  It represents the consensus of the IETF community.  It has
+   received public review and has been approved for publication by the
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 7841.
+
+   Information about the current status of this document, any errata,
+   and how to provide feedback on it may be obtained at
+   http://www.rfc-editor.org/info/rfc8025.
+
+Copyright Notice
+
+   Copyright (c) 2016 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 1]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Updating RFC 4944 . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  Page 1 Paging Dispatch  . . . . . . . . . . . . . . . . . . .   4
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+     6.1.  Page Switch Dispatch Types  . . . . . . . . . . . . . . .   5
+     6.2.  New Column in Dispatch Type Registry  . . . . . . . . . .   5
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .   7
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
+
+1.  Introduction
+
+   The design of Low-Power and Lossy Networks (LLNs) is generally
+   focused on saving energy, which is often a very constrained resource.
+   Other constraints, such as memory capacity and duty cycle
+   restrictions on LLN devices, usually derive from that primary
+   concern.  Energy is often available only from primary batteries that
+   are expected to last for years or is scavenged from the environment
+   in very limited amounts.  Any protocol that is intended for use in
+   LLNs must be designed with a primary focus on saving energy, which is
+   a strict requirement.
+
+   Controlling the amount of data transmission is one possible means of
+   saving energy.  In a number of LLN standards, the frame size is
+   limited to much smaller values than the IPv6 maximum transmission
+   unit (MTU) of 1280 bytes.  In particular, an LLN that relies on the
+   classical Physical Layer (PHY) of IEEE 802.15.4 [IEEE.802.15.4] is
+   limited to 127 bytes per frame.  The need to compress IPv6 packets
+   over IEEE 802.15.4 led to the 6LoWPAN Header Compression (6LoWPAN-HC)
+   [RFC6282] work.
+
+   As more and more protocols need to be compressed, the encoding
+   capabilities of the original dispatch defined in the 6LowPAN
+   adaptation-layer framework ([RFC4944] and [RFC6282]) becomes
+   saturated.  This specification introduces a new context switch
+   mechanism for 6LoWPAN compression, expressed in terms of Pages and
+   signaled by a new Paging Dispatch mechanism.
+
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 2]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   [RFC2119].
+
+   The terminology used in this document is consistent with and
+   incorporates that described in "Terms Used in Routing for Low-Power
+   and Lossy Networks" [RFC7102] and "Terminology for Constrained-Node
+   Networks" [RFC7228].
+
+3.  Updating RFC 4944
+
+   This document adapts 6LoWPAN while maintaining backward compatibility
+   with IPv6 over IEEE 802.15.4 [RFC4944] by introducing the concept of
+   a "parsing context" in the 6LoWPAN parser, a context being identified
+   by a Page Number.  This specification defines 16 Pages.
+
+   Pages are delimited in a 6LoWPAN packet by a Paging Dispatch value
+   that indicates the next current Page.  The Page Number is encoded in
+   a Paging Dispatch with the Value Bit Pattern of 11 11xxxx, where xxxx
+   is the Page Number, 0 to 15, as described in Figure 1:
+
+                            0
+                            0 1 2 3 4 5 6 7
+                           +-+-+-+-+-+-+-+-+
+                           |1|1|1|1|Page Nb|
+                           +-+-+-+-+-+-+-+-+
+
+            Figure 1: Paging Dispatch with Page Number Encoding
+
+   Values of the Dispatch byte defined in [RFC4944] are considered as
+   belonging to the Page 0 parsing context, which is the default and
+   does not need to be signaled explicitly at the beginning of a 6LoWPAN
+   packet.  This ensures backward compatibility with existing
+   implementations of 6LoWPAN.
+
+   The Dispatch bits defined in [RFC4944] are used in Page 0 and are
+   free to be reused in Pages 1 to 15.  In Section 4, this specification
+   allocates some values in Page 1 and leaves the rest open for future
+   allocations.
+
+   Values made available by this specification in Pages 1 to 14 are to
+   be assigned for new protocols whereas Page 15 is reserved for
+   Experimental Use [RFC5226].
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 3]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+   Note: This specification does not use the Escape Dispatch, which
+   extends Page 0 to more values, but rather allocates another Dispatch
+   Bit Pattern (11 11xxxx) for a new Paging Dispatch that is present in
+   all Pages, including Page 0 and Pages defined in future
+   specifications, to indicate the next parsing context represented by
+   its Page Number.  The rationale for avoiding that approach is that
+   there can be multiple occurrences of a new header indexed by this
+   specification in a single frame and the overhead on an octet each
+   time for the Escape Dispatch would be prohibitive.
+
+   A Page (say Page N) is said to be active once the Page N Paging
+   Dispatch is parsed, and it remains active until another Paging
+   Dispatch is parsed.
+
+4.  Page 1 Paging Dispatch
+
+   This specification defines some special properties for Page 1,
+   detailed below:
+
+      The Dispatch bits defined for LOWPAN_IPHC by the "Compression
+      Format for IPv6 Datagrams over IEEE 802.15.4-Based Networks"
+      [RFC6282] are defined with the same values in Page 1, so there is
+      no need to switch context from Page 1 to Page 0 to decode a packet
+      that is encoded per [RFC6282].
+
+      Mesh Headers represent Layer 2 information and are processed
+      before any Layer 3 information that is encoded in Page 1.  If a
+      6LoWPAN packet requires a Mesh Header, the Mesh Header MUST always
+      be placed in the packet before the first Page 1 Paging Dispatch,
+      if any.
+
+      For the same reason, Fragment Headers as defined in [RFC4944] MUST
+      always be placed in the packet before the first Page 1 Paging
+      Dispatch, if any.
+
+      The NALP Dispatch Bit Pattern as defined in [RFC4944] is only
+      defined for the first octet in the packet.  Switching back to Page
+      0 for NALP inside a 6LoWPAN packet does not make sense.
+
+      As a result, there is no need to restore the Page 0 parsing
+      context after a context was switched to Page 1, so the value for
+      the Page 0 Paging Dispatch of 11 110000 may not actually occur in
+      those packets that adhere to 6LoWPAN specifications available at
+      the time of writing this specification.
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 4]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+5.  Security Considerations
+
+   The security considerations of [RFC4944] and [RFC6282] apply.
+
+6.  IANA Considerations
+
+6.1.  Page Switch Dispatch Types
+
+   This document allocates 16 values for "Page switch" from the
+   "Dispatch Type Field" registry that was created by [RFC4944].  The
+   allocated values are from 11 110000 through 11 111111 and represent
+   Page Numbers 0 through 15 as discussed in this document.
+
+6.2.  New Column in Dispatch Type Registry
+
+   This document extends the "Dispatch Type Field" registry, which was
+   created by [RFC4944] and updated by [RFC6282], by adding a new column
+   called "Page".
+
+   This document defines 16 Pages, "Page 0" to "Page 15".
+
+   The preexisting registry content is assigned to "Page 0".
+
+   This document also associates the Dispatch type field values that are
+   allocated for LOWPAN_IPHC by [RFC6282] to Page 1.  These values range
+   from 01 100000 through 01 111111 and have the same definition in Page
+   1 as they do in Page 0; as a result, Page 0 and Page 1 are grouped
+   together in the registry for this range.
+
+   Values ranging from 00 000000 to 11 101111 in Page 15 (that is, all
+   of Page 15 except the space used for Page switch) are reserved for
+   Experimental Use [RFC5226] and shall not be assigned.
+
+   Figure 2 represents the updates to the registry as described above.
+   Refer to <http://www.iana.org/assignments/_6lowpan-parameters> for
+   the complete list of updates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 5]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Bit Pattern  |    Page     | Header Type         |  Reference      |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |               |     0       |  NALP               |  RFC 4944,      |
+ |               |             |                     |  this document  |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  00 xxxxxx    |    1-14     |  Unassigned         |                 |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+ |               |    15       |  Reserved for       |  this document  |
+ |               |             |  Experimental Use   |                 |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |               |     0       |  ESC                |  RFC 6282,      |
+ |               |             |                     |  this document  |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  01 000000    |    1-14     |  Unassigned         |                 |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+ |               |    15       |  Reserved for       |  this document  |
+ |               |             |  Experimental Use   |                 |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                       ...                   ...
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |               |    0-1      |  LOWPAN_IPHC        |  RFC 6282,      |
+ |               |             |                     |  this document  |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  01 1xxxxx    |    2-14     |  Unassigned         |                 |
+ +               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-|
+ |               |    15       |  Reserved for       |  this document  |
+ |               |             |  Experimental Use   |                 |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                       ...                   ...
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  11 11xxxx    |    0-15     |  Page switch        |  this document  |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                 Figure 2: Integrating the New Page Column
+
+   Future assignments in these registries are to be coordinated via IANA
+   under the policy of "Specification Required" [RFC5226].  It is
+   expected that this policy will allow for other (non-IETF)
+   organizations to more easily obtain assignments.
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 6]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+7.  References
+
+7.1.  Normative References
+
+   [IEEE.802.15.4]
+              IEEE, "IEEE Standard for Low-Rate Wireless Networks",
+              IEEE 802.15.4-2015, DOI 10.1109/IEEESTD.2016.7460875,
+              <http://ieeexplore.ieee.org/document/7460875/>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
+              "Transmission of IPv6 Packets over IEEE 802.15.4
+              Networks", RFC 4944, DOI 10.17487/RFC4944, September 2007,
+              <http://www.rfc-editor.org/info/rfc4944>.
+
+   [RFC5226]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", BCP 26, RFC 5226,
+              DOI 10.17487/RFC5226, May 2008,
+              <http://www.rfc-editor.org/info/rfc5226>.
+
+   [RFC6282]  Hui, J., Ed. and P. Thubert, "Compression Format for IPv6
+              Datagrams over IEEE 802.15.4-Based Networks", RFC 6282,
+              DOI 10.17487/RFC6282, September 2011,
+              <http://www.rfc-editor.org/info/rfc6282>.
+
+7.2.  Informative References
+
+   [RFC7102]  Vasseur, JP., "Terms Used in Routing for Low-Power and
+              Lossy Networks", RFC 7102, DOI 10.17487/RFC7102, January
+              2014, <http://www.rfc-editor.org/info/rfc7102>.
+
+   [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
+              Constrained-Node Networks", RFC 7228,
+              DOI 10.17487/RFC7228, May 2014,
+              <http://www.rfc-editor.org/info/rfc7228>.
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 7]
+
+RFC 8025                 6LoWPAN Paging Dispatch           November 2016
+
+
+Acknowledgments
+
+   The authors wish to thank Tom Phinney, Thomas Watteyne, Tengfei
+   Chang, Martin Turon, James Woodyatt, Samita Chakrabarti, Jonathan
+   Hui, Gabriel Montenegro, and Ralph Droms for constructive reviews of
+   the design in the 6lo working group.
+
+Authors' Addresses
+
+   Pascal Thubert (editor)
+   Cisco Systems
+   Building D - Regus
+   45 Allee des Ormes
+   BP1200
+   Mougins - Sophia Antipolis  06254
+   France
+
+   Phone: +33 4 97 23 26 34
+   Email: pthubert@cisco.com
+
+
+   Robert Cragie
+   ARM Ltd.
+   110 Fulbourn Road
+   Cambridge  CB1 9NJ
+   United Kingdom
+
+   Email: robert.cragie@gridmerge.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Cragie             Standards Track                    [Page 8]
+

@@ -750,7 +750,7 @@ void Ipv6::localDeliver(Packet *packet)
 
     // Defragmentation: look for Ipv6FragmentHeader chunk after the base header
     // Scan extension header chunks to find the fragment header
-    const Ipv6FragmentHeader *fh = nullptr;
+    Ptr<const Ipv6FragmentHeader> fh;
     {
         b offset = ipv6Header->getChunkLength();
         IpProtocolId nextHdr = ipv6Header->getProtocolId();
@@ -759,7 +759,7 @@ void Ipv6::localDeliver(Packet *packet)
             if (nextHdr == IP_PROT_IPv6EXT_FRAGMENT) {
                 auto fragHdr = dynamicPtrCast<const Ipv6FragmentHeader>(extHdr);
                 if (fragHdr) {
-                    fh = fragHdr.get();
+                    fh = fragHdr;
                     break;
                 }
             }
@@ -777,7 +777,7 @@ void Ipv6::localDeliver(Packet *packet)
             fragbuf.purgeStaleFragments(simTime() - FRAGMENT_TIMEOUT);
         }
 
-        packet = fragbuf.addFragment(packet, ipv6Header.get(), fh, simTime());
+        packet = fragbuf.addFragment(packet, ipv6Header.get(), fh.get(), simTime());
         if (!packet) {
             EV_DETAIL << "No complete datagram yet.\n";
             return;
