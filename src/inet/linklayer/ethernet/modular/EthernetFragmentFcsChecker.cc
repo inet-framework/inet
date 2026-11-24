@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (fragment marker reconstruction from the FCS)
+//
 
 
 #include "inet/linklayer/ethernet/modular/EthernetFragmentFcsChecker.h"

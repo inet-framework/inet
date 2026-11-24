@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (AP association and HT management)
+//
 
 
 #include "inet/common/ModuleAccess.h"

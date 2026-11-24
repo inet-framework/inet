@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (shared HT capability validation and management rate publication)
+//
 
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"

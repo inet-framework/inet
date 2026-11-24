@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (per-receiver retry accounting and Block Ack recovery)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"

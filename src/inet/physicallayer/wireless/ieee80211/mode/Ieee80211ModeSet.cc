@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (HT mode catalog and operational capability queries)
+//
 
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"

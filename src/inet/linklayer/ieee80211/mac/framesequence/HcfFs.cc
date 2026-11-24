@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (EDCA TXOP protection and Block Ack exchange sequencing)
+//
 
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 

@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (primitive Block Ack exchanges and QoS data lifetime handling)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"

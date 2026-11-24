@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (non-HT reference rate calculation)
+//
 
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeBase.h"

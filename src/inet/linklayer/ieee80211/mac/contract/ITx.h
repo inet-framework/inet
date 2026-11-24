@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (deferred radio commands and NAV reservation contracts)
+//
 
 
 #ifndef __INET_ITX_H

@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (receive-window ordering and Block Ack Request handling)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"

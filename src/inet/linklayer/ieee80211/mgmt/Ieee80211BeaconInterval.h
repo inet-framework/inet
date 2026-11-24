@@ -1,5 +1,6 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
+// Author: Miguel González-López
 //
 
 #ifndef __INET_IEEE80211BEACONINTERVAL_H

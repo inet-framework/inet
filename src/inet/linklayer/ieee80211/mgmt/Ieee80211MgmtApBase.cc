@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (AP channel tracking and HT/DSSS channel advertisement)
+//
 
 
 #include <string.h>

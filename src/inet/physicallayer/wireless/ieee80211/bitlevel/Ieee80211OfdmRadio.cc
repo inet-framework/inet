@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (layered OFDM SIGNAL decoding and parity validation)
+//
 
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmRadio.h"

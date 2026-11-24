@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (Basic and Compressed Block Ack feedback handling)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"

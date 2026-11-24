@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (peer-specific HT rate selection and Compressed Block Ack control rates)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"

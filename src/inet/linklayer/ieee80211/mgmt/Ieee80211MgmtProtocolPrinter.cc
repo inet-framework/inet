@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (diagnostic formatting for HT capabilities and operation)
+//
 
 
 #include <sstream>

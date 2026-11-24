@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (TXOP duration calculation and protection timing)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"

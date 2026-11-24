@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (standard channel mappings and 5 GHz channel center frequencies)
+//
 
 
 #include <algorithm>

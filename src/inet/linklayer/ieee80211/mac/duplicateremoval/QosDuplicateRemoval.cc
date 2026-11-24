@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (non-QoS duplicate identity and peer teardown)
+//
 
 
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"

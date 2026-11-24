@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
+// Contributor: Miguel González-López (AP association completion and HT discovery interfaces)
+//
 
 
 #ifndef __INET_IEEE80211MGMTAP_H

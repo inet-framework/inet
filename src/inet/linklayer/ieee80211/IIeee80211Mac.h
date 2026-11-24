@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+// Author: Miguel González-López
 
 #ifndef __INET_IIEEE80211MAC_H
 #define __INET_IIEEE80211MAC_H
