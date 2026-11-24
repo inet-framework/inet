@@ -344,7 +344,46 @@ fixes them.
 
 ### 6.3 The prepared commit entries
 
-Empty. Step 3 of §6.1 writes the entries of each change here before its gate A.
+Step 3 of §6.1 writes the entries of each change here before its gate A.
+
+#### R1: TCP comments and code without effect (BD-5, BD-13, BD-16, BD-6, BD-9), prepared 2026-11-24
+
+**Re-check.** No commit from `bc39ec7571` to master `d8a58564ee` changes `src/inet/transportlayer/tcp`. The five
+places are as §2.2 says.
+
+**The fault.** No test can fail for BD-5, BD-13 and BD-16, because they are comments. BD-6 and BD-9 give the same
+results as their repairs, by the text of the entries. So step 2 of §6.1 has no failing test for R1. The check is that
+no fingerprint and no module test changes.
+
+**A risk found in the preparation.** BD-6 changes the lower limit of the ssthresh after a timeout from `2 * snd_mss` to
+`2 * snd_effmss`. Since `5118cd85ec` a connection with timestamps sends the TS option on each segment, so `snd_effmss`
+is 12 bytes less than `snd_mss` there. RFC 5681 section 2 defines SMSS without the TCP options, so `snd_effmss` is the
+correct value, but the limit binds only when FlightSize/2 is below 2*SMSS, and then results can move. If a fingerprint
+moves at C4, BD-6 leaves R1 and becomes a change of its own with its re-record, by a revision of this plan.
+
+**Commits.** [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol) does not apply: no commit changes
+a protocol behavior, and C4 leaves R1 if it does.
+
+- **C3: `tcp: comment: each comment is above its function, and no comment describes a removed function`** (BD-5,
+  BD-13, BD-16). `TcpConnection.h`: the comment "Utility: update window information (snd_wnd, snd_wl1, snd_wl2)"
+  moves from above the comment of `getFlightSize()` to above `updateWndInfo()`. `TcpReno.h`: delete the 4 lines of the
+  comment of the removed `isInFastRecovery()` above `public:`. `Rfc5681CongestionControl.cc:100`: the comment says that
+  a timeout sets cwnd to 1 SMSS (RFC 5681 section 3.1) and the reaction to an ECN-Echo can leave it at 1 SMSS, so the
+  division needs no guard against a small cwnd, only against 0. `Change: src.transportlayer.tcp | comment | - |
+  baseline-catch-up-defect-repairs`.
+- **C4: `tcp: refactor: the ssthresh after a timeout comes from calculateSsthresh() with the effective MSS`** (BD-6).
+  `TcpClassicAlgorithmBase::calculateSsthreshForRto()` returns `calculateSsthresh(state->snd_max - state->snd_una)`,
+  as `TcpCubic` does with its own count. `Change: src.transportlayer.tcp | refactor | - |
+  baseline-catch-up-defect-repairs`.
+- **C5: `tcp: refactor: step (2) of RFC 6675 tests IsLost(HighACK + 1) at SND.UNA`** (BD-9).
+  `Rfc6675Recovery.cc:332` tests `isLost(state->snd_una)`, and its comment names HighACK + 1 as SND.UNA. `Change:
+  src.transportlayer.tcp | refactor | - | baseline-catch-up-defect-repairs`.
+
+**Checks.** Build debug and release. Run the module tests of the places in debug mode: `tcp_rto_cwnd_1`,
+`tcp_fastrexmit_rto_1`, `tcp_algorithm_reno`, `tcp_algorithm_newreno`, `tcp_sack_1` to `tcp_sack_8`,
+`tcp_sack_old_ack_1` and `tcp_limited_transmit_sack_1`. Run all 5784 stored fingerprints in release mode once at the
+base and once after C5, as two task groups of the editor; both must pass. A run of the fingerprints after each commit
+is not necessary: if the run after C5 moves, the runs of C3 and C4 alone find the commit.
 
 ## 7. Verification
 
