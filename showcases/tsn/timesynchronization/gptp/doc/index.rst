@@ -332,8 +332,9 @@ hot-standby master clock itself drifts from the primary master, and gets
 synchronized periodically. The upper bound of the time difference is apparent on
 the chart.
 
-Note that the slave clocks in domain 1 get synchronized just before the time of
-the hot stand-by master clock is updated in domain 0. As in the previous cases,
+Note that the hot-standby master clock is synchronized in domain 0 half a sync
+interval before it sends its own sync messages in domain 1, so the slave clocks
+in domain 1 receive a recently corrected time. As in the previous cases,
 the drift rate of slave clocks is compensated to be more aligned with the master
 clock's rate.
 
