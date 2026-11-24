@@ -127,6 +127,7 @@ Left out: D-G11 (`@bit`, `FunctionBase::printStructure()`), the print and log de
 - The coverage review (`audit/whatsnew-4.8/review-coverage.md`) found lost facts in 88 of the 159 old entries, about 35 of them minor. The commit 099d0d355a puts back the facts that a user needs; it leaves out background, RFC quotes and some method names of the old text.
 - The fact review (`audit/whatsnew-4.8/review-facts.md`) found five wrong claims and one wrong credit, all corrected in 099d0d355a.
 - The preview has 584 lines and about 18000 words; the old one had 1069 lines and about 20000 words, without the 63 gaps.
+- Follow-up of 2026-11-24 (ff2ac1c2c2): at the request of the owner, the Block Ack, IEEE 802.1ad, TCP model rework and TCP fixes themes went from 3541 to 1919 words. They keep the parameters, defaults, selections, result changes and the names that custom C++ code needs, and they leave the internal protocol rules and the C++ contracts to the migration guide. The preview now has about 16500 words.
 
 ## Open points for the release
 
