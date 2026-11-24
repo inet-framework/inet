@@ -6,12 +6,16 @@ is `master` `d8a58564ee` (2026-11-24) plus 4 commits; of them, only `b0d922e023`
 `master` `d8a58564ee` through git. The untracked files `plan/evidence/ieee80211-chart-evolution/` and
 `plan/pending/statistical-and-chart-baseline-catch-up.md` belong to other work.
 
-Plan revision: 2026-11-24, first text.
+Plan revision: 2026-11-24, second text: a simpler workflow and the charts of the progress (§9).
 
-Approval: pending. On 2026-11-24 the maintainer asked for this plan: "I want to create a plan which fixes the non
-802.11 related defects that were added since inet version 4.7 or are easy to fix. [...] I want to be able to follow
-the implementation of the plan in the IDE." The request does not approve an implementation
-([PLR-APPROVAL](../../doc/project/rule/planning.md#plr-approval)).
+Approval: approved by the maintainer on 2026-11-24 ("I approve the plan. The workflow is a bit too much this way, keep
+it simpler. I also need charts to see the progress."). The approval covers the scope of §8. The decisions D1 to D10
+and the proposed answers to the three questions of §8 count as approved with the plan. The second text changes only
+the view of §9.
+
+On 2026-11-24 the maintainer asked for this plan: "I want to create a plan which fixes the non 802.11 related defects
+that were added since inet version 4.7 or are easy to fix. [...] I want to be able to follow the implementation of the
+plan in the IDE."
 
 ## 1. Problem and intended behavior
 
@@ -144,7 +148,7 @@ The code read of 2026-11-24 found these differences from the text of
 
 ## 4. Proposed design and reasons
 
-The assistant proposes these decisions. The maintainer did not decide them yet.
+The assistant proposed these decisions. The maintainer approved them with the plan on 2026-11-24.
 
 - **D1. The places.** The code changes go into a new worktree, `/home/projectured/workspace/inet-cpp-defect-repairs`,
   on the branch `topic/baseline-catch-up-defect-repairs` from `master`. Reason: other sessions use the main checkout,
@@ -205,7 +209,7 @@ No sealed file changes. No consumer outside INET changes.
 ### 6.1 The cycle of a change
 
 1. **Re-check.** Rebase the topic branch on the master of that day. Read the place of each entry again, and run the
-   check of the entry if the code changed. Record the result in the workflow and the table (§9).
+   check of the entry if the code changed. Record the result in the table (§9.2).
 2. **Show the fault.** Write the test of the entry. Build in debug mode and run the test in the editor. It must fail.
    If it passes, record the result, close the entry and go to step 9.
 3. **Prepare.** Write the commit entries of the change into §6.3: subject, files, the items 1 to 5 of
@@ -384,12 +388,12 @@ and `tests/protocol/quic/`. Step 3 of §6.1 names the exact files.
   file that the subagent changed.
 - Other work can change TCP on master during this plan. Step 1 of §6.1 runs at the start of each change.
 
-**Open questions for the maintainer:**
+**Answered questions** (the approval of 2026-11-24 kept the proposed answers):
 
-1. Is the scope of §2.2 correct? Especially: BD-31 is out as an 802.11 entry; BD-33 is out because its 802.11 part is
-   repaired and the rest needs a decision; BD-24 and BD-39 are in as easy entries.
-2. Do you agree to the order of D4, with R1 as the first change?
-3. Do you agree to D2 and D10: the plan and the files of the view go into git, also on master?
+1. The scope is §2.2: BD-31 is out as an 802.11 entry; BD-33 is out because its 802.11 part is repaired and the rest
+   needs a decision; BD-24 and BD-39 are in as easy entries.
+2. The order is D4, with R1 as the first change.
+3. D2 and D10 hold: the plan and the files of the view go into git, also on master.
 
 **Approval scope:** an approval of this plan covers step 0 and the cycle of §6.1 for each change up to its gate A. The
 code of each change needs gate A, and its landing needs gate B. The approval does not cover a push, a change of a
@@ -404,22 +408,27 @@ exist in the editor of 2026-11-24.
 
 | View | It shows | Made with |
 | --- | --- | --- |
-| **Workflow**, above the conversation | The steps of §6.2 with their states (`:open`, `:active`, `:done`, `:dropped`). Under the active step: the steps of the cycle of §6.1, the decisions of gate A and gate B with their reasons, and an entry for each finding and each link | `start_workflow!`, `add_workflow_step!`, `change_workflow_state!`, `add_workflow_entry!`, `record_workflow_decision!` |
-| **Defects**, a table | One row for each of the 44 entries: BD, title, area, origin, scope, change, state, repair commit. The states are `open`, `re-checked`, `fault shown`, `design approved`, `repaired`, `result approved`, `landed`, `closed`, `left out`. The maintainer filters and sorts it | `RecordTable` in a `.pred` file, `replace_referenced_value!` for one field, `save_file_to_disk!` |
+| **Workflow**, a tab above the conversation | One line for each step of §6.2, with a short title such as "R2 TCP override timer" and its state (`:open`, `:active`, `:done`, `:dropped`). A step gets an entry only at gate A and at gate B, with the words of the maintainer, and when it ends with no repair. No sub-steps and no embedded files | `change_workflow_state!`, `add_workflow_entry!` |
+| **Progress**, a tab of three charts | (1) the 27 entries in scope in four groups of states: not started, in work, repaired, landed or closed; (2) a stacked bar for each change R1 to R19, with its entries in the same four groups; (3) the count of the entries repaired and of the entries landed or closed, on each day of the work | `Dashboard` of three `DashboardCard`s, each a `Chart` (`ChartBarSeries`, `ChartLineSeries`) that the helper `refresh_progress_1()` draws again from the table |
+| **Defects**, a tab with a table | One row for each of the 44 entries: BD, title, area, change, state, scope, reason, origin, repair commit, `repaired_on`, `landed_on`. The states of an entry in scope are `1 open`, `2 re-checked`, `3 fault shown`, `4 design approved`, `5 repaired`, `6 result approved`, `7 landed` and `8 closed`; an entry out of scope is `left out` or `closed`. The maintainer filters and sorts it | `RecordTable` in a `.pred` file; the helper `set_defect_state_1(number, state; commit)` writes a state and its date, saves the table and refreshes the charts |
 | **Tasks** | Each build, test, update and attribution run as a group with a progress ring, counts and the log of each task; each group opens in a tab when it starts | `build_simulation_project!`, `run_protocol_tests!`, `run_module_tests!`, `run_unit_tests!`, `run_fingerprint_tests!`, `update_fingerprint_test_results!`; `run_tasks!` with `ProgramTask` for `tools/prun.sh` |
 | **Moved values** | The scalars that a statistical test found different, and the differences of two result files | the page of a statistical test task (`LegacyStatisticalTaskDocument`, `LegacyScalarDifferences`), `LegacyResultComparison`, `LegacyTestLog` for the log of a run in the image |
 | **Commits** | The commits of the topic branch and of the statistics branch, each with its changed files and diffs | `GitCommitRange("…/inet-cpp-defect-repairs", "master..topic/baseline-catch-up-defect-repairs")`, `GitCommit` |
-| **Explorer "Defect repairs"**, a tab | The workflow, the table, this plan, [baseline-catch-up-defects.md](baseline-catch-up-defects.md), the project of the worktree, the two commit ranges, the reviewer documents, and the tasks of the editor | `ExplorerSection`, `Explorer`, `open_file_document!`, `get_session_task_group_list()` |
+| **Explorer "Defect repairs"**, a tab | The workflow, the table, the charts, this plan, [baseline-catch-up-defects.md](baseline-catch-up-defects.md), the two commits that repaired entries before the plan, the TCP commits since v4.7.0, the project of the worktree, the two commit ranges, and the tasks of the editor | `ExplorerSection`, `Explorer`, `open_file_document!`, `get_session_task_group_list()` |
 | **The page of a gate** | At gate A the prepared entry of §6.3; at gate B the reviewer document, the moved values and the commits, each in a tab | `open_pane!`, `show_pane!` |
+
+A pivot table of the editor can draw the same charts, but it shows its field controls above each chart and no labels
+of the categories, so the charts are plain `Chart` documents. A pivot and a chart keep a copy of their rows, so the
+assistant draws the charts again after each change of the table.
 
 ### 9.2 How the assistant keeps the view current
 
-1. When a step starts, mark it `:active` and add the steps of §6.1 under it. Mark each `:done` when it ends.
-2. When an entry changes its state, write the field `state` of its row, and save the table.
-3. When a task group starts, open it in a tab. When it ends, add an entry with its result to the workflow.
-4. At each gate, record the decision with `record_workflow_decision!`, with the words of the maintainer as the reason.
-5. After each change of the workflow, save it to `workflow.pred`. A live task group can not be written to a file, so
-   take it out before the write and put it back after it.
+1. When an entry changes its state, call `set_defect_state_1(number, state; commit)`. It writes the state and the
+   date, saves the table and draws the charts again.
+2. When a step starts, mark it `:active`. When it ends, mark it `:done`, or `:dropped` with an entry that says why.
+3. At gate A and gate B, add one entry to the step with the words of the maintainer.
+4. When a task group starts, open it in a tab. The workflow gets no entry for a task group.
+5. After each change of the workflow, call `save_workflow_1()`.
 6. When a program rewrites a file that a tab shows, load it again with `reload_file_from_disk!`.
 
 ### 9.3 The files
@@ -427,9 +436,9 @@ exist in the editor of 2026-11-24.
 `plan/evidence/baseline-catch-up-defect-repairs/` holds:
 
 - `workflow.pred`: the workflow.
-- `defects.pred`: the table of the defects.
-- `ide-session.jl`: the code that opens the tabs of §9.1 again after a restart of the editor, and defines the helpers
-  that find a step and save the workflow. The assistant passes its text to one `execute_julia_code` call.
+- `defects.pred`: the table of the defects. The charts come from it, so no other file keeps the progress.
+- `ide-session.jl`: the code that opens the four tabs of §9.1 again after a restart of the editor, and defines the
+  helpers of §9.2. The assistant passes its text to one `execute_julia_code` call.
 
 Before step 0, these files are in the main checkout. After step 0, they are in the worktree, and `ide-session.jl`
 names the paths of the worktree.
