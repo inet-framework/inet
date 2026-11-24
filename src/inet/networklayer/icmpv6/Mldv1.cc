@@ -360,6 +360,14 @@ void Mldv1::processMldMessage(Packet *packet)
     const auto& mldMsg = packet->peekAtFront<Icmpv6Header>();
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     EV_INFO << "Received MLD message, type=" << (int)mldMsg->getType() << endl;  // keep for MLD_smoke.test
+    // a node sends a Report or a Done from the unspecified address before it has a valid
+    // link-local address; routers and hosts silently discard it (RFC 3590 sections 4 and 6)
+    if ((mldMsg->getType() == ICMPv6_MLD_REPORT || mldMsg->getType() == ICMPv6_MLD_DONE)
+            && packet->getTag<L3AddressInd>()->getSrcAddress().isUnspecified()) {
+        EV_INFO << "Ignoring an MLD Report or Done from the unspecified address.\n";
+        delete packet;
+        return;
+    }
     switch (mldMsg->getType()) {
         case ICMPv6_MLD_QUERY:
             processQuery(ie, packet);
