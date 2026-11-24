@@ -690,6 +690,15 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
         return;
     }
 
+    // a datagram from the unspecified address is never forwarded (RFC 4291 section 2.5.2), as an
+    // MLDv1 Report to the address of its group that a node sends before it has a valid link-local
+    // address (RFC 3590 section 4)
+    if (srcAddr.isUnspecified()) {
+        EV_INFO << "multicast source address is unspecified, not forwarding\n";
+        delete packet;
+        return;
+    }
+
     // find the multicast route for (source, group); if there is none, give a multicast
     // routing protocol (e.g. PIM) a chance to create one, then look up again
     Ipv6MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
