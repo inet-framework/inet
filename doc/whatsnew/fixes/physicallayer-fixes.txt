@@ -1,0 +1,9 @@
+Physical layer fixes
+
+DielectricObstacleLoss attenuated a signal that crosses an obstacle by twice the dB of the power decay of a plane wave in a low-loss material: a concrete wall of 0.2 m at 2.4 GHz took 3.085 dB instead of 1.542 dB. The loss is now exp(-2 alpha z), with an attenuation constant that also holds for a large loss tangent, and a material with resistivity 0 blocks the signal. For the INET materials at microwave frequencies, the dielectric loss in dB is half of the former value. This changes the results of simulations with enableDielectricLoss, for example the examples obstacle and objectcache and the showcases wireless/ratecontrol, visualizer/canvas/ieee80211 and visualizer/canvas/spectrum.
+
+StochasticErrorModel and Ieee80211BerTableErrorModel did not initialize ErrorModelBase, so a failed reception stopped the simulation with "Unknown corruption mode", and the BER table model crashed for packet-level IEEE 802.11 transmissions. Both models now initialize their base, and the BER table model reads the length of the PSDU from the PHY header.
+
+With separateReceptionParts = true, the radio medium now computes the interference, the noise and the SNIR of a reception again when a new transmission overlaps it; before, an interferer that started after the preamble or the header did not cause a bit error. The scalar "reception decision computation count" now counts the decisions of the parts.
+
+A radio that is created during the run now works with the radio medium. It is added to the medium before its lifecycle starts, it sees a transmission in progress as interference, and a radio without a receiver, for example a NoiseSource, no longer crashes the medium. With listeningFilter = true, a radio that changes its channel during its own transmission no longer crashes. With attenuateWithCenterFrequency = false, DimensionalMediumAnalogModel no longer throws "Cannot partition FrequencyDependentAttenuationFunction".

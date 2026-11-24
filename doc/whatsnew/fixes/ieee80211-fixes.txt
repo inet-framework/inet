@@ -1,0 +1,11 @@
+IEEE 802.11 fixes
+
+Ieee80211CompliantBands::band5GHz placed the channel centers 2.5 MHz off the 5 MHz grid of IEEE 802.11. Channel i now has its center at 5000 + 5 * (i + 1) MHz, as IEEE Std 802.11-2024 Equation (17-27) states. Simulations with the "5 GHz" band have a carrier 2.5 MHz higher, with a little more path loss and a little less SNIR.
+
+The default maxTransmissionDuration of MediumLimitCache (10 ms) was shorter than a full-size frame at the DSSS rate of 1 Mbit/s, so a simulation stopped with "Maximum transmission duration is exceeded" when rate control went down to 1 Mbit/s. Ieee80211RadioMedium now sets it to 35 ms. The timer that removes old transmissions fires 25 ms later, which changes the event fingerprints (tplx) of 215 runs, but not their link-layer and network-layer trajectories.
+
+The HT mode factory now includes the band and the preamble format in its cache key, so a request for 5 GHz after an equivalent request for 2.4 GHz gets the requested band and timing. The preamble duration of an HT or VHT transmission no longer includes the HT-SIG or VHT-SIG-A field, which is the header part, so the data part is no longer 8 us too short, and a short VHT frame no longer has a negative data duration; the total duration does not change. The Block Ack decoders no longer leak memory.
+
+A station no longer stops with "Unknown control frame" when it receives a response that no frame exchange waits for: an Ack or a CTS at a DCF station, a CTS or a BlockAck at an HCF station. Such a frame arrives after its timeout, for example from a peer far away. IEEE 802.11-2024 counts an Ack or a CTS only when it starts within its timeout (10.3.2.11, 10.3.2.9), so the station ignores it.
+
+The corrections of the 5 GHz band, of the HT mode cache, of maxTransmissionDuration and of the Block Ack decoders were contributed by Miguel González-López.

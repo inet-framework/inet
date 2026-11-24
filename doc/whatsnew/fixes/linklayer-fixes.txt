@@ -1,0 +1,13 @@
+Ethernet, VLAN, MRP and other link layer fixes
+
+The classic MAC relays Ieee8021dRelay (the default relay of EthernetSwitch), MacRelayUnit and MrpRelay work with an 802.1Q layer (ieee8021q.typename = "Ieee8021qProtocol"). A forwarded frame keeps its VLAN tag, with its tag type, VLAN ID, PCP and DEI; before, the relays sent each forwarded tagged frame untagged. They look up destinations in the VLAN of the frame; before, they looked up in VLAN 0, so they flooded tagged unicast frames. A packet from the upper layer of a relay goes down with the tags that it requests; before, the request was dropped. MrpRelay no longer sends a multicast frame back out of its arrival port or out of ring ports that MRP blocks.
+
+An 802.1Q tag inserter removed the user priority request after it encoded the request into its tag, so nothing below the inserter got the user priority. In a node with a C-tag and an S-tag, the outer tag had PCP 0, and an IEEE 802.11 or CSMA/CA interface under an 802.1Q layer sent each frame without a priority. The inserters now leave the user priority request on the packet, as IEEE Std 802.1Q-2018 6.9.2 requires, so an 802.11 MAC sends a QoS data frame, two bytes longer, in the access category of the user priority. On receive, nothing changes.
+
+A static unicast entry of MacForwardingTable, from the forwardingTable parameter, a configurator or the forwardingTableFile parameter, aged out after the agingTime (120 s), and a learning switch wrote over it from the first frame of that address. Static entries now stay for the whole simulation, and learning does not write over them, as the User's Guide states.
+
+EthernetMacPhy and EthernetCsmaMacPhy read only the bit error flag of the received signal, and EthernetCsmaPhy wrote that flag over the flag of the frame. A frame with its own bit error therefore passed up, and IPv6 stopped at an assertion. These receivers now discard such a frame. A deserialized fragment trailer (mCRC) of Ethernet frame preemption keeps its type, so the checker no longer takes each valid fragment for the last one.
+
+AckingMac checks the bit error of a received frame before it reads the MAC header, so a frame with an incorrect header no longer stops the simulation. LMac drops a data frame that does not fit in its slot with the reason PACKET_TOO_BIG; before, it stopped with "I am still sending a message, while a new slot is starting!". The gate scheduling configurators no longer stop on an interface without a datarate, for example a cellular or tunnel interface.
+
+The trailer fix of Ethernet fragments was contributed by Miguel González-López.

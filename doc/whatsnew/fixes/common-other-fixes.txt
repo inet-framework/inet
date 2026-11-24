@@ -1,0 +1,13 @@
+Other fixes: packets, result filters, external processes, DYMO and visualization
+
+A part of a flagged chunk now has the flags of the chunk, because a flag says that the content is incomplete, incorrect or improperly represented, but not where. Before, a part of a BitCountChunk, BitsChunk, ByteCountChunk or BytesChunk was clean, so for example the first bytes of an incorrect BytesChunk looked correct. A conversion keeps the incomplete and incorrect flags, two chunks with different flags no longer merge, and SequenceChunk and SliceChunk give their flags to their parts. Code that reads a part of flagged content must pass PF_ALLOW_INCOMPLETE, PF_ALLOW_INCORRECT or PF_ALLOW_IMPROPERLY_REPRESENTED, as it must for a whole flagged chunk.
+
+A slice of a ByteCountChunk or a BitCountChunk keeps the fill value; before, it serialized as default bytes, for example in a retransmission queue. A slice that starts or ends inside a byte no longer stops serialization with "Cannot convert between integer units", for example when Ppp cuts a frame at a disconnect. The deserializers of both chunks read the fill value from the wire.
+
+DataAgeFilter, ApplicationPacketSequenceNumberFilter, PacketLifeTimeFilter and LifeTimePerRegionFilter no longer stop the run on a packet of length zero, for example a UDP datagram that is only the header at a UdpSink.
+
+When ExternalProcess could not start its command, for example a missing ping, the child process ran the teardown of the simulation and killed the whole process group, including the run script. Now the child exits with status 127, and the parent applies its onExit policy.
+
+A DYMO node whose route discovery ran out of attempts no longer deletes the RREQ wait timer twice, which corrupted the heap. The DynamicIPv6 configuration of the DYMO example therefore runs.
+
+PacketDropCanvasVisualizer read its dx parameter into dy too, so dy had no effect. The canvas animation of a dropped packet now rises to the height dy, 64 pixels by default, for example in showcases/visualizer/canvas/packetdrop. Simulation results do not change.
