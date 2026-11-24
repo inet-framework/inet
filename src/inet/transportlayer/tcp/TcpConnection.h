@@ -596,7 +596,6 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: the window field of a SYN or a SYN-ACK, which is not scaled; call after updateRcvWnd(). */
     virtual uint16_t synWindow();
 
-    /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     /**
      * FlightSize for the ssthresh of fast retransmit (RFC 5681 equation (4)): the data
      * that was sent but is not cumulatively acknowledged. Step 2 of RFC 5681 section
@@ -604,6 +603,7 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t getFlightSize() const;
 
+    /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
     /**

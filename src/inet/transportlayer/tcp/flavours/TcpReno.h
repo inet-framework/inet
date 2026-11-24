@@ -35,11 +35,6 @@ class INET_API TcpReno : public TcpClassicAlgorithmBase
     virtual ITcpCongestionControl *createCongestionControl() override;
     virtual ITcpRecovery *createRecovery() override;
 
-    /**
-     * With SACK, Reno is in loss recovery while lossRecovery is set (RFC 6675). Without
-     * it, Reno is in fast recovery from the third duplicate ACK to the next ACK of new data.
-     */
-
   public:
     /** Ctor */
     TcpReno();

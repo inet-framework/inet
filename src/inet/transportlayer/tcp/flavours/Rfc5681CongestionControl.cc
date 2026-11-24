@@ -97,8 +97,9 @@ void Rfc5681CongestionControl::congestionAvoidance(uint32_t numBytesAcked)
     // If the above formula yields 0, the result SHOULD be rounded up to 1
     // byte.
     //"
-    // cwnd is floored at 2*SMSS everywhere it is reduced, but guard the division
-    // anyway: a zero cwnd here would be a hard crash rather than a misprediction.
+    // cwnd can be 1 SMSS here: a timeout sets it to 1 SMSS (RFC 5681 section 3.1), and
+    // the reaction to an ECN-Echo can leave it at 1 SMSS. Guard the division anyway:
+    // a zero cwnd here would be a hard crash rather than a misprediction.
     uint32_t i = state->snd_cwnd > 0 ? state->snd_effmss * state->snd_effmss / state->snd_cwnd : state->snd_effmss;
     if (i == 0) i = 1;
     state->snd_cwnd += i;
