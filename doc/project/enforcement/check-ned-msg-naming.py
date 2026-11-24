@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Author: Miguel González-López
 """Check the mechanical NED/MSG subset of doc/project/rule/naming.md."""
 
 from __future__ import annotations

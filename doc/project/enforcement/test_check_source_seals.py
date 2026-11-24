@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Author: Miguel González-López
 
 import os
 from pathlib import Path

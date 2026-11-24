@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Author: Miguel González-López
 #
 # Check whether modified or target source files overlap the canonical INET seal registry.
 # This is the source-path companion to check-seals.sh, which checks document seal flags.

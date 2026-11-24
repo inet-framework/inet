@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Contributor: Miguel González-López (diff-aware NED/MSG naming checks)
+#
 # The naming gate for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
 # It enforces the path/asset half of doc/project/rule/naming.md: the names a script can see.
 # The C++ identifiers are check-cpp.sh; declaration-level NED/MSG names are checked by the

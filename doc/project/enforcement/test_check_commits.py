@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Contributor: Miguel González-López (regression coverage for commit-message paragraph layout checks)
 
 from pathlib import Path
 import json
