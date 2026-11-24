@@ -2012,29 +2012,33 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             }
         }
         auto lifetimeHandler = edca->getLifetimeHandler();
-        auto step = frameSequenceHandler->getContext()->getLastStep();
-        auto protectedPacket = dynamic_cast<RtsTransmitStep *>(step);
-        auto data = protectedPacket ? protectedPacket->getProtectedFrame() : packet;
+        auto data = rtsStep ? rtsStep->getProtectedFrame() : packet;
         // IEEE Std 802.11-2024, 10.23.2.12.1: a delayed start cannot exceed DATA lifetime.
         if (lifetimeHandler->isExpired(data, simTime() + ifs))
             return false;
         auto txop = channelOwner->getTxopProcedure();
-        bool scopedSingle = txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && !par("isBlockAckSupported").boolValue();
-        Packet *retainedPacket = packet;
-        auto retainedModeTag = scopedSingle ? retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
-        auto retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
+        bool singleProtection = txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION;
+        bool scopedSingle = singleProtection && !par("isBlockAckSupported").boolValue();
+        bool basicDataExchange = originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC &&
+            !header->getReceiverAddress().isMulticast() && (rtsStep || dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header));
         bool dataAfterCts = false;
-        if (scopedSingle && context->getNumSteps() >= 3) {
-            auto rtsStep = dynamic_cast<RtsTransmitStep *>(context->getStep(context->getNumSteps() - 3));
+        if ((scopedSingle || basicDataExchange) && context->getNumSteps() >= 3) {
+            auto precedingRts = dynamic_cast<RtsTransmitStep *>(context->getStep(context->getNumSteps() - 3));
             auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStepBeforeLast());
-            dataAfterCts = rtsStep && rtsStep->getProtectedFrame() == packet && receiveStep &&
+            dataAfterCts = precedingRts && precedingRts->getProtectedFrame() == packet && receiveStep &&
                 receiveStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
                 receiveStep->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_CTS;
         }
+        // DATA after the opening RTS/CTS is still part of the opening exchange.
+        bool basicContinuation = basicDataExchange && context->getNumSteps() > (dataAfterCts ? 3 : 1);
+        Packet *retainedPacket = packet;
+        auto retainedModeTag = scopedSingle || basicContinuation ? retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
+        auto retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
         auto compressedBar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header);
         auto mode = preparedStep ? (rtsStep ? prepared->rtsMode : prepared->dataMode) :
             compressedBar ? rateSelection->computeCompressedBlockAckReqMode(packet, compressedBar, context->getNumSteps() == 1) :
-            dataAfterCts ? packet->getTag<Ieee80211ModeReq>()->getMode() : rateSelection->computeMode(packet, header, txop);
+            dataAfterCts && (scopedSingle || basicContinuation) ? packet->getTag<Ieee80211ModeReq>()->getMode() :
+            rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
         if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
             auto basic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(bar);
@@ -2052,6 +2056,45 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 ((txop->getLimit() > 0 && ifs + cost > txop->getRemaining()) ||
                  (txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && cost >= rx->getTxnavRemaining())))
                 return false;
+        }
+        simtime_t responseDuration = SIMTIME_ZERO;
+        simtime_t nextFrameDuration = SIMTIME_ZERO;
+        simtime_t cost = SIMTIME_ZERO;
+        if (scopedSingle || basicContinuation) {
+            cost = mode->getDuration(packet->getDataLength());
+            auto sifs = modeSet->getSifsTime();
+            if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+                retainedPacket = const_cast<Packet *>(rtsStep->getProtectedFrame());
+                retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
+                retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
+                auto protectedHeader = retainedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                auto dataMode = rateSelection->computeMode(retainedPacket, protectedHeader, txop);
+                setFrameMode(retainedPacket, protectedHeader, dataMode);
+                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
+                nextFrameDuration = dataMode->getDuration(retainedPacket->getDataLength());
+                if (recipientAckPolicy->isAckNeeded(protectedHeader))
+                    nextFrameDuration += sifs + computeImmediateResponseDuration(retainedPacket, protectedHeader);
+                cost += sifs + responseDuration + sifs + nextFrameDuration;
+            }
+            else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+                if (recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
+                    responseDuration = computeImmediateResponseDuration(packet, dataOrMgmt);
+                    cost += sifs + responseDuration;
+                }
+            }
+            else
+                throw cRuntimeError("Unsupported holder frame for TXOP admission");
+
+            // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: the exchange must be shorter than
+            // TXNAV at the decision, and its preceding IFS also counts against the TXOP limit.
+            bool checkContinuation = basicContinuation || (!dataAfterCts && context->getNumSteps() > 1);
+            if (checkContinuation && (txop->getLimit() == 0 || cost >= rx->getTxnavRemaining() || ifs + cost > txop->getRemaining())) {
+                if (retainedModeTag)
+                    retainedPacket->addTagIfAbsent<Ieee80211ModeReq>()->setMode(retainedMode);
+                else
+                    retainedPacket->removeTagIfPresent<Ieee80211ModeReq>();
+                return false;
+            }
         }
         if (preparedStep) {
             auto response = rtsStep ? prepared->ctsMode->getDuration(LENGTH_CTS) :
@@ -2079,47 +2122,8 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             updated->setDurationField(duration);
             packet->insertAtFront(updated);
         }
-        else if (scopedSingle) {
-            auto sifs = modeSet->getSifsTime();
-            auto cost = mode->getDuration(packet->getDataLength());
-            simtime_t responseDuration = SIMTIME_ZERO;
-            simtime_t nextFrameDuration = SIMTIME_ZERO;
+        else if (scopedSingle || (basicContinuation && singleProtection && rtsStep)) {
             bool finalFrame = true;
-            if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
-                auto step = check_and_cast<RtsTransmitStep *>(context->getLastStep());
-                auto protectedPacket = const_cast<Packet *>(step->getProtectedFrame());
-                retainedPacket = protectedPacket;
-                retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
-                retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
-                auto protectedHeader = protectedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
-                auto dataMode = rateSelection->computeMode(protectedPacket, protectedHeader, txop);
-                setFrameMode(protectedPacket, protectedHeader, dataMode);
-                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
-                nextFrameDuration = dataMode->getDuration(protectedPacket->getDataLength());
-                auto ackDuration = computeImmediateResponseDuration(protectedPacket, protectedHeader);
-                if (recipientAckPolicy->isAckNeeded(protectedHeader))
-                    nextFrameDuration += sifs + ackDuration;
-                cost += sifs + responseDuration + sifs + nextFrameDuration;
-            }
-            else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
-                responseDuration = computeImmediateResponseDuration(packet, dataOrMgmt);
-                if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
-                    cost += sifs + responseDuration;
-            }
-            else
-                throw cRuntimeError("Unsupported single protection holder frame");
-            // IEEE Std 802.11-2024, 10.23.2.8: compare the exchange duration strictly against TXNAV.
-            // INET samples at the preceding exchange's completion, before the initial SIFS wait.
-            // The separate TXOP limit includes that wait (10.23.2.9).
-            if (!dataAfterCts && context->getNumSteps() > 1 &&
-                (txop->getLimit() == 0 || cost >= rx->getTxnavRemaining() || ifs + cost > txop->getRemaining())) {
-                // The response estimate needs the selected mode; refusal must retain the frame's prior tag.
-                if (retainedModeTag)
-                    retainedPacket->addTagIfAbsent<Ieee80211ModeReq>()->setMode(retainedMode);
-                else
-                    retainedPacket->removeTagIfPresent<Ieee80211ModeReq>();
-                return false;
-            }
             if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
                 nextFrameDuration = forecastSingleProtectionSuccessor(packet, dataOrMgmt, txop,
                     channelOwner->getInProgressFrames(), simTime() + ifs + cost);

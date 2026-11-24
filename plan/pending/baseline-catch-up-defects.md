@@ -240,6 +240,25 @@ Keep the Duration/ID equation in single protection.
   rerun `Ieee80211SingleProtectionGroup_1` as a control for the protection equation.
   Record the comparison in [Group-frame Duration/ID](../../tests/protocol/wifi/single-protection-group-duration.md).
 
+### Basic Block Ack TXOP admission, BD-27
+
+Commit `BD-27`, “ieee80211: fix: bound Basic Block Ack TXOP continuations”.
+Use the group-frame reservation fix from PR #1481 as the parent. HCF checks the selected unicast
+exchange before transmission, including RTS/CTS and any immediate ACK. Apply the strict TXNAV
+comparison in IEEE Std 802.11-2024, 10.23.2.8, and count the leading SIFS against the nonzero TXOP
+limit in 10.23.2.9. Keep the protected DATA rate selected before RTS through the CTS step.
+
+- Add [WifiBasicTxopAdmission.test](../../tests/protocol/wifi/common/WifiBasicTxopAdmission.test).
+  Use associated non-HT stations and queued UDP traffic to exercise Basic DATA in the production
+  MAC. Check multiple protection with and without RTS, and use already extracted unicast fragments
+  to exercise single protection. Check a tight TXOP deadline and a reservation too short for RTS/CTS
+  plus DATA. Verify that fitting continuations can proceed and that deferred airtime does not
+  prevent subsequent Basic DATA and feedback.
+- Run the same fixture before and after the fix with a debug library and the Wi-Fi protocol runner
+  filtered to `WifiBasicTxopAdmission.test`. The fixture covers continuations with positive
+  limits at fixed rates and observes Block Ack feedback as evidence of progress.
+  Record the results and controls in [Basic Block Ack TXOP admission](../../tests/protocol/wifi/basic-txop-admission.md).
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair
@@ -600,9 +619,11 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   this fault without Block Ack support. `ad59ba2ec1` admits prepared DATA with the complete cost of the exchange only
   for Compressed Block Ack: `Hcf::prepareDataTransmission()` answers LEGACY unless `blockAckVariant` is COMPRESSED.
   So Basic Block Ack keeps the fault (checked at `292582ba24` and at `bc39ec7571`).
-- **Baselines:** none known.
+- **Baselines:** five run-0 fingerprint cases change when a DATA continuation after an expired
+  reservation waits for a fresh grant. See the [fingerprint comparison](../../tests/protocol/wifi/basic-txop-admission.md#fingerprint-comparison).
 - **Repair:** the complete cost of the exchange for Basic Block Ack too.
-- **Check:** with Basic Block Ack, no exchange ends after the end of the TXOP.
+- **Check:** a Basic DATA continuation fits the remaining TXNAV and the TXOP deadline, including
+  protection and any immediate response. [Regression evidence](../../tests/protocol/wifi/basic-txop-admission.md).
 
 #### BD-28: the centers of the arithmetic band "5 GHz" are 2.5 MHz off the grid
 

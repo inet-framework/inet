@@ -533,7 +533,16 @@ The first exchange proceeds even when its cost exceeds a positive TXOP limit. Th
 
 A zero limit permits the initial exchange and its existing RTS/CTS and immediate response. Each later fragment or unrelated unit needs a fresh TXOP. Prepared fragments and A-MSDUs use the same complete-cost check under positive limits.
 
-With Block Ack support enabled, active Compressed agreements use the admission described in :ref:`ug:sec:80211:blockack`. Basic and traffic outside those agreements retain their existing admission policy. Those retained paths can exceed DATA exchange bounds. All paths use shared TXNAV. Basic Block Ack admission and BAR forecasts remain outside the Compressed correction.
+With Block Ack support enabled and the Basic profile selected, HCF applies both budgets to
+later unicast Data and Management exchanges. This includes Normal Ack traffic without an
+active Block Ack agreement. For a protected continuation, HCF budgets RTS, CTS, the
+selected DATA transmission, any immediate ACK, and the intervening SIFS before sending
+RTS. It retains the selected DATA mode through CTS and checks the remaining budget again
+before sending DATA. DATA after the opening RTS/CTS is part of the opening exchange.
+
+Active Compressed agreements use the admission described in :ref:`ug:sec:80211:blockack`.
+Traffic outside those agreements in the Compressed profile retains its existing admission
+policy.
 
 Under single protection, HCF sends one group-addressed Data or Management frame per TXOP.
 The frame advertises zero Duration/ID with either setting of Block Ack support.
@@ -608,7 +617,18 @@ The standard separately requires AIFSN of at least 1 for APs and at least 2 for 
 example, a non-AP station with AIFSN 1 meets the ownership condition but violates the standard's
 minimum.
 
-Outside active Compressed agreements, multiple protection does not check complete exchange cost against the remaining budget. For example, that retained policy can start a 120 us exchange with only 100 us left. Active Compressed agreements use their separate complete-cost admission. The reference scope assumes whole-microsecond positive limits, integral initial PPDU airtime, and integral legacy RTS airtime.
+With Block Ack support enabled and the Basic profile selected, HCF checks both budgets
+for later unicast Data and Management exchanges, including Normal Ack traffic without an
+active agreement. The complete exchange must be shorter than the remaining TXNAV, and
+its leading SIFS plus the exchange must fit the remaining positive TXOP limit. For example,
+HCF refuses a 120 us exchange with only 100 us of TXOP time left and leaves the frame for
+a fresh grant.
+
+Active Compressed agreements use their separate complete-cost admission. With Block Ack
+support disabled, or in the Compressed profile outside an active agreement, multiple
+protection retains its existing admission policy for these exchanges. The reference scope
+assumes whole-microsecond positive limits, integral initial PPDU airtime, and integral legacy
+RTS airtime.
 
 Multiple protection adds no A-MPDU, new fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. Reverse direction, beamforming, S1G, multi-user operation, and general MAC lifecycle support remain outside this implementation. General rate selection and recipient response timing retain their separate limits.
 

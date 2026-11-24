@@ -1,0 +1,5 @@
+Basic Block Ack continuations respect the transmission opportunity limit
+
+With Basic Block Ack enabled, the Wi-Fi sender now checks the airtime of the whole next exchange, including RTS/CTS and an immediate ACK when required. When the exchange cannot fit within the remaining transmission opportunity and the sender's reservation, the sender leaves the frame for a new channel access. Tight limits can therefore change the number of frames sent per transmission opportunity.
+
+The Wi-Fi QoS example's MacQosWithBlockAck configuration and the fragmentation showcase's HCFfragblockack, OnlyPacketSizeHCFfragblockack, PacketSizeHCFfragblockack and ThresholdHCFfragblockack configurations send some frames in a fresh transmission opportunity after the previous reservation expires.
