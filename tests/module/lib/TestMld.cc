@@ -403,6 +403,9 @@ void TestMld::sendMld(Packet *msg, NetworkInterface *ie, Ipv6Address dest)
 
     msg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressInd>()->setDestAddress(dest);
+    // the message comes from the link-local address of another node on the link, as every MLD
+    // message does (RFC 2710 section 3, RFC 9777 section 5)
+    msg->addTagIfAbsent<L3AddressInd>()->setSrcAddress(Ipv6Address("fe80::99"));
     msg->addTagIfAbsent<HopLimitInd>()->setHopLimit(1);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mld);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::mld);
