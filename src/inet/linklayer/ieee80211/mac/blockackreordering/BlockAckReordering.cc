@@ -52,10 +52,10 @@ void BlockAckReordering::clearPeer(MacAddress peer)
 
 BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe)
 {
-    return processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, {});
+    return processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, false, {});
 }
 
-BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, const std::function<void(Packet *)>& onDuplicate)
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, bool hadCompressedReceipt, const std::function<void(Packet *)>& onDuplicate)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     auto sequenceNumber = dataHeader->getSequenceNumber();
@@ -68,7 +68,7 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
         if (onDuplicate && dataHeader->getRetry()) {
             auto record = agreement->getBlockAckRecord();
             bool received = agreement->getVariant() == BlockAckVariant::BASIC ?
-                record->hasBasicReceipt(sequenceNumber, dataHeader->getFragmentNumber()) : record->hasCompleteReceipt(sequenceNumber);
+                record->hasBasicReceipt(sequenceNumber, dataHeader->getFragmentNumber()) : hadCompressedReceipt;
             if (received)
                 onDuplicate(dataPacket);
         }

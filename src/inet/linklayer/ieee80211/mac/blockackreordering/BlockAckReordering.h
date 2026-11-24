@@ -57,7 +57,9 @@ class INET_API BlockAckReordering
 
     void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
     ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe = false);
-    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, const std::function<void(Packet *)>& onDuplicate);
+    // For a Compressed retry, pass whether this sequence had a receipt before
+    // compressedFrameReceived() records the current arrival.
+    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, bool hadCompressedReceipt, const std::function<void(Packet *)>& onDuplicate);
     ReleasedFrames processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 

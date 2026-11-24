@@ -126,6 +126,8 @@ ordinary cache drops its duplicate. Next it opens a fresh Basic agreement starti
 sequence 1. The first in-window retry of sequence 1 is delivered and sets its Basic
 receipt bit. It emits no duplicate-drop event despite the matching ordinary cache entry.
 
+The next two steps add case 18 for [Basic Normal Ack retries](basic-blockack-normal-ack-retries.md) and case 19 for [Compressed retries after a reorder gap](compressed-blockack-retry-receipts.md). Both passed, and the final recipient module run completed all 20 scenarios successfully.
+
 From the worktree root, load `.envrc`, build the debug model, and use the focused selectors:
 
 ```sh
