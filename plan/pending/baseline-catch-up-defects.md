@@ -29,7 +29,8 @@ copy. The baseline commit of each step in `statistics` and `media` gives the exp
 A check of master `d8a58564ee` on 2026-11-24 found BD-40 repaired before this list was written, BD-28 repaired, and
 the IEEE 802.11 part of BD-33 repaired. An entry that the check changed has a line "State (2026-11-24)". So 42 entries
 are open. The plan [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs 27 of them: the
-entries outside IEEE 802.11 that are new since v4.7.0 or easy.
+entries outside IEEE 802.11 that are new since v4.7.0 or easy. Later commits of that day address BD-29 and BD-30
+(`bdd73c5a60`) and BD-31 (`ad34cc37dc`); their subsections of §3 describe them.
 
 Each entry was found and checked at the commit that it names. The entries that say "master" were checked at
 `bc39ec7571` or earlier. The commits from `bc39ec7571` to `b436a63418` change no source file of an entry: they change

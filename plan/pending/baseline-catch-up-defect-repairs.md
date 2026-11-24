@@ -457,6 +457,12 @@ baseline.
 of the CI at `4e65771abb`, whose sources equal C3. Result: 1847 runs, 1846 PASS and 1 expected ERROR, in 12 min 28 s
 (`runs/r1-landing/` of the folder of D10). R1 is ready to land.
 
+**Landing (2026-11-24).** The maintainer said: "land it and continue". Master had moved to `ad34cc37dc` with 25
+commits of other work (IPv6 Neighbor Discovery, 802.11 Block Ack, BD-31), none in `src/inet/transportlayer/tcp`. The
+branch was rebased onto it with no conflict. C3 is the same patch, and it changes no compiled token, so the
+fingerprint results of C3 hold on the new base. `check-pull-request.sh` passes on the rebased series. Master moves
+to the head of the branch by a fast-forward.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
