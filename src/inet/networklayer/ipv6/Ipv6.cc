@@ -1054,6 +1054,24 @@ static void insertIcmpv6Checksum(Packet *packet)
     packet->insertAtFront(headers);
 }
 
+// true for an MLD Report or Done: MLD sends one from the unspecified address while the interface
+// has no valid link-local address (RFC 3590 section 4, RFC 9777 section 5.2.14)
+static bool isMldReportOrDone(Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    b offset = ipv6Header->getChunkLength();
+    IpProtocolId nextHeader = ipv6Header->getProtocolId();
+    while (isIpv6ExtensionHeader(nextHeader)) {
+        auto extensionHeader = peekIpv6ExtensionHeaderAt(packet, offset, nextHeader);
+        offset += extensionHeader->getChunkLength();
+        nextHeader = extensionHeader->getNextHeaderProtocol();
+    }
+    if (nextHeader != IP_PROT_IPv6_ICMP)
+        return false;
+    int type = packet->peekDataAt<Icmpv6Header>(offset)->getType();
+    return type == ICMPv6_MLD_REPORT || type == ICMPv6_MLD_DONE || type == ICMPv6_MLDv2_REPORT;
+}
+
 void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL)
 {
 //    const NetworkInterface *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -1074,9 +1092,10 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
             }
         }
     }
-    // ensure source address is filled
+    // ensure source address is filled; the Neighbor Solicitation of Duplicate Address Detection
+    // and an MLD Report or Done keep the unspecified address
     if (fromHL && ipv6Header->getSrcAddress().isUnspecified() &&
-        !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
+        !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress() && !isMldReportOrDone(packet))
     {
         // source address can be unspecified during DAD
         const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
