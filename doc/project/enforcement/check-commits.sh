@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Contributor: Miguel González-López (commit-message paragraph layout checks)
+#
 # The commit gate for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
 # It enforces the mechanical half of doc/project/rule/pull-request.md over a commit range.
 # The judgment rules — PR-SPLIT-ONE-CHANGE, PR-SPLIT-UPSTREAM, PR-SPLIT-PREPARE,

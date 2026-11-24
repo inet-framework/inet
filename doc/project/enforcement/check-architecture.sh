@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Contributor: Miguel González-López (scoped architecture checks and determinism integration)
+#
 # Architecture check for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
 # Enforces the mechanical parts of four rules from doc/project/rule/architecture.md:
 #
