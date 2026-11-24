@@ -251,7 +251,7 @@ No sealed file changes. No consumer outside INET changes.
 
 ### 6.2 The steps
 
-- [ ] **Step 0. Set up and correct the list.**
+- [x] **Step 0. Set up and correct the list.** Done on 2026-11-24; item 3 ends in R2 (below).
   1. Make the worktree and the branch of D1. Copy the plan commit (D2). Run `opp_checkout_test_baselines` in the
      worktree. **Done 2026-11-24.** The two plan commits of `inet-julia` are `cf630c7310` and `f19249ad58` on the
      topic branch. `opp_checkout_test_baselines` is not on the PATH of this machine, so `statistics` and `media` are
@@ -263,7 +263,9 @@ No sealed file changes. No consumer outside INET changes.
   3. In the job copy of the CI, run `tools/prun.sh build-omnetpp`, fetch the topic branch into
      `inet-cpp-baseline-catch-up`, and run one statistical test of `examples/inet/bulktransfer` at master. It must
      pass with the pin of master. **2026-11-24:** `ghci-baseline-catch-up/inet` is at the head of the topic branch,
-     with `statistics` and `media` at the pins of master; the build of OMNeT++ in the image runs as a task.
+     with `statistics` and `media` at the pins of master; the build of OMNeT++ in the image runs as a task. The build of OMNeT++
+     passed in release mode, and in debug mode for the landing of R1. The statistical test of `bulktransfer` moves
+     to R2, the first change that moves statistics (2026-11-24, after the maintainer asked whether the set-up was done).
   4. Write the corrections of §2.4 and the closure of BD-40 into
      [baseline-catch-up-defects.md](baseline-catch-up-defects.md). **Done 2026-11-24** in C2, which also records BD-28
      as repaired by `d69fc0eaff`.
