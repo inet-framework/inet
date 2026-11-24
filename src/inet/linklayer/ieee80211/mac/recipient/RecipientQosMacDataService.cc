@@ -61,10 +61,15 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     auto agreement = blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS &&
         !dataHeader->getReceiverAddress().isMulticast() ?
         blockAckAgreementHandler->getAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress()) : nullptr;
+    bool hadCompressedReceipt = false;
     if (agreement) {
         agreement->recordReceived(dataHeader);
-        if (agreement->getVariant() == BlockAckVariant::COMPRESSED)
-            agreement->getBlockAckRecord()->compressedFrameReceived(dataHeader);
+        if (agreement->getVariant() == BlockAckVariant::COMPRESSED) {
+            auto record = agreement->getBlockAckRecord();
+            // A first arrival can still be inside the receipt window after reordering skipped its sequence.
+            hadCompressedReceipt = dataHeader->getRetry() && record->hasCompleteReceipt(dataHeader->getSequenceNumber());
+            record->compressedFrameReceived(dataHeader);
+        }
     }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     auto reportDuplicate = [this](Packet *packet) {
@@ -81,7 +86,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     }
     BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
     if (blockAckReordering && agreement)
-        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, reportDuplicate);
+        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, hadCompressedReceipt, reportDuplicate);
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
         for (auto it : frames) {

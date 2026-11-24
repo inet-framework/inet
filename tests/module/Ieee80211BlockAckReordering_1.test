@@ -9,8 +9,9 @@ Basic bitmap cases check that BAR and DATA window advances retire receipt histor
 The sequence reuse case checks that a retired fragment receipt cannot set a bit in the next sequence cycle.
 Group QoS data uses a separate sequence space and must leave individual Basic and Compressed agreements untouched.
 An equal group sequence must not suppress the first received unicast retry, with or without an agreement.
+Check duplicate reporting for a received Normal Ack fragment and a late retry first seen after a Compressed reorder gap.
 
-%extraargs: -r 0..18
+%extraargs: -r 0..19
 
 %file: RecipientReordering.cc
 #include "inet/common/Simsignals.h"
@@ -99,9 +100,10 @@ class RecipientReorderingTest : public cSimpleModule {
         return packet;
     }
 
-    std::vector<Packet *> receive(Packet *packet) {
+    using cSimpleModule::receive;
+    std::vector<Packet *> receive(Packet *packet, bool interframe = false) {
         auto header = packet->peekAtFront<Ieee80211DataHeader>();
-        return recipient->dataFrameReceived(packet, header, &agreements);
+        return recipient->dataFrameReceived(packet, header, &agreements, interframe);
     }
 
     std::vector<Packet *> receiveBar(int start, MacAddress transmitter, Tid tid = 5, int fragment = 0) {
@@ -398,6 +400,33 @@ class RecipientReorderingTest : public cSimpleModule {
                 recipient->unsubscribe(packetDroppedSignal, &drops);
                 break;
             }
+            case 19: { // The receipt window still covers a sequence that reordering skipped.
+                DuplicateDropProbe drops;
+                recipient->subscribe(packetDroppedSignal, &drops);
+                agreements.accept(peer, 5, 100, 4, BlockAckVariant::COMPRESSED);
+                checkDelivery(receive(makeData(100, "first")), {"first"});
+                auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+                bar->setTransmitterAddress(peer);
+                bar->setReceiverAddress(receiver);
+                bar->setTidInfo(5);
+                bar->setChunkLength(LENGTH_BLOCKACKREQ - B(4));
+                bar->setStartingSequenceNumber(SequenceNumberCyclic(101));
+                auto request = new Packet("compressed-bar", bar);
+                checkDelivery(recipient->controlFrameReceived(request, bar, &agreements), {});
+                delete request;
+                auto record = agreements.getAgreement(5, peer)->getBlockAckRecord();
+                ASSERT(record->getWindowStart() == SequenceNumberCyclic(101));
+                checkDelivery(receive(makeData(102, "after-gap"), true), {"after-gap"});
+                checkWindow(103, 0, peer);
+                ASSERT(!record->getCompressedAckState(SequenceNumberCyclic(101)));
+                checkDelivery(receive(makeData(101, "first-seen-retry", 0, false, peer, 5, false, true)), {});
+                ASSERT(drops.packets.empty());
+                ASSERT(record->getCompressedAckState(SequenceNumberCyclic(101)));
+                checkDelivery(receive(makeData(101, "repeat-late-retry", 0, false, peer, 5, false, true)), {});
+                ASSERT(drops.packets == std::vector<std::string>{"repeat-late-retry"});
+                recipient->unsubscribe(packetDroppedSignal, &drops);
+                break;
+            }
             default:
                 throw cRuntimeError("Unknown recipient scenario");
         }
@@ -441,7 +470,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.test.scenario = ${scenario=0..18}
+*.test.scenario = ${scenario=0..19}
 
 %contains: stdout
 Recipient reordering checks passed.

@@ -4,3 +4,4 @@ Wi-Fi duplicate-drop statistics now count retries that the Block Ack receive win
 as duplicates using retained receipts or buffered fragments. Measurements that previously counted
 only the ordinary duplicate cache can report more drops even when packet delivery is unchanged.
 Basic agreements also count retries of retained Normal Ack frames.
+Compressed agreements count a late retry only when there was already a receipt for it.

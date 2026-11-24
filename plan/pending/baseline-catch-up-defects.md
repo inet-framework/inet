@@ -182,6 +182,22 @@ is discarded without a signal.
 - Build `MODE=debug` for the module fixture and `MODE=release` for the statistical comparisons. Run from the INET worktree root with the [module and statistical commands and filters](../../tests/protocol/wifi/basic-blockack-normal-ack-retries.md#verification).
 - Record case 18 and the baseline comparison in [Basic Normal Ack retry reporting](../../tests/protocol/wifi/basic-blockack-normal-ack-retries.md).
 
+### Compressed duplicate reporting after a reorder gap
+
+Commit `BA-COMPRESSED-PRIOR-RECEIPT`, “ieee80211: fix: classify late Compressed retries using prior receipts”.
+Follows `BA-BASIC-NORMAL-ACK` in the series and uses the duplicate callback from `BA-REPORT`.
+The recipient service reads the Compressed receipt before updating it and passes that result
+to `BlockAckReordering::processReceivedQoSFrame`. The declaration specifies the required order.
+In the parent, a first-seen retry of sequence 101 can create the receipt that marks itself as a duplicate.
+
+- Add case 19 to [Ieee80211BlockAckReordering_1](../../tests/module/Ieee80211BlockAckReordering_1.test).
+  After reordering skips 101, the first arrival sets the Compressed bit and emits no duplicate
+  signal. The next retry emits one signal.
+- Run the six focused release statistical comparisons against the Basic follow-up's pin.
+  Each is expected to match its reference.
+- Build `MODE=debug` for the module fixture and `MODE=release` for the statistical comparisons. Run from the INET worktree root with the [module and statistical commands and filters](../../tests/protocol/wifi/compressed-blockack-retry-receipts.md#verification).
+- Record case 19 and the baseline comparison in [Compressed retries after a reorder gap](../../tests/protocol/wifi/compressed-blockack-retry-receipts.md).
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair
