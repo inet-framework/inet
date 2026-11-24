@@ -26,7 +26,10 @@ SSM-03 (Current-State Report on a General Query):
 Addresses are pinned with Ipv6NetworkConfigurator so the receiver's `multicastSources`
 can reference S1's global address (2001:db8:1:1::1) deterministically. All nodes share a
 single Ethernet segment via a hub. MLDv2 is enabled everywhere; the router is the
-querier (multicastForwarding=true at node level). DAD disabled; RNG seed pinned.
+querier (multicastForwarding=true at node level). DAD disabled; RNG seed pinned. The receiver
+joins at t=1.5s, after it has its link-local address (hostBootupTime of at most 1s): a Report
+before it leaves from the unspecified address, and the router discards it (RFC 9777 section
+5.2.14).
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -120,6 +123,7 @@ seed-set = 0
 *.recv.app[0].localPort = 1000
 *.recv.app[0].multicastGroup = "ff3e::8:8:8"
 *.recv.app[0].multicastSources = "2001:db8:1:1::1"
+*.recv.app[0].startTime = 1.5s
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: config.xml
