@@ -235,15 +235,18 @@ No sealed file changes. No consumer outside INET changes.
 
 - [ ] **Step 0. Set up and correct the list.**
   1. Make the worktree and the branch of D1. Copy the plan commit (D2). Run `opp_checkout_test_baselines` in the
-     worktree.
+     worktree. **Done 2026-11-24.** The two plan commits of `inet-julia` are `cf630c7310` and `f19249ad58` on the
+     topic branch. `opp_checkout_test_baselines` is not on the PATH of this machine, so `statistics` and `media` are
+     clones with `--reference-if-able` of the clones of the main checkout, at the pins `9a67a652ff` and `cd94c731e7`.
   2. In the editor, open the worktree as a project with `open_simulation_project!`, and build it in debug and release
-     mode as tasks.
+     mode as tasks. **Started 2026-11-24**, each build with 16 jobs.
   3. In the job copy of the CI, run `tools/prun.sh build-omnetpp`, fetch the topic branch into
      `inet-cpp-baseline-catch-up`, and run one statistical test of `examples/inet/bulktransfer` at master. It must
      pass with the pin of master.
   4. Write the corrections of §2.4 and the closure of BD-40 into
-     [baseline-catch-up-defects.md](baseline-catch-up-defects.md).
-  5. Make the view of §9 and save its files.
+     [baseline-catch-up-defects.md](baseline-catch-up-defects.md). **Done 2026-11-24** in C2, which also records BD-28
+     as repaired by `d69fc0eaff`.
+  5. Make the view of §9 and save its files. **Done 2026-11-24.**
   - **C1: `plan: add: repair the defects of the baseline catch-up that are new since v4.7.0 or easy, outside IEEE 802.11`.**
     This plan and the files of the view. No dependency.
   - **C2: `plan: change: the defects of the baseline catch-up after the check of 2026-11-24`.** The corrections of

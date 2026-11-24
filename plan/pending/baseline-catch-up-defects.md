@@ -26,6 +26,11 @@ the job copy of the catch-up (`evidence/defects.json`), outside git, so this pla
 entry. The evidence of each step (logs, experiments, row differences) is in `evidence/steps/step-NNN/` of that job
 copy. The baseline commit of each step in `statistics` and `media` gives the explanation of the step.
 
+A check of master `d8a58564ee` on 2026-11-24 found BD-40 repaired before this list was written, BD-28 repaired, and
+the IEEE 802.11 part of BD-33 repaired. An entry that the check changed has a line "State (2026-11-24)". So 42 entries
+are open. The plan [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs 27 of them: the
+entries outside IEEE 802.11 that are new since v4.7.0 or easy.
+
 Each entry was found and checked at the commit that it names. The entries that say "master" were checked at
 `bc39ec7571` or earlier. The commits from `bc39ec7571` to `b436a63418` change no source file of an entry: they change
 LMac, one comment of the visualizer, the build and the baselines. A spot check at `b436a63418` finds the code of
@@ -357,6 +362,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-15: the ACK of the SYN-ACK grows cwnd on the passive side
 
+- **State (2026-11-24):** open on master `d8a58564ee`. A pure ACK of the SYN-ACK does not reach the algorithm (`TcpConnectionRcvSegment.cc:1858` skips it in SYN_RCVD), so the fault occurs only when the ACK of the SYN-ACK carries data (`:750-756`). Change R11 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it.
 - **Place:** `TcpClassicAlgorithmBase::established()` and `receivedAckForUnackedData()`. From `a653d3bfbc` (step 17);
   the form with one MSS is older than G.
 - **Fault:** `established()` sets cwnd to the initial window. Then the same ACK reaches `receivedAckForUnackedData()`
@@ -392,6 +398,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-18: slow start of `~Tcp` has the limit of Linux `tcp_is_cwnd_limited()`
 
+- **State (2026-11-24):** open on master `d8a58564ee`. The limit is also in `TcpCubic.cc:165`. Change R15 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it.
 - **Place:** the slow start of the classic flavours. From `f7ff78102b` (step 18).
 - **Fault:** the slow start of `~Tcp` grows cwnd only while cwnd is below twice the peak of the segments in flight of
   the current window, as Linux `tcp_is_cwnd_limited()` does, always. `Tcp.ned` says that the defaults of `~Tcp` have
@@ -438,6 +445,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-23: the override timeout is one RTO, so at least 1 s
 
+- **State (2026-11-24):** open on master `d8a58564ee`. The first interval is at least `minRexmitTimeout`: 1 s in `~Tcp` and 200 ms in `~LinuxTcp`. Change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it with BD-21.
 - **Place:** `startPersistTimer()`. From `6148d90738` (step 30).
 - **Fault:** RFC 9293 section 3.8.6.2.1: "The override timeout should be in the range 0.1 - 1.0 seconds." The persist
   timer starts at the RTO, and `minRexmitTimeout` is 1 s, so the override comes after 1 s or more. The RFC also
@@ -486,6 +494,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-39: `TcpTahoe` and `TcpWestwood` start a second fast retransmit in the same window
 
+- **State (2026-11-24):** open on master `d8a58564ee`. The numbers of `inet-westwood` above come from before `7beeb0dc88`, which changes the threshold of Westwood. Change R5 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it with BD-8 and measures them again.
 - **Place:** `TcpTahoe::receivedDuplicateAck()` and `TcpWestwood::receivedDuplicateAck()`. Older than G; shown by
   `07722bc21b` (step 59).
 - **Fault:** the two flavours have no guard against a second fast retransmit in the same window. A third duplicate
@@ -502,6 +511,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-40: `TcpWestwood` never measures the RTT, so its threshold never moves
 
+- **State (2026-11-24):** **closed.** `7beeb0dc88` (2026-11-04, "tcp: fix: TcpWestwood takes an RTT sample from each ACK of new data") repairs it, with the tests `TcpAlgorithmClassWestwood.test` and `TcpAlgorithmClassWestwoodRto.test` and the reviewer document `tests/protocol/tcp/westwood-rtt-sample.md`. That commit is older than `bc39ec7571`, so the entry was already repaired when this list was written.
 - **Place:** `TcpWestwood::receivedAckForUnackedData()`
   ([TcpWestwood.cc](../../src/inet/transportlayer/tcp/flavours/TcpWestwood.cc)). Older than G; shown by `db81577ca0`
   (step 64).
@@ -575,6 +585,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-28: the centers of the arithmetic band "5 GHz" are 2.5 MHz off the grid
 
+- **State (2026-11-24):** repaired by `d69fc0eaff` (2026-11-24).
 - **Place:** `Ieee80211CompliantBands::band5GHz` in
   [Ieee80211Band.cc](../../src/inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.cc). Older than G; found at
   step 38 (`51721609f8`).
@@ -642,6 +653,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-33: the default `maxTransmissionDuration` of the radio medium is shorter than a full-size 802.11 frame at 1 Mbit/s
 
+- **State (2026-11-24):** the part of IEEE 802.11 is repaired by `0cb56f4a6f` (2026-11-24), which sets `mediumLimitCache.maxTransmissionDuration = default(35ms)` in `Ieee80211RadioMedium`. The generic default stays 10 ms, and `LMac`, `BMac` and `XMac` send at 19200 bps by default, so the rest stays open.
 - **Place:** [MediumLimitCache.ned](../../src/inet/physicallayer/wireless/common/medium/MediumLimitCache.ned), line 30
   (`default(10ms)`). Older than G; found at step 47 (`ceb825e500`).
 - **Fault:** a full-size 802.11 frame (about 1536 bytes with the headers) at DSSS 1 Mbit/s takes 12.3 ms, plus 192 µs
@@ -671,6 +683,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-47: `DielectricObstacleLoss` ignores refraction, reflections inside the object and diffraction
 
+- **State (2026-11-24):** open on master `d8a58564ee`. Also, `computeObjectLoss()` takes no reflection at the second surface: that code is a comment with `// TODO this returns NaN because n1 > n2` (`DielectricObstacleLoss.cc:116-121`).
 - **Place:** `DielectricObstacleLoss::computeObjectLoss()`
   ([DielectricObstacleLoss.cc](../../src/inet/physicallayer/wireless/common/obstacleloss/DielectricObstacleLoss.cc)).
   Older than G; found at step 91.
@@ -711,6 +724,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-24: the queue length of the compound `REDQueue` of netperfmeter becomes negative
 
+- **State (2026-11-24):** open on master `d8a58564ee`. A code read finds the probable cause: the upper layer pushes through the gate `in`, which is connected to `red.in`, so `CompoundPacketQueueBase::pushPacket()` does not run and the compound emits no `packetPushStarted`, but the MAC pulls through the module, so the compound emits `packetPulled`. `queueLength` counts only the local signals of the compound (`CompoundPacketQueueBase.ned:33`). `RedDropperQueue` has the same connection. Change R12 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) checks the cause with a run and repairs it.
 - **Place:** [netperfmeter.ned](../../examples/inet/netperfmeter/netperfmeter.ned) (in --> red.in, red.out --> fifo.in,
   fifo.out --> out, with the base `CompoundPacketQueueBase`) and
   [CompoundPacketQueueBase.cc](../../src/inet/queueing/queue/CompoundPacketQueueBase.cc). Older than G; found in the
