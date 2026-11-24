@@ -6,6 +6,7 @@ Record each peer and TID without a change to protocol decisions.
 %extraargs: -c Compatibility
 
 %file: BasicCompatibility.cc
+// Author: Miguel González-López
 #include <iostream>
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"

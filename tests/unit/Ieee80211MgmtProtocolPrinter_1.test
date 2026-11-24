@@ -3,6 +3,7 @@ Verify compact set notation for sparse, contiguous, mixed, and empty HT MCS
 bitmaps in the IEEE 802.11 management protocol printer.
 
 %includes:
+// Author: Miguel González-López
 #include <initializer_list>
 #include <string>
 

@@ -6,6 +6,7 @@ The Tx callback releases its frame before the radio emits normal completion.
 %extraargs: -r 0..13
 
 %file: Completion.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/common/ProtocolTag_m.h"

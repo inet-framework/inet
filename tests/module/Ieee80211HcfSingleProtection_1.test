@@ -5,6 +5,7 @@ Check strict TXNAV boundaries, independent TXOP containment, propagation, mode c
 %extraargs: -r 0..25
 
 %file: SingleProtection.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

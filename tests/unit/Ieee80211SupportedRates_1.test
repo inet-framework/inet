@@ -4,6 +4,7 @@ membership, split/merge behavior, malformed-element rejection, and logical
 Association/Reassociation Response AID encoding.
 
 %includes:
+// Author: Miguel González-López
 #include <algorithm>
 #include <cstdint>
 #include <vector>

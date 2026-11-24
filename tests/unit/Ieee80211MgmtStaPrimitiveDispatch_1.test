@@ -5,6 +5,7 @@ primitive emitted by the station agent. Verify association timeout ownership,
 confirm typing, AP-list cleanup, restart eligibility, and late-response rejection.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 

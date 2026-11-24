@@ -5,6 +5,7 @@ channel. Legacy packet-domain discovery converts the DSSS Parameter Set channel
 number to the internal channel index.
 
 %file: TestIeee80211MgmtStaDiscovery.cc
+// Author: Miguel González-López
 
 #include <string>
 #include <vector>

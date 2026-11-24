@@ -3,6 +3,7 @@ Verify byte-exact HT Capabilities and HT Operation management elements, includin
 frame-subtype-specific Basic HT-MCS presence, typed deserialization, and malformed-length rejection.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"

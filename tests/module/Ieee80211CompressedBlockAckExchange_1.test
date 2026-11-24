@@ -14,6 +14,7 @@ The LowestResponse configuration supplies two extra runs with a 6 Mbps BAR and B
 %extraargs: -r 0..15
 
 %file: Exchange.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

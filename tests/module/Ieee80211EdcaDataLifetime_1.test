@@ -5,6 +5,7 @@ Hold channel access beyond the default deadline.
 %extraargs: -r 0..18
 
 %file: EdcaDataLifetime.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

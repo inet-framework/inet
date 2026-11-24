@@ -3,6 +3,7 @@ Check a real Compressed BAR and its first Block Ack response after production AD
 Require non-HT control modes, a 32-byte response, a 64-bit bitmap, and positive receipt evidence.
 
 %file: N_CompressedBa.cc
+// Contributor: Miguel González-López (Compressed Block Ack wire format, control mode, and receipt assertions)
 
 #include "ProtocolTest.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

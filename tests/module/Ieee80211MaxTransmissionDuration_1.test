@@ -6,6 +6,7 @@ packet (1472 B ICMP echo payload) at DSSS 1 Mbit/s (~12.48 ms on the air) and
 complete the ping exchange without hitting "Maximum transmission duration is exceeded".
 
 %file: test.ned
+// Author: Miguel González-López
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;

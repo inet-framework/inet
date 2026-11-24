@@ -2,6 +2,7 @@
 Verify both explicit Tx overloads and the completed NAV choice across a callback.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/Tx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 using namespace omnetpp;

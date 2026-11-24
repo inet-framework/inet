@@ -4,6 +4,7 @@ The production policy reads the production ACK handler through an in-progress qu
 These helper checks supplement the HCF module fixture.
 
 %includes:
+// Author: Miguel González-López
 #include <type_traits>
 #include <utility>
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"

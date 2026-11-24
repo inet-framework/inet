@@ -4,6 +4,7 @@ the standard HT element presence matrix and commits mutually usable peer state
 at both ends.
 
 %file: Ieee80211HtAssociationChecker.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"

@@ -3,6 +3,7 @@ Check beacon interval bounds and independent Beacon/Probe Response wire bytes,
 DSSS element absence, malformed lengths, duplicates, and mesh reason code 62.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"

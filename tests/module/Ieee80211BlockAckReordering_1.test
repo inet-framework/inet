@@ -14,6 +14,7 @@ Check duplicate reporting for a received Normal Ack fragment and a late retry fi
 %extraargs: -r 0..19
 
 %file: RecipientReordering.cc
+// Author: Miguel González-López
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"

@@ -2,6 +2,7 @@
 Verify the four multiple protection equations, field encoding, nominal continuation checks, and TXOP reset.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"

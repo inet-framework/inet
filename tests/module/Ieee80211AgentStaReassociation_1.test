@@ -7,6 +7,7 @@ the production agent-to-management path. Also verify reassociation handover
 signals, callback-visible prevAP state, and completion signal ordering.
 
 %file: TestIeee80211AgentStaReassociation.cc
+// Author: Miguel González-López
 
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"

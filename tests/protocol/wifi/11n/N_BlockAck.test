@@ -8,6 +8,7 @@ The third run uses the unquoted INI keyword default. OMNeT++ accepts the paramet
 %postrun-command: python3 check-default.py
 
 %file: N_BlockAck.cc
+// Contributor: Miguel González-López (production Block Ack exchange coverage for 802.11n)
 
 #include "ProtocolTest.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

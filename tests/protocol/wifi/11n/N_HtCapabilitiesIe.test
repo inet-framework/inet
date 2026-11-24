@@ -3,6 +3,7 @@ Observe the production Ieee80211AssociationRequestFrame and assert its HtCapabil
 The element is represented inside the management body, not as a standalone chunk.
 
 %file: N_HtCapabilitiesIe.cc
+// Contributor: Miguel González-López (assertions for HT Capabilities in association request bodies)
 
 #include "WifiTestSupport.h"
 

@@ -3,6 +3,7 @@ Verify IEEE 802.11 band center frequencies, explicit standards channel-number
 mappings, and rejection of bands without a representable mapping.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 
 using namespace inet;

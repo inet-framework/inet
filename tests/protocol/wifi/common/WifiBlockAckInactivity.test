@@ -8,6 +8,7 @@ The fixture reads agreement state; it never changes a deadline or schedules the 
 %extraargs: -r 0..1
 
 %file: Inactivity.cc
+// Author: Miguel González-López
 #include "BlockAckRequestProbe.h"
 
 namespace inet::protocoltest {

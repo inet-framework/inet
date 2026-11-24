@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Author: Miguel González-López
 """Check Basic exchanges in the retained demonstrations with a module-test observer."""
 
 import argparse

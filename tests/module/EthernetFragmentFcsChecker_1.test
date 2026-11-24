@@ -3,6 +3,7 @@ Checks that EthernetFragmentFcsChecker reconstructs the intermediate/final disti
 XOR-adjusted and normal FCS values of raw Ethernet fragments.
 
 %file: TestSource.cc
+// Author: Miguel González-López
 #include <vector>
 
 #include "inet/common/ProtocolTag_m.h"

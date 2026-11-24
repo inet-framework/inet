@@ -3,6 +3,7 @@ Check bounded chunk traversal without a production caller.
 Cover lengths, alignment, truncation, final padding, and delimiter error flags.
 
 %includes:
+// Author: Miguel González-López
 #include <tuple>
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"

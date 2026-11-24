@@ -7,6 +7,7 @@ No changed mode-duration helper supplies the expected value.
 %extraargs: -r 0..4
 
 %file: HtSignalExtension.cc
+// Author: Miguel González-López
 #include "../../LocalInterframeTestSupport.h"
 #include "ProtocolTest.h"
 #include "inet/common/Simsignals.h"

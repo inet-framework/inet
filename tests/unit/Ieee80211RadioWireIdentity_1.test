@@ -3,6 +3,7 @@ Exercise real packet-level and bit-level radio encapsulation/decapsulation,
 derived PHY factories and tags, and independent SIGNAL parity corruption.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"

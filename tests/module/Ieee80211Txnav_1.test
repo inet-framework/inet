@@ -7,6 +7,7 @@ Check another AC after an initial DATA failure with a 200 us ACK timeout.
 
 %extraargs: -r 0..4
 %file: Txnav.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

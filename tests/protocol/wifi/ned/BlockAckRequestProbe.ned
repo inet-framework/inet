@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
+// Author: Miguel González-López
 package inet.protocoltest.wifi;
 
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;

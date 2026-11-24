@@ -9,6 +9,7 @@ Send two classified flows (TIDs 0 and 5), then observe a Multi-TID Block Ack.
 Frame declarations exist, but the variant is unfinished and rejected by production handlers.
 
 %file: Ac_MultiTidBa.cc
+// Contributor: Miguel González-López (two-TID traffic stimulus and Block Ack assertions)
 
 #include "ProtocolTest.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

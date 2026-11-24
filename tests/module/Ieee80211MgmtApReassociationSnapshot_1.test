@@ -4,6 +4,7 @@ HT Operation with runtime channel changes at completion while preserving
 the advertised response element.
 
 %file: TestIeee80211MgmtApReassociationSnapshot.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"

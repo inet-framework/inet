@@ -2,6 +2,7 @@
 Verify single-protection field equations and Duration/ID clamp, ceiling, range, and wire encoding.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 using namespace omnetpp;

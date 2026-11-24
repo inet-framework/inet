@@ -3,6 +3,7 @@ Verify that a station tears down its current association when the associated
 AP sends Deauthentication, while preserving unrelated AP transactions.
 
 %file: TestIeee80211MgmtStaDeauthentication.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 

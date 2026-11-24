@@ -8,6 +8,7 @@ The fixture supplies agreement records and does not transmit frames through a pe
 %extraargs: -r 0..10
 
 %file: ActionDisposal.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"

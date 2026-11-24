@@ -13,6 +13,7 @@ cmdenv-express-mode = false
 cmdenv-log-prefix = ""
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"

@@ -8,6 +8,7 @@ Run 0 checks both endpoints. Run 1 checks AP callbacks independently.
 %extraargs: -r 0..1
 
 %file: StateCommit.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"

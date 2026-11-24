@@ -13,6 +13,7 @@ network = inet.showcases.wireless.blockack.BlockAckShowcase
 **.wlan[*].mac.hcf.isBlockAckSupported = true
 
 %file: check-profile.py
+# Author: Miguel González-López
 from pathlib import Path
 import subprocess
 

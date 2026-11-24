@@ -3,6 +3,7 @@ Observe the production Ieee80211BeaconFrame and assert its HtOperation element i
 The element is represented inside the management body, not as a standalone chunk.
 
 %file: N_HtOperationIe.cc
+// Contributor: Miguel González-López (assertions for HT Operation in beacon bodies)
 
 #include "WifiTestSupport.h"
 

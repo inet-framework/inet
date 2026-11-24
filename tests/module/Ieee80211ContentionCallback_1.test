@@ -5,6 +5,7 @@ This fixture injects callback installation at the reentry boundary.
 It does not test channel arbitration.
 
 %file: ContentionCallbackTest.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mac/contention/Contention.h"
 

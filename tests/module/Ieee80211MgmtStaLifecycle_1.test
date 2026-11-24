@@ -5,6 +5,7 @@ state on shutdown and crash. The node remains down past every pending timer
 deadline and restarts without resurrecting the interrupted state.
 
 %file: TestIeee80211MgmtStaLifecycle.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"

@@ -7,6 +7,7 @@ The observer uses existing management-element fields so the same test compiles b
 %extraargs: -r 0..7
 
 %file: RifsPermission.cc
+// Author: Miguel González-López
 #include "ProtocolTest.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"

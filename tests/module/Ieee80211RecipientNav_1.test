@@ -11,6 +11,7 @@ The Compressed case uses a 32-byte response MPDU and retains the same NAV invari
 %extraargs: -r 0..3
 
 %file: RecipientNav.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

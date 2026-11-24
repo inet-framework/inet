@@ -3,6 +3,7 @@ PCAPng honors finite snaplen while preserving original length, and treats zero
 as unlimited. The limit applies to the selected packet range.
 
 %includes:
+// Author: Miguel González-López
 #include <cstdio>
 #include <fstream>
 #include <iterator>

@@ -9,6 +9,7 @@ This fixture does not establish association behavior. The infrastructure exchang
 %extraargs: -r 0..23
 
 %file: Admission.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag_m.h"

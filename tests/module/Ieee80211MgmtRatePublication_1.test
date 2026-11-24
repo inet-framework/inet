@@ -7,6 +7,7 @@ Check completed state inside callbacks for disassociation, replacement,
 full STA stop, simplified STA stop, and the AP's static peer departure.
 
 %file: TestRatePublication.cc
+// Author: Miguel González-López
 
 #include <limits>
 

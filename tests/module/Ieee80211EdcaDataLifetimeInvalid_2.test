@@ -2,6 +2,7 @@
 Reject msduLifetime = -1s before channel access.
 
 %file: test.ned
+// Author: Miguel González-López
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 network LifetimeInvalidNetwork {

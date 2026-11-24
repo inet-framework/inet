@@ -6,6 +6,7 @@ Compare the default with a one-second lifetime through production MAC exchanges.
 %extraargs: -r 0..1
 
 %file: LifetimeCongestion.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

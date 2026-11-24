@@ -3,6 +3,7 @@ Associate with AP A, authenticate with AP B, then request reassociation through
 the existing station-agent primitives and verify the request, response and completion.
 
 %file: WifiReassociation.cc
+// Contributor: Miguel González-López (two-access-point reassociation scenario and assertions)
 
 #include "WifiTestSupport.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"

@@ -6,6 +6,7 @@ The radio medium drops the ACK of the original ADDBA Request for sta1 only; sta2
 The AP must receive the retry before it sends its response. Management frames use AC_VO, and the ini sets the AIFSN of AC_VO at the AP to 15. So the AP starts its response at the earliest 2 SIFS + ACK + 15 slots after the request. sta1 starts its retry at the latest 2 SIFS + 10 slots + the PHY receive start delay after the request, with a contention window of 7 slots after the first failure. If the AP sent its response first, it would send no second one after the retry, and the step that waits for the response after the retry would miss its deadline.
 
 %file: DuplicateAddba.cc
+// Author: Miguel González-López
 #include "BlockAckLifecycleTestSupport.h"
 
 namespace inet::protocoltest {

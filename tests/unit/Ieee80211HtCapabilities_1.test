@@ -3,6 +3,7 @@ Verify directional HT negotiation and association-response classification,
 including acceptance of a genuinely legacy AP.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
 
