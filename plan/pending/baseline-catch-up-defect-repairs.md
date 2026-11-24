@@ -235,14 +235,15 @@ No sealed file changes. No consumer outside INET changes.
    pin in `inet.opp` ([change-a-baseline.md](../../doc/project/guide/change-a-baseline.md)).
 7. **Document.** Write the reviewer document beside the protocol test and the whatsnew entry.
 8. **Gates.** Run "Before every push" of [run-the-gates.md](../../doc/project/guide/run-the-gates.md). Run
-   `check-baseline-attribution.sh plan` and `run` in the job copy of the CI. Run all stored fingerprints as the
-   workflow "Test: fingerprint" runs them: in the image of the CI, with `opp_featuretool enable all`, in release and in
-   debug mode (`runs/fingerprints-in-ci-image.sh` of the folder of D10). A gate runs the release mode only; the
-   debug mode runs once when a change lands (the maintainer, 2026-11-24: "run only release fingerprint tests, they
-   are faster and debug tests is enough when landing"). Each run must pass, except a run that a marker
-   declares as expected. The runs in the editor use the features of the worktree and this machine (clang 23), so they
-   focus the work but do not decide a gate (added 2026-11-24, after the maintainer asked: "all should pass otherwise
-   how can we create a PR?").
+   `check-baseline-attribution.sh plan` and `run` in the job copy of the CI. Run all stored fingerprints with all features, as the
+   workflow "Test: fingerprint" runs them. A gate runs the release mode, in the editor, on the worktree, which has
+   `opp_featuretool enable all` since 2026-11-24 (the maintainer: "why don't you run the fingerprints just here?").
+   The debug mode runs once when a change lands, in the image of the CI (`runs/fingerprints-in-ci-image.sh <label>
+   debug` of the folder of D10), because the fingerprint verb of the editor has no mode and runs release only (the
+   maintainer, 2026-11-24: "run only release fingerprint tests, they are faster and debug tests is enough when
+   landing"). The image of the CI also runs a fingerprint whose result in the editor differs from the CI. Each run
+   must pass, except a run that a marker declares as expected (the maintainer, 2026-11-24: "all should pass
+   otherwise how can we create a PR?").
 9. **Gate B.** Open the reviewer document, the moved values and the commits of the change in tabs. Ask the
    maintainer: "Do you approve the result of R<n>?" After the approval, mark the change done in this plan, write the
    repair commit into [baseline-catch-up-defects.md](baseline-catch-up-defects.md), and commit both as
@@ -451,6 +452,9 @@ repository (folder names such as `tcp_common` and `flavours`, icon files, `site.
 for the changed files passes. So R1 adds no violation. R1 is no protocol change, so it has no protocol test and no
 reviewer document ([TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol)), and it moves no
 baseline.
+
+**Gate B** approved by the maintainer on 2026-11-24 ("yes"). The debug fingerprints of the landing run in the image
+of the CI at `4e65771abb`, whose sources equal C3.
 
 ## 7. Verification
 
