@@ -63,12 +63,12 @@ The maintainer follows the work in the window of `omnet_ide`, while it runs (§9
 
 ### 2.2 The entries in scope
 
-27 entries in 19 changes. "Origin" says whether the fault is new since v4.7.0. "Easy" gives the size that the code read
+27 entries in 21 changes. "Origin" says whether the fault is new since v4.7.0. "Easy" gives the size that the code read
 found on master.
 
 | Change | Entries | Area | Origin | Easy | Place on master |
 | --- | --- | --- | --- | --- | --- |
-| R1 | BD-5, BD-13, BD-16, BD-6, BD-9 | TCP text and code with no result change | new (`b2313324ef`, `985edc2057`, `80357d0e09`, `d6da042a42`) | yes: 1 to 4 lines each | `TcpConnection.h:599-607`, `TcpReno.h:42-45`, `Rfc5681CongestionControl.cc:100`, `TcpClassicAlgorithmBase.h:66`, `Rfc6675Recovery.cc:332` |
+| R1 | BD-5, BD-13, BD-16 | TCP comments | new (`b2313324ef`, `985edc2057`, `80357d0e09`) | yes: 1 to 4 lines each | `TcpConnection.h:599-607`, `TcpReno.h:42-45`, `Rfc5681CongestionControl.cc:100` |
 | R2 | BD-21, BD-23 | TCP: the override timer of the sender SWS avoidance | new (`40b842fc88`, `6148d90738`) | no: needs the decision of the override interval | `TcpAlgorithmBase.cc:1006-1022`, `:751-757` |
 | R3 | BD-44 | `VlanReqMapper` sends priority-tagged frames on untagged ports | older (`4a63e09916`, 2023) | yes: 3 to 6 lines | `VlanReqMapper.cc:61` |
 | R4 | BD-49 | NaN constants of copper and aluminium | older | yes: 2 lines | `MaterialRegistry.cc:37-38` |
@@ -87,6 +87,11 @@ found on master.
 | R17 | BD-10 | the `unacked` vector keeps an old value during SACK recovery | new (`d6da042a42`) | yes: 2 to 6 lines | `Rfc6675Recovery.cc:140`, `:369` |
 | R18 | BD-36 | `examples/inet/shutdownrestart` maps no random stream | older | yes: about 4 lines of ini | `examples/inet/shutdownrestart/omnetpp.ini:75-81`, `:108-113` |
 | R19 | BD-34 | two deprecated alias parameters of `Tcp.ned` still act | new (`ed18cbd7ce`, `88d161714a`) | yes: mechanical, about 100 lines in about 80 files | `Tcp.ned:469`, `:497`, `TcpConnectionUtil.cc:1164-1202` |
+
+| R20 | BD-6 | TCP: the lower limit of the ssthresh after a timeout uses `snd_mss` | new (`b2313324ef`) | yes: 1 line; it moves 6 fingerprint runs | `TcpClassicAlgorithmBase.h:66` |
+| R21 | BD-9 | TCP: step (2) of RFC 6675 tests `isLost(snd_una + 1)` | new (`d6da042a42`) | yes: 1 line; it moves 1 fingerprint run | `Rfc6675Recovery.cc:332` |
+
+R20 and R21 were part of R1 until the revision of 2026-11-24 (§6.3, R1).
 
 The entries of R2, R6, R8, R9, R14 and R15 are not easy. They are in scope because they are new since v4.7.0.
 
@@ -232,7 +237,9 @@ No sealed file changes. No consumer outside INET changes.
 8. **Gates.** Run "Before every push" of [run-the-gates.md](../../doc/project/guide/run-the-gates.md). Run
    `check-baseline-attribution.sh plan` and `run` in the job copy of the CI. Run all stored fingerprints as the
    workflow "Test: fingerprint" runs them: in the image of the CI, with `opp_featuretool enable all`, in release and in
-   debug mode (`runs/fingerprints-in-ci-image.sh` of the folder of D10). Each run must pass, except a run that a marker
+   debug mode (`runs/fingerprints-in-ci-image.sh` of the folder of D10). A gate runs the release mode only; the
+   debug mode runs once when a change lands (the maintainer, 2026-11-24: "run only release fingerprint tests, they
+   are faster and debug tests is enough when landing"). Each run must pass, except a run that a marker
    declares as expected. The runs in the editor use the features of the worktree and this machine (clang 23), so they
    focus the work but do not decide a gate (added 2026-11-24, after the maintainer asked: "all should pass otherwise
    how can we create a PR?").
@@ -264,12 +271,10 @@ No sealed file changes. No consumer outside INET changes.
     This plan. No dependency.
   - **C2: `plan: change: the defects of the baseline catch-up after the check of 2026-11-24`.** The corrections of
     §2.4 and the closure of BD-40. Depends on C1.
-- [ ] **Step 1. R1: TCP text and code with no result change (BD-5, BD-13, BD-16, BD-6, BD-9).** Check: the
-  fingerprints of all TCP tests do not change, and the module tests of the places pass.
+- [ ] **Step 1. R1: TCP comments (BD-5, BD-13, BD-16).** Check: no fingerprint changes, and the module tests of the
+  places pass. Until the revision of 2026-11-24, R1 also held BD-6 and BD-9; they are R20 and R21 now.
   - `tcp: comment: each comment is above its function, and no comment describes a removed function` (BD-5, BD-13,
     BD-16).
-  - `tcp: refactor: calculateSsthreshForRto() uses calculateSsthresh() with the effective MSS` (BD-6).
-  - `tcp: refactor: step (2) of RFC 6675 tests IsLost(HighACK + 1) at SND.UNA` (BD-9).
 - [ ] **Step 2. R2: the override timer (BD-21, BD-23).** Gate A decides the override interval: a separate interval in
   the range 0.1 s to 1.0 s of RFC 9293 section 3.8.6.2.1, or the RTO with a documented reason. Test: a sender holds a
   small segment, and the peer sends data at intervals shorter than the RTO with no change of the window; the held
@@ -347,7 +352,15 @@ No sealed file changes. No consumer outside INET changes.
   names remains, and the fingerprints do not change.
   - `tests: change: the tests and examples use initialWindow and tcpEcnMode` (no result moves).
   - `tcp: remove: the parameters increasedIWEnabled and ecnWillingness` (D-120 of 2026-10-15).
-- [ ] **Step 20. Close.** Write the summary of the changes and the closed entries at the top of this plan. Move it to
+- [ ] **Step 20. R20: the lower limit of the ssthresh after a timeout (BD-6).** The commit `74882daa4e` exists. It
+  moves 6 fingerprint runs (§6.3, R1). The cycle of §6.1 explains each moved value, writes a protocol test of the
+  ssthresh after a timeout with the TS option on each segment, and re-records the fingerprints and the statistics.
+  - `tcp: change: the ssthresh after a timeout takes the lower limit 2*SMSS with the effective MSS (RFC 5681)`.
+- [ ] **Step 21. R21: step (2) of RFC 6675 at SND.UNA (BD-9).** The commit `38958b1fb8` exists. It moves the run 0 of
+  `examples/inet/shutdownrestart` `TCP`, whose Telnet segments are 1 byte long. The cycle of §6.1 explains the move,
+  writes a protocol test with a segment of 1 byte at SND.UNA, and re-records.
+  - `tcp: change: step (2) of RFC 6675 tests IsLost(HighACK + 1) at SND.UNA`.
+- [ ] **Step 22. Close.** Write the summary of the changes and the closed entries at the top of this plan. Move it to
   `plan/done/`.
   - **C(last): `plan: location: move the plan of the defect repairs of the baseline catch-up to done`.**
 
@@ -417,11 +430,25 @@ is not necessary: if the run after C5 moves, the runs of C3 and C4 alone find th
   byte.
 - A stop of the task of `tools/prun.sh` stopped the client of podman, but not its container; `podman stop` stopped it.
 
-**Proposed revision ([PLR-REVISION](../../doc/project/rule/planning.md#plr-revision)), waiting for the maintainer.**
+**Revision ([PLR-REVISION](../../doc/project/rule/planning.md#plr-revision)), approved by the maintainer on 2026-11-24** ("yes, run only release fingerprint tests, they are faster and debug tests is enough when landing").
 R1 keeps only C3 (BD-5, BD-13, BD-16) and moves no result. BD-6 and BD-9 leave R1 and become the changes R20 and R21,
 each with the whole cycle of §6.1: the attribution of each moved fingerprint and statistic to the mechanism, the
 re-record in the image of the CI, and a protocol test and its reviewer document, because each changes a protocol
 behavior. C4 and C5 stay on the branch after C3 until their changes are prepared.
+
+**The check of the gate (2026-11-24).** In the image of the CI, with all features, release mode, at C3
+`6f3eb8a25c`: 1847 runs, 1846 PASS and 1 ERROR that a marker declares as expected (`tests/fingerprint`
+`ethernet-nonstandardspeed.ini`, 5 Gbit/s half duplex), in 2 min 24 s. The log is `runs/r1-c3/` of the folder of
+D10. The debug mode of the job copy needs a debug build of OMNeT++ first (`MODE=debug tools/prun.sh
+build-omnetpp`); it runs at the landing.
+
+**The mechanical gates (2026-11-24)**, at C3 in the job copy, with the base `d8a58564ee`: `check-pull-request.sh`,
+`check-source-seals.sh` and `check-architecture.sh src/inet/transportlayer/tcp` pass. `check-naming.sh` reports 24
+violations and `check-interfaces.sh` 16 classes; master `d8a58564ee` gives the same 24 and the same 16, all of the whole
+repository (folder names such as `tcp_common` and `flavours`, icon files, `site.yml`). The part of `check-naming.sh`
+for the changed files passes. So R1 adds no violation. R1 is no protocol change, so it has no protocol test and no
+reviewer document ([TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol)), and it moves no
+baseline.
 
 ## 7. Verification
 
