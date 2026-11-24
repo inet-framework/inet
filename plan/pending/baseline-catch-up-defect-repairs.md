@@ -239,10 +239,13 @@ No sealed file changes. No consumer outside INET changes.
      topic branch. `opp_checkout_test_baselines` is not on the PATH of this machine, so `statistics` and `media` are
      clones with `--reference-if-able` of the clones of the main checkout, at the pins `9a67a652ff` and `cd94c731e7`.
   2. In the editor, open the worktree as a project with `open_simulation_project!`, and build it in debug and release
-     mode as tasks. **Started 2026-11-24**, each build with 16 jobs.
+     mode as tasks. **2026-11-24:** the debug build is done in 4 min 22 s. The first release build stopped after 0.4 s,
+     because it started with the debug build and the makefiles did not exist yet; it runs again alone. Start the two
+     modes of a new tree one after the other: they also share the generated message files.
   3. In the job copy of the CI, run `tools/prun.sh build-omnetpp`, fetch the topic branch into
      `inet-cpp-baseline-catch-up`, and run one statistical test of `examples/inet/bulktransfer` at master. It must
-     pass with the pin of master.
+     pass with the pin of master. **2026-11-24:** `ghci-baseline-catch-up/inet` is at the head of the topic branch,
+     with `statistics` and `media` at the pins of master; the build of OMNeT++ in the image runs as a task.
   4. Write the corrections of §2.4 and the closure of BD-40 into
      [baseline-catch-up-defects.md](baseline-catch-up-defects.md). **Done 2026-11-24** in C2, which also records BD-28
      as repaired by `d69fc0eaff`.
@@ -453,7 +456,7 @@ exist in the editor of 2026-11-24.
 | **Workflow**, a tab above the conversation | One line for each step of §6.2, with a short title such as "R2 TCP override timer" and its state (`:open`, `:active`, `:done`, `:dropped`). A step gets an entry only at gate A and at gate B, with the words of the maintainer, and when it ends with no repair. No sub-steps and no embedded files | `change_workflow_state!`, `add_workflow_entry!` |
 | **Progress**, a tab of three charts | (1) the 27 entries in scope in four groups of states: not started, in work, repaired, landed or closed; (2) a stacked bar for each change R1 to R19, with its entries in the same four groups; (3) the count of the entries repaired and of the entries landed or closed, on each day of the work | `Dashboard` of three `DashboardCard`s, each a `Chart` (`ChartBarSeries`, `ChartLineSeries`) that the helper `refresh_progress_1()` draws again from the table |
 | **Defects**, a tab with a table | One row for each of the 44 entries: BD, title, area, change, state, scope, reason, origin, repair commit, `repaired_on`, `landed_on`. The states of an entry in scope are `1 open`, `2 re-checked`, `3 fault shown`, `4 design approved`, `5 repaired`, `6 result approved`, `7 landed` and `8 closed`; an entry out of scope is `left out` or `closed`. The maintainer filters and sorts it | `RecordTable` in a `.pred` file; the helper `set_defect_state_1(number, state; commit)` writes a state and its date, saves the table and refreshes the charts |
-| **Tasks** | Each build, test, update and attribution run as a group with a progress ring, counts and the log of each task; each group opens in a tab when it starts | `build_simulation_project!`, `run_protocol_tests!`, `run_module_tests!`, `run_unit_tests!`, `run_fingerprint_tests!`, `update_fingerprint_test_results!`; `run_tasks!` with `ProgramTask` for `tools/prun.sh` |
+| **Tasks**, in the explorer tab | Each build, test, update and attribution run as a group with a progress ring, counts and the log of each task, under "Tasks of the editor". A group gets no tab of its own (the maintainer, 2026-11-24: "you should not open each build in a new tab pane, that's too much"); only the runs of a gate open in its page | `build_simulation_project!`, `run_protocol_tests!`, `run_module_tests!`, `run_unit_tests!`, `run_fingerprint_tests!`, `update_fingerprint_test_results!`; `run_tasks!` with `ProgramTask` for `tools/prun.sh` |
 | **Moved values** | The scalars that a statistical test found different, and the differences of two result files | the page of a statistical test task (`LegacyStatisticalTaskDocument`, `LegacyScalarDifferences`), `LegacyResultComparison`, `LegacyTestLog` for the log of a run in the image |
 | **Commits** | The commits of the topic branch and of the statistics branch, each with its changed files and diffs | `GitCommitRange("…/inet-cpp-defect-repairs", "master..topic/baseline-catch-up-defect-repairs")`, `GitCommit` |
 | **Explorer "Defect repairs"**, a tab | The workflow, the table, the charts, this plan, [baseline-catch-up-defects.md](baseline-catch-up-defects.md), the two commits that repaired entries before the plan, the TCP commits since v4.7.0, the project of the worktree, the two commit ranges, and the tasks of the editor | `ExplorerSection`, `Explorer`, `open_file_document!`, `get_session_task_group_list()` |
@@ -469,7 +472,8 @@ assistant draws the charts again after each change of the table.
    date, saves the table and draws the charts again.
 2. When a step starts, mark it `:active`. When it ends, mark it `:done`, or `:dropped` with an entry that says why.
 3. At gate A and gate B, add one entry to the step with the words of the maintainer.
-4. When a task group starts, open it in a tab. The workflow gets no entry for a task group.
+4. When a task group starts, open no tab for it: it shows under "Tasks of the editor" in the explorer tab. The
+   workflow gets no entry for a task group.
 5. After each change of the workflow, call `save_workflow_1()`.
 6. When a program rewrites a file that a tab shows, load it again with `reload_file_from_disk!`.
 
