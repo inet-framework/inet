@@ -1,0 +1,222 @@
+%description:
+
+A start of listening before the link-local address is tested.
+
+Checks RFC9777-REP-34, REP-37 and REP-39 from
+doc/project/evidence/standard/rfc9777/catalog.md. The English procedure is in
+doc/project/evidence/protocol/mld/checks/listener-reports.md#a-start-of-listening-before-the-link-local-address-is-tested;
+the program steps below map onto its expected observations. Step 1 is observation 1; the first
+guard is observation 2; the second guard is observation 3; step 2 is observation 4; step 3, the
+gap guard and step 4 are observation 5.
+
+As the scenario constants say, R skips Duplicate Address Detection (dupAddrDetectTransmits = 0)
+and has a Query Response Interval of 1 second, and A has a Robustness Variable of 1. The test
+sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9777 section
+9.11.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MldChecks.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static const Ipv6Address G("ff0e::1:1"), H("ff0e::1:2");
+static const Ipv6Address S1("2001:db8:2::10");
+static const Ipv6Address A_LL("fe80::800:ff:fe00:a");
+
+// The Neighbor Solicitation of the detection of the link-local address of A.
+static bool isDadOfLinkLocal(const Packet *p)
+{
+    auto ns = findChunk<Ipv6NeighbourSolicitation>(p);
+    return ns != nullptr && ns->getTargetAddress() == A_LL && srcOf(p).isUnspecified();
+}
+static bool isFwd(const Packet *p) { return isDatagram(p, S1, G); }
+static bool unspecifiedReportForG;
+static bool linkLocalReportForG;
+static simtime_t detectionEnd;
+static simtime_t lastS1;
+
+Define_ProtocolTestProgram()
+{
+    unspecifiedReportForG = false;
+    linkLocalReportForG = false;
+    detectionEnd = -1;
+    lastS1 = -1;
+    return ProtocolTest("rfc9777_report_before_link_local")
+        // Expected observation 2: a Report of A for G from the unspecified address comes before
+        // the first Report of A from its link-local address, which leaves after the detection.
+        .meanwhile(never(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) {
+                      const Packet *p = c.event.packet;
+                      if (!isV2Report(p))
+                          return false;
+                      if (srcOf(p).isUnspecified()) {
+                          if (hasRecord(p, G))
+                              unspecifiedReportForG = true;
+                          return false;
+                      }
+                      if (srcOf(p) == A_LL && hasRecord(p, G))
+                          linkLocalReportForG = true;
+                      return srcOf(p) == A_LL && !unspecifiedReportForG;
+                  })
+                  .describe("a Report of A from its link-local address, with no Report of A for G from the unspecified address before it (RFC9777-REP-34)")
+                  .within(30.0)))
+        // Expected observation 3: no datagram of S1 on L1 before a Report of A for G from its
+        // link-local address.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; return !linkLocalReportForG && isFwd(p); })
+                  .describe("a datagram of S1 to G on L1 before a Report of A for G from its link-local address (RFC9777-REP-37)")
+                  .within(30.0)))
+        // Expected observation 1: the Neighbor Solicitation for the link-local address of A.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isDadOfLinkLocal(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { detectionEnd = c.event.time + 1.0; return true; })
+                  .describe("the Neighbor Solicitation of A for its link-local address")
+                  .within(2.0))
+        // Expected observation 4: after the detection, a Report of A from its link-local address
+        // with records for G and H.
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; return isV2Report(p) && srcOf(p) == A_LL && hasRecord(p, G) && hasRecord(p, H); })
+                  .assertEvent([](const MatchContext& c) { return c.event.time >= detectionEnd; })
+                  .describe("a Report of A from its link-local address with records for G and H, after the detection (RFC9777-REP-39)")
+                  .within(28.0))
+        // Expected observation 5: within 1 s, a datagram of S1 on L1 ...
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isFwd(c.event.packet); })
+                  .assertEvent([](const MatchContext& c) { lastS1 = c.event.time; return true; })
+                  .describe("a datagram of S1 to G on L1 after the Report of A from its link-local address")
+                  .within(1.0))
+        // ... and one every 0.5 s after it.
+        .meanwhile(never(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { const Packet *p = c.event.packet; if (!isFwd(p) || c.event.time > 30) return false; bool gap = lastS1 >= 0 && c.event.time - lastS1 > 1.0; lastS1 = c.event.time; return gap; })
+                  .describe("a gap longer than 1.0 s between forwarded datagrams of S1 until 30 s")
+                  .within(30.0)))
+        // The end of the window.
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .filterEvent([](const MatchContext& c) { return isFwd(c.event.packet) && c.event.time >= 29; })
+                  .describe("a datagram of S1 on L1 at the end of the window")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc9777_report_before_link_local compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+
+// The requests of a host, as its sockets would make them (tests/protocol/mld/MldChecks.h).
+simple MldRequests
+{
+    parameters:
+        @class(::inet::protocoltest::MldRequests);
+        string node;
+        string interfaceName = default("eth0");
+        string script;
+}
+
+// The multicast routing of R: one route from L2 to L1 with L1 as a leaf (MldChecks.h).
+simple MulticastLeafRoute6
+{
+    parameters:
+        @class(::inet::protocoltest::MulticastLeafRoute6);
+        string node;
+        string origin;
+        int prefixLength;
+        string group;
+        string inInterface;
+        string outInterface;
+}
+
+// the link with a source: R, A and B on L1 (router.eth0 through sw1); R, S1 and S2 on L2 (router.eth1 through sw2).
+network MldSource
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator {
+            // every node gets the address of the mockup; the configurator adds no route,
+            // and the multicast route of R comes from routeR
+            assignAddressesToHosts = true;
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='router' names='eth0' address='2001:db8:1::1'/>" +
+                         "<interface hosts='router' names='eth1' address='2001:db8:2::1'/>" +
+                         "<interface hosts='hostA' names='eth0' address='2001:db8:1::10'/>" +
+                         "<interface hosts='hostB' names='eth0' address='2001:db8:1::11'/>" +
+                         "<interface hosts='S1' names='eth0' address='2001:db8:2::10'/>" +
+                         "<interface hosts='S2' names='eth0' address='2001:db8:2::11'/>" +
+                         "</config>");
+            @display("p=50,50");
+        }
+        router: Router6 { @display("p=350,200"); }
+        sw1: EthernetSwitch { @display("p=350,330"); }
+        hostA: StandardHost6 { @display("p=250,450"); }
+        hostB: StandardHost6 { @display("p=450,450"); }
+        sw2: EthernetSwitch { @display("p=350,80"); }
+        S1: StandardHost6 { @display("p=250,20"); }
+        S2: StandardHost6 { @display("p=450,20"); }
+        requestsA: MldRequests {
+            node = "hostA";
+            script = "0 a ff0e::1:1 EXCLUDE; 0 b ff0e::1:2 EXCLUDE";
+            @display("p=50,500");
+        }
+        routeR: MulticastLeafRoute6 {
+            node = "router";
+            origin = "2001:db8:2::";
+            prefixLength = 64;
+            group = "::";
+            inInterface = "eth1";
+            outInterface = "eth0";
+            @display("p=50,250");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> sw1.ethg++;
+        router.ethg++ <--> Eth100M <--> sw2.ethg++;
+        hostA.ethg++ <--> Eth100M <--> sw1.ethg++;
+        hostB.ethg++ <--> Eth100M <--> sw1.ethg++;
+        S1.ethg++ <--> Eth100M <--> sw2.ethg++;
+        S2.ethg++ <--> Eth100M <--> sw2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MldSource
+sim-time-limit = 32s
+seed-set = 0
+**.mld.unsolicitedReportInterval = 1s
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.hasMld = true
+**.ipv6.mld.typename = "Mldv2"
+**.mld.checksumMode = "computed"
+*.router.multicastForwarding = true
+*.router.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.router.ipv6.mld.queryResponseInterval = 1s
+*.hostA.ipv6.mld.robustnessVariable = 1
+*.router.eth[0].address = "0A-00-00-00-00-01"
+*.router.eth[1].address = "0A-00-00-00-00-02"
+*.hostA.eth[0].address = "0A-00-00-00-00-0A"
+*.hostB.eth[0].address = "0A-00-00-00-00-0B"
+*.S1.eth[0].address = "0A-00-00-00-00-10"
+*.S2.eth[0].address = "0A-00-00-00-00-11"
+*.S1.numApps = 1
+*.S1.app[0].typename = "UdpBasicApp"
+*.S1.app[0].destAddresses = "ff0e::1:1"
+*.S1.app[0].destPort = 5000
+*.S1.app[0].messageLength = 100B
+*.S1.app[0].sendInterval = 0.5s
+*.S1.app[0].startTime = 0.5s
+*.S1.app[0].timeToLive = 16
+*.S1.app[0].multicastInterface = "eth0"
+
+%contains: stdout
+PROTOCOLTEST rfc9777_report_before_link_local: PASS
