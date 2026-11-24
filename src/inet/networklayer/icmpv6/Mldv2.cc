@@ -754,6 +754,14 @@ void Mldv2::processMldMessage(Packet *packet)
 {
     const auto& icmp = packet->peekAtFront<Icmpv6Header>();
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    // a node sends a Report, or in MLDv1 a Done, from the unspecified address before it has a
+    // valid link-local address; a router discards it without action on its contents (RFC 9777
+    // section 5.2.14), and so does a host (RFC 3590 section 6)
+    if (icmp->getType() != ICMPv6_MLD_QUERY && packet->getTag<L3AddressInd>()->getSrcAddress().isUnspecified()) {
+        EV_INFO << "Ignoring an MLD Report or Done from the unspecified address.\n";
+        delete packet;
+        return;
+    }
     switch (icmp->getType()) {
         case ICMPv6_MLD_QUERY:
             // Type 130 is shared by MLDv1 (24-byte MldQuery) and MLDv2 (>=28-byte
