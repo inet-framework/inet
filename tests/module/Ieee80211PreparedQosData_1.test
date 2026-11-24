@@ -10,6 +10,7 @@ The fixture uses no HCF runtime path. Its Edca subclass supplies only the produc
 %extraargs: -r 0..9
 
 %file: PreparedData.cc
+// Author: Miguel González-López
 #include <iostream>
 
 #include "inet/common/Simsignals.h"

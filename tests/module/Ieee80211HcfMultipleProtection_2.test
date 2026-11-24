@@ -9,6 +9,7 @@ The Compressed cases supply valid HT peer state and accepted agreements where th
 %extraargs: -r 0..9
 
 %file: ProtectionRates.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

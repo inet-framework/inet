@@ -8,6 +8,7 @@ Require zero duration for protected DATA after the reservation expires inside an
 %extraargs: -r 0..17
 
 %file: MultipleProtection.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"

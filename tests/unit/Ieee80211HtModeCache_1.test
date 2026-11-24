@@ -4,6 +4,7 @@ Both request orders produce distinct modes for different parameters.
 Identical requests reuse the same mode object.
 
 %includes:
+// Author: Miguel González-López
 #include <algorithm>
 #include <vector>
 

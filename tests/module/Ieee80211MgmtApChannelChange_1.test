@@ -8,6 +8,7 @@ operation is known, and keep advertised HT Operation and existing negotiated
 peer state consistent throughout.
 
 %file: TestIeee80211MgmtApChannelChange.cc
+// Author: Miguel González-López
 
 #include <vector>
 

@@ -8,6 +8,7 @@ The Type 0 control preserves an ordinary Basic exchange.
 %extraargs: -r 0..2
 
 %file: BlockAckWireType.cc
+// Author: Miguel González-López
 #include "BlockAckLifecycleTestSupport.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"

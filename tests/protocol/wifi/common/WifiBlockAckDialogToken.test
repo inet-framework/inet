@@ -8,6 +8,7 @@ All frames cross the radio. Read-only observations check production agreement st
 %extraargs: -r 0..2
 
 %file: DialogToken.cc
+// Author: Miguel González-López
 #include "BlockAckRequestProbe.h"
 
 namespace inet::protocoltest {

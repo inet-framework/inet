@@ -7,6 +7,7 @@ The measurements describe these traffic shapes. They do not estimate agreement-r
 %extraargs: -r 0..1
 
 %file: CompletionCost.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"

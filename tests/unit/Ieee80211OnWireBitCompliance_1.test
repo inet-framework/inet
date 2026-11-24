@@ -2,6 +2,7 @@
 Validate byte-exact 802.11 MAC and PHY bitfield packing for on-wire fields.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

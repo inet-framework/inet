@@ -3,6 +3,7 @@ Test that EthernetFcsSerializer reconstructs the concrete FCS type requested thr
 serializer registry while preserving the common on-wire representation.
 
 %includes:
+// Author: Miguel González-López
 #include <string>
 #include <vector>
 

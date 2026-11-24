@@ -4,6 +4,7 @@ VO grows CW, VI saturates at CWmax, and BK exhausts a retry limit of one. The co
 drop must occur, and the typed terminal callback must be delivered exactly once.
 
 %file: TestIeee80211HcfInternalCollision.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"

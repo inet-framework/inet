@@ -2,6 +2,7 @@
 Tests that TxopProcedure reports the remaining time until the TXOP limit.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 

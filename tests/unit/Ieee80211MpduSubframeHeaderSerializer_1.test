@@ -4,6 +4,7 @@ Check decoded fields through the registered serializer using fresh byte-backed p
 so cached serialized bytes cannot hide an incorrect decoded length.
 
 %includes:
+// Author: Miguel González-López
 #include <vector>
 
 #include "inet/common/packet/Packet.h"

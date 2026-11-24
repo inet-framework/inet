@@ -5,6 +5,7 @@ omit HT elements. The real beacon timer and management frame dispatch reach the
 production generators; checked frames continue to the real MAC and radio.
 
 %file: TestIeee80211MgmtApGenericRadio.cc
+// Author: Miguel González-López
 
 #include <iostream>
 

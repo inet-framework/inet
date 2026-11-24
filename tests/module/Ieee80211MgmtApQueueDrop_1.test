@@ -5,6 +5,7 @@ pending association and reserved AID are cleared, and a retransmitted request
 gets a new transaction token.
 
 %file: TestIeee80211MgmtApQueueDrop.cc
+// Author: Miguel González-López
 
 #include <vector>
 

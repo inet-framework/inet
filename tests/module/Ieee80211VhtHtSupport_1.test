@@ -13,6 +13,7 @@ These checks retain the model's short-GI duration and control-format limits.
 %extraargs: -r 0..6
 
 %file: VhtHtSupport.cc
+// Author: Miguel González-López
 #include "inet/applications/udpapp/UdpSink.h"
 #include <algorithm>
 #include <cmath>

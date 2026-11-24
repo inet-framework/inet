@@ -5,6 +5,7 @@ initial channel signal when the transmitter is also unconfigured, so initializat
 missing MIB-owned channel instead of serializing an invalid value.
 
 %file: test.ned
+// Author: Miguel González-López
 
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;

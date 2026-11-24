@@ -4,6 +4,7 @@ Check individual removal, bulk removal, and replacement state from a callback.
 Standalone HT and rate removal methods retain their notifications.
 
 %includes:
+// Author: Miguel González-López
 #include <functional>
 
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"

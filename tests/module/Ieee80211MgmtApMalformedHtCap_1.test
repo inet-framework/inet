@@ -4,6 +4,7 @@ Association Request and Reassociation Request frames, rejecting malformed
 field-based elements with SC_UNSUP_CAP without terminating the simulation.
 
 %file: TestIeee80211MgmtApMalformedHtCap.cc
+// Author: Miguel González-López
 
 #include <vector>
 #include <string>

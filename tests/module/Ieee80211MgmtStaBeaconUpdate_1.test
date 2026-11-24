@@ -6,6 +6,7 @@ MCS constraints, and that legacy or unusable updates preserve the association
 while falling back to legacy operational modes.
 
 %file: TestIeee80211MgmtStaBeaconUpdate.cc
+// Author: Miguel González-López
 
 #include <string>
 #include <vector>

@@ -6,6 +6,7 @@ peer state and startup restores both. Verify crash performs the same cleanup,
 and remains safe when the recorded AP can no longer be resolved.
 
 %file: TestInitializationObserver.cc
+// Author: Miguel González-López
 
 #include "inet/common/InitStages.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"

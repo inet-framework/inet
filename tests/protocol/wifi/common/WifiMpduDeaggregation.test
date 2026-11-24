@@ -6,6 +6,7 @@ Four seed-zero runs cover both layouts as typed chunks and reconstructed bytes.
 %extraargs: -r 0..3
 
 %file: WifiMpduDeaggregation.cc
+// Author: Miguel González-López
 #include "ProtocolTest.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"

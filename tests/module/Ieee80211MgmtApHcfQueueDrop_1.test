@@ -6,6 +6,7 @@ pending state is cleared, and a retransmission completes without disturbing a
 committed association.
 
 %file: TestIeee80211MgmtApHcfQueueDrop.cc
+// Author: Miguel González-López
 
 #include <vector>
 

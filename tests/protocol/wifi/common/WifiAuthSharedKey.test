@@ -4,6 +4,7 @@ AP sends transactions 2 and 4 with successful status. This observes the dummy
 management exchange supported by numAuthSteps=4; it does not validate WEP cryptography.
 
 %file: WifiAuthSharedKey.cc
+// Contributor: Miguel González-López (four-message shared-key authentication assertions)
 
 #include "WifiTestSupport.h"
 

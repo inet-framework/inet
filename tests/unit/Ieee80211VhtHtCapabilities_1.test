@@ -5,6 +5,7 @@ Stream limits 1, 2, 3, 4, and 8 expose exact MCS sets through MCS 31.
 This fixture does not establish antenna propagation through the radio.
 
 %includes:
+// Author: Miguel González-López
 #include <algorithm>
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"

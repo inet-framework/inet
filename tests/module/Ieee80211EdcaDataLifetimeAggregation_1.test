@@ -7,6 +7,7 @@ With qOsCheck true, non-QoS sources retain ordinary extraction behavior.
 %extraargs: -r 0..4
 
 %file: LifetimeAggregationTest.cc
+// Author: Miguel González-López
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/Simsignals.h"

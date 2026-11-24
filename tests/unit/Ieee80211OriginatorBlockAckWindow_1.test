@@ -3,6 +3,7 @@ Shared originator operations preserve the earliest unresolved sequence across wr
 The accepted transmit window and the 64-position response bitmap have distinct boundaries.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 using namespace inet;
 using namespace inet::ieee80211;

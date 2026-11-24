@@ -12,6 +12,7 @@ The separate Compressed exchange fixture tests negotiation and frame exchange.
 %extraargs: -r 0..1
 
 %file: CompressedInput.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"

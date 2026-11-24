@@ -3,6 +3,7 @@ After successful association, issue the station deauthentication primitive and
 verify the addressed frame, leaving reason, and delivery to AP management.
 
 %file: WifiDeauth.cc
+// Contributor: Miguel González-López (station deauthentication stimulus and assertions)
 
 #include "WifiTestSupport.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"

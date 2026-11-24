@@ -5,6 +5,7 @@ Verify initial and runtime channel signals, including band-only changes and
 notifications without band details.
 
 %file: TestBeaconSchedule.cc
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"

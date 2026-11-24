@@ -9,6 +9,7 @@ limit drops an Association Response, then verify that a fresh transaction
 recovers through a real response/ACK exchange and reuses the released AID.
 
 %file: TestIeee80211MgmtAp.cc
+// Author: Miguel González-López
 
 #include <vector>
 

@@ -7,6 +7,7 @@ IEEE Std 802.11-2024, 9.2.4.1.6 defines Retry for retransmitted standalone DATA.
 %extraargs: -r 0..1
 
 %file: BlockAckDataRetry.cc
+// Author: Miguel González-López
 #include "BlockAckLifecycleTestSupport.h"
 
 namespace inet::protocoltest {

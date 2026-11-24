@@ -5,6 +5,7 @@ The HT/VHT response delay is 24 us, independent of the transmitting mode
 set's reference profile.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorAckPolicy.h"

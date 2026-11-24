@@ -4,6 +4,7 @@ The next delivery continues the byte sequence across its wrap at 256.
 A corrupt byte after the first chunk must raise the production validation error.
 
 %file: QuicOrderedPayload.cc
+// Author: Miguel González-López
 #include "inet/applications/quicapp/QuicOrderedReceiver.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"

@@ -5,6 +5,7 @@ after restarting the AP, a former station is no longer accepted as associated
 until it authenticates and associates again.
 
 %file: TestIeee80211MgmtApLifecycle.cc
+// Author: Miguel González-López
 
 #include <vector>
 

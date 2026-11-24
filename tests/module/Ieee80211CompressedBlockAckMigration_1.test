@@ -8,6 +8,7 @@ Require a queued successor without ADDBA, BAR, or BA. Check profile and capabili
 %postrun-command: python3 check-diagnostics.py
 
 %file: Migration.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

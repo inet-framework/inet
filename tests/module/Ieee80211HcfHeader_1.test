@@ -5,6 +5,7 @@ Require one ACK-policy selection for the selected exchange.
 
 %extraargs: -r 0..3
 %file: Header.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

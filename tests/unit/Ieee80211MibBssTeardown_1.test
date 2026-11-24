@@ -4,6 +4,7 @@ Check individual and bulk cleanup, empty state, local-state retention,
 unrelated peers, and replacement state installed by a callback.
 
 %includes:
+// Author: Miguel González-López
 #include <functional>
 
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"

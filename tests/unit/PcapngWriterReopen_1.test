@@ -4,6 +4,7 @@ file. The first packet of the second file refers to an interface description
 in that file.
 
 %includes:
+// Author: Miguel González-López
 #include <cstdio>
 #include <fstream>
 #include <iterator>

@@ -5,6 +5,7 @@ The ac catalog retains VHT fixed-rate ties and equal-rate traversal order.
 Also verify exact sparse HT MCS and width derivation from typed mode entries.
 
 %includes:
+// Author: Miguel González-López
 #include <algorithm>
 #include <vector>
 

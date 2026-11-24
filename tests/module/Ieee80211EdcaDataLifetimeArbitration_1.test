@@ -9,6 +9,7 @@ All runs use seed 0, zero contention windows, and native AIFS values.
 %extraargs: -r 0..2
 
 %file: LifetimeArbitration.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

@@ -7,6 +7,7 @@ Each seed-zero run checks its own completion and PASS result.
 %extraargs: -r 0..32
 
 %file: Interframe.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "../../LocalInterframeTestSupport.h"
 #include "inet/common/Simsignals.h"

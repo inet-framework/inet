@@ -4,6 +4,7 @@ Check failed attempts, acknowledgment, and retry-limit disposal before any DATA 
 Use the production recovery procedure with both short and long retry counters.
 
 %file: QosRecoveryPeerIdentityTest.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 

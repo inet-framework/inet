@@ -4,6 +4,7 @@ The reference rate depends on stream 1 modulation and the code rate.
 Channel width, guard interval, and spatial stream count do not change it.
 
 %includes:
+// Author: Miguel González-López
 #include <cmath>
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"

@@ -5,6 +5,7 @@ Both production data selectors check every n and ac catalog candidate.
 Valid 20 MHz peer state restricts HT output; absent state selects legacy.
 
 %includes:
+// Author: Miguel González-López
 #include <initializer_list>
 
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"

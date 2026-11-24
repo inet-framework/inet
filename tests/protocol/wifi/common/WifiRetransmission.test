@@ -4,6 +4,7 @@ one addressed ACK after 1s and emits proof of the fault. Production DCF must ret
 the same sequence/fragment with Retry set, and the destination must deliver only once.
 
 %file: WifiRetransmission.cc
+// Contributor: Miguel González-López (addressed ACK suppression and retransmission assertions)
 #include "WifiTestSupport.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 

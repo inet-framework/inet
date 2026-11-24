@@ -8,6 +8,7 @@ channels 0 (5005 MHz), 35 (5180 MHz, interoperating on air with a passive
 %extraargs: -r 0..2
 
 %file: A_5ghzBandCenters.cc
+// Author: Miguel González-López
 
 #include "ProtocolTest.h"
 #include "inet/common/Simsignals.h"

@@ -5,6 +5,7 @@ the description of its interface and link type. Packets without a network
 interface follow the same rule.
 
 %includes:
+// Author: Miguel González-López
 #include <cstdio>
 #include <fstream>
 #include <iterator>

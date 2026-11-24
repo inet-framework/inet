@@ -6,6 +6,7 @@ The receiver accepts FCS independently of the interval result.
 %extraargs: -r 0..50
 
 %file: LocalInputs.cc
+// Author: Miguel González-López
 #include "../../LocalInterframeTestSupport.h"
 #include <iostream>
 #include "inet/common/Simsignals.h"

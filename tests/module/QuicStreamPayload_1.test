@@ -4,6 +4,7 @@ The receiver must consume the declared byte count before it reads another frame 
 The invalid token example sends 1500 bytes on the first connection and 3000 on the second.
 
 %file: QuicStreamPayload.cc
+// Author: Miguel González-López
 #include "inet/applications/quicapp/QuicDiscardServer.h"
 
 namespace inet {

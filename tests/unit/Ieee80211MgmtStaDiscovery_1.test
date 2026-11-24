@@ -4,6 +4,7 @@ Operation primary channel as the cached AP channel, while legacy discovery
 converts the DSSS Parameter Set channel to the internal index (including index 0).
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"

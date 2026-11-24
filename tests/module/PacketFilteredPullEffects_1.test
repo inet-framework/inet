@@ -6,6 +6,7 @@ The filter captures a selected packet. Its query must preserve storage and confi
 %extraargs: -r 0..5
 
 %file: SelectiveExtraction.cc
+// Author: Miguel González-López
 #include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/TimeTag.h"

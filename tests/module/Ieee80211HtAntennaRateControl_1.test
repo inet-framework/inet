@@ -4,6 +4,7 @@ stream capability, while peer-aware rate selection keeps data transmissions
 within that capability after a full infrastructure association.
 
 %file: Ieee80211HtAntennaRateControl.cc
+// Author: Miguel González-López
 
 #include <utility>
 #include <vector>

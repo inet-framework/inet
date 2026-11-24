@@ -5,6 +5,7 @@ active association transaction, while a current-AP frame clears the current
 association and emits one typed refusal only for a same-AP pending request.
 
 %file: TestIeee80211MgmtSta.cc
+// Author: Miguel González-López
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 

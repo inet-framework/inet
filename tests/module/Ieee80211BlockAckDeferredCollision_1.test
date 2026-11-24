@@ -13,6 +13,7 @@ HCF must retire that agreement and queue DELBA before a successor can transmit.
 %extraargs: -r 0..2
 
 %file: DeferredCollision.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"

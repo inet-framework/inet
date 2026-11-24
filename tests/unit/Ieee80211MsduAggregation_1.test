@@ -5,6 +5,7 @@ subframe payloads and source/destination addresses. IEEE Std 802.11-2024 9.3.2.1
 Outer Address3/Address4 bytes follow the Basic A-MSDU BSSID rules in Table 9-60.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"

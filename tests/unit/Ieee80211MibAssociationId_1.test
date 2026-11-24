@@ -3,6 +3,7 @@ Verify deterministic IEEE 802.11 association ID reservation, commit,
 cancellation, reuse, and lifecycle clearing.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 using namespace inet;

@@ -7,6 +7,7 @@ The 24 runs cover seeds 0/1/2, short/long frames, retry limits 1/2 and CW satura
 %extraargs: -r 0..23
 
 %file: TestIeee80211HcfManagementRecovery.cc
+// Author: Miguel González-López
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"

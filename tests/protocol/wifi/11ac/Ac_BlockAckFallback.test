@@ -8,6 +8,7 @@ Check absent peer HT records during traffic and at the final audit.
 This fixture does not establish an on-air association exchange or a limitation of all ac stations.
 
 %file: Ac_BlockAckFallback.cc
+// Author: Miguel González-López
 #include "ProtocolTest.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"

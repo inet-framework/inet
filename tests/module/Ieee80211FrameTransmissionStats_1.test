@@ -6,6 +6,7 @@ by the @statistic declarations on Ieee80211Mac (frameTransmissionOutcome,
 frameAcked, frameRetryLimitReached, and frameDroppedBeforeTx).
 
 %file: TestIeee80211FrameTransmissionStats.cc
+// Author: Miguel González-López
 
 #include <omnetpp/cresultfilter.h>
 #include <omnetpp/resultrecorders.h>

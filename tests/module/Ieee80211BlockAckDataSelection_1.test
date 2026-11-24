@@ -9,6 +9,7 @@ Ordinary service and filtered queries must work. A refused pull must preserve qu
 %extraargs: -r 0..3
 
 %file: DataSelection.cc
+// Author: Miguel González-López
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"

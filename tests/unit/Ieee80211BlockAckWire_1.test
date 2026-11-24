@@ -7,6 +7,7 @@ Compressed uses the non-HE, 64-position format from IEEE Std 802.11-2024, 9.3.1.
 This test does not establish complete exchanges or response airtime.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 

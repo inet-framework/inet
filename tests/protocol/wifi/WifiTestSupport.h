@@ -1,6 +1,8 @@
 //
 // WiFi conformance suite -- shared test support.
 //
+// Contributor: Miguel González-López (typed Wi-Fi management frame observation helpers)
+//
 // The single place the INET 802.11 PHY-mode + tag headers are #included. Provides
 // C++ predicates that read the transmitted frame's Ieee80211ModeReq tag (an opaque
 // `const IIeee80211Mode *` the PacketFilter string engine cannot follow) and cast it

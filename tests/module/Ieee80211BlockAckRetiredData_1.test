@@ -6,6 +6,7 @@ The late ACK must emit one packetReceivedFromPeer signal. Further cases reset du
 %extraargs: -r 0..8
 
 %file: RetiredData.cc
+// Author: Miguel González-López
 #include <iostream>
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"

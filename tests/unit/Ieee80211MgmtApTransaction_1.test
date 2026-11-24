@@ -5,6 +5,7 @@ retain ACKed non-final fragments, and clear on a terminal retry-limit result;
 stale, missing, and malformed responses are ignored.
 
 %includes:
+// Author: Miguel González-López
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"

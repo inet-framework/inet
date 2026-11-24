@@ -4,6 +4,7 @@ when a management frame is replaced by fragmentation packets, and that a
 generic body region tag is clipped and rebased for each fragment.
 
 %includes:
+// Author: Miguel González-López
 #include <vector>
 
 #include "inet/common/TimeTag_m.h"
