@@ -29,6 +29,7 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     /// persist timer
     //@{
     simtime_t persist_timeout = 5.0; ///< the interval of the next zero-window probe
+    bool persistOverride = false; ///< the persist timer times the override timeout of the sender SWS avoidance (an open window, RFC 9293 section 3.8.6.2.1, rule (4)); false: a zero-window probe
     //@}
 
     /// keepalive (RFC 9293 section 3.8.4)

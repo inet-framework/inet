@@ -185,6 +185,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual bool processWindowUpdate();
 
+    /** When the window closes while the persist timer times the override of the SWS avoidance, starts it again for the first probe. */
+    virtual void restartOverrideTimerAsProbe();
+
     /** Whether data waits to be sent: the send queue has data from snd_una on. */
     virtual bool isDataWaiting() const;
 

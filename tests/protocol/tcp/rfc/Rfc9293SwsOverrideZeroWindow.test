@@ -1,0 +1,74 @@
+%description:
+
+RFC 9293 section 3.8.6.1, SHLD-29 — a zero window that comes while the override timer runs gets its first probe one RTO later.
+
+The rule: "The transmitting host SHOULD send the first zero-window probe when a zero window has existed for the
+retransmission timeout period (SHLD-29)". The sender SWS avoidance of section 3.8.6.2.1 holds data with the override
+timer, which is the persist timer in the role of the override. When the window closes while that timer runs, the timer
+must time the first probe from the moment the window closed, not keep the time that is left of the override. The
+reviewer document is ../sws-override-timer.md.
+
+Host under test: host1, with an MSS of 1000 bytes and a minimum RTO of 2 s, so its RTO is 2 s, sends 5000 bytes. The
+TS option takes 12 bytes of each segment, so a full segment holds 988 bytes. Peer: host2, with an advertised window of
+3464 bytes, reads nothing. After three segments, 2964 bytes, the window of host2 is 500 bytes, and host1 holds the
+rest from about 0.2 s. At 0.5 s host2 sends 100 bytes, and the tap sets the window of that segment to 0, as a peer that
+shrinks its window does.
+
+Observation: host1 sends no data and no probe for 1.9 s after the window closed, and sends its first probe one RTO,
+2 s, after it. A timer that keeps the time of the override sends the probe at about 1.2 s, 0.7 s after the window
+closed.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("Rfc9293SwsOverrideZeroWindow")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 500")
+             .describe("the ACK of host2 that leaves a window of 500 bytes: host1 holds its data")
+             .within(1.0))
+        .meanwhile(tap("tap").from("host2").filterPacket("tcp.pshBit == true").nth(1).set("tcp.window", "0")
+                       .describe("the data segment of host2: the window field 0"))
+        .act(action().at(0.5).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.accepted(0), 100);
+        }))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+              .describe("data or a probe before one RTO after the window closed")
+              .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the first zero-window probe, one RTO after the window closed")
+             .within(0.2));
+}
+
+%activity:
+EV << "Rfc9293SwsOverrideZeroWindow compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+**.tcp.mss = 1000
+*.host1.tcp.minRexmitTimeout = 2s
+*.host2.tcp.advertisedWindow = 3464
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST Rfc9293SwsOverrideZeroWindow: PASS

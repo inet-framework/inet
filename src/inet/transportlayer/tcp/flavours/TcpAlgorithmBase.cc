@@ -516,6 +516,7 @@ void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
     if (state->persist_timeout > maxPersistTimeout)
         state->persist_timeout = maxPersistTimeout;
 
+    state->persistOverride = false;
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 
     // sending persist probe
@@ -750,6 +751,10 @@ bool TcpAlgorithmBase::isDataWaiting() const
 
 void TcpAlgorithmBase::startPersistTimer()
 {
+    // With an open window and nothing in flight, the timer times the override of the
+    // sender SWS avoidance (RFC 9293 section 3.8.6.2.1, rule (4)); with a zero window,
+    // the first zero-window probe. processWindowUpdate() treats the two roles apart.
+    state->persistOverride = state->snd_wnd > 0 && state->snd_una == state->snd_max;
     // the first probe after one RTO (SHLD-29), at most maxPersistTimeout, as the later
     // ones (Linux caps the first interval too)
     state->persist_timeout = std::min(state->rexmit_timeout, maxPersistTimeout);
@@ -977,8 +982,10 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is not started.\n";
         }
         else {
-            if (persistTimer->isScheduled())
+            if (persistTimer->isScheduled()) {
                 EV_INFO << "Received zero-sized window and PERSIST timer is already running.\n";
+                restartOverrideTimerAsProbe();
+            }
             else if (!isDataWaiting())
                 EV_INFO << "Received zero-sized window, but no data waits, therefore PERSIST timer is not started.\n";
             else {
@@ -1011,18 +1018,40 @@ bool TcpAlgorithmBase::processWindowUpdate()
     // tcp_data_snd_check()). Also with nothing in flight and no persist timer, as after
     // a zero window of the SYN-ACK. Not with other data in flight, so that a duplicate
     // ACK of a loss recovery does not come here.
+    if (state->snd_wnd == 0 && persistTimer->isScheduled())
+        restartOverrideTimerAsProbe();
     if (state->snd_wnd > 0 && (state->snd_una == state->snd_max || persistTimer->isScheduled())) {
-        if (persistTimer->isScheduled()) {
+        if (persistTimer->isScheduled() && !state->persistOverride) {
             EV_INFO << "The window update opens the window: cancelling the PERSIST timer\n";
             cancelTimer(persistTimer);
             // The ACK is below the probe octet, so the receiver did not accept it: the
             // octet goes again as the first octet of the data.
             conn->unsendWindowProbe();
         }
+        // The override timer of the sender SWS avoidance keeps running: a segment of the
+        // peer that updates no window must not restart it, or held data waits for ever
+        // while the peer sends (RFC 9293 section 3.8.6.2.1, rule (4)). sendData() sends
+        // what the window allows now, and the timer stops when the held data left.
         sendData(false);
+        if (persistTimer->isScheduled() && state->persistOverride && state->snd_una != state->snd_max) {
+            EV_INFO << "The held data left: cancelling the override timer\n";
+            cancelTimer(persistTimer);
+        }
         return true;
     }
     return false;
+}
+
+void TcpAlgorithmBase::restartOverrideTimerAsProbe()
+{
+    // The window closed while the override timer runs: the timer now times the first
+    // zero-window probe, one RTO after the window closed (RFC 9293 SHLD-29), and not
+    // what is left of the override timeout.
+    if (!state->persistOverride)
+        return;
+    EV_INFO << "The window closes while the override timer runs: the PERSIST timer starts again for a probe\n";
+    cancelTimer(persistTimer);
+    startPersistTimer();
 }
 
 void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)

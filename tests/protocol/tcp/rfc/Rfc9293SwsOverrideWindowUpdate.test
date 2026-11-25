@@ -1,0 +1,76 @@
+%description:
+
+RFC 9293 section 3.8.6.2.1 — a window update that opens a full segment ends the hold of the sender SWS avoidance at once.
+
+The rule: "Send data: (1) if a maximum-sized segment can be sent". While the override timer of rule (4) runs, a
+window update of the peer that opens room for a full segment lets the held data go at once; the sender does not wait
+for the override timeout. Silly window avoidance is out of the scope of the catalog of RFC 9293
+(doc/project/evidence/standard/rfc9293/catalog.md, "Out of scope in this catalog"), so this test checks the section
+directly. The reviewer document is ../sws-override-timer.md.
+
+Host under test: host1, with an MSS of 1000 bytes and an RTO of 1 s, sends 5000 bytes. The TS option takes 12 bytes of
+each segment, so a full segment holds 988 bytes. Peer: host2, with an advertised window of 3464 bytes, reads nothing
+until 0.5 s. After three segments, 2964 bytes, the window of host2 is 500 bytes, and host1 holds the rest. At 0.5 s
+host2 reads all. With windowUpdateAfterRead, the read sends the window update at once: the default sends the new
+window only with the next ACK, and host2 has nothing to acknowledge.
+
+Observation: host1 sends no data while it holds, and sends data right after the window update, long before the
+override timeout. This test keeps the behavior of a window update while the repair of BD-21 of
+plan/pending/baseline-catch-up-defects.md lets the override timer run through segments that update no window.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("Rfc9293SwsOverrideWindowUpdate")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 500")
+             .describe("the ACK of host2 that leaves a window of 500 bytes: host1 holds its data")
+             .within(0.45))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+              .describe("held data before the window update")
+              .within(0.29))
+        .act(action().at(0.5).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.accepted(0).read(65535);
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window >= 1000")
+             .describe("the window update of host2 after its read")
+             .within(0.2))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the held data, right after the window update and before the override timeout")
+             .within(0.1));
+}
+
+%activity:
+EV << "Rfc9293SwsOverrideWindowUpdate compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+**.tcp.mss = 1000
+*.host2.tcp.advertisedWindow = 3464
+*.host2.tcp.windowUpdateAfterRead = true
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST Rfc9293SwsOverrideWindowUpdate: PASS

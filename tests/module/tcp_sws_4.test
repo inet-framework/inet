@@ -1,0 +1,54 @@
+%description:
+Tests that the override timeout of the sender SWS avoidance (RFC 9293 section
+3.8.6.2.1, rule (4)) expires while the peer sends data. The setup is that of
+tcp_sws_2.test: the server offers 3500 bytes and reads nothing, so after three
+segments its window is 500 bytes, and the client holds the rest of its data.
+Here the server also sends 100 bytes every 0.3 s, shorter than the RTO of 1 s.
+Each of its segments acknowledges SND.UNA with the same window of 500 bytes, so
+it updates no window and must not restart the override timer: the client sends
+the 500 bytes one RTO after the hold, at 2.2 s, as in tcp_sws_2.test, and not
+only after the server stops sending (BD-21 of baseline-catch-up-defects.md).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 6s
+*.cli_app.sendScript="1.0 5000"
+*.srv_app.sendScript="1.35 100; 1.65 100; 1.95 100; 2.25 100; 2.55 100; 2.85 100; 3.15 100; 3.45 100; 3.75 100; 4.05 100"
+*.*_tcp.mss = 1000
+*.srv_tcp.advertisedWindow = 3500
+*.srv_app.autoRead=false
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: postrun-command(1).out
+\[2\.2\d\d A\d+\] A\.1000 > B\.2000: A 3001:3501\(500\)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PERSIST timer expired with an open window: overriding the SWS avoidance
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

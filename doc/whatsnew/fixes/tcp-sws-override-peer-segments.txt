@@ -1,0 +1,3 @@
+Held TCP data no longer waits for the end of the traffic of the peer
+
+When the sender silly-window-syndrome avoidance of Tcp held data, each segment of the peer that acknowledged nothing new and kept the window started the override timer again, so the held data left only one RTO after the last such segment. A peer that sends without a pause, as in a two-way transfer, held the data for ever. The override timer now runs through such segments and stops when the held data leaves, as RFC 9293 section 3.8.6.2.1, rule (4), asks. Simulations in which a sender holds data while its peer sends data change.

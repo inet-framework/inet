@@ -1,0 +1,75 @@
+%description:
+
+RFC 9293 section 3.8.6.2.1, rule (4) — the override timeout of the sender SWS avoidance expires while the peer sends data.
+
+The rule: "Send data: [...] (4) if data is PUSHed and the override timeout occurs." The override timeout forces the
+transmission of data that the sender SWS avoidance holds (MUST-38 asks for the algorithm). Silly window avoidance is
+out of the scope of the catalog of RFC 9293 (doc/project/evidence/standard/rfc9293/catalog.md, "Out of scope in this
+catalog"), so this test checks the section directly. The reviewer document is ../sws-override-timer.md.
+
+Host under test: host1, with an MSS of 1000 bytes and an RTO of 1 s, sends 5000 bytes. The TS option takes 12 bytes of
+each segment, so a full segment holds 988 bytes. Peer: host2, with an advertised window of 3464 bytes, reads nothing
+and sends 100 bytes to host1 at 0.35 s, 0.65 s and 0.95 s. After three segments, 2964 bytes, the window of host2 is
+500 bytes: less than one segment, less than the queued data and less than half of the largest window, so host1 holds
+the rest from about 0.2 s. Each segment of host2 acknowledges SND.UNA with the same window: it updates no window.
+
+Observation: host1 sends the held data one RTO after the hold, at about 1.2 s, between the segments of host2 and
+before 1.3 s. The fault BD-21 of plan/pending/baseline-catch-up-defects.md started the timer again at each segment of
+host2, so the held data left only one RTO after the last segment of host2, at about 1.95 s.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static void sendHundredBytes(TcpTestApp& app)
+{
+    app.sendData(app.accepted(0), 100);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("Rfc9293SwsOverridePeerData")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 500")
+             .describe("the ACK of host2 that leaves a window of 500 bytes: host1 holds its data")
+             .within(1.0))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                             .describe("held data before the override timeout, while host2 sends")
+                             .within(0.9)))
+        .act(action().at(0.35).run<TcpTestApp>("host2.app[0]", sendHundredBytes))
+        .act(action().at(0.65).run<TcpTestApp>("host2.app[0]", sendHundredBytes))
+        .act(action().at(0.95).run<TcpTestApp>("host2.app[0]", sendHundredBytes))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the held data, one RTO after the hold and before one RTO after the last segment of host2")
+             .within(0.35));
+}
+
+%activity:
+EV << "Rfc9293SwsOverridePeerData compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+**.tcp.mss = 1000
+*.host2.tcp.advertisedWindow = 3464
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST Rfc9293SwsOverridePeerData: PASS
