@@ -24,7 +24,7 @@ def run(scaling):
     scalar_file = Path.cwd() / f"ftp-{scaling}.sca"
     result = subprocess.run(
         [
-            str(root / "bin/inet"), "--debug", "-u", "Cmdenv",
+            str(root / "bin/inet"), "-u", "Cmdenv",
             "-f", "omnetpp-ftp.ini", "-c", "TwoHosts", "-r", "0",
             "--seed-set=0", "--cmdenv-express-mode=false", "--cmdenv-log-prefix=%m: ",
             "--cmdenv-log-level=off", "--**.mobility.cmdenv-log-level=info",

@@ -31,7 +31,7 @@ for policies in [("originator",), ("recipient",), ("originator", "recipient")]:
                   "Compressed Block Ack does not support delayedAckPolicySupported"))
     cases.append(("basic", True, policies, None))
 for variant, supported, policies, diagnostic in cases:
-    command = [str(root / "bin/inet"), "--debug", "-u", "Cmdenv", "-f", str(Path.cwd() / "profile.ini"), "-c", "General", "-r", "0",
+    command = [str(root / "bin/inet"), "-u", "Cmdenv", "-f", str(Path.cwd() / "profile.ini"), "-c", "General", "-r", "0",
                "--sim-time-limit=0s", "--record-vector-results=false", "--record-scalar-results=false",
                f"--result-dir={Path.cwd() / 'results'}",
                f"--**.wlan[*].mac.hcf.isBlockAckSupported={'true' if supported else 'false'}"]
