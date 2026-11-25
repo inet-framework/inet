@@ -34,7 +34,7 @@ simple LinuxTcp extends Tcp
         retainSackAfterRto = default(true);
         rackReoTimerGranularity = default(4ms);
         // timers: tcp_set_rto(), TCP_RTO_MIN, TCP_RTO_MAX, tcp_retries2, tcp_syn_retries,
-        // tcp_syn_linear_timeouts, and a TIME_WAIT of 60 s (TCP_TIMEWAIT_LEN)
+        // tcp_syn_linear_timeouts, tcp_probe_timer(), and a TIME_WAIT of 60 s (TCP_TIMEWAIT_LEN)
         seedRttFromHandshake = default(true);
         minRexmitTimeout = default(200ms);
         rtoVarianceFloor = default(true);
@@ -44,6 +44,7 @@ simple LinuxTcp extends Tcp
         synLinearTimeouts = default(4);
         maxPersistTimeout = default(120s);
         zeroWindowProbe = default("linux");
+        swsOverrideAfterRto = default(true);
         msl = default(30s);
         // sending and receiving: the delayed ACK, Nagle, PSH, and the receive window and
         // buffer of Linux (tcp_rmem[1] = 131072)

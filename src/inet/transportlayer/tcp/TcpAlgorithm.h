@@ -41,6 +41,7 @@ class INET_API TcpAlgorithm : public SimpleModule
     bool retainSackAfterRto = false; // a retransmission timeout keeps the SACKed marks, as Linux
     int maxRexmitCount = 0; // the retransmissions of one segment, after which the connection aborts
     simtime_t maxPersistTimeout; // the upper limit of the interval of the zero-window probes
+    bool swsOverrideAfterRto = false; // the override timeout of the sender SWS avoidance is one RTO, as Linux
     simtime_t delayedAckTimeout; // the longest delay of an ACK
     bool sendDataWithFirstAck = true; // the data that waits at the end of an active open goes with the ACK of the SYN-ACK
 
@@ -105,6 +106,7 @@ class INET_API TcpAlgorithm : public SimpleModule
         maxPersistTimeout = tcpMain->par("maxPersistTimeout");
         if (maxPersistTimeout <= SIMTIME_ZERO)
             throw cRuntimeError("maxPersistTimeout must be more than 0, but it is %s", maxPersistTimeout.str().c_str());
+        swsOverrideAfterRto = tcpMain->par("swsOverrideAfterRto");
         delayedAckTimeout = tcpMain->par("delayedAckTimeout");
         if (delayedAckTimeout < SIMTIME_ZERO)
             throw cRuntimeError("delayedAckTimeout must be 0 or more, but it is %s", delayedAckTimeout.str().c_str());

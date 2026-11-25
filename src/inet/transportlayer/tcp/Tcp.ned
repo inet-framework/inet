@@ -155,11 +155,13 @@ import inet.transportlayer.contract.ITcp;
 //    Linux, by parameter: the PSH of Linux (`pushSegmentsOnWriteBoundary`), the
 //    adaptive delayed ACK with its quickack mode (`adaptiveDelayedAcks`), the Nagle
 //    algorithm of Minshall (`minshallNagle`), the zero-window probe of Linux
-//    (`zeroWindowProbe`), the reset of Linux at an abort (`abortRstWithAck`), the
-//    close() of Linux (`abortOnDataAfterClose`), the checks of a received segment
-//    of Linux (`dropBeyondWindowEdge`, `acceptBeyondBufferAtEmptyQueue`), the
-//    receive window of Linux (`windowAutoTuning`, `windowUpdateAfterRead`), and the
-//    out-of-band byte of received urgent data (`urgentOutOfBand`).
+//    (`zeroWindowProbe`), the override timeout of the sender silly-window-syndrome
+//    avoidance of Linux, one RTO (`swsOverrideAfterRto`), the reset of Linux at an
+//    abort (`abortRstWithAck`), the close() of Linux (`abortOnDataAfterClose`), the
+//    checks of a received segment of Linux (`dropBeyondWindowEdge`,
+//    `acceptBeyondBufferAtEmptyQueue`), the receive window of Linux
+//    (`windowAutoTuning`, `windowUpdateAfterRead`), and the out-of-band byte of
+//    received urgent data (`urgentOutOfBand`).
 //    The MSS that this host announces is that of the address family for an MTU of
 //    1500 bytes, 1460 for IPv4 and 1440 for IPv6 (`mss = -1`); 536 and 1220 are
 //    what a missing MSS option of the peer implies (MUST-15).
@@ -458,6 +460,7 @@ simple Tcp extends SimpleModule like ITcp
         string zeroWindowProbe @enum("rfc","linux") = default("rfc"); // the probe of a zero window. "rfc": the first unacknowledged octet, as RFC 9293 section 3.8.6.1 says ("at least one octet of new data (if available), or retransmit"); "linux": a segment without data with SEG.SEQ = SND.UNA - 1, which the receiver answers with an ACK, as Linux (tcp_xmit_probe_skb())
         double maxPersistTimeout @unit(s) = default(60s); // the upper limit of the interval of the zero-window probes, which starts at the RTO and doubles at each probe (RFC 9293 SHLD-29, SHLD-30); it limits the first interval too; more than 0
         // Linux behaviors (no RFC)
+        bool swsOverrideAfterRto = default(false); // the interval of the override timeout of the sender silly-window-syndrome avoidance, which sends held data when the window is open but too small to use and nothing is in flight (RFC 9293 section 3.8.6.2.1, rule (4)). true: one RTO, at most maxPersistTimeout, as Linux, which sends such data from its probe timer (tcp_probe_timer(), tcp_write_wakeup()); false: the RTO held in the range 0.1 s to 1.0 s of the RFC, at most maxPersistTimeout
         bool minshallNagle = default(false); // with nagleEnabled, the variant of Minshall, as Linux (tcp_minshall_check()): a small segment waits only while an earlier small segment is not acknowledged, so a flight of full-sized segments does not hold the end of a write; false: the Nagle algorithm of RFC 9293 section 3.7.4, where a small segment waits while any data is not acknowledged
         bool pushSegmentsOnWriteBoundary = default(false); // set PSH as Linux: on the segment that ends a write without MSG_MORE (tcp_mark_push()), on the last segment of a GSO burst of new data (tcp_transmit_skb()), in a write longer than half the largest window (forced_push()), and on the segment that ends the data of a Fast Open SYN; false: the PSH of pushLastBufferedSegment, and PSH on a partial segment that TCP_CORK or MSG_MORE held
         int notsentLowat @unit(B) = default(-1B); // TCP_NOTSENT_LOWAT (a Linux socket option, no RFC): a low-water mark on the unsent bytes: when they exceed it, TCP sends no TCP_I_SEND_MSG until they are at or below it again, and then it sends one; TcpSocket::setNotsentLowat() sets it for one connection; -1B: off

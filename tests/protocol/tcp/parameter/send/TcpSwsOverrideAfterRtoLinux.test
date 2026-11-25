@@ -1,0 +1,70 @@
+%description:
+
+Tcp.swsOverrideAfterRto:linux -- the override timeout of the sender SWS avoidance is one RTO, also above 1.0 s.
+
+The claim (Tcp.ned): "true: one RTO, at most maxPersistTimeout, as Linux, which sends such data from its probe timer
+(tcp_probe_timer(), tcp_write_wakeup())".
+
+The classes: rfc-upper and rfc-lower (false): the RTO held in the range 0.1 s to 1.0 s of RFC 9293 section 3.8.6.2.1;
+linux (true; the value of LinuxTcp): one RTO. The code: TcpAlgorithmBase::startPersistTimer() and
+processPersistTimer(). This test separates "linux" from "rfc-upper".
+
+Host under test: host1, with an MSS of 1000 bytes and a minimum RTO of 2 s, so its RTO is 2 s, sends 5000 bytes. The
+TS option takes 12 bytes of each segment, so a full segment holds 988 bytes. Peer: host2, with an advertised window of
+3464 bytes, reads nothing. After three segments, 2964 bytes, the window of host2 is 500 bytes, and host1 holds the
+rest. Observation: level 1, host1 sends no data for 1.9 s after the hold, and sends the held data 2 s after the hold.
+
+%# parameter: Tcp.swsOverrideAfterRto
+%# class: linux
+%# value: true
+%# key: *.host1.tcp.swsOverrideAfterRto
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSwsOverrideAfterRtoLinux")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 500")
+             .describe("the ACK of host2 that leaves a window of 500 bytes: host1 holds its data")
+             .within(1.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+              .describe("held data before one RTO, 2 s, after the hold")
+              .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the held data, one RTO after the hold")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpSwsOverrideAfterRtoLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.swsOverrideAfterRto = true    # the parameter under test
+**.tcp.mss = 1000
+*.host1.tcp.minRexmitTimeout = 2s
+*.host2.tcp.advertisedWindow = 3464
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSwsOverrideAfterRtoLinux: PASS
