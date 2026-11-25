@@ -1,0 +1,3 @@
+Custom Wi-Fi ACK policies must provide a Basic Block Ack forecast
+
+Implementations of IOriginatorQoSAckPolicy now supply computeBlockAckReqParametersAfterData(). The query receives the active TXOP and forecasts which request becomes due once the selected DATA is outstanding. See the migration guide for custom policies and frame queues.

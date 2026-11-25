@@ -40,9 +40,24 @@ bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *frames, TxopP
 
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *frames, TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements) const
 {
+    return selectBlockAckRequest(frames, agreements, nullptr);
+}
+
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParametersAfterData(InProgressFrames *frames,
+        const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data) const
+{
+    return selectBlockAckRequest(frames, agreements, data);
+}
+
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::selectBlockAckRequest(InProgressFrames *frames,
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData) const
+{
     using Id = std::pair<MacAddress, Tid>;
     std::map<Id, std::vector<Packet *>> groups;
-    for (auto frame : frames->getOutstandingFrames()) {
+    auto outstanding = frames->getOutstandingFrames();
+    if (transmittingData)
+        outstanding.push_back(transmittingData);
+    for (auto frame : outstanding) {
         auto header = frame->peekAtFront<Ieee80211DataHeader>();
         auto agreement = agreements ? agreements->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
         if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(header->getSequenceNumber()))
@@ -50,7 +65,7 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
     }
     if (groups.empty())
         return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
-    auto candidate = frames->peekFrameToTransmit();
+    auto candidate = transmittingData ? frames->peekFrameToTransmitExcluding(transmittingData) : frames->peekFrameToTransmit();
     auto data = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
     auto result = std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
     simtime_t oldestArrival = SIMTIME_MAX;

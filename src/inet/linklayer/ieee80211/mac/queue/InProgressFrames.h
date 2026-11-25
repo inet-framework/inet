@@ -56,6 +56,8 @@ class INET_API InProgressFrames : public SimpleModule
     void adoptPreparedFrame(Packet *packet);
     virtual Packet *getFrameToTransmit();
     virtual Packet *peekFrameToTransmit();
+    // A null exclusion selects the ordinary candidate.
+    virtual Packet *peekFrameToTransmitExcluding(const Packet *excludedFrame);
     SequenceNumberCyclic getCandidateSequenceNumber(Packet *packet) const;
     virtual Packet *getPendingFrameFor(Packet *frame, bool extract = true);
     virtual void dropFrame(Packet *packet);
