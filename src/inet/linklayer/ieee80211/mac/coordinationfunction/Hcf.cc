@@ -2016,10 +2016,18 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
     auto candidate = frames->getPendingFrameFor(packet);
     if (!candidate || candidate->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast())
         return SIMTIME_ZERO;
+    auto [protectionCost, completeCost] = estimateSingleProtectionExchange(candidate, txop, nullptr);
+    return completionTime + modeSet->getSifsTime() + completeCost <= txop->getStart() + txop->getLimit() ?
+        protectionCost : SIMTIME_ZERO;
+}
+
+std::pair<simtime_t, simtime_t> Hcf::estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
+        OriginatorBlockAckAgreement *agreement)
+{
     std::unique_ptr<Packet> forecast(candidate->dup());
     auto nextHeader = forecast->peekAtFront<Ieee80211DataOrMgmtHeader>();
     if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(nextHeader)) {
-        auto policy = originatorAckPolicy->computeAckPolicy(forecast.get(), data, nullptr);
+        auto policy = originatorAckPolicy->computeAckPolicy(forecast.get(), data, agreement);
         auto updated = forecast->removeAtFront<Ieee80211DataHeader>();
         updated->setAckPolicy(policy);
         forecast->insertAtFront(updated);
@@ -2044,8 +2052,7 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
         protectionCost = rtsMode->getDuration(rts.getDataLength()) + sifs + ctsDuration;
         completeCost += protectionCost + sifs;
     }
-    return completionTime + sifs + completeCost <= txop->getStart() + txop->getLimit() ?
-        protectionCost : SIMTIME_ZERO;
+    return {protectionCost, completeCost};
 }
 
 bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
@@ -2259,11 +2266,32 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                     // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
                     pendingPacket = nullptr;
                 }
-                // Basic Block Ack DATA has no immediate response, so the successor can start one SIFS after DATA.
-                if (pendingPacket && basicBlockAckData && frames->isExpired(pendingPacket, dataEnd + modeSet->getSifsTime()))
-                    pendingPacket = nullptr;
+                bool replacingExpiredSuccessor = pendingPacket && basicBlockAckData && frames->isExpired(pendingPacket, dataEnd);
+                if (pendingPacket && basicBlockAckData) {
+                    // Live selection runs at DATA completion. A frame that expires during SIFS
+                    // can still be selected there, so check its lifetime again at the scheduled start.
+                    if (replacingExpiredSuccessor)
+                        pendingPacket = frames->peekInProgressFrameToTransmitExcluding(packet, dataEnd);
+                    if (pendingPacket && frames->isExpired(pendingPacket, dataEnd + modeSet->getSifsTime()))
+                        pendingPacket = nullptr;
+                }
                 const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
-                duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
+                if (replacingExpiredSuccessor) {
+                    if (pendingHeader && !pendingHeader->getReceiverAddress().isMulticast()) {
+                        auto nextData = dynamicPtrCast<const Ieee80211DataHeader>(pendingHeader);
+                        auto agreement = nextData ?
+                            originatorBlockAckAgreementHandler->getAgreement(nextData->getReceiverAddress(), nextData->getTid()) : nullptr;
+                        auto [protectionCost, completeCost] = estimateSingleProtectionExchange(pendingPacket, txop, agreement);
+                        auto sifs = modeSet->getSifsTime();
+                        auto reservation = encodeDuration(sifs + protectionCost, false);
+                        // The complete exchange must fit the TXOP and satisfy strict TXNAV admission.
+                        if (dataEnd + sifs + completeCost <= txop->getStart() + txop->getLimit() &&
+                            completeCost < reservation && reservation <= SimTime(MAX_DURATION_FIELD_MICROSECONDS, SIMTIME_US))
+                            duration = reservation;
+                    }
+                }
+                else
+                    duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
             }
             auto header = packet->removeAtFront<Ieee80211MacHeader>();
             header->setDurationField(duration);

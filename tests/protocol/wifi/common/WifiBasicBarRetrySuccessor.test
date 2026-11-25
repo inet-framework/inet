@@ -1,0 +1,307 @@
+%description:
+After a lost Basic Block Ack, the first retry starts before its MSDU expires.
+Its sibling expires during that PPDU. A retry from the next MSDU remains live
+and can use the same TXOP when no BAR is due.
+Repeat with a 300 us TXOP and check that a live replacement that exceeds
+the remaining budget leaves Duration/ID at zero.
+Exercise a Normal Ack replacement and an RTS-protected replacement.
+With a custom queue, prefer the second MSDU's short fragment 1 over its
+longer fragment 0 and check the exact reservation for the retry sent.
+
+%extraargs: -r 0..4
+
+%file: BasicBarRetrySuccessor.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRtsPolicy.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+
+static Edcaf *voiceAccessFunction()
+{
+    auto network = cSimulation::getActiveSimulation()->getSystemModule();
+    auto edca = check_and_cast<Edca *>(network->getModuleByPath("sta1.wlan[0].mac.hcf.edca"));
+    return edca->getEdcaf(AC_VO);
+}
+
+class RetrySuccessorHcf : public BlockAckLifecycleHcf
+{
+  private:
+    msgid_t replacementTreeId = -1;
+
+  protected:
+    void doBuildInside() override
+    {
+        BlockAckLifecycleHcf::doBuildInside();
+        if (par("preferShortRetry").boolValue()) {
+            // EDCAF has a fixed queue submodule. Install the test queue before EDCAF initializes.
+            auto voice = getSubmodule("edca")->getSubmodule("edcaf", AC_VO);
+            voice->getSubmodule("inProgressFrames")->deleteModule();
+            cModuleType::get("OrderedRetryFrames")->create("inProgressFrames", voice)->buildInside();
+        }
+    }
+
+  public:
+    void recordReplacement(const Packet *packet) { replacementTreeId = packet->getTreeId(); }
+    bool isReplacement(const Packet *packet) const { return replacementTreeId == packet->getTreeId(); }
+
+    std::pair<simtime_t, simtime_t> estimate(Packet *packet)
+    {
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid());
+        return estimateSingleProtectionExchange(packet, voiceAccessFunction()->getTxopProcedure(), agreement);
+    }
+
+    simtime_t controlAirtime(const char *bitrateParameter, b length)
+    {
+        auto bitrate = getSubmodule("rateSelection")->par(bitrateParameter).doubleValue();
+        return modeSet->getMode(bps(bitrate))->getDuration(length);
+    }
+};
+
+static RetrySuccessorHcf *retrySuccessorHcf()
+{
+    auto network = cSimulation::getActiveSimulation()->getSystemModule();
+    return check_and_cast<RetrySuccessorHcf *>(network->getModuleByPath("sta1.wlan[0].mac.hcf"));
+}
+
+// Select only the second MSDU's first fragment, and only after the lost Block Ack.
+static bool isReplacementRetry(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
+{
+    return header && retrySuccessorHcf()->isReplacement(packet) &&
+        voiceAccessFunction()->getAckHandler()->getQoSDataAckStatus(header) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED;
+}
+
+// Among retries of the second MSDU, prefer its short final fragment.
+class OrderedRetryFrames : public InProgressFrames
+{
+  public:
+    Packet *peekInProgressFrameToTransmitExcluding(const Packet *excluded, simtime_t time) override
+    {
+        auto first = InProgressFrames::peekInProgressFrameToTransmitExcluding(excluded, time);
+        if (!first || !isReplacementRetry(first, dynamicPtrCast<const Ieee80211DataHeader>(first->peekAtFront<Ieee80211MacHeader>())))
+            return first;
+        auto sequence = first->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+        for (auto candidate : inProgressFrames) {
+            auto header = dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>());
+            if (candidate != excluded && header && header->getSequenceNumber() == sequence &&
+                header->getFragmentNumber() == 1 && isEligibleToTransmit(candidate, time))
+                return candidate;
+        }
+        return first;
+    }
+};
+
+Define_Module(OrderedRetryFrames);
+
+class RetrySuccessorAckPolicy : public OriginatorQosAckPolicy
+{
+  public:
+    AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header,
+            OriginatorBlockAckAgreement *agreement) const override
+    {
+        return isReplacementRetry(packet, header) ? NORMAL_ACK :
+            OriginatorQosAckPolicy::computeAckPolicy(packet, header, agreement);
+    }
+};
+
+class RetrySuccessorRtsPolicy : public QosRtsPolicy
+{
+  public:
+    bool isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) const override
+    {
+        return isReplacementRetry(packet, dynamicPtrCast<const Ieee80211DataHeader>(header)) ||
+            QosRtsPolicy::isRtsNeeded(packet, header);
+    }
+};
+
+Define_Module(RetrySuccessorAckPolicy);
+Define_Module(RetrySuccessorRtsPolicy);
+Define_Module(RetrySuccessorHcf);
+
+enum class Replacement { FITTING, SHORT, NORMAL_ACK, RTS, ORDERED };
+
+static ProtocolTest retrySuccessor(const char *name, Replacement replacement)
+{
+    const char *sender = "sta1.wlan[0].mac";
+    const char *feedback = "has(Ieee80211BasicBlockAck) && ieee80211mac.receiverAddress.getInt() == 2199023255555";
+    auto firstFragment = on(sender).signal("packetSentToLower")
+        .filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
+        .filterEvent([](const MatchContext& c) {
+            auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+            return !data->getRetry() && data->getFragmentNumber() == 0 && data->getMoreFragments();
+        });
+    auto sequence = [](const PacketEvent& event) {
+        return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+    };
+    auto test = ProtocolTest(name);
+    test.intercept(tap("radioMedium").from("ap").to("sta1").filterPacket(feedback).nth(1).drop())
+        .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02));
+    auto secondFragment = firstFragment;
+    test
+        .once(firstFragment.capture("first", sequence).describe("fragment 0 of the first MSDU").within(0.01))
+        .once(secondFragment.capture("second", [sequence](const PacketEvent& event) {
+                retrySuccessorHcf()->recordReplacement(event.packet);
+                return sequence(event);
+            }).describe("fragment 0 of the second MSDU").within(0.01))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower").filterPacket(feedback)
+            .assertEvent([](const MatchContext& c) {
+                auto ack = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                auto start = ack->getStartingSequenceNumber();
+                return start.get() == c.get("first").intValue() && (start + 1).get() == c.get("second").intValue() &&
+                    ack->getBlockAckBitmap(0).getBit(1) && ack->getBlockAckBitmap(1).getBit(0);
+            }).describe("the AP sends a Basic Block Ack covering both MSDUs").within(0.01))
+        .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 && ieee80211mac.retry == true")
+            .assertEvent([](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getSequenceNumber().get() == c.get("first").intValue() && header->getFragmentNumber() == 0;
+            })
+            .capture("grant", [](const PacketEvent&) { return cValue(voiceAccessFunction()->getTxopProcedure()->getStart().dbl()); })
+            .capture("dataStart", [](const PacketEvent& event) { return cValue(event.time.dbl()); })
+            .capture("dataBits", [](const PacketEvent& event) { return cValue(event.packet->getDataLength().get()); })
+            .capture("dataEnd", [](const PacketEvent& event) {
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                return cValue((event.time + mode->getDuration(event.packet->getDataLength())).dbl());
+            })
+            .capture("sifs", [](const PacketEvent& event) {
+                return cValue(event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode()->getSifsTime().dbl());
+            })
+            .capture("dataDuration", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField().dbl());
+            }).describe("fragment 0 retries after the lost Block Ack").within(0.01))
+        .once(on("sta1.wlan[0].mac.hcf").signal("packetDropped").filterPacket("has(Ieee80211DataHeader)")
+            .filterEvent([](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getSequenceNumber().get() == c.get("first").intValue() && data->getFragmentNumber() == 1;
+            })
+            .assertEvent([replacement](const MatchContext& c) {
+                auto dataEnd = SimTime(c.get("dataEnd").doubleValue());
+                if (c.event.time >= dataEnd)
+                    return false;
+                if (replacement == Replacement::FITTING || replacement == Replacement::ORDERED)
+                    return true;
+                auto access = voiceAccessFunction();
+                auto frames = access->getInProgressFrames();
+                auto txop = access->getTxopProcedure();
+                auto sifs = SimTime(c.get("sifs").doubleValue());
+                auto start = dataEnd + sifs;
+                auto dataAirtime = dataEnd - SimTime(c.get("dataStart").doubleValue());
+                for (int i = 0; i < frames->getLength(); i++) {
+                    auto packet = frames->getFrames(i);
+                    auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                    if (header->getSequenceNumber().get() != c.get("second").intValue() || header->getFragmentNumber() != 0)
+                        continue;
+                    if (frames->isExpired(packet, start) || !access->getAckHandler()->isEligibleToTransmit(header) ||
+                        packet->getDataLength().get() != c.get("dataBits").intValue() ||
+                        SimTime(c.get("dataDuration").doubleValue()) != SIMTIME_ZERO)
+                        return false;
+                    auto deadline = txop->getStart() + txop->getLimit();
+                    if (replacement == Replacement::SHORT)
+                        return start + dataAirtime > deadline;
+                    auto hcf = retrySuccessorHcf();
+                    auto [protectionCost, completeCost] = hcf->estimate(packet);
+                    if (replacement == Replacement::NORMAL_ACK) {
+                        auto expected = dataAirtime + sifs + hcf->controlAirtime("responseAckFrameBitrate", LENGTH_ACK);
+                        return protectionCost == expected && completeCost == expected &&
+                            start + dataAirtime + sifs <= deadline && start + expected > deadline;
+                    }
+                    auto protection = hcf->controlAirtime("controlFrameBitrate", LENGTH_RTS) + sifs +
+                        hcf->controlAirtime("responseCtsFrameBitrate", LENGTH_CTS);
+                    return protectionCost == protection && completeCost == protection + sifs + dataAirtime &&
+                        start + completeCost <= deadline && completeCost >= sifs + protectionCost;
+                }
+                return false;
+            })
+            .describe("HCF discards the first retry's sibling during the PPDU").within(0.00015));
+    if (replacement != Replacement::FITTING && replacement != Replacement::ORDERED)
+        return test;
+    return test.once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 || has(Ieee80211BasicBlockAckReq)")
+            .assertEvent([replacement](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                auto mode = c.event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                auto sifs = mode->getSifsTime();
+                auto ordered = replacement == Replacement::ORDERED;
+                return data && data->getRetry() && data->getFragmentNumber() == (ordered ? 1 : 0) &&
+                    (!ordered || c.event.packet->getDataLength().get() < c.get("dataBits").intValue()) &&
+                    data->getSequenceNumber().get() == c.get("second").intValue() &&
+                    voiceAccessFunction()->getTxopProcedure()->getStart() == SimTime(c.get("grant").doubleValue()) &&
+                    c.event.time == SimTime(c.get("dataEnd").doubleValue()) + sifs &&
+                    SimTime(c.get("dataDuration").doubleValue()) == sifs + mode->getDuration(c.event.packet->getDataLength());
+            }).describe("the next MSDU's live retry follows at SIFS in the advertised reservation").within(0.001));
+}
+
+Define_ProtocolTest(wifi_basic_bar_retry_successor) { return retrySuccessor("wifi_basic_bar_retry_successor", Replacement::FITTING); }
+Define_ProtocolTest(wifi_basic_bar_retry_successor_short) { return retrySuccessor("wifi_basic_bar_retry_successor_short", Replacement::SHORT); }
+Define_ProtocolTest(wifi_basic_bar_retry_successor_ack) { return retrySuccessor("wifi_basic_bar_retry_successor_ack", Replacement::NORMAL_ACK); }
+Define_ProtocolTest(wifi_basic_bar_retry_successor_rts) { return retrySuccessor("wifi_basic_bar_retry_successor_rts", Replacement::RTS); }
+
+Define_ProtocolTest(wifi_basic_bar_retry_successor_ordered) { return retrySuccessor("wifi_basic_bar_retry_successor_ordered", Replacement::ORDERED); }
+
+} // namespace inet::protocoltest
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
+
+simple OrderedRetryFrames extends InProgressFrames
+{
+    @class(::inet::protocoltest::OrderedRetryFrames);
+}
+
+simple RetrySuccessorAckPolicy extends OriginatorQosAckPolicy
+{
+    @class(::inet::protocoltest::RetrySuccessorAckPolicy);
+}
+
+simple RetrySuccessorRtsPolicy extends QosRtsPolicy
+{
+    @class(::inet::protocoltest::RetrySuccessorRtsPolicy);
+}
+
+module RetrySuccessorHcf extends BlockAckLifecycleHcf
+{
+    bool preferShortRetry = default(false);
+    @class(::inet::protocoltest::RetrySuccessorHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${scenario="wifi_basic_bar_retry_successor","wifi_basic_bar_retry_successor_short","wifi_basic_bar_retry_successor_ack","wifi_basic_bar_retry_successor_rts","wifi_basic_bar_retry_successor_ordered"}
+*.sta1.wlan[0].mac.hcf.preferShortRetry = ${false,false,false,false,true ! scenario}
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.003s
+*.sta1.wlan[0].mac.hcf.typename = "RetrySuccessorHcf"
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = ${2260us,2710us,2710us,3140us,2260us ! scenario}
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure.txopLimit = ${4ms,300us,350us,4ms,4ms ! scenario}
+*.sta1.wlan[0].mac.hcf.originatorAckPolicy.typename = ${"OriginatorQosAckPolicy","OriginatorQosAckPolicy","RetrySuccessorAckPolicy","OriginatorQosAckPolicy","OriginatorQosAckPolicy" ! scenario}
+*.sta1.wlan[0].mac.hcf.rtsPolicy.typename = ${"QosRtsPolicy","QosRtsPolicy","QosRtsPolicy","RetrySuccessorRtsPolicy","QosRtsPolicy" ! scenario}
+*.sta1.wlan[0].mac.hcf.rateSelection.responseAckFrameBitrate = ${-1bps,-1bps,6Mbps,-1bps,-1bps ! scenario}
+*.sta1.wlan[0].mac.hcf.rateSelection.responseCtsFrameBitrate = ${-1bps,-1bps,-1bps,12Mbps,-1bps ! scenario}
+*.sta1.wlan[0].mac.hcf.rateSelection.controlFrameBitrate = ${-1bps,-1bps,-1bps,6Mbps,-1bps ! scenario}
+*.sta1.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 850B
+*.sta1.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 3000B
+*.sta1.wlan[0].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 4
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_retry_successor: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_retry_successor_short: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_retry_successor_ack: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_retry_successor_rts: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_retry_successor_ordered: PASS

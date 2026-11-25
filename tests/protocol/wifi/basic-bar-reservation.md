@@ -260,3 +260,127 @@ sequenceDiagram
     Note over STA1: Fragment 1 remains live
     STA1->>AP: Fragment 1 follows at SIFS in the same grant
 ```
+
+### A live retry after an expired sibling
+
+[WifiBasicBarRetrySuccessor.test](common/WifiBasicBarRetrySuccessor.test) uses
+seed 0, 850-byte fragmentation, a 2,260 µs voice lifetime, and a 4 ms
+single-protection TXOP. STA1 establishes a Basic Block Ack agreement and
+sends fragments from two MSDUs. The tap drops the AP's first Block Ack at
+STA1. It covers both MSDUs, whose unconfirmed fragments become eligible
+for retry. The first retry starts at 1.002222617676 s. Its sibling expires
+at 1.002360 s, during the 150 µs PPDU.
+
+The parent cleared the successor reservation. The second MSDU's first
+fragment was still live at the next SIFS, but the sender had to contend
+again and the fragment expired at 1.002460 s before the next grant.
+With the repair, HCF looks past candidates whose lifetime has ended by
+DATA completion. The live retry starts at 1.002382617676 s in the same
+grant. The fixture checks Retry, sequence and fragment identity, SIFS,
+the original grant, and Duration/ID coverage for SIFS plus DATA. A BAR
+in place of the expected next transmission also fails the assertion.
+
+The forecast continues to use in-progress frames in transmit order.
+A candidate still eligible at DATA completion must also survive until
+the scheduled start. This test exercises expiry during the PPDU at the
+originator.
+
+```mermaid
+sequenceDiagram
+    participant STA1 as STA1 sender
+    participant AP
+    STA1->>AP: Fragments from two MSDUs and a Basic BAR
+    AP--xSTA1: Basic Block Ack lost
+    STA1->>AP: First MSDU fragment 0 retries
+    Note over STA1: Fragment 1 expires during the retry PPDU
+    alt Parent
+        Note over STA1: Fresh contention. Second MSDU expires before a grant.
+    else Repair
+        STA1->>AP: Second MSDU retries after SIFS in the same grant
+    end
+```
+
+### A live retry outside the TXOP budget
+
+The same fixture's short-grant run uses a 300 µs TXOP and a 2,710 µs
+voice lifetime. The 150 µs opening retry leaves 150 µs. Its sibling
+expires during the PPDU. The replacement is still eligible at SIFS
+and would need 160 µs including SIFS. The earlier activation
+advertised 160 µs even though admission rejected the replacement.
+The short-grant assertion fails against that implementation and
+passes when DATA advertises zero. The 4 ms run checks that a fitting
+retry still follows in the same grant.
+
+The replacement forecast uses both the complete exchange airtime
+and the airtime encoded by single protection. It includes applicable
+RTS/CTS and immediate responses in the complete cost. A forecast
+must fit the TXOP deadline and leave enough encoded TXNAV for
+admission. Both fixtures use a fixed seed and disable RTS for the
+sender's tested frames.
+
+```mermaid
+flowchart LR
+    DATA["150 µs opening retry in a 300 µs TXOP"]
+    DATA --> Budget["Live replacement needs 160 µs with SIFS"]
+    Budget --> Old["Earlier activation advertised 160 µs. Admission refused the retry."]
+    Budget --> Fixed["Deadline check leaves Duration/ID at zero"]
+```
+
+### Response airtime in the replacement forecast
+
+The budget checks derive SIFS from the opening retry's PHY mode. The two response
+cases use test policies that identify the second MSDU's first fragment from the
+original transmission and apply only after a Block Ack timeout. The sender
+still establishes an actual Basic agreement, loses the AP's reply and follows
+its normal queue, expiry, forecast and transmission paths.
+
+In the 350 µs Normal Ack case, the replacement DATA and the two SIFS intervals
+fit the remaining TXOP. The configured 6 Mbps ACK makes the complete exchange
+too long. The test checks the complete estimate and observes zero Duration/ID
+on the opening retry.
+
+```mermaid
+flowchart LR
+    Data["150 µs opening retry in a 350 µs TXOP"]
+    Data --> Replacement["Replacement DATA and two SIFS intervals fit"]
+    Replacement --> ACK["Configured immediate ACK pushes the exchange past the deadline"]
+    ACK --> Zero["Opening DATA advertises zero"]
+```
+
+In the 4 ms RTS/CTS case, the complete exchange fits the grant. The fixture
+checks the RTS/CTS interval and the complete estimate independently using
+the configured 6 Mbps RTS, 12 Mbps CTS, and actual DATA airtime. A fallback
+to the RTS mode changes the estimated CTS airtime and fails the assertion.
+The full exchange exceeds the interval single protection can encode for RTS/CTS, so strict TXNAV
+admission leaves the opening DATA's Duration/ID at zero. Checking the
+estimator's airtime also catches a missing CTS cost when the final field is
+already zero.
+
+```mermaid
+flowchart LR
+    Data["Opening retry has a live replacement requiring RTS"]
+    Data --> Costs["Check RTS plus SIFS plus CTS and full exchange airtime"]
+    Costs --> Deadline["Full exchange fits the 4 ms TXOP"]
+    Deadline --> TXNAV["RTS/CTS reservation is too short for strict TXNAV admission"]
+    TXNAV --> Zero["Opening DATA advertises zero"]
+```
+
+### Replacement retry with a custom queue order
+
+Run 4 of `WifiBasicBarRetrySuccessor` repeats the 4 ms grant and lost Block Ack from run 0.
+When the first MSDU's sibling expires, both fragments of the second MSDU are eligible
+for retry. The test queue prefers its shorter fragment 1. Its ordering hook receives
+the outgoing DATA and projected completion time during forecasting, then the current
+time during live selection. The fixture checks the transmitted sequence and fragment,
+the grant, the SIFS spacing and the exact Duration/ID against the transmitted frame's
+PHY airtime. An oversized reservation for fragment 0 fails that last check even if
+fragment 1 transmits at the right time.
+
+```mermaid
+flowchart LR
+    Loss["Lost Block Ack covers two MSDUs"] --> Expiry["Sibling expires during opening retry"]
+    Expiry --> Choice["Both fragments of second MSDU are live"]
+    Choice --> Forecast["Queue prefers short fragment 1 for the reservation"]
+    Forecast --> Retry["Fragment 1 follows at SIFS in the same grant"]
+    Retry --> Field["Opening Duration/ID equals SIFS plus fragment 1 airtime"]
+```
