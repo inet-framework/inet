@@ -3,10 +3,13 @@ Under single protection, Basic Block Ack DATA protects a due BAR and its reply
 if the feedback exchange fits the TXOP. With a shorter grant the same DATA
 must leave the reservation at zero and the BAR must contend separately.
 When that DATA expires during its PPDU, it must leave the reservation at
-zero and no BAR may follow for that sequence. The ACK policy receives the
-observed DATA, its projected completion time, and the active voice TXOP.
+zero and no BAR may follow for that sequence. The fragmented case also
+checks that HCF does not reserve airtime for the discarded sibling.
+A live sibling can still follow at SIFS when the BAR threshold is two.
+The ACK policy receives the observed DATA, its projected completion time,
+and the active voice TXOP.
 
-%extraargs: -r 0..2
+%extraargs: -r 0..4
 
 %file: BasicBarReservation.cc
 #include "BlockAckLifecycleTestSupport.h"
@@ -119,19 +122,21 @@ Define_ProtocolTest(wifi_basic_bar_deferred)
     return feedbackReservation(false);
 }
 
-Define_ProtocolTest(wifi_basic_bar_expired)
+static ProtocolTest expiredFeedbackReservation(bool fragmented)
 {
     auto sender = "sta1.wlan[0].mac";
-    return ProtocolTest("wifi_basic_bar_expired")
+    auto test = ProtocolTest(fragmented ? "wifi_basic_bar_expired_fragment" : "wifi_basic_bar_expired")
         .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02))
         .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
-            .assertEvent([](const MatchContext& context) {
+            .assertEvent([fragmented](const MatchContext& context) {
                 const auto& event = context.event;
                 auto root = cSimulation::getActiveSimulation()->getSystemModule();
                 auto edca = check_and_cast<Edca *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca"));
                 auto frames = edca->getEdcaf(AC_VO)->getInProgressFrames();
                 auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
                 auto header = event.packet->peekAtFront<Ieee80211DataHeader>();
+                if (header->getFragmentNumber() != 0 || header->getMoreFragments() != fragmented)
+                    return false;
                 for (int i = 0; i < frames->getLength(); i++) {
                     auto frame = frames->getFrames(i);
                     if (frame->getTreeId() == event.packet->getTreeId()) {
@@ -145,9 +150,63 @@ Define_ProtocolTest(wifi_basic_bar_expired)
             .capture("sequence", [](const PacketEvent& event) {
                 return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
             })
-            .describe("DATA expiring during its PPDU advertises zero Duration/ID").within(0.03))
-        .never(on(sender).signal("packetSentToLower").filterPacket("has(Ieee80211BasicBlockAckReq) && ieee80211mac.startingSequenceNumber == {sequence}")
+            .describe("DATA expiring during its PPDU advertises zero Duration/ID").within(0.03));
+    if (fragmented)
+        test.once(on("sta1.wlan[0].mac.hcf").signal("packetDropped")
+            .filterPacket("has(Ieee80211DataHeader)")
+            .assertEvent([](const MatchContext& context) {
+                auto header = context.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getFragmentNumber() == 1 &&
+                    header->getSequenceNumber().get() == context.get("sequence").intValue();
+            })
+            .describe("HCF discards the sibling of the expired fragment").within(0.00015));
+    test.never(on(sender).signal("packetSentToLower").filterPacket("has(Ieee80211BasicBlockAckReq) && ieee80211mac.startingSequenceNumber == {sequence}")
             .describe("BAR for the expired DATA").within(0.003));
+    return test;
+}
+
+Define_ProtocolTest(wifi_basic_bar_expired)
+{
+    return expiredFeedbackReservation(false);
+}
+
+Define_ProtocolTest(wifi_basic_bar_expired_fragment)
+{
+    return expiredFeedbackReservation(true);
+}
+
+Define_ProtocolTest(wifi_basic_bar_live_fragment)
+{
+    auto sender = "sta1.wlan[0].mac";
+    return ProtocolTest("wifi_basic_bar_live_fragment")
+        .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02))
+        .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
+            .assertEvent([](const MatchContext& context) {
+                auto header = context.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getFragmentNumber() == 0 && header->getMoreFragments();
+            })
+            .capture("sequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .capture("grant", [](const PacketEvent&) { return cValue(senderVoiceTxop()->getStart().dbl()); })
+            .capture("dataEnd", [](const PacketEvent& event) {
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                return cValue((event.time + mode->getDuration(event.packet->getDataLength())).dbl());
+            })
+            .capture("dataDuration", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField().dbl());
+            }).describe("the first Basic Block Ack fragment").within(0.03))
+        .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 || has(Ieee80211BasicBlockAckReq)")
+            .assertEvent([](const MatchContext& context) {
+                const auto& event = context.event;
+                auto header = dynamicPtrCast<const Ieee80211DataHeader>(event.packet->peekAtFront<Ieee80211MacHeader>());
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                return header && header->getFragmentNumber() == 1 &&
+                    header->getSequenceNumber().get() == context.get("sequence").intValue() &&
+                    senderVoiceTxop()->getStart() == SimTime(context.get("grant").doubleValue()) &&
+                    event.time == SimTime(context.get("dataEnd").doubleValue()) + mode->getSifsTime() &&
+                    SimTime(context.get("dataDuration").doubleValue()) >= mode->getSifsTime() + mode->getDuration(event.packet->getDataLength());
+            }).describe("the live sibling follows after SIFS using the advertised reservation").within(0.001));
 }
 
 } // namespace inet::protocoltest
@@ -163,11 +222,14 @@ simple BasicBarReservationAckPolicy extends OriginatorQosAckPolicy
 
 %inifile: test.ini
 [General]
-*.tester.testName = ${scenario="wifi_basic_bar_reserved","wifi_basic_bar_deferred","wifi_basic_bar_expired"}
+*.tester.testName = ${scenario="wifi_basic_bar_reserved","wifi_basic_bar_deferred","wifi_basic_bar_expired","wifi_basic_bar_expired_fragment","wifi_basic_bar_live_fragment"}
 *.sta1.app[0].sendInterval = 0.1ms
 *.sta1.app[0].stopTime = 1.003s
 *.sta1.wlan[0].mac.hcf.originatorAckPolicy.typename = "BasicBarReservationAckPolicy"
-*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = ${scenario} == "wifi_basic_bar_expired" ? 920us : 0.512s
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = ${0.512s,0.512s,920us,1300us,0.512s ! scenario}
+*.sta1.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${10000B,10000B,10000B,850B,850B ! scenario}
+*.sta1.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == "wifi_basic_bar_live_fragment" ? 3000B : 100B
+*.sta1.wlan[0].mac.hcf.originatorAckPolicy.blockAckReqThreshold = ${scenario} == "wifi_basic_bar_live_fragment" ? 2 : 1
 **.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == "wifi_basic_bar_deferred" ? 0.35ms : 4ms
 **.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
 **.hcf.rtsPolicy.rtsThreshold = 100B
@@ -183,3 +245,9 @@ PROTOCOLTEST wifi_basic_bar_deferred: PASS
 
 %contains: stdout
 PROTOCOLTEST wifi_basic_bar_expired: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_expired_fragment: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_live_fragment: PASS

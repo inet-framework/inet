@@ -222,3 +222,41 @@ sequenceDiagram
     Note over STA1: Lifetime expires during the DATA PPDU
     Note over STA1: No BAR for this sequence
 ```
+
+### Fragment successor lifetime
+
+Run 3 splits DATA at 850 bytes and uses a 1,300 µs voice MSDU lifetime.
+After ADDBA, fragment 0 starts live and its 150 µs PPDU crosses the
+shared deadline. The parent skips the BAR but still advertises 140 µs
+for the in-progress sibling. HCF discards that sibling during the PPDU.
+The new assertion fails on the parent's nonzero Duration/ID. The fix
+checks the queued successor at the earliest start after DATA and SIFS,
+so the same frame advertises zero. The fixture also observes the sibling
+drop and checks that no matching BAR follows.
+
+```mermaid
+sequenceDiagram
+    participant STA1 as STA1 sender
+    participant AP
+    Note over STA1,AP: Basic Block Ack agreement active
+    STA1->>AP: Fragment 0 starts live
+    Note over STA1: Shared deadline expires during the PPDU
+    Note over STA1: Drop fragment 1
+    Note over STA1,AP: Parent advertises 140 µs. Fix advertises zero.
+```
+
+Run 4 disables RTS for the sender, uses a longer lifetime, and raises
+the BAR threshold to two. Fragment 0 reserves airtime for live fragment 1.
+Both versions send fragment 1 after SIFS in the original grant. The
+fixture checks that the first field covers the following DATA and SIFS.
+Both runs use seed 0 and observe the sender MAC.
+
+```mermaid
+sequenceDiagram
+    participant STA1 as STA1 sender
+    participant AP
+    Note over STA1,AP: Basic Block Ack agreement active
+    STA1->>AP: Fragment 0 reserves airtime for fragment 1
+    Note over STA1: Fragment 1 remains live
+    STA1->>AP: Fragment 1 follows at SIFS in the same grant
+```

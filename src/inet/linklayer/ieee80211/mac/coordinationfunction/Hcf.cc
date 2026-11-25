@@ -2252,12 +2252,16 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 // IEEE Std 802.11-2024, 9.2.5.2(a)(9)(i): the final group frame advertises zero Duration/ID.
                 // HcfFs ends the group sequence after this frame. Zero-limit fragment reservations are handled above.
                 bool finalDataOrMgmt = dataOrMgmt && (dataOrMgmt->getReceiverAddress().isMulticast() || txop->getLimit() == 0);
+                auto frames = channelOwner->getInProgressFrames();
                 auto pendingPacket = finalDataOrMgmt || dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
-                    channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
-                if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
+                    frames->getPendingFrameFor(packet, false);
+                if (pendingPacket && !frames->containsFrame(pendingPacket)) {
                     // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
                     pendingPacket = nullptr;
                 }
+                // Basic Block Ack DATA has no immediate response, so the successor can start one SIFS after DATA.
+                if (pendingPacket && basicBlockAckData && frames->isExpired(pendingPacket, dataEnd + modeSet->getSifsTime()))
+                    pendingPacket = nullptr;
                 const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
                 duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
             }

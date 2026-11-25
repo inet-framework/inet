@@ -721,6 +721,26 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   Run the fixture in debug and release and compare the Basic packet-size and SNIR charts.
   The [reviewer notes](../../tests/protocol/wifi/basic-bar-reservation.md) cover the exchange.
 
+- **Commit BD-26-BASIC-SUCCESSOR-EXPIRY**, “ieee80211: fix: skip single-protection reservations for expiring successors”.
+  This follows BD-26-BASIC-BAR-EXPIRY. In
+  [Hcf::transmitFrame()](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc),
+  the fallback still reserves 140 µs for the queued sibling of a Basic Block Ack fragment that expires
+  during its PPDU. The sibling shares that deadline and HCF discards it before it can transmit.
+  Check the already in-progress candidate at DATA completion plus SIFS before advertising the
+  following exchange under IEEE Std 802.11-2024 §9.2.5.2(a)(9).
+  The Basic series in the fragmentation showcase moves in the packet-size and SNIR charts.
+  In the 6,000-byte run, the first changed frame advertises zero Duration/ID after the check.
+  Extend [WifiBasicBarReservation.test](../../tests/protocol/wifi/common/WifiBasicBarReservation.test).
+  In run 3, establish a Basic Block Ack agreement, fragment at 850 bytes, and give voice DATA a
+  1,300 µs lifetime. Assert that fragment 0 starts live and expires during its PPDU. The parent
+  fails the zero-Duration/ID assertion. The repair advertises zero, discards fragment 1, and sends
+  no BAR for that sequence. Run 4 keeps the sibling live and checks coverage of SIFS plus DATA and
+  same-grant continuation with RTS deferred and a BAR threshold of two.
+  Record the cases in [basic-bar-reservation.md](../../tests/protocol/wifi/basic-bar-reservation.md#fragment-successor-lifetime).
+  Use seed 0 with `opp_run_protocol_tests --load . -p inet -m <mode> --no-build
+  -w '^tests/protocol/wifi$' -f 'WifiBasicBarReservation\.test$'` on the release parent
+  and on the repair in debug and release. The assertions observe originator behavior.
+
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 
 - **Place:** `Hcf::prepareDataTransmission()`. From the commit message of `6e812198d4` (step 37).
