@@ -8,6 +8,8 @@
 #ifndef __INET_BASICREASSEMBLY_H
 #define __INET_BASICREASSEMBLY_H
 
+#include <tuple>
+
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
@@ -19,11 +21,19 @@ class INET_API BasicReassembly : public IReassembly, public cObject
 {
   protected:
     struct Key {
-        MacAddress macAddress;
+        MacAddress transmitterAddress;
         Tid tid;
         SequenceNumber seqNum;
-        bool operator==(const Key& o) const { return macAddress == o.macAddress && tid == o.tid && seqNum == o.seqNum; }
-        bool operator<(const Key& o) const { return macAddress < o.macAddress || (macAddress == o.macAddress && (tid < o.tid || (tid == o.tid && seqNum < o.seqNum))); }
+        MacAddress groupAddress;
+
+        bool operator==(const Key& other) const {
+            return std::tie(transmitterAddress, tid, seqNum, groupAddress) ==
+                   std::tie(other.transmitterAddress, other.tid, other.seqNum, other.groupAddress);
+        }
+        bool operator<(const Key& other) const {
+            return std::tie(transmitterAddress, tid, seqNum, groupAddress) <
+                   std::tie(other.transmitterAddress, other.tid, other.seqNum, other.groupAddress);
+        }
     };
     struct Value {
         std::vector<Packet *> fragments;

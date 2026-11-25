@@ -1,0 +1,3 @@
+Wi-Fi keeps fragments sent to different multicast groups separate
+
+When an INET Wi-Fi simulation fragments group-addressed traffic, a receiver now reassembles each multicast destination independently. A lost fragment for one group can no longer cause its remaining fragments to be combined with traffic for another group.
