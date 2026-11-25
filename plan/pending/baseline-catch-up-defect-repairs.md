@@ -706,33 +706,50 @@ requests no encapsulation (`Ieee8021adPolicy.cc:286-297`). `VlanPolicyLayer` sti
 VLAN 10 on the access port with a C-tag, and a1, which has no 802.1Q layer, stops with "Unknown protocol: protocolId =
 32, protocolName = ieee8021qctag" at 0.10002538 s. The other four tests of `tests/protocol/vlan` pass.
 
-**Design questions for gate A.**
+**Design questions for gate A.** Revised on 2026-11-25, after the maintainer asked for the more correct, more generic,
+more standard-conformant and more lasting form.
+
+INET keeps two kinds of priority on a frame. `UserPriorityReq` is the priority of the frame, the priority parameter of
+the EISS (IEEE 802.1Q-2018 6.9): the tag checker sets the user priority from the PCP of a received tag
+(`Ieee8021qTagEpdHeaderChecker.cc:52`, 6.9.1 h), and the direction reverser forwards it always, whatever `forwardPcp`
+says (`PacketDirectionReverser.cc:99-100`). `PcpReq` and `DropEligibleReq` of a tag type ask for the fields of the
+tag of that type: the inserter takes the PCP from `PcpReq`, and else from the user priority
+(`mapUserPriorityReqToPcpReq()`), and removes the request when it writes the tag. So `forwardPcp = true` only copies
+the PCP of the received tag as a request for the same tag at the egress.
 
 1. *The form of the repair.* (A) `VlanReqMapper` requests no 802.1Q encapsulation when its map sends the VLAN of the
-   frame untagged, and keeps the `PcpReq`. The priority stays with the frame for the traffic class of the egress port
-   (`PcpTrafficClassClassifier` reads the `PcpReq`): IEEE 802.1Q-2018 selects the queue by the priority (8.6.6) after
-   the egress rules (8.6.4), and the tag only carries the priority. (B) It also removes the `PcpReq` and the
-   `DropEligibleReq`, as `Ieee8021adPolicy` does. The two policies then act the same on an untagged port, but the
-   egress port selects the traffic class of an untagged frame without its priority. The assistant recommends (A): it
-   changes only the request of the encapsulation, and it keeps the priority, which the standard gives to the frame.
-   With (A), the removal of the `PcpReq` in `Ieee8021adPolicy` can depart from 8.6.6 in the same way. The assistant
-   then proposes a check of it as a new entry, not as a part of R3.
+   frame untagged, and keeps the `PcpReq`. (B) It requests no encapsulation and removes all the requests of that tag
+   type: the `VlanReq`, the `PcpReq` and the `DropEligibleReq`, as `Ieee8021adPolicy::processSentPacket()` does
+   (`Ieee8021adPolicy.cc:286-297`). The assistant recommends (B), in place of its first answer (A):
+   - It is more correct: a frame that leaves untagged has no tag, so a request for the fields of that tag has no
+     object. The priority of the frame stays as `UserPriorityReq`, the parameter that 6.9.2 passes down unchanged.
+   - It is more generic: one rule for an untagged egress, "no tag, and no request for that tag", in both VLAN
+     policies of INET, for the C-tag and the S-tag.
+   - It lasts: a later module that reads a `PcpReq` finds one only on a frame that carries the tag, so it can not
+     take it for a tag that exists.
+   - The first answer (A) rested on the wrong reading that the `PcpReq` is the only carrier of the priority.
+   `PcpTrafficClassClassifier` reads only `PcpReq` and `PcpInd`, not `UserPriorityReq`, so on an untagged egress it
+   gives no class from the priority, with (B) as today with `forwardPcp = false`. Whether the classifier must fall
+   back to the user priority (8.6.6) is outside R3.
 2. *The four configurations with `forwardPcp = false`:* `examples/ethernet/vlan/omnetpp.ini:44`,
    `showcases/ethernet/sharedcore/omnetpp.ini:124-128` (with a comment that describes the fault),
-   `tests/module/lib/vlan-access-trunk.ini:55` and `tests/module/EthernetUnknownEtherType_1.test:209`. (i) All four keep
-   the setting, and only the comment of the showcase changes. (ii) The setting goes from the example and the showcase,
-   so their bridges run with the default, which the repair makes correct; the two module tests keep it, because their
-   expected logs test other features. The assistant recommends (ii): the example and the showcase show a user the
-   configuration of a bridge, and a setting that avoids a repaired fault teaches the wrong thing.
+   `tests/module/lib/vlan-access-trunk.ini:55` and `tests/module/EthernetUnknownEtherType_1.test:209`. Each one exists
+   only to avoid BD-44. (i) All four keep the setting, and only the comment of the showcase changes. (ii) The setting
+   goes from all four, so every one runs the default, which the repair makes correct. The assistant recommends (ii),
+   in place of its first answer, which kept the two module tests: without the setting, the module tests of
+   `vlan-access-trunk.ini`, whose hosts have no 802.1Q layer behind access ports, check the repair too, and no
+   setting hides a later return of the fault. A fifth setting stays: `forwardPcp = false` in
+   `tests/module/Ieee8021qTagEpd_stacked_2.test:162` is no workaround; that test checks that forwarded tags take their
+   PCP from the user priority.
 
 **Commits** (with the recommended answers).
 
-- **C9: `linklayer.vlan: fix: VlanReqMapper asks for no 802.1Q tag when the VLAN leaves untagged`** (BD-44).
-  `VlanReqMapper.cc`, `processPacket()`. The items of
+- **C9: `linklayer.vlan: fix: VlanReqMapper sends a frame untagged, with no request for the tag, when its VLAN leaves
+  untagged`** (BD-44). `VlanReqMapper.cc`, `processPacket()`. The items of
   [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
-  1. Requirement: IEEE 802.1Q-2018 8.8.2 (the untagged set), with 8.6.4 and 6.9.1 h. Bug: a priority tag (VLAN ID 0)
-     on a port whose untagged set holds the VLAN of the frame. Evidence: the test above, and the experiments E1 of
-     steps 78 and 79 of the catch-up.
+  1. Requirement: IEEE 802.1Q-2018 8.8.2 (the untagged set), with 8.6.4 and 6.9.1 h and 6.9.2. Bug: a priority tag
+     (VLAN ID 0) on a port whose untagged set holds the VLAN of the frame. Evidence: the test above, and the
+     experiments E1 of steps 78 and 79 of the catch-up.
   2. Existing tests: `Ieee8021qUntaggedSetNoPriorityTag.test` covers `Ieee8021adPolicy` only. No test covers
      `VlanReqMapper` with a PCP request on an untagged port: the module tests of `vlan-access-trunk.ini` set
      `forwardPcp = false`.
@@ -743,27 +760,30 @@ VLAN 10 on the access port with a C-tag, and a1, which has no 802.1Q layer, stop
      10 to -1), `b.eth[0]`. Observation: `packetSentToLower` of `b.eth[0]` and `packetReceivedFromLower` of `a1.udp`.
      Assertion: the frame on eth0 has the IPv4 EtherType 2048 in its Ethernet header, and a1 gets the datagram, each
      within 0.15 s.
-  5. Before C9: b sends a C-tag, and a1 stops with the error above. After C9: the test passes, because no 802.1Q
-     encapsulation is requested for a frame that leaves untagged.
-  6. Code action: the request of the 802.1Q encapsulation (`ensureEncapsulationProtocolReq()`) in
-     `VlanReqMapper::processPacket()`. No state changes.
+  5. Before C9: b sends a C-tag, and a1 stops with the error above. After C9: the test passes, because a frame that
+     leaves untagged carries no request for the tag and no request of the 802.1Q encapsulation.
+  6. Code action: in `VlanReqMapper::processPacket()`, a map to -1 removes the `VlanReq`, the `PcpReq` and the
+     `DropEligibleReq` of the tag type and requests no encapsulation; a frame with no map entry keeps the behavior of
+     today. No state changes.
   7. Runner: `run_protocol_tests!(project; suite = "vlan", mode = "debug")` in the editor, after a debug build of the
      branch; the module tests `tests/module/Vlan*`, `Ieee8021*` and `EthernetUnknownEtherType_1`. Limit: the test
      covers the C-tag; the S-tag of a provider edge bridge with `VlanPolicyLayer` takes the same line with
      `vlanTagType = "s"` and has no test of its own.
   8. Reviewer document: `tests/protocol/vlan/vlan-req-mapper-untagged.md`, in C9, with a whatsnew entry.
-- **C10: `showcases: change: the VLAN example and the shared core showcase forward the PCP, as a bridge does by
-  default`** (answer (ii)). `examples/ethernet/vlan/omnetpp.ini` and `showcases/ethernet/sharedcore/omnetpp.ini`.
+- **C10: `examples: change: the bridges of the VLAN examples and tests forward the PCP, as a bridge does by default`**
+  (answer (ii)). The four files above.
 
 **Expected baselines.** None for C9: each stored configuration with `VlanReqMapper` and an untagged port sets
 `forwardPcp = false`. C10 can move the fingerprints and the results of `examples/ethernet/vlan` and
-`showcases/ethernet/sharedcore`; no host of the two sets a PCP, so their frames can stay the same. The runs of
-the gate find each moved value, and each gets its line of attribution.
+`showcases/ethernet/sharedcore`, and the expected output of the module tests of `vlan-access-trunk.ini` and of
+`EthernetUnknownEtherType_1`. On a trunk, the forwarded PCP equals the PCP that the inserter takes from the user
+priority, so the frames can stay the same. The runs of the gate find each moved value, and each gets its line of
+attribution.
 
 **Checks.** The new protocol test and the other four tests of `tests/protocol/vlan` in debug mode; the VLAN module
-tests; with (ii), the pings of `showcases/ethernet/sharedcore` `FiltersAndMappers` get answers with `forwardPcp =
-true` (E1 of step 79: 0 of 80 before); all fingerprints in release mode (§6.1, step 8); the statistical tests of the
-moved folders in the image of the CI.
+tests; the pings of `showcases/ethernet/sharedcore` `FiltersAndMappers` get answers (E1 of step 79: 0 of 80 with
+`forwardPcp = true` before); all fingerprints in release mode (§6.1, step 8); the statistical tests of the moved
+folders in the image of the CI.
 
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
 
