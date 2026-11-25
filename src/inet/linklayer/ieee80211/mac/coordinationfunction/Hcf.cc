@@ -1749,8 +1749,7 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
             estimateZeroLimitExchange(predicted.get(), protectedHeader, txop, protectedDuration);
     }
     if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header))
-        return ppduDuration + sifs + rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT)->getDuration(
-            dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(bar) ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK);
+        return computeBlockAckExchangeDuration(packet, bar, ppduDuration);
     if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
         if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
             return ppduDuration + sifs + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmt, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
@@ -1763,6 +1762,13 @@ simtime_t Hcf::computeImmediateResponseDuration(Packet *packet, const Ptr<const 
 {
     return recipientAckPolicy->isAckNeeded(header) ?
         rateSelection->computeResponseAckFrameMode(packet, header, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
+}
+
+simtime_t Hcf::computeBlockAckExchangeDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, simtime_t ppduDuration)
+{
+    auto responseMode = rateSelection->computeResponseBlockAckFrameMode(packet, header, ResponseQueryRole::PREDICT);
+    auto responseLength = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header) ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK;
+    return ppduDuration + modeSet->getSifsTime() + responseMode->getDuration(responseLength);
 }
 
 bool Hcf::isInitialDataException(const FrameSequenceContext *context, const PreparedDataTransmission& prepared) const
@@ -2048,13 +2054,11 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 originatorBlockAckAgreementHandler->getAgreement(bar->getReceiverAddress(), tid) : nullptr;
             if (!agreement || !agreement->getIsAddbaResponseReceived())
                 return false;
-            auto response = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT)->getDuration(
-                compressed ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK);
-            auto cost = mode->getDuration(packet->getDataLength()) + modeSet->getSifsTime() + response;
+            auto cost = computeBlockAckExchangeDuration(packet, bar, mode->getDuration(packet->getDataLength()));
             // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: a later BAR must fit both bounds.
             if (context->getNumSteps() > 1 &&
                 ((txop->getLimit() > 0 && ifs + cost > txop->getRemaining()) ||
-                 (txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && cost >= rx->getTxnavRemaining())))
+                 (singleProtection && cost >= rx->getTxnavRemaining())))
                 return false;
         }
         simtime_t responseDuration = SIMTIME_ZERO;
@@ -2136,17 +2140,38 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
             auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
-            // IEEE Std 802.11-2024, 9.2.5.2(a)(9)(i): the final group frame advertises zero Duration/ID.
-            // HcfFs ends the group sequence after this frame. A zero-limit exchange also has no successor.
-            bool finalDataOrMgmt = dataOrMgmt && (dataOrMgmt->getReceiverAddress().isMulticast() || txop->getLimit() == 0);
-            auto pendingPacket = finalDataOrMgmt || dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
-                channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
-            if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
-                // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
-                pendingPacket = nullptr;
+            auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
+            bool basicBlockAckData = basicDataExchange && dataHeader && dataHeader->getAckPolicy() == BLOCK_ACK && txop->getLimit() > 0;
+            auto [peer, sequence, tid] = basicBlockAckData ?
+                originatorAckPolicy->computeBlockAckReqParametersAfterData(context->getInProgressFrames(), txop, originatorBlockAckAgreementHandler, packet) :
+                std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
+            simtime_t duration = SIMTIME_ZERO;
+            if (tid != -1) {
+                // IEEE Std 802.11-2024, 9.2.5.2(a)(9): protect the following request and its immediate response.
+                auto requestHeader = originatorBlockAckProcedure->buildBasicBlockAckReqFrame(peer, tid, sequence);
+                Packet request("forecast-BAR", requestHeader);
+                request.insertAtBack(makeShared<Ieee80211MacTrailer>());
+                auto requestMode = rateSelection->computeMode(&request, requestHeader, txop);
+                setFrameMode(&request, requestHeader, requestMode);
+                auto feedback = computeBlockAckExchangeDuration(&request, requestHeader, requestMode->getDuration(request.getDataLength()));
+                auto reservation = encodeDuration(modeSet->getSifsTime() + feedback, false);
+                if (reservation <= SimTime(32767, SIMTIME_US) &&
+                    ifs + mode->getDuration(packet->getDataLength()) + reservation <= txop->getRemaining())
+                    duration = reservation;
             }
-            const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
-            auto duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
+            else {
+                // IEEE Std 802.11-2024, 9.2.5.2(a)(9)(i): the final group frame advertises zero Duration/ID.
+                // HcfFs ends the group sequence after this frame. A zero-limit exchange also has no successor.
+                bool finalDataOrMgmt = dataOrMgmt && (dataOrMgmt->getReceiverAddress().isMulticast() || txop->getLimit() == 0);
+                auto pendingPacket = finalDataOrMgmt || dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
+                    channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
+                if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
+                    // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
+                    pendingPacket = nullptr;
+                }
+                const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+                duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
+            }
             auto header = packet->removeAtFront<Ieee80211MacHeader>();
             header->setDurationField(duration);
             EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";

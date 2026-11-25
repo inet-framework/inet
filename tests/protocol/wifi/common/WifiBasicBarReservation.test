@@ -1,0 +1,149 @@
+%description:
+Under single protection, Basic Block Ack DATA protects a due BAR and its reply
+if the feedback exchange fits the TXOP. With a shorter grant the same DATA
+must leave the reservation at zero and the BAR must contend separately.
+In both grants the ACK policy must forecast for the observed DATA with the
+active voice TXOP and readable remaining airtime.
+
+%extraargs: -r 0..1
+
+%file: BasicBarReservation.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+
+static TxopProcedure *senderVoiceTxop()
+{
+    auto root = cSimulation::getActiveSimulation()->getSystemModule();
+    return check_and_cast<TxopProcedure *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure"));
+}
+
+class BasicBarReservationAckPolicy : public OriginatorQosAckPolicy
+{
+  private:
+    mutable msgid_t forecastDataTreeId = -1;
+
+  public:
+    bool observedForecast(const Packet *data) const { return forecastDataTreeId == data->getTreeId(); }
+
+    std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParametersAfterData(InProgressFrames *frames,
+            const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data) const override
+    {
+        if (txop != senderVoiceTxop() || txop->getRemaining() <= SIMTIME_ZERO)
+            throw cRuntimeError("The Basic BAR forecast must receive the active voice TXOP with time remaining");
+        forecastDataTreeId = data->getTreeId();
+        return OriginatorQosAckPolicy::computeBlockAckReqParametersAfterData(frames, txop, agreements, data);
+    }
+};
+
+Define_Module(BasicBarReservationAckPolicy);
+
+static ProtocolTest feedbackReservation(bool fits)
+{
+    auto sender = "sta1.wlan[0].mac";
+    auto txopStart = [](const PacketEvent&) { return cValue(senderVoiceTxop()->getStart().dbl()); };
+    auto ppduEnd = [](const PacketEvent& event) {
+        auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        return event.time + mode->getDuration(event.packet->getDataLength());
+    };
+    return ProtocolTest(fits ? "wifi_basic_bar_reserved" : "wifi_basic_bar_deferred")
+        .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02))
+        .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
+            .capture("dataTxop", txopStart)
+            .capture("forecastObserved", [](const PacketEvent& event) {
+                auto root = cSimulation::getActiveSimulation()->getSystemModule();
+                auto policy = check_and_cast<BasicBarReservationAckPolicy *>(
+                    root->getModuleByPath("sta1.wlan[0].mac.hcf.originatorAckPolicy"));
+                return cValue(policy->observedForecast(event.packet));
+            })
+            .capture("dataEnd", [=](const PacketEvent& event) { return cValue(ppduEnd(event).dbl()); })
+            .capture("dataDuration", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField().dbl());
+            })
+            .capture("sequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .capture("tid", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getTid());
+            })
+            .describe("the first Basic Block Ack DATA after agreement setup").within(0.03))
+        .once(on(sender).signal("packetSentToLower").filterPacket("has(Ieee80211BasicBlockAckReq)")
+            .assertEvent([=](const MatchContext& context) {
+                const auto& event = context.event;
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                auto request = event.packet->peekAtFront<Ieee80211BasicBlockAckReq>();
+                if (request->getTidInfo() != context.get("tid").intValue() ||
+                    request->getStartingSequenceNumber().get() != context.get("sequence").intValue())
+                    return false;
+                auto duration = SimTime(context.get("dataDuration").doubleValue());
+                auto grant = txopStart(event).doubleValue();
+                auto dataGrant = context.get("dataTxop").doubleValue();
+                if (!fits)
+                    return grant > dataGrant && duration == SIMTIME_ZERO;
+                auto required = mode->getSifsTime() + mode->getDuration(event.packet->getDataLength()) + request->getDurationField();
+                auto gap = event.time - SimTime(context.get("dataEnd").doubleValue());
+                return grant == dataGrant && gap == mode->getSifsTime() &&
+                    duration >= required && duration - required < SimTime(1, SIMTIME_US);
+            })
+            .capture("barTxop", txopStart)
+            .capture("barEnd", [=](const PacketEvent& event) { return cValue(ppduEnd(event).dbl()); })
+            .capture("barDuration", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211BasicBlockAckReq>()->getDurationField().dbl());
+            })
+            .describe(fits ? "BAR follows DATA after SIFS with the full feedback interval reserved" : "BAR acquires a separate TXOP").within(0.01))
+        .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211BasicBlockAck)")
+            .assertEvent([=](const MatchContext& context) {
+                auto reply = context.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                auto responseEnd = SimTime(context.get("barEnd").doubleValue()) + SimTime(context.get("barDuration").doubleValue());
+                return context.get("forecastObserved").boolValue() &&
+                    reply->getTidInfo() == context.get("tid").intValue() &&
+                    reply->getStartingSequenceNumber().get() == context.get("sequence").intValue() &&
+                    reply->getBlockAckBitmap(0).getBit(0) &&
+                    txopStart(context.event).doubleValue() == context.get("barTxop").doubleValue() &&
+                    context.event.time <= responseEnd + SimTime(1, SIMTIME_US);
+            })
+            .describe("the matching Block Ack confirms receipt of DATA forecast in the active TXOP").within(0.001));
+}
+
+Define_ProtocolTest(wifi_basic_bar_reserved)
+{
+    return feedbackReservation(true);
+}
+
+Define_ProtocolTest(wifi_basic_bar_deferred)
+{
+    return feedbackReservation(false);
+}
+
+} // namespace inet::protocoltest
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+
+simple BasicBarReservationAckPolicy extends OriginatorQosAckPolicy
+{
+    parameters:
+        @class(::inet::protocoltest::BasicBarReservationAckPolicy);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${fits=true,false} ? "wifi_basic_bar_reserved" : "wifi_basic_bar_deferred"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.003s
+*.sta1.wlan[0].mac.hcf.originatorAckPolicy.typename = "BasicBarReservationAckPolicy"
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${fits} ? 4ms : 0.35ms
+**.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
+**.hcf.rtsPolicy.rtsThreshold = 100B
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_reserved: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_deferred: PASS

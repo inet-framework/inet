@@ -1,0 +1,3 @@
+Basic Block Ack feedback can follow DATA in the same transmission opportunity
+
+Under single protection, Wi-Fi DATA now reserves time for a due Basic Block Ack Request and its immediate reply when the exchange fits the remaining TXOP. The sender can then request feedback after SIFS. If the exchange cannot fit, the request waits for a fresh channel access.
