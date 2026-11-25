@@ -21,7 +21,10 @@ the baseline commit. So the baselines of master hold the values of the open defe
 its own explanation.
 
 The list has 51 entries. Seven are repaired: BD-0, BD-1, BD-2, BD-22 and BD-45 by commits of the catch-up, and BD-42
-and BD-50 by `858477687b` and `dd73c4376b` after it. This plan holds the 44 open entries. The list itself is a file of
+and BD-50 by `858477687b` and `dd73c4376b` after it. This plan holds the 44 open entries. On 2026-11-25 the review of
+change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) against the RFC found two
+more faults, and the maintainer added them as BD-51 and BD-52 ("yes to all of your questions"), so the list has 53
+entries. The list itself is a file of
 the job copy of the catch-up (`evidence/defects.json`), outside git, so this plan gives the complete facts of each
 entry. The evidence of each step (logs, experiments, row differences) is in `evidence/steps/step-NNN/` of that job
 copy. The baseline commit of each step in `statistics` and `media` gives the explanation of the step.
@@ -317,6 +320,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-5: `updateWndInfo()` lost its comment
 
+- **State (2026-11-24):** repaired by `519e772c16` (change R1 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-24.
 - **Place:** [TcpConnection.h](../../src/inet/transportlayer/tcp/TcpConnection.h), `getFlightSize()` and
   `updateWndInfo()`. From `b2313324ef` (step 8).
 - **Fault:** the new comment of `getFlightSize()` is below the comment of `updateWndInfo()`. The documentation tool
@@ -401,6 +405,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-13: `TcpReno.h` keeps the comment of a removed function
 
+- **State (2026-11-24):** repaired by `519e772c16` (change R1 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-24.
 - **Place:** [TcpReno.h](../../src/inet/transportlayer/tcp/flavours/TcpReno.h). From `985edc2057` (step 15).
 - **Fault:** the commit removes `TcpReno::isInFastRecovery()` but keeps its comment. The comment is now above
   `public:` and describes a function that does not exist.
@@ -441,6 +446,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-16: a wrong comment in `Rfc5681CongestionControl::congestionAvoidance()`
 
+- **State (2026-11-24):** repaired by `519e772c16` (change R1 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-24.
 - **Place:** [Rfc5681CongestionControl.cc](../../src/inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.cc).
   From `80357d0e09`; found at step 19.
 - **Fault:** the comment "cwnd is floored at 2*SMSS everywhere it is reduced" is wrong. A timeout sets cwnd to 1 MSS
@@ -496,6 +502,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-21: held data waits for ever, because the override timer does not expire while segments arrive
 
+- **State (2026-11-25):** repaired by `0cb5166482` on the branch `topic/baseline-catch-up-defect-repairs` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests and the reviewer document `tests/protocol/tcp/sws-override-timer.md`. The maintainer approved the result on 2026-11-25. No stored fingerprint or statistic moves.
 - **Place:** `processWindowUpdate()` (from `40b842fc88`) and the persist timer. Shown by `6148d90738` (step 30).
 - **Fault:** RFC 9293 section 3.8.6.2.1, rule (4), gives the sender SWS avoidance an override timeout. The persist
   timer is the override timer while the window is open. But `processWindowUpdate()` treats each segment with
@@ -511,6 +518,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-23: the override timeout is one RTO, so at least 1 s
 
+- **State (2026-11-25):** repaired by `7e0fd12257` and `31c275f882` on the branch `topic/baseline-catch-up-defect-repairs` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)): the override timeout of `~Tcp` is the RTO held in 0.1 s to 1.0 s, and the parameter `swsOverrideAfterRto` keeps the RTO in `~LinuxTcp`. The maintainer approved the result on 2026-11-25. No stored fingerprint or statistic moves.
 - **State (2026-11-24):** open on master `d8a58564ee`. The first interval is at least `minRexmitTimeout`: 1 s in `~Tcp` and 200 ms in `~LinuxTcp`. Change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it with BD-21.
 - **Place:** `startPersistTimer()`. From `6148d90738` (step 30).
 - **Fault:** RFC 9293 section 3.8.6.2.1: "The override timeout should be in the range 0.1 - 1.0 seconds." The persist
@@ -594,6 +602,45 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 - **Repair:** read the entry before `clearTo()`, as `TcpVegas` does.
 - **Check:** the ssthresh vector of `inet-westwood` has samples, and after a loss the threshold equals the estimated
   bandwidth times the smallest RTT.
+
+#### BD-51: data that TCP_CORK holds below the window waits as long as the cork stays set
+
+- **State (2026-11-25):** open. Added by the maintainer on 2026-11-25. Not in the scope of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) until a revision of that plan takes it.
+- **Place:** `TcpAlgorithmBase::sendData()` and the cork timer
+  ([TcpAlgorithmBase.cc](../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc)). From `6db7d1a459`
+  (2026-10-13, "tcp: add: TCP_CORK and MSG_MORE, with the cork timer"), new since v4.7.0. Found by the review of R2
+  against the RFC, not by a step of the catch-up.
+- **Fault:** a partial segment that TCP_CORK holds, with a window below one segment, is also held by the sender SWS
+  avoidance. The persist timer starts only when the cork timer does not run, so the override of RFC 9293 section
+  3.8.6.2.1, rule (4), never starts. The expiry of the cork timer does not bypass the SWS hold, and the cork timer
+  starts again. So the data waits as long as the cork stays set and the window does not grow. Linux
+  `tcp_write_wakeup()` ignores the cork. Found in the code; not run.
+- **Baselines:** none known.
+- **Repair:** the expiry of the override sends the held data also under the cork, as Linux does. Decide the form at
+  gate A.
+- **Check:** a protocol test: the application sets TCP_CORK and writes less than one segment, and the peer advertises
+  a window below one segment with no change. The data leaves at the expiry of the override timer.
+
+#### BD-52: a retransmission timer that runs with nothing in flight delays the override timer
+
+- **State (2026-11-25):** open. Added by the maintainer on 2026-11-25. Not in the scope of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) until a revision of that plan takes it.
+- **Place:** `TcpAlgorithmBase::sendData()`, the condition that starts the persist timer, and
+  `TcpAlgorithmBase::processTimer()` ([TcpAlgorithmBase.cc](../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc)).
+  From `e01c747832` (2026-10-09, "tcp: fix: no retransmission at a timeout with nothing in flight") and `6148d90738`
+  (2026-10-13, "tcp: fix: the sender avoids the silly window syndrome (RFC 9293 MUST-38)"), new since v4.7.0. Found by
+  the review of R2 against the RFC.
+- **Fault:** after an ECN-Echo at a congestion window of one segment, RFC 3168 section 6.1.2 resets the retransmission
+  timer also with nothing in flight. The persist timer starts only when the retransmission timer does not run. So data
+  that the sender SWS avoidance holds in that time gets no override timer until the retransmission timer expires, and
+  it can wait one RTO more than rule (4) of RFC 9293 section 3.8.6.2.1 permits. Found in the code; not run. BD-7
+  (change R8) changes the same case of RFC 3168.
+- **Baselines:** none known.
+- **Repair:** start the override timer also while the retransmission timer runs with nothing in flight, or let the
+  expiry of that timer send the held data. Decide it with BD-7.
+- **Check:** a protocol test: an ECN-Echo at a cwnd of one MSS, then a write that the SWS avoidance holds. The held
+  data leaves at the expiry of the override timer.
 
 ### 4.2 IEEE 802.11
 

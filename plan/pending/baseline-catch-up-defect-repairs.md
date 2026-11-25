@@ -274,11 +274,12 @@ No sealed file changes. No consumer outside INET changes.
     This plan. No dependency.
   - **C2: `plan: change: the defects of the baseline catch-up after the check of 2026-11-24`.** The corrections of
     §2.4 and the closure of BD-40. Depends on C1.
-- [ ] **Step 1. R1: TCP comments (BD-5, BD-13, BD-16).** Check: no fingerprint changes, and the module tests of the
+- [x] **Step 1. R1: TCP comments (BD-5, BD-13, BD-16).** Landed on master on 2026-11-24 as `519e772c16`. Check: no fingerprint changes, and the module tests of the
   places pass. Until the revision of 2026-11-24, R1 also held BD-6 and BD-9; they are R20 and R21 now.
   - `tcp: comment: each comment is above its function, and no comment describes a removed function` (BD-5, BD-13,
     BD-16).
-- [ ] **Step 2. R2: the override timer (BD-21, BD-23).** Gate A decides the override interval: a separate interval in
+- [x] **Step 2. R2: the override timer (BD-21, BD-23).** Repaired; gate B approved on 2026-11-25 (§6.3, R2). It lands
+  after the debug fingerprints in the image of the CI. Gate A decides the override interval: a separate interval in
   the range 0.1 s to 1.0 s of RFC 9293 section 3.8.6.2.1, or the RTO with a documented reason. Test: a sender holds a
   small segment, and the peer sends data at intervals shorter than the RTO with no change of the window; the held
   segment leaves when the override timer expires. Baselines: `examples/inet/bulktransfer` `inet_inet_2b`.
@@ -644,6 +645,20 @@ fingerprint run.
   plan` ("No commit of the series moves a pin over a result or a fingerprint value") pass. `check-naming.sh` reports 24
   violations and `check-interfaces.sh` 16 classes; a worktree of `master` gives the same 24 and 16, all of the whole
   repository, so R2 adds none. `whatsnew.py check` and `check_catalog.py` pass, and no link of the new files is broken.
+
+**Gate B** approved by the maintainer on 2026-11-25 ("yes to all of your questions"). The same answer decides two
+more things:
+
+- The two older faults of the review become the entries BD-51 (TCP_CORK) and BD-52 (a retransmission timer with
+  nothing in flight) of [baseline-catch-up-defects.md](baseline-catch-up-defects.md). Both are new since v4.7.0, so
+  they meet the criterion of this plan, but they stay outside its scope until a revision
+  ([PLR-REVISION](../../doc/project/rule/planning.md#plr-revision)) takes them.
+- The two faults of omnet-julia above are repaired in a separate change of omnet-julia: a start of a test verb opens
+  a tab, and the build step of `run_fingerprint_tests!` builds nothing in release mode.
+
+The repair commits of BD-21 and BD-23 are in the defect list. The gate B of R1 left out the repair commit of BD-5,
+BD-13 and BD-16 (`519e772c16`); it is in the list now too. Next: the debug fingerprints of the landing in the image
+of the CI, then the landing.
 
 ## 7. Verification
 
