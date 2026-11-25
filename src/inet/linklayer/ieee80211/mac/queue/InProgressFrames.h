@@ -64,7 +64,8 @@ class INET_API InProgressFrames : public SimpleModule
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
     virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
-    virtual std::vector<Packet *> getOutstandingFrames();
+    bool isExpired(const Packet *packet, simtime_t time) const;
+    virtual std::vector<Packet *> getOutstandingFrames(simtime_t time = simTime());
 
     virtual void clearDroppedFrames();
 };

@@ -680,9 +680,12 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   each later step at `txop->getLimit() == 0`. IEEE Std 802.11-2024 10.23.2.9 a) 1) permits "One or more SU PPDUs
   carrying fragments of a single MSDU or MMPDU" in such a TXOP, with the required acknowledgments. So each fragment of
   one MSDU needs a new channel access. Found in the code; not run.
-- **Baselines:** release run 0 of `showcases/wireless/blockack / Fragmentation` changes the three
-  default fingerprint values and its scalar comparison. That workload uses AC_BE. The HCF
-  fragmentation showcase uses port 4000 mapped to AC_VI and its run-0 baselines match.
+- **Baselines:** the zero-limit repair changes the three default fingerprints and the statistical
+  baseline in run 0 of `showcases/wireless/blockack / Fragmentation` and
+  `examples/wireless/mactest / MacEdca`. The first uses AC_BE. In MacEdca, the fragmented
+  FTP traffic uses AC_BK. The HCF fragmentation showcase uses port 4000 mapped to AC_VI.
+  Its Basic Block Ack packet-size and SNIR charts move when HCF starts checking the lifetime
+  of outgoing DATA in the Basic BAR forecast.
 - **Preparation BD-26-IDENTITY**, “ieee80211: add: identify and forecast a fragment continuation”.
   Add the shared fragment match, accepted-ACK query and HCF airtime forecast before enabling continuation. The
   [identity unit test](../../tests/unit/Ieee80211FragmentContinuation_1.test) checks the immediate successor
@@ -707,6 +710,16 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   Run `opp_run_protocol_tests --load . -p inet -m <mode> --no-build
   -w '^tests/protocol/wifi$' -f 'N_TxopFragment(s|Retry)\.test$'` on the release parent build
   and the debug and release builds of the repair.
+
+- **Commit BD-26-BASIC-BAR-EXPIRY**, “ieee80211: fix: exclude expiring DATA from the Basic BAR forecast”.
+  Following BD-26 and the BD-43 BAR forecast, make HCF pass the scheduled DATA completion time
+  to the originator QoS ACK policy. Filter outstanding DATA and the transmitting frame at that time
+  before deciding whether a BAR is due. In run 2 of
+  [WifiBasicBarReservation](../../tests/protocol/wifi/common/WifiBasicBarReservation.test),
+  the 920 µs lifetime ends during transmission. The parent advertises 128 µs for a BAR and reply
+  that HCF skips. Require zero Duration/ID and no matching BAR. Keep the live-DATA controls.
+  Run the fixture in debug and release and compare the Basic packet-size and SNIR charts.
+  The [reviewer notes](../../tests/protocol/wifi/basic-bar-reservation.md) cover the exchange.
 
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 

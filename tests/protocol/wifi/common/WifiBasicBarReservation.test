@@ -2,10 +2,11 @@
 Under single protection, Basic Block Ack DATA protects a due BAR and its reply
 if the feedback exchange fits the TXOP. With a shorter grant the same DATA
 must leave the reservation at zero and the BAR must contend separately.
-In both grants the ACK policy must forecast for the observed DATA with the
-active voice TXOP and readable remaining airtime.
+When that DATA expires during its PPDU, it must leave the reservation at
+zero and no BAR may follow for that sequence. The ACK policy receives the
+observed DATA, its projected completion time, and the active voice TXOP.
 
-%extraargs: -r 0..1
+%extraargs: -r 0..2
 
 %file: BasicBarReservation.cc
 #include "BlockAckLifecycleTestSupport.h"
@@ -30,12 +31,12 @@ class BasicBarReservationAckPolicy : public OriginatorQosAckPolicy
     bool observedForecast(const Packet *data) const { return forecastDataTreeId == data->getTreeId(); }
 
     std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParametersAfterData(InProgressFrames *frames,
-            const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data) const override
+            const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data, simtime_t dataEnd) const override
     {
         if (txop != senderVoiceTxop() || txop->getRemaining() <= SIMTIME_ZERO)
             throw cRuntimeError("The Basic BAR forecast must receive the active voice TXOP with time remaining");
         forecastDataTreeId = data->getTreeId();
-        return OriginatorQosAckPolicy::computeBlockAckReqParametersAfterData(frames, txop, agreements, data);
+        return OriginatorQosAckPolicy::computeBlockAckReqParametersAfterData(frames, txop, agreements, data, dataEnd);
     }
 };
 
@@ -118,6 +119,37 @@ Define_ProtocolTest(wifi_basic_bar_deferred)
     return feedbackReservation(false);
 }
 
+Define_ProtocolTest(wifi_basic_bar_expired)
+{
+    auto sender = "sta1.wlan[0].mac";
+    return ProtocolTest("wifi_basic_bar_expired")
+        .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02))
+        .once(on(sender).signal("packetSentToLower").filterPacket("ieee80211mac.type == 40 && ieee80211mac.ackPolicy == 3")
+            .assertEvent([](const MatchContext& context) {
+                const auto& event = context.event;
+                auto root = cSimulation::getActiveSimulation()->getSystemModule();
+                auto edca = check_and_cast<Edca *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca"));
+                auto frames = edca->getEdcaf(AC_VO)->getInProgressFrames();
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+                auto header = event.packet->peekAtFront<Ieee80211DataHeader>();
+                for (int i = 0; i < frames->getLength(); i++) {
+                    auto frame = frames->getFrames(i);
+                    if (frame->getTreeId() == event.packet->getTreeId()) {
+                        auto deadline = edca->getLifetimeHandler()->getDeadline(frame);
+                        return event.time < deadline && deadline < event.time + mode->getDuration(event.packet->getDataLength()) &&
+                            header->getDurationField() == SIMTIME_ZERO;
+                    }
+                }
+                return false;
+            })
+            .capture("sequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .describe("DATA expiring during its PPDU advertises zero Duration/ID").within(0.03))
+        .never(on(sender).signal("packetSentToLower").filterPacket("has(Ieee80211BasicBlockAckReq) && ieee80211mac.startingSequenceNumber == {sequence}")
+            .describe("BAR for the expired DATA").within(0.003));
+}
+
 } // namespace inet::protocoltest
 
 %file: test.ned
@@ -131,11 +163,12 @@ simple BasicBarReservationAckPolicy extends OriginatorQosAckPolicy
 
 %inifile: test.ini
 [General]
-*.tester.testName = ${fits=true,false} ? "wifi_basic_bar_reserved" : "wifi_basic_bar_deferred"
+*.tester.testName = ${scenario="wifi_basic_bar_reserved","wifi_basic_bar_deferred","wifi_basic_bar_expired"}
 *.sta1.app[0].sendInterval = 0.1ms
 *.sta1.app[0].stopTime = 1.003s
 *.sta1.wlan[0].mac.hcf.originatorAckPolicy.typename = "BasicBarReservationAckPolicy"
-**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${fits} ? 4ms : 0.35ms
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = ${scenario} == "wifi_basic_bar_expired" ? 920us : 0.512s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == "wifi_basic_bar_deferred" ? 0.35ms : 4ms
 **.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
 **.hcf.rtsPolicy.rtsThreshold = 100B
 **.hcf.originatorAckPolicy.blockAckReqThreshold = 1
@@ -147,3 +180,6 @@ PROTOCOLTEST wifi_basic_bar_reserved: PASS
 
 %contains: stdout
 PROTOCOLTEST wifi_basic_bar_deferred: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_expired: PASS

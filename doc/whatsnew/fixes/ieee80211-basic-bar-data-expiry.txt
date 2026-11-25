@@ -1,0 +1,3 @@
+Basic Block Ack reservation and DATA lifetime
+
+The Wi-Fi QoS MAC now accounts for DATA lifetime at the projected end of transmission when reserving time for a Basic Block Ack request. DATA that expires during transmission can no longer trigger a reservation for feedback that the sender will skip.

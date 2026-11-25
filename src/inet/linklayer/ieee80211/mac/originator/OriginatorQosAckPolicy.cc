@@ -40,22 +40,22 @@ bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *frames, TxopP
 
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *frames, TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements) const
 {
-    return selectBlockAckRequest(frames, agreements, nullptr);
+    return selectBlockAckRequest(frames, agreements, nullptr, simTime());
 }
 
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParametersAfterData(InProgressFrames *frames,
-        const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data) const
+        const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data, simtime_t dataEnd) const
 {
-    return selectBlockAckRequest(frames, agreements, data);
+    return selectBlockAckRequest(frames, agreements, data, dataEnd);
 }
 
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::selectBlockAckRequest(InProgressFrames *frames,
-        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData) const
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime) const
 {
     using Id = std::pair<MacAddress, Tid>;
     std::map<Id, std::vector<Packet *>> groups;
-    auto outstanding = frames->getOutstandingFrames();
-    if (transmittingData)
+    auto outstanding = frames->getOutstandingFrames(selectionTime);
+    if (transmittingData && !frames->isExpired(transmittingData, selectionTime))
         outstanding.push_back(transmittingData);
     for (auto frame : outstanding) {
         auto header = frame->peekAtFront<Ieee80211DataHeader>();

@@ -2229,8 +2229,10 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
             auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
             bool basicBlockAckData = basicDataExchange && dataHeader && dataHeader->getAckPolicy() == BLOCK_ACK && txop->getLimit() > 0;
+            auto dataEnd = simTime() + ifs + mode->getDuration(packet->getDataLength());
             auto [peer, sequence, tid] = basicBlockAckData ?
-                originatorAckPolicy->computeBlockAckReqParametersAfterData(context->getInProgressFrames(), txop, originatorBlockAckAgreementHandler, packet) :
+                originatorAckPolicy->computeBlockAckReqParametersAfterData(context->getInProgressFrames(), txop,
+                    originatorBlockAckAgreementHandler, packet, dataEnd) :
                 std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
             simtime_t duration = SIMTIME_ZERO;
             if (tid != -1) {
@@ -2243,7 +2245,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 auto feedback = computeBlockAckExchangeDuration(&request, requestHeader, requestMode->getDuration(request.getDataLength()));
                 auto reservation = encodeDuration(modeSet->getSifsTime() + feedback, false);
                 if (reservation <= SimTime(MAX_DURATION_FIELD_MICROSECONDS, SIMTIME_US) &&
-                    ifs + mode->getDuration(packet->getDataLength()) + reservation <= txop->getRemaining())
+                    dataEnd - simTime() + reservation <= txop->getRemaining())
                     duration = reservation;
             }
             else {

@@ -192,11 +192,16 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
     }
 }
 
-std::vector<Packet *> InProgressFrames::getOutstandingFrames()
+bool InProgressFrames::isExpired(const Packet *packet, simtime_t time) const
+{
+    return lifetimeHandler && lifetimeHandler->isExpired(packet, time);
+}
+
+std::vector<Packet *> InProgressFrames::getOutstandingFrames(simtime_t time)
 {
     std::vector<Packet *> outstandingFrames;
     for (auto frame : inProgressFrames) {
-        if ((!lifetimeHandler || !lifetimeHandler->isExpired(frame)) &&
+        if (!isExpired(frame, time) &&
             ackHandler->isOutstandingFrame(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             outstandingFrames.push_back(frame);
     }
