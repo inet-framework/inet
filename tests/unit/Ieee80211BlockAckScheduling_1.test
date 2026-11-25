@@ -1,5 +1,6 @@
 %description:
 Check peer/TID BAR arbitration, window boundaries, cyclic sequence order, and ACK-state isolation.
+Check that a below-threshold forecast agrees with live selection after DATA transmission.
 The production policy reads the production ACK handler through an in-progress queue.
 These helper checks supplement the HCF module fixture.
 
@@ -8,6 +9,7 @@ These helper checks supplement the HCF module fixture.
 #include <type_traits>
 #include <utility>
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
@@ -60,8 +62,11 @@ class SchedulingAgreements : public OriginatorBlockAckAgreementHandler {
 class SchedulingFrames : public InProgressFrames {
   public:
     Packet *candidate = nullptr;
-    void configure(QosAckHandler *handler) { ackHandler = handler; }
-    Packet *peekFrameToTransmit() override { return candidate; }
+    void configure(QosAckHandler *handler, IOriginatorMacDataService *service = nullptr) {
+        ackHandler = handler;
+        dataService = service;
+    }
+    Packet *peekFrameToTransmit() override { return dataService ? InProgressFrames::peekFrameToTransmit() : candidate; }
     Ptr<const Ieee80211DataHeader> add(MacAddress peer, Tid tid, int sequence, bool sent = true) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
@@ -77,6 +82,27 @@ class SchedulingFrames : public InProgressFrames {
         if (sent)
             check_and_cast<QosAckHandler *>(ackHandler)->processTransmittedDataOrMgmtFrame(header);
         return header;
+    }
+};
+
+class EmptyPendingDataService : public OriginatorQosMacDataService {
+  public:
+    Packet *peekEligibleFrame(queueing::IPacketQueue *) const override { return nullptr; }
+};
+
+class OrderedPeekFrames : public InProgressFrames {
+  private:
+    Packet *preferred;
+    Packet *successor;
+
+  public:
+    OrderedPeekFrames(EmptyPendingDataService& service, Packet *preferred, Packet *successor) :
+        preferred(preferred), successor(successor)
+    {
+        dataService = &service;
+    }
+    Packet *peekFrameToTransmitExcluding(const Packet *excludedFrame) override {
+        return excludedFrame == preferred ? successor : preferred;
     }
 };
 }
@@ -139,6 +165,37 @@ choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
 ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 2);
 ASSERT(std::get<1>(choice) == SequenceNumberCyclic(100));
 ASSERT(otherAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
+{
+    EmptyPendingDataService emptyPendingData;
+    Packet preferred("preferred"), successor("successor");
+    OrderedPeekFrames orderedFrames(emptyPendingData, &preferred, &successor);
+    ASSERT(orderedFrames.peekFrameToTransmit() == &preferred);
+    ASSERT(orderedFrames.peekFrameToTransmitExcluding(&preferred) == &successor);
+}
+for (bool hasSuccessor : {false, true}) {
+    QosAckHandler forecastAck;
+    EmptyPendingDataService emptyPendingData;
+    SchedulingFrames forecastFrames;
+    forecastFrames.configure(&forecastAck, &emptyPendingData);
+    auto data = forecastFrames.add(peer, 2, 100, false);
+    auto transmitting = forecastFrames.getFrames(0);
+    if (hasSuccessor)
+        forecastFrames.add(peer, 2, 101, false);
+
+    TxopProcedure txop;
+    const IOriginatorQoSAckPolicy& forecastPolicy = policy;
+    auto forecast = forecastPolicy.computeBlockAckReqParametersAfterData(&forecastFrames, &txop, &agreements, transmitting);
+    ASSERT(forecastAck.getQoSDataAckStatus(data) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(forecastFrames.getOutstandingFrames().empty());
+    ASSERT(forecastFrames.getLength() == (hasSuccessor ? 2 : 1));
+    ASSERT(forecastFrames.peekFrameToTransmit() == transmitting);
+    forecastAck.processTransmittedDataOrMgmtFrame(data);
+    ASSERT(forecast == forecastPolicy.computeBlockAckReqParameters(&forecastFrames, &txop, &agreements));
+    if (hasSuccessor)
+        ASSERT(std::get<2>(forecast) == -1);
+    else
+        ASSERT(forecast == std::make_tuple(peer, SequenceNumberCyclic(100), Tid(2)));
+}
 for (int start : {100, 4094}) {
     for (int responseOffset : {0, 6, 100}) {
         QosAckHandler compressedAck;

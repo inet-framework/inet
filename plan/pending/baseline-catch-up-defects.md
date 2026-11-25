@@ -259,6 +259,33 @@ limit in 10.23.2.9. Keep the protected DATA rate selected before RTS through the
   limits at fixed rates and observes Block Ack feedback as evidence of progress.
   Record the results and controls in [Basic Block Ack TXOP admission](../../tests/protocol/wifi/basic-txop-admission.md).
 
+### Basic Block Ack feedback scheduling, BD-43
+
+Build on the Basic continuation admission from PR #1483.
+
+1. “ieee80211: add: forecast Basic Block Ack requests before DATA transmission” adds the
+   read-only query with the active TXOP and shares the existing ACK policy's selection rules.
+   Extend [Ieee80211BlockAckScheduling_1.test](../../tests/unit/Ieee80211BlockAckScheduling_1.test)
+   with one below-threshold case with an in-window successor and one with an empty queue
+   after the current DATA. Check the forecast against live selection after transmission and
+   verify that forecasting leaves the queue and ACK state intact. Verify that the ordinary
+   and exclusion-aware peeks share a custom queue's ordering. Run the focused debug unit test
+   and compare the selected run-0 release fingerprints against PR #1483.
+2. “ieee80211: fix: reserve TXOP airtime for a due Basic Block Ack request” calls the forecast
+   before HCF sends Basic DATA under single protection. Reserve the full feedback interval in
+   the DATA Duration/ID if it fits the deadline. Check the actual request and reply against the
+   live reservation and TXOP before submission. Add
+   [WifiBasicBarReservation.test](../../tests/protocol/wifi/common/WifiBasicBarReservation.test)
+   and compare a fitting request with one that must contend again. Verify the SIFS gap, grant
+   identity, advertised duration and matching Basic bitmap in debug and release. Install a
+   test ACK policy that checks the active TXOP and its remaining time when HCF calls the
+   forecast for the observed DATA.
+
+Compare the affected QoS and fragmentation configurations with matched seeds, using BARs that
+open a grant and BARs that follow DATA to explain the change in contention. Keep agreement
+retention a separate change. Record the test, workload and fingerprint comparisons in
+[Basic Block Ack feedback scheduling](../../tests/protocol/wifi/basic-bar-reservation.md).
+
 ## 4. The entries
 
 Each entry gives the place, the fault with its basis, the baselines that hold values of the fault, a proposed repair

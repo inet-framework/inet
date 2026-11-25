@@ -111,8 +111,13 @@ Packet *InProgressFrames::getFrameToTransmit()
 
 Packet *InProgressFrames::peekFrameToTransmit()
 {
+    return peekFrameToTransmitExcluding(nullptr);
+}
+
+Packet *InProgressFrames::peekFrameToTransmitExcluding(const Packet *excludedFrame)
+{
     for (auto frame : inProgressFrames) {
-        if (isEligibleToTransmit(frame))
+        if (frame != excludedFrame && isEligibleToTransmit(frame))
             return frame;
     }
     return check_and_cast<IOriginatorQosMacDataService *>(dataService)->peekEligibleFrame(pendingQueue);
