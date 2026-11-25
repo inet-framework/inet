@@ -1,3 +1,0 @@
-Basic Block Ack reports missing fragments
-
-The recipient leaves a fragment's bitmap bit clear if the fragment is missing from the tracked sequence range, even when no fragments have arrived yet or the sequence numbers have wrapped. The sender can then retry the missing fragment.

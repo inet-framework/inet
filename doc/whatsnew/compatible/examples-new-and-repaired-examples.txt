@@ -4,7 +4,7 @@ New examples and showcases: examples/ethernet/providerbridging (IEEE 802.1ad pro
 
 opp_featuretool enable now also enables the features that the simulations of 11 example, tutorial and showcase features need, for example BgpTutorial, RipTutorial, QuicExamples and QuicShowcases. Before, their simulations stopped at setup.
 
-Some examples did not do what their pages said, and they are repaired. The inet-tahoe configuration of examples/inet/tcpclientserver runs TcpTahoe; before, it ran TcpReno, so its results change. examples/mpls/net37 signals its LSP. The Óbuda street map of the SatelliteMobility configuration of examples/mobility shows. The frequencyGains of the PartiallyOverlappingFrequencyBands configuration of showcases/wireless/crosstalk reach the analog model of the transmitter. The medium visualizers of examples/wireless/obstacle show the signals. Ini entries that had no effect are removed from 12 examples.
+Some examples did not do what their pages said, and they are repaired. The inet-tahoe configuration of examples/inet/tcpclientserver runs TcpTahoe; before, it ran TcpReno, so its results change. examples/mpls/net37 signals its LSP. The Óbuda street map of the SatelliteMobility configuration of examples/mobility shows. The frequencyGains of the PartiallyOverlappingFrequencyBands configuration of showcases/wireless/crosstalk reach the analog model of the transmitter. The medium visualizers of examples/wireless/obstacle show the signals. Ini entries that had no effect are removed from 12 examples. In the lan80211 examples, the mobility of the hosts takes a random number stream apart from the backoff of IEEE 802.11, so a change of the traffic no longer changes the paths of the hosts; with the same seed as before, Ping1, TwoHosts and Streaming1 give other paths, link breaks and traffic results.
 
 The map image images/maps/europe-er.png was a Web Mercator image, but GeoMapCanvasVisualizer stretches its image linearly in latitude, so the figures on it were up to 5.4 degrees of latitude off. The image is now equirectangular, and a model that shows it with GeoMapCanvasVisualizer must declare its window:
 
@@ -14,3 +14,5 @@ The map image images/maps/europe-er.png was a Web Mercator image, but GeoMapCanv
   *.map.maxLongitude = 44.1deg
 
 35 configurations, for example 22 QUIC examples, examples/inet/hierarchical99, examples/inet/ipv4hook and the steps of tutorials/protocol, now have a real sim-time-limit, at or after the time when the simulation runs out of events. Their time averages change.
+
+The repair of the lan80211 examples was contributed by Miguel González-López.
