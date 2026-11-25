@@ -1,0 +1,136 @@
+%description:
+IEEE Std 802.11-2024, 10.23.2.9(a)(1): an AC_BE zero-limit TXOP can carry the successive
+fragments of one MSDU. Check SIFS, Duration/ID, and the grant boundary at the next MSDU.
+
+%extraargs: -r 0..6
+
+%file: N_TxopFragments.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+
+using namespace ieee80211;
+using namespace physicallayer;
+
+struct FragmentEvidence
+{
+    int sequence = -1;
+    bool multiple = false;
+    simtime_t grant;
+    simtime_t ackEnd;
+    simtime_t reservedUntil;
+    simtime_t secondReservedUntil;
+    simtime_t finalReservedUntil;
+};
+
+static TxopProcedure *txop(const MatchContext& c)
+{
+    auto module = c.event.node->getModuleByPath(".wlan[0].mac.hcf.edca.edcaf[1].txopProcedure");
+    return check_and_cast<TxopProcedure *>(module);
+}
+
+static simtime_t reservationEnd(const MatchContext& c, const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto packet = c.event.packet;
+    return c.event.time + packet->getTag<Ieee80211ModeReq>()->getMode()->getDuration(packet->getDataLength()) +
+        header->getDurationField();
+}
+
+Define_ProtocolTest(wifi_qos_txop_fragments)
+{
+    auto evidence = std::make_shared<FragmentEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
+    auto fallback = cSimulation::getActiveSimulation()->getEnvir()->getConfigEx()->getActiveRunNumber() == 6;
+    return ProtocolTest("wifi_qos_txop_fragments")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->sequence = header->getSequenceNumber().get();
+                auto procedure = txop(c);
+                evidence->grant = procedure->getStart();
+                evidence->multiple = procedure->getProtectionMechanism() == TxopProcedure::MULTIPLE_PROTECTION;
+                evidence->reservedUntil = reservationEnd(c, header);
+                return procedure->getLimit() == 0 && header->getFragmentNumber() == 0 && header->getMoreFragments();
+            }).describe("fragment zero opens a grant").within(2))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                return evidence->reservedUntil > c.event.time;
+            }).describe("fragment zero reserves airtime after its own ACK").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->secondReservedUntil = reservationEnd(c, header);
+                return header->getSequenceNumber().get() == evidence->sequence &&
+                    header->getFragmentNumber() == 1 && header->getMoreFragments() &&
+                    txop(c)->getStart() == evidence->grant && c.event.time == evidence->ackEnd + sifs;
+            }).describe("fragment one follows the ACK by SIFS in the same grant").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                return evidence->multiple || c.event.time == evidence->reservedUntil;
+            }).describe("single protection reserves the next exchange").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs, fallback](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->finalReservedUntil = reservationEnd(c, header);
+                if (header->getSequenceNumber().get() != evidence->sequence ||
+                    header->getFragmentNumber() != 2 || header->getMoreFragments())
+                    return false;
+                return fallback ? txop(c)->getStart() > evidence->grant && c.event.time > evidence->ackEnd + sifs :
+                    txop(c)->getStart() == evidence->grant && c.event.time == evidence->ackEnd + sifs;
+            })
+            .capture("finalDuration", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getDurationField().dbl());
+            }).describe("fragment two uses the expected grant").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence, sifs, fallback](const MatchContext& c) {
+                evidence->ackEnd = c.event.time;
+                auto ackMode = c.event.packet->getTag<Ieee80211ModeInd>()->getMode();
+                auto ackCoverage = sifs + ackMode->getDuration(c.event.packet->getDataLength());
+                if (SimTime(c.get("finalDuration").doubleValue()) < ackCoverage)
+                    return false;
+                if (fallback)
+                    return true;
+                return c.event.time == evidence->secondReservedUntil && c.event.time == evidence->finalReservedUntil &&
+                    (!evidence->multiple || c.event.time == evidence->reservedUntil);
+            }).describe("the final DATA field covers SIFS plus the selected ACK airtime").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getSequenceNumber().get() != evidence->sequence && header->getFragmentNumber() == 0 &&
+                    txop(c)->getStart() > evidence->grant && c.event.time > evidence->ackEnd + sifs;
+            }).describe("the next MSDU uses a fresh grant").within(0.02));
+}
+
+} // namespace inet::protocoltest
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_qos_txop_fragments"
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = ${delay=0s,0s,0s,0s,1us,1us,1us}
+*.sta1.app[0].messageLength = 700B
+*.sta1.app[0].sendInterval = 1us
+*.sta1.app[0].stopTime = 1.000002s
+*.sta1.wlan[0].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.sta1.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+*.sta1.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.protectionMechanism = ${"single","multiple","single","multiple","multiple","multiple","multiple" ! delay}
+*.sta1.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${3000B,3000B,100B,100B,3000B,100B,3000B ! delay}
+*.sta1.wlan[0].mac.hcf.zeroLimitFragmentRoundTripTime = ${0s,0s,0s,0s,2us,2us,0s ! delay}
+*.sta1.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 300B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.hcf.isBlockAckSupported = false
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_txop_fragments: PASS
+
+%not-contains: stdout
+PROTOCOLTEST wifi_qos_txop_fragments: FAIL

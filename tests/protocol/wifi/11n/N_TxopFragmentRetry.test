@@ -1,0 +1,94 @@
+%description:
+Lose the first ACK for an AC_BE fragment. Verify that the sender retries it under a fresh
+zero-limit grant, then sends the next fragment at SIFS once the retry is acknowledged.
+
+%file: N_TxopFragmentRetry.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+namespace inet::protocoltest {
+
+using namespace ieee80211;
+using namespace physicallayer;
+
+struct FragmentRetryEvidence
+{
+    int sequence = -1;
+    b length;
+    simtime_t firstGrant;
+    simtime_t retryGrant;
+    simtime_t retryAck;
+};
+
+static simtime_t grantStart(const MatchContext& c)
+{
+    auto module = c.event.node->getModuleByPath(".wlan[0].mac.hcf.edca.edcaf[1].txopProcedure");
+    return check_and_cast<TxopProcedure *>(module)->getStart();
+}
+
+Define_ProtocolTest(wifi_txop_fragment_retry)
+{
+    auto evidence = std::make_shared<FragmentRetryEvidence>();
+    auto sifs = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getSifsTime();
+    return ProtocolTest("wifi_txop_fragment_retry")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->sequence = header->getSequenceNumber().get();
+                evidence->length = c.event.packet->getDataLength();
+                evidence->firstGrant = grantStart(c);
+                return header->getFragmentNumber() == 0 && header->getMoreFragments() && !header->getRetry();
+            }).capture("sta1", [](const PacketEvent& e) {
+                return cValue((intval_t)e.packet->peekAtFront<Ieee80211DataHeader>()->getTransmitterAddress().getInt());
+            }).describe("initial transmission of fragment zero").within(2))
+        .meanwhile(tap("radioMedium").to("sta1")
+            .filterPacket("ieee80211mac.type == 29 && ieee80211mac.receiverAddress.getInt() == {sta1}").nth(1).drop()
+            .describe("the first addressed ACK is lost at STA1"))
+        .once(on("sta2.wlan[0].radio").signal("packetSentToUpper")
+            .filterPacket("ieee80211mac.type == 29 && ieee80211mac.receiverAddress.getInt() == {sta1}")
+            .describe("STA2 observes the ACK that STA1 misses").within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                evidence->retryGrant = grantStart(c);
+                return header->getRetry() && header->getSequenceNumber().get() == evidence->sequence &&
+                    header->getFragmentNumber() == 0 && c.event.packet->getDataLength() == evidence->length &&
+                    evidence->retryGrant > evidence->firstGrant;
+            }).describe("fragment zero is retried unchanged under a new grant").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 29")
+            .assertEvent([evidence](const MatchContext& c) {
+                evidence->retryAck = c.event.time;
+                return true;
+            }).within(0.003))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([evidence, sifs](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return !header->getRetry() && header->getSequenceNumber().get() == evidence->sequence &&
+                    header->getFragmentNumber() == 1 && grantStart(c) == evidence->retryGrant &&
+                    c.event.time == evidence->retryAck + sifs;
+            }).describe("fragment one follows the accepted retry ACK at SIFS").within(0.003));
+}
+
+} // namespace inet::protocoltest
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_txop_fragment_retry"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.sta1.app[0].messageLength = 420B
+*.sta1.app[0].stopTime = 1.000001s
+*.sta1.wlan[0].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.sta1.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+*.sta1.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 300B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.hcf.isBlockAckSupported = false
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_txop_fragment_retry: PASS

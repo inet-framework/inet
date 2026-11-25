@@ -527,11 +527,11 @@ When the next exchange needs RTS/CTS, the preceding frame's successor term conta
 
 For example, after DATA A and its ACK, queued DATA B needs RTS/CTS. HCF refuses B before RTS and retains B for a fresh grant after TXNAV expires. An initial exchange can still use RTS/CTS.
 
-The TXNAV check does not require the initial SIFS plus exchange cost to fit the previous reservation. This permits continuation with positive propagation when the selected exchange retains its forecast cost. If airtime estimates are exact and field conversion adds no margin, unchanged DATA/ACK forecasts require round-trip propagation shorter than SIFS. The positive TXOP limit remains a separate constraint. Response airtime remains estimated; admission does not guarantee the peer's exact completion time.
+The TXNAV check compares the exchange cost with the time remaining at the transmission decision. A zero-limit fragment continuation under multiple protection also checks that the encoded reservation at the scheduled DATA end covers SIFS and the selected ACK. The positive TXOP limit remains a separate constraint. Response airtime remains estimated.
 
 The first exchange proceeds even when its cost exceeds a positive TXOP limit. This compatibility fallback preserves queue progress. It does not implement the standard's required fragmentation from the TXOP budget. For example, a hypothetical 1500-byte frame at 6 Mbit/s needs 2084 us with ACK. The initial exchange proceeds under the default 1504 us voice limit. An additional exchange with that cost must pass the separate budgets.
 
-A zero limit permits the initial exchange and its existing RTS/CTS and immediate response. Each later fragment or unrelated unit needs a fresh TXOP. Prepared fragments and A-MSDUs use the same complete-cost check under positive limits.
+A zero limit permits one MSDU or MMPDU and its required responses and protection. After an acknowledged fragment, the next fragment of the same MSDU or MMPDU can follow after SIFS if the reservation allows it. Single protection forecasts one successor exchange at a time. An unrelated unit needs a fresh TXOP. Prepared fragments and A-MSDUs use the same complete-cost check under positive limits.
 
 With Block Ack support enabled and the Basic profile selected, HCF applies both budgets to
 later unicast Data and Management exchanges. This includes Normal Ack traffic without an
@@ -591,15 +591,20 @@ each way. The first DATA starts at zero and advertises 924 us. After ACK, the ne
 places DATA at 176.4 us. Its raw field is 747.6 us, which HCF converts to 748 us. The reservation now
 ends at 1024.4 us. HCF stops before the third exchange without a transmission failure or retry increment.
 
-For a zero limit, the initial field estimates the selected exchange, with its required response and
-optional RTS/CTS. For example, a hypothetical 96-byte MPDU uses 9 Mbps during the RTS estimate but 6
+For a zero limit, the opening field estimates the planned exchange, including any eligible fragment
+burst, required responses, and optional RTS/CTS. The HCF parameter
+`zeroLimitFragmentRoundTripTime` adds a configured propagation allowance for each predicted CTS
+or ACK in a fragmented exchange. For a constant one-way propagation delay
+of 1 µs, set it to 2 µs to account for the round trip. If the remaining reservation cannot
+cover a successor's ACK, the successor waits for a fresh grant.
+
+For example, a hypothetical 96-byte MPDU uses 9 Mbps during the RTS estimate but 6
 Mbps when DATA transmits. With 6 Mbps control responses, the reservation ends at 296 us, while the
 actual ACK ends at 340 us. Later mode queries can change the airtime, so the estimate does not
 guarantee protection through the actual response.
 
 Rate queries retain the adaptive rate controller's existing effects. A failed CTS does not undo a
-rate increase from the estimate. One conventional fragment under a zero limit reserves only its
-selected exchange.
+rate increase from the estimate.
 
 Unused reservation time remains busy because this implementation sends no CF-End to release it. The
 current group sequence sends one group frame per grant, even with a positive limit. For the 200 us

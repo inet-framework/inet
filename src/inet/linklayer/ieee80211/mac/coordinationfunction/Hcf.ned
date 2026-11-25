@@ -30,6 +30,7 @@ module Hcf extends Module like IHcf
     parameters:
         bool isBlockAckSupported = default(false);
         string blockAckVariant = default("compressed"); // Compressed requires usable HT state. Select Basic explicitly for historical compatibility.
+        double zeroLimitFragmentRoundTripTime @unit(s) = default(0s); // Propagation allowance per response in a multiple-protection fragment burst.
 
         string rxModule;
         string txModule;

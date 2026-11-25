@@ -670,7 +670,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   and with Basic or Compressed support enabled.
   [Regression evidence](../../tests/protocol/wifi/single-protection-group-duration.md).
 
-#### BD-26: a TXOP limit of 0 permits one frame exchange, also for the fragments of one MSDU
+#### BD-26: a zero-limit TXOP loses the rest of a fragment burst
 
 - **Place:** [HcfFs.cc](../../src/inet/linklayer/ieee80211/mac/framesequence/HcfFs.cc) `hasMoreTxOps()`, and
   [Hcf.cc](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) `transmitFrame()` and
@@ -680,9 +680,33 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   each later step at `txop->getLimit() == 0`. IEEE Std 802.11-2024 10.23.2.9 a) 1) permits "One or more SU PPDUs
   carrying fragments of a single MSDU or MMPDU" in such a TXOP, with the required acknowledgments. So each fragment of
   one MSDU needs a new channel access. Found in the code; not run.
-- **Baselines:** none known. A repair moves the HCF runs with fragmentation (`showcases/wireless/fragmentation`).
-- **Repair:** at a limit of 0, admit the next fragment of the same MSDU in the TXOP.
-- **Check:** in AC_BE with the default limit, the fragments of one MSDU follow each other at SIFS.
+- **Baselines:** release run 0 of `showcases/wireless/blockack / Fragmentation` changes the three
+  default fingerprint values and its scalar comparison. That workload uses AC_BE. The HCF
+  fragmentation showcase uses port 4000 mapped to AC_VI and its run-0 baselines match.
+- **Preparation BD-26-IDENTITY**, “ieee80211: add: identify and forecast a fragment continuation”.
+  Add the shared fragment match, accepted-ACK query and HCF airtime forecast before enabling continuation. The
+  [identity unit test](../../tests/unit/Ieee80211FragmentContinuation_1.test) checks the immediate successor
+  and rejects different receiver, TID, sequence, allocation, skipped fragment, finished MSDU and A-MSDU cases.
+  The preparation leaves transmission behavior unchanged.
+- **Commit BD-26**, “ieee80211: fix: continue fragment bursts in zero-limit TXOPs”. Use the accepted
+  ACK and preceding transmit step to match the eligible in-progress successor in HCF selection and
+  submission. Compare the receiver, type, sequence number, fragment number, and, for DATA, TID and local
+  sequence allocation. A single-protection fragment advertises the next exchange. Multiple protection
+  budgets the eligible fragment burst when it establishes its reservation. HCF rechecks TXNAV at submission.
+- **Protocol tests:** Add [N_TxopFragments.test](../../tests/protocol/wifi/11n/N_TxopFragments.test)
+  and [N_TxopFragmentRetry.test](../../tests/protocol/wifi/11n/N_TxopFragmentRetry.test), adapting the
+  fixtures from `98cc0c7f99`. After infrastructure association, a sender queues two AC_BE MSDUs.
+  Check SIFS between the ACK and the next fragment, Duration/ID through the final ACK, and fresh
+  contention for the second MSDU. In the loss fixture, suppress one addressed ACK and check that the
+  same fragment retries in a fresh grant, then the next fragment follows the successful retry at SIFS.
+  The parent splits the fragments across grants. The tests cover Normal Ack at zero TXOP limit and
+  exercise protection modes with fixed rates. The multiple-protection cases also use a 1 µs
+  propagation delay to check ACK coverage with a 2 µs round-trip allowance and fresh contention
+  when the allowance is zero.
+- **Reviewer document:** [zero-txop-fragment-continuation.md](../../tests/protocol/wifi/zero-txop-fragment-continuation.md).
+  Run `opp_run_protocol_tests --load . -p inet -m <mode> --no-build
+  -w '^tests/protocol/wifi$' -f 'N_TxopFragment(s|Retry)\.test$'` on the release parent build
+  and the debug and release builds of the repair.
 
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 
