@@ -1,0 +1,3 @@
+The override timeout of the TCP sender SWS avoidance is at most 1 s
+
+When the sender silly-window-syndrome avoidance holds data, because the window of the peer is open but smaller than a segment and nothing is in flight, the override timeout sends the data (RFC 9293 section 3.8.6.2.1, rule (4)). Tcp started this timeout with the RTO, which is at least 1 s and grows with the backoff. It now holds the RTO in the range 0.1 s to 1.0 s, as the RFC says. The new parameter swsOverrideAfterRto selects one RTO, as Linux, which sends such data from its probe timer; LinuxTcp sets it. Simulations with Tcp in which a sender holds data while its RTO is not in the range 0.1 s to 1.0 s change.

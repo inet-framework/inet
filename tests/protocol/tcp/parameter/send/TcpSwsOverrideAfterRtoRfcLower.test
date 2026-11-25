@@ -1,0 +1,71 @@
+%description:
+
+Tcp.swsOverrideAfterRto:rfc-lower -- with an RTO below 0.1 s, the override timeout of the sender SWS avoidance is 0.1 s.
+
+The claim (Tcp.ned): "false: the RTO held in the range 0.1 s to 1.0 s of the RFC, at most maxPersistTimeout". RFC
+9293 section 3.8.6.2.1: "The override timeout should be in the range 0.1 - 1.0 seconds."
+
+The classes: rfc-upper and rfc-lower (false): the RTO held in the range 0.1 s to 1.0 s; linux (true; the value of
+LinuxTcp): one RTO. The code: TcpAlgorithmBase::startPersistTimer() and processPersistTimer(). This test separates
+"rfc-lower" from "linux".
+
+Host under test: host1, with an MSS of 1000 bytes and a minimum RTO of 10 ms, sends 5000 bytes. The round trip of the
+network is below 1 ms, so the RTO of host1 is 10 ms. The TS option takes 12 bytes of each segment, so a full segment
+holds 988 bytes. Peer: host2, with an advertised window of 3464 bytes, reads nothing. After three segments, 2964
+bytes, the window of host2 is 500 bytes, and host1 holds the rest. Observation: level 1, host1 sends no data for 90 ms
+after the hold, and sends the held data 0.1 s after the hold, not one RTO after it.
+
+%# parameter: Tcp.swsOverrideAfterRto
+%# class: rfc-lower
+%# value: false
+%# key: *.host1.tcp.swsOverrideAfterRto
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSwsOverrideAfterRtoRfcLower")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 500")
+             .describe("the ACK of host2 that leaves a window of 500 bytes: host1 holds its data")
+             .within(1.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+              .describe("held data before 0.1 s after the hold")
+              .within(0.09))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the held data, 0.1 s after the hold")
+             .within(0.02));
+}
+
+%activity:
+EV << "TcpSwsOverrideAfterRtoRfcLower compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.swsOverrideAfterRto = false    # the parameter under test
+**.tcp.mss = 1000
+*.host1.tcp.minRexmitTimeout = 10ms
+*.host2.tcp.advertisedWindow = 3464
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSwsOverrideAfterRtoRfcLower: PASS

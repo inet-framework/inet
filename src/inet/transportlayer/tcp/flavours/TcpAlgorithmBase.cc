@@ -757,7 +757,13 @@ void TcpAlgorithmBase::startPersistTimer()
     state->persistOverride = state->snd_wnd > 0 && state->snd_una == state->snd_max;
     // the first probe after one RTO (SHLD-29), at most maxPersistTimeout, as the later
     // ones (Linux caps the first interval too)
-    state->persist_timeout = std::min(state->rexmit_timeout, maxPersistTimeout);
+    simtime_t timeout = state->rexmit_timeout;
+    // RFC 9293 section 3.8.6.2.1: "The override timeout should be in the range 0.1 -
+    // 1.0 seconds." Linux sends the held data from its probe timer, after one RTO
+    // (swsOverrideAfterRto).
+    if (state->persistOverride && !swsOverrideAfterRto)
+        timeout = std::min(std::max(timeout, SimTime(100, SIMTIME_MS)), SimTime(1, SIMTIME_S));
+    state->persist_timeout = std::min(timeout, maxPersistTimeout);
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 }
 
