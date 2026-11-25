@@ -155,6 +155,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool isInitialDataException(const FrameSequenceContext *context, const PreparedDataTransmission& prepared) const;
     simtime_t forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);
+    std::pair<simtime_t, simtime_t> estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
+            OriginatorBlockAckAgreement *agreement);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,

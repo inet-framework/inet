@@ -753,6 +753,44 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   When successor selection extracts several fragments, register the full batch and ask the queue
   which eligible fragment comes next. In `Ieee80211BlockAckScheduling_1`, a queue that prefers
   fragment 1 must return it both immediately after extraction and at live transmission selection.
+- **Commit BD-26-BASIC-RETRY-SUCCESSOR**, “ieee80211: fix: reserve the next live Basic Block Ack retry”.
+  This uses BD-26-BASIC-RETRY-LOOKUP and extends BD-26-BASIC-SUCCESSOR-EXPIRY. A missed Basic Block Ack leaves retries from two
+  MSDUs in progress. During the first retry PPDU, the first MSDU's sibling expires, while a later
+  retry stays live. The parent clears the reservation and the later retry contends again.
+  Have HCF and [InProgressFrames](../../src/inet/linklayer/ieee80211/mac/queue/InProgressFrames.cc)
+  forecast the first in-progress successor eligible at DATA completion. Reserve airtime only
+  if that candidate still has lifetime at its earliest start after SIFS and the full exchange
+  fits the TXOP. Include RTS/CTS and the immediate response when required. Check the complete
+  exchange against the encoded single-protection field and the strict TXNAV admission rule.
+  The Basic series in the SNIR chart moves. In its 0.07 mW run, a fitting replacement starts
+  at SIFS in the original grant, 600 µs before the previous run starts that retry.
+  Add [WifiBasicBarRetrySuccessor.test](../../tests/protocol/wifi/common/WifiBasicBarRetrySuccessor.test).
+  Establish a real Basic Block Ack agreement and lose a reply covering two MSDUs. With no BAR due
+  after the expiring retry, assert that the first retry advertises airtime for a live later
+  sequence and that this sequence follows after SIFS in the original retry's grant.
+  Repeat with a custom voice queue that prefers the second MSDU's shorter fragment 1.
+  Require the opening Duration/ID to equal SIFS plus the airtime of the actual selected retry.
+  Repeat with a 300 µs grant and a 2,710 µs lifetime. The live replacement needs
+  160 µs including SIFS, while only 150 µs remain. Check zero Duration/ID at the sibling drop.
+  The previous activation without the deadline check advertised 160 µs in this case.
+  Retain the expired-sibling and live-sibling controls from BD-26-BASIC-SUCCESSOR-EXPIRY.
+  Record the cases in [basic-bar-reservation.md](../../tests/protocol/wifi/basic-bar-reservation.md).
+  Use seed 0 with `opp_run_protocol_tests --load . -p inet -m <mode> --no-build
+  -w '^tests/protocol/wifi$' -f '(WifiBasicBarRetrySuccessor|WifiBasicBarReservation)\.test$'`
+  on the release parent and on the repair in debug and release. The test observes originator
+  selection, reservation and retry timing.
+  In the same commit, extend [WifiBasicBarRetrySuccessor.test](../../tests/protocol/wifi/common/WifiBasicBarRetrySuccessor.test)
+  to check response airtime. Use the opening retry's PHY mode for SIFS.
+  In a 350 µs grant, have a fixture ACK policy choose Normal Ack for the identified replacement
+  after the lost Block Ack. Check that DATA and the two SIFS intervals fit, that the configured
+  immediate ACK pushes the exchange over the deadline, and that Duration/ID is zero.
+  In a 4 ms grant, have a fixture RTS policy protect the identified replacement. Check that
+  the complete exchange fits the TXOP and that the advertised reservation stays zero because
+  single protection cannot encode enough airtime to satisfy strict TXNAV admission. Check the
+  estimator's RTS, SIFS, CTS and DATA cost using 6 Mbps RTS and a 12 Mbps CTS override so the TXNAV
+  refusal does not mask a missing airtime component or an ignored CTS override. Run the existing
+  focused selector in debug and release. These are test cases for the existing estimator and do
+  not change production behavior.
 
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 

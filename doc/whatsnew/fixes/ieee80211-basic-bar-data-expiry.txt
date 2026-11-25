@@ -1,3 +1,3 @@
 Basic Block Ack reservation and DATA lifetime
 
-The Wi-Fi QoS MAC now accounts for DATA lifetime at the projected end of transmission when reserving time for a Basic Block Ack request. Before reserving airtime for a successor, it also checks whether that successor will still be live when it could start. This prevents reservations for feedback and sibling fragments that the sender will skip.
+The Wi-Fi QoS MAC now accounts for DATA lifetime at the projected end of transmission when reserving time for a Basic Block Ack request. Before reserving airtime for a successor, it looks past frames that have already expired by DATA completion and checks whether the selected successor will still be live when it could start. A replacement retry can use the existing grant when its complete exchange fits the available airtime.
