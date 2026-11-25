@@ -137,6 +137,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 2. Add the pin trailer to the cause commit. Do not change `inet.opp`.
 3. If a baseline commit changes later (a new record or new values), its hash changes. `baseline_pins.py retrail` writes the new hashes into the trailers of the series, in the order of the steps.
 4. After another pull request lands, do nothing, unless `Baseline merge` is red. If it is red, record the common files again on the new head of baseline `master`, then run `retrail`.
+5. If your series is from before part 2 and moves a `ref`, run `baseline_pins.py convert`. It removes the `ref` changes from `inet.opp`, adds the pin trailers to the cause commits, and rebases the series onto `master`.
 
 ## Changes for each repository
 
@@ -158,7 +159,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | INET, part 2 | `inet.opp:17-47` | The `trailer` keys, no `ref`, and a new comment. |
 | INET, part 2 | `doc/project/rule/testing.md:196, 210, 214-228, 230-254` | `TR-BASELINE-PIN`: the pin trailer, the landing job, the overlap instead of the conflict in `inet.opp`. `TR-BASELINE-PROVENANCE`: `INET-Subject:` is the subject of the cause commit. `TR-BASELINE-COMMIT`. `TR-BASELINE-PARENT` and `TR-BASELINE-ATTRIBUTION`: "the old pins" becomes "the baseline of the parent". |
 | INET, part 2 | `doc/project/rule/pull-request.md:191, 447, 561`, `doc/project/rule/classification.md:201-246` | "A pin that moves over results" becomes "a pin trailer whose step changes results". |
-| INET, part 2 | `doc/project/guide/change-a-baseline.md:106-228`, `run-the-gates.md:35, 49-50`, `review-a-pull-request.md:120`, `contribute-a-change.md:45` | The procedure of section 6, the landing job, the repair of section 3. |
+| INET, part 2 | `doc/project/guide/change-a-baseline.md:106-228`, `run-the-gates.md:35, 49-50`, `review-a-pull-request.md:120`, `contribute-a-change.md:45` | The procedure of section 6 with `convert`, the landing job, the repair of section 3. |
 | INET, part 2 | `doc/project/enforcement/README.md:56-58, 89-96`, `.github/pull_request_template.md:16` | The rows and the commands. |
 | statistics, media | `README.md` | The rebase by the landing job, the mark, and the close of the pull requests. |
 | outside | `~/workspace/ghci-standards-fixes/tools/check_series.py` (F13) | Use `opp_checkout_test_baselines` instead of the regular expression, when the tool is used again. |
@@ -173,7 +174,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | P4 | End-to-end test on local bare copies of INET, statistics and media. Two series with no overlap land one after the other, and the landing job makes their marks. A series with an overlap gets a red status, and the landing job stops for it. A bisect over the switch finds the baseline of each commit. Then a run of the landing job against the real repositories with no `--push`. | — |
 | P5 | Land part 1. Check the first run of the landing job on `master`: it sees the `ref` and does the fast-forward as today. | the push |
 | P6 | INET part 2: the switch commit, the rules, the guides, `enforcement/README.md`, the template. Run `check-seals.sh` (`SR-RULE-CHANGE-STALES`). The token of T10 exists before the landing. Land part 2. | the push |
-| P7 | The 5 open pull requests that move a pin (F6): `baseline_pins.py convert` (decision T8). | each push to a pull request |
+| P7 | Try `baseline_pins.py convert` on local copies of the 5 open pull requests that move a pin (F6), with no push. Repair `convert` if it fails. The owners convert their pull requests (decision T8). | — |
 | P8 | The required check `Baseline merge` (Rudolf Hornig). Record the results in this plan, and move it to `plan/done/`. | the required check |
 
 ## Progress
@@ -184,7 +185,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 - [ ] P4 end-to-end test
 - [ ] P5 land part 1
 - [ ] P6 INET part 2 and its landing
-- [ ] P7 open pull requests
+- [ ] P7 `convert` tried on the open pull requests
 - [ ] P8 required check, record, plan to done
 
 ## Decisions
@@ -198,7 +199,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | T5 | The order of the jobs on `master` | The statistical and chart tests start with a `workflow_run` of the landing job. Rejected: a test that waits until the mark is there. | proposal |
 | T6 | The form in `inet.opp` | The key `trailer`, a general feature of opp_repl. `ref` stays valid for old commits and for other projects. | proposal |
 | T7 | The names | Trailers `Statistical-Baseline:` and `Chart-Baseline:`, mark `Baseline-Of:`. `INET-Commit:` keeps its meaning (F11). The rule ID `TR-BASELINE-PIN` and the names of the scripts stay; their texts change. | proposal |
-| T8 | The 5 open pull requests that move a pin (F6) | The user converts the upstream branches (#1484, #1474, #1463) with `convert`. For the forks (#1488, #1459): the author, or a push by a maintainer when the pull request lets maintainers edit it. No comment on pull requests of other authors (D8 of the earlier plan). | open |
+| T8 | The 5 open pull requests that move a pin (F6) | The owner of each pull request converts it with `baseline_pins.py convert` (item 5 of section 6). This plan does not push to these pull requests and does not comment on them (D8 of the earlier plan). After part 2, such a pull request has a conflict with the switch commit in `inet.opp`, and the gate rejects its `ref`. Thus the owner sees the need to convert. | settled, user 2026-11-25 |
 | T9 | A failed landing job | A maintainer repairs it by hand, as in step 3 of section 3. | proposal |
 | T10 | The close of the baseline pull requests | A GitHub App or a token with write access to `statistics` and `media`, as a secret of the environment `baseline-masters`. A deploy key gives git access only, not the API. Rudolf Hornig sets it up. Alternative: no token; the job prints the numbers of the pull requests, and a maintainer closes them. | open |
 | T11 | The gap between a landing and the new statuses (Limits) | No merge queue now. GitHub's merge queue lands one pull request at a time and runs the check just before each landing. Add it only if the gap causes a real problem. | proposal |
