@@ -559,8 +559,91 @@ debug mode, `Rfc9293SwsOverridePeerData` fails at the held data and the other tw
 40 protocol tests of the send parameters, of `TcpWindow*` of the receive parameters, of the RFC 9293 tests of the
 window and of Nagle give 34 PASS and 6 that can not run here: the Nagle tests of `linux/` and `packetdrill/` need
 `inet_run_packetdrill` on the `PATH`, which the runner of the editor does not set, and then `inet-gpl`, which this
-machine does not have, so they skip. C6 is the commit `68148012eb`. Its re-records, the reviewer document and the
-whatsnew entry come into the same commit by a fixup after the runs of the gate (§6.1, step 6).
+machine does not have, so they skip. C6 was committed then; its reviewer document and its whatsnew entry came into
+it by fixups after the runs of the gate (§6.1, step 6), and the series below gives its final hash.
+
+**C7 and C8 (2026-11-25).** The parameter is `swsOverrideAfterRto`, the name of gate A: `default(false)` in
+`Tcp.ned` under the Linux behaviors of "sending data", with an item in the header text, and `default(true)` in
+`LinuxTcp.ned` (D7). `LegacyTcp` sets no value, because it sets only the old values of parameters that existed
+before. `TcpAlgorithm::initializeAlgorithm()` reads it. Facts and decisions of the implementation:
+
+- The catalog check (`tests/protocol/tcp/parameter/check_catalog.py`) stops a default of a preset that no row names,
+  so C7 needs a row and a parameter test of the class of `LinuxTcp`. C7 adds the class `linux`
+  (`TcpSwsOverrideAfterRtoLinux.test`, an RTO of 2 s: the data leaves after 2 s), which passes before and after C8.
+  C8 adds the classes `rfc-upper` (an RTO of 2 s: the data leaves after 1.0 s) and `rfc-lower` (an RTO of 10 ms: the
+  data leaves after 0.1 s). These two parameter tests are the fourth case of the protocol test of C8 above; with the
+  code of C7 both fail, with C8 both pass. The catalog has 117 parameters and 342 rows.
+- In C7 the value `false` still gives the RTO, so the NED comment of C7 describes the behavior that C8 gives it. The
+  message of C7 says so.
+- C8 changes only `startPersistTimer()`: in the override role and with `false`, the interval is the RTO held in
+  0.1 s to 1.0 s, and then at most `maxPersistTimeout`. The interval of a zero-window probe does not change. With
+  the defaults of `~Tcp` the RTO is at least 1 s, so the override is 1.0 s; a result moves only where data is held
+  while the RTO is above 1 s.
+- Each commit carries its own whatsnew entry, as [doc/whatsnew/README.md](../../doc/whatsnew/README.md) asks
+  (TR-SHIP-WITH): C6 `fixes/tcp-sws-override-peer-segments.txt`, C8
+  `incompatible/tcp-sws-override-interval.txt`, which also names the parameter of C7.
+- Debug mode, with C8: the 11 protocol tests of the override, of the parameter, of `TcpMaxPersistTimeout*` and of
+  `TcpZeroWindowProbe*` pass, and the 11 module tests `tcp_sws_*`, `tcp_persist_*`, `tcp_window_update_read_1` and
+  `tcp_wnd_update_data_1` pass.
+- A start of a test verb of the editor, such as `run_protocol_tests!`, opens the page of its group in a tab, although
+  the assistant guide says that a start opens no tab: `evaluate_operation(editor, ::StartLegacyTasksOperation)` of
+  omnet-julia opens it for a press of Run, and the verbs use the same operation. The assistant closes such a tab after
+  each start (the maintainer, 2026-11-25: "it's enough if the runs appear in the plan specific explorer").
+- The first run of all fingerprints at C8 gave 1836 PASS and no FAIL, but it did not check the repair: the step
+  "building inet" of `run_fingerprint_tests!` reported DONE and built nothing in release mode, so the runs used
+  `src/libINET.so` of 2026-11-24 17:26, and `out/clang-release` did not exist. A gate therefore builds the release mode
+  first with `build_simulation_project!(project; mode = "release")`, checks that `src/libINET.so` holds the change, and
+  starts the fingerprints with `build = false`.
+
+**The review of R2 against the RFC (2026-11-25, D9).** The `simulation-domain-expert` agent read C6 to C8. Its
+findings:
+
+- Defect, repaired: when the window closes while the override timer runs, the timer kept what was left of the
+  override, so the first probe came early, against SHLD-29 ("send the first zero-window probe when a zero window has
+  existed for the retransmission timeout period"); with C8 the clamped interval also became the base of the probe
+  backoff. C6 now adds `restartOverrideTimerAsProbe()` too: at a zero window, an override timer
+  starts again in the probe role. The new protocol test `Rfc9293SwsOverrideZeroWindow.test` shrinks the window of host2
+  to 0 at 0.5 s with a tap; before the fix the first probe came at 1.2 s, with it at 2.5 s, one RTO later. With the fix,
+  the 14 protocol tests of the override, of the parameter, of `TcpMaxPersistTimeout*`, of `TcpZeroWindowProbe*` and of
+  `Rfc9293ShrunkWindow*` and the 11 module tests pass in debug mode.
+- Correct: the start, the keep and the stop of the override timer; the reading of "0.1 - 1.0 seconds"; the interval of
+  `~LinuxTcp`; no interaction with Nagle, the delayed ACK or the loss recovery.
+- Limit, recorded in the reviewer document: by the memory of the reviewer, Linux restarts its probe timer at a pure ACK
+  that leaves the head of the queue outside the window (`tcp_ack_probe()`), but not at the in-order data segment of
+  BD-21; `~LinuxTcp` never restarts it.
+- Two older faults, not part of R2, for the maintainer to decide: (1) data that TCP_CORK holds below one segment, with
+  a window below it, waits as long as the cork stays set, because the expiry of the override does not bypass the hold
+  of the cork, and the cork timer starts again; Linux `tcp_write_wakeup()` ignores the cork. (2) A retransmission
+  timer that runs with nothing in flight (the ECN case of `processRexmitTimer()`) blocks the start of the override
+  timer, so held data can wait one RTO more.
+
+**The author of the commits (2026-11-25).** The maintainer: "please use levy@omnetpp.org author for all inet-cpp git
+commits now and also in the future. I don't want the projectured user to be used there". Each INET repository of the
+workspace, with its `statistics` and `media` clones, has the local `user.name` "Levente Meszaros" and `user.email`
+`levy@omnetpp.org`, the form of the commits of levy on master. The ten unpushed commits of the topic branch were
+made again with `git commit-tree`, with the same trees, messages and dates, so the worktree did not change during the
+fingerprint run.
+
+**The results of R2 (2026-11-25).** No recorded result moves, so R2 re-records nothing.
+
+- The release library holds C6 to C8 (`build_simulation_project!` in release mode, then a check of `src/libINET.so`).
+  All 1847 stored fingerprint runs in release mode in the editor, with all features but OSG: 1836 PASS, the 1 ERROR
+  that a marker declares, and the 10 runs of `showcases/visualizer/osg` that a build without OSG can not start.
+- All statistical tests in the image of the CI (`tools/prun.sh` of the job copy, at the head of the series, against
+  the pins of master `statistics` `76d45e4e68` and `media` `2ab7ae005b`, which the job copy fetched for this run):
+  945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected; the logs are `evidence/runs/28413967e9/` of the job copy.
+- The entry BD-21 found the fault in `examples/inet/bulktransfer` `inet_inet_2b` at step 30 of the catch-up, with
+  3223 starts of the persist timer. A debug run of that configuration at the head of the series starts the persist
+  timer 0 times: master no longer holds data there, and the series touches no condition of a hold. The "Expected
+  baselines" of the preparation above were therefore wrong; the protocol tests are the only check of the case.
+- The fixups are squashed. The series of R2 is C6 `0cb5166482`, the plan commit `5627d82b0b`, C7 `7e0fd12257` and C8
+  `31c275f882`. The trailers of C6 and C8 name the obligations `test whatsnew`, and their messages say that no
+  stored fingerprint changes. The reviewer document is `tests/protocol/tcp/sws-override-timer.md`.
+- The gates of "Before every push", with the base `master` `08e3648c36`: `check-architecture.sh
+  src/inet/transportlayer/tcp`, `check-pull-request.sh`, `check-source-seals.sh` and `check-baseline-attribution.sh
+  plan` ("No commit of the series moves a pin over a result or a fingerprint value") pass. `check-naming.sh` reports 24
+  violations and `check-interfaces.sh` 16 classes; a worktree of `master` gives the same 24 and 16, all of the whole
+  repository, so R2 adds none. `whatsnew.py check` and `check_catalog.py` pass, and no link of the new files is broken.
 
 ## 7. Verification
 
