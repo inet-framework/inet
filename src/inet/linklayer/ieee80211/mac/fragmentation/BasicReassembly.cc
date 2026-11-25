@@ -33,11 +33,16 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         return packet;
     // find entry for this frame
     Key key;
-    key.macAddress = header->getTransmitterAddress();
+    key.transmitterAddress = header->getTransmitterAddress();
     key.tid = -1;
-    if (header->getType() == ST_DATA_WITH_QOS)
-        if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+    if (header->getType() == ST_DATA_WITH_QOS) {
+        if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             key.tid = qosDataHeader->getTid();
+            // The shared QoS sequence allocator can reuse a sequence number across group addresses.
+            if (header->getReceiverAddress().isMulticast())
+                key.groupAddress = header->getReceiverAddress();
+        }
+    }
     key.seqNum = header->getSequenceNumber().get();
     short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
@@ -76,11 +81,13 @@ Packet *BasicReassembly::addFragment(Packet *packet)
 void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
     Key key;
-    key.macAddress = address;
+    key.transmitterAddress = address;
     key.tid = tid;
     key.seqNum = startSeqNumber;
     auto itStart = fragmentsMap.lower_bound(key);
     key.seqNum = endSeqNumber;
+    // Include every group address at the upper sequence bound.
+    key.groupAddress = MacAddress::BROADCAST_ADDRESS;
     auto itEnd = fragmentsMap.upper_bound(key);
 
     if (endSeqNumber < startSeqNumber) {
