@@ -660,6 +660,13 @@ The repair commits of BD-21 and BD-23 are in the defect list. The gate B of R1 l
 BD-13 and BD-16 (`519e772c16`); it is in the list now too. Next: the debug fingerprints of the landing in the image
 of the CI, then the landing.
 
+**The debug fingerprints of the landing (2026-11-25).** Master had moved to `b029add207` with 30 commits of other
+work. None of them changes `src/inet/transportlayer/tcp`, but they re-record 36 values of
+`tests/fingerprint/store.json`. So the check ran on the series rebased onto that master, as a detached head
+`53ea79b3fd` of the job copy of the CI, with no conflict; the topic branch did not change. In debug mode with all
+features: 1847 runs, 1846 PASS and 1 ERROR that a marker declares as expected, in 7 min 10 s (`runs/r2-landing/` of
+the folder of D10). R2 is ready to land.
+
 #### R3: no priority tag on an untagged port (BD-44), prepared 2026-11-25
 
 **Re-check.** Master `b029add207` (2026-11-25) changes no file of `src/inet/linklayer/vlan`, of the 802.1Q layer, of
