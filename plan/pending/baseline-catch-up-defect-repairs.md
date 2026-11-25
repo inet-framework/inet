@@ -278,8 +278,8 @@ No sealed file changes. No consumer outside INET changes.
   places pass. Until the revision of 2026-11-24, R1 also held BD-6 and BD-9; they are R20 and R21 now.
   - `tcp: comment: each comment is above its function, and no comment describes a removed function` (BD-5, BD-13,
     BD-16).
-- [x] **Step 2. R2: the override timer (BD-21, BD-23).** Repaired; gate B approved on 2026-11-25 (§6.3, R2). It lands
-  after the debug fingerprints in the image of the CI. Gate A decides the override interval: a separate interval in
+- [x] **Step 2. R2: the override timer (BD-21, BD-23).** Landed on master on 2026-11-25 as `54234c9502`,
+  `8411e13607` and `4f05735a09` (§6.3, R2). Gate A decides the override interval: a separate interval in
   the range 0.1 s to 1.0 s of RFC 9293 section 3.8.6.2.1, or the RTO with a documented reason. Test: a sender holds a
   small segment, and the peer sends data at intervals shorter than the RTO with no change of the window; the held
   segment leaves when the override timer expires. Baselines: `examples/inet/bulktransfer` `inet_inet_2b`.
@@ -666,6 +666,16 @@ work. None of them changes `src/inet/transportlayer/tcp`, but they re-record 36 
 `53ea79b3fd` of the job copy of the CI, with no conflict; the topic branch did not change. In debug mode with all
 features: 1847 runs, 1846 PASS and 1 ERROR that a marker declares as expected, in 7 min 10 s (`runs/r2-landing/` of
 the folder of D10). R2 is ready to land.
+
+**Landing (2026-11-25).** The maintainer said: "land R2, master moved". Master had moved to `d88ae6c573` with 4
+commits of IEEE 802.11 work (BD-27 and BD-43), none in `src/inet/transportlayer/tcp`. They re-record 42 values of
+`tests/fingerprint/store.json`, move the pins of `statistics` and `media`, and change §3 and BD-27 of
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md). The branch was rebased onto it with no conflict: C6 is
+`54234c9502`, C7 `8411e13607` and C8 `4f05735a09`. `check-pull-request.sh --base origin/master` (0 violations) and
+`check-baseline-attribution.sh plan` pass on the rebased series. The debug fingerprints ran again on its head in the
+image of the CI, because the new values of IEEE 802.11 can reach TCP: 1847 runs, 1846 PASS and 1 expected ERROR, in
+11 min 48 s (`runs/r2-landing-2/` of the folder of D10). Master moves to the head of the branch by a fast-forward. The
+plan commits of R3 to R5 land with it; their tests are not committed yet.
 
 #### R3: no priority tag on an untagged port (BD-44), prepared 2026-11-25
 

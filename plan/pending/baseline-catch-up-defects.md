@@ -502,7 +502,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-21: held data waits for ever, because the override timer does not expire while segments arrive
 
-- **State (2026-11-25):** repaired by `0cb5166482` on the branch `topic/baseline-catch-up-defect-repairs` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests and the reviewer document `tests/protocol/tcp/sws-override-timer.md`. The maintainer approved the result on 2026-11-25. No stored fingerprint or statistic moves.
+- **State (2026-11-25):** repaired by `54234c9502` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-25, with the protocol tests and the reviewer document `tests/protocol/tcp/sws-override-timer.md`. No stored fingerprint or statistic moves.
 - **Place:** `processWindowUpdate()` (from `40b842fc88`) and the persist timer. Shown by `6148d90738` (step 30).
 - **Fault:** RFC 9293 section 3.8.6.2.1, rule (4), gives the sender SWS avoidance an override timeout. The persist
   timer is the override timer while the window is open. But `processWindowUpdate()` treats each segment with
@@ -518,7 +518,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-23: the override timeout is one RTO, so at least 1 s
 
-- **State (2026-11-25):** repaired by `7e0fd12257` and `31c275f882` on the branch `topic/baseline-catch-up-defect-repairs` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)): the override timeout of `~Tcp` is the RTO held in 0.1 s to 1.0 s, and the parameter `swsOverrideAfterRto` keeps the RTO in `~LinuxTcp`. The maintainer approved the result on 2026-11-25. No stored fingerprint or statistic moves.
+- **State (2026-11-25):** repaired by `8411e13607` and `4f05735a09` (change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-25: the override timeout of `~Tcp` is the RTO held in 0.1 s to 1.0 s, and the parameter `swsOverrideAfterRto` keeps the RTO in `~LinuxTcp`. No stored fingerprint or statistic moves.
 - **State (2026-11-24):** open on master `d8a58564ee`. The first interval is at least `minRexmitTimeout`: 1 s in `~Tcp` and 200 ms in `~LinuxTcp`. Change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it with BD-21.
 - **Place:** `startPersistTimer()`. From `6148d90738` (step 30).
 - **Fault:** RFC 9293 section 3.8.6.2.1: "The override timeout should be in the range 0.1 - 1.0 seconds." The persist
