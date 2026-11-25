@@ -784,6 +784,102 @@ checked (BD-46). The assistant has no alternative to propose; gate A approves th
 **Checks.** The three `ObstacleLoss_Dielectric*` unit tests in debug mode; all fingerprints in release mode in the
 editor, which must not move.
 
+#### R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39), prepared 2026-11-25
+
+**Re-check.** Master `b029add207` changes no TCP file after `08e3648c36`. `TcpTahoe::resetToSlowStart()`
+(`TcpTahoe.cc`), which the third duplicate ACK and the timeout call, still sets ssthresh to max(cwnd / 2, 2*SMSS).
+`TcpTahoe::receivedDuplicateAck()` and `TcpWestwood::receivedDuplicateAck()` still test `dupacks == dupthresh` and
+nothing else. Tahoe goes back to slow start from `snd_una` at its fast retransmit and at a timeout; Westwood
+retransmits one segment and inflates cwnd at its fast retransmit, as Reno does, and goes back only at a timeout.
+`recover` is a field of `TcpAlgorithmBaseState.msg` (`:71`), so both flavours have it already; only
+`Rfc6582Recovery` and `TcpNewReno::ackProcessed()` use it, and `Rfc6582Recovery` starts it at ISS - 1
+(`Rfc6582Recovery.cc:33`). The `recoveryPoint` of `TcpAlgorithmBase` at a timeout belongs to the SACK recovery.
+
+**The faults, shown.** Three new protocol tests in `tests/protocol/tcp/rfc`, in debug mode on the branch:
+
+- `Rfc5681TahoeThresholdFlightSize.test` (BD-8): host B offers 8 segments (11584 bytes), so cwnd grows beyond the
+  window; the relay removes the 40th data segment. At the third duplicate ACK, cwnd is 33580 and FlightSize 10136:
+  TcpTahoe sets ssthresh 16790, where equation (4) of RFC 5681 gives 5068. The test fails at that step.
+- `Rfc6582TahoeOneFastRetransmitPerWindow.test` (BD-39): the relay removes the 40th, 42nd and 44th data segments.
+  After the first fast retransmit and the go-back, the duplicates of the segments that host B already had start a
+  second fast retransmit at t = 0.2089 s, with the cumulative ACK 117672 equal to the highest octet + 1 that host A had
+  sent at the first; RFC 6582 needs an ACK above it. The guard fails.
+- `Rfc6582WestwoodOneFastRetransmitPerWindow.test` (BD-39): the relay removes six data segments of one window, the
+  retransmission timer expires at 1.208 s, and the go-back starts a fast retransmit at t = 1.2093 s, with the
+  cumulative ACK 95952 below the highest octet + 1 that host A had sent at the timeout, 117672. The guard fails.
+
+Two faults of the first forms of the tests, not of the model: the last data segment carries the FIN (`tClose = -1s`),
+so no ACK covers exactly the last data octet, and the last step reads `tcp.ackNo >=`; and a first form of the
+Westwood test with three losses and a guard from the fast retransmit had no second fast retransmit, because Westwood
+does not go back there.
+
+**Design questions for gate A.**
+
+1. *The threshold of Tahoe (BD-8).* (A) `resetToSlowStart()` takes FlightSize as `~TcpReno` does: at the third
+   duplicate ACK `conn->getFlightSize()`, which leaves out the data of limited transmit, and at a timeout the
+   outstanding data `snd_max - snd_una`, as `calculateSsthreshForRto()` of `TcpClassicAlgorithmBase.h:66` does.
+   RFC 5681 section 3.1 sets equation (4) for both. The assistant recommends (A). No alternative fits the RFC.
+2. *Where Westwood sets recover (BD-39).* Tahoe sets recover at its fast retransmit and at a timeout, because both
+   go back. For Westwood: (a) at a timeout only, the go-back that RFC 6582 section 6 names; its fast retransmit
+   stays the one of Reno, so a second real loss in the window still gets a fast retransmit. (b) Also at its fast
+   retransmit, as `~TcpNewReno` does; then a second loss in the window waits for the timer, because Westwood has no
+   partial ACK of NewReno. The assistant recommends (a): it repairs the cause of BD-39 and changes nothing else of
+   the recovery of Westwood.
+3. *The test of recover.* Both flavours use the test of `Rfc6582Recovery`: a fast retransmit only when
+   `snd_una - 1 > recover`, with `recover = snd_max - 1` when it is set, and `recover` starts at ISS - 1 when the
+   connection is established. The heuristics of RFC 6582 section 4 (the ACK and the timestamp heuristics) stay out,
+   as in `~TcpNewReno`.
+
+**Commits** (with the recommended answers).
+
+- **C12: `tcp: fix: TcpTahoe takes ssthresh from FlightSize, as RFC 5681 equation (4) says`** (BD-8).
+  `TcpTahoe.cc`. The items of [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
+  1. Requirement: RFC 5681 section 3.1, equation (4), and its note against cwnd; section 3.2, step 2. Bug: ssthresh
+     from cwnd. Evidence: the test above; `inet-tahoe` run 0 at t = 0.412 s (BD-8).
+  2. Existing tests: `TcpAlgorithmClassTahoe.test` checks the window of one MSS at a fast retransmit, not the
+     threshold; `Rfc5681FastRetransmit.test` runs `TcpReno`. None exposes the gap.
+  3. New: `tests/protocol/tcp/rfc/Rfc5681TahoeThresholdFlightSize.test`, one case.
+  4. Initial state: TcpTahoe without SACK and without limited transmit, host B with an advertised window of
+     11584 bytes. Stimulus: 300000 bytes, the relay removes the 40th data segment. Production path:
+     `receivedDuplicateAck()`, `resetToSlowStart()`. Observation: the segments, the ACKs and the cwnd signal of host A,
+     and its ssthresh signal after the third duplicate. Assertion: cwnd > FlightSize at the third duplicate, and
+     ssthresh = max(FlightSize / 2, 2*SMSS).
+  5. Before C12: ssthresh 16790, expected 5068. After C12: equal, because the formula takes FlightSize.
+  6. Code action: `resetToSlowStart()` of `TcpTahoe`; ssthresh changes, cwnd is still one SMSS.
+  7. Runner: `run_protocol_tests!(project; file = "Rfc5681Tahoe|Rfc6582|TcpAlgorithmClass", mode = "debug")` in
+     the editor, after a debug build. Limit: the timeout path of the formula has no test of its own.
+  8. Reviewer document: `tests/protocol/tcp/tahoe-threshold-flight-size.md`, in C12, with a whatsnew entry.
+- **C13: `tcp: fix: TcpTahoe and TcpWestwood start one fast retransmit in each window (RFC 6582 section 6)`**
+  (BD-39). `TcpTahoe.cc` and `TcpWestwood.cc`.
+  1. Requirement: RFC 6582 section 6 and the steps "Three duplicate ACKs" and "Retransmit timeouts" of section
+     3.2. Bug: a second fast retransmit from the duplicates of the go-back. Evidence: the two tests above; `inet-tahoe`
+     run 0 does 164 fast retransmits in place of 7 after `07722bc21b` (BD-39).
+  2. Existing tests: none for Tahoe or Westwood; `~TcpNewReno` has the guard and its tests.
+  3. New: `Rfc6582TahoeOneFastRetransmitPerWindow.test` and `Rfc6582WestwoodOneFastRetransmitPerWindow.test`, one
+     case each.
+  4. Initial state: the flavour without SACK. Stimulus: 300000 bytes, the relay removes three (Tahoe) or six
+     (Westwood) data segments of one window, once each. Production path: `receivedDuplicateAck()`, the go-back of
+     `resetToSlowStart()` (Tahoe) or of `processRexmitTimer()` (Westwood). Observation: the ACKs and the segments of
+     host A, and its `numRtos` signal. Assertion: no fast retransmit while the cumulative ACK does not cover more than
+     the highest octet that host A had sent at the last fast retransmit (Tahoe) or timeout (Westwood), and the run ends
+     with the ACK of all data.
+  5. Before C13: both guards fail, at t = 0.2089 s and t = 1.2093 s. After C13: both pass, because the third
+     duplicate below recover starts no fast retransmit.
+  6. Code action: `receivedDuplicateAck()` of both flavours reads `recover`; `resetToSlowStart()` (Tahoe) and
+     `processRexmitTimer()` (Westwood) set it.
+  7. Runner: as for C12. Limit: the timeout path of Tahoe and the fast retransmit of Westwood after a second real
+     loss have no test of their own.
+  8. Reviewer document: `tests/protocol/tcp/one-fast-retransmit-per-window.md`, in C13, with a whatsnew entry.
+
+**Expected baselines.** `examples/inet/tcpclientserver` `inet-tahoe` and `inet-westwood` (C12 moves `inet-tahoe`,
+C13 both), and each fingerprint of a run with TcpTahoe or TcpWestwood. The numbers of `inet-westwood` in BD-39 come
+from before `7beeb0dc88`, so the gate measures them again. Each moved value gets its line of attribution, and the
+re-record runs in the image of the CI.
+
+**Checks.** The three new protocol tests, `Rfc5681FastRetransmit`, `Rfc5681TimeoutResponse` and the
+`TcpAlgorithmClass*` tests in debug mode; all fingerprints in release mode in the editor; the statistical tests of
+`examples/inet/tcpclientserver` in the image of the CI.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
