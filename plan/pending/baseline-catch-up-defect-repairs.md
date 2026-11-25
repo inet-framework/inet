@@ -785,6 +785,25 @@ tests; the pings of `showcases/ethernet/sharedcore` `FiltersAndMappers` get answ
 `forwardPcp = true` before); all fingerprints in release mode (§6.1, step 8); the statistical tests of the moved
 folders in the image of the CI.
 
+**The examples before and after (2026-11-25).** The maintainer asked for a complete example, a flow figure and a
+diff. The change of design B and the removal of the four settings are in the working tree, not committed; the diff is
+the preview commit `3ac195fce8` on the ref `preview/r3`, which does not land. Debug runs of
+`showcases/ethernet/sharedcore` `FiltersAndMappers` and of five configurations of `examples/ethernet/vlan`
+(`runs/r3-run.sh` and `runs/r3/` of the folder of D10):
+
+- Today, with `forwardPcp = true` for every bridge: the showcase answers 0 of 80 pings, and the inbound filters of
+  `sp1w`, `sp1e`, `sp2w` and `sp2e` drop 4 frames each. On the wire at `pebW` eth0, 4 frames carry an S-tag of VLAN 0
+  and PCP 0 over the C-tag (`802.1Q-QinQ (0x88a8), vlan 0, p 0`). So the fault hits frames of priority 0 too: the
+  copied PCP request makes the tag by its presence. In the VLAN example, `DoubleTagged` stops with "Unknown protocol
+  ... ieee8021qstag" at host2, `Asymmetric` transfers 0 bytes, and the other three transfer all data.
+- Today, with the workaround: all six runs work.
+- After the change, with the default: all six runs work, and each scalar of the six runs equals the run of today with
+  the workaround. The new protocol test and the other four VLAN protocol tests pass, and so do the 11 module tests
+  that use the changed files (`EthernetUnknownEtherType_1`, `Ieee8021adPolicy_1`, `Ieee8021adPolicy_runtime_1`,
+  `VlanIndMapper_1`, `VlanPolicyLayer_runtime_1`, `VlanPolicyMapsInvalid_1` to `_6`).
+- The documentation page of the showcase explained the workaround and included the removed lines; the change replaces
+  that paragraph.
+
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
 
 **Re-check.** Master `b029add207` changes no file of `src/inet/environment` or of the obstacle loss after
