@@ -67,6 +67,9 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     auto qos = context->getQoSContext();
     bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);
     qos->preparedData.reset();
+    if (!bar && frameSequence->getCount() != 0 && qos->txopProcedure->getLimit() == 0 &&
+        context->isFragmentContinuation(frames->peekFrameToTransmit(), context->getNumSteps()))
+        return true;
     if (!bar && qos->prepareData) {
         auto preparation = qos->prepareData(context);
         if (preparation == DataPreparationResult::READY)

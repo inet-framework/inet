@@ -72,6 +72,10 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
 bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
     auto protectedFrame = context->getDataFrameToTransmit();
+    // IEEE Std 802.11-2024, 10.23.2.9(a)(1) and (c)(1): a zero-limit fragment burst shares one protection exchange.
+    if (context->getQoSContext()->txopProcedure->getLimit() == 0 &&
+        context->isFragmentContinuation(protectedFrame, context->getNumSteps()))
+        return false;
     return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekAtFront<Ieee80211MacHeader>());
 }
 

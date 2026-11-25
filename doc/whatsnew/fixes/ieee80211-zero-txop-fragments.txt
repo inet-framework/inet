@@ -1,0 +1,3 @@
+IEEE 802.11 fragment bursts with a zero TXOP limit
+
+The QoS MAC can now send successive fragments of one unicast packet in a zero-limit TXOP. With Normal Ack, the next fragment follows the acknowledgment after SIFS when the reservation covers the exchange. With multiple protection, the `zeroLimitFragmentRoundTripTime` parameter can account for propagation in the opening reservation. A missed acknowledgment still triggers contention before retransmission.

@@ -34,6 +34,8 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+static constexpr int MAX_DURATION_FIELD_MICROSECONDS = 32767;
+
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
 simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
 simsignal_t Hcf::blockAckAgreementDeletedSignal = cComponent::registerSignal("blockAckAgreementDeleted");
@@ -44,6 +46,9 @@ void Hcf::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        zeroLimitFragmentRoundTripTime = par("zeroLimitFragmentRoundTripTime");
+        if (zeroLimitFragmentRoundTripTime < SIMTIME_ZERO)
+            throw cRuntimeError("zeroLimitFragmentRoundTripTime must be nonnegative");
         const char *configuredVariant = par("blockAckVariant").stringValue();
         if (!strcmp(configuredVariant, "basic"))
             blockAckVariant = BlockAckVariant::BASIC;
@@ -1698,8 +1703,8 @@ simtime_t Hcf::encodeDuration(simtime_t duration, bool holder)
     auto microsecond = SimTime(1, SIMTIME_US).raw();
     auto raw = std::max(SIMTIME_ZERO, duration).raw();
     auto microseconds = raw / microsecond + (raw % microsecond != 0);
-    if (holder && microseconds > 32767)
-        throw cRuntimeError("Protection duration exceeds 32767 microseconds");
+    if (holder && microseconds > MAX_DURATION_FIELD_MICROSECONDS)
+        throw cRuntimeError("Protection duration exceeds %d microseconds", MAX_DURATION_FIELD_MICROSECONDS);
     return SimTime(microseconds, SIMTIME_US);
 }
 
@@ -1745,14 +1750,19 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
         setFrameMode(predicted.get(), protectedHeader, mode);
         auto protectedDuration = mode->getDuration(predicted->getDataLength());
         auto ctsDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
-        return ppduDuration + sifs + ctsDuration + sifs +
+        auto ctsRoundTrip = (protectedHeader->getMoreFragments() || protectedHeader->getFragmentNumber() != 0) &&
+            recipientAckPolicy->isAckNeeded(protectedHeader) ? zeroLimitFragmentRoundTripTime : SIMTIME_ZERO;
+        return ppduDuration + sifs + ctsDuration + ctsRoundTrip + sifs +
             estimateZeroLimitExchange(predicted.get(), protectedHeader, txop, protectedDuration);
     }
     if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         return computeBlockAckExchangeDuration(packet, bar, ppduDuration);
     if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
-        if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
-            return ppduDuration + sifs + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmt, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
+        if (recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
+            auto ackRoundTrip = dataOrMgmt->getMoreFragments() || dataOrMgmt->getFragmentNumber() != 0 ?
+                zeroLimitFragmentRoundTripTime : SIMTIME_ZERO;
+            return ppduDuration + sifs + computeImmediateResponseDuration(packet, dataOrMgmt) + ackRoundTrip;
+        }
         return ppduDuration;
     }
     throw cRuntimeError("Unsupported zero-limit multiple protection frame");
@@ -1928,6 +1938,8 @@ DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context
     auto header = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
     if (!header || header->getType() != ST_DATA_WITH_QOS || header->getReceiverAddress().isMulticast())
         return DataPreparationResult::LEGACY;
+    if (context->getQoSContext()->txopProcedure->getLimit() == 0 && (header->getMoreFragments() || header->getFragmentNumber() != 0))
+        return DataPreparationResult::LEGACY;
     auto agreement = originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid());
     if (!agreement || !agreement->getIsAddbaResponseReceived())
         return DataPreparationResult::LEGACY;
@@ -1998,7 +2010,7 @@ DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context
 simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
         TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime)
 {
-    // The current group sequence cannot continue. A zero limit permits only the initial exchange.
+    // The current group sequence cannot continue. Zero-limit fragments use a separate forecast.
     if (header->getReceiverAddress().isMulticast() || txop->getLimit() == 0)
         return SIMTIME_ZERO;
     auto candidate = frames->getPendingFrameFor(packet);
@@ -2077,18 +2089,29 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         bool scopedSingle = singleProtection && !par("isBlockAckSupported").boolValue();
         bool basicDataExchange = originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC &&
             !header->getReceiverAddress().isMulticast() && (rtsStep || dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header));
+        auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
+        bool zeroLimit = txop->getLimit() == 0;
+        if (zeroLimit && rtsStep && !preparedStep && context->getNumSteps() > 1)
+            return false;
         bool dataAfterCts = false;
-        if ((scopedSingle || basicDataExchange) && context->getNumSteps() >= 3) {
+        if ((scopedSingle || basicDataExchange || zeroLimit) && context->getNumSteps() >= 3) {
             auto precedingRts = dynamic_cast<RtsTransmitStep *>(context->getStep(context->getNumSteps() - 3));
             auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStepBeforeLast());
             dataAfterCts = precedingRts && precedingRts->getProtectedFrame() == packet && receiveStep &&
                 receiveStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
                 receiveStep->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_CTS;
         }
+        bool fragmentContinuation = zeroLimit && dataOrMgmt && !preparedStep && context->getNumSteps() > 1 && !dataAfterCts;
+        if (fragmentContinuation && (!context->isFragmentContinuation(packet, context->getNumSteps() - 1) ||
+            !recipientAckPolicy->isAckNeeded(dataOrMgmt)))
+            return false;
+        bool zeroLimitFragment = zeroLimit && dataOrMgmt && recipientAckPolicy->isAckNeeded(dataOrMgmt) &&
+            (dataOrMgmt->getMoreFragments() || dataOrMgmt->getFragmentNumber() != 0);
         // DATA after the opening RTS/CTS is still part of the opening exchange.
         bool basicContinuation = basicDataExchange && context->getNumSteps() > (dataAfterCts ? 3 : 1);
         Packet *retainedPacket = packet;
-        auto retainedModeTag = scopedSingle || basicContinuation ? retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
+        auto retainedModeTag = scopedSingle || basicContinuation || zeroLimitFragment ?
+            retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
         auto retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
         auto compressedBar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header);
         auto mode = preparedStep ? (rtsStep ? prepared->rtsMode : prepared->dataMode) :
@@ -2114,7 +2137,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         simtime_t responseDuration = SIMTIME_ZERO;
         simtime_t nextFrameDuration = SIMTIME_ZERO;
         simtime_t cost = SIMTIME_ZERO;
-        if (scopedSingle || basicContinuation) {
+        if (scopedSingle || basicContinuation || zeroLimitFragment) {
             cost = mode->getDuration(packet->getDataLength());
             auto sifs = modeSet->getSifsTime();
             if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
@@ -2142,7 +2165,14 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: the exchange must be shorter than
             // TXNAV at the decision, and its preceding IFS also counts against the TXOP limit.
             bool checkContinuation = basicContinuation || (!dataAfterCts && context->getNumSteps() > 1);
-            if (checkContinuation && (txop->getLimit() == 0 || cost >= rx->getTxnavRemaining() || ifs + cost > txop->getRemaining())) {
+            bool insufficientContinuationTime = checkContinuation && (cost >= rx->getTxnavRemaining() ||
+                (zeroLimit ? !fragmentContinuation : ifs + cost > txop->getRemaining()));
+            // IEEE Std 802.11-2024, 9.2.5.2(b)(2): subtract the leading SIFS and DATA PPDU
+            // from the established reservation before checking the advertised ACK coverage.
+            bool insufficientAckReservation = fragmentContinuation && !singleProtection &&
+                encodeDuration(txop->getReservationEnd() - (simTime() + ifs) - mode->getDuration(packet->getDataLength()), true) <
+                    sifs + responseDuration;
+            if (insufficientContinuationTime || insufficientAckReservation) {
                 if (retainedModeTag)
                     retainedPacket->addTagIfAbsent<Ieee80211ModeReq>()->setMode(retainedMode);
                 else
@@ -2176,11 +2206,18 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             updated->setDurationField(duration);
             packet->insertAtFront(updated);
         }
-        else if (scopedSingle || (basicContinuation && singleProtection && rtsStep)) {
+        else if (scopedSingle || (singleProtection && (zeroLimitFragment || (basicContinuation && rtsStep)))) {
             bool finalFrame = true;
             if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
-                nextFrameDuration = forecastSingleProtectionSuccessor(packet, dataOrMgmt, txop,
-                    channelOwner->getInProgressFrames(), simTime() + ifs + cost);
+                auto completionTime = simTime() + ifs + cost;
+                if (zeroLimit) {
+                    auto forecast = forecastZeroLimitFragments(packet, completionTime,
+                        SimTime(MAX_DURATION_FIELD_MICROSECONDS, SIMTIME_US) - responseDuration - modeSet->getSifsTime(), false);
+                    nextFrameDuration = std::max(SIMTIME_ZERO, forecast - modeSet->getSifsTime());
+                }
+                else
+                    nextFrameDuration = forecastSingleProtectionSuccessor(packet, dataOrMgmt, txop,
+                        channelOwner->getInProgressFrames(), completionTime);
                 finalFrame = nextFrameDuration == 0;
             }
             auto duration = singleProtectionMechanism->computeDurationField(header, responseDuration, nextFrameDuration, finalFrame);
@@ -2205,13 +2242,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 setFrameMode(&request, requestHeader, requestMode);
                 auto feedback = computeBlockAckExchangeDuration(&request, requestHeader, requestMode->getDuration(request.getDataLength()));
                 auto reservation = encodeDuration(modeSet->getSifsTime() + feedback, false);
-                if (reservation <= SimTime(32767, SIMTIME_US) &&
+                if (reservation <= SimTime(MAX_DURATION_FIELD_MICROSECONDS, SIMTIME_US) &&
                     ifs + mode->getDuration(packet->getDataLength()) + reservation <= txop->getRemaining())
                     duration = reservation;
             }
             else {
                 // IEEE Std 802.11-2024, 9.2.5.2(a)(9)(i): the final group frame advertises zero Duration/ID.
-                // HcfFs ends the group sequence after this frame. A zero-limit exchange also has no successor.
+                // HcfFs ends the group sequence after this frame. Zero-limit fragment reservations are handled above.
                 bool finalDataOrMgmt = dataOrMgmt && (dataOrMgmt->getReceiverAddress().isMulticast() || txop->getLimit() == 0);
                 auto pendingPacket = finalDataOrMgmt || dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
                     channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
@@ -2235,6 +2272,11 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             auto remaining = std::max(SIMTIME_ZERO, txop->getStart() + txop->getLimit() - projectedStart);
             auto exchangeDuration = txop->getLimit() == 0 && reservation == 0 ?
                 estimateZeroLimitExchange(packet, header, txop, ppduDuration) : SIMTIME_ZERO;
+            if (exchangeDuration > 0 && (dataOrMgmt || rtsStep)) {
+                auto first = rtsStep ? rtsStep->getProtectedFrame() : packet;
+                exchangeDuration += forecastZeroLimitFragments(first, projectedStart + exchangeDuration,
+                    SimTime(MAX_DURATION_FIELD_MICROSECONDS, SIMTIME_US) - (exchangeDuration - ppduDuration), true);
+            }
             auto duration = computeMultipleProtectionDuration(txop->getLimit(), remaining, reservation,
                 ppduDuration, exchangeDuration, txop->getReservationEnd() != 0);
             auto updated = packet->removeAtFront<Ieee80211MacHeader>();
