@@ -4455,7 +4455,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_show" value="true"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value="6"/>
+            <property name="yaxis_max" value="7"/>
             <property name="xaxis_max" value="8"/>
             <property name="image_export_width" value="7.5"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
@@ -5185,7 +5185,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_show" value="true"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value="6"/>
+            <property name="yaxis_max" value="7"/>
             <property name="xaxis_max" value="8"/>
             <property name="image_export_width" value="7.5"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
