@@ -1,6 +1,7 @@
 %description:
 Check peer/TID BAR arbitration, window boundaries, cyclic sequence order, and ACK-state isolation.
 Check that a below-threshold forecast agrees with live selection after DATA transmission.
+Check ordered in-progress selection before and at a projected lifetime deadline.
 The production policy reads the production ACK handler through an in-progress queue.
 These helper checks supplement the HCF module fixture.
 
@@ -101,7 +102,7 @@ class OrderedPeekFrames : public InProgressFrames {
     {
         dataService = &service;
     }
-    Packet *peekFrameToTransmitExcluding(const Packet *excludedFrame) override {
+    Packet *peekInProgressFrameToTransmitExcluding(const Packet *excludedFrame, simtime_t time) override {
         return excludedFrame == preferred ? successor : preferred;
     }
 };
@@ -171,6 +172,28 @@ ASSERT(otherAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(4094)
     OrderedPeekFrames orderedFrames(emptyPendingData, &preferred, &successor);
     ASSERT(orderedFrames.peekFrameToTransmit() == &preferred);
     ASSERT(orderedFrames.peekFrameToTransmitExcluding(&preferred) == &successor);
+}
+{
+    QosAckHandler timedAck;
+    EmptyPendingDataService emptyPending;
+    EdcaTransmitLifetimeHandler lifetime(1, 1, 1, 1);
+    SchedulingFrames timedFrames;
+    timedFrames.configure(&timedAck, &emptyPending);
+    timedFrames.setLifetimeHandler(&lifetime);
+    timedFrames.add(peer, 5, 10, false);
+    timedFrames.add(peer, 5, 11);
+    timedFrames.add(peer, 5, 12, false);
+    auto first = timedFrames.getFrames(0);
+    auto last = timedFrames.getFrames(2);
+    auto deadline = simTime() + SimTime(1, SIMTIME_US);
+    lifetime.registerFragments({first}, deadline);
+    ASSERT(timedFrames.peekFrameToTransmit() == first);
+    ASSERT(timedFrames.peekInProgressFrameToTransmitExcluding(nullptr, deadline - SimTime(1, SIMTIME_NS)) == first);
+    ASSERT(timedFrames.peekInProgressFrameToTransmitExcluding(first, simTime()) == last);
+    ASSERT(timedFrames.peekInProgressFrameToTransmitExcluding(nullptr, deadline) == last);
+    ASSERT(timedFrames.peekInProgressFrameToTransmitExcluding(last, deadline) == nullptr);
+    ASSERT(timedFrames.getLength() == 3);
+    lifetime.forgetFrame(first->getId());
 }
 for (bool hasSuccessor : {false, true}) {
     QosAckHandler forecastAck;

@@ -24,8 +24,20 @@ and apply lifetime filtering at that time, excluding frames whose deadline
 is at or before it. The base declaration defaults ``time`` to ``simTime()``
 for live selection.
 
-Custom ``InProgressFrames`` classes that override ``peekFrameToTransmit()``
-should move their candidate ordering into ``peekFrameToTransmitExcluding()``
-and inherit the ordinary peek. The ordinary peek passes a null exclusion.
-The forecast passes the DATA it is forecasting after. Return a borrowed
-candidate using the same ordering in both cases.
+Custom ``InProgressFrames`` classes that order in-progress DATA in
+``peekFrameToTransmit()`` or ``peekFrameToTransmitExcluding()`` should move
+that ordering into ``peekInProgressFrameToTransmitExcluding(const Packet *,
+simtime_t time)`` and inherit the ordinary lookup and extraction methods.
+Skip the excluded packet and use ``isEligibleToTransmit(packet, time)``
+for each candidate. Return a borrowed in-progress frame, or null when none
+qualifies. The caller handles pending DATA when appropriate. Live selection
+passes the current time. A replacement retry forecast passes the outgoing
+DATA and its scheduled completion time.
+
+The one-argument ``peekFrameToTransmitExcluding()`` override was introduced
+on the development branch after INET 4.7.0. It is replaced before its first
+release because it cannot receive the time at which to check eligibility
+and may return a frame from the pending queue. Keeping it as a separate
+live-ordering hook would allow the sender to reserve airtime for one retry
+and transmit another. Calls to the one-argument method still work. Declaring
+it final makes the compiler identify overrides that need to move.
