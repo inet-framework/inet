@@ -184,7 +184,7 @@ for (bool hasSuccessor : {false, true}) {
 
     TxopProcedure txop;
     const IOriginatorQoSAckPolicy& forecastPolicy = policy;
-    auto forecast = forecastPolicy.computeBlockAckReqParametersAfterData(&forecastFrames, &txop, &agreements, transmitting);
+    auto forecast = forecastPolicy.computeBlockAckReqParametersAfterData(&forecastFrames, &txop, &agreements, transmitting, simTime());
     ASSERT(forecastAck.getQoSDataAckStatus(data) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
     ASSERT(forecastFrames.getOutstandingFrames().empty());
     ASSERT(forecastFrames.getLength() == (hasSuccessor ? 2 : 1));

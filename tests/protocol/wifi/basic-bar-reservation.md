@@ -197,3 +197,28 @@ The activation produces the new values in debug and release CI.
 | Configuration | `tplx` | `~tNl` | `~tND` |
 | --- | --- | --- | --- |
 | `examples/adhoc/qos`, `MacQos`, run 1 | fb07-79a3 → 0ef5-75c8 | ecaf-89f7 → 868a-9bbf | 9398-0fae → 79a8-1974 |
+
+## DATA that expires during transmission
+
+The expiration case in [WifiBasicBarReservation.test](common/WifiBasicBarReservation.test)
+uses the same established Basic Block Ack agreement and 4 ms grant as the first
+control. The sender's voice MSDU lifetime is 920 µs. The first Block Ack DATA starts
+with about 100 µs of lifetime left and takes 174 µs to transmit. The test checks
+that the lifetime ends inside the PPDU, that DATA advertises zero Duration/ID, and
+that the sender issues no BAR for that sequence during the observation window.
+
+The earlier forecast counted the transmitting DATA toward the BAR threshold and
+reserved 128 µs. At DATA completion the live outstanding-frame scan already
+excluded that DATA. The forecast now evaluates that same lifetime rule at the
+scheduled PPDU end, so the expiring DATA cannot make a BAR due. The test covers the
+originator's reservation and BAR selection. It does not measure third-party NAV.
+
+```mermaid
+sequenceDiagram
+    participant STA1 as STA1 sender
+    participant AP
+    Note over STA1,AP: Basic Block Ack agreement active
+    STA1->>AP: Basic Block Ack DATA with zero Duration/ID
+    Note over STA1: Lifetime expires during the DATA PPDU
+    Note over STA1: No BAR for this sequence
+```
