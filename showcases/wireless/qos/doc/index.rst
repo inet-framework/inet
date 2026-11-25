@@ -181,13 +181,13 @@ The average end-to-end delay for the different access categories are summarized 
    +-------------+------------+-----------+
    |             | non-Qos    | QoS       |
    +=============+============+===========+
-   | background  | 128 ms     | 1300 ms   |
+   | background  | 112 ms     | 698 ms    |
    +-------------+------------+-----------+
-   | best effort | 128 ms     | 345 ms    |
+   | best effort | 112 ms     | 256 ms    |
    +-------------+------------+-----------+
-   | video       | 128 ms     | 2 ms      |
+   | video       | 112 ms     | 1.5 ms    |
    +-------------+------------+-----------+
-   | voice       | 128 ms     | 1 ms      |
+   | voice       | 115 ms     | 0.8 ms    |
    +-------------+------------+-----------+
 
 In the QoS case, the video and voice priority delay is markedly improved compared to the non-QoS case.
