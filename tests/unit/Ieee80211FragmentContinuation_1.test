@@ -1,0 +1,57 @@
+%description:
+The next fragment must match the receiver, QoS TID, sequence number and allocation
+of the preceding fragment, and its fragment number must be exactly one higher.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static void setFragment(Packet& packet, const MacAddress& receiver, int tid, int sequence,
+        int fragment, bool moreFragments, int allocation, bool aggregated = false)
+{
+    if (packet.getDataLength() != b(0))
+        packet.removeAtFront<Ieee80211DataHeader>();
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setReceiverAddress(receiver);
+    header->setTid(tid);
+    header->setSequenceNumber(SequenceNumberCyclic(sequence));
+    header->setFragmentNumber(fragment);
+    header->setMoreFragments(moreFragments);
+    header->setAMsduPresent(aggregated);
+    packet.insertAtFront(header);
+    packet.addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(allocation);
+}
+
+%activity:
+const MacAddress receiver("02:00:00:00:00:01");
+const MacAddress anotherReceiver("02:00:00:00:00:02");
+Packet previous("previous");
+Packet candidate("candidate");
+setFragment(previous, receiver, 3, 4095, 0, true, 7);
+setFragment(candidate, receiver, 3, 4095, 1, false, 7);
+ASSERT(FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(candidate, anotherReceiver, 3, 4095, 1, false, 7);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(candidate, receiver, 4, 4095, 1, false, 7);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(candidate, receiver, 3, 0, 1, false, 7);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(candidate, receiver, 3, 4095, 2, false, 7);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(candidate, receiver, 3, 4095, 1, false, 8);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(previous, receiver, 3, 4095, 0, false, 7);
+setFragment(candidate, receiver, 3, 4095, 1, false, 7);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+setFragment(previous, receiver, 3, 4095, 0, true, 7, true);
+setFragment(candidate, receiver, 3, 4095, 1, false, 7, true);
+ASSERT(!FrameSequenceContext::isNextFragment(&previous, &candidate));
+EV << "Fragment continuation identity checked\n";
+
+%contains: stdout
+Fragment continuation identity checked

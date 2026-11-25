@@ -55,6 +55,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
+    simtime_t zeroLimitFragmentRoundTripTime;
     bool validateBlockAckRequest(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& bar) const;
 
   public:
@@ -158,6 +159,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
             TxopProcedure *txop, simtime_t ppduDuration);
+    simtime_t forecastZeroLimitFragments(const Packet *packet, simtime_t completionTime, simtime_t budget, bool wholeBurst);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
     bool hasEligibleFrameToTransmit(AccessCategory ac) const;
