@@ -21,6 +21,13 @@ The themes of the 4.8 release notes ([plan/done/whatsnew-4.8.md](../done/whatsne
 
 ## Steps
 
-1. [ ] Fold the new entries into the themes (C-1 to C-3). Commit.
-2. [ ] The changed results and the introduction (C-4). Commit.
-3. [ ] Check: `whatsnew.py check`, `check-pull-request.sh`. Move this plan to `plan/done/`. Commit.
+1. [x] Fold the new entries into the themes (C-1 to C-3). Commit.
+2. [x] The changed results and the introduction (C-4). Commit.
+3. [x] Check: `whatsnew.py check`, `check-pull-request.sh`. Move this plan to `plan/done/`. Commit.
+
+## Results
+
+- 43 themed entries: 30 incompatible, 8 compatible, 5 fixes. The new theme `ipv4-igmp-and-mld-corrections.txt` has 748 words (the two old entries had 1812), and `ipv6-neighbor-discovery.txt` has 718 words (the two old entries had 1089).
+- The new section of the migration guide, `ieee80211-basic-block-ack-receipts.rst`, stays a file of `development/`; the release moves it with the others.
+- `whatsnew.py check` and the six series gates of `check-pull-request.sh --base origin/master --head HEAD` pass. One note stays: the first paragraph of an older commit body of this branch has 127 words.
+- The open points of [plan/done/whatsnew-4.8.md](../done/whatsnew-4.8.md) for the release do not change.
