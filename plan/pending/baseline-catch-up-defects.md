@@ -652,9 +652,17 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   The run gave 1312 ms and 414 ms before `fb7aeea94a`, and 750 ms and 233 ms after it. The description of the delay
   and jitter charts and the jitter table come from the same run. The commit updated the charts but not the text.
 - **Baselines:** none (text).
-- **Repair:** write the values of the current run. Do it after the 802.11 repairs of this plan, because they move the
-  values again.
-- **Check:** each value of the text equals the scalar of the run.
+- **Repair:** prior commits on `master` (`fa5de30a6d`, `42dbb75bfb`, `28f1dc534c`) updated the end-to-end delay
+  table (`112, 112, 112, 115 ms` non-QoS; `698, 256, 1.5, 0.8 ms` QoS), background delay fluctuation onset
+  (`1.6 s`), throughput chart y-axis (`7 Mbps`), and post-6 s throughput text (`increases sharply`). Commit
+  `BD-12` (“showcases: fix: match the QoS jitter table and text to the current runs”) repairs the remaining stale
+  jitter table (mean absolute instantaneous packet delay variation: `0.77, 0.68, 1.6, 5.9 ms` non-QoS and
+  `6.7, 1.1, 0.75, 0.45 ms` QoS) and jitter prose (non-QoS voice spacing, post-6 s queue-drain negative
+  delay variation, and the `-0.3 ms` background A-MSDU band in the zoomed plot).
+- **Check:** verified against release runs of `NonQos` and `Qos` (`run 0`) on `master` `e74ac35bbf` (identical in
+  code and baselines to `36cac8abf2`, PR #1489): all compared scalar and vector-summary metrics match the
+  `statistics` pin `0efeed37319c` (`2,049` `NonQos`, `4,888` `Qos`, `0` diffs) and all 8 exported 150 DPI
+  `Qos.anf` charts match the `media` pin `838086b3f96d` pixel for pixel (`0` differing pixels; no baselines move).
 
 #### BD-25: the Duration/ID of a group frame can reserve a successor that does not come
 

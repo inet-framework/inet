@@ -201,8 +201,11 @@ Let's take a look at jitter:
 .. figure:: media/jitter_nonqos.png
    :width: 90%
 
-In the non-QoS case, the jitter data points are scattered with the same pattern
-for all four traffic categories.
+In the non-QoS case, all four traffic categories share the same queue and delay curve,
+so their jitter data points are centered around zero with the same pattern. Sparser
+categories such as voice show wider consecutive delay differences because fewer packets
+are received and successive packets arrive farther apart in time along the fluctuating
+delay curve.
 
 .. figure:: media/jitter_qos.png
    :width: 90%
@@ -210,28 +213,31 @@ for all four traffic categories.
 In the QoS case, the jitter is lower for the video
 and voice categories (lowest for voice), and higher for background and best effort.
 Also, the background and best effort data points are more scattered than the higher
-priority ones. The jitter for the lower priority categories decreases at around 6 seconds
-when the higher priority traffic stops.
+priority ones. After 6 seconds, when traffic generation stops and the remaining queued
+background and best effort packets drain without high-priority contention, their delay
+drops sharply, producing negative delay-variation points until the last packets arrive
+around 6.2 seconds.
 
 Here are the jitter charts on the same scale (slightly zoomed in):
 
 .. figure:: media/jitter.png
    :width: 100%
 
-The following table summarizes the average jitter for the different access categories (approximately):
+The following table summarizes the average jitter (mean absolute instantaneous packet
+delay variation) for the different access categories (approximately):
 
 .. table:: Average jitter
 
    +-------------+------------+-----------+
    |             | non-Qos    | QoS       |
    +=============+============+===========+
-   | background  | 30 ms      | 440 ms    |
+   | background  | 0.77 ms    | 6.7 ms    |
    +-------------+------------+-----------+
-   | best effort | 30 ms      | 73 ms     |
+   | best effort | 0.68 ms    | 1.1 ms    |
    +-------------+------------+-----------+
-   | video       | 30 ms      | 1.1 ms    |
+   | video       | 1.6 ms     | 0.75 ms   |
    +-------------+------------+-----------+
-   | voice       | 30 ms      | 0.6 ms    |
+   | voice       | 5.9 ms     | 0.45 ms   |
    +-------------+------------+-----------+
 
 As with the delay, the jitter is improved in the QoS case for video and voice, and worse
@@ -243,18 +249,17 @@ some data points forming horizontal lines. Here is a relevant part of the plot, 
  .. figure:: media/jitter_qos_zoomed.png
     :width: 100%
 
-Some jitter data points of best effort and video form two horizontal lines.
-The best effort line is at -0.25 ms; the video line is at -1 ms. The reason
-for these data points is that sometimes, packets belonging to the same access
-category are sent consecutively. The packets are generated every 0.25 and 1 ms,
-but it takes a few microseconds to transmit a frame, thus the consecutive packets
-arrive at the receiver at the same time (a few microseconds apart). This results
-in the -0.25 ms and -1 ms jitter.
+Some jitter data points of best effort, background, and video form horizontal lines:
+best effort at -0.25 ms, background (sparser) at -0.3 ms, and video at -1 ms. The reason
+for these data points is that HCF aggregates consecutive packets of the same access
+category into an A-MSDU, so packets generated about 0.25 ms, 0.3 ms, or 1 ms apart are
+delivered to the receiver at the same simulation time. Their end-to-end delays therefore
+differ by minus their generation interval, producing the -0.25 ms, -0.3 ms, and -1 ms
+jitter bands.
 
-There is no horizontal line for background because it is low priority and packets
-don't have the chance to be sent consecutively. Also, there is no horizontal line
-for voice, because voice packets are generated infrequently and they are high priority;
-a voice packet gets transmitted before the next one is generated.
+There is no horizontal line for voice, because voice packets are generated infrequently
+(every 10 ms) and have the highest priority, so each voice packet is transmitted before
+the next one is generated.
 
 Throughput
 ~~~~~~~~~~
