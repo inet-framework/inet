@@ -236,8 +236,34 @@ visualization.
 In the following video we can examine that how network path activity
 visualization follows the routing changes in a complex network.
 
-.. video:: media/ChangingPaths_v0614.m4v
+.. video:: media/ChangingPaths_v1124.mp4
    :width: 100%
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   ChangingPaths
+   seed:     default
+   shows:    the ping paths from t=0 through the four lifecycle changes of
+             changeRoute.xml (router1 down 5s / up 10s, router3 down 15s / up 20s)
+   anchors:  pings start at 1s; t=3s both pings via router1; t=7s router1 crossed,
+             no path drawn; t=11s and t=13s via router1 again; t=14.5s both via
+             router3; t=16s router3 shutting down, paths via router1; t=18s and
+             t=21.9s via router1, router3 back up; these are the paths the page
+             text describes, so a change here means re-reading the text too
+   window:   rebuild_network, record from t=0 to time_limit=22s; no fade wait
+             (fadeOutMode=simulationTime)
+   view:     set_canvas_view module_path=NetworkPathRIPShowcase fit=true after
+             rebuild (zoom 0.919); at zoom 1 the 1100x680 canvas is wider than the
+             Qtenv canvas pane, which scrolls and clips the left edge
+   anim:     playback_speed=1, min_animation_speed=1   # set_animation_parameters,
+             normal profile; Qtenv built-in animation off (~/.config/omnetpp/.qtenvrc
+             animation_enabled=false), so nothing requests an animation speed and
+             without the clamp the recorder takes one frame per event
+   capture:  fps=30, crop_area=with_padding (660 frames); crop was 1034x648, the
+             floating toolbar and the zoom label fall outside it
+   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (22 s, real time)
+   post:     none
+   stamp:    recorded 2026-11, INET master bc39ec7571
 
 At the beginning of the video, ping traffic is routed through
 ``router1``. After five seconds, small cogwheels appear above
