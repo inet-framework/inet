@@ -743,6 +743,47 @@ tests; with (ii), the pings of `showcases/ethernet/sharedcore` `FiltersAndMapper
 true` (E1 of step 79: 0 of 80 before); all fingerprints in release mode in the editor; the statistical tests of the
 moved folders in the image of the CI.
 
+#### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
+
+**Re-check.** Master `b029add207` changes no file of `src/inet/environment` or of the obstacle loss after
+`08e3648c36`. `MaterialRegistry::getMaterial()` still makes copper with `Ohmm(1.68), NaN, NaN` and aluminium with
+`Ohmm(2.65), NaN, NaN` (`MaterialRegistry.cc:37-38`), below the comment `// TODO verify values`. No environment file of
+the repository uses either: its 1803 objects are of brick, concrete, forest and glass.
+
+**The fault, shown.** Two new unit tests, `tests/unit/ObstacleLoss_DielectricCopper.test` and
+`ObstacleLoss_DielectricAluminium.test`, have the form of `ObstacleLoss_Dielectric.test`: one path crosses a plate 2 mm
+thick at 2.4 GHz, 10 MHz and 100 kHz, with no reflection loss. In debug mode on the branch both fail with "ASSERT:
+Condition '0 <= factor && factor <= 1' does not hold in function 'computeDielectricLoss'"; `ObstacleLoss_Dielectric`
+passes. The expected values come from the skin depth of a good conductor, delta = sqrt(2 rho / (2 pi f mu_0)), as the
+check outside INET ([TR-VALIDATE-EXTERNAL](../../doc/project/rule/testing.md#tr-validate-external)): for copper
+842.111 dB at 10 MHz and 84.211 dB at 100 kHz, for aluminium 670.504 dB and 67.050 dB. At 2.4 GHz the factor is below
+the smallest double, so it is 0 and the test expects `inf dB`. The formula of the model gives the same values to the
+third decimal, because the loss tangent of a metal is about 10^8 and more.
+
+**A limit found by the test.** The first form of the tests had a sheet 10 um thick and gave 0 dB at each frequency:
+`computeObjectLoss()` takes a loss only when `intersection1 != intersection2`, and `Coord::operator==` compares with
+`EPSILON` (`INETMath.h:86`, 1 mm). So an object thinner than 1 mm along the path takes no loss at all, also a metal
+foil that blocks the signal. The code is older than v4.7.0 (it is older than the reformatting `a903d00920` of 2020)
+and not part of BD-49; the maintainer decides whether it becomes an entry.
+
+**Design question for gate A.** The values: the resistivities at 20 °C, 1.68e-8 Ω m for copper and 2.65e-8 Ω m for
+aluminium, with a relative permittivity and permeability of 1. The permittivity of a metal does not change the
+result, because the conduction term is about 10^8 times larger, and the real permeabilities (0.999994 and 1.000022)
+differ from 1 by less than 3e-5. The comment `// TODO verify values` stays, because the other materials are not
+checked (BD-46). The assistant has no alternative to propose; gate A approves the values.
+
+**Commit.**
+
+- **C11: `environment: fix: copper and aluminium have their real resistivity and a relative permittivity and
+  permeability of 1`** (BD-49). `MaterialRegistry.cc`, the two new unit tests, and a whatsnew entry. This is no
+  protocol change, so [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol) asks for no protocol
+  test and no reviewer document. Expected before C11: both tests fail at the ASSERT, as above. After C11: both pass.
+
+**Expected baselines.** None: no stored simulation uses copper or aluminium.
+
+**Checks.** The three `ObstacleLoss_Dielectric*` unit tests in debug mode; all fingerprints in release mode in the
+editor, which must not move.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
