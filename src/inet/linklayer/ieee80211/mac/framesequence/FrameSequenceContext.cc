@@ -9,6 +9,9 @@
 
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -51,6 +54,36 @@ void FrameSequenceContext::removeLastStep()
 Packet *FrameSequenceContext::getDataFrameToTransmit() const
 {
     return qosContext && qosContext->preparedData ? qosContext->preparedData->frame : inProgressFrames->getFrameToTransmit();
+}
+
+bool FrameSequenceContext::isNextFragment(const Packet *previous, const Packet *candidate)
+{
+    auto first = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(previous->peekAtFront<Ieee80211MacHeader>());
+    auto next = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(candidate->peekAtFront<Ieee80211MacHeader>());
+    if (!first || !next || !first->getMoreFragments() || first->getReceiverAddress().isMulticast() ||
+        first->getType() != next->getType() || first->getReceiverAddress() != next->getReceiverAddress() ||
+        first->getSequenceNumber() != next->getSequenceNumber() || first->getFragmentNumber() + 1 != next->getFragmentNumber())
+        return false;
+    if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(first)) {
+        auto nextData = staticPtrCast<const Ieee80211DataHeader>(next);
+        auto firstSequence = previous->findTag<Ieee80211DataSequenceTag>();
+        auto nextSequence = candidate->findTag<Ieee80211DataSequenceTag>();
+        // IEEE Std 802.11-2024, 10.4 and 10.23.2.9(a)(1): this is an MSDU fragment burst.
+        return !data->getAMsduPresent() && !nextData->getAMsduPresent() && data->getTid() == nextData->getTid() &&
+            firstSequence && nextSequence && firstSequence->getAllocationIndex() == nextSequence->getAllocationIndex();
+    }
+    return true;
+}
+
+bool FrameSequenceContext::isFragmentContinuation(const Packet *candidate, int numCompletedSteps) const
+{
+    if (!candidate || numCompletedSteps < 2 || !inProgressFrames->containsFrame(candidate))
+        return false;
+    auto ack = dynamic_cast<IReceiveStep *>(getStep(numCompletedSteps - 1));
+    auto data = dynamic_cast<ITransmitStep *>(getStep(numCompletedSteps - 2));
+    return ack && ack->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+        ack->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK &&
+        data && isNextFragment(data->getFrameToTransmit(), candidate);
 }
 
 simtime_t FrameSequenceContext::getIfs() const

@@ -1800,6 +1800,56 @@ simtime_t Hcf::computePreparedDataCost(const PreparedDataTransmission& prepared,
     return cost;
 }
 
+simtime_t Hcf::forecastZeroLimitFragments(const Packet *packet, simtime_t completionTime, simtime_t budget, bool wholeBurst)
+{
+    auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    if (!header->getMoreFragments() || !recipientAckPolicy->isAckNeeded(header))
+        return SIMTIME_ZERO;
+    auto owner = edca->getChannelOwner();
+    auto frames = owner->getInProgressFrames();
+    auto first = frames->peekFrameToTransmitExcluding(packet);
+    auto txop = owner->getTxopProcedure();
+    auto sifs = modeSet->getSifsTime();
+    simtime_t duration;
+    auto previous = packet;
+    for (int i = 0; i < frames->getLength(); i++) {
+        auto candidate = frames->getFrames(i);
+        if (previous == packet && candidate != first)
+            continue;
+        auto start = completionTime + duration + sifs;
+        if (!FrameSequenceContext::isNextFragment(previous, candidate) ||
+            edca->getLifetimeHandler()->isExpired(candidate, start) || !isFrameEligible(candidate, true) ||
+            !owner->getAckHandler()->isEligibleToTransmit(candidate->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+            break;
+        std::unique_ptr<Packet> forecast(candidate->dup());
+        auto next = forecast->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(next)) {
+            auto agreement = originatorBlockAckAgreementHandler ?
+                originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid()) : nullptr;
+            if (originatorAckPolicy->computeAckPolicy(candidate, data, agreement) != NORMAL_ACK)
+                break;
+            auto updated = forecast->removeAtFront<Ieee80211DataHeader>();
+            updated->setAckPolicy(NORMAL_ACK);
+            forecast->insertAtFront(updated);
+            next = updated;
+        }
+        if (!recipientAckPolicy->isAckNeeded(next))
+            break;
+        auto mode = rateSelection->computeMode(forecast.get(), next, txop);
+        setFrameMode(forecast.get(), next, mode);
+        auto cost = sifs + mode->getDuration(forecast->getDataLength()) + sifs + computeImmediateResponseDuration(forecast.get(), next);
+        if (wholeBurst)
+            cost += zeroLimitFragmentRoundTripTime;
+        if (duration + cost > budget)
+            break;
+        duration += cost;
+        if (!wholeBurst)
+            break;
+        previous = candidate;
+    }
+    return duration;
+}
+
 bool Hcf::canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
         simtime_t ifs, bool protect) const
 {
