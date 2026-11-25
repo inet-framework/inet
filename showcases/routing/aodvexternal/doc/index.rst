@@ -15,7 +15,7 @@ The goal of this showcase is to demonstrate how AODV's external gateway feature
 enables seamless routing between an ad hoc wireless network and a traditional
 Ethernet-based network infrastructure.
 
-| INET version: ``4.6``
+| Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/routing/aodvexternal <https://github.com/inet-framework/inet/tree/master/showcases/routing/aodvexternal>`__
 
 The Model
