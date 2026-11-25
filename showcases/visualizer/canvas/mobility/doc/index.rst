@@ -75,8 +75,32 @@ easier.
 
 The following video shows what happens when we run the simulation.
 
-.. video:: media/VisualizingFeatures_v0627.m4v
+.. video:: media/VisualizingFeatures_v1124.mp4
    :width: 80%
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   VisualizingFeatures
+   seed:     default
+   shows:    the three hosts from t=0 with movement trails, velocity arrows and
+             orientation cones; host3's trail closes into a circle by the end
+   anchors:  CircleMobility period 2*pi*200m/40mps = 31.4s, so host3's trail
+             (trailLength=300 x 0.1s update = 30s) is one circle minus a small gap
+             at t=30s; last frame (824x624 crop) has host1 ~(297,312), host2
+             ~(182,282), host3 ~(370,450) px, the same positions as the 2024 video
+             and as NoFeatures_v0620.m4v, which the page's "movement is the same"
+             sentence relies on; NoFeatures was not re-recorded
+   window:   rebuild_network, then record from t=0 to time_limit=30s; no fade wait
+   anim:     playback_speed=2        # set_animation_parameters, normal profile;
+             model animation speed is 1 (mobilityVisualizer.animationSpeed)
+   capture:  fps=30, crop_area=with_padding (449 frames); canvas was 824x624
+   encode:   ffmpeg -r 30 -vcodec libx264 -pix_fmt yuv420p (15 s)
+   post:     the Qtenv canvas toolbar floats over the top-right corner; repaint
+             the box x>=658, y<35 of each cropped frame with the static border
+             (green padding rows 0-9 and columns >=814, black border rows 10-11
+             and columns 812-813, gray 209 inside) after checking that a 20 px
+             band around the box is static in every frame
+   stamp:    recorded 2026-11, INET master bc39ec7571
 
 Compare this video to the previous one! The first thing you may notice
 is that the hosts' movement is the same as in the previous video.
