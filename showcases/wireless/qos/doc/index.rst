@@ -170,7 +170,7 @@ sent first.)
 
 The best effort category is prioritized over the background priority; the best effort has lower delay.
 At around 1.3 seconds, the best effort queue runs out of the earliest packets, and the delay starts to
-fluctuate. The same thing happens to the background queue at around 2.5 seconds.
+fluctuate. The same thing happens to the background queue at around 1.6 seconds.
 It takes more time for the background priority curve to start to fluctuate because the background frames
 are sent more sporadically, so that it takes more time for the early packets in the queue to be sent.
 
@@ -277,7 +277,7 @@ and the channel is saturated.
 
 In the QoS case, throughput for the video and voice categories can reach their nominal bitrate.
 The throughput for the background and best effort categories is lower while the high priority
-ones have data to send, and increases just a bit when the high priority traffic stops (there are still
+ones have data to send, and increases sharply when the high priority traffic stops (there are still
 some packets left in the background and best effort queues).
 
 The bitrate of video and voice is lower than the others, but the others generate enough traffic
