@@ -740,6 +740,15 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   Use seed 0 with `opp_run_protocol_tests --load . -p inet -m <mode> --no-build
   -w '^tests/protocol/wifi$' -f 'WifiBasicBarReservation\.test$'` on the release parent
   and on the repair in debug and release. The assertions observe originator behavior.
+- **Preparation BD-26-BASIC-RETRY-LOOKUP**, “ieee80211: refactor: expose timed in-progress DATA selection”.
+  Extract the ordered lookup in [InProgressFrames](../../src/inet/linklayer/ieee80211/mac/queue/InProgressFrames.cc).
+  Route peeking, live extraction and successor selection through one overridable in-progress
+  ordering operation. Use the current simulation time for the ordinary peek and retain its pending-queue fallback.
+  Check order, exclusion, ACK eligibility, and the exact expiry boundary in
+  [Ieee80211BlockAckScheduling_1.test](../../tests/unit/Ieee80211BlockAckScheduling_1.test) with
+  `opp_run_unit_tests --load . -p inet -m debug --no-build -f 'Ieee80211BlockAckScheduling_1\.test$'`.
+  The default queue retains storage order. Custom queues implement their retry ordering once
+  for forecasts and actual transmissions.
 
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 
