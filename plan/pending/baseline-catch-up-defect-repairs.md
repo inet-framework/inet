@@ -244,6 +244,13 @@ No sealed file changes. No consumer outside INET changes.
    landing"). The image of the CI also runs a fingerprint whose result in the editor differs from the CI. Each run
    must pass, except a run that a marker declares as expected (the maintainer, 2026-11-24: "all should pass
    otherwise how can we create a PR?").
+   **Correction (2026-11-25).** The fingerprint verb of the editor runs **debug**, not release: the fingerprint kind
+   of omnet-julia defaults to `mode = "debug"`, as `opp_repl` does (`LegacyFingerprintTestTask.jl:401`), `inet.opp`
+   names no mode for it, and the verb has no `mode` keyword. So the "release" gate runs of R2 in the editor were debug
+   runs. The maintainer, 2026-11-25: "We should simply fix the runner to allow running both." omnet-julia gets the
+   repair: the mode that the caller or the Runner gives is the mode of the runs and of the build, and debug stays the
+   default, as in `opp_repl`. Then a gate runs release in the editor again. Until that repair lands, a gate runs the
+   release fingerprints in the image of the CI (`runs/fingerprints-in-ci-image.sh <label>`).
 9. **Gate B.** Open the reviewer document, the moved values and the commits of the change in tabs. Ask the
    maintainer: "Do you approve the result of R<n>?" After the approval, mark the change done in this plan, write the
    repair commit into [baseline-catch-up-defects.md](baseline-catch-up-defects.md), and commit both as
@@ -594,7 +601,9 @@ before. `TcpAlgorithm::initializeAlgorithm()` reads it. Facts and decisions of t
   "building inet" of `run_fingerprint_tests!` reported DONE and built nothing in release mode, so the runs used
   `src/libINET.so` of 2026-11-24 17:26, and `out/clang-release` did not exist. A gate therefore builds the release mode
   first with `build_simulation_project!(project; mode = "release")`, checks that `src/libINET.so` holds the change, and
-  starts the fingerprints with `build = false`.
+  starts the fingerprints with `build = false`. **Correction (2026-11-25):** the step built the debug mode, which the
+  runs use, so it built correctly; the release library was not what the runs loaded (§6.1, step 8). omnet-julia now
+  names the mode in the step: "building inet in debug mode".
 
 **The review of R2 against the RFC (2026-11-25, D9).** The `simulation-domain-expert` agent read C6 to C8. Its
 findings:
@@ -628,8 +637,11 @@ fingerprint run.
 **The results of R2 (2026-11-25).** No recorded result moves, so R2 re-records nothing.
 
 - The release library holds C6 to C8 (`build_simulation_project!` in release mode, then a check of `src/libINET.so`).
-  All 1847 stored fingerprint runs in release mode in the editor, with all features but OSG: 1836 PASS, the 1 ERROR
-  that a marker declares, and the 10 runs of `showcases/visualizer/osg` that a build without OSG can not start.
+  All 1847 stored fingerprint runs in the editor, with all features but OSG: 1836 PASS, the 1 ERROR that a marker
+  declares, and the 10 runs of `showcases/visualizer/osg` that a build without OSG can not start. These runs were in
+  **debug** mode, not release (§6.1, step 8, correction). The release fingerprints of R2 ran after the landing, on
+  the sources of master `7f7f77a00f` in the image of the CI: 1847 runs, 1846 PASS and 1 expected ERROR, in 1 min 41 s
+  (`runs/r2-landed-release/` of the folder of D10).
 - All statistical tests in the image of the CI (`tools/prun.sh` of the job copy, at the head of the series, against
   the pins of master `statistics` `76d45e4e68` and `media` `2ab7ae005b`, which the job copy fetched for this run):
   945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected; the logs are `evidence/runs/28413967e9/` of the job copy.
@@ -750,7 +762,7 @@ the gate find each moved value, and each gets its line of attribution.
 
 **Checks.** The new protocol test and the other four tests of `tests/protocol/vlan` in debug mode; the VLAN module
 tests; with (ii), the pings of `showcases/ethernet/sharedcore` `FiltersAndMappers` get answers with `forwardPcp =
-true` (E1 of step 79: 0 of 80 before); all fingerprints in release mode in the editor; the statistical tests of the
+true` (E1 of step 79: 0 of 80 before); all fingerprints in release mode (§6.1, step 8); the statistical tests of the
 moved folders in the image of the CI.
 
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
@@ -791,8 +803,8 @@ checked (BD-46). The assistant has no alternative to propose; gate A approves th
 
 **Expected baselines.** None: no stored simulation uses copper or aluminium.
 
-**Checks.** The three `ObstacleLoss_Dielectric*` unit tests in debug mode; all fingerprints in release mode in the
-editor, which must not move.
+**Checks.** The three `ObstacleLoss_Dielectric*` unit tests in debug mode; all fingerprints in release mode (§6.1,
+step 8), which must not move.
 
 #### R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39), prepared 2026-11-25
 
@@ -887,7 +899,7 @@ from before `7beeb0dc88`, so the gate measures them again. Each moved value gets
 re-record runs in the image of the CI.
 
 **Checks.** The three new protocol tests, `Rfc5681FastRetransmit`, `Rfc5681TimeoutResponse` and the
-`TcpAlgorithmClass*` tests in debug mode; all fingerprints in release mode in the editor; the statistical tests of
+`TcpAlgorithmClass*` tests in debug mode; all fingerprints in release mode (§6.1, step 8); the statistical tests of
 `examples/inet/tcpclientserver` in the image of the CI.
 
 ## 7. Verification
