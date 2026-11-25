@@ -535,11 +535,32 @@ the two OSG features, because the OMNeT++ of this machine has no OSG.
 **The runner of the protocol tests (2026-11-24).** The keys of master are right: they are the keywords of
 `get_opp_test_tasks` of `opp_repl` (`opp_repl/test/opp.py:212`), which the workflow "Test: protocol" reads, and the
 message of `4d3705af84` was wrong in that point. The maintainer approved a repair of the editor in place of a change of
-INET ("yes"): omnet-julia `0d35ce9a6`, on `main` and not pushed, translates the three names of `opp_repl` in
+INET ("yes"): omnet-julia `0d35ce9a6`, on `main` and pushed on 2026-11-24, translates the three names of `opp_repl` in
 `get_kind_opp_test_tasks`, with a test of a description as INET master writes it. Its checks, the smaller set that the
 maintainer chose ("the smaller set"): `OmnetLegacyTest test_legacy` and `OmnetIdeTest test_ide`, 160 parts, 6242 pass,
 0 fail, 0 error, 134 marked broken. `4d3705af84` left `inet-julia`, and its three plan commits above it were written
 again. The running editor needs a restart to load `0d35ce9a6`; then the protocol tests of R2 run in it.
+
+**The protocol tests and C6 (2026-11-25).** After the restart, the editor runs the protocol tests of the branch. The
+first run, on the code of master, found three faults of the tests, not of master:
+
+- The TS option takes 12 bytes of each segment, so a full segment holds 988 bytes, and a window of 3500 bytes left
+  536 bytes after three segments, not 500. The window is now 3464 bytes: 3 × 988 + 500.
+- The steps of a `ProtocolTest` run in order, and an `act` step waits for its time. So in
+  `Rfc9293SwsOverridePeerData` the check of the window waited for the last send of host2 at 2.45 s, and the test
+  passed on master. The guard "no held data" now runs with `meanwhile(never(...))`, host2 sends at 0.35 s, 0.65 s and
+  0.95 s after the check of the window, and the held data must leave before 1.3 s. With the fault, it leaves at
+  about 1.95 s, one RTO after the last segment of host2.
+- `windowUpdateAfterRead` is `false` by default, so the read of host2 in `Rfc9293SwsOverrideWindowUpdate` sent no
+  window update. The test sets it, and its read comes after the checks of the hold.
+
+The protocol test of C6 above is three files, not one file with three cases. On the code of master in
+debug mode, `Rfc9293SwsOverridePeerData` fails at the held data and the other two pass; with C6, all three pass. The
+40 protocol tests of the send parameters, of `TcpWindow*` of the receive parameters, of the RFC 9293 tests of the
+window and of Nagle give 34 PASS and 6 that can not run here: the Nagle tests of `linux/` and `packetdrill/` need
+`inet_run_packetdrill` on the `PATH`, which the runner of the editor does not set, and then `inet-gpl`, which this
+machine does not have, so they skip. C6 is the commit `68148012eb`. Its re-records, the reviewer document and the
+whatsnew entry come into the same commit by a fixup after the runs of the gate (§6.1, step 6).
 
 ## 7. Verification
 
