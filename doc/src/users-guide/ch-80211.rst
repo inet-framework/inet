@@ -540,6 +540,12 @@ selected DATA transmission, any immediate ACK, and the intervening SIFS before s
 RTS. It retains the selected DATA mode through CTS and checks the remaining budget again
 before sending DATA. DATA after the opening RTS/CTS is part of the opening exchange.
 
+With Basic Block Ack and a positive TXOP limit, a DATA frame can reserve the airtime
+for a due Block Ack Request and its immediate reply. Under single protection, its
+Duration/ID includes both frames and their SIFS intervals when the feedback fits.
+HCF checks the request against TXNAV and the remaining TXOP before sending it. A
+request that cannot fit waits for a new EDCA grant.
+
 Active Compressed agreements use the admission described in :ref:`ug:sec:80211:blockack`.
 Traffic outside those agreements in the Compressed profile retains its existing admission
 policy.
