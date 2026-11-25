@@ -1,12 +1,15 @@
 name: "Test: coverage"
 
-# Runs the fingerprint tests and the unit, module, packet, queueing and protocol tests in coverage
-# mode, and makes one line, function and branch coverage report of src/. The test verdicts belong
-# to the other workflows: a failed test does not fail this workflow, a missing coverage export
-# does. It runs once a week on master, not on each push or pull request. The scheduled run
-# publishes the report to https://inet-framework.github.io/coverage/ and adds one line to the
-# history of inet-framework/coverage. A manual start gives the report as an artifact only. The plan
-# is plan/done/coverage-tests.md.
+# Runs the fingerprint, statistical, chart, smoke and validation tests and the unit, module, packet,
+# queueing and protocol tests in coverage mode, and makes one line, function and branch coverage
+# report of src/. The test verdicts belong to the other workflows: a failed test does not fail this
+# workflow, a missing coverage export does. The speed tests do not run: omnetpp-6.x has no
+# --measure-cpu-usage option, so each speed run stops at startup. The workflow runs once a week on
+# master, not on each push or pull request. The scheduled run publishes the report to
+# https://inet-framework.github.io/coverage/ and adds one line to the history of
+# inet-framework/coverage. A manual start gives the report as an artifact only. The plan is
+# plan/done/coverage-tests.md; the test selection of opp_repl (its plan/pending/test-selection.md)
+# needs the coverage of all suites.
 
 on:
   schedule:
@@ -22,10 +25,15 @@ concurrency:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    # The chart job runs the 4752 simulations of its charts in one job, because a split of the chart
+    # tests does not divide the simulations. They need 15 minutes in release mode, and coverage
+    # mode is about 6 times slower than release mode.
+    timeout-minutes: ${{ matrix.job == 'chart' && 240 || 150 }}
     strategy:
       matrix:
-        job: ["fingerprint-0", "fingerprint-1", "fingerprint-2", "fingerprint-3", "suites"]
+        # the statistical tests need 18 minutes in release mode, so they run in 2 splits
+        job: ["fingerprint-0", "fingerprint-1", "fingerprint-2", "fingerprint-3", "suites",
+              "statistical-0", "statistical-1", "chart", "smoke", "validation"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v6
@@ -69,9 +77,22 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
 
+          case $JOB in
+            statistical-*|chart|validation)
+              echo "::group::Compiling the result reader of omnetpp in release mode"
+              # these tests read the results with omnetpp.scave. It loads the Python bindings of a
+              # release, debug or sanitize build, and not those of the coverage build.
+              make -C $GITHUB_WORKSPACE/omnetpp MODE=release -j $(nproc) scave
+              echo "::endgroup::" ;;
+          esac
+
           echo "::group::Installing opp_repl"
           python3 -m venv $GITHUB_WORKSPACE/venv
           source $GITHUB_WORKSPACE/venv/bin/activate
+          case $JOB in
+            # omnetpp.scave needs these packages
+            statistical-*|chart|validation) python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt ;;
+          esac
           python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
           python3 -m pip install pyyaml  # inet-gpl's packetdrill suite reads its YAML configuration
           echo "::endgroup::"
@@ -124,13 +145,24 @@ jobs:
 
           cd $GITHUB_WORKSPACE/inet
           echo "### Test verdicts in coverage mode" >> $GITHUB_STEP_SUMMARY
-          if [ "$JOB" = suites ]; then
-            for kind in unit module packet queueing protocol; do
-              run_suite $kind opp_run_${kind}_tests --load $INET_ROOT -p inet -m coverage
-            done
-          else
-            run_suite $JOB opp_run_fingerprint_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 4 --split-index ${JOB#fingerprint-}
-          fi
+          # -m coverage replaces the release mode that inet.opp gives the statistical and chart tests;
+          # these tests compare with the commit of the baseline repository that inet.opp pins
+          case $JOB in
+            suites)
+              for kind in unit module packet queueing protocol; do
+                run_suite $kind opp_run_${kind}_tests --load $INET_ROOT -p inet -m coverage
+              done ;;
+            fingerprint-*)
+              run_suite $JOB opp_run_fingerprint_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 4 --split-index ${JOB#fingerprint-} ;;
+            statistical-*)
+              opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
+              run_suite $JOB opp_run_statistical_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 2 --split-index ${JOB#statistical-} ;;
+            chart)
+              opp_checkout_test_baselines --load $INET_ROOT -p inet chart
+              run_suite $JOB opp_run_chart_tests --load $INET_ROOT -p inet -m coverage --no-build ;;
+            smoke|validation)
+              run_suite $JOB opp_run_${JOB}_tests --load $INET_ROOT -p inet -m coverage --no-build ;;
+          esac
           df -h $GITHUB_WORKSPACE
       - uses: actions/cache/save@v5
         if: github.event_name == 'schedule' && matrix.job == 'fingerprint-0'
