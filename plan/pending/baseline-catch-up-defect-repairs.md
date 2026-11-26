@@ -1295,8 +1295,7 @@ expiry sends new data. The new parameter `eceAtOneSegment = "linux"`, which `~Li
 
 **Commit** (with the recommended answers).
 
-- **C15: `tcp: fix: after an ECN-Echo at a congestion window of one segment, new data waits for the retransmission
-  timer (RFC 3168 section 6.1.2)`** (BD-7). `Tcp.ned`, `LinuxTcp.ned`, `TcpAlgorithm.h`, `TcpConnectionState.msg`,
+- **C15: `tcp: fix: an ECN-Echo at a window of one segment holds new data until the RTO (RFC 3168)`** (BD-7). `Tcp.ned`, `LinuxTcp.ned`, `TcpAlgorithm.h`, `TcpConnectionState.msg`,
   `TcpAlgorithmBase.cc`, `TcpClassicAlgorithmBase.cc`. The items of
   [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
   1. Requirement: RFC 3168 section 6.1.2, the window of one MSS. Bug: no hold of new data, and the reset also after a
@@ -1330,6 +1329,24 @@ timer) touches the same case; it stays outside this plan.
 **Gate A** approved by the maintainer on 2026-11-26 ("yes I approve the design and the answers"): (a) the state
 variable `eceHold`, (i) the window of one segment at the ECN-Echo, before the halving, and the parameter
 `eceAtOneSegment = "linux"` for `~LinuxTcp`.
+
+**The results of R8 (2026-11-26).** Master moved to `22df607673` with three commits (two CI workflows and two plan
+files), and the series was rebased onto it, and on 2026-11-27 onto `0fec958a59` (no change of `src`): C14 is
+`e5e54f2661`, and C15 is `82b9ea7470`, with both tests, the reviewer
+document `tests/protocol/tcp/ece-at-one-segment.md` and the release note `doc/whatsnew/fixes/tcp-ece-at-one-segment.txt`.
+`check-pull-request.sh` passes; its note on the length of the first subject of C15 led to the shorter subject.
+
+- In the image of the CI at the tree of C15 (`9116bbf901`, the same code before the change of the subject): the release
+  fingerprints give 1845 PASS, 1 FAIL and 1 expected ERROR, and the statistical tests 933 PASS, 11 SKIP and 1 FAIL
+  (`runs/r8-gate/` of the folder of D10, `evidence/runs/9116bbf901/` of the job copy). Only `examples/inet/dctcp`
+  `TcpRenoIncast` moves, with the values of the preview:
+  - fingerprint, run 0: `3c90-c807/tplx` to `ac67-fe19/tplx`, `6def-df14/~tNl` to `8ab0-4000/~tNl`, `e2bf-bdfc/~tND` to
+    `2cb2-29fe/~tND`;
+  - statistics: 10193 of 34493 values; the applications receive 88683320 bytes in place of 89349080 (60742 packets in
+    place of 61198), because a Reno sender at a window of one segment waits for its retransmission timer after an
+    ECN-Echo.
+- The re-record of these values waits for the approval of the maintainer
+  ([change-a-baseline.md](../../doc/project/guide/change-a-baseline.md) §2).
 
 ## 7. Verification
 
