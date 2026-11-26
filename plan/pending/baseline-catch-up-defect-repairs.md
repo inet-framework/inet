@@ -1242,6 +1242,91 @@ to `0fec958a59` with eight commits (gate scripts, two workflows, documents, plan
 tests), none in `src` or in the fingerprint store, so the series was rebased once more and C14 is `e5e54f2661`. Master
 moves to this commit by a fast-forward.
 
+#### R8: the ECN-Echo at a congestion window of one segment (BD-7), prepared 2026-11-26
+
+**Re-check.** On master `f1670fb2e4`, `TcpClassicAlgorithmBase::processEce()` still halves cwnd to at least one MSS
+(`calculateSsthreshForEce()`), and it restarts the retransmission timer when cwnd is one MSS *after* the halving, so
+also when it was up to two MSS before. Nothing holds new data afterwards: `sendData()` after the ECN-Echo sends at once.
+The expiry of the retransmission timer with nothing in flight already sends new data and is no loss (`e01c747832`).
+`TcpCubic` uses the same `processEce()`; `DcTcp` has its own response (RFC 8257) and no timer reset.
+
+RFC 3168 section 6.1.2: "The value of the congestion window is bounded below by a value of one MSS. However, the
+sending TCP should still decrease its congestion window in response to the receipt of an ECN-Echo ACK packet. The
+sending TCP MUST reset the retransmit timer on receiving the ECN-Echo packet when the congestion window is one. The
+sending TCP will then be able to send a new packet only when the retransmit timer expires." Linux does not do this:
+at an ECE it enters CWR (`tcp_enter_cwr()`, `tcp_init_cwnd_reduction()`), PRR reduces cwnd as the ACKs arrive
+(`tcp_cwnd_reduction()`), and a web read of `net/ipv4/tcp_input.c` and `tcp_output.c` of Linux master found no reset
+of the timer and no hold for an ECE at one segment (a part of the source was read only as a summary).
+
+**The fault, shown.** `tests/protocol/tcp/rfc/Rfc3168EceAtOneSegmentWaitsForTimer.test`, in debug mode on the
+branch: host A starts with a window of one segment (`initialWindow = "rfc2001"`) and `tcpEcnMode = "rfc3168"`, and the
+relay marks its first data segment CE. The ACK of host B with ECE acknowledges all data at 0.40025684 s; host A resets
+the timer and sends its next data segment in the same event. The test fails at that segment.
+
+**The design before gate A (preview, 2026-11-26).** The recommended design is in the working tree, not committed; its
+diff is the preview commit `f93d0cb088` on the branch `preview/r8`, which does not land. `processEce()` notes whether
+cwnd is one segment before the halving; then it restarts the timer and sets the state variable `eceHold`. While it
+holds, `TcpAlgorithmBase::sendData()` sends no new data; the expiry of the retransmission timer ends it, and that
+expiry sends new data. The new parameter `eceAtOneSegment = "linux"`, which `~LinuxTcp` sets, does neither, as Linux.
+28 added and 3 removed lines in 6 files, with the comments.
+
+- A second test, `Rfc3168EceAtTwoSegmentsSendsAtOnce.test`, starts with two segments: the ECN-Echo halves the window to
+  one segment, which is a decrease, so the next data segment leaves at once. It passes today and with the design.
+- With the preview, both tests pass, and so do the 45 protocol tests of RFC 3168, ECN, DCTCP and the algorithm classes
+  and the 36 module tests of ECN, DCTCP, the algorithms and the window, in debug mode.
+- In the image of the CI: the release fingerprints give 1845 PASS, 1 FAIL and 1 expected ERROR: only `examples/inet/dctcp`
+  `TcpRenoIncast` moves, in its three ingredients (`runs/r8-preview/` of the folder of D10). The statistical tests give
+  933 PASS, 11 SKIP and 1 FAIL: only `TcpRenoIncast` moves, 10193 of 34493 values (`evidence/runs/f93d0cb088/` of the
+  job copy). Its applications receive 0.75 % less data, 88683320 bytes in place of 89349080 (60742 packets in place of
+  61198), because a Reno sender at a window of one segment now waits for its retransmission timer after an ECN-Echo.
+
+**Design questions for gate A.**
+
+1. *The form of the hold.* (a) A state variable `eceHold`: the ECN-Echo sets it, the expiry of the retransmission
+   timer ends it, and `sendData()` sends no new data while it holds. (b) A congestion window below one segment until
+   the expiry: less code, but RFC 3168 bounds the window below by one MSS, and the statistic `cwnd` would show 0. The
+   assistant recommends (a).
+2. *When the window counts as one segment.* (i) At the ECN-Echo, before the halving: RFC 3168 lets the window decrease
+   and asks for the wait only when it cannot. (ii) After the halving, as today: then a window of two segments also
+   waits. The assistant recommends (i), the repair of the entry.
+3. *The variants.* `~Tcp` follows RFC 3168, and the parameter `eceAtOneSegment = "linux"`, which `~LinuxTcp` sets,
+   resets no timer and holds no data, as Linux; `~LegacyTcp` keeps the default of `~Tcp`. This is the rule of
+   `Tcp.ned`, which the maintainer applied to R7. The assistant recommends it.
+
+**Commit** (with the recommended answers).
+
+- **C15: `tcp: fix: after an ECN-Echo at a congestion window of one segment, new data waits for the retransmission
+  timer (RFC 3168 section 6.1.2)`** (BD-7). `Tcp.ned`, `LinuxTcp.ned`, `TcpAlgorithm.h`, `TcpConnectionState.msg`,
+  `TcpAlgorithmBase.cc`, `TcpClassicAlgorithmBase.cc`. The items of
+  [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
+  1. Requirement: RFC 3168 section 6.1.2, the window of one MSS. Bug: no hold of new data, and the reset also after a
+     halving to one segment. Evidence: the test above; `examples/inet/dctcp` `TcpRenoIncast` client18 at t=62.059170 s
+     (BD-7).
+  2. Existing tests: `tcp_ecn_cwnd_1.test` checks that the expiry with nothing in flight is no loss; no test checks the
+     hold.
+  3. New: `Rfc3168EceAtOneSegmentWaitsForTimer.test` and `Rfc3168EceAtTwoSegmentsSendsAtOnce.test`, one case each.
+  4. Initial state: a classic algorithm with ECN and a window of one (two) segments. Stimulus: the relay marks the
+     first data segment CE. Production path: `processEce()`, `restartRexmitTimer()`, `sendData()`, `processTimer()`.
+     Observation: the segments of host A. Assertion: no data segment before the expiry of the timer (at once, for two
+     segments), and the ACK of all data.
+  5. Before C15: a data segment at the ECN-Echo. After C15: the next data segment at the expiry of the timer.
+  6. Code action: `processEce()` sets `eceHold` at a window of one segment before the halving, `sendData()` holds, and
+     the expiry of the retransmission timer ends the hold.
+  7. Runner: `run_protocol_tests!(project; file = "Rfc3168|TcpAlgorithmClass|DcTcp|Ecn", mode = "debug")` and the module
+     tests of ECN, DCTCP and the algorithms in the editor, after a debug build. Limit: Limited Transmit and the SACK
+     recovery send new data in paths of their own, which need data in flight; at an ECN-Echo at one segment the ACK
+     normally acknowledges all data. No test runs `eceAtOneSegment = "linux"`.
+  8. Reviewer document: `tests/protocol/tcp/ece-at-one-segment.md`, in C15, with the release note
+     `doc/whatsnew/fixes/tcp-ece-at-one-segment.txt`.
+
+**Expected baselines.** `examples/inet/dctcp` `TcpRenoIncast`, as the entry says: its fingerprint (one run, three ingredients) and its
+statistics. No other stored result moves. The re-record needs the approval of the exact values, after the commit.
+
+**Checks.** The two new tests, the protocol tests of RFC 3168, ECN, DCTCP and the algorithm classes, and the module
+tests of ECN, DCTCP and the algorithms, in debug mode; all fingerprints in release mode and all statistical tests in
+the image of the CI (§6.1, step 8). BD-52 (a retransmission timer that runs with nothing in flight delays the override
+timer) touches the same case; it stays outside this plan.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
