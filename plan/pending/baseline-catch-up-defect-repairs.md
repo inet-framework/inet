@@ -309,7 +309,8 @@ No sealed file changes. No consumer outside INET changes.
   receiver window. Baselines: `examples/inet/tcpclientserver` `inet-tahoe` and `inet-westwood`.
   - `tcp: fix: TcpTahoe takes ssthresh from FlightSize, as RFC 5681 equation (4) says` (BD-8).
   - `tcp: fix: TcpTahoe and TcpWestwood start one fast retransmit in each window (RFC 6582 section 6)` (BD-39).
-- [ ] **Step 6. R6: RACK starts the recovery at an ACK with data (BD-35).** Test: in a two-way transfer, a loss that
+- [x] **Step 6. R6: RACK starts the recovery at an ACK with data (BD-35).** Closed on 2026-11-26 with no change: BD-35
+  does not hold as written, and BD-53 and BD-54 take the narrower faults, outside this plan (§6.3, R6). Test: in a two-way transfer, a loss that
   RACK finds starts the recovery at that ACK. Baselines: `examples/inet/bulktransfer` (check R1 of step 50 of the
   catch-up).
   - `tcp: fix: a loss that RACK marks at an ACK with data starts the recovery (RFC 8985 section 6.2)`.
@@ -1090,6 +1091,31 @@ workflow `check-baseline-masters.yml` puts the two `statistics` commits onto mas
 Before the push, master moved to `25bb4dee13` with three commits of another plan, so the series was rebased once more:
 C9 is `5ea3dcb616`, C10 `2138b73fc5`, C11 `b3757616e3`, C12 `9facdcab8b` and C13 `8a687bf056`. Only plan files differ
 from the tested head `5f2fb71e7c`, so the gates hold.
+
+#### R6: RACK at an ACK with data (BD-35), re-checked 2026-11-26
+
+**Re-check.** On master `f1670fb2e4`, BD-35 does not hold as written:
+
+- When an ACK marks a new loss, `Rfc6675Recovery::rackDetectAndMarkLost()` arms the RACK timer with zero delay, and
+  its handler `TcpConnection::processRackReoTimeout()` calls `reoTimeout()`, which calls `step4()` at the same time.
+  So a loss that RACK marks at an ACK with data starts the recovery at that ACK. The code is from `4b53fe828a`
+  (2026-10-08), before step 50, where the entry was found.
+- An INET receiver puts SACK blocks only on the ACK that it sends at once for an out-of-order segment
+  (`TcpConnection::addSacks()` clears `snd_sack`). Its data segments carry none, so between INET hosts an ACK with data
+  brings no new SACK information, and RACK marks nothing at it.
+
+An exploration test shows both (`runs/r6/` of the folder of D10, with its traces; not committed): host A sends
+300000 bytes, host B echoes them twice on the same connection, and the relay removes the 40th, 42nd and 44th data
+segment of host A. Host A retransmits the 40th segment at the RACK timer, after the reordering window of the first
+SACK. During the recovery, host B sends 10 ACKs with data and no SACK block, and the 42nd segment goes when PRR allows
+it at a pure duplicate ACK. A first form with an initial window of 1000 segments at host B looked like a wait of 90
+ms, but there the ACKs with the SACK blocks waited in the interface queue of host B behind its data.
+
+Two narrower faults remain, both already in v4.7.0: the receiver does not repeat the SACK blocks on all ACKs while it
+holds out-of-order data (RFC 2018 section 4, a SHOULD), and in a recovery an ACK with data and new SACK information runs
+neither PRR nor step C (RFC 6675 section 2, RFC 6937). The maintainer agreed on 2026-11-26 ("agreed") to close BD-35
+and to add the two faults as BD-53 and BD-54 of [baseline-catch-up-defects.md](baseline-catch-up-defects.md), outside
+the scope of this plan until a revision takes them. R6 makes no commit of code.
 
 ## 7. Verification
 

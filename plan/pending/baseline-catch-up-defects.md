@@ -24,7 +24,8 @@ The list has 51 entries. Seven are repaired: BD-0, BD-1, BD-2, BD-22 and BD-45 b
 and BD-50 by `858477687b` and `dd73c4376b` after it. This plan holds the 44 open entries. On 2026-11-25 the review of
 change R2 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) against the RFC found two
 more faults, and the maintainer added them as BD-51 and BD-52 ("yes to all of your questions"), so the list has 53
-entries. The list itself is a file of
+entries. On 2026-11-26 the re-check of change R6 closed BD-35 and found two narrower faults, and the maintainer added
+them as BD-53 and BD-54 ("agreed"), so the list has 55 entries. The list itself is a file of
 the job copy of the catch-up (`evidence/defects.json`), outside git, so this plan gives the complete facts of each
 entry. The evidence of each step (logs, experiments, row differences) is in `evidence/steps/step-NNN/` of that job
 copy. The baseline commit of each step in `statistics` and `media` gives the explanation of the step.
@@ -556,6 +557,14 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-35: a loss that RACK found waits for a duplicate ACK, the RACK timer or the RTO
 
+- **State (2026-11-26):** **closed** by the re-check of change R6 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) on master
+  `f1670fb2e4`; the maintainer agreed. The fault does not hold as written. When an ACK marks a new loss,
+  `rackDetectAndMarkLost()` arms the RACK timer with zero delay, and its handler `processRackReoTimeout()` calls
+  `reoTimeout()` and `step4()` at the same time; this code is from `4b53fe828a` (2026-10-08), before step 50. And an
+  INET receiver puts SACK blocks only on the ACK that it sends at once for an out-of-order segment (BD-53), so between
+  INET hosts an ACK with data brings no new SACK information, and RACK marks nothing at it. The exploration test of R6
+  shows both (`runs/r6/` of the folder of D10). Check R1 of step 50 acted on the standing marks at every ACK with data,
+  also outside this case; the re-check did not explain its moves. The narrower faults are BD-53 and BD-54.
 - **Place:** `Rfc6675Recovery::processSACKOption()`, `reoTimeout()` and `step4()`. Active by default from `eca05a10b4`
   (step 50).
 - **Fault:** RACK marks losses at each ACK with new SACK information, also at an ACK that carries data. But only a
@@ -642,6 +651,48 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   expiry of that timer send the held data. Decide it with BD-7.
 - **Check:** a protocol test: an ECN-Echo at a cwnd of one MSS, then a write that the SWS avoidance holds. The held
   data leaves at the expiry of the override timer.
+
+#### BD-53: an INET receiver puts SACK blocks only on the first ACK after an out-of-order segment
+
+- **State (2026-11-26):** open. Added by the maintainer on 2026-11-26 ("agreed"). Not in the scope of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) until a revision of that plan takes it.
+- **Place:** `TcpConnection::addSacks()` clears `snd_sack` after one segment
+  ([TcpConnectionSackUtil.cc](../../src/inet/transportlayer/tcp/TcpConnectionSackUtil.cc)), and
+  `TcpConnection::writeHeaderOptions()` adds SACK blocks only while `snd_sack` or `snd_dsack` is set
+  ([TcpConnectionUtil.cc](../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc)). Already in v4.7.0. Found by the
+  re-check of change R6, not by a step of the catch-up.
+- **Fault:** RFC 2018 section 4: "If sent at all, SACK options SHOULD be included in all ACKs which do not ACK the
+  highest sequence number in the data receiver's queue." An INET receiver sends the SACK blocks only on the ACK that it
+  sends at once for an out-of-order segment. Its later segments, its data segments among them, carry none while the
+  hole stays. Linux puts the SACK blocks on every segment while its out-of-order queue holds data
+  (`tcp_established_options()`). So between INET hosts an ACK with data never brings SACK information, and the SACK
+  information of a lost ACK does not come again. In the exploration test of R6 (`runs/r6/` of the folder of D10), the 10
+  ACKs with data of host B during the recovery of host A carry no SACK block.
+- **Baselines:** each stored run with SACK, data in both directions and a loss; not measured.
+- **Repair:** put the SACK blocks on every segment while the receive queue holds out-of-order data, as RFC 2018 and
+  Linux do.
+- **Check:** a protocol test: during a hole, a data segment of the receiver carries the SACK blocks.
+
+#### BD-54: in a recovery, an ACK with data and new SACK information runs neither PRR nor step C
+
+- **State (2026-11-26):** open. Added by the maintainer on 2026-11-26 ("agreed"). Not in the scope of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) until a revision of that plan takes it.
+- **Place:** `Rfc6675Recovery::isDuplicateAck()` asks for an ACK with no data
+  ([Rfc6675Recovery.cc](../../src/inet/transportlayer/tcp/flavours/Rfc6675Recovery.cc)), and
+  `TcpAlgorithmBase::countDuplicateAck()` calls `receivedDuplicateAck()` only for a duplicate ACK
+  ([TcpAlgorithmBase.cc](../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc)). Already in v4.7.0, where
+  the duplicate ACK of `TcpConnectionRcvSegment.cc` asks for no data. Found by the re-check of change R6.
+- **Fault:** RFC 6675 section 2 counts an ACK that carries new SACK information as a duplicate acknowledgment "even if
+  it carries new data". RFC 6937 computes DeliveredData on every ACK of a recovery, and Linux `tcp_fastretrans_alert()`
+  runs on each ACK of a recovery. In INET, an ACK at SND.UNA with data and new SACK information runs no PRR
+  (`prrCwndReduction()`) and no step C, so its delivered data counts only at the next pure duplicate ACK, and the
+  retransmissions wait for it. Only a peer that puts SACK blocks on data segments sends such ACKs: Linux, or INET after
+  a repair of BD-53. Found in the code; not run.
+- **Baselines:** none between INET hosts (BD-53).
+- **Repair:** count an ACK with new SACK information as a duplicate ACK in `Rfc6675Recovery::isDuplicateAck()`, with or
+  without data, as RFC 6675 section 2 says. Decide it with BD-53.
+- **Check:** a protocol test with a peer that puts SACK blocks on its data segments: in a recovery, the delivered data
+  of an ACK with data lets PRR send.
 
 ### 4.2 IEEE 802.11
 
