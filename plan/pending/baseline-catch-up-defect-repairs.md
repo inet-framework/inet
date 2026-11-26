@@ -295,15 +295,16 @@ No sealed file changes. No consumer outside INET changes.
   segment leaves when the override timer expires. Baselines: `examples/inet/bulktransfer` `inet_inet_2b`.
   - `tcp: fix: a segment that does not change the window keeps the override timer running` (BD-21).
   - `tcp: change: the override timeout of the sender SWS avoidance <decision of gate A>` (BD-23).
-- [x] **Step 3. R3: no priority tag on an untagged port (BD-44).** Repaired as C9 `d18a4b049a` and C10 `5d4c830ee4`; gate B approved on 2026-11-26 (§6.3, R3). It lands after the debug fingerprints in the image of the CI. Test: a protocol test in `tests/protocol/vlan`
+- [x] **Step 3. R3: no priority tag on an untagged port (BD-44).** Landed on master on 2026-11-26 as C9 `5ea3dcb616` and C10 `2138b73fc5`, with R4 and R5 (§6.3, R3 and R5). Test: a protocol test in `tests/protocol/vlan`
   with `VlanReqMapper` and `forwardPcp = true`; the frame of an untagged VLAN leaves with no tag. Gate A decides
   whether `examples/ethernet/vlan`, `showcases/ethernet/sharedcore`, `tests/module/lib/vlan-access-trunk.ini` and
   `tests/module/EthernetUnknownEtherType_1.test` keep `forwardPcp = false`.
   - `linklayer.vlan: fix: VlanReqMapper asks for no 802.1Q tag when the VLAN leaves untagged`.
-- [x] **Step 4. R4: the constants of copper and aluminium (BD-49).** Repaired as C11 `ac770b1913`; gate B approved on 2026-11-26 (§6.3, R4). It lands with R3. Test: a module test with a copper object and
+- [x] **Step 4. R4: the constants of copper and aluminium (BD-49).** Landed on master on 2026-11-26 as C11 `b3757616e3`, with R3 and R5 (§6.3, R4 and R5). Test: a module test with a copper object and
   `DielectricObstacleLoss`; the factor is a number from 0 to 1 in debug mode.
   - `environment: fix: copper and aluminium have their real resistivity and a relative permittivity and permeability of 1`.
-- [ ] **Step 5. R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39).** Test: after a loss and a go-back,
+- [x] **Step 5. R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39).** Landed on master on 2026-11-26 as C12
+  `9facdcab8b` and C13 `8a687bf056`, with the `statistics` commits `0f47b1d8b9` and `bbd9999454` (§6.3, R5). Test: after a loss and a go-back,
   one fast retransmit occurs in each window; ssthresh equals max(FlightSize/2, 2*SMSS) with cwnd larger than the
   receiver window. Baselines: `examples/inet/tcpclientserver` `inet-tahoe` and `inet-westwood`.
   - `tcp: fix: TcpTahoe takes ssthresh from FlightSize, as RFC 5681 equation (4) says` (BD-8).
@@ -1033,6 +1034,62 @@ re-record runs in the image of the CI.
 **Checks.** The three new protocol tests, `Rfc5681FastRetransmit`, `Rfc5681TimeoutResponse` and the
 `TcpAlgorithmClass*` tests in debug mode; all fingerprints in release mode (§6.1, step 8); the statistical tests of
 `examples/inet/tcpclientserver` in the image of the CI.
+
+**Gate A** approved by the maintainer on 2026-11-26 ("I accept R5"): the recommended answers, (A) for question 1 and
+(a) for question 2, and the test of question 3.
+
+**The results of R5 (2026-11-26).** C12 and C13 hold the repairs, the three protocol tests, the two reviewer documents
+and the two release notes, as above.
+
+- The measurement in the image of the CI, before the landing (C12 `6b9b606e1c` and C13 `db21272722` on master
+  `7f7f77a00f`): at C12 the release fingerprints give 1840 PASS, 6 FAIL and 1 expected ERROR, and the statistical
+  tests 933 PASS, 11 SKIP and 1 FAIL; at C13, 1834 PASS, 12 FAIL and 1 expected ERROR, and 932 PASS, 11 SKIP and 2
+  FAIL. Only `examples/inet/tcpclientserver` moves, as the expected baselines say (`runs/r5-c12/` and `runs/r5-c13/`
+  of the folder of D10, `evidence/runs/6b9b606e1c/` and `evidence/runs/db21272722/` of the job copy).
+  - C12 moves the fingerprints of `inet-tahoe` runs 1 to 6, and 4 of 1858 statistics of `inet-tahoe`: the ssthresh
+    vector of `client1`, whose highest value is 13032 in place of 13140. Run 0 keeps its fingerprint.
+  - C13 moves the fingerprints of `inet-tahoe` and `inet-westwood` runs 0, 2, 3, 5 and 6, and the statistics of both
+    tests: 344 of 1518 and 329 of 1532. In `inet-tahoe` run 0, `client1` sends 719 segments in place of 1198, and the
+    server gets 75 segments out of order in place of 16; in `inet-westwood` run 0, `client1` gets 2 timeouts in place
+    of 1. Runs 1 and 4 of both keep the fingerprint of C12.
+- The maintainer approved the re-record of exactly these values on 2026-11-26 ("yes I approve and you can land the
+  changes up to R5"), after the list with a reason for each line
+  ([change-a-baseline.md](../../doc/project/guide/change-a-baseline.md) §2).
+- Master had moved to `4e768408d2`, with 32 commits. Among them, `004ac5c214` moves the baseline pins into commit
+  trailers: the cause commit names its baseline commit in a trailer `Statistical-Baseline:`, and `inet.opp` does not
+  change. The series was rebased onto that master with no conflict, and the values were recorded on the rebased
+  series, in the image of the CI, with `statistics` at the head of its master `17be4498`
+  (`runs/r5-record.sh`, `runs/r5-record-c12/` and `runs/r5-record-c13/` of the folder of D10):
+  - C12 `9facdcab8b`: 18 fingerprint values, and the `statistics` commit `0f47b1d8b9`.
+  - C13 `8a687bf056`: 30 fingerprint values, and the `statistics` commit `bbd9999454` after it.
+  - Both `statistics` commits are on the branch `topic/baseline-catch-up-defect-repairs` of `statistics`, with their
+    record. The trailers `Change:` of C12 and C13 name `fingerprint statistical test whatsnew`, and their messages
+    hold the `Baseline changes:` lines with a reason on each.
+- The gates on the head `5f2fb71e7c`, whose sources equal the landed head `8a687bf056`:
+  - `check-baselines.sh` with the local clones passes. `check-pull-request.sh --base origin/master` passes, except
+    that the two pinned `statistics` commits are not on GitHub before the push of their branch.
+    `check-baseline-attribution.sh plan` passes, and its `run` in the job copy (`runs/r5-attribution.sh`, with the
+    commands of the image of the CI): the parent and the commit of C12 and of C13 pass, each against its own baseline, with 1 or 2
+    statistical tests and 7 or 14 fingerprint runs (`runs/r5-attribution/` of the folder of D10).
+  - In the image of the CI, all fingerprints in release mode: 1847 runs, 1846 PASS and 1 expected ERROR, in 3 min 4 s (`runs/r5-landing/` of the folder
+    of D10); all statistical tests: 945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected, in 11 min 6 s, with `statistics` at
+    `bbd9999454` (`evidence/runs/5f2fb71e7c/` of the job copy); all
+    fingerprints in debug mode, for the landing: 1847 runs, 1846 PASS and 1 expected ERROR, in 17 min 34 s
+    (`runs/r5-landing/`).
+  - `check-architecture.sh` of the three places, `check-naming.sh`, `check-interfaces.sh` and
+    `check-source-seals.sh` give the results of master: the old candidate `OsgEarthGround.cc`, 24 naming violations
+    and 16 classes.
+
+**Gate B** approved by the maintainer on 2026-11-26, with the same answer. The repair commits of BD-8 and BD-39 are in
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md).
+
+**Landing of R3 to R5 (2026-11-26).** The maintainer asked for it in the same answer. R3 is C9 `5ea3dcb616` and C10
+`2138b73fc5`, and R4 is C11 `b3757616e3`, on the rebased series. The branch `topic/baseline-catch-up-defect-repairs`
+of `statistics` goes to GitHub first, then master of INET moves to the head of the series by a fast-forward. The
+workflow `check-baseline-masters.yml` puts the two `statistics` commits onto master of `statistics` and marks them.
+Before the push, master moved to `25bb4dee13` with three commits of another plan, so the series was rebased once more:
+C9 is `5ea3dcb616`, C10 `2138b73fc5`, C11 `b3757616e3`, C12 `9facdcab8b` and C13 `8a687bf056`. Only plan files differ
+from the tested head `5f2fb71e7c`, so the gates hold.
 
 ## 7. Verification
 

@@ -356,6 +356,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-8: `TcpTahoe` takes ssthresh from cwnd, not from FlightSize
 
+- **State (2026-11-26):** repaired by `9facdcab8b` (change R5 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-26, with the protocol test `Rfc5681TahoeThresholdFlightSize.test` and the reviewer document `tests/protocol/tcp/tahoe-threshold-flight-size.md`. It moves the fingerprints of `examples/inet/tcpclientserver` `inet-tahoe` runs 1 to 6, and four ssthresh statistics of `inet-tahoe` run 0 (`statistics` `0f47b1d8b9`).
 - **Place:** [TcpTahoe.cc](../../src/inet/transportlayer/tcp/flavours/TcpTahoe.cc) (line 107 at `bc39ec7571`). From
   `b1b214c002` (step 11).
 - **Fault:** `TcpTahoe` sets ssthresh to max(cwnd/2, 2*SMSS) at the third duplicate ACK and at a timeout. RFC 5681
@@ -568,7 +569,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-39: `TcpTahoe` and `TcpWestwood` start a second fast retransmit in the same window
 
-- **State (2026-11-24):** open on master `d8a58564ee`. The numbers of `inet-westwood` above come from before `7beeb0dc88`, which changes the threshold of Westwood. Change R5 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) repairs it with BD-8 and measures them again.
+- **State (2026-11-26):** repaired by `8a687bf056` (change R5 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-26, with the protocol tests `Rfc6582TahoeOneFastRetransmitPerWindow.test` and `Rfc6582WestwoodOneFastRetransmitPerWindow.test` and the reviewer document `tests/protocol/tcp/one-fast-retransmit-per-window.md`. It moves the fingerprints of `examples/inet/tcpclientserver` `inet-tahoe` and `inet-westwood` runs 0, 2, 3, 5 and 6, and the statistics of both (`statistics` `bbd9999454`): `inet-tahoe` run 0 does 5 fast retransmits in place of 163, and `inet-westwood` run 0 gets 2 timeouts in place of 1. The numbers of `inet-westwood` above come from before `7beeb0dc88`.
 - **Place:** `TcpTahoe::receivedDuplicateAck()` and `TcpWestwood::receivedDuplicateAck()`. Older than G; shown by
   `07722bc21b` (step 59).
 - **Fault:** the two flavours have no guard against a second fast retransmit in the same window. A third duplicate
@@ -942,7 +943,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-49: copper and aluminium have NaN constants and wrong resistivities
 
-- **State (2026-11-26):** repaired by `ac770b1913` on the branch `topic/baseline-catch-up-defect-repairs` (change R4 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the unit tests `ObstacleLoss_DielectricCopper.test` and `ObstacleLoss_DielectricAluminium.test`. No stored fingerprint or statistic moves.
+- **State (2026-11-26):** repaired by `b3757616e3` (change R4 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-26, with the unit tests `ObstacleLoss_DielectricCopper.test` and `ObstacleLoss_DielectricAluminium.test`. No stored fingerprint or statistic moves.
 - **Place:** [MaterialRegistry.cc](../../src/inet/environment/common/MaterialRegistry.cc). Older than G; found at
   step 91.
 - **Fault:** copper and aluminium have the relative permittivity and permeability NaN, and the resistivities 1.68 and
@@ -1024,7 +1025,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-44: `VlanReqMapper` sends priority-tagged frames on untagged ports
 
-- **State (2026-11-26):** repaired by `d18a4b049a` and `5d4c830ee4` on the branch `topic/baseline-catch-up-defect-repairs` (change R3 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol test `Ieee8021qVlanReqMapperUntaggedNoPriorityTag.test` and the reviewer document `tests/protocol/vlan/vlan-req-mapper-untagged.md`. The four configurations no longer set `forwardPcp = false`. No stored fingerprint or statistic moves.
+- **State (2026-11-26):** repaired by `5ea3dcb616` and `2138b73fc5` (change R3 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-26, with the protocol test `Ieee8021qVlanReqMapperUntaggedNoPriorityTag.test` and the reviewer document `tests/protocol/vlan/vlan-req-mapper-untagged.md`. The four configurations no longer set `forwardPcp = false`. No stored fingerprint or statistic moves.
 - **Place:** [VlanReqMapper.cc](../../src/inet/linklayer/vlan/VlanReqMapper.cc) `processPacket()`, and
   [PacketDirectionReverser.ned](../../src/inet/linklayer/ethernet/common/PacketDirectionReverser.ned)
   (`forwardPcp = true` by default). From `4a63e09916` (2023-01-17, older than G); found at step 78 (`688c3d74f2`) from
