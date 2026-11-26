@@ -14,6 +14,11 @@ import inet.queueing.contract.IPacketFlow;
 // Updates the VLAN request tag (`CVlanReq` or `SVlanReq`, see `vlanTagType`)
 // on packets.
 //
+// A map to -1 sends the frame untagged on that interface (the untagged set of
+// IEEE 802.1Q-2018 8.8.2): the module removes the VLAN, PCP and drop eligible
+// requests of its tag type and requests no encapsulation of its tag protocol.
+// The priority of the frame stays as its user priority (`UserPriorityReq`).
+//
 simple VlanReqMapper extends PacketFlowBase like IPacketFlow
 {
     parameters:

@@ -206,7 +206,6 @@ record-vector-results = false
 *.*.eth[*].bitrate = 100Mbps
 
 *.switchA.bridging.typename = "BridgingLayer"
-*.switchA.bridging.directionReverser.reverser.forwardPcp = false
 *.switchB.bridging.typename = "MacRelayUnit"
 
 %subst: /\x1B\[[0-9;]*m//

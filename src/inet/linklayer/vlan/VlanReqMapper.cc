@@ -9,6 +9,7 @@
 
 #include "inet/common/ProtocolUtils.h"
 #include "inet/common/Simsignals.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -46,19 +47,27 @@ void VlanReqMapper::processPacket(Packet *packet)
     auto interfaceReq = packet->findTag<InterfaceReq>();
     auto networkInterface = interfaceReq != nullptr ? interfaceTable->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
     std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
+    bool untagged = false;
     if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
         auto vlanReq = findVlanReq(packet, vlanTagType);
         auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
         auto it = interfaceMappedVlanIds->find(requestedVlanId);
         if (it != interfaceMappedVlanIds->end()) {
             auto mappedVlanId = it->second;
-            if (mappedVlanId == -1)
+            if (mappedVlanId == -1) {
+                // IEEE 802.1Q-2018 8.8.2: the VLAN is in the untagged set of the port, so the frame leaves without
+                // a tag of this type, and the requests for the fields of that tag have no object. The priority of
+                // the frame stays as its user priority (6.9.2), as Ieee8021adPolicy does on an untagged port.
                 removeVlanReqIfPresent(packet, vlanTagType);
+                removePcpReqIfPresent(packet, vlanTagType);
+                removeDropEligibleReqIfPresent(packet, vlanTagType);
+                untagged = true;
+            }
             else
                 addVlanReqIfAbsent(packet, vlanTagType)->setVlanId(mappedVlanId);
         }
     }
-    ensureEncapsulationProtocolReq(packet, protocol, findVlanReq(packet, vlanTagType) != nullptr || findPcpReq(packet, vlanTagType) != nullptr);
+    ensureEncapsulationProtocolReq(packet, protocol, !untagged && (findVlanReq(packet, vlanTagType) != nullptr || findPcpReq(packet, vlanTagType) != nullptr));
     setDispatchProtocol(packet);
 }
 
