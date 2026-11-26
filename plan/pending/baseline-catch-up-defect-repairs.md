@@ -1117,6 +1117,85 @@ neither PRR nor step C (RFC 6675 section 2, RFC 6937). The maintainer agreed on 
 and to add the two faults as BD-53 and BD-54 of [baseline-catch-up-defects.md](baseline-catch-up-defects.md), outside
 the scope of this plan until a revision takes them. R6 makes no commit of code.
 
+#### R7: a window update is no duplicate ACK (BD-4), prepared 2026-11-26
+
+**Re-check.** On master `f1670fb2e4`, `TcpConnection::processAckInEstabEtc()` still writes the window of an ACK at
+SND.UNA into `snd_wnd` (`updateWndInfo()`) before `receivedAckForAlreadyAckedData()`, and
+`Rfc5681Recovery::isDuplicateAck()` compares the window of the ACK with that `snd_wnd`. So condition (e) of RFC 5681
+section 2 always holds, and a window update counts as a duplicate ACK. `Rfc6582Recovery` uses the same test.
+`TcpAlgorithmBase::isDuplicateAck()`, which `TcpTahoe`, `TcpVegas`, `TcpWestwood` and `TcpNoCongestionControl` use,
+has no condition (e) at all. The SACK recovery (`Rfc6675Recovery`) defines a duplicate ACK by its SACK blocks and has
+no window condition, so BD-4 acts only without SACK. The baselines of the entry come from step 7, when SACK was off by
+default; with SACK on by default, `examples/inet/bulktransfer` no longer uses this test.
+
+**The fault, shown.** `tests/protocol/tcp/rfc/Rfc5681WindowUpdateNoDuplicateAck.test`, in debug mode on the branch:
+`TcpNewReno` without SACK, and host B advertises 60000 bytes. The relay sends the third ACK of host B three more times,
+10 microseconds apart, with the windows 60100, 60200 and 60300. Host A counts them as duplicate ACKs 1 to 3 and starts a
+fast retransmit of the segment at 33688, with no segment lost. The test fails at that retransmission.
+
+**The design before gate A (preview, 2026-11-26).** The recommended design is in the working tree, not committed; its
+diff is the preview commit `56ecbbe58b` on the branch `preview/r7`, which does not land. `updateWndInfo()` answers
+whether the ACK is a window update. The connection keeps the answer in the state variable `snd_wnd_updated` for the
+ACK at SND.UNA in process, and both duplicate ACK tests read it as condition (e). The diff has 20 added and 10
+removed lines in 6 files, with the comments.
+
+- A first form took any change of the window. It fails `tests/module/tcp_rcvbuf_shrink_3.test`: there the receiver
+  offers a smaller window with each out-of-order segment (`windowShrinkAllowed`), so these ACKs are no duplicates, and
+  the expected fast retransmit does not come. Linux takes the window of an ACK that acknowledges nothing new only when
+  it grows or is zero (`tcp_may_update_window()`), and only then sets `FLAG_WIN_UPDATE`, which makes the ACK no
+  duplicate. The second form, the preview, does the same.
+- With the second form, the new test passes, and so do the 40 protocol tests of RFC 5681, RFC 6582, the window and the
+  algorithm classes, and 45 of the 49 module tests of the duplicate ACK and of the window, in debug mode. The other 4
+  are `tcp_stresstest_*`. They fail on this machine with and without the change: the OMNeT++ of the editor
+  (`omnet-cpp` `ee5ed4066b`) prints a line "Network hash", which their expected output does not hold.
+- In the image of the CI, the first form moves no stored fingerprint: 1847 runs, 1846 PASS and 1 expected ERROR
+  (`runs/r7-preview/` of the folder of D10). The second form: 1847 runs, 1846 PASS and 1 expected ERROR (`runs/r7-preview-b/`), and
+  all statistical tests, 945 TOTAL, 934 PASS and 11 SKIP (expected), 0 unexpected (`evidence/runs/56ecbbe58b/` of the
+  job copy). So the design moves no stored result.
+
+**Design questions for gate A.**
+
+1. *Which window change makes an ACK no duplicate.* (A) A larger window or a zero window, as Linux
+   `FLAG_WIN_UPDATE`. A smaller window that out-of-order data leaves keeps the duplicate, so a receiver that counts
+   the buffer of out-of-order data still gets its fast retransmit. (B) Any change, as the text of condition (e) says;
+   then `tcp_rcvbuf_shrink_3` changes, and its fast retransmit waits for the timer. The assistant recommends (A).
+2. *The scope.* (a) Both tests: the recoveries of RFC 5681 and RFC 6582 (`TcpReno`, `TcpNewReno`, `TcpCubic` and
+   `DcTcp` without SACK), and `TcpAlgorithmBase::isDuplicateAck()` (`TcpTahoe`, `TcpVegas`, `TcpWestwood`,
+   `TcpNoCongestionControl`), which has no condition (e) at all. (b) Only the place of the entry, the two recoveries.
+   The assistant recommends (a): it is the same definition, and the same fault.
+
+**Commit** (with the recommended answers).
+
+- **C14: `tcp: fix: a window update is no duplicate ACK (RFC 5681 section 2)`** (BD-4). `TcpConnectionState.msg`,
+  `TcpConnection.h`, `TcpConnectionUtil.cc`, `TcpConnectionRcvSegment.cc`, `Rfc5681Recovery.cc`,
+  `TcpAlgorithmBase.cc`. The items of [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
+  1. Requirement: RFC 5681 section 2, the definition of a duplicate acknowledgment, condition (e). Bug: the comparison
+     uses the window that the same ACK has just written. Evidence: the test above.
+  2. Existing tests: `Rfc5681FastRetransmit.test` and the module tests of the algorithms send no window update in a
+     loss; `tcp_rcvbuf_shrink_3.test` sends smaller windows, which stay duplicates. None exposes the gap.
+  3. New: `tests/protocol/tcp/rfc/Rfc5681WindowUpdateNoDuplicateAck.test`, one case.
+  4. Initial state: `TcpNewReno` without SACK, host B with an advertised window of 60000 bytes. Stimulus: 300000
+     bytes, and three copies of the third ACK of host B with a larger window each. Production path:
+     `processAckInEstabEtc()`, `updateWndInfo()`, `countDuplicateAck()`, `Rfc6582Recovery::isDuplicateAck()`.
+     Observation: the segments of host A. Assertion: no retransmission, and the ACK of all data.
+  5. Before C14: a fast retransmit at the third copy. After C14: none, because each copy is a window update.
+  6. Code action: `updateWndInfo()` answers whether the ACK is a window update, `snd_wnd_updated` keeps it, and
+     both duplicate ACK tests read it.
+  7. Runner: `run_protocol_tests!(project; file = "Rfc5681|Rfc6582|TcpAlgorithmClass|Rfc9293", mode = "debug")` and
+     the module tests of the algorithms and of the window in the editor, after a debug build. Limit: the test runs one
+     algorithm; the module tests of `TcpTahoe`, `TcpVegas` and `TcpWestwood` cover the other test without a window
+     update.
+  8. Reviewer document: `tests/protocol/tcp/window-update-no-duplicate-ack.md`, in C14, with the release note
+     `doc/whatsnew/fixes/tcp-window-update-no-duplicate-ack.txt`.
+
+**Expected baselines.** None. The preview moves no stored fingerprint and no statistic (above): the stored runs use SACK, or they get no
+window update during a loss. The baselines of the entry (`examples/inet/bulktransfer`, from step 7) date from before
+SACK was on by default.
+
+**Checks.** The new test, the protocol tests of RFC 5681, RFC 6582, RFC 9293 and the algorithm classes, and the
+module tests of the algorithms and of the window, in debug mode; all fingerprints in release mode and all statistical
+tests in the image of the CI (§6.1, step 8).
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
