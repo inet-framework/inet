@@ -4,9 +4,10 @@ pin moves to. It is the mechanical half of TR-BASELINE-PIN, TR-BASELINE-PROVENAN
 TR-BASELINE-ATTRIBUTION and TR-BASELINE-PARENT (doc/project/rule/testing.md), and of
 PR-SPLIT-BASELINE for a baseline in another repository.
 
-  TR-BASELINE-PIN          each commit pins the commit of each baseline repository with a full hash;
-                           a pin moves only forward, over at most one commit that changes results;
-                           the pinned commit is in the baseline repository
+  TR-BASELINE-PIN          each commit pins the commit of each baseline repository with a full hash,
+                           in the ref of inet.opp or in a pin trailer of its message (the trailer
+                           form); a pin moves only forward, over at most one commit that changes
+                           results; the pinned commit is in the baseline repository
   TR-BASELINE-PROVENANCE   the baseline commit, which is the commit that changes results, has its
                            record: the computed "Baseline changes:" list with a reason on each
                            line, and the trailers INET-Subject (or INET-Commit) and Attribution
@@ -25,6 +26,11 @@ reason on each line. When it changes fingerprint values, the code that moves the
 commit itself, or a reduction patch in its message after a line "Reduction:", with the trailer
 "Attribution: forward" or "Attribution: reverse". A commit that only adds, removes or renames runs
 or ingredient sets, or that changes no source line, has no size limit.
+
+In the trailer form, the first pin of a kind in the series moves from the base of its baseline branch:
+the merge base of the pin and the master branch of the baseline repository. Whether the baseline
+branch can land on that master branch with no common file is the status "Baseline merge" of
+baseline_masters.py check, because it changes when another pull request lands.
 
 A result is a .sca file of the statistics repository, or an image of the media repository that a
 chart of an analysis file of the INET tree exports. A commit of a baseline repository that changes
@@ -56,7 +62,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import baseline_summary  # noqa: E402
 import fingerprint_moves  # noqa: E402
-from baseline_pins import PinError, git, is_full_hash, read_baselines  # noqa: E402
+from baseline_pins import PinError, git, is_full_hash, is_trailer_form, master_of, pin_trailers, read_baselines  # noqa: E402
 
 FAIL_LINES = 100
 NOTE_LINES = 30
@@ -108,6 +114,7 @@ class BaselineRepository:
         else:
             self.folder = os.path.join(cache_folder, kind)
             os.makedirs(self.folder)
+            self._master = None
             git("init", "-q", "--bare", ".", cwd=self.folder)
             git("remote", "add", "origin", source, cwd=self.folder)
             # a clone without the file contents: the gate gets only the contents that it reads
@@ -129,6 +136,19 @@ class BaselineRepository:
 
     def has(self, commit):
         return git("cat-file", "-e", f"{commit}^{{commit}}", cwd=self.folder, check=False).returncode == 0
+
+    def master(self):
+        """The commit of the master branch of the baseline repository."""
+        if self.is_local:
+            return master_of(self.folder)
+        if self._master is None:
+            git("fetch", "-q", "--no-tags", "--filter=blob:none", "origin", "+refs/heads/master:refs/remotes/origin/master", cwd=self.folder)
+            self._master = git("rev-parse", "refs/remotes/origin/master", cwd=self.folder).stdout.strip()
+        return self._master
+
+    def branch_base(self, pin):
+        """The base of the baseline branch of a pin: its merge base with the master branch, or None."""
+        return git("merge-base", pin, self.master(), cwd=self.folder, check=False).stdout.strip() or None
 
     def parents(self, commit):
         return git("rev-list", "--parents", "-n", "1", commit, cwd=self.folder).stdout.split()[1:]
@@ -417,11 +437,29 @@ def read_description(args):
     return None
 
 
+def check_trailer_pin(report, commit, kind, old, new):
+    """TR-BASELINE-PIN for one commit of the trailer form. Returns the pin of its trailer, or None."""
+    if old is not None and not is_trailer_form(old):
+        report.note(f"{short(commit)} changes the {kind} baseline to the trailer form, with the trailer {new['trailer']}")
+    elif old is not None and old.get("trailer") != new["trailer"]:
+        report.flag(f"{short(commit)} changes the trailer key of the {kind} baseline from {old.get('trailer')!r} to {new['trailer']!r}; a series does not change it")
+    values = pin_trailers(commit, new["trailer"])
+    if len(values) > 1:
+        report.flag(f"{short(commit)} has {len(values)} trailers {new['trailer']}; a commit has one pin of the {kind} baseline")
+    elif values and not is_full_hash(values[0]):
+        report.flag(f"{short(commit)} the trailer {new['trailer']} is {values[0]!r}, not a full commit hash")
+    elif values:
+        return values[0]
+    return None
+
+
 def check_pins(report, commits, base, baselines):
-    """TR-BASELINE-PIN on the INET side. Returns [(commit, parent, kind, old ref, new ref)] for each
-    pin that moves, and the baseline entries of the base."""
+    """TR-BASELINE-PIN on the INET side. Returns [(commit, parent, kind, old pin, new pin)] for each
+    pin that moves. For the trailer form, the old pin of the first move of a kind is None: the base of
+    the baseline branch, which the baseline repository gives."""
     report.section("TR-BASELINE-PIN: each commit pins the commit of each baseline repository")
     moves = []
+    last = {}
     previous, parent = baselines, base
     for commit in commits:
         try:
@@ -437,6 +475,18 @@ def check_pins(report, commits, base, baselines):
                 continue
             if old is not None and (new.get("repository"), new.get("folder")) != (old.get("repository"), old.get("folder")):
                 report.flag(f"{short(commit)} changes the repository or the folder of the {kind} baseline; a series does not move a baseline repository")
+            if new.get("ref") and new.get("trailer"):
+                report.flag(f"{short(commit)} the {kind} baseline entry has a ref and a trailer; it has one of them")
+                continue
+            if is_trailer_form(new):
+                pin = check_trailer_pin(report, commit, kind, old, new)
+                if pin is not None:
+                    moves.append((commit, parent, kind, last.get(kind), pin))
+                    last[kind] = pin
+                continue
+            if is_trailer_form(old):
+                report.flag(f"{short(commit)} gives the {kind} baseline a ref, and its parent has the trailer form; a commit names its pin with the trailer {old['trailer']}")
+                continue
             new_ref, old_ref = new.get("ref"), (old or {}).get("ref")
             if not is_full_hash(new_ref):
                 if is_full_hash(old_ref) or new_ref is not None:
@@ -591,11 +641,24 @@ def main(argv=None):
                 repository = repositories[kind] = BaselineRepository(kind, source, cache_folder)
                 if repository.is_local:
                     report.note(f"the {kind} baseline commits are read from the local clone {source}; this run does not prove that they are in the repository of the project")
-                pins = sorted({ref for move in moves if move[2] == kind for ref in move[3:5]})
+                pins = sorted({ref for move in moves if move[2] == kind for ref in move[3:5] if ref})
                 missing = repository.get(pins)
                 for commit, parent, move_kind, old, new in moves:
                     if move_kind != kind:
                         continue
+                    # the hint for a first pin of the trailer form: its step starts at the merge base with master
+                    hint = ""
+                    if old is None and new not in missing:
+                        # the trailer form: the first pin moves from the base of its baseline branch
+                        old = repository.branch_base(new)
+                        if old is None:
+                            report.flag(f"{short(commit)} pins {kind} {short(new)}, which has no common commit with master of the baseline repository; the baseline branch must stand on master")
+                            continue
+                        if old == new:
+                            print(f"  {short(commit)} pins {kind} {short(new)}, which is on master of the baseline repository already")
+                            continue
+                        hint = (f"; the step starts at {short(old)}, the merge base of the pin and master of the baseline repository: "
+                                f"a baseline branch that does not stand on master takes in other commits, so rebase it onto master")
                     if new in missing:
                         report.flag(f"{short(commit)} pins {kind} {short(new)}, which is not in the baseline repository; push the baseline branch, or open a pull request in the baseline repository")
                     elif old in missing:
@@ -612,7 +675,7 @@ def main(argv=None):
                         chain = repository.chain(old, new)
                         with_results = [c for c in chain if any(is_result(path) for path in repository.changed_paths(c))]
                         if len(with_results) > 1:
-                            report.flag(f"{short(commit)} moves the {kind} pin over {len(with_results)} baseline commits that change results; one cause commit has one baseline commit")
+                            report.flag(f"{short(commit)} moves the {kind} pin over {len(with_results)} baseline commits that change results; one cause commit has one baseline commit{hint}")
                         elif with_results:
                             usable.append((commit, parent, kind, repository.parents(with_results[0])[0], with_results[0], is_result))
                             if len(chain) > 1:

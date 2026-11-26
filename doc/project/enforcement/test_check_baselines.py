@@ -70,6 +70,20 @@ def opp_text(pins, omit=(), statistical_repository="inet-framework/statistics"):
     return OPP % (parameters,)
 
 
+TRAILER_KEYS = {"statistical": "Statistical-Baseline", "chart": "Chart-Baseline"}
+
+
+def trailer_opp_text():
+    """The text of inet.opp in the trailer form: the pins are in commit trailers."""
+    parameters = {}
+    for kind, repository, folder in (("statistical", "inet-framework/statistics", "statistics"), ("chart", "inet-framework/media", "media")):
+        baseline = {"repository": repository, "trailer": TRAILER_KEYS[kind], "folder": folder}
+        if kind == "chart":
+            baseline["read_folder"] = "doc/media"
+        parameters[kind] = {"baseline": baseline}
+    return OPP % (parameters,)
+
+
 class GateTestCase(unittest.TestCase):
     """The three repositories, and the helpers that build commits in them."""
 
@@ -287,6 +301,82 @@ class PinViolationTest(GateTestCase):
         self.git(self.stat, "commit", "-qm", "unrelated")
         self.inet_commit(source=1, trailer=CHANGE + "statistical", pins={"statistical": self.head(self.stat)})
         self.assert_fails("which does not stand on the pin of the parent")
+
+
+class TrailerTest(GateTestCase):
+    """The trailer form: the pin is in a trailer of the cause commit. The first pin of a kind moves
+    from the base of its baseline branch on master of the baseline repository."""
+
+    def setUp(self):
+        super().setUp()
+        self.git(self.inet, "checkout", "-q", "master")
+        self.write(self.inet, "inet.opp", trailer_opp_text())
+        self.git(self.inet, "commit", "-qam", "switch to the trailer form")
+        self.git(self.inet, "checkout", "-q", "-B", "topic", "master")
+        for repository in (self.stat, self.media):
+            self.git(repository, "checkout", "-q", "-b", "branch")
+
+    def trailer_move(self, stat=None, media=None, subject=SUBJECT, source=1, extra_trailers="", stat_record=None):
+        pins = {}
+        for kind, repository, changes, options in (("statistical", self.stat, stat, stat_record), ("chart", self.media, media, None)):
+            if changes is not None:
+                pins[kind] = self.record(repository, changes, **{"inet_subject": subject, **(options or {})})
+        trailer = CHANGE + " ".join(sorted(pins)) + "".join(f"\n{TRAILER_KEYS[kind]}: {pin}" for kind, pin in sorted(pins.items())) + extra_trailers
+        self.inet_commit(subject, source, trailer, opp=trailer_opp_text())
+        return pins
+
+    def test_a_correct_pin_trailer_passes(self):
+        self.trailer_move(stat={SCA_A: sca(sent="11")}, media={PNG_A: b"\x89PNG new"})
+        result = self.assert_passes()
+        self.assertIn("2 pin move(s)", result.stdout)
+
+    def test_a_first_step_over_a_commit_with_no_result_and_a_record_passes(self):
+        self.plain(self.stat, {"README.md": "notes\n"})
+        self.trailer_move(stat={SCA_A: sca(sent="11")})
+        result = self.assert_passes()
+        self.assertIn("moves the statistical pin over 2 commits", result.stdout)
+
+    def test_two_steps_of_one_kind_pass(self):
+        self.trailer_move(stat={SCA_A: sca(sent="11")})
+        self.trailer_move(stat={SCA_B: sca(rcvd="8")}, subject="src: change: another value")
+        result = self.assert_passes()
+        self.assertIn("2 pin move(s)", result.stdout)
+
+    def test_a_first_step_over_two_commits_with_results_fails(self):
+        self.record(self.stat, {SCA_B: sca(rcvd="8")})
+        self.trailer_move(stat={SCA_A: sca(sent="11")})
+        result = self.assert_fails("over 2 baseline commits that change results")
+        self.assertIn(f"the step starts at {self.first['statistical'][:9]}, the merge base of the pin and master", result.stdout)
+
+    def test_the_record_rules_hold_for_the_trailer_form(self):
+        pin = self.record(self.stat, {SCA_A: sca(sent="11")}, attribution=None)
+        self.inet_commit(SUBJECT, 1, CHANGE + f"statistical\nStatistical-Baseline: {pin}", opp=trailer_opp_text())
+        self.assert_fails("needs one Attribution trailer")
+
+    def test_two_pin_trailers_of_one_kind_fail(self):
+        self.trailer_move(stat={SCA_A: sca(sent="11")}, extra_trailers=f"\nStatistical-Baseline: {self.first['statistical']}")
+        self.assert_fails("has 2 trailers Statistical-Baseline")
+
+    def test_a_pin_trailer_that_is_not_a_full_hash_fails(self):
+        self.inet_commit(SUBJECT, 1, CHANGE + "statistical\nStatistical-Baseline: master", opp=trailer_opp_text())
+        self.assert_fails("the trailer Statistical-Baseline is 'master', not a full commit hash")
+
+    def test_a_pin_trailer_that_is_not_in_the_baseline_repository_fails(self):
+        self.inet_commit(SUBJECT, 1, CHANGE + "statistical\nStatistical-Baseline: " + "1" * 40, opp=trailer_opp_text())
+        self.assert_fails("which is not in the baseline repository")
+
+    def test_a_ref_after_the_trailer_form_fails(self):
+        self.inet_commit(SUBJECT, 1, CHANGE + "statistical", pins={"statistical": self.record(self.stat, {SCA_A: sca(sent="11")})})
+        self.assert_fails("gives the statistical baseline a ref, and its parent has the trailer form")
+
+    def test_a_pin_on_master_of_the_baseline_repository_needs_no_step(self):
+        self.inet_commit(SUBJECT, 1, CHANGE + f"statistical\nStatistical-Baseline: {self.first['statistical']}", opp=trailer_opp_text())
+        result = self.assert_passes()
+        self.assertIn("on master of the baseline repository already", result.stdout)
+
+    def test_the_switch_in_a_series_is_a_note(self):
+        result = self.assert_passes(self.gate(series="master~1..master"))
+        self.assertIn("changes the statistical baseline to the trailer form", result.stdout)
 
 
 class RecordViolationTest(GateTestCase):
