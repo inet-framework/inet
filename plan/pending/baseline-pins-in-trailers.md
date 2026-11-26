@@ -1,6 +1,6 @@
 # Baseline pins in commit trailers
 
-**Status:** pending. Written 2026-11-25 from `master` at `28f1dc534c` (equal to `origin/master`). On 2026-11-25 the user chose this design ("yes write the trailer design as a plan"). The same day the user chose a rebase in the baseline repositories, as INET lands with "Rebase and merge" (T2), and a check that blocks the landing when that rebase would fail (T3, T4). No step has started. Each step needs the approval of the user.
+**Status:** pending. Written 2026-11-25 from `master` at `28f1dc534c` (equal to `origin/master`). On 2026-11-25 the user chose this design ("yes write the trailer design as a plan"). The same day the user chose a rebase in the baseline repositories, as INET lands with "Rebase and merge" (T2), and a check that blocks the landing when that rebase would fail (T3, T4). On 2026-11-26 the user chose the mark in a commit of its own, a fast-forward when the steps are on top of baseline `master`, and a close of the other baseline pull requests by a workflow of the baseline repository (T2, T10). No step has started. Each step needs the approval of the user.
 
 This plan changes the link of the plan `baseline-updates-in-pull-requests.md` (decision D1 there: the pin in `inet.opp`). The other decisions of that plan stay.
 
@@ -32,6 +32,9 @@ All facts come from the tree at `28f1dc534c`, the local clones of opp_repl and o
 | F12 | A pull request run of the statistical and chart tests tests the merge ref `refs/pull/N/merge`. When GitHub reports the pull request as not mergeable, the run stops with an error. Thus a pull request with a pin conflict gets no test result. | `statistical-tests.yml:61-66`, the same in `chart-tests.yml` |
 | F13 | Outside the repositories, the local tool `~/workspace/ghci-standards-fixes/tools/check_series.py` reads the pin with a regular expression (line 21) and checks out the statistics at it (line 44). | the file |
 | F14 | No rule unit that this plan changes has a `🔒` flag. | `grep` in `testing.md`, `pull-request.md`, `classification.md` |
+| F15 | After a push from outside GitHub, GitHub marks a pull request as merged only when its head commit is on the base branch. The pull requests statistics #5-#7 and media #2-#4 come from a fork and show "Merged": their merge commit is their head, because a fast-forward moved baseline `master` to it. The button "Rebase and merge" marks a pull request as merged with no head on the base branch: the head `525f029e38` of INET #1487 is not on `master`, which has the rebased `b2ee64e54f`. | `gh pr list`, `gh pr view`, `git merge-base --is-ancestor`, 2026-11-26 |
+| F16 | Only a contributor from a fork opens a pull request in a baseline repository. A member pushes a branch there (D2 of the earlier plan). Nobody merges a baseline pull request with the button. | `guide/change-a-baseline.md:201, 220-222` |
+| F17 | statistics and media have no workflow. Actions are enabled in statistics. Our token cannot read the Actions setting of media. | GitHub API, 2026-11-26 |
 
 ## Definitions
 
@@ -39,7 +42,7 @@ All facts come from the tree at `28f1dc534c`, the local clones of opp_repl and o
 - **Cause commit**: an INET commit that changes a baseline. Its message has a pin trailer.
 - **Baseline branch**: the baseline commits of one series. It starts on a commit of baseline `master`, its base.
 - **Step**: the baseline commits that one pin adds. A step goes from the pin of the previous cause commit of the series, or from the base of the baseline branch, to the pin.
-- **Mark**: the trailer `Baseline-Of: <INET hash>` that the landing job adds to the last rebased commit of a step on baseline `master`.
+- **Mark**: a commit on baseline `master` with no change of files, after the steps that one run of the landing job adds. For each cause commit of these steps, its message has the trailer `Baseline-Of: <INET hash> <baseline hash>` (section 3).
 - **Baseline of a commit**: the baseline commit that the tests of an INET commit compare against. Section 2 gives the function that finds it.
 - **Overlap**: a file that the baseline branch changes and that baseline `master` also changed after the base of the branch.
 
@@ -67,7 +70,7 @@ Statistical-Baseline: <40 hex digits>
 Chart-Baseline: <40 hex digits>
 ```
 
-The value is the last commit of the step, on the baseline branch of the series. The rules of a step do not change: the step has no merge commit, at most one of its commits changes results, and that commit has the record (`TR-BASELINE-PIN`, D12 of the earlier plan). The pinned commit is in the upstream baseline repository, on a branch with the name of the INET branch or as the head of a pull request there (D2 of the earlier plan). After the landing, the pin names the commit before the rebase of section 3. That commit stays on its branch, or in the ref `refs/pull/N/head` of its pull request.
+The value is the last commit of the step, on the baseline branch of the series. The rules of a step do not change: the step has no merge commit, at most one of its commits changes results, and that commit has the record (`TR-BASELINE-PIN`, D12 of the earlier plan). The pinned commit is in the upstream baseline repository, on a branch with the name of the INET branch or as the head of a pull request there (D2 of the earlier plan). After the landing, the pin names a commit of baseline `master` if the landing job did a fast-forward, or else the commit before the rebase of section 3. A commit before a rebase stays on its branch, or in the ref `refs/pull/N/head` of its pull request.
 
 `inet.opp` names the trailer key instead of a `ref`:
 
@@ -85,7 +88,7 @@ One function in opp_repl finds the baseline of the INET commit X for one kind:
 
 1. If `inet.opp` at X has a `ref`, the baseline is that commit (R7).
 2. B is the merge base of X and INET `master`. B is X when X is on `master`.
-3. M is the newest commit of baseline `master` whose mark names B or an ancestor of B. If no mark does, M is the `ref` of the newest ancestor of B that has a `ref` (section 5).
+3. A is the newest first-parent ancestor of B, B included, that a mark on baseline `master` names. M is the baseline hash that the mark gives for A. If no mark names an ancestor of B, M is the `ref` of the newest ancestor of B that has a `ref` (section 5).
 4. S is the pin of the newest commit in `B..X` that has the trailer. If no commit has one, the baseline is M.
 5. Otherwise the baseline is the baseline branch up to S, rebased onto M, as the landing job will rebase it (section 3). The function makes the rebased commits locally, with a fixed committer and date, so their hashes are the same on each machine. The function stops with an error if the rebase conflicts or if the branch overlaps with M. The message names the files.
 
@@ -93,24 +96,38 @@ This one function serves all callers:
 
 - **V1**, a pull request run on the merge ref: B is the head of `master`. The baseline is the baseline branch rebased onto the newest baseline `master`. This is the baseline that the landing will make.
 - **V2**, the attribution run at a parent and at a cause commit: B is the base of the pull request. The two baselines differ only by the step of the cause commit.
-- **A push run on `master`**: no trailer is in `B..X`, and M is the commit that the landing job marked for the newest cause commit.
+- **A push run on `master`**: no trailer is in `B..X`, and M is the baseline hash that the mark gives for the newest cause commit.
 - **A bisect, opp_ci, a developer machine**: the same function, on any commit.
 
 ### 3. The landing job
 
-`check-baseline-masters.yml` keeps its trigger, its environment `baseline-masters`, its deploy keys and its concurrency group (F9). `baseline_masters.py` changes from a fast-forward to a rebase, as INET lands with "Rebase and merge" (T2):
+`check-baseline-masters.yml` keeps its trigger, its environment `baseline-masters`, its deploy keys and its concurrency group (F9). `baseline_masters.py` keeps the fast-forward when a step starts on the head of baseline `master`. Else it does a rebase, as INET lands with "Rebase and merge" (T2). For each kind, the job makes the new baseline `master` on a local work branch that starts on the head of baseline `master`:
 
-1. For each commit X of INET `master` after the commit that the newest mark names, in first-parent order, and for each pin trailer of X: fetch the pin S from the upstream baseline repository. Rebase the step of S onto the head of baseline `master`, and check the overlap. Add the trailer `Baseline-Of: <full hash of X>` to the last commit of the step. The other commits of the step keep their messages, and all of them keep their authors.
-2. Push baseline `master`. The push is a fast-forward and is never forced.
-3. If a conflict or an overlap stops a rebase, the job pushes nothing for that kind from X on, and fails. Its log names X, S and the files. A later run tries X again, because X has no mark. A maintainer repairs it by hand: run the moved tests of the common files at X, commit their results on the head of baseline `master` as the step of X, with the mark, and push.
-4. Close the pull request of the baseline repository whose head is S, with a comment that names the landed commits. This needs a token (T10).
+1. For each commit X of INET `master` after the newest commit that a mark names, in first-parent order, and for each pin trailer of X: fetch the pin S from the upstream baseline repository. If the step of S starts on the head of the work branch, take the step as it is. Else rebase the step onto that head, and check the overlap. The rebased commits keep their messages and their authors. Note the pair of X and the commit that is now the last of its step.
+2. After the last step, add the mark: a commit with no change of files and this message:
+
+   ```
+   Baseline of INET <short hash of the last X>: <subject of the last X>
+
+   Baseline-Of: <full hash of X> <full baseline hash>
+   Baseline-Pull-Request: #<N>
+   ```
+
+   The message has one `Baseline-Of:` line for each pair of step 1. It has one `Baseline-Pull-Request:` line for each pull request of the baseline repository whose head is a pin of a rebased step. The job finds N with `git ls-remote origin 'refs/pull/*/head'`, which needs only git access. One mark after all steps, not one mark after each step: a mark between two steps of one series would stop the fast-forward of the second step.
+3. Push baseline `master`. The push is a fast-forward and is never forced.
+4. If a conflict or an overlap stops a rebase, the job pushes the steps before X with their mark, and fails. Its log names X, S and the files. A later run tries X again, because no mark names X. A maintainer repairs it by hand: run the moved tests of the common files at X, commit their results on the head of baseline `master` as the step of X, add the mark, and push.
 5. After the push, post the status `Baseline merge` on the head of each open pull request that has a pin trailer (section 4).
+
+A baseline pull request closes in one of two ways (T10):
+
+- **Fast-forward.** The head of the pull request is now on baseline `master`, and GitHub marks the pull request as merged by itself (F15). This is the usual case for the first of two pull requests.
+- **Rebase.** The head is not on baseline `master`, and the pull request stays open. A workflow of the baseline repository, `.github/workflows/close-landed-pull-requests.yml`, runs on each push to `master`. For each new mark, it closes each open pull request that a `Baseline-Pull-Request:` line names. It uses the `GITHUB_TOKEN` of its own repository with `pull-requests: write`. It needs no secret and no GitHub App. It writes no comment (D8 of the earlier plan). The `#N` in the mark gives a reference on the timeline of the pull request (to check in P6). The state of the pull request is "Closed", not "Merged", because only the button or a head on the base branch gives "Merged" (F15).
 
 The rebase has the properties of "Rebase and merge" in INET:
 
 - Baseline `master` stays linear, with no merge commit, as `TR-BASELINE-PIN` asks today.
-- The rebased commits keep their authors, their changes and their records. `git blame` of a baseline file shows a commit with the record.
-- The pin in the INET commit names the commit before the rebase (section 1). After the landing, the mark gives the exact baseline of the INET commit (section 2).
+- The rebased commits keep their authors, their changes and their records. `git blame` of a baseline file shows a commit with the record, never a mark, because a mark changes no file.
+- After a rebase, the pin in the INET commit names the commit before the rebase (section 1). After the landing, the mark gives the exact baseline of the INET commit (section 2).
 
 The statistical and chart tests of `master` start after the landing job. Their trigger for `master` changes from `push` to a `workflow_run` of the landing job (R5).
 
@@ -151,9 +168,9 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | opp_ci | `tests/test_executor_baseline.py` | Tests of the `trailer` form. |
 | INET, part 1 | `doc/project/enforcement/baseline_pins.py` | Read the pin trailers. New `retrail` (section 6). New `convert`: change a series that moves a `ref` into a series with trailers (step P7). `rebase` stays for a `ref` until part 2. |
 | INET, part 1 | `doc/project/enforcement/check_baselines.py:420-450, 512-546, 583-621` | `check_pins`, the step check and `check_attribution` take the pin trailer as the unit. A trailer only in a commit that changes source (as today for a pin). New section: the overlap. |
-| INET, part 1 | `doc/project/enforcement/baseline_masters.py` | The rebase, the mark and the close of section 3, and the command `check` of section 4. |
+| INET, part 1 | `doc/project/enforcement/baseline_masters.py` | The fast-forward or the rebase, and the mark of section 3. The command `check` of section 4. The gates of the baseline commits accept a mark: no change of files, only mark trailers. |
 | INET, part 1 | `doc/project/enforcement/baseline_attribution.py:128-170, 188-222` | `find_steps` and `add_fingerprints` read the pin trailers. The checkout gets the baselines from the function of section 2. |
-| INET, part 1 | `.github/workflows/check-baseline-masters.yml`, `check-pull-request.yml` | The status `Baseline merge`. In `check-baseline-masters.yml`, also the token of T10. |
+| INET, part 1 | `.github/workflows/check-baseline-masters.yml`, `check-pull-request.yml` | The status `Baseline merge`. |
 | INET, part 1 | `.github/workflows/statistical-tests.yml`, `chart-tests.yml` | On `master`: `workflow_run` of the landing job. The path filter (lines 74-75) also reacts to a pin trailer. |
 | INET, part 1 | `doc/project/enforcement/test_*.py` | The fixtures of `test_baseline_pins`, `test_check_baselines`, `test_baseline_masters`, `test_baseline_attribution`, `test_baseline_description`, `test_fingerprint_attribution` and `test_check_classification` write trailers, and the two forms are tested. |
 | INET, part 2 | `inet.opp:17-47` | The `trailer` keys, no `ref`, and a new comment. |
@@ -161,7 +178,8 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | INET, part 2 | `doc/project/rule/pull-request.md:191, 447, 561`, `doc/project/rule/classification.md:201-246` | "A pin that moves over results" becomes "a pin trailer whose step changes results". |
 | INET, part 2 | `doc/project/guide/change-a-baseline.md:106-228`, `run-the-gates.md:35, 49-50`, `review-a-pull-request.md:120`, `contribute-a-change.md:45` | The procedure of section 6 with `convert`, the landing job, the repair of section 3. |
 | INET, part 2 | `doc/project/enforcement/README.md:56-58, 89-96`, `.github/pull_request_template.md:16` | The rows and the commands. |
-| statistics, media | `README.md` | The rebase by the landing job, the mark, and the close of the pull requests. |
+| statistics, media | `README.md` | The fast-forward or the rebase by the landing job, the mark, and the close of the pull requests. |
+| statistics, media | `.github/workflows/close-landed-pull-requests.yml` | New: the close of section 3. |
 | outside | `~/workspace/ghci-standards-fixes/tools/check_series.py` (F13) | Use `opp_checkout_test_baselines` instead of the regular expression, when the tool is used again. |
 
 ## Steps
@@ -171,9 +189,9 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | P1 | opp_repl: the `trailer` form, the function of section 2, the self-tests, the documentation. The self-tests use fixture repositories of INET and of a baseline: a commit on `master`, a branch, a merge ref, the switch, an overlap, a conflict. Commit on `main`, then on `github_ci` and `opp_ci`. | the push |
 | P2 | opp_ci: the checkout through opp_repl, and its tests. | the push and the restart of the worker |
 | P3 | INET part 1, on the branch `topic/baseline-pins-in-trailers` in a worktree: the tools, the gates, the landing job, the status, the workflows and the tests. One commit for each tool. | — |
-| P4 | End-to-end test on local bare copies of INET, statistics and media. Two series with no overlap land one after the other, and the landing job makes their marks. A series with an overlap gets a red status, and the landing job stops for it. A bisect over the switch finds the baseline of each commit. Then a run of the landing job against the real repositories with no `--push`. | — |
+| P4 | End-to-end test on local bare copies of INET, statistics and media. Two series with no overlap land one after the other, and the landing job makes their marks: the first one by a fast-forward, the second one by a rebase. A series with two steps of one kind lands by a fast-forward. A series with an overlap gets a red status, and the landing job stops for it. A bisect over the switch finds the baseline of each commit. Then a run of the landing job against the real repositories with no `--push`. | — |
 | P5 | Land part 1. Check the first run of the landing job on `master`: it sees the `ref` and does the fast-forward as today. | the push |
-| P6 | INET part 2: the switch commit, the rules, the guides, `enforcement/README.md`, the template. Run `check-seals.sh` (`SR-RULE-CHANGE-STALES`). The token of T10 exists before the landing. Land part 2. | the push |
+| P6 | INET part 2: the switch commit, the rules, the guides, `enforcement/README.md`, the template. Run `check-seals.sh` (`SR-RULE-CHANGE-STALES`). Before the landing, push `close-landed-pull-requests.yml` to statistics and media, and check that Actions are enabled in media (F17). Check that a push by a deploy key starts that workflow, and that the `#N` of a mark gives a reference on the pull request. Land part 2. | each push |
 | P7 | Try `baseline_pins.py convert` on local copies of the 5 open pull requests that move a pin (F6), with no push. Repair `convert` if it fails. The owners convert their pull requests (decision T8). | — |
 | P8 | The required check `Baseline merge` (Rudolf Hornig). Record the results in this plan, and move it to `plan/done/`. | the required check |
 
@@ -193,15 +211,15 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 | # | Decision | Proposal | State |
 | --- | --- | --- | --- |
 | T1 | The place of the pin | A trailer in the message of the cause commit. Rejected: a comment or the description of the pull request (not in the hash and not in git, F3); the `ref` in `inet.opp` (the conflict of the goal). This decision replaces D1 of the earlier plan. | settled, user 2026-11-25 |
-| T2 | How a baseline lands on baseline `master` | A rebase of the step onto baseline `master`, as INET lands with "Rebase and merge", with the mark on the last rebased commit. Rejected: a merge commit for each cause commit. It keeps the hashes, but baseline `master` then gets merge commits, against `TR-BASELINE-PIN`, and the two repositories land in different ways. | settled, user 2026-11-25 |
+| T2 | How a baseline lands on baseline `master` | A fast-forward when a step starts on the head of baseline `master`, else a rebase, as INET lands with "Rebase and merge". After the steps of one run, a mark: a commit with no change of files. Rejected: the mark in the last commit of a step (its message changes, so the head of a baseline pull request never reaches `master`, F15); a mark after each step (the second step of a series then needs a rebase); a merge commit for each cause commit (baseline `master` then gets merge commits, against `TR-BASELINE-PIN`, and the two repositories land in different ways). | settled, user 2026-11-25, changed 2026-11-26 |
 | T3 | The overlap | A common file since the base of the baseline branch. This is stricter than a rebase with no conflict: two changes of the same result file mean that one simulation moved two times. | settled, user 2026-11-25 |
 | T4 | The check before the landing | The status `Baseline merge`: the rebase applies and has no overlap. The pull request audit and the landing job post it, and it is required. If the rebase would fail, the landing is blocked. | settled, user 2026-11-25 |
 | T5 | The order of the jobs on `master` | The statistical and chart tests start with a `workflow_run` of the landing job. Rejected: a test that waits until the mark is there. | proposal |
 | T6 | The form in `inet.opp` | The key `trailer`, a general feature of opp_repl. `ref` stays valid for old commits and for other projects. | proposal |
-| T7 | The names | Trailers `Statistical-Baseline:` and `Chart-Baseline:`, mark `Baseline-Of:`. `INET-Commit:` keeps its meaning (F11). The rule ID `TR-BASELINE-PIN` and the names of the scripts stay; their texts change. | proposal |
+| T7 | The names | Trailers `Statistical-Baseline:` and `Chart-Baseline:`. In a mark: `Baseline-Of:` and `Baseline-Pull-Request:`. `INET-Commit:` keeps its meaning (F11). The rule ID `TR-BASELINE-PIN` and the names of the scripts stay; their texts change. | proposal |
 | T8 | The 5 open pull requests that move a pin (F6) | The owner of each pull request converts it with `baseline_pins.py convert` (item 5 of section 6). This plan does not push to these pull requests and does not comment on them (D8 of the earlier plan). After part 2, such a pull request has a conflict with the switch commit in `inet.opp`, and the gate rejects its `ref`. Thus the owner sees the need to convert. | settled, user 2026-11-25 |
 | T9 | A failed landing job | A maintainer repairs it by hand, as in step 3 of section 3. | proposal |
-| T10 | The close of the baseline pull requests | A GitHub App or a token with write access to `statistics` and `media`, as a secret of the environment `baseline-masters`. A deploy key gives git access only, not the API. Rudolf Hornig sets it up. Alternative: no token; the job prints the numbers of the pull requests, and a maintainer closes them. | open |
+| T10 | The close of the baseline pull requests | After a fast-forward, GitHub marks the pull request as merged by itself (F15). After a rebase, the workflow `close-landed-pull-requests.yml` of the baseline repository closes it, with the `GITHUB_TOKEN` of that repository. Rejected: a GitHub App or a token with write access to `statistics` and `media` in INET (a secret for each repository, and Rudolf Hornig must set it up; a deploy key gives git access only); a close by hand. | settled, user 2026-11-26 |
 | T11 | The gap between a landing and the new statuses (Limits) | No merge queue now. GitHub's merge queue lands one pull request at a time and runs the check just before each landing. Add it only if the gap causes a real problem. | proposal |
 
 ## Limits
@@ -211,6 +229,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 - After the landing job of one pull request, the new statuses need some time. In that time a person can land a second pull request with an old green status. The concurrency group runs the second landing job after the first one, and the second job fails on an overlap. GitHub's merge queue closes this gap (T11).
 - The function of section 2 needs the history of INET `master` and of baseline `master`. With old clones, M is older. If no overlap exists, the rebase of the branch onto M still gives a correct baseline.
 - The baseline of a commit that is not on `master` is a local rebased commit, which no repository holds. Its hash is the same on each machine (step 5 of section 2), and the log prints it.
+- A baseline pull request whose step needed a rebase shows "Closed", not "Merged" (T10). Its mark on baseline `master` names it.
 - The fingerprint store stays as it is. A conflict there is a real conflict (decision of the user, 2026-10-20).
 
 ## Permissions
