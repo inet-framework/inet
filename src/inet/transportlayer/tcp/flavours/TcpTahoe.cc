@@ -35,7 +35,8 @@ void TcpTahoe::processRexmitTimer(TcpEventCode& event)
     if (event == TCP_E_ABORT)
         return;
 
-    resetToSlowStart();
+    // RFC 5681 equation (4), with the outstanding data as FlightSize
+    resetToSlowStart(state->snd_max - state->snd_una);
 }
 
 void TcpTahoe::receivedAckForUnackedData(uint32_t firstSeqAcked)
@@ -98,13 +99,15 @@ void TcpTahoe::receivedDuplicateAck()
     // slow start from the first unacknowledged segment as a timeout does
     if (state->dupacks == state->dupthresh) {
         EV_DETAIL << "Tahoe on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Slow Start:\n";
-        resetToSlowStart();
+        resetToSlowStart(conn->getFlightSize());
     }
 }
 
-void TcpTahoe::resetToSlowStart()
+void TcpTahoe::resetToSlowStart(uint32_t flightSize)
 {
-    state->ssthresh = std::max(state->snd_cwnd / 2, 2 * state->snd_mss);
+    // RFC 5681 equation (4): "ssthresh = max (FlightSize / 2, 2*SMSS)"; section 3.1 warns
+    // against cwnd, which can grow beyond the window of the receiver
+    state->ssthresh = std::max(flightSize / 2, 2 * state->snd_mss);
     conn->emit(ssthreshSignal, state->ssthresh);
     state->snd_cwnd = state->snd_mss;
     conn->emit(cwndSignal, state->snd_cwnd);

@@ -1,0 +1,3 @@
+TcpTahoe sets ssthresh from FlightSize
+
+TcpTahoe set the slow-start threshold after a loss to half of the congestion window. When the window of the receiver limits the sender, the congestion window of Tahoe grows far beyond the data in flight, so the threshold was too high. It now takes half of the FlightSize, at least two segments, as RFC 5681 equation (4) says and as TcpReno and TcpNewReno do: at the third duplicate ACK the data in flight without the data of limited transmit, at a timeout the outstanding data. Simulations with TcpTahoe change.

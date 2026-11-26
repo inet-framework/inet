@@ -1,0 +1,219 @@
+%description:
+
+RFC 5681 -- TcpTahoe sets the threshold at the third duplicate acknowledgment from FlightSize,
+not from the congestion window.
+
+RFC 5681 section 3.2, step 2, and section 3.1, equation (4): "ssthresh = max (FlightSize / 2,
+2*SMSS)". Section 3.1 also warns: "An easy mistake to make is to simply use cwnd, rather than
+FlightSize, which in some implementations may incidentally increase well beyond rwnd."
+
+TcpTahoe grows cwnd by one segment for each acknowledgment of new data, also when the receive
+window and not cwnd limits what it sends. Here host B offers a window of 8 segments (11584
+bytes), so FlightSize stays at most 11584 bytes while cwnd grows far beyond it. The relay
+removes the 40th data segment once; the later segments make host B repeat its
+acknowledgment. At the third duplicate, the threshold must be max(FlightSize / 2, 2*SMSS),
+with FlightSize the data that host A has sent and host B has not acknowledged, as two observers
+keep it from the segments. A guard checks that cwnd is larger than FlightSize there, so the
+check tells equation (4) from max(cwnd / 2, 2*SMSS) (BD-8 of the defect list).
+
+The scenario runs TcpTahoe without SACK. Limited transmit (RFC 3042) is off, because the data
+that it sends does not count in FlightSize, and the check reads equation (4) alone.
+
+%includes:
+#include <algorithm>
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What host A has sent and what host B has acknowledged, kept by observers that run beside the
+// ordered steps. The engine offers every event to the running guards first and to the ordered
+// step after them, so a step reads values that already include its own event.
+static long smss = 0;             // the largest data length of host A's segments: SMSS
+static long highestSent = -1;     // one past the highest octet host A has sent
+static long cumulativeAck = -1;   // the highest acknowledgment host A has received
+static int duplicates = 0;        // consecutive duplicates of cumulativeAck
+static long lastCwnd = -1;        // the last value of the cwnd signal of host A
+static long flightAtTrigger = -1; // FlightSize at the third duplicate
+static long cwndAtTrigger = -1;   // cwnd at the third duplicate
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+// At host A's TCP a segment starts with its TCP header, so the data is what follows it.
+static long dataLengthOf(const Packet *packet)
+{
+    return (long)(packet->getByteLength() - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B"));
+}
+
+static bool dataSegment(const MatchContext& context)
+{
+    return context.event.packet != nullptr && dataLengthOf(context.event.packet) > 0;
+}
+
+// Observer: every data segment host A sends. Never a match.
+static bool recordSent(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.destPort") != 1000)
+        return false;
+    long length = dataLengthOf(packet);
+    if (length <= 0)
+        return false;
+    smss = std::max(smss, length);
+    highestSent = std::max(highestSent, fieldOf(packet, "tcp.sequenceNo") + length);
+    return false;
+}
+
+// Observer: every acknowledgment host A receives. RFC 5681 section 2 counts an acknowledgment
+// as a duplicate when it carries no data and repeats the highest acknowledgment number. At the
+// third, it keeps FlightSize and cwnd. Never a match.
+static bool recordAck(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.srcPort") != 1000)
+        return false;
+    long ack = fieldOf(packet, "tcp.ackNo");
+    if (ack < 0)
+        return false;
+    if (ack > cumulativeAck) {
+        cumulativeAck = ack;
+        duplicates = 0;
+    }
+    else if (ack == cumulativeAck && dataLengthOf(packet) == 0) {
+        duplicates++;
+        if (duplicates == 3 && flightAtTrigger < 0) {
+            flightAtTrigger = highestSent - cumulativeAck;
+            cwndAtTrigger = lastCwnd;
+        }
+    }
+    return false;
+}
+
+// Observer: the cwnd signal of host A. Never a match.
+static bool recordCwnd(const MatchContext& context)
+{
+    lastCwnd = (long)context.event.value;
+    return false;
+}
+
+// True on the first third duplicate acknowledgment, which RFC 5681 section 3.2 names as the
+// trigger.
+static bool thirdDuplicateAcknowledgment(const MatchContext&)
+{
+    return duplicates == 3 && flightAtTrigger >= 0;
+}
+
+// The check tells the two formulas apart only when cwnd is larger than FlightSize.
+static bool cwndBeyondFlightSize(const MatchContext&)
+{
+    return cwndAtTrigger > flightAtTrigger;
+}
+
+// Equation (4) of RFC 5681, with integer octets as the model counts them.
+static bool equationFour(const MatchContext& context)
+{
+    long threshold = (long)context.event.value;
+    long expected = std::max(flightAtTrigger / 2, 2 * smss);
+    if (threshold != expected)
+        EV_INFO << "ssthresh " << threshold << ", expected max(" << flightAtTrigger << " / 2, 2 * " << smss << ") = "
+                << expected << ", cwnd " << cwndAtTrigger << "\n";
+    return threshold == expected;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_tahoe_threshold_flight_size")
+        // Remove exactly one segment, after cwnd has grown beyond the window of host B. Every
+        // later segment gets through, and each one makes host B repeat the same acknowledgment.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false")
+                       .minBytes(100).nth(40)
+                       .drop().describe("the 40th data segment of host A"))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(recordSent)
+                             .describe("every data segment host A sends")
+                             .within(20.0)))
+        .meanwhile(never(on("host1.tcp").signal("packetReceivedFromLower")
+                             .filterEvent(recordAck)
+                             .describe("every acknowledgment host A receives")
+                             .within(20.0)))
+        .meanwhile(never(on("host1.tcp").signal("cwnd")
+                             .filterEvent(recordCwnd)
+                             .describe("every value of cwnd of host A")
+                             .within(20.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterEvent(thirdDuplicateAcknowledgment)
+                  .assertEvent(cwndBeyondFlightSize)
+                  .describe("the third duplicate acknowledgment, with cwnd larger than FlightSize")
+                  .within(5.0))
+        .once(on("host1.tcp").signal("ssthresh").first()
+                  .assertEvent(equationFour)
+                  .describe("the threshold: max(FlightSize / 2, 2*SMSS)")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_tahoe_threshold_flight_size compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network TahoeThresholdNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TahoeThresholdNet
+sim-time-limit = 30s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+# TcpTahoe without SACK, the algorithm of BD-8. Limited transmit is off, because the data that
+# it sends does not count in FlightSize (RFC 3042), and the check reads equation (4) alone.
+**.tcp.tcpAlgorithmClass = "TcpTahoe"
+**.tcp.sackSupport = false
+**.tcp.limitedTransmitEnabled = false
+# host B offers 8 segments of 1448 bytes, so the window and not cwnd limits host A.
+*.host2.tcp.advertisedWindow = 11584
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 300000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_tahoe_threshold_flight_size: PASS
