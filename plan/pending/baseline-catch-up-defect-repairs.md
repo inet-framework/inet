@@ -1327,6 +1327,10 @@ tests of ECN, DCTCP and the algorithms, in debug mode; all fingerprints in relea
 the image of the CI (§6.1, step 8). BD-52 (a retransmission timer that runs with nothing in flight delays the override
 timer) touches the same case; it stays outside this plan.
 
+**Gate A** approved by the maintainer on 2026-11-26 ("yes I approve the design and the answers"): (a) the state
+variable `eceHold`, (i) the window of one segment at the ECN-Echo, before the halving, and the parameter
+`eceAtOneSegment = "linux"` for `~LinuxTcp`.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
