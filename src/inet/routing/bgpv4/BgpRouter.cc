@@ -1120,6 +1120,9 @@ bool BgpRouter::isBetterRoute(const BgpRouteInfo *candidate, const BgpRouteInfo 
         return candidate->getASCount() < current->getASCount();
     if (candidate->getPathType() != current->getPathType())
         return candidate->getPathType() < current->getPathType();
+    // RFC 4271 9.1.2.2 d): prefer a route received via EBGP to one received via IBGP
+    if (candidate->isIBgpLearned() != current->isIBgpLearned())
+        return !candidate->isIBgpLearned();
     return candidate->getSourcePeerAddress() < current->getSourcePeerAddress();
 }
 
