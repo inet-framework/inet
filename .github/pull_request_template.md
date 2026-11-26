@@ -13,9 +13,9 @@ Then list the commits in the order to read them, and end with the evidence: the 
 the baselines that moved, and what is not verified. For a statistical or chart baseline, name the
 branch or the pull request in the statistics or media repository.
 
-When a commit changes the fingerprint store or moves a pin over results, add a section
-"Baseline changes" with one entry for each such commit: its exact subject, then a summary of its
-baseline changes in your words. For example:
+When a commit changes the fingerprint store or has a pin trailer whose step changes results, add
+a section "Baseline changes" with one entry for each such commit: its exact subject, then a summary
+of its baseline changes in your words. For example:
 
 ## Baseline changes
 
