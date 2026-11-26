@@ -39,15 +39,20 @@ class CheckPullRequestTest(unittest.TestCase):
         self.git("commit", "-q", "-m", f"{subject}\n\nThe value changes.\n\n{trailer}".rstrip())
 
     def check(self, *args):
-        return subprocess.run(["bash", str(CHECKER), "--base", "master", *args], cwd=self.root,
-                              capture_output=True, text=True)
+        # an empty list of required contexts, outside the repository, keeps check-required-contexts.sh away
+        # from the GitHub API
+        required = Path(self.tempdir.name + "-required-contexts")
+        required.write_text("", encoding="utf-8")
+        self.addCleanup(required.unlink, missing_ok=True)
+        return subprocess.run(["bash", str(CHECKER), "--base", "master", "--required-contexts-file", str(required), *args],
+                              cwd=self.root, capture_output=True, text=True)
 
     def test_a_clean_series_passes(self):
         self.commit("src: change: one value")
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
         for gate in ("check-commits.sh", "check-classification.sh", "check-includes.sh", "check-ned-params.sh",
-                     "check-whatsnew.sh", "check-baselines.sh"):
+                     "check-whatsnew.sh", "check-baselines.sh", "check-required-contexts.sh"):
             self.assertRegex(result.stdout, rf"{gate} +pass")
         self.assertIn("check-pr-description.sh    not run", result.stdout)
 

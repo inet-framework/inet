@@ -5,8 +5,11 @@
 Usage, from the repository root:
   check-pull-request.sh --base origin/master --head refs/pr/1308 --pr 1308
   check-pull-request.sh --base <base-sha> --head <head-sha> --description-file body.md --markdown report.md
+  check-pull-request.sh --base origin/master --required-contexts-file contexts.txt
 
 Without --pr or --description-file the description gate does not run, and the report says so.
+--required-contexts-file gives the required contexts of master to check-required-contexts.sh, one on
+each line; without it, that gate reads them with `gh api`.
 --markdown also writes the report as Markdown, for a CI job summary. The report escapes the output
 of each gate, because a commit message and a description are untrusted text.
 
@@ -23,7 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 GUIDE = "doc/project/guide/review-a-pull-request.md"
 RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md", "doc/project/rule/release.md",
-         "doc/project/rule/testing.md"]
+         "doc/project/rule/testing.md", "plan/pending/master-guards.md"]
 
 
 def git(*args, cwd=None):
@@ -37,7 +40,7 @@ def commit_of(ref):
     return out.stdout.strip()
 
 
-def gates(commit_range, description):
+def gates(commit_range, description, required_contexts_file=None):
     """(gate, rules, arguments) for each gate, in the order of the review guide."""
     found = [
         ("check-commits.sh", "PR-SPLIT-*, PR-SERIES-*, PR-MSG-*", [commit_range]),
@@ -47,6 +50,8 @@ def gates(commit_range, description):
         ("check-whatsnew.sh", "RR-WHATSNEW-FILE, RR-MIGRATE-FILE", [commit_range]),
         ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION, PR-REQ-BASELINES",
          [commit_range] + (["--description-file" if description[0] == "--file" else "--pr", description[1]] if description else [])),
+        ("check-required-contexts.sh", "W1, W2, W4, W5 of the required checks",
+         [commit_range] + (["--required-file", required_contexts_file] if required_contexts_file else [])),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))
@@ -122,6 +127,7 @@ def main():
     source.add_argument("--description-file", help="a file that holds the description")
     source.add_argument("--pr", type=int, help="a pull request number, to read its description")
     parser.add_argument("--markdown", help="also write the report as Markdown to this file")
+    parser.add_argument("--required-contexts-file", help="the required contexts of master, one on each line")
     args = parser.parse_args()
     try:
         base, head = commit_of(args.base), commit_of(args.head)
@@ -141,7 +147,7 @@ def main():
     print(f"== the pull-request audit: {commit_range} ==")
     print(f"  {commits} commit(s); the gates are from {gate_commit[:10]}")
     results = []
-    for gate, rules, arguments in gates(commit_range, description):
+    for gate, rules, arguments in gates(commit_range, description, args.required_contexts_file):
         print()
         print(f"######## {gate} ({rules})")
         status, output = run(gate, arguments)

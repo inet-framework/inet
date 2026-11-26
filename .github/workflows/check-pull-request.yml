@@ -63,6 +63,20 @@ jobs:
             echo "error: fetched pull-request head $actual_head_sha, expected $EXPECTED_HEAD_SHA" >&2
             exit 2
           fi
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install the packages of the gates
+        # check-required-contexts.sh reads the workflows with PyYAML, which the system Python of the runner does not have
+        run: python3 -m pip install --quiet "pyyaml==6.0.2"
+      - name: Read the required contexts of master
+        # for check-required-contexts.sh; without the file, that gate gives a note and checks nothing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/rules/branches/master" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context' \
+            > "$RUNNER_TEMP/required-contexts.txt" || rm -f "$RUNNER_TEMP/required-contexts.txt"
       - name: Run the series gates
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -73,8 +87,10 @@ jobs:
           token="$(openssl rand -hex 16)"
           echo "::stop-commands::$token"
           set +e
+          required=()
+          [ -f "$RUNNER_TEMP/required-contexts.txt" ] && required=(--required-contexts-file "$RUNNER_TEMP/required-contexts.txt")
           doc/project/enforcement/check-pull-request.sh --base "$BASE_SHA" --head "$HEAD_SHA" \
-            --description-file "$RUNNER_TEMP/description.md" --markdown "$RUNNER_TEMP/report.md"
+            --description-file "$RUNNER_TEMP/description.md" --markdown "$RUNNER_TEMP/report.md" "${required[@]}"
           status=$?
           set -e
           echo "::$token::"
@@ -179,6 +195,20 @@ jobs:
             # shellcheck disable=SC2086
             git fetch --no-tags origin $refspecs
           fi
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install the packages of the gates
+        # check-required-contexts.sh reads the workflows with PyYAML, which the system Python of the runner does not have
+        run: python3 -m pip install --quiet "pyyaml==6.0.2"
+      - name: Read the required contexts of master
+        # for check-required-contexts.sh; without the file, that gate gives a note and checks nothing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/rules/branches/master" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context' \
+            > "$RUNNER_TEMP/required-contexts.txt" || rm -f "$RUNNER_TEMP/required-contexts.txt"
       - name: Run the series gates on each pull request
         env:
           GH_TOKEN: ${{ github.token }}
@@ -203,7 +233,9 @@ jobs:
             fi
             # the gate output goes to a file, never to the log, so it cannot hold a workflow command
             set +e
-            env -u GH_TOKEN doc/project/enforcement/check-pull-request.sh --base "$base_sha" --head "$head_sha" \
+            required=()
+            [ -f "$RUNNER_TEMP/required-contexts.txt" ] && required=(--required-contexts-file "$RUNNER_TEMP/required-contexts.txt")
+            env -u GH_TOKEN doc/project/enforcement/check-pull-request.sh --base "$base_sha" --head "$head_sha" "${required[@]}" \
               --description-file "$RUNNER_TEMP/description.md" --markdown "$reports/pr-$n.md" > "$reports/pr-$n.txt" 2>&1
             status=$?
             set -e
