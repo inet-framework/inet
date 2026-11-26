@@ -749,6 +749,10 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   `opp_run_unit_tests --load . -p inet -m debug --no-build -f 'Ieee80211BlockAckScheduling_1\.test$'`.
   The default queue retains storage order. Custom queues implement their retry ordering once
   for forecasts and actual transmissions.
+- **Commit BD-26-FRAGMENT-BATCH-ORDER**, “ieee80211: fix: honor queue ordering after fragment batch extraction”.
+  When successor selection extracts several fragments, register the full batch and ask the queue
+  which eligible fragment comes next. In `Ieee80211BlockAckScheduling_1`, a queue that prefers
+  fragment 1 must return it both immediately after extraction and at live transmission selection.
 
 #### BD-27: with Basic Block Ack, HCF keeps the legacy admission of a further exchange
 
