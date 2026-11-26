@@ -354,7 +354,10 @@ class SchedulingHcf : public Hcf {
                 ASSERT(data->getDurationField() == SIMTIME_ZERO);
             if (!par("multiple").boolValue() && scenario() == 3) {
                 ASSERT(dataInTxop == 0);
-                ASSERT(data->getDurationField() == SIMTIME_ZERO);
+                int sent = dataCount + 1;
+                bool basicBarDue = !compressed() && (sent % window() == 0 || sent == burst());
+                // Basic BAR (32 us), Basic Block Ack (72 us), and two SIFS intervals (32 us).
+                ASSERT(data->getDurationField() == SimTime(basicBarDue ? 136 : 0, SIMTIME_US));
             }
             if (scenario() == 4 && data->getReceiverAddress() == other)
                 ASSERT(bars >= 1);
@@ -376,6 +379,10 @@ class SchedulingHcf : public Hcf {
             bars++;
             if (bars == 1) {
                 firstBarWasStandalone = dataInTxop == 0;
+                if (!compressed() && !par("multiple").boolValue() && (scenario() == 3 || scenario() == 8)) {
+                    ASSERT(dataInTxop == 1);
+                    ASSERT(ifs == modeSet->getSifsTime());
+                }
                 ASSERT(bar->getReceiverAddress() == peer);
                 ASSERT(barTid(bar) == 5);
                 if (scenario() != 9)
@@ -386,7 +393,7 @@ class SchedulingHcf : public Hcf {
             auto cost = mode->getDuration(packet->getDataLength()) + modeSet->getSifsTime() + responseMode->getDuration(responseLength());
             auto txop = edca->getChannelOwner()->getTxopProcedure();
             auto end = simTime() + ifs + cost;
-            if (dataInTxop > 1 && txop->getLimit() > 0)
+            if (dataInTxop > 0 && txop->getLimit() > 0)
                 ASSERT(end <= txop->getStart() + txop->getLimit());
             std::cout << "BAR timing: scenario=" << scenario() << " multiple=" << par("multiple").boolValue()
                 << " start=" << simTime() << " ifs=" << ifs << " bytes=" << packet->getByteLength()
@@ -491,7 +498,7 @@ class SchedulingHcf : public Hcf {
                 ASSERT(retries == 1 && bars == 2);
             if (compressed() && scenario() >= 15 && scenario() <= 17)
                 ASSERT(retries == (scenario() == 15 ? 0 : scenario() == 16 ? 1 : 4) && bars == (scenario() == 15 ? 1 : 2));
-            if (scenario() == 8 || scenario() == 10 || scenario() == 13)
+            if ((scenario() == 8 && (compressed() || par("multiple").boolValue())) || scenario() == 10 || scenario() == 13)
                 ASSERT(firstBarWasStandalone);
             if (scenario() == 12 || scenario() == 14)
                 ASSERT(collisions == 1 && retries == 0);

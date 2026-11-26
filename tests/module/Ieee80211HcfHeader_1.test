@@ -1,6 +1,7 @@
 %description:
 Select Block Ack from an initial Normal Ack DATA header through production HCF.
 Check the emitted DATA field and optional RTS field with fixed 6 Mbit/s modes.
+The built-in policy has an accepted agreement and reserves the due Basic Block Ack exchange.
 Require one ACK-policy selection for the selected exchange.
 
 %extraargs: -r 0..3
@@ -52,8 +53,12 @@ class HeaderMac : public Ieee80211Mac {
             else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
                 data++;
                 ASSERT(dataHeader->getAckPolicy() == BLOCK_ACK);
-                ASSERT(header->getDurationField() == SIMTIME_ZERO);
-                if (!par("builtin").boolValue()) {
+                if (par("builtin").boolValue()) {
+                    // Basic BAR (56 us), Basic Block Ack (228 us), and two SIFS intervals (32 us).
+                    ASSERT(header->getDurationField() == SimTime(316, SIMTIME_US));
+                }
+                else {
+                    ASSERT(header->getDurationField() == SIMTIME_ZERO);
                     auto policy = check_and_cast<HeaderAckPolicy *>(getSubmodule("hcf")->getSubmodule("originatorAckPolicy"));
                     ASSERT(policy->selections == 1);
                 }
