@@ -50,16 +50,16 @@ Define_Module(AdmissionService);
 
 class AdmissionRecovery : public QosRecoveryProcedure {
   public:
-    int controls = 0;
+    int edcaFailures = 0;
     int dataFailures = 0;
     int numberedRtsFailures = 0;
     std::vector<int> qsrcHistory;
-    int qsrc() const { return stationShortRetryCounter; }
+    int qsrc() const { return cwCalculator->getEdcaRetryCount(); }
     size_t numberedCounters() const { return shortRetryCounter.size() + longRetryCounter.size(); }
-    void controlFrameTransmissionFailed() override {
-        controls++;
-        QosRecoveryProcedure::controlFrameTransmissionFailed();
-        qsrcHistory.push_back(stationShortRetryCounter);
+    void edcaTransmissionFailed() override {
+        edcaFailures++;
+        QosRecoveryProcedure::edcaTransmissionFailed();
+        qsrcHistory.push_back(qsrc());
     }
     void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override {
         dataFailures++;
@@ -552,14 +552,14 @@ class AdmissionTest : public cSimpleModule {
                     ASSERT(hcf->lifetime()->getDeadline(hcf->queue()->getPacket(0)) == hcf->deadlines[1]);
                 }
                 if (scenario == 7 || scenario == 8) {
-                    ASSERT(recovery->controls == (scenario == 7 ? 1 : 2));
+                    ASSERT(recovery->edcaFailures == (scenario == 7 ? 1 : 2));
                     ASSERT(recovery->numberedRtsFailures == 0);
                     ASSERT(hcf->queriesAtData.front() == (scenario == 7 ? 2 : 3));
                     ASSERT(recovery->qsrcHistory[0] == 1);
                     if (scenario == 8) ASSERT(recovery->qsrcHistory[1] == 0);
                 }
                 else
-                    ASSERT(recovery->controls == 0);
+                    ASSERT(recovery->edcaFailures == recovery->dataFailures + recovery->numberedRtsFailures);
                 if (scenario == 11)
                     ASSERT(hcf->queriesAtData.front() == 1 && hcf->mutation == 1);
                 if (scenario == 13) {

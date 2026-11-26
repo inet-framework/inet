@@ -113,22 +113,27 @@ class TestManagementRecoveryHcf : public Hcf
         header->setType(ST_DATA_WITH_QOS);
         header->setTid(6);
         header->setSequenceNumber(SequenceNumberCyclic(100));
-        vo->getRecoveryProcedure()->ctsFrameReceived();
+        vo->getRecoveryProcedure()->txopCompleted();
         vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(header);
     }
 
-    void assertQosCounterPreserved()
+    void assertNextQosFailure(bool managementSucceeded)
     {
-        Enter_Method("assertQosCounterPreserved");
+        Enter_Method("assertNextQosFailure");
         auto vo = getAc(AC_VO);
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->setTid(6);
         header->setSequenceNumber(SequenceNumberCyclic(100));
-        // A second failure must reach the QoS station retry limit of two.
-        // If management CTS/multicast reset that counter, CW would grow.
+        ASSERT(vo->getEdcaRetryCount() == (managementSucceeded ? 0 : 2));
+        auto cwMin = (int)vo->par("cwMin").intValue();
+        auto cwMax = (int)vo->par("cwMax").intValue();
         vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(header);
-        ASSERT(vo->getCw() == vo->par("cwMin").intValue());
+        if (vo->getCw() != (managementSucceeded ? std::min(2 * cwMin + 1, cwMax) : cwMin))
+            throw cRuntimeError("Next QoS failure did not use the shared EDCA retry count");
+        Packet protectedData("protected-data", header);
+        ASSERT(vo->getRecoveryProcedure()->isRtsFrameRetryLimitReached(&protectedData, header));
+        vo->getRecoveryProcedure()->dropFrame(header);
     }
 
     void sendGroup(bool management)
@@ -186,7 +191,7 @@ class TestManagementRecoveryHcf : public Hcf
         Hcf::originatorProcessFailedFrame(packet);
         failures++;
         bool terminal = par("retryLimit").intValue() == 1;
-        int expectedCw = terminal ? vo->par("cwMin").intValue() : std::min(2 * oldCw + 1, (int)vo->par("cwMax").intValue());
+        int expectedCw = std::min(2 * oldCw + 1, (int)vo->par("cwMax").intValue());
         ASSERT(vo->getCw() == expectedCw);
         auto header = packet->peekAtFront<Ieee80211MgmtHeader>();
         ASSERT(vo->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(packet, header) == (terminal ? 0 : 1));
@@ -197,6 +202,7 @@ class TestManagementRecoveryHcf : public Hcf
     {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto vo = getAc(AC_VO);
+        int oldCw = vo->getCw();
         if (header->getType() == ST_CTS)
             ASSERT(vo->getStationRetryCounters()->getStationShortRetryCount() > 0);
         Hcf::originatorProcessReceivedFrame(packet, lastTransmittedPacket);
@@ -206,7 +212,7 @@ class TestManagementRecoveryHcf : public Hcf
         }
         if (header->getType() == ST_ACK) {
             acknowledgments++;
-            ASSERT(vo->getCw() == vo->par("cwMin").intValue());
+            ASSERT(vo->getCw() == oldCw);
             auto transmitted = lastTransmittedPacket->peekAtFront<Ieee80211MgmtHeader>();
             ASSERT(vo->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(lastTransmittedPacket, transmitted) == 0);
             auto counters = vo->getStationRetryCounters();
@@ -233,7 +239,6 @@ class ManagementRecoveryTest : public cSimpleModule
         auto vo = hcf->getAc(AC_VO);
         hcf->getAc(AC_BE)->incrementCw(); // distinguish an accidental BE reset
         hcf->seedQosCounter();
-        vo->resetCw(); // initial condition only, before the exchange under test
         hcf->snapshot();
         bool longFrame = par("longFrame");
         bool terminal = par("retryLimit").intValue() == 1;
@@ -248,7 +253,7 @@ class ManagementRecoveryTest : public cSimpleModule
         ASSERT(hcf->acknowledgments == (terminal ? 0 : 1));
         ASSERT(hcf->cts == (longFrame ? hcf->attempts : 0));
         ASSERT(mgmt->lastStatus == (terminal ? FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED : FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED));
-        hcf->assertQosCounterPreserved();
+        hcf->assertNextQosFailure(!terminal);
 
         // A new transaction after success or discard must complete once.
         mgmt->markAuthenticated(address);
@@ -262,7 +267,7 @@ class ManagementRecoveryTest : public cSimpleModule
         ASSERT(hcf->failures == 1);
         ASSERT(hcf->acknowledgments == (terminal ? 1 : 2));
 
-        // Multicast management resets only the local non-QoS station counters.
+        // Group management completes the TXOP and resets its shared EDCA state.
         hcf->seedQosCounter();
         auto counters = vo->getStationRetryCounters();
         counters->resetStationShortRetryCount();
@@ -272,21 +277,26 @@ class ManagementRecoveryTest : public cSimpleModule
         hcf->sendGroup(true);
         wait(SimTime(2, SIMTIME_MS));
         ASSERT(hcf->groupFrames == 1);
-        hcf->assertQosCounterPreserved();
+        ASSERT(vo->getEdcaRetryCount() == 0);
+        ASSERT(vo->getCw() == vo->par("cwMin").intValue());
         counters->incrementStationShortRetryCount();
         counters->incrementStationLongRetryCount();
         hcf->seedQosCounter();
         hcf->sendGroup(false);
         wait(SimTime(2, SIMTIME_MS));
         ASSERT(hcf->groupFrames == 2);
-        // Multicast QoS must clear its own station SRC; its next failure grows CW.
-        int oldCw = vo->getCw();
+        // A completed QoS group TXOP resets both the station SRC and CW.
+        auto cwMin = (int)vo->par("cwMin").intValue();
+        auto cwMax = (int)vo->par("cwMax").intValue();
+        if (vo->getCw() != cwMin)
+            throw cRuntimeError("Completed QoS group TXOP did not reset CW");
         auto qosHeader = makeShared<Ieee80211DataHeader>();
         qosHeader->setType(ST_DATA_WITH_QOS);
         qosHeader->setTid(6);
         qosHeader->setSequenceNumber(SequenceNumberCyclic(100));
         vo->getRecoveryProcedure()->rtsFrameTransmissionFailed(qosHeader);
-        ASSERT(vo->getCw() == std::min(2 * oldCw + 1, (int)vo->par("cwMax").intValue()));
+        if (vo->getCw() != std::min(2 * cwMin + 1, cwMax))
+            throw cRuntimeError("First failure after QoS TXOP completion did not use QSRC one");
         ASSERT(hcf->failures == 1);
         ASSERT(mgmt->terminalCallbacks == 2);
         ASSERT(mgmt->associationResponseCallbacks == 2);

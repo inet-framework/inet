@@ -29,6 +29,11 @@ class INET_API IRecoveryProcedure
         virtual int getCw() = 0;
     };
 
+    class INET_API IEdcaCwCalculator : public ICwCalculator {
+      public:
+        virtual int getEdcaRetryCount() const = 0;
+    };
+
   public:
     virtual ~IRecoveryProcedure() {}
 };
