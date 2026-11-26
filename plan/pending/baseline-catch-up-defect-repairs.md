@@ -1196,6 +1196,38 @@ SACK was on by default.
 module tests of the algorithms and of the window, in debug mode; all fingerprints in release mode and all statistical
 tests in the image of the CI (§6.1, step 8).
 
+**Gate A** approved by the maintainer on 2026-11-26, with a change. The maintainer agreed with the recommended answers
+and asked: "is there a distinction to be made for the RFC variant Tcp and for the LinuxTcp variant?" There is: Linux
+departs from the text of condition (e) for a smaller window (Linux: a duplicate; RFC 5681: none) and for a repeated
+zero window (Linux: no duplicate; RFC 5681: a duplicate). The rule of `Tcp.ned` is that `~Tcp` follows the RFCs and a
+parameter selects the behavior of Linux, which `~LinuxTcp` sets. So the maintainer approved ("yes") this design:
+
+- `~Tcp` takes any change of the window as a window update, as condition (e) says; this was the first form above.
+- The new parameter `duplicateAckWindowRule = "linux"` takes a larger or a zero window only, as Linux;
+  `~LinuxTcp` sets it, and `~LegacyTcp` keeps the default of `~Tcp`.
+- `tests/module/tcp_rcvbuf_shrink_3.test`, whose receiver shrinks its window with out-of-order data, selects the rule of
+  Linux for its sender, so its expected output stays.
+- Both duplicate ACK tests read the rule (answer (a)).
+
+**The results of R7 (2026-11-26).** The commit is C14 `ad63065ecf`: the 6 files of the design, `Tcp.ned` and
+`LinuxTcp.ned` with the parameter, the two protocol tests `Rfc5681WindowUpdateNoDuplicateAck.test` and
+`Rfc5681SmallerWindowNoDuplicateAck.test` (the second checks the rule of the RFC with smaller windows), the change of
+`tcp_rcvbuf_shrink_3.test`, the reviewer document `tests/protocol/tcp/window-update-no-duplicate-ack.md` and the
+release note `doc/whatsnew/fixes/tcp-window-update-no-duplicate-ack.txt`. The preview branch `preview/r7` is deleted.
+
+- Both new tests fail without the repair, at the fast retransmit of 0.2009128 s, and pass with it, in debug mode.
+- With C14, the 41 protocol tests of RFC 5681, RFC 6582, the window of RFC 9293 and the algorithm classes pass, and 45
+  of the 49 module tests of the algorithms and of the window. The other 4 are `tcp_stresstest_*`, which fail on this
+  machine with and without the repair (the line "Network hash" of the OMNeT++ of the editor).
+- The gates of "Before every push" pass with the base `master` `f1670fb2e4`: `check-pull-request.sh` (with
+  `check-ned-params.sh` and `check-whatsnew.sh`), `check-architecture.sh src/inet/transportlayer/tcp`,
+  `check-source-seals.sh` and `whatsnew.py check`; `check-naming.sh` reports the 24 violations and
+  `check-interfaces.sh` the 16 classes of master.
+- In the image of the CI at C14: all 1847 fingerprint runs in release mode, 1846 PASS and 1 expected ERROR
+  (`runs/r7-gate/` of the folder of D10), and all statistical tests, 945 TOTAL, 934 PASS, 11 SKIP (expected), 0
+  unexpected (`evidence/runs/ad63065ecf/` of the job copy). So R7 moves no baseline and re-records nothing, and
+  `check-baseline-attribution.sh plan` finds no commit that moves a result.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
