@@ -45,7 +45,7 @@ void NonQosRecoveryProcedure::incrementStationSrc(StationRetryCounters *stationC
 {
     stationCounters->incrementStationShortRetryCount();
     EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationCounters->getStationShortRetryCount() << ".\n";
-    if (stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
+    if (!dynamic_cast<IEdcaCwCalculator *>(cwCalculator) && stationCounters->getStationShortRetryCount() == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
         incrementContentionWindow();
@@ -55,7 +55,7 @@ void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationC
 {
     stationCounters->incrementStationLongRetryCount();
     EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationCounters->getStationLongRetryCount() << ".\n";
-    if (stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
+    if (!dynamic_cast<IEdcaCwCalculator *>(cwCalculator) && stationCounters->getStationLongRetryCount() == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow();
     else
         incrementContentionWindow();
@@ -123,7 +123,9 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
     // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
     // all or part of an MSDU or MMPDU
     //
-    resetContentionWindow();
+    // HCF resets the shared EDCA window at the end of the TXOP.
+    if (!dynamic_cast<IEdcaCwCalculator *>(cwCalculator))
+        resetContentionWindow();
 }
 
 //
