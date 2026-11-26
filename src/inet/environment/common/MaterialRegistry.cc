@@ -34,8 +34,10 @@ const Material *MaterialRegistry::getMaterial(const char *name) const
         // TODO verify values
         addMaterial(new Material("vacuum", Ohmm(NaN), 1, 1));
         addMaterial(new Material("air", Ohmm(NaN), 1.00058986, 1.00000037));
-        addMaterial(new Material("copper", Ohmm(1.68), NaN, NaN));
-        addMaterial(new Material("aluminium", Ohmm(2.65), NaN, NaN));
+        // the resistivities of the metals at 20 °C; their permittivity does not change the loss, because the
+        // conduction term is about 10^8 times larger, and their relative permeability differs from 1 by less than 3e-5
+        addMaterial(new Material("copper", Ohmm(1.68E-8), 1, 1));
+        addMaterial(new Material("aluminium", Ohmm(2.65E-8), 1, 1));
         addMaterial(new Material("wood", Ohmm(1E+15), 5, 1.00000043));
         addMaterial(new Material("forest", Ohmm(37E+3), 1.6, 1));
         addMaterial(new Material("brick", Ohmm(3E+3), 4.5, 1));

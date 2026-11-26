@@ -1,0 +1,83 @@
+%description:
+Tests the dielectric loss of DielectricObstacleLoss for a metal: one transmission
+crosses a single plate of copper that is 2 mm thick, at three frequencies. Reflection
+loss is switched off. The plate is thicker than EPSILON (1 mm), below which the two
+intersections of the path are the same Coord and the object takes no loss.
+
+Copper has the resistivity 1.68e-8 Ohm m and a relative permittivity and permeability
+of 1. Its loss tangent 1 / (2 pi f rho eps_0) is very large, so the power decays as
+exp(-2 z / delta) with the skin depth delta = sqrt(2 rho / (2 pi f mu_0)) of a good
+conductor. Expected values:
+
+  2.4 GHz: delta = 1.332 um, loss 13046 dB (factor 0)
+  10 MHz:  delta = 20.63 um, loss 842.111 dB
+  100 kHz: delta = 206.3 um, loss 84.211 dB
+
+At 2.4 GHz the factor exp(-2 z / delta) is below the smallest double, so it is 0 and
+the plate blocks the signal.
+
+Before the repair (BD-49 of the defect list), copper had the resistivity
+1.68 Ohm m and the permittivity and permeability NaN, so the factor was NaN and the
+ASSERT of computeDielectricLoss() failed in debug mode.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.environment.common.PhysicalEnvironment;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
+import inet.test.unittest.lib.ObstacleLossTest;
+
+network ObstacleLossTestNetwork
+{
+    submodules:
+        physicalEnvironment: PhysicalEnvironment;
+        radioMedium: RadioMedium;
+        test: ObstacleLossTest;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%file: environment.xml
+<environment>
+    <object position="min 4.9 -5 -5" orientation="0 0 0" shape="cuboid 0.002 10 10" material="copper"/>
+</environment>
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = ObstacleLossTestNetwork
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%l %C: "
+**.cmdenv-log-level = INFO
+
+*.physicalEnvironment.spaceMinX = -10m
+*.physicalEnvironment.spaceMinY = -10m
+*.physicalEnvironment.spaceMinZ = -10m
+*.physicalEnvironment.spaceMaxX = 20m
+*.physicalEnvironment.spaceMaxY = 10m
+*.physicalEnvironment.spaceMaxZ = 10m
+*.physicalEnvironment.config = xmldoc("environment.xml")
+*.radioMedium.backgroundNoise.power = -100dBm
+*.radioMedium.obstacleLoss.typename = "DielectricObstacleLoss"
+*.radioMedium.obstacleLoss.enableReflectionLoss = false
+
+*.test.frequencies = "2.4e9 1e7 1e5"
+*.test.txX = 0m
+*.test.txY = 0m
+*.test.txZ = 0m
+*.test.rxX = 10m
+*.test.rxY = 0m
+*.test.rxZ = 0m
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -s
+%subst: /\n<!> No more events, simulation completed.*?\n//
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "obstacle loss at" test.out > filtered.out
+%#--------------------------------------------------------------------------------------------------------------
+%contains: filtered.out
+INFO (ObstacleLossTest)ObstacleLossTestNetwork.test: obstacle loss at 2.4e+09 Hz: inf dB
+INFO (ObstacleLossTest)ObstacleLossTestNetwork.test: obstacle loss at 1e+07 Hz: 842.111 dB
+INFO (ObstacleLossTest)ObstacleLossTestNetwork.test: obstacle loss at 100000 Hz: 84.211 dB
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor

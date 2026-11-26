@@ -1,0 +1,3 @@
+Copper and aluminium have real constants
+
+The materials copper and aluminium of the physical environment had the relative permittivity and permeability NaN, and resistivities 10^8 times too large (1.68 and 2.65 Ohm m). So DielectricObstacleLoss computed the loss of an object of these materials as NaN, and failed its assertion in debug mode. They now have their resistivities at 20 °C, 1.68e-8 and 2.65e-8 Ohm m, and a relative permittivity and permeability of 1. An object of these materials now takes the loss of a good conductor: a plate 2 mm thick takes about 842 dB (copper) at 10 MHz and blocks a signal of 2.4 GHz.
