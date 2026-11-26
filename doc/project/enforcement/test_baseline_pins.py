@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Tests of baseline_pins.py: the show and moved commands, the parser, and the rebase command.
+"""Tests of baseline_pins.py: the show and moved commands, the parser, the rebase command, and the
+trailer form with the retrail and convert commands.
 
 Each test builds three temporary git repositories: the baseline repositories "statistics" and "media",
 and an INET-like repository with an inet.opp that pins one commit of each baseline. The tool runs as a
@@ -34,6 +35,15 @@ def opp_text(pins, name="inet"):
         if kind in pins:
             baseline["ref"] = pins[kind]
         parameters[kind] = {"baseline": baseline}
+    return OPP % (name, parameters)
+
+
+def trailer_text(name="inet"):
+    """The text of inet.opp in the trailer form: the pins are in commit trailers."""
+    parameters = {}
+    for kind, repository, folder, key in (("statistical", "inet-framework/statistics", "statistics", "Statistical-Baseline"),
+                                          ("chart", "inet-framework/media", "media", "Chart-Baseline")):
+        parameters[kind] = {"baseline": {"repository": repository, "trailer": key, "folder": folder}}
     return OPP % (name, parameters)
 
 
@@ -466,6 +476,101 @@ class RebaseErrorTest(PinTestCase):
         self.commit(self.inet, "source", {"src/a.c": "int a = 1;\n"})
         result = self.run_tool("rebase", "master")
         self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class TrailerTest(PinTestCase):
+    """The trailer form: the pin is in a trailer of the cause commit, and inet.opp does not change."""
+
+    def switch(self):
+        """INET master changes to the trailer form, and the series starts on it."""
+        self.git(self.inet, "checkout", "-q", "master")
+        self.switch_commit = self.commit(self.inet, "switch to the trailer form", {"inet.opp": trailer_text()})
+        self.git(self.inet, "checkout", "-q", "-B", "topic", "master")
+        self.git(self.stat, "checkout", "-q", "-b", "branch")
+
+    def cause(self, subject, pin, files=None, key="Statistical-Baseline"):
+        return self.commit(self.inet, f"{subject}\n\nChange: behavior\n{key}: {pin}", files or {f"src/{subject}.c": f"int {subject};\n"})
+
+    def retrail(self, *extra):
+        return self.run_tool("retrail", "master", "--baseline-repository", f"statistical={self.stat}", *extra)
+
+    def test_show_and_moved_read_the_trailer(self):
+        self.switch()
+        pin = self.baseline_commit(self.stat, "b")
+        cause = self.cause("one", pin)
+        result = self.run_tool("show")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(f"statistical inet-framework/statistics trailer Statistical-Baseline {pin} statistics", result.stdout)
+        self.assertEqual(self.run_tool("moved", cause).stdout.strip(), "statistical")
+        self.assertEqual(self.run_tool("moved", self.switch_commit).stdout.strip(), "")
+
+    def test_the_moves_of_a_series_take_the_previous_pin_of_the_kind(self):
+        self.switch()
+        first, second = self.baseline_commit(self.stat, "b"), self.baseline_commit(self.stat, "c")
+        one = self.cause("one", first)
+        self.commit(self.inet, "no pin", {"src/x.c": "int x;\n"})
+        two = self.cause("two", second)
+        moves = baseline_pins.series_pin_moves(self.switch_commit, self.series(), cwd=self.inet)
+        self.assertEqual(moves, [(one, self.head(self.inet, f"{one}^"), "statistical", None, first),
+                                 (two, self.head(self.inet, f"{two}^"), "statistical", first, second)])
+
+    def test_retrail_writes_the_new_hash_of_an_amended_baseline_commit(self):
+        self.switch()
+        old = self.baseline_commit(self.stat, "b")
+        cause = self.cause("one", old)
+        self.git(self.stat, "commit", "-q", "--amend", "-m", "baseline b, recorded again")
+        new = self.head(self.stat)
+        result = self.retrail()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f"statistical pin trailer {old[:9]} -> {new[:9]}", result.stdout)
+        head = self.head(self.inet)
+        self.assertEqual(self.raw_message(head), self.raw_message(cause).replace(old, new))
+        self.assertEqual(self.head(self.inet, f"{head}^{{tree}}"), self.head(self.inet, f"{cause}^{{tree}}"))
+        self.assertEqual(self.describe(head).split("|")[:3], self.describe(cause).split("|")[:3])
+
+    def test_retrail_gives_two_pins_the_commits_of_the_new_branch_in_order(self):
+        self.switch()
+        self.cause("one", self.baseline_commit(self.stat, "b"))
+        self.cause("two", self.baseline_commit(self.stat, "c"))
+        self.git(self.stat, "checkout", "-q", "-B", "branch", "master")
+        first, second = self.baseline_commit(self.stat, "b2"), self.baseline_commit(self.stat, "c2")
+        result = self.retrail()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        one, two = self.series()
+        self.assertEqual(baseline_pins.pin_trailers(one, "Statistical-Baseline", cwd=self.inet), [first])
+        self.assertEqual(baseline_pins.pin_trailers(two, "Statistical-Baseline", cwd=self.inet), [second])
+
+    def test_retrail_refuses_a_branch_with_other_commits_than_the_pins(self):
+        self.switch()
+        self.cause("one", self.baseline_commit(self.stat, "b"))
+        self.baseline_commit(self.stat, "c")
+        head = self.head(self.inet)
+        self.assert_refused(self.retrail(), head)
+
+    def test_convert_takes_the_ref_out_of_inet_opp_and_gives_the_pin_trailer(self):
+        pin = self.baseline_commit(self.stat, "b")
+        cause = self.move("one: moves a\n\nChange: behavior", {"statistical": pin, "chart": self.pins["chart"]}, {"src/a.c": "int a = 1;\n"})
+        self.commit(self.inet, "two: no pin", {"src/b.c": "int b = 1;\n"})
+        self.git(self.inet, "checkout", "-q", "master")
+        self.commit(self.inet, "switch to the trailer form", {"inet.opp": trailer_text()})
+        self.git(self.inet, "checkout", "-q", "topic")
+        result = self.run_tool("convert", "master")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f"statistical pin trailer none -> {pin[:9]}", result.stdout)
+        one, two = self.series()
+        self.assertEqual(self.git(self.inet, "show", f"{one}:inet.opp").stdout, trailer_text())
+        self.assertEqual(self.git(self.inet, "show", f"{two}:src/a.c").stdout, "int a = 1;\n")
+        self.assertEqual(self.git(self.inet, "show", f"{two}:src/b.c").stdout, "int b = 1;\n")
+        self.assertEqual(self.raw_message(one), f"one: moves a\n\nChange: behavior\nStatistical-Baseline: {pin}\n")
+        self.assertEqual(self.raw_message(two), self.raw_message("topic@{1}"))
+        self.assertEqual(self.describe(one).split("|")[:3], self.describe(cause).split("|")[:3])
+        self.assertEqual(baseline_pins.series_pin_moves(self.head(self.inet, "master"), [one, two], cwd=self.inet),
+                         [(one, self.head(self.inet, "master"), "statistical", None, pin)])
+
+    def test_convert_refuses_an_upstream_of_the_ref_form(self):
+        self.move("one", {"statistical": self.baseline_commit(self.stat, "b"), "chart": self.pins["chart"]})
+        head = self.head(self.inet)
+        self.assert_refused(self.run_tool("convert", "master"), head)
 
 
 class UsageTest(PinTestCase):
