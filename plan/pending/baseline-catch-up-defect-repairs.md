@@ -834,6 +834,12 @@ re-records nothing.
 [baseline-catch-up-defects.md](baseline-catch-up-defects.md). Next: the debug fingerprints of the landing in the image
 of the CI, then the landing.
 
+**The debug fingerprints of the landing (2026-11-26).** Master had moved to `f0df1e5383` with 3 commits that change
+only `README.md` and a plan file, so no compiled token differs from the base of the series. The check ran in the image
+of the CI at `73de36dae6`, whose sources equal the series, in debug mode with all features: 1847 runs, 1846 PASS and 1
+ERROR that a marker declares as expected, in 6 min 59 s (`runs/r3-landing/` of the folder of D10). R3 is ready to
+land.
+
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
 
 **Re-check.** Master `b029add207` changes no file of `src/inet/environment` or of the obstacle loss after
