@@ -70,12 +70,27 @@ void TcpWestwood::recalculateBWE(uint32_t cumul_ack)
     state->w_lastAckTime = currentTime;
 }
 
+void TcpWestwood::established(bool active)
+{
+    TcpAlgorithmBase::established(active);
+
+    // RFC 6582 section 3.2, step 1, starts recover at the ISS; it starts one below, as
+    // in Rfc6582Recovery, so that a loss of the first data segment gets a fast retransmit
+    state->recover = state->iss - 1;
+}
+
 void TcpWestwood::processRexmitTimer(TcpEventCode& event)
 {
     TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
+
+    // RFC 6582 section 3.2, "Retransmit timeouts": "record the highest sequence number
+    // transmitted in the variable recover", so that the duplicates of the go-back below
+    // start no fast retransmit (section 6). The fast retransmit of Westwood does not go
+    // back, so it leaves recover as it is.
+    state->recover = state->snd_max - 1;
 
     // TCP Westwood: congestion control with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
     // After REXMIT timeout in TCP Westwood: a increases from 1 to 4, in steps of 1 during slow start,
@@ -207,6 +222,15 @@ void TcpWestwood::receivedDuplicateAck()
         uint32_t cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
     } // Closes if w_sendtime != nullptr
+
+    // RFC 6582 section 6: after a timeout, the go-back sends again segments that the
+    // receiver can have, and their duplicates must start no fast retransmit and no fast
+    // recovery. As in Rfc6582Recovery, the duplicates count only when the cumulative ACK
+    // "covers more than recover" (section 3.2, step 2).
+    if (state->dupacks >= state->dupthresh && !seqGreater(state->snd_una - 1, state->recover)) {
+        EV_DETAIL << "Westwood on dupAcks >= DUPTHRESH(=" << state->dupthresh << "): the cumulative ACK does not cover more than recover=" << state->recover << ", no Fast Retransmit and no Fast Recovery\n";
+        return;
+    }
 
     if (state->dupacks == state->dupthresh) {
         EV_DETAIL << "Westwood on dupAcks == DUPTHRESH(=" << state->dupthresh << ": Faster Retransmit \n";

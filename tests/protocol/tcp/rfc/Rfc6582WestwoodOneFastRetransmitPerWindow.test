@@ -1,0 +1,214 @@
+%description:
+
+RFC 6582 -- after a retransmission timeout and its go-back, TcpWestwood starts no fast
+retransmit in the same window.
+
+RFC 6582 section 6 names the problem: without SACK, a sender can not tell the duplicate
+acknowledgment of a lost segment from the duplicate acknowledgment of a segment that it sent
+again and the receiver already had. So the losses of one window can start several fast
+retransmits, and Tahoe, which goes back after a fast retransmit, is the worst case. Its guard is
+the variable recover: at a fast retransmit, recover is the highest sequence number sent, and the
+third duplicate acknowledgment starts a fast retransmit only when the cumulative acknowledgment
+covers more than recover. TcpNewReno has it; TcpTahoe and TcpWestwood test dupacks ==
+dupthresh and nothing else (BD-39 of the defect list).
+
+TcpWestwood goes back only after a retransmission timeout: its fast retransmit sends one
+segment and inflates cwnd, as Reno does. The step "Retransmit timeouts" of RFC 6582 section 3.2
+sets recover at a timeout too, so this test checks the timeout. The relay removes six data segments of one window, the
+40th, 42nd, 44th, 46th, 48th and 50th, once each. The duplicate acknowledgments do not repair
+them all, the retransmission timer expires, and TcpWestwood goes back to slow start from the
+first unacknowledged segment: it sends again segments that host B already has. An observer marks
+a fast retransmit: a segment that host A sends again while it holds three duplicates of one
+acknowledgment. Another observer keeps the highest octet that host A has sent at each timeout.
+The guard forbids a fast retransmit after a timeout while the cumulative acknowledgment does not
+cover more than that octet. The run must end with the acknowledgment of all data.
+
+The scenario runs TcpWestwood without SACK.
+
+%includes:
+#include <algorithm>
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// What host A has sent and what host B has acknowledged, kept by observers that run beside the
+// ordered steps. The engine offers every event to the running guards first and to the ordered
+// step after them, so a step reads values that already include its own event.
+static long highestSent = -1;   // one past the highest octet host A has sent
+static long cumulativeAck = -1; // the highest acknowledgment host A has received
+static int duplicates = 0;      // consecutive duplicates of cumulativeAck
+static long recoverPoint = -1;  // highestSent at the last timeout: RFC 6582 recover + 1
+static int timeouts = 0;        // the retransmission timeouts of host A
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+// At host A's TCP a segment starts with its TCP header, so the data is what follows it.
+static long dataLengthOf(const Packet *packet)
+{
+    return (long)(packet->getByteLength() - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B"));
+}
+
+// Observer: every acknowledgment host A receives. RFC 5681 section 2 counts an acknowledgment
+// as a duplicate when it carries no data and repeats the highest acknowledgment number. Never a
+// match.
+static bool recordAck(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.srcPort") != 1000)
+        return false;
+    long ack = fieldOf(packet, "tcp.ackNo");
+    if (ack < 0)
+        return false;
+    if (ack > cumulativeAck) {
+        cumulativeAck = ack;
+        duplicates = 0;
+    }
+    else if (ack == cumulativeAck && dataLengthOf(packet) == 0)
+        duplicates++;
+    return false;
+}
+
+// Observer: the counter of retransmission timeouts of host A. At each timeout, RFC 6582 sets
+// recover to the highest sequence number sent. Never a match.
+static bool recordTimeout(const MatchContext&)
+{
+    timeouts++;
+    recoverPoint = highestSent;
+    return false;
+}
+
+// True for a segment that host A sends again while it holds three duplicates, a fast
+// retransmit, after a timeout and before the cumulative acknowledgment covers more than the
+// highest octet that host A had sent at the timeout. It keeps highestSent for each segment.
+static bool fastRetransmitBeforeRecover(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.destPort") != 1000)
+        return false;
+    long length = dataLengthOf(packet);
+    if (length <= 0)
+        return false;
+    long sequenceNumber = fieldOf(packet, "tcp.sequenceNo");
+    bool retransmission = sequenceNumber + length <= highestSent;
+    highestSent = std::max(highestSent, sequenceNumber + length);
+    if (!retransmission || duplicates != 3 || recoverPoint < 0 || cumulativeAck > recoverPoint)
+        return false;
+    EV_INFO << "fast retransmit of " << sequenceNumber << " after a timeout, with the cumulative acknowledgment "
+            << cumulativeAck << ", recover + 1 = " << recoverPoint << "\n";
+    return true;
+}
+
+static bool atLeastOneTimeout(const MatchContext&)
+{
+    return timeouts >= 1;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc6582_westwood_one_fast_retransmit_per_window")
+        // Remove six segments of one window, once each.
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 39 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 40th data segment of host A, the first time"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 41 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 42nd data segment of host A, the first time"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 43 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 44th data segment of host A, the first time"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 45 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 46th data segment of host A, the first time"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 47 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 48th data segment of host A, the first time"))
+        .intercept(tap("relay")
+                       .filterPacket("tcp.destPort == 1000 && tcp.sequenceNo == {isn} + 1 + 49 * 1448 && ipv4.totalLengthField > 100B")
+                       .nth(1).drop().describe("the 50th data segment of host A, the first time"))
+        .meanwhile(never(on("host1.tcp").signal("packetReceivedFromLower")
+                             .filterEvent(recordAck)
+                             .describe("every acknowledgment host A receives")
+                             .within(20.0)))
+        .meanwhile(never(on("host1.tcp").signal("numRtos")
+                             .filterEvent(recordTimeout)
+                             .describe("every retransmission timeout of host A")
+                             .within(20.0)))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(fastRetransmitBeforeRecover)
+                             .describe("a fast retransmit after a timeout before the cumulative acknowledgment covers more than recover")
+                             .within(20.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host A")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackNo >= {isn} + 1 + 300000")
+                  .first()
+                  .assertEvent(atLeastOneTimeout)
+                  .describe("the acknowledgment of the last byte, after at least one timeout")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc6582_westwood_one_fast_retransmit_per_window compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network OneFastRetransmitNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = OneFastRetransmitNet
+sim-time-limit = 30s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+# TcpWestwood without SACK, the algorithm of BD-39.
+**.tcp.tcpAlgorithmClass = "TcpWestwood"
+**.tcp.sackSupport = false
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 300000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc6582_westwood_one_fast_retransmit_per_window: PASS

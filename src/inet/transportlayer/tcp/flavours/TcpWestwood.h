@@ -33,6 +33,9 @@ class INET_API TcpWestwood : public TcpAlgorithmBase
     /** Recalculate BWE */
     virtual void recalculateBWE(uint32_t cumul_ack);
 
+    /** Starts recover of RFC 6582 below the first data octet */
+    virtual void established(bool active) override;
+
   public:
     /** Ctor */
     TcpWestwood();
