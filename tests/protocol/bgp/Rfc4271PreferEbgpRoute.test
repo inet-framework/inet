@@ -1,0 +1,142 @@
+%description:
+
+RFC 4271 section 9.1.2.2 d) -- a border router that learns one prefix over EBGP and over IBGP,
+with the same LOCAL_PREF, AS_PATH length and ORIGIN, keeps the route it received via EBGP.
+
+RFC 4271, rfc4271.txt:4543-4545: "If at least one of the candidate routes was received via EBGP,
+remove from consideration all routes that were received via IBGP." Step d) comes before step g)
+(rfc4271.txt:4569, the lowest peer address), and rfc4271.txt:4459-4460 says "The criteria MUST be
+applied in the order specified."
+
+The network: RA (AS 64500) advertises netA, 10.0.0.0/30. RB1 and RB2 (AS 64600) each have an
+EBGP session to RA and an IBGP session to each other, with NEXT_HOP set to self. Each border
+router learns netA from RA and from the other. The two routes tie on LOCAL_PREF (100), AS_PATH
+length (1) and ORIGIN. The IBGP peer addresses (20.0.0.1, 20.0.0.2) are lower than the EBGP
+peer addresses (192.168.0.2, 192.168.0.6), so step g) alone picks the IBGP route on both border
+routers. Then RB1 forwards to RB2 and RB2 forwards to RB1, and a datagram for netA loops until
+its time to live (TTL) expires.
+
+Host B, behind RB1, sends datagrams to host A on netA from 30 s, after the sessions are up.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc4271_prefer_ebgp_route")
+        // Expected observation 1: a datagram of host B reaches host A. RB1 forwards it over
+        // its EBGP route to RA.
+        .once(on("hostA.udp").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("a datagram of host B, received by host A")
+                  .within(35.0))
+        // Expected observation 2: no datagram of host B reaches RB2. RB1 does not use its
+        // IBGP route through RB2.
+        .never(on("RB2.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000")
+                  .describe("a datagram of host B, received by RB2 from RB1")
+                  .within(4.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc4271_prefer_ebgp_route compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+// RA in AS 64500 with netA behind it; RB1 and RB2 in AS 64600, each linked to RA and to the
+// other; host B behind RB1.
+network BgpTwoBorderRouters
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>" +
+                         "<interface hosts='RB1' names='eth0' address='20.0.0.1' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RB2' names='eth0' address='20.0.0.2' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RB1' names='eth1' address='192.168.0.1' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RA' names='eth0' address='192.168.0.2' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RB2' names='eth1' address='192.168.0.5' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RA' names='eth1' address='192.168.0.6' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RA' names='eth2' address='10.0.0.1' netmask='255.255.255.252'/>" +
+                         "<interface hosts='hostA' names='eth0' address='10.0.0.2' netmask='255.255.255.252'/>" +
+                         "<interface hosts='RB1' names='eth2' address='40.0.0.1' netmask='255.255.255.252'/>" +
+                         "<interface hosts='hostB' names='eth0' address='40.0.0.2' netmask='255.255.255.252'/>" +
+                         "<route hosts='hostA' destination='*' netmask='0.0.0.0' gateway='10.0.0.1' interface='eth0'/>" +
+                         "<route hosts='hostB' destination='*' netmask='0.0.0.0' gateway='40.0.0.1' interface='eth0'/>" +
+                         "</config>");
+            @display("p=100,50");
+        }
+        RA: Router { @display("p=300,200"); }
+        RB1: Router { @display("p=500,100"); }
+        RB2: Router { @display("p=500,300"); }
+        hostA: StandardHost { @display("p=100,200"); }
+        hostB: StandardHost { @display("p=700,100"); }
+    connections:
+        RB1.ethg++ <--> Eth100M <--> RB2.ethg++;
+        RB1.ethg++ <--> Eth100M <--> RA.ethg++;
+        RB2.ethg++ <--> Eth100M <--> RA.ethg++;
+        RA.ethg++ <--> Eth100M <--> hostA.ethg++;
+        RB1.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%file: bgp.xml
+
+<BGPConfig>
+    <AS id="64500">
+        <Router interAddr="10.0.0.1">
+            <Network address="10.0.0.0"/>
+        </Router>
+    </AS>
+    <AS id="64600">
+        <Router interAddr="20.0.0.1">
+            <Neighbor address="20.0.0.2" nextHopSelf="true"/>
+        </Router>
+        <Router interAddr="20.0.0.2">
+            <Neighbor address="20.0.0.1" nextHopSelf="true"/>
+        </Router>
+    </AS>
+    <Session id="1">
+        <Router exterAddr="192.168.0.2"/>
+        <Router exterAddr="192.168.0.1"/>
+    </Session>
+    <Session id="2">
+        <Router exterAddr="192.168.0.6"/>
+        <Router exterAddr="192.168.0.5"/>
+    </Session>
+</BGPConfig>
+
+%inifile: omnetpp.ini
+
+[General]
+network = BgpTwoBorderRouters
+sim-time-limit = 40s
+seed-set = 0
+
+*.R*.hasBgp = true
+*.R*.bgp.bgpConfig = xmldoc("bgp.xml")
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpBasicApp"
+*.hostB.app[0].destAddresses = "10.0.0.2"
+*.hostB.app[0].destPort = 5000
+*.hostB.app[0].localPort = 4000
+*.hostB.app[0].messageLength = 100B
+*.hostB.app[0].startTime = 30s
+*.hostB.app[0].sendInterval = 1s
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpSink"
+*.hostA.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc4271_prefer_ebgp_route: PASS
