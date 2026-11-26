@@ -314,7 +314,8 @@ No sealed file changes. No consumer outside INET changes.
   RACK finds starts the recovery at that ACK. Baselines: `examples/inet/bulktransfer` (check R1 of step 50 of the
   catch-up).
   - `tcp: fix: a loss that RACK marks at an ACK with data starts the recovery (RFC 8985 section 6.2)`.
-- [ ] **Step 7. R7: a window update is no duplicate ACK (BD-4).** Test: a peer sends three ACKs with the same number
+- [x] **Step 7. R7: a window update is no duplicate ACK (BD-4).** Repaired as C14 `ad63065ecf`; gate B approved on
+  2026-11-26 (§6.3, R7). It moves no baseline, and it lands when the maintainer asks. Test: a peer sends three ACKs with the same number
   and a larger window during a transfer; the sender does not start a fast retransmit. Baselines:
   `examples/inet/bulktransfer` `inet__inet`, `inet_inet_2a`, `inet_inet_2b`.
   - `tcp: fix: condition (e) of a duplicate ACK compares the window before its update (RFC 5681)`.
@@ -1227,6 +1228,10 @@ release note `doc/whatsnew/fixes/tcp-window-update-no-duplicate-ack.txt`. The pr
   (`runs/r7-gate/` of the folder of D10), and all statistical tests, 945 TOTAL, 934 PASS, 11 SKIP (expected), 0
   unexpected (`evidence/runs/ad63065ecf/` of the job copy). So R7 moves no baseline and re-records nothing, and
   `check-baseline-attribution.sh plan` finds no commit that moves a result.
+
+**Gate B** approved by the maintainer on 2026-11-26 ("I approve"). The repair commit of BD-4 is in
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md). R7 lands when the maintainer asks; the debug fingerprints
+of the landing run in the image of the CI.
 
 ## 7. Verification
 

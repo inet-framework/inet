@@ -308,6 +308,13 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-4: a window update counts as a duplicate ACK
 
+- **State (2026-11-26):** repaired by `ad63065ecf` on the branch `topic/baseline-catch-up-defect-repairs` (change R7
+  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests `Rfc5681WindowUpdateNoDuplicateAck.test` and
+  `Rfc5681SmallerWindowNoDuplicateAck.test` and the reviewer document
+  `tests/protocol/tcp/window-update-no-duplicate-ack.md`. `~Tcp` takes any change of the window as a window update, as
+  condition (e) says; the new parameter `duplicateAckWindowRule = "linux"`, which `~LinuxTcp` sets, takes a larger or a
+  zero window only, as Linux. The fault acts only without SACK, so no stored fingerprint or statistic moves; the
+  baselines below date from before SACK was on by default.
 - **Place:** [TcpConnectionRcvSegment.cc](../../src/inet/transportlayer/tcp/TcpConnectionRcvSegment.cc), the update of
   the window before `receivedAckForAlreadyAckedData()`. From `45199ea23d` (step 7).
 - **Fault:** condition (e) of the duplicate ACK of RFC 5681 (the advertised window does not change) compares the
