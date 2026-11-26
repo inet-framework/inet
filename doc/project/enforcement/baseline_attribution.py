@@ -32,7 +32,8 @@ Usage, from the INET repository root:
         [--build COMMAND] [--checkout COMMAND] [--statistical COMMAND] [--chart COMMAND] [--fingerprint COMMAND]
 
 plan prints the runs and reads git objects only. run does them. Each COMMAND is a shell command for
-this checkout; the tool adds the filter of the moved tests to the three test commands. The defaults
+this checkout; the tool adds the filter of the moved tests to the three test commands, and the
+option --commit with the commit that gives the expectations to the checkout command. The defaults
 are the commands of the CI workflows.
 
 Exit status 0 = each run passes (or plan is done), 1 = a run fails, 2 = invalid usage or the tool cannot run.
@@ -47,7 +48,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import baseline_summary  # noqa: E402
-from baseline_pins import OPP_FILE, PinError, git, is_full_hash, read_baselines  # noqa: E402
+from baseline_pins import OPP_FILE, PinError, git, read_baselines, series_pin_moves  # noqa: E402
 from check_baselines import (FINGERPRINT_FORMS, FORMS, REDUCTION_FORMS, STORE, BaselineRepository, message_of,  # noqa: E402
                              reduction_in_message, short, store_at, subject_of, trailers_of)
 
@@ -128,20 +129,23 @@ def find_steps(commit_range, sources, cache_folder):
     base = git("rev-parse", commit_range.split("..")[0] or "HEAD").stdout.strip()
     commits = git("log", "--format=%H", "--reverse", "--first-parent", commit_range).stdout.split()
     repositories, steps = {}, []
-    previous, parent = read_baselines(base), base
+    moves = series_pin_moves(base, commits)
+    parent = base
     for commit in commits:
         current = read_baselines(commit)
         step = Step(commit, parent)
-        for kind in sorted(current):
-            old, new = (previous.get(kind) or {}).get("ref"), current[kind].get("ref")
-            if not (is_full_hash(old) and is_full_hash(new)) or old == new:
-                continue
+        for _, _, kind, old, new in (move for move in moves if move[0] == commit):
             if kind not in repositories:
-                source = sources.get(kind) or (previous.get(kind) or current[kind])["repository"]
+                source = sources.get(kind) or current[kind]["repository"]
                 if not os.path.isdir(source) and "://" not in source and not source.startswith("git@"):
                     source = f"https://github.com/{source}.git"
                 repositories[kind] = BaselineRepository(kind, source, cache_folder)
             repository = repositories[kind]
+            if old is None:
+                # the trailer form: the first pin moves from the base of its baseline branch
+                old = None if repository.get([new]) else repository.branch_base(new)
+                if old is None:
+                    raise AttributionError(f"{short(commit)} pins {kind} {short(new)}, which is not in the baseline repository or not on its master; run check-baselines.sh first")
             if repository.get([old, new]) or not repository.is_ancestor(old, new):
                 raise AttributionError(f"{short(commit)} moves the {kind} pin to a commit that is not in the baseline repository, or not forward; run check-baselines.sh first")
             folders = {}
@@ -178,7 +182,7 @@ def find_steps(commit_range, sources, cache_folder):
         add_fingerprints(step)
         if step.form is not None:
             steps.append(step)
-        previous, parent = current, commit
+        parent = commit
     return steps
 
 
@@ -277,7 +281,8 @@ def do_run(step, run, commands, log_folder, number):
                 return False, "the reduction does not apply"
         if shell(commands["build"], prefix + "-build.log") != 0:
             return False, f"the build fails, see {prefix}-build.log"
-        if (statistical or chart) and shell(commands["checkout"], prefix + "-checkout.log") != 0:
+        # the baselines of the commit that gives the expectations: for the trailer form, its history gives them
+        if (statistical or chart) and shell(f"{commands['checkout']} --commit {expectations}", prefix + "-checkout.log") != 0:
             return False, f"the checkout of the baselines fails, see {prefix}-checkout.log"
         failed, passed = [], []
         for kind, value, option in (("statistical", statistical, "-f"), ("chart", chart, "-w"), ("fingerprint", fingerprint, "-f")):

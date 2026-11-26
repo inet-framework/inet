@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_check_baselines import (GateTestCase, SCA_A, SCA_B, PNG_A, PNG_DOC, PATCH, FORWARD_PATCH,  # noqa: E402
                                   REVERSE_PATCH, BAD_PATCH, sca)
 import baseline_attribution as ba  # noqa: E402
+import test_check_baselines  # noqa: E402
 
 WRAPPER = Path(__file__).with_name("check-baseline-attribution.sh").resolve()
 SCA_C = "examples/c/omnetpp.ini-General-#0.sca"
@@ -336,6 +337,40 @@ class RunTest(AttributionTestCase):
         for kind in ("build", "checkout", "statistical"):
             self.assertEqual(len([name for name in logs if name.endswith(f"-{kind}.log")]), 2)
         self.assertIn("Tested statistical test (1 concurrent)", next(self.logs.glob("*-statistical.log")).read_text())
+
+
+class TrailerAttributionTest(AttributionTestCase):
+    """The trailer form: the step of a pin trailer starts on the base of its baseline branch, and the
+    checkout of each run gets the commit whose expectations it uses."""
+
+    def setUp(self):
+        super().setUp()
+        self.git(self.inet, "checkout", "-q", "master")
+        self.write(self.inet, "inet.opp", test_check_baselines.trailer_opp_text())
+        self.git(self.inet, "commit", "-qam", "switch to the trailer form")
+        self.git(self.inet, "checkout", "-q", "-B", "topic", "master")
+        for repository in (self.stat, self.media):
+            self.git(repository, "checkout", "-q", "-b", "branch")
+
+    def trailer_move(self, **kwargs):
+        return test_check_baselines.TrailerTest.trailer_move(self, **kwargs)
+
+    def test_the_plan_of_a_pin_trailer_lists_the_parent_run_and_the_commit_run(self):
+        self.trailer_move(stat={SCA_A: sca(sent="11")})
+        result = self.tool("plan")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("form commit; 1 statistical test(s), charts in 0 folder(s)", result.stdout)
+        self.assertEqual(result.stdout.count("  run "), 2)
+
+    def test_the_checkout_of_each_run_gets_the_commit_of_its_expectations(self):
+        self.trailer_move(stat={SCA_A: sca(sent="11"), PATCH: FORWARD_PATCH}, stat_record={"attribution": f"forward {PATCH}"})
+        (commit,) = self.commits()
+        parent = self.parent_of(commit)
+        result = self.tool("run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        checkouts = [(c["head"], c["args"]) for c in self.calls() if c["action"] == "checkout"]
+        # the forward reduction runs in the parent tree with the expectations of the commit
+        self.assertEqual(checkouts, [(parent, f"--commit {parent}"), (commit, f"--commit {commit}"), (parent, f"--commit {commit}")])
 
 
 class UsageTest(AttributionTestCase):

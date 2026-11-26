@@ -100,7 +100,7 @@ jobs:
           make makefiles
           make MODE=release -j"$(nproc)"
           END
-          echo 'exec opp_checkout_test_baselines --load "$GITHUB_WORKSPACE/inet" -p inet' > "$RUNNER_TEMP/checkout.sh"
+          echo 'exec opp_checkout_test_baselines --load "$GITHUB_WORKSPACE/inet" -p inet "$@"' > "$RUNNER_TEMP/checkout.sh"
           echo 'exec opp_run_statistical_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/statistical.sh"
           echo 'exec opp_run_chart_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/chart.sh"
           echo 'exec opp_run_fingerprint_tests --load "$GITHUB_WORKSPACE/inet" -p inet -m release --no-build "$@"' > "$RUNNER_TEMP/fingerprint.sh"
