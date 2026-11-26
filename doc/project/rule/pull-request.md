@@ -188,7 +188,7 @@ What the earlier form of this rule protected — that a baseline never moves unn
 
 A value that is recorded for the first time is not a baseline update. A new fingerprint row for a new example is the test of that example, and it belongs to the commit that adds the example.
 
-**A baseline in another repository travels by its pin.** The statistical and chart baselines are in the `statistics` and `media` repositories, so their values cannot be in the INET commit. The commit that moves them changes the pin in `inet.opp` to the baseline commit that holds the new values ([TR-BASELINE-PIN](testing.md#tr-baseline-pin)). The commit is then true on its own as before: its tests pass against its own pins. The message of the baseline commit holds the record of the moved results ([TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance)), with the attribution to a small change ([TR-BASELINE-ATTRIBUTION](testing.md#tr-baseline-attribution)). A commit that changes only a pin is a baseline-only commit, and it stands alone only when no source commit causes the move.
+**A baseline in another repository travels by its pin.** The statistical and chart baselines are in the `statistics` and `media` repositories, so their values cannot be in the INET commit. The commit that moves them has a pin trailer with the baseline commit that holds the new values ([TR-BASELINE-PIN](testing.md#tr-baseline-pin)). The commit is then true on its own as before: its tests pass against its own baseline. The message of the baseline commit holds the record of the moved results ([TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance)), with the attribution to a small change ([TR-BASELINE-ATTRIBUTION](testing.md#tr-baseline-attribution)). A commit that has a pin trailer and changes no source is a baseline-only commit, and it stands alone only when no source commit causes the move.
 
 ### PR-SPLIT-DRIVEBY
 
@@ -444,7 +444,7 @@ A reviewer who stops after the summary must still be able to answer the reviewer
 
 **The description summarizes the baseline changes of each commit that changes a baseline**
 
-A series can have more than one commit that changes a baseline: the fingerprint store, or the pin of a statistical or chart baseline over a result. The reviewer needs one place that says what each of them moves and why. The description has a section "Baseline changes" with one entry for each such commit: its subject, then a summary of its baseline changes in your words.
+A series can have more than one commit that changes a baseline: the fingerprint store, or a pin trailer of a statistical or chart baseline whose step changes results. The reviewer needs one place that says what each of them moves and why. The description has a section "Baseline changes" with one entry for each such commit: its subject, then a summary of its baseline changes in your words.
 
 ```
 ## Baseline changes
@@ -558,7 +558,7 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 |---|---|---|
 | PR-SPLIT-WHITESPACE | T3 | per-commit check: a file whose diff is empty under `git diff -w` but not otherwise, in a commit that also has real changes |
 | PR-SPLIT-MOVE | T3 | per-commit check: a delete/add pair with high similarity plus a content change |
-| PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body; for a baseline in another repository, a pin that moves in a commit with no source change and no environment cause (T3) + agent review that the commit which moves the values explains the movement (T4) |
+| PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body; for a baseline in another repository, a pin trailer in a commit with no source change and no environment cause (T3) + agent review that the commit which moves the values explains the movement (T4) |
 | PR-SPLIT-MECHANICAL | T3+T4 | diff-size and hunk-uniformity heuristic (T3) + agent review |
 | PR-SPLIT-SIZE | T3+T4 | note: more than 400 changed source lines (T3) + agent review of the reason in the body (T4) |
 | PR-SERIES-BUILDS | T2 | CI builds and tests every commit of the branch, not only the head |

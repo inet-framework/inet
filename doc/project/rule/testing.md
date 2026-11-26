@@ -30,7 +30,7 @@ Every test rule in document order.
 | [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes only after explicit approval, never as a side effect |
 | [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause, and gives a reason for each category of its changes |
 | [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update travels with the change that causes it |
-| [TR-BASELINE-PIN](#tr-baseline-pin) | Each commit pins the commit of each baseline repository |
+| [TR-BASELINE-PIN](#tr-baseline-pin) | A commit that moves a result pins its baseline commit in a trailer |
 | [TR-BASELINE-PARENT](#tr-baseline-parent) | A baseline changes only for a test that passes on the parent commit and that the change moves |
 | [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution) | The code that moves baseline values is the smallest fragment that produces them, and a run proves it |
 
@@ -193,7 +193,7 @@ The size class of a changed test file comes from the largest relative change of 
 
 [baseline_summary.py](../enforcement/baseline_summary.py) computes the list of statistics and charts, and [fingerprint_moves.py](../enforcement/fingerprint_moves.py) the list of fingerprints. More prose in the message is welcome, but the list is the part that a gate checks.
 
-**In a baseline repository, the commit message also holds the link.** `INET-Subject:` is the exact subject of the INET commit that moves the pin. A hash cannot be the link, because the hash changes when the change lands with a rebase. A re-record whose cause is on the target branch already uses `INET-Commit:` with the hash. `Attribution:` names one of the forms of [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution).
+**In a baseline repository, the commit message also holds the link.** `INET-Subject:` is the exact subject of the cause commit: the INET commit that has the pin trailer. A hash cannot be the link, because the hash changes when the change lands with a rebase. A re-record whose cause is on the target branch already uses `INET-Commit:` with the hash. `Attribution:` names one of the forms of [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution).
 
 The INET commit keeps its own task: its message says which behavior changes and why the new behavior is correct. `git blame` on a baseline file then shows the commit that explains its values.
 
@@ -207,25 +207,34 @@ The rule is [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline); it is repeat
 
 A re-record that no single commit causes — a compiler, tool or solver version change, or drift from outside the branch — keeps a commit of its own, because there is no commit beside it to hold the reason.
 
-A baseline in another repository cannot be in the INET commit. The pin of [TR-BASELINE-PIN](#tr-baseline-pin) takes its place: the commit that changes the behavior changes the pin.
+A baseline in another repository cannot be in the INET commit. The pin trailer of [TR-BASELINE-PIN](#tr-baseline-pin) takes its place: the commit that changes the behavior has the pin trailer.
 
-*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the values, and a pin that moves in a commit with no source change; T4 for the reason itself.*
+*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the values, and a pin trailer in a commit with no source change; T4 for the reason itself.*
 
 ### TR-BASELINE-PIN
 
-**Each commit pins the commit of each baseline repository, with a full commit hash.**
+**A commit that moves a result pins its baseline commit in a pin trailer, with a full commit hash.**
 
-The statistical and chart baselines are in the `statistics` and `media` repositories. `inet.opp` names one commit of each in the `ref` field of its `baseline` entry. That commit is the baseline that this INET commit passes with. CI checks out the pins. It never reads a baseline that moves, such as the head of a branch.
+The statistical and chart baselines are in the `statistics` and `media` repositories. The `baseline` entry of each kind in `inet.opp` names the key of its pin trailer: `Statistical-Baseline` and `Chart-Baseline`. The commit that causes the move, the cause commit, has the trailer in its message, and `inet.opp` does not change:
 
-A pin moves in the commit that causes the move, and it moves only forward: the new pin descends from the pin before it, with no merge between. The step holds at most one commit that changes results. That commit is the baseline commit of the INET commit, and it has the record of [TR-BASELINE-PROVENANCE](#tr-baseline-provenance). Thus the link is exact for each commit, it survives a rebase, a bisect knows the baseline of each commit, and the branches of the two repositories do not have to move at the same moment.
+```
+Change: src.ieee80211 | behavior.change.fix | statistical test whatsnew
+Statistical-Baseline: 0123456789abcdef0123456789abcdef01234567
+```
+
+The value is the pin: the last commit of a step of the baseline branch of the series. A step goes from the pin of the previous cause commit of the series, or for the first one from the base of the baseline branch, to the pin. It moves only forward, with no merge. The step holds at most one commit that changes results. That commit is the baseline commit of the INET commit, and it has the record of [TR-BASELINE-PROVENANCE](#tr-baseline-provenance). A commit message is a part of the hash of the commit, so the required checks cover the pin, and "Rebase and merge" keeps it.
 
 **Not each file of a baseline repository is a result.** In `statistics`, the results are the `.sca` files. In `media`, the results are the images that a chart of an analysis file in the INET tree exports; the other files are documentation media, such as network images and videos. A commit that changes no result needs no record, and a pin can move over it. The `media` pin of an INET commit thus also names the documentation media that the commit goes with.
 
-The pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there. After the INET change lands, `master` of the baseline repository moves to the pin by a fast-forward. Thus `master` of a baseline repository is always the pin of INET `master`.
+The baseline branch starts on the head of `master` of the baseline repository. Before the landing, the pinned commit must be in the baseline repository of the project: on a branch with the name of the INET branch, or as the head of a pull request there.
 
-Two series that move the same pin conflict in `inet.opp`. The second one rebases its baseline branch onto the new pin and writes the new hashes into its commits. The conflict is correct: the baseline of the second series must stand on the baseline of the first one.
+**The landing job lands the baseline.** After each push to INET `master`, [check-baseline-masters.yml](../../../.github/workflows/check-baseline-masters.yml) puts the steps of the new cause commits onto `master` of each baseline repository, the oldest first. A step that starts on the head of `master` lands by a fast-forward, and GitHub marks a pull request whose head is the pin as merged. The job makes another step again on the head of `master`, with its messages and authors, as "Rebase and merge" does; GitHub does not mark the pull request of that step as merged, so the log and the job summary of the job name it, and a maintainer closes it. After the steps, the job adds a mark: a commit with no change of files and a line `Baseline-Of: <INET hash> <baseline hash>` for each landed cause commit. Thus `master` of a baseline repository always holds the baseline of INET `master`, and its history is a line.
 
-*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin, the step forward with at most one commit that changes results, and the presence of the commit in the baseline repository; [baseline_masters.py](../enforcement/baseline_masters.py), after each push to `master`: each baseline master is at its pin; T2 — the statistical and chart tests run against the pins.*
+**Each INET commit has one exact baseline.** opp_repl finds it from the two histories: the baseline that the newest mark gives for the merge base of the commit with INET `master`, and the pin trailers after that merge base, rebased locally onto that baseline. A commit of `master` gets the baseline that its mark gives. A pull request is tested against the baseline that its landing will make. A commit of a series is tested against the baseline of its own base. A commit from before the trailer form has a `ref` in `inet.opp`, the pin of that time, and keeps it. A new commit has no `ref`. CI never reads a baseline that moves, such as the head of a branch.
+
+**An overlap blocks the landing.** Two series that move the same baseline land one after the other with no new push, when no file is common to them. A file that the baseline branch changes and that `master` of the baseline repository changed since the base of the branch is an overlap: two series moved one result two times, and a merge of the text can mix the values of two runs. The commit status `Baseline merge` of a pull request with an overlap is red, and a pull request with a red `Baseline merge` does not land. The author records the common results again on the new head of `master` and writes the new pins with `baseline_pins.py retrail`. If a landing stops, the job fails, and INET `master` has no baseline for that commit until a maintainer repairs it ([change-a-baseline.md](../guide/change-a-baseline.md)).
+
+*Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form of each pin trailer, the step forward with at most one commit that changes results, and the presence of the commit in the baseline repository; [baseline_masters.py](../enforcement/baseline_masters.py) `check`, the status `Baseline merge` of each pull request: no overlap with `master` of the baseline repository; `baseline_masters.py`, after each push to `master`: the landing of the steps and the marks; T2 — the statistical and chart tests run against the baseline of each commit.*
 
 ### TR-BASELINE-PARENT
 
@@ -249,9 +258,9 @@ The `Attribution:` trailer names one form. For statistics and charts it is in th
 
 | Form | Claim | Proof |
 | --- | --- | --- |
-| `commit` | The INET commit that moves the pin is the small change. | The moved tests pass at its parent with the old pins, and at the commit with the new pins. |
-| `forward <file>` | The patch applies to the parent of the INET commit, and the parent with the patch gives the new results. | The moved tests pass at the parent with the patch, against the new pins. |
-| `reverse <file>` | The patch applies to the INET commit, and the commit with the patch gives the old results. | The moved tests pass at the commit with the patch, against the old pins. |
+| `commit` | The INET commit that has the pin trailer is the small change. | The moved tests pass at its parent against the baseline of the parent, and at the commit against its own baseline. |
+| `forward <file>` | The patch applies to the parent of the INET commit, and the parent with the patch gives the new results. | The moved tests pass at the parent with the patch, against the baseline of the INET commit. |
+| `reverse <file>` | The patch applies to the INET commit, and the commit with the patch gives the old results. | The moved tests pass at the commit with the patch, against the baseline of the parent. |
 | `first-record` | The INET commit adds the test. No earlier values exist. | The baseline commit only adds files. |
 | `removal` | The INET commit removes the test. | The baseline commit only removes files. |
 | `environment` | No source change is the cause: a new version of OMNeT++, of a tool, of a compiler or of a library. | The INET commit changes no source, and its message names the version change. |
