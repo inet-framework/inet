@@ -90,7 +90,9 @@ jobs:
 
   chart-tests:
     needs: changes
-    if: needs.changes.outputs.relevant == 'true'
+    # No `if:` for the job: GitHub gives a job that its `if:` skips the name without the matrix value,
+    # and the required check `chart-tests (release)` then never reports. Thus the job always runs, and
+    # its steps do not run when no path of the pull request can change a chart result.
     runs-on: ubuntu-latest
     # runs-on: [self-hosted, linux]
     strategy:
@@ -98,12 +100,17 @@ jobs:
         mode: ["release"]
       fail-fast: false
     steps:
+      - name: No test is necessary
+        if: needs.changes.outputs.relevant != 'true'
+        run: echo "No test runs; the job 'Paths that can change a result' gives the reason. The check passes."
       - uses: actions/checkout@v6
+        if: needs.changes.outputs.relevant == 'true'
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
           ref: omnetpp-6.x
       - uses: actions/checkout@v6
+        if: needs.changes.outputs.relevant == 'true'
         with:
           path: inet
           # the commit of the landing job for master, empty for a pull request, and the merge ref of the
@@ -114,13 +121,16 @@ jobs:
           filter: blob:none
           persist-credentials: false
       - run: mkdir -p /home/runner/work/ccache
+        if: needs.changes.outputs.relevant == 'true'
       - uses: actions/cache/restore@v5
+        if: needs.changes.outputs.relevant == 'true'
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
       - name: Build and test
+        if: needs.changes.outputs.relevant == 'true'
         env:
           MODE: ${{ matrix.mode }}
         run: |
@@ -163,7 +173,7 @@ jobs:
           opp_run_chart_tests --load $INET_ROOT -p inet -m $MODE --no-build
           echo "::endgroup::"
       - uses: actions/upload-artifact@v7
-        if: always() # even if the test failed, of course
+        if: always() && needs.changes.outputs.relevant == 'true' # even if the test failed, of course
         with:
           name: chart-test-results
           path: |
