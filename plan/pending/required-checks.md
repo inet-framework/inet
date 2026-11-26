@@ -1,6 +1,6 @@
 # Required checks of `master`
 
-**Status:** in progress. Written 2026-11-26, and written again the same day after the user decided the target state. The target state is in [master-guards.md](master-guards.md): it has the rules, and each rule has an ID. This plan has the facts of today and the steps from today to that state. The user decided all rules on 2026-11-26. Steps G0, G1 and G2 are done. No other step has an approval yet.
+**Status:** in progress. Written 2026-11-26, and written again the same day after the user decided the target state. The target state is in [master-guards.md](master-guards.md): it has the rules, and each rule has an ID. This plan has the facts of today and the steps from today to that state. The user decided all rules on 2026-11-26. Steps G0, G1, G2 and G5 are done. The user approved G2a and G5 on 2026-11-26; no other step has an approval yet.
 
 ## Goal
 
@@ -31,11 +31,10 @@ The facts are of 2026-11-26, with `master` at `0572d1152e`.
 
 | Rules | State today | Step |
 | --- | --- | --- |
-| A1 to A4, A9, A11, A12, R6, R8, T5 to T7, M2, M3, M7, B1, B3, C1 to C5, C7, C8 | in effect | — |
+| A1 to A4, A9, A11, A12, R6, R8, W2 to W5, T5 to T7, M2, M3, M7, B1, B3, C1 to C5, C7, C8 | in effect | — |
 | W1 | repaired for the statistical and chart jobs; the case of a pull request is not seen yet | G0 |
 | R9, R10, C6 | the environment is not set up, and the check is not required | G3 |
 | B2 | no ruleset | G4 |
-| W2 to W5 | no text and no gate | G5 |
 | W6 | `Baseline merge` comes from any source | G6 |
 | A5, S1 to S6 | no push check | G6, G7 |
 | M8, M10 | no context `Master green` | G8 |
@@ -56,7 +55,7 @@ A step that changes a setting needs an admin at that time. A step with code land
 | G2a | T8, the path part, for the fingerprint tests: the workflow gets the job `Paths that can change a result`, as the statistical and chart workflows have. When no path of the pull request can change a fingerprint, the eight jobs run, skip their steps and report green with no build (W1). The paths are those of the statistical job, and `tests/fingerprint/` and the fingerprint workflow. The selection replaces the list later. | code | A pull request that changes only a document gets the eight contexts green in about one minute. |
 | G3 | R9, R10: give the environment `sealed-source-change` the team `inet-core` as reviewers, with "Prevent self-review", and the variable `SEALED_SOURCE_APPROVAL`. Then add `Source seal policy` to the ruleset. | admin | A test pull request that changes a sealed path waits for the review, its author cannot approve it, and another member can. |
 | G4 | B2: a ruleset in `statistics` and in `media` that lets only the deploy key and the roles maintain and admin update `master`. | admin of each repository; for `media`, Rudolf Hornig | The next landing with a pin trailer moves the baseline `master`. |
-| G5 | W2 to W5: the list of the required contexts and the rules in `doc/project/enforcement/README.md`; a gate of the audit that reads the rules of `master` from the API and gives a violation for a pull request that renames or removes a required context. | code | Unit tests of the gate; a test pull request that renames a job is red. |
+| G5 | Done 2026-11-26: W2 to W5. `check-required-contexts.sh` computes the contexts that the workflows report on a pull request, at the base and at the head, with the names that GitHub gives, and fails a series that renames or removes a required context, gives a required matrix job a job-level `if:`, or gives the workflow of a required job a path filter. The audit runs it with the list of the rules of `master`. `doc/project/enforcement/README.md` lists the 14 contexts and the rules. | — | 17 unit tests; on `master`, the gate computes all 14 required contexts; a temporary rename of the fingerprint job gives 8 violations. Left: the first audit on GitHub, which runs the gate with PyYAML from `actions/setup-python`. |
 | G6 | F12, W6: a test on a scratch branch with a ruleset of its own. A workflow posts a commit status and a check run with its token; a pull request into the scratch branch shows if GitHub counts each for a context that must come from GitHub Actions. Then a person with only the role write pushes a marked commit to the scratch branch. With the result, give `Baseline merge` its source in the ruleset. | admin; one collaborator | The merge state of the test pull request, and the result of the push. |
 | G7 | A5, S1 to S6: the push check. A script decides if the commits of a branch are trivial: the file rules of S3, with a lexer that removes comments from C++ and NED text and keeps the line breaks; no pin trailer; the gates of the audit. A workflow runs it for each push to a branch other than `master`, and marks the required contexts, but not `Master green`. The guides get the trivial path. | code; G6 | Unit tests: a comment that ends with a backslash, a comment marker in a string, a raw string, a moved line; a real typo fix lands with no pull request. |
 | G8 | M8, M10: the context `Master green`. A trusted workflow computes the state of the full run of the head of `master` and posts it on each open pull request, at each change of that state and at each event of a pull request. Then add the context to the ruleset. | code; admin; a green `master` (F11) | A red job on `master` blocks a test pull request; a run of the job again clears it. |

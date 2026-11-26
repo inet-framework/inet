@@ -79,7 +79,7 @@ Not required: `main` of `Build: Linux`, because its trigger has a path filter (r
 
 | ID | Rule | State |
 | --- | --- | --- |
-| W1 | A required job reports a result on each pull request. It has no path filter in its trigger and no `if:` on the job. When it has nothing to test, it skips its steps and reports green, or it reports `Selected 0 of M`. | D (2026-11-26) |
+| W1 | A required job reports a result on each pull request. Its workflow has no path filter in its pull request trigger. A job with a matrix has no job-level `if:`: when the job has nothing to test, its steps skip and it reports green, or it reports `Selected 0 of M`. A job-level `if:` on another required job is true for each event of a pull request, because a skipped job counts as passed. | D (2026-11-26) |
 | W2 | A change that renames or removes a required job, or changes its matrix, lands together with the change of the ruleset. Otherwise each pull request waits for ever. | D (2026-11-26) |
 | W3 | A new job becomes required only after it reports on pull requests. | D (2026-11-26) |
 | W4 | `Mechanical audit` is red for a pull request that renames or removes a required context. | D (2026-11-26) |
