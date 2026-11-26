@@ -250,7 +250,10 @@ No sealed file changes. No consumer outside INET changes.
    runs. The maintainer, 2026-11-25: "We should simply fix the runner to allow running both." omnet-julia gets the
    repair: the mode that the caller or the Runner gives is the mode of the runs and of the build, and debug stays the
    default, as in `opp_repl`. Then a gate runs release in the editor again. Until that repair lands, a gate runs the
-   release fingerprints in the image of the CI (`runs/fingerprints-in-ci-image.sh <label>`).
+   release fingerprints in the image of the CI (`runs/fingerprints-in-ci-image.sh <label>`). **2026-11-26:** the
+   repair is on the main of omnet-julia (`edb2181eb` and `11b9281ac`): each start verb has a `mode` keyword, and an
+   untouched Runner runs each kind in its own mode. After a restart of the editor, a gate runs
+   `run_fingerprint_tests!(project; mode = "release")` in the editor.
 9. **Gate B.** Open the reviewer document, the moved values and the commits of the change in tabs. Ask the
    maintainer: "Do you approve the result of R<n>?" After the approval, mark the change done in this plan, write the
    repair commit into [baseline-catch-up-defects.md](baseline-catch-up-defects.md), and commit both as
