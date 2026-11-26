@@ -42,10 +42,9 @@ bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     //   (e) the advertised window in the incoming acknowledgment equals the
     //       advertised window in the last incoming acknowledgment.
     //"
-    uint32_t trueWindow = tcpHeader->getWindow();
-    if (state->ws_enabled && !tcpHeader->getSynBit())
-        trueWindow = tcpHeader->getWindow() << state->snd_wnd_scale;
-    bool e = trueWindow == state->snd_wnd;
+    // The connection has already written the window of this ACK into snd_wnd, so it keeps
+    // whether the ACK is a window update (duplicateAckWindowRule).
+    bool e = !state->snd_wnd_updated;
     return a && b && c && d && e;
 }
 

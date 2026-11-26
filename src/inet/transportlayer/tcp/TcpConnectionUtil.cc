@@ -1144,6 +1144,7 @@ void TcpConnection::configureStateVariables()
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->dropSynData = tcpMain->par("dropSynData");
     state->linuxZeroWindowProbe = !strcmp(tcpMain->par("zeroWindowProbe").stringValue(), "linux");
+    state->linuxDuplicateAckWindowRule = !strcmp(tcpMain->par("duplicateAckWindowRule").stringValue(), "linux");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     if (corkSockopt >= 0)
         state->tcp_cork = corkSockopt != 0; // TCP_CORK of this connection
@@ -3773,7 +3774,7 @@ uint32_t TcpConnection::getFlightSize() const
     return outstanding > state->limitedTransmitBytes ? outstanding - state->limitedTransmitBytes : 0;
 }
 
-void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
+bool TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();
     // RFC 7323 section 2.3:
@@ -3791,6 +3792,11 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool do
                          (state->snd_wl2 == tcpHeader->getAckNo() && true_window > state->snd_wnd))))
     {
         // send window should be updated
+        // a window update (duplicateAckWindowRule): any change of the window, as condition (e)
+        // of RFC 5681 section 2 says; or, as Linux tcp_may_update_window() takes the window of
+        // an ACK that acknowledges nothing new, a larger or a zero window only
+        bool changed = state->linuxDuplicateAckWindowRule ? true_window > state->snd_wnd || true_window == 0
+                                                          : true_window != state->snd_wnd;
         state->snd_wnd = true_window;
         if (state->snd_wnd > state->max_window)
             state->max_window = state->snd_wnd;
@@ -3799,7 +3805,9 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool do
         state->snd_wl2 = tcpHeader->getAckNo();
 
         emit(sndWndSignal, state->snd_wnd);
+        return changed;
     }
+    return false;
 }
 
 void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestionWindow)

@@ -1722,8 +1722,9 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // should be updated", also by a duplicate ACK, by a window update when nothing is
         // in flight, and by a data segment of the peer; updateWndInfo() keeps old segments
         // out (SND.WL1, SND.WL2)
-        if (state->snd_una == tcpHeader->getAckNo())
-            updateWndInfo(tcpHeader);
+        // the duplicate ACK test reads whether this ACK is a window update (condition (e) of
+        // RFC 5681 section 2), because snd_wnd already holds the window of this ACK
+        state->snd_wnd_updated = state->snd_una == tcpHeader->getAckNo() && updateWndInfo(tcpHeader);
 
         if (state->accEcnNegotiated)
             processAccEcnAce(tcpHeader);

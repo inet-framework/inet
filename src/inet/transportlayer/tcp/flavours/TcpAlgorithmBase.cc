@@ -1075,7 +1075,9 @@ bool TcpAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t paylo
     //    (1) snd_una == ackNo
     //    (2) segment contains no data
     //    (3) there's unacked data (snd_una != snd_max)
-    return state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max;
+    //    (4) the ACK is no window update (condition (e) of RFC 5681 section 2)
+    return state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max
+           && !state->snd_wnd_updated;
 }
 
 void TcpAlgorithmBase::countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)

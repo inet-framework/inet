@@ -240,6 +240,8 @@ import inet.transportlayer.contract.ITcp;
 //    Deviation: the congestion window is kept in bytes rather than in segments,
 //    so a rule that counts segments divides the window by the effective MSS
 //    first.
+//    Linux, by parameter: the window update of Linux, which keeps an ACK with a
+//    smaller window a duplicate ACK (`duplicateAckWindowRule`).
 //
 //  - RFC 3390 - Increasing TCP's Initial Window
 //    The default initial window (`initialWindow = "rfc3390"`), the upper bound of
@@ -476,6 +478,7 @@ simple Tcp extends SimpleModule like ITcp
         // loss detection and recovery
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
         int dupthresh = default(3); // the duplicate ACK threshold of the fast retransmit (RFC 5681, RFC 6675) of each algorithm class but DumbTcp; with RACK, the number of SACKed segments at which the reordering window becomes 0; the start of the learned reordering degree; at least 1
+        string duplicateAckWindowRule @enum("rfc","linux") = default("rfc"); // which window of an ACK that acknowledges no new data is a window update, and so no duplicate ACK (RFC 5681 section 2, condition (e)), for each algorithm class but DumbTcp. "rfc": any change of the window, as condition (e) says ("the advertised window in the incoming acknowledgment equals the advertised window in the last incoming acknowledgment"); "linux": a larger window or a zero window, as Linux (tcp_may_update_window(), FLAG_WIN_UPDATE), so a smaller window, which a receiver can offer when out-of-order data takes its buffer (windowShrinkAllowed), keeps the duplicate ACK
         bool tlpEnabled = default(true); // Tail Loss Probe (RFC 8985 section 7): about two SRTTs after the last transmission or ACK of new data, send one probe, so that its ACK starts the repair of a lost tail before the RTO. Requires sackSupport.
         bool prrEnabled = default(true); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.
         bool frtoEnabled = default(false); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2). Requires sackSupport. F-RTO decides at the first ACK after the timeout: the steps 2.b and 3 of RFC 5682 (new data, then the decision at the second ACK) are not modeled, so a delay spike with an ACK for each segment is not detected

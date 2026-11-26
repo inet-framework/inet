@@ -27,6 +27,9 @@ sim-time-limit = 4s
 *.*_tcp.delayedAcksEnabled = false
 *.srv_tcp.receiveBufferSize = 20000B
 *.srv_tcp.windowShrinkAllowed = true
+# the window of the receiver shrinks with out-of-order data, as Linux, so the sender keeps
+# these ACKs duplicate ACKs, as Linux (RFC 5681 condition (e) takes any change of the window)
+*.cli_tcp.duplicateAckWindowRule = "linux"
 *.srv_app.autoRead=false
 *.srv_app.readScript="3 20000"
 

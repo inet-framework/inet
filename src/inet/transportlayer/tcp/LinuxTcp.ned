@@ -32,6 +32,9 @@ simple LinuxTcp extends Tcp
         frtoEnabled = default(true);
         lossUndoEnabled = default(true);
         retainSackAfterRto = default(true);
+        // the duplicate ACK: tcp_may_update_window() takes the window of an ACK at snd_una only
+        // when it grows or is zero, and only then sets FLAG_WIN_UPDATE
+        duplicateAckWindowRule = default("linux");
         rackReoTimerGranularity = default(4ms);
         // timers: tcp_set_rto(), TCP_RTO_MIN, TCP_RTO_MAX, tcp_retries2, tcp_syn_retries,
         // tcp_syn_linear_timeouts, tcp_probe_timer(), and a TIME_WAIT of 60 s (TCP_TIMEWAIT_LEN)

@@ -603,8 +603,8 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t getFlightSize() const;
 
-    /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
+    /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2); true if it is a window update (duplicateAckWindowRule) */
+    virtual bool updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
 
     /**
      * The MSS that congestion control counts with: snd_mss less the space of the

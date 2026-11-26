@@ -1,0 +1,150 @@
+%description:
+
+RFC 5681 -- a window update is no duplicate acknowledgment: three acknowledgments that repeat the
+acknowledgment number but advertise a larger window start no fast retransmit.
+
+RFC 5681 section 2 counts an acknowledgment as a duplicate only when, among other conditions,
+"(e) the advertised window in the incoming acknowledgment equals the advertised window in the last
+incoming acknowledgment". The sender compares the window of the acknowledgment with snd_wnd, but
+the connection writes the window of the acknowledgment into snd_wnd before the comparison, so a
+window update still counts as a duplicate (BD-4 of the defect list).
+
+Host B acknowledges with a window of 60000 bytes. The relay sends its third acknowledgment of data
+three more times, 10 microseconds apart, with a window of 100, 200 and 300 bytes more: three window
+updates that repeat the acknowledgment number while host A has data in flight. No segment is lost,
+so each retransmission of host A is wrong. The run must end with the acknowledgment of all data.
+
+The scenario runs TcpNewReno without SACK, whose duplicate acknowledgment is that of RFC 5681.
+
+%includes:
+#include <algorithm>
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static long highestSent = -1; // one past the highest octet host A has sent
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+// At host A's TCP a segment starts with its TCP header, so the data is what follows it.
+static long dataLengthOf(const Packet *packet)
+{
+    return (long)(packet->getByteLength() - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B"));
+}
+
+// True for a data segment of host A that it sent before: a retransmission. It keeps highestSent.
+static bool retransmission(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.destPort") != 1000)
+        return false;
+    long length = dataLengthOf(packet);
+    if (length <= 0)
+        return false;
+    long sequenceNumber = fieldOf(packet, "tcp.sequenceNo");
+    bool again = sequenceNumber + length <= highestSent;
+    highestSent = std::max(highestSent, sequenceNumber + length);
+    if (again)
+        EV_INFO << "retransmission of " << sequenceNumber << "\n";
+    return again;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc5681_window_update_no_duplicate_ack")
+        // The third acknowledgment of data of host B, three more times; then a larger window on each copy.
+        // A rule counts the copies that the rules before it did not take, so each rule takes its first one.
+        .intercept(tap("relay").from("host2")
+                       .filterPacket("tcp.srcPort == 1000 && tcp.synBit == false && tcp.ackBit == true")
+                       .nth(3).duplicate(0.00001, 3)
+                       .describe("the third acknowledgment of host B, and three copies of it"))
+        .intercept(tap("relay").copiesOnly().nth(1).set("tcp.window", "tcp.window + 100")
+                       .describe("the first copy advertises 100 bytes more"))
+        .intercept(tap("relay").copiesOnly().nth(1).set("tcp.window", "tcp.window + 200")
+                       .describe("the second copy advertises 200 bytes more"))
+        .intercept(tap("relay").copiesOnly().nth(1).set("tcp.window", "tcp.window + 300")
+                       .describe("the third copy advertises 300 bytes more"))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterEvent(retransmission)
+                             .describe("a retransmission of host A, with no segment lost")
+                             .within(20.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host A")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.srcPort == 1000 && tcp.window == 60300")
+                  .first()
+                  .describe("the third copy, a window update to 60300 bytes, arrives at host A")
+                  .within(1.0))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackNo >= {isn} + 1 + 300000")
+                  .first()
+                  .describe("the acknowledgment of the last byte")
+                  .within(20.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc5681_window_update_no_duplicate_ack compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network WindowUpdateNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = WindowUpdateNet
+sim-time-limit = 30s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+# TcpNewReno without SACK: the duplicate acknowledgment of RFC 5681 section 2.
+**.tcp.sackSupport = false
+# Host B advertises 60000 bytes, so a window update of 300 bytes more fits in the 16 bits of the field.
+*.host2.tcp.advertisedWindow = 60000
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 300000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc5681_window_update_no_duplicate_ack: PASS

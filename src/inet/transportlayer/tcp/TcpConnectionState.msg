@@ -160,6 +160,7 @@ struct TcpStateVariables
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
     uint32_t snd_wl2 = 0;           // segment ack. number used for last window update
+    bool snd_wnd_updated = false;   // the ACK at SND.UNA in process is a window update (duplicateAckWindowRule), so it is no duplicate ACK (condition (e) of RFC 5681 section 2)
     uint32_t iss = 0;               // initial sequence number (ISS)
 
     // receive sequence number variables
@@ -178,6 +179,7 @@ struct TcpStateVariables
     simtime_t syn_rexmit_timeout;   // current SYN/SYN+ACK retransmission timeout
     int synRetries = 12;            // the retransmissions of a SYN or a SYN-ACK, after which the open fails (synRetries parameter)
     bool linuxZeroWindowProbe = false; // the zero-window probe of Linux, without data (zeroWindowProbe parameter)
+    bool linuxDuplicateAckWindowRule = false; // only a larger or a zero window is a window update of an ACK at SND.UNA, as Linux (duplicateAckWindowRule parameter)
     int synLinearTimeouts = 0;      // the retransmissions of a SYN after which its timeout does not double yet (synLinearTimeouts parameter)
     bool dropSynData = false;       // the data of a SYN that Fast Open does not accept is dropped (dropSynData parameter)
     uint32_t rcvRttUs = 0;          // the receive RTT of Linux, in microseconds times 8 (rcv_rtt_est.rtt_us of tcp_rcv_rtt_update()); 0: no sample yet
