@@ -41,7 +41,8 @@ The facts are of 2026-11-26, with `master` at `0572d1152e`.
 | M8, M10 | no context `Master green` | G8 |
 | M9 | each push to `master` starts a full run | G9 |
 | A6 | the bypass has the mode "always" | G10 |
-| R7, T1 to T4, T8, M1, M4 | the plan of the test selection makes the jobs; that work is not pushed yet (F13) | G11 |
+| T8, the path part | the eight fingerprint jobs build and test on each pull request | G2a |
+| R7, T1 to T4, T8, M1, M4 | the plan of the test selection makes the jobs and adds their contexts to the ruleset; that work is not pushed yet (F13) | the plan of the test selection |
 
 ## Steps
 
@@ -52,6 +53,7 @@ A step that changes a setting needs an admin at that time. A step with code land
 | G0 | Done: the statistical and chart jobs always run and report under their full names (INET `0572d1152e`). | — | Left: the first pull request with no result path after the repair shows both contexts green. |
 | G1 | Done 2026-11-26: A4, "Create a merge commit" and "Squash and merge" are off. | — | The API shows only the rebase button. |
 | G2 | Done 2026-11-26: R6, R8, the eight fingerprint contexts and `Enforcement checker tests` are in the ruleset, from GitHub Actions. | — | Before: each context was on the head of #1495, from integration 15368. After: GitHub marks all nine as required on #1495. |
+| G2a | T8, the path part, for the fingerprint tests: the workflow gets the job `Paths that can change a result`, as the statistical and chart workflows have. When no path of the pull request can change a fingerprint, the eight jobs run, skip their steps and report green with no build (W1). The paths are those of the statistical job, and `tests/fingerprint/` and the fingerprint workflow. The selection replaces the list later. | code | A pull request that changes only a document gets the eight contexts green in about one minute. |
 | G3 | R9, R10: give the environment `sealed-source-change` the team `inet-core` as reviewers, with "Prevent self-review", and the variable `SEALED_SOURCE_APPROVAL`. Then add `Source seal policy` to the ruleset. | admin | A test pull request that changes a sealed path waits for the review, its author cannot approve it, and another member can. |
 | G4 | B2: a ruleset in `statistics` and in `media` that lets only the deploy key and the roles maintain and admin update `master`. | admin of each repository; for `media`, Rudolf Hornig | The next landing with a pin trailer moves the baseline `master`. |
 | G5 | W2 to W5: the list of the required contexts and the rules in `doc/project/enforcement/README.md`; a gate of the audit that reads the rules of `master` from the API and gives a violation for a pull request that renames or removes a required context. | code | Unit tests of the gate; a test pull request that renames a job is red. |
@@ -60,11 +62,11 @@ A step that changes a setting needs an admin at that time. A step with code land
 | G8 | M8, M10: the context `Master green`. A trusted workflow computes the state of the full run of the head of `master` and posts it on each open pull request, at each change of that state and at each event of a pull request. Then add the context to the ruleset. | code; admin; a green `master` (F11) | A red job on `master` blocks a test pull request; a run of the job again clears it. |
 | G9 | M9: a push to `master` whose changes are all trivial, by the script of G7, starts no build and no test, and it leaves `Master green` as it is. | code; G7, G8 | A typo fix on `master` does not block the next landing. |
 | G10 | A6: change the bypass of the three actors to the mode "pull requests only". | admin; G7 with a real use; G8; a green `master`; the approval of the user at that time | A direct push of an admin is refused; a merge of a pull request with the bypass works. |
-| G11 | R7: add the context of each new pull request job of the test selection to the ruleset, after the job reports on pull requests (W3). | admin; the test selection finished and pushed (F13) | GitHub marks each as required. |
+| G11 | Moved on 2026-11-26 to phase 5 of the plan of the test selection: after a new pull-request job of a kind reports on pull requests, an admin adds its context to the ruleset (R7, W3). | — | — |
 | G12 | The rules of [master-guards.md](master-guards.md) go into the project documents: the access and landing rules into `rule/pull-request.md`, the test and check rules into `rule/testing.md`, and the procedures into `guide/run-the-gates.md` and `guide/contribute-a-change.md`. | code | `check-links.sh` and `check-seals.sh` pass. |
-| G13 | Record the results, and move this plan and [master-guards.md](master-guards.md) to `plan/done/`. | G0 to G12 | Two commits, as `PR-SPLIT-MOVE` asks. |
+| G13 | Record the results, and move this plan and [master-guards.md](master-guards.md) to `plan/done/`. | G0 to G10, G12 | Two commits, as `PR-SPLIT-MOVE` asks. |
 
-The order: G1 and G2 were first, because they needed only a setting and the user was admin. Then G5 and G6, which protect the ruleset and test the two assumptions. Then G3 and G4. Then G7, G8 and G9. G10 is the last step that changes how a change lands, because after it each change that is not trivial needs green checks on a pull request, also a change of an admin. G11 follows the test selection, which is not finished and not pushed yet.
+The order: G1 and G2 were first, because they needed only a setting and the user was admin. Then G5 and G6, which protect the ruleset and test the two assumptions. Then G3 and G4. Then G7, G8 and G9. G10 is the last step that changes how a change lands, because after it each change that is not trivial needs green checks on a pull request, also a change of an admin. G2a can land at any time; it is the first code step, because the fingerprint checks are required since G2. G11 is a step of the plan of the test selection now, which is not finished and not pushed yet.
 
 ## Permissions
 
