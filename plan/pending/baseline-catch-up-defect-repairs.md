@@ -900,6 +900,11 @@ landing. No recorded result moves, so R4 re-records nothing.
 is in [baseline-catch-up-defects.md](baseline-catch-up-defects.md). R4 lands with R3, when the maintainer asks; the
 debug fingerprints of the landing run in the image of the CI.
 
+**The debug fingerprints of the landing of R3 and R4 (2026-11-26).** In the image of the CI at `45291e4886`, whose
+sources equal the branch with R3 and R4, in debug mode with all features: 1847 runs, 1846 PASS and 1 expected ERROR, in
+8 min 7 s (`runs/r3-r4-landing/` of the folder of D10). R3 and R4 are ready to land. If master changes code before the
+landing, the check runs again on the rebased branch.
+
 #### R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39), prepared 2026-11-25
 
 **Re-check.** Master `b029add207` changes no TCP file after `08e3648c36`. `TcpTahoe::resetToSlowStart()`
