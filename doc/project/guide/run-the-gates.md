@@ -30,6 +30,17 @@ For protocol cases, follow the suite and test-file selection and build instructi
 
 Keep the working directory, exact build and test commands, configuration, run and seed where applicable, filter, exit status and artifact paths. An unfiltered category or repository-wide suite may add integration coverage, but it cannot replace a directly related case. If no such case exists, report the coverage gap instead of broadening the command until something green appears ([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
 
+The change-based test selection of opp_repl ([doc/test_map.md](https://github.com/omnetpp/opp_repl/blob/main/doc/test_map.md)) helps with the mapping. It reads a test map, which records what each test used. Get the map of the newest push run of `master` first, and then ask which tests the change can affect:
+
+```bash
+# the map of the newest push run whose commit is an ancestor of origin/master, into coverage/test-map/map
+GITHUB_REPOSITORY=inet-framework/inet _scripts/github/get-test-map.sh fingerprint-tests.yml fingerprint origin/master coverage/test-map/map
+opp_select_tests --changes origin/master...worktree --explain --ignore-environment
+opp_show_test_map src/inet/<path>.cc --line <line>   # the tests that ran the function at this line
+```
+
+The selection lists each test that the change can affect, with the rule and the changed place that select it. Pick the directly related cases from this list. The local omnetpp, opp_repl or compiler is usually not the one of the map, and then the selection gives all tests. Thus a local selection adds `--ignore-environment`, which gives a warning for each difference instead, and the report says so. CI never uses this option.
+
 A dry run previews selection; it supplies no executed-test evidence. Report a zero-case selection as not run. Distinguish observed passes, declared expected failures, unexpected outcomes and setup errors even when the runner exits successfully. For protocol expectations, use the failure classes in [derive-tests-from-a-standard.md](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
 
 Statistical and chart comparisons read the checkouts `statistics` and `media`. `opp_checkout_test_baselines` puts them at the baseline of the commit: the ref of `inet.opp` for an older commit, and else the baseline that follows from the pin trailers of the series and the marks on `master` of each baseline repository. A test gives a warning when a checkout does not have the files of that baseline. Statistical comparisons also record the baseline repository revision and local changes. For a base-versus-feature comparison, use the same baseline revision and environment on both sides; advancing the baseline during the comparison changes the experiment. Diagnose missing baselines separately from changed simulation results. Changes to recorded expectations follow [change-a-baseline.md](change-a-baseline.md).
@@ -54,9 +65,14 @@ doc/project/enforcement/check-interfaces.sh                # every I<Stem> class
 doc/project/enforcement/check-source-seals.sh --base origin/master
 
 # 3. rerun each recorded, explicitly filtered test command against a fresh matching library
+
+# 4. run the tests that the selection gives for the series, for each kind that the map holds
+opp_run_fingerprint_tests --changes origin/master...HEAD --test-map coverage/test-map/map --ignore-environment
 ```
 
-CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping.
+Step 4 is [TR-SELECTED-PASS](../rule/testing.md#tr-selected-pass). The map of a push run holds the fingerprint tests. Report the line `Selected N of M`, the map commit, each environment difference that `--ignore-environment` ignored, and the reason when all tests are selected.
+
+CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping. The fingerprint jobs of a pull request run only the selected tests, in the environment of the map; the label `full-tests` runs all of them, also for a change that needs a newer omnetpp or opp_repl than the map. A push to `master` runs all tests.
 
 ## When the change touches this document set
 

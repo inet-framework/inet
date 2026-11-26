@@ -47,6 +47,7 @@ Every test rule in document order.
 | Rule | Statement |
 | --- | --- |
 | [TR-CI-EVERY-COMMIT](#tr-ci-every-commit) | CI builds and tests every commit of a branch, not only its head |
+| [TR-SELECTED-PASS](#tr-selected-pass) | Before a push, the tests that the change-based selection gives for the series pass |
 | [TR-CI-FEATURE-MATRIX](#tr-ci-feature-matrix) | A feature is built with its neighbours switched off |
 | [TR-FLAKY](#tr-flaky) | A flaky test is repaired or disabled with an issue, never re-run until green |
 
@@ -308,6 +309,16 @@ Declared infrastructure includes the matching INET build, shared suite fixtures 
 `git bisect` is the fastest tool for a regression nobody can explain, and one broken middle commit makes it useless. This is the mechanical half of [PR-SERIES-BUILDS](pull-request.md#pr-series-builds), which is otherwise a rule that nothing checks.
 
 *Enforced at T2 — not yet configured; the workflows test the head only.*
+
+### TR-SELECTED-PASS
+
+**Before a push, the tests that the change-based test selection gives for the series pass, for each kind of test that the test map holds.**
+
+The selection of opp_repl ([doc/test_map.md](https://github.com/omnetpp/opp_repl/blob/main/doc/test_map.md)) reads a test map, which records the files, functions, NED types and ini sections that each test used. It leaves out a test only if the series changes nothing that the test used, so the outcome of the test cannot change. The selected tests thus show that the series breaks no other test. They do not show that the change itself is correct, which still needs its directly related cases under [TR-FOCUSED-EVIDENCE](#tr-focused-evidence).
+
+A kind of test that the map does not hold gets no obligation from this rule. A change of a file that the CI jobs run, a test that the map does not know, and a difference of the environment from the map select all tests of the kind, or that test. Report the line `Selected N of M` of each kind, the map commit, and the reason of each kind for which all tests are selected. [run-the-gates.md](../guide/run-the-gates.md#before-every-push) has the commands.
+
+*Enforced at T2 — the fingerprint jobs of a pull request run the selected fingerprint tests, and each push to `master` runs all tests and checks the selection against the previous push.*
 
 ### TR-CI-FEATURE-MATRIX
 
