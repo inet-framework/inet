@@ -65,13 +65,13 @@ to RA's network (10.0.0.0/30):
    via their respective E-BGP sessions.
 2. **I-BGP Propagation**: RB1 and RB2 advertise this route to RB3 via I-BGP.
 3. **Initial Route Selection**: Initially, RB3 installs the route learned from
-   RB1 (next hop 20.0.0.1) at approximately 60.0s.
-4. **Best Path Update**: Shortly after (at 62.0s), RB3 receives the update from
+   RB1 (next hop 20.0.0.1) at approximately 60.4s.
+4. **Best Path Update**: Shortly after (at 62.4s), RB3 receives the update from
    RB2. Because RB2's advertisement carries a higher Local Preference (600 vs
    100), RB3 **updates its routing table** to use RB2 (next hop 20.0.0.5) as the
    preferred exit point.
 
-You can verify this in ``step10.rt`` by observing the route change at the 62s
+You can verify this in ``step10.rt`` by observing the route change at the 62.4s
 mark for router RB3.
 
 This step illustrates how network administrators can use Local Preference to
