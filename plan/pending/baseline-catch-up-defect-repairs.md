@@ -300,7 +300,7 @@ No sealed file changes. No consumer outside INET changes.
   whether `examples/ethernet/vlan`, `showcases/ethernet/sharedcore`, `tests/module/lib/vlan-access-trunk.ini` and
   `tests/module/EthernetUnknownEtherType_1.test` keep `forwardPcp = false`.
   - `linklayer.vlan: fix: VlanReqMapper asks for no 802.1Q tag when the VLAN leaves untagged`.
-- [ ] **Step 4. R4: the constants of copper and aluminium (BD-49).** Repaired as C11 `ac770b1913`; waits for gate B. Test: a module test with a copper object and
+- [x] **Step 4. R4: the constants of copper and aluminium (BD-49).** Repaired as C11 `ac770b1913`; gate B approved on 2026-11-26 (§6.3, R4). It lands with R3. Test: a module test with a copper object and
   `DielectricObstacleLoss`; the factor is a number from 0 to 1 in debug mode.
   - `environment: fix: copper and aluminium have their real resistivity and a relative permittivity and permeability of 1`.
 - [ ] **Step 5. R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39).** Test: after a loss and a go-back,
@@ -895,6 +895,10 @@ landing. No recorded result moves, so R4 re-records nothing.
 - The gates of "Before every push" pass, with the base `master` `7f7f77a00f`. `check-architecture.sh
   src/inet/environment` reports one old candidate, `OsgEarthGround.cc` includes the visualizer, a file that R4 does
   not touch. `check-naming.sh` reports 24 violations and `check-interfaces.sh` 16 classes, the same as master.
+
+**Gate B** approved by the maintainer on 2026-11-26 ("the R4 commit C11 looks good to me"). The repair commit of BD-49
+is in [baseline-catch-up-defects.md](baseline-catch-up-defects.md). R4 lands with R3, when the maintainer asks; the
+debug fingerprints of the landing run in the image of the CI.
 
 #### R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39), prepared 2026-11-25
 
