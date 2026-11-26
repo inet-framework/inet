@@ -146,7 +146,6 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame, bool extract)
             return check_and_cast<IOriginatorQosMacDataService *>(dataService)->peekEligibleFrame(pendingQueue);
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
-            auto firstFrame = (*frames)[0];
             for (auto frame : *frames) {
                 take(frame);
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
@@ -157,7 +156,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame, bool extract)
             delete frames;
             // FIXME If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
             // a wrong pending frame.
-            return firstFrame;
+            return peekInProgressFrameToTransmitExcluding(frameToTransmit, simTime());
         }
         else
             return nullptr;

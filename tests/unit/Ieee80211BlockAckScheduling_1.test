@@ -2,6 +2,7 @@
 Check peer/TID BAR arbitration, window boundaries, cyclic sequence order, and ACK-state isolation.
 Check that a below-threshold forecast agrees with live selection after DATA transmission.
 Check ordered in-progress selection before and at a projected lifetime deadline.
+Check that successor selection after extracting fragments uses the same order as live transmission.
 The production policy reads the production ACK handler through an in-progress queue.
 These helper checks supplement the HCF module fixture.
 
@@ -91,19 +92,25 @@ class EmptyPendingDataService : public OriginatorQosMacDataService {
     Packet *peekEligibleFrame(queueing::IPacketQueue *) const override { return nullptr; }
 };
 
-class OrderedPeekFrames : public InProgressFrames {
-  private:
-    Packet *preferred;
-    Packet *successor;
-
+class FragmentBatchService : public EmptyPendingDataService {
   public:
-    OrderedPeekFrames(EmptyPendingDataService& service, Packet *preferred, Packet *successor) :
-        preferred(preferred), successor(successor)
-    {
-        dataService = &service;
+    std::vector<Packet *> batch;
+    std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *) override {
+        if (batch.empty())
+            return nullptr;
+        auto result = new std::vector<Packet *>();
+        result->swap(batch);
+        return result;
     }
+};
+
+class OrderedPeekFrames : public SchedulingFrames {
+  public:
     Packet *peekInProgressFrameToTransmitExcluding(const Packet *excludedFrame, simtime_t time) override {
-        return excludedFrame == preferred ? successor : preferred;
+        for (auto it = inProgressFrames.rbegin(); it != inProgressFrames.rend(); ++it)
+            if (*it != excludedFrame && isEligibleToTransmit(*it, time))
+                return *it;
+        return nullptr;
     }
 };
 }
@@ -167,11 +174,33 @@ ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 2);
 ASSERT(std::get<1>(choice) == SequenceNumberCyclic(100));
 ASSERT(otherAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
 {
-    EmptyPendingDataService emptyPendingData;
-    Packet preferred("preferred"), successor("successor");
-    OrderedPeekFrames orderedFrames(emptyPendingData, &preferred, &successor);
-    ASSERT(orderedFrames.peekFrameToTransmit() == &preferred);
-    ASSERT(orderedFrames.peekFrameToTransmitExcluding(&preferred) == &successor);
+    QosAckHandler batchAck;
+    FragmentBatchService service;
+    OrderedPeekFrames orderedFrames;
+    orderedFrames.configure(&batchAck, &service);
+    auto currentHeader = orderedFrames.add(peer, 5, 10, false);
+    auto current = orderedFrames.getFrames(0);
+    for (int fragment = 0; fragment < 2; fragment++) {
+        auto header = makeShared<Ieee80211DataHeader>(*currentHeader);
+        header->setSequenceNumber(SequenceNumberCyclic(11));
+        header->setFragmentNumber(fragment);
+        header->setMoreFragments(fragment == 0);
+        service.batch.push_back(new Packet("fragment", header));
+    }
+    auto first = service.batch.front();
+    auto preferred = service.batch.back();
+    ASSERT(orderedFrames.getPendingFrameFor(current, false) == nullptr);
+    ASSERT(orderedFrames.getLength() == 1);
+    auto successor = orderedFrames.getPendingFrameFor(current);
+    ASSERT(service.batch.empty() && orderedFrames.getLength() == 3);
+    ASSERT(successor == preferred);
+    batchAck.processTransmittedDataOrMgmtFrame(currentHeader);
+    ASSERT(orderedFrames.peekFrameToTransmit() == preferred);
+    ASSERT(orderedFrames.peekFrameToTransmitExcluding(preferred) == first);
+    ASSERT(orderedFrames.getFrameToTransmit() == successor);
+    for (auto frame : {current, first, preferred})
+        orderedFrames.dropFrame(frame);
+    orderedFrames.clearDroppedFrames();
 }
 {
     QosAckHandler timedAck;
