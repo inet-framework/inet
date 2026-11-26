@@ -418,18 +418,11 @@ VLAN-aware bridge a :ned:`VlanPolicyLayer`:
    :start-at: [Config FiltersAndMappers]
    :end-at: *.pb.bridging.vlanPolicy.typename
 
-:ned:`VlanPolicyLayer` needs one more setting. By default, the direction
-reverser turns the PCP of a received tagged frame into a PCP request. The
-outbound mapper of a port that sends the VLAN untagged removes only the VLAN
-request, and the remaining PCP request makes the 802.1Q layer insert a tag
-with VLAN id 0, a priority tag. Neither the hosts nor the service provider
-bridges expect such tags, so PCP forwarding is turned off.
-(:ned:`Ieee8021adPolicy` removes the PCP request itself on such ports.)
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: # A forwarded PCP would keep the tag
-   :end-at: *.pb.bridging.directionReverser.reverser.forwardPcp
+By default, the direction reverser turns the PCP of a received tagged frame
+into a PCP request. On a port that sends the VLAN untagged, the outbound mapper
+removes the VLAN request and the PCP and drop eligible requests of its tag, so
+the frame leaves without a tag, as with :ned:`Ieee8021adPolicy`. The priority
+of the frame stays as its user priority.
 
 The service provider bridges have the entries of access ports on the ports of
 the customer sites. The uplink to the core (``eth3``) is a trunk port, so the
