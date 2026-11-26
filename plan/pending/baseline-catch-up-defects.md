@@ -1023,6 +1023,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-44: `VlanReqMapper` sends priority-tagged frames on untagged ports
 
+- **State (2026-11-26):** repaired by `d18a4b049a` and `5d4c830ee4` on the branch `topic/baseline-catch-up-defect-repairs` (change R3 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol test `Ieee8021qVlanReqMapperUntaggedNoPriorityTag.test` and the reviewer document `tests/protocol/vlan/vlan-req-mapper-untagged.md`. The four configurations no longer set `forwardPcp = false`. No stored fingerprint or statistic moves.
 - **Place:** [VlanReqMapper.cc](../../src/inet/linklayer/vlan/VlanReqMapper.cc) `processPacket()`, and
   [PacketDirectionReverser.ned](../../src/inet/linklayer/ethernet/common/PacketDirectionReverser.ned)
   (`forwardPcp = true` by default). From `4a63e09916` (2023-01-17, older than G); found at step 78 (`688c3d74f2`) from

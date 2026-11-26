@@ -295,7 +295,7 @@ No sealed file changes. No consumer outside INET changes.
   segment leaves when the override timer expires. Baselines: `examples/inet/bulktransfer` `inet_inet_2b`.
   - `tcp: fix: a segment that does not change the window keeps the override timer running` (BD-21).
   - `tcp: change: the override timeout of the sender SWS avoidance <decision of gate A>` (BD-23).
-- [ ] **Step 3. R3: no priority tag on an untagged port (BD-44).** Test: a protocol test in `tests/protocol/vlan`
+- [ ] **Step 3. R3: no priority tag on an untagged port (BD-44).** Repaired as C9 `d18a4b049a` and C10 `5d4c830ee4`; waits for gate B. Test: a protocol test in `tests/protocol/vlan`
   with `VlanReqMapper` and `forwardPcp = true`; the frame of an untagged VLAN leaves with no tag. Gate A decides
   whether `examples/ethernet/vlan`, `showcases/ethernet/sharedcore`, `tests/module/lib/vlan-access-trunk.ini` and
   `tests/module/EthernetUnknownEtherType_1.test` keep `forwardPcp = false`.
@@ -806,6 +806,29 @@ the preview commit `3ac195fce8` on the ref `preview/r3`, which does not land. De
   `VlanIndMapper_1`, `VlanPolicyLayer_runtime_1`, `VlanPolicyMapsInvalid_1` to `_6`).
 - The documentation page of the showcase explained the workaround and included the removed lines; the change replaces
   that paragraph.
+
+**Gate A** approved by the maintainer on 2026-11-26 ("I approve R3"): design B and the removal of the four settings,
+as in the preview diff.
+
+**The results of R3 (2026-11-26).** The series is C9 `d18a4b049a` and C10 `5d4c830ee4`. C9 holds the fix, its NED
+comment, the new protocol test, the two module test configurations without their workaround, the reviewer document
+`tests/protocol/vlan/vlan-req-mapper-untagged.md` and the release note
+`doc/whatsnew/fixes/linklayer-vlan-req-mapper-untagged.txt`; a commit of the area `src` carries its tests, as C6 of
+R2 did, so the plan entry C10 holds only the example and the showcase and its page. No recorded result moves, so R3
+re-records nothing.
+
+- The editor still runs the omnet-julia of before its restart, whose fingerprint verb runs debug only, so the gate ran
+  the release fingerprints in the image of the CI at `73de36dae6`, whose tree equals the series: 1847 runs, 1846 PASS
+  and 1 expected ERROR, in 1 min 27 s (`runs/r3-gate/` of the folder of D10).
+- All statistical tests in the image of the CI, at the same tree, against the pins of master `statistics`
+  `78d4dcbb63` and `media` `d3247e79c0`: 945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected (`evidence/runs/
+  73de36dae6/` of the job copy).
+- The gates of "Before every push", with the base `master` `7f7f77a00f`: `check-architecture.sh
+  src/inet/linklayer/vlan`, `check-pull-request.sh` (0 violations), `check-source-seals.sh`,
+  `check-baseline-attribution.sh plan` and `whatsnew.py check` pass. `check-naming.sh` reports 24 violations and
+  `check-interfaces.sh` 16 classes, the same as master, none in the files of R3.
+- The protocol tests and module tests of the section above ran on the same code before the commits; the debug
+  fingerprints run when R3 lands.
 
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
 
