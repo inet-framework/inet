@@ -90,7 +90,7 @@ Do not put such a re-record inside an unrelated fix. It has no cause there.
 
 The description lists every baseline update ([PR-REQ-STORY](../rule/pull-request.md#pr-req-story)). A reviewer who has to discover a baseline change by reading the file list has already been failed by the description.
 
-Give the description a section `## Baseline changes` ([PR-REQ-BASELINES](../rule/pull-request.md#pr-req-baselines)). It has one entry for each commit that changes the fingerprint store or moves a pin over results: the exact subject of the commit, then a summary of its baseline changes in your words. A series can have more than one such commit, and the section is the one place where the reviewer sees all of them:
+Give the description a section `## Baseline changes` ([PR-REQ-BASELINES](../rule/pull-request.md#pr-req-baselines)). It has one entry for each commit that changes the fingerprint store or has a pin trailer whose step changes results: the exact subject of the commit, then a summary of its baseline changes in your words. A series can have more than one such commit, and the section is the one place where the reviewer sees all of them:
 
 ```
 ## Baseline changes
@@ -103,17 +103,17 @@ The lists with a reason for each line stay in the commits. The report of the gat
 
 ## A baseline in another repository
 
-The statistical baseline is in the `statistics` repository, and the chart baseline is in the `media` repository. `inet.opp` pins one commit of each ([TR-BASELINE-PIN](../rule/testing.md#tr-baseline-pin)). Steps 1 to 3 apply as they are. The other steps change as follows.
+The statistical baseline is in the `statistics` repository, and the chart baseline is in the `media` repository. The commit that moves a result names one commit of each in a pin trailer of its message, and `inet.opp` does not change ([TR-BASELINE-PIN](../rule/testing.md#tr-baseline-pin)). Steps 1 to 3 apply as they are. The other steps change as follows.
 
 ### Get the checkouts and record the values
 
 ```bash
-opp_checkout_test_baselines                 # statistics/ and media/ at the pins of this commit
+opp_checkout_test_baselines                 # statistics/ and media/ at the baseline of this commit
 opp_run_statistical_tests -m release -w '<simulation-directory-regex>' -c '<config-regex>'
 opp_run_chart_tests -m release -w '<showcase-directory-regex>'
 ```
 
-A test and an update never move a checkout. They give a warning when a checkout is not at its pin.
+The command finds the baseline of the commit from the pin trailers of the series and the marks on `master` of each baseline repository, and prints how. A test and an update never move a checkout. They give a warning when a checkout does not have the files of the baseline of the commit.
 
 Record the new values on your machine. The update commands change only the files of the tests that move:
 
@@ -122,13 +122,13 @@ opp_update_statistical_test_results -m release -w '<simulation-directory-regex>'
 opp_update_chart_test_results -m release -w '<showcase-directory-regex>'
 ```
 
-Check the parent commit first. A test that you update must pass on the parent with the old pins ([TR-BASELINE-PARENT](../rule/testing.md#tr-baseline-parent)). A test that fails on the parent keeps its baseline: take its file out of the update, and name the test in the record.
+Check the parent commit first. A test that you update must pass on the parent against the baseline of the parent ([TR-BASELINE-PARENT](../rule/testing.md#tr-baseline-parent)). A test that fails on the parent keeps its baseline: take its file out of the update, and name the test in the record.
 
 ### Make the cause small
 
 The reviewer accepts the new values through a small change ([TR-BASELINE-ATTRIBUTION](../rule/testing.md#tr-baseline-attribution)). There are three ways to give one, the best first:
 
-1. **Divide the series.** The first commits prepare and move no result. The last commit is small and turns the behavior on, and it moves the pin. The form is `commit`.
+1. **Divide the series.** The first commits prepare and move no result. The last commit is small and turns the behavior on, and it has the pin trailer. The form is `commit`.
 2. **A forward reduction.** Write a patch for the parent of the cause commit that gives the new results. Check it: apply the patch to the parent, build, and run the moved tests against the new baseline.
 3. **A reverse reduction.** Write a patch for the cause commit that gives the old results. Check it: apply the patch to the cause commit, build, and run the moved tests against the old baseline.
 
@@ -136,7 +136,14 @@ A reduction is an experiment, not code that lands. Its limit is 100 changed line
 
 ### Commit the values with their record
 
-Make one baseline commit for one INET commit, on a branch with the name of the INET branch. Stage only the files that move. Then get the computed list of the staged change:
+Make one baseline commit for one INET commit, on a branch with the name of the INET branch. The branch starts on the head of `master` of the baseline repository, and the next steps of the series go on the same branch:
+
+```bash
+git -C statistics fetch origin
+git -C statistics switch -c <INET branch> origin/master
+```
+
+Record on a series that stands on the head of INET `master`. Then the checkout of the baseline and the head of `master` of the baseline repository have the same files, and the values come from the code that they land on. Stage only the files that move. Then get the computed list of the staged change:
 
 ```bash
 python3 doc/project/enforcement/baseline_summary.py statistics
@@ -174,11 +181,18 @@ Attribution: commit
 - A line of one test is an exception that the reader will ask about. Its reason says why that test moves in another way.
 - More prose in the message is welcome, but it does not replace a reason on a line.
 - For a chart, look at the old and the new image, and say how the picture changes: which curve or bar moves, and by how much.
-- `INET-Subject:` is the exact subject of the INET commit that moves the pin.
+- `INET-Subject:` is the exact subject of the cause commit: the INET commit that has the pin trailer.
 
 ### Pin the baseline commit
 
-Write the hash of the baseline commit into the `ref` of its entry in `inet.opp`, in the INET commit that causes the move ([PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline)). Name `statistical` or `chart` in the obligations of its `Change:` trailer. Then run the gate with the local clones:
+Add the pin trailer to the message of the INET commit that causes the move ([PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline)), with the full hash of the last commit of its step on the baseline branch. Do not change `inet.opp`. Name `statistical` or `chart` in the obligations of its `Change:` trailer:
+
+```
+Change: src.physicallayer | behavior.change | statistical test whatsnew
+Statistical-Baseline: <full hash of the baseline commit>
+```
+
+Then run the gate with the local clones:
 
 ```bash
 doc/project/enforcement/check-baselines.sh origin/master..HEAD \
@@ -194,38 +208,71 @@ doc/project/enforcement/check-baseline-attribution.sh run origin/master..HEAD \
     --baseline-repository statistical=statistics --baseline-repository chart=media
 ```
 
-The tool runs the moved tests at the parent with the old pins, and at the cause commit with the new pins. For a reduction, it also runs them with the patch. A run that selects other tests than the moved tests fails. `run` checks out and builds each commit in the work tree, so use a checkout for this purpose only, such as the local copy of the CI job; its options `--build`, `--checkout`, `--statistical` and `--chart` take the commands of that copy. The check `Check: baseline attribution` does the same runs for each pull request, and its job summary holds the result. A run in the copy of the CI job gives the result before the push.
+The tool runs the moved tests at the parent against the baseline of the parent, and at the cause commit against its own baseline. For a reduction, it also runs them with the patch, against the baseline that the form names. A run that selects other tests than the moved tests fails. `run` checks out and builds each commit in the work tree, so use a checkout for this purpose only, such as the local copy of the CI job; its options `--build`, `--checkout`, `--statistical` and `--chart` take the commands of that copy. The check `Check: baseline attribution` does the same runs for each pull request, and its job summary holds the result. A run in the copy of the CI job gives the result before the push.
 
 ### Push and link
 
 Push the baseline branch to the baseline repository. A contributor with no push right opens a pull request from a fork of the baseline repository. Name the branch or the pull request in the description of the INET pull request ([PR-REQ-STORY](../rule/pull-request.md#pr-req-story)). The maintainer approves the values in the baseline repository; that approval is apart from the approval of the source change.
 
-### A commit that changes no result
-
-The `media` repository also holds documentation media: network images, screenshots and videos. Only the images that a chart of an analysis file exports are results; `python3 doc/project/enforcement/baseline_summary.py media` lists the results of a staged change and leaves the other files out. A commit that changes no result needs no record and no attribution. Commit it to the branch of the `media` repository, and move the pin to it in the INET commit that needs the files. A pin can move over more than one commit, but only one of them can change results.
-
-### After a baseline commit or the base changes
-
-A baseline commit gets a new hash when its message or its values change, and when its branch is rebased. A rebase is necessary after another change lands and moves the pin of `master`. The pins of your series then name commits that are gone. First rebase the baseline branch, then let the tool make the series again with the new pins:
+Then check that the baseline branch can land on `master` of the baseline repository with no overlap. The pull request audit posts the same result as the commit status `Baseline merge`:
 
 ```bash
-git -C statistics rebase --onto <pin of origin/master> <old pin>
-python3 doc/project/enforcement/baseline_pins.py rebase origin/master
+python3 doc/project/enforcement/baseline_masters.py check HEAD --base origin/master
 ```
 
-The tool keeps the messages, the authors and the changes of the commits. It gives the pin moves of the series the commits of the baseline branch in order; a pin move takes as many commits as it took before. It pushes nothing.
+### A commit that changes no result
+
+The `media` repository also holds documentation media: network images, screenshots and videos. Only the images that a chart of an analysis file exports are results; `python3 doc/project/enforcement/baseline_summary.py media` lists the results of a staged change and leaves the other files out. A commit that changes no result needs no record and no attribution. Commit it to the branch of the `media` repository, and name it in the pin trailer of the INET commit that needs the files. A step can go over more than one commit, but only one of them can change results.
+
+### After a baseline commit changes
+
+A baseline commit gets a new hash when its message or its values change, for example after a new record. The pin trailers of your series then name commits that are gone. Let the tool write the new hashes into the series:
+
+```bash
+python3 doc/project/enforcement/baseline_pins.py retrail origin/master --baseline-repository statistical=statistics
+```
+
+The tool gives the pin trailers of the series the commits of the baseline branch in order; a pin takes as many commits as it took before. It keeps the messages, the authors and the files of the commits, and changes only the pin trailers. Without `--baseline <KIND>=<REVISION>`, the baseline branch is the `HEAD` of the clone. It pushes nothing.
+
+### After another change lands
+
+Do nothing, unless the status `Baseline merge` of your pull request is red. Another change that lands does not change your pins: the landing job puts your steps onto the new head of `master` of the baseline repository when your change lands, and the pull request tests already test against that result. A red status names the files that your baseline branch and `master` of the baseline repository both change. Then rebase the INET series onto `origin/master`, start the baseline branch again on the new head of `master` of the baseline repository, record the common results again, and run `retrail`.
+
+### A series from before the trailer form
+
+A series that moves the `ref` of `inet.opp` conflicts with the commit that changed `inet.opp` to the trailer form, and the gate rejects a new `ref`. Let the tool make the series again on `origin/master`:
+
+```bash
+python3 doc/project/enforcement/baseline_pins.py convert origin/master
+```
+
+The tool takes the `ref` changes out of `inet.opp`, and gives each commit that moved a `ref` the pin trailer with that `ref`. It keeps the messages, the authors and the other changes of the commits. It stops and changes nothing when another file has a conflict. It pushes nothing.
 
 ### When the change lands
 
-Land the INET pull request only. Do not merge the pull request of the baseline repository with the button of GitHub: a merge commit or a rebase makes a new commit that no INET commit pins.
+Land the INET pull request only. Do not merge the pull request of the baseline repository with the button of GitHub.
 
-After each push to INET `master`, the workflow `check-baseline-masters.yml` moves `master` of each baseline repository to its pin by a fast-forward. GitHub then shows the pull request of the baseline repository as merged, because its head is on `master`. When the workflow has no deploy key, it fails and its log gives the command for a maintainer:
+After each push to INET `master`, the workflow `check-baseline-masters.yml` puts the steps of the new cause commits onto `master` of each baseline repository, the oldest first, and adds a mark: a commit with no change of files and a line `Baseline-Of: <INET hash> <baseline hash>` for each landed cause commit.
+
+- A step that starts on the head of `master` lands by a fast-forward. GitHub then shows the pull request of the baseline repository as merged, because its head is on `master`.
+- Another step lands by a rebase onto the head of `master`, with its messages and authors. The mark has a line `Baseline-Pull-Request: #<number>` for the pull request whose head is the pin. GitHub does not mark that pull request as merged, so the log and the job summary of the workflow name it, and a maintainer closes it, with no comment. Its state is then "Closed", not "Merged".
+
+Then the workflow posts the status `Baseline merge` again on the open pull requests with a pin trailer, and the statistical and chart tests of `master` start. When the workflow has no deploy key, it fails and its log says so.
+
+**If a landing stops.** At an overlap or a conflict, the workflow pushes the steps before the stopped INET commit with their mark, and fails. A later run tries that commit again, because no mark names it. Until then INET `master` has no baseline for that commit, and the statistical and chart tests of `master` stop with "no mark names it". A maintainer repairs it:
+
+1. Check out the stopped INET commit and build it. Check out the head of `master` of the baseline repository: `git -C statistics fetch origin` and `git -C statistics switch --detach origin/master`. A mark changes no file, so this checkout has the files of the baseline of the parent of the stopped commit.
+2. On that checkout, record the moved tests of the step again, also the common files, and commit the values with their record, as above.
+3. Add the mark, and push to `master` of the baseline repository. When a pull request of the baseline repository holds the old pin, add its line too, and close that pull request:
 
 ```bash
-git push git@github.com:inet-framework/statistics.git <pin>:refs/heads/master
+git -C statistics commit --allow-empty -m "Baseline of INET <short hash>: <subject>" \
+    -m "Baseline-Of: <full INET hash> <full hash of the new baseline commit>
+Baseline-Pull-Request: #<number>"
+git -C statistics push origin HEAD:refs/heads/master
 ```
 
-The push is not a fast-forward when `master` of the baseline repository holds a commit that the pin does not hold, for example a commit that a person pushed by hand. The workflow then fails and changes nothing. Pin that commit in an INET commit, or move `master` back by hand.
+The push is a fast-forward. Then start the workflow "Check: baseline masters" by hand on `master` (Actions, then "Run workflow"). Nothing else starts it before the next push to INET `master`. The run finds the mark and has nothing to land, it posts the status `Baseline merge` again, and its end starts the statistical and chart tests of `master`. Its later runs start after the marked commit.
 
 ## At release time
 
