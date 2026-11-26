@@ -13,6 +13,10 @@ name: "Check: pull request"
 # A pull request without activity gets no event. To audit the pull requests that exist, start the
 # workflow by hand with the numbers, or with 'open' for every open pull request to master. That run
 # posts a commit status on each head, with a link to the run.
+#
+# The job baseline-merge and the run by hand also post the commit status "Baseline merge": whether the
+# baseline branches of the pin trailers of the pull request can land on master of each baseline
+# repository now. The landing job (check-baseline-masters.yml) posts it again after each landing.
 
 on:
   pull_request_target:
@@ -78,6 +82,58 @@ jobs:
             cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
           fi
           exit "$status"
+
+  baseline-merge:
+    # the status "Baseline merge": whether the baseline branches of the pin trailers can land on master of
+    # each baseline repository now (doc/project/enforcement/baseline_masters.py check). The landing job
+    # posts it again after each move of a baseline master. It is a commit status, not the result of this
+    # job, so that the landing job can change it.
+    name: Baseline merge status
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+      - name: Fetch pull-request head as data
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch -q --no-tags --filter=blob:none origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/pull/${PR_NUMBER}/head"
+          actual_head_sha="$(git rev-parse "refs/remotes/pull/${PR_NUMBER}/head^{commit}")"
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "error: fetched pull-request head $actual_head_sha, expected $EXPECTED_HEAD_SHA" >&2
+            exit 2
+          fi
+      - name: Check and post the status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # the output goes to a file, never to the log, so the text of a pull request cannot hold a workflow command
+          set +e
+          python3 doc/project/enforcement/baseline_masters.py check "$HEAD_SHA" --base "$BASE_SHA" > "$RUNNER_TEMP/check.txt" 2>&1
+          status=$?
+          set -e
+          case "$status" in
+            0) state=success ;;
+            1) state=failure ;;
+            *) state=error ;;
+          esac
+          description="$(sed -n 's/^RESULT: //p' "$RUNNER_TEMP/check.txt" | cut -c1-140)"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" -f state="$state" \
+            -f context="Baseline merge" -f description="${description:-the check could not run}" -f target_url="$run_url"
+          { echo "## Baseline merge"; echo; echo '```'; cat "$RUNNER_TEMP/check.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$([ "$state" = error ] && echo 2 || echo 0)"
 
   sweep:
     name: Mechanical audit of existing pull requests
@@ -162,6 +218,19 @@ jobs:
             printf '| #%s | `%s` | %s |\n' "$n" "${head_sha:0:10}" "$result" >> "$RUNNER_TEMP/table.md"
             gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$head_sha" -f state="$state" \
               -f context="$context" -f description="$result" -f target_url="$run_url"
+            # the status "Baseline merge", as the job baseline-merge posts it on an event of the pull request
+            set +e
+            python3 doc/project/enforcement/baseline_masters.py check "$head_sha" --base "$base_sha" > "$reports/baseline-merge-$n.txt" 2>&1
+            merge_status=$?
+            set -e
+            case "$merge_status" in
+              0) merge_state=success ;;
+              1) merge_state=failure ;;
+              *) merge_state=error; errors=1 ;;
+            esac
+            merge_text="$(sed -n 's/^RESULT: //p' "$reports/baseline-merge-$n.txt" | cut -c1-140)"
+            gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$head_sha" -f state="$merge_state" \
+              -f context="Baseline merge" -f description="${merge_text:-the check could not run}" -f target_url="$run_url"
           done
           {
             echo "## Pull-request audit of existing pull requests"

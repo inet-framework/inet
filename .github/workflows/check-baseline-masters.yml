@@ -1,12 +1,21 @@
 name: "Check: baseline masters"
 
-# The master branch of each baseline repository (statistics, media) is the commit that inet.opp of
-# INET master pins (TR-BASELINE-PIN in doc/project/rule/testing.md). After each push to master, this
-# workflow moves a baseline master that is behind its pin by a fast-forward, with the deploy key of
-# that repository in the secret STATISTICS_DEPLOY_KEY or MEDIA_DEPLOY_KEY of the environment
-# baseline-masters. The push is never forced. Without the key, or when a master is ahead of its pin or
-# on another line, the job fails and its log says what to do. Only master can use the environment, so
-# GitHub rejects a run on another branch.
+# The master branch of each baseline repository (statistics, media) holds the baseline of INET master
+# (TR-BASELINE-PIN in doc/project/rule/testing.md). After each push to master, this workflow lands the
+# baselines with the deploy key of each repository in the secret STATISTICS_DEPLOY_KEY or
+# MEDIA_DEPLOY_KEY of the environment baseline-masters. For the ref form of inet.opp, it moves a
+# baseline master that is behind its pin by a fast-forward. For the trailer form, it lands the steps
+# of the pin trailers by a fast-forward or a rebase, and adds a mark. The push is never forced. After
+# a rebase, GitHub does not mark the pull request of the baseline repository as merged: the log and the
+# job summary name it, and a maintainer closes it.
+# Without the key, at an overlap, or when a master is ahead of its pin or on another line, the job
+# fails and its log says what to do. Only master can use the environment, so GitHub rejects a run on
+# another branch.
+#
+# Then the job posts the commit status "Baseline merge" on the head of each open pull request with a
+# pin trailer: a landing can give such a pull request an overlap with no event of its own. The
+# statistical and chart tests of master start when this workflow completes, so they test against the
+# baseline that it landed.
 
 on:
   push:
@@ -17,6 +26,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
+  statuses: write
 
 concurrency:
   group: baseline-masters
@@ -30,12 +41,60 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # the history of master finds the newest commit that a mark names; the files come when a tool reads them
+          fetch-depth: 0
+          filter: blob:none
           persist-credentials: false
-      - name: Move each baseline master to its pin
+      - name: Land the baseline of each kind
         env:
           STATISTICS_DEPLOY_KEY: ${{ secrets.STATISTICS_DEPLOY_KEY }}
           MEDIA_DEPLOY_KEY: ${{ secrets.MEDIA_DEPLOY_KEY }}
           PUSH: ${{ github.ref == 'refs/heads/master' && '--push' || '' }}
         run: |
+          # the log holds file names of baseline branches, so workflow commands stop while the tool prints
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          set +e
           # shellcheck disable=SC2086 # PUSH is empty or one option
-          python3 doc/project/enforcement/baseline_masters.py HEAD $PUSH
+          python3 doc/project/enforcement/baseline_masters.py HEAD $PUSH | tee "$RUNNER_TEMP/landing.txt"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "::$token::"
+          # a pull request of a baseline repository whose step landed by a rebase: a maintainer closes it
+          if grep -q 'a maintainer closes the pull request' "$RUNNER_TEMP/landing.txt"; then
+            { echo "## Close these pull requests"; echo; grep 'a maintainer closes the pull request' "$RUNNER_TEMP/landing.txt" | sed 's/^ */- /'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
+      - name: Post the status "Baseline merge" on the open pull requests
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --repo "$GITHUB_REPOSITORY" --base master --state open --limit 1000 \
+            --json number,headRefOid > "$RUNNER_TEMP/open.json"
+          refspecs=$(jq -r '.[] | "+refs/pull/\(.number)/head:refs/remotes/pull/\(.number)/head"' "$RUNNER_TEMP/open.json")
+          if [ -n "$refspecs" ]; then
+            # shellcheck disable=SC2086
+            git fetch -q --no-tags --filter=blob:none origin $refspecs
+          fi
+          base_sha="$(git rev-parse HEAD)"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          for n in $(jq -r '.[].number' "$RUNNER_TEMP/open.json"); do
+            head_sha="$(jq -r --argjson n "$n" '.[] | select(.number == $n) | .headRefOid' "$RUNNER_TEMP/open.json")"
+            # the output goes to a file, never to the log, so the text of a pull request cannot hold a workflow command
+            set +e
+            python3 doc/project/enforcement/baseline_masters.py check "$head_sha" --base "$base_sha" > "$RUNNER_TEMP/check-$n.txt" 2>&1
+            status=$?
+            set -e
+            # a pull request with no pin trailer keeps its status
+            grep -q '^RESULT: no baseline change$' "$RUNNER_TEMP/check-$n.txt" && continue
+            case "$status" in
+              0) state=success ;;
+              1) state=failure ;;
+              *) state=error ;;
+            esac
+            description="$(sed -n 's/^RESULT: //p' "$RUNNER_TEMP/check-$n.txt" | cut -c1-140)"
+            echo "#$n ${head_sha:0:10}: $state"
+            gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$head_sha" -f state="$state" \
+              -f context="Baseline merge" -f description="${description:-the check could not run}" -f target_url="$run_url"
+          done

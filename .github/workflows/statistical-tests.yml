@@ -1,7 +1,12 @@
 name: "Test: statistical"
 
 on:
-  push:
+  # master: after the landing job, so that the baseline repositories hold the baseline of the pushed commit
+  workflow_run:
+    workflows:
+      - "Check: baseline masters"
+    types:
+      - completed
     branches:
       - master
   pull_request:
@@ -36,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
         run: |
-          # a push, and a run by hand with no pull request, test the branch; a pull request runs the
+          # master after the landing job, and a run by hand with no pull request, test the branch; a pull request runs the
           # tests only when it changes a path that can change a statistical result, and else the check passes
           if [ -z "$NUMBER" ]; then
             echo "relevant=true" >> "$GITHUB_OUTPUT"
@@ -74,7 +79,9 @@ jobs:
           paths+='|^(inet\.opp|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
           paths+='|^\.github/workflows/statistical-tests\.yml$|^doc/project/enforcement/baseline_'
           gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[].filename' > "$RUNNER_TEMP/files.txt"
-          if grep -qE "$paths" "$RUNNER_TEMP/files.txt"; then
+          # a pin trailer moves the baseline with no change of inet.opp
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/commits" --jq '.[].commit.message' > "$RUNNER_TEMP/messages.txt"
+          if grep -qE "$paths" "$RUNNER_TEMP/files.txt" || grep -qiE '^Statistical-Baseline:' "$RUNNER_TEMP/messages.txt"; then
             echo "relevant=true" >> "$GITHUB_OUTPUT"
           else
             echo "relevant=false" >> "$GITHUB_OUTPUT"
@@ -99,8 +106,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: inet
-          # empty for a push and a pull request; the merge ref of the pull request for a run by hand
-          ref: ${{ needs.changes.outputs.ref }}
+          # the commit of the landing job for master, empty for a pull request, and the merge ref of the
+          # pull request for a run by hand
+          ref: ${{ needs.changes.outputs.ref || github.event.workflow_run.head_sha }}
+          # the trailer form of a baseline needs the history of the commit and of master
+          fetch-depth: 0
+          filter: blob:none
           persist-credentials: false
       - run: mkdir -p /home/runner/work/ccache
       - uses: actions/cache/restore@v5
@@ -135,8 +146,9 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Checking out the inet statistical results"
-          # inet.opp pins the commit of the statistics repository that this INET commit passes
-          # with; the command prints the commit
+          # inet.opp names the commit of the statistics repository that this INET commit passes with:
+          # its ref, or for the trailer form the baseline that follows from the pin trailers and
+          # the marks; the command prints the commit
           opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
           echo "::endgroup::"
 
