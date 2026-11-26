@@ -1,6 +1,7 @@
 %description:
 Exercise production single-protection HCF admission with deterministic DATA/ACK and RTS/CTS exchanges.
 Check strict TXNAV boundaries, independent TXOP containment, propagation, mode changes, and finite queue progress.
+The zero-limit fragment burst must send all fragments in one grant with a SIFS after each preceding ACK.
 
 %extraargs: -r 0..25
 
@@ -324,8 +325,11 @@ class SingleTest : public cSimpleModule {
             ASSERT(sender->acknowledgments >= 2);
             ASSERT(mac->transmissions.size() >= 2);
             if (s == 18) {
-                ASSERT(sender->grants == sender->acknowledgments);
-                for (auto count : sender->burstData) ASSERT(count == 1);
+                ASSERT(sender->acknowledgments == 3 && mac->transmissions.size() == 3);
+                ASSERT(sender->grants == 1 && sender->refusals == 0);
+                ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 3);
+                for (size_t i = 1; i < mac->transmissions.size(); i++)
+                    ASSERT(mac->transmissions[i].start == sender->acknowledgmentTimes.at(i - 1) + SimTime(16, SIMTIME_US));
             }
             else ASSERT(sender->burstData[0] > 1);
         }

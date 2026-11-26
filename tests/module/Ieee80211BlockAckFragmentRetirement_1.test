@@ -326,7 +326,8 @@ record-vector-results = false
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
 **.wlan[*].mac.hcf.edca.edcaf[*].aifsn = 20
-**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 0s
+# Allow the opening exchange and force a new grant for any subsequent fragment.
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 1us
 *.host.wlan[0].address = "02:00:00:00:00:01"
 **.mobility.initFromDisplayString = false
 **.mobility.constraintAreaMinX = 0m
