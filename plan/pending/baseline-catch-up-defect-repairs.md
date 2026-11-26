@@ -295,7 +295,7 @@ No sealed file changes. No consumer outside INET changes.
   segment leaves when the override timer expires. Baselines: `examples/inet/bulktransfer` `inet_inet_2b`.
   - `tcp: fix: a segment that does not change the window keeps the override timer running` (BD-21).
   - `tcp: change: the override timeout of the sender SWS avoidance <decision of gate A>` (BD-23).
-- [ ] **Step 3. R3: no priority tag on an untagged port (BD-44).** Repaired as C9 `d18a4b049a` and C10 `5d4c830ee4`; waits for gate B. Test: a protocol test in `tests/protocol/vlan`
+- [x] **Step 3. R3: no priority tag on an untagged port (BD-44).** Repaired as C9 `d18a4b049a` and C10 `5d4c830ee4`; gate B approved on 2026-11-26 (§6.3, R3). It lands after the debug fingerprints in the image of the CI. Test: a protocol test in `tests/protocol/vlan`
   with `VlanReqMapper` and `forwardPcp = true`; the frame of an untagged VLAN leaves with no tag. Gate A decides
   whether `examples/ethernet/vlan`, `showcases/ethernet/sharedcore`, `tests/module/lib/vlan-access-trunk.ini` and
   `tests/module/EthernetUnknownEtherType_1.test` keep `forwardPcp = false`.
@@ -829,6 +829,10 @@ re-records nothing.
   `check-interfaces.sh` 16 classes, the same as master, none in the files of R3.
 - The protocol tests and module tests of the section above ran on the same code before the commits; the debug
   fingerprints run when R3 lands.
+
+**Gate B** approved by the maintainer on 2026-11-26 ("yes"). The repair commits of BD-44 are in
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md). Next: the debug fingerprints of the landing in the image
+of the CI, then the landing.
 
 #### R4: the constants of copper and aluminium (BD-49), prepared 2026-11-25
 
