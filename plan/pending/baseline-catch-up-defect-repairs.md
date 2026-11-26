@@ -934,6 +934,39 @@ so no ACK covers exactly the last data octet, and the last step reads `tcp.ackNo
 Westwood test with three losses and a guard from the fast retransmit had no second fast retransmit, because Westwood
 does not go back there.
 
+**The example before and after (2026-11-26).** As for R3, the recommended design is in the working tree, not
+committed; the diff is the preview commit `274e642e46` on the ref `preview/r5`, which does not land. Debug runs of
+`examples/inet/tcpclientserver` `inet-tahoe` and `inet-westwood`, runs 0 to 6 (`runs/r5-run.sh`, `runs/r5-summary.py`
+and `runs/r5/` of the folder of D10), with the TCP vectors of client1; "99%" is the time when 99% of the data is
+acknowledged, because the last segments can wait 200 ms each for a delayed ACK:
+
+| run | fast retransmits | timeouts | segments | 99% acknowledged (s) |
+| --- | --- | --- | --- | --- |
+| inet-tahoe 0 | 163 -> 5 | 0 -> 0 | 1198 -> 719 | 1.816 -> 1.241 |
+| inet-tahoe 1 | 5 -> 5 | 0 -> 0 | 697 -> 697 | 1.228 -> 1.229 |
+| inet-tahoe 2 | 17 -> 5 | 0 -> 0 | 752 -> 719 | 1.282 -> 1.241 |
+| inet-tahoe 3 | 35 -> 7 | 0 -> 1 | 802 -> 722 | 1.345 -> 2.244 |
+| inet-tahoe 4 | 6 -> 5 | 1 -> 2 | 703 -> 703 | 2.224 -> 2.223 |
+| inet-tahoe 5 | 14 -> 10 | 3 -> 3 | 727 -> 733 | 4.457 -> 4.462 |
+| inet-tahoe 6 | 31 -> 25 | 8 -> 12 | 765 -> 759 | 12.671 -> 14.847 |
+| inet-westwood 0 | 5 -> 3 | 1 -> 2 | 710 -> 709 | 2.841 -> 2.835 |
+| inet-westwood 1 | 4 -> 4 | 1 -> 1 | 698 -> 698 | 4.029 -> 4.029 |
+| inet-westwood 2 | 5 -> 4 | 1 -> 1 | 710 -> 709 | 3.037 -> 3.037 |
+| inet-westwood 3 | 6 -> 6 | 2 -> 1 | 712 -> 711 | 4.040 -> 3.440 |
+| inet-westwood 4 | 4 -> 4 | 4 -> 4 | 702 -> 702 | 4.615 -> 4.615 |
+| inet-westwood 5 | 13 -> 11 | 8 -> 10 | 725 -> 725 | 12.254 -> 13.850 |
+| inet-westwood 6 | 26 -> 25 | 15 -> 15 | 747 -> 746 | 21.662 -> 21.657 |
+
+The time-sequence graph of `inet-tahoe` run 0 shows the cause of BD-39 today: from 0.47 s to the end, the sender
+repeats one cycle about every 8 ms, three segments, three duplicates of the go-back, a fast retransmit and a go-back
+with cwnd = 1 SMSS. With the repair the go-back finishes and slow start grows. The cost of the check of recover is
+visible too: a real loss inside a go-back, below recover, no longer gets a fast retransmit and waits for the timer,
+so Tahoe runs 3 and 6 and Westwood run 5, with high loss rates, get more timeouts and acknowledge 99% later. This is
+the behavior that RFC 6582 specifies; its heuristics (section 4), which can tell such a loss from a duplicate of the
+go-back, stay out, as in `~TcpNewReno` (question 3). With the repair, the 39 protocol tests of RFC 5681, RFC 6582,
+RFC 6298 and the TCP algorithm classes, the three new tests among them, and the 28 module tests that use Tahoe or
+Westwood pass in debug mode.
+
 **Design questions for gate A.**
 
 1. *The threshold of Tahoe (BD-8).* (A) `resetToSlowStart()` takes FlightSize as `~TcpReno` does: at the third
