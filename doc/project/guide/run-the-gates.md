@@ -30,10 +30,10 @@ For protocol cases, follow the suite and test-file selection and build instructi
 
 Keep the working directory, exact build and test commands, configuration, run and seed where applicable, filter, exit status and artifact paths. An unfiltered category or repository-wide suite may add integration coverage, but it cannot replace a directly related case. If no such case exists, report the coverage gap instead of broadening the command until something green appears ([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
 
-The change-based test selection of opp_repl ([doc/test_map.md](https://github.com/omnetpp/opp_repl/blob/main/doc/test_map.md)) helps with the mapping. It reads a test map, which records what each test used. Get the map of the newest push run of `master` first, and then ask which tests the change can affect:
+The change-based test selection of opp_repl ([doc/test_map.md](https://github.com/omnetpp/opp_repl/blob/main/doc/test_map.md)) helps with the mapping. It reads a test map, which records what each test used. Get the map of the newest push or scheduled run of `master` first, and then ask which tests the change can affect:
 
 ```bash
-# the map of the newest push run whose commit is an ancestor of origin/master, into coverage/test-map/map
+# the map of the newest CI run of master whose commit is an ancestor of origin/master, into coverage/test-map/map
 GITHUB_REPOSITORY=inet-framework/inet _scripts/github/get-test-map.sh fingerprint-tests.yml fingerprint origin/master coverage/test-map/map
 opp_select_tests --changes origin/master...worktree --explain --ignore-environment
 opp_show_test_map src/inet/<path>.cc --line <line>   # the tests that ran the function at this line
@@ -70,9 +70,9 @@ doc/project/enforcement/check-source-seals.sh --base origin/master
 opp_run_fingerprint_tests --changes origin/master...HEAD --test-map coverage/test-map/map --ignore-environment
 ```
 
-Step 4 is [TR-SELECTED-PASS](../rule/testing.md#tr-selected-pass). The map of a push run holds the fingerprint tests. Report the line `Selected N of M`, the map commit, each environment difference that `--ignore-environment` ignored, and the reason when all tests are selected.
+Step 4 is [TR-SELECTED-PASS](../rule/testing.md#tr-selected-pass). The map of a CI run holds the fingerprint tests. Report the line `Selected N of M`, the map commit, each environment difference that `--ignore-environment` ignored, and the reason when all tests are selected.
 
-CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping. The fingerprint jobs of a pull request run only the selected tests, in the environment of the map; the label `full-tests` runs all of them, also for a change that needs a newer omnetpp or opp_repl than the map. A push to `master` runs all tests.
+CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping. The fingerprint jobs of a pull request run only the selected tests, in the environment of the map; the label `full-tests` runs all of them, also for a change that needs a newer omnetpp or opp_repl than the map. A push to `master` runs the selected tests and a random sample of the other tests, and updates the map; each night when `master`, omnetpp or opp_repl changed, a scheduled run runs all tests and makes a full map.
 
 ## When the change touches this document set
 

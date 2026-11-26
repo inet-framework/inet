@@ -318,7 +318,7 @@ The selection of opp_repl ([doc/test_map.md](https://github.com/omnetpp/opp_repl
 
 A kind of test that the map does not hold gets no obligation from this rule. A change of a file that the CI jobs run, a test that the map does not know, and a difference of the environment from the map select all tests of the kind, or that test. Report the line `Selected N of M` of each kind, the map commit, and the reason of each kind for which all tests are selected. [run-the-gates.md](../guide/run-the-gates.md#before-every-push) has the commands.
 
-*Enforced at T2 — the fingerprint jobs of a pull request run the selected fingerprint tests, and each push to `master` runs all tests and checks the selection against the previous push.*
+*Enforced at T2 — the fingerprint jobs of a pull request run the selected fingerprint tests. Each push to `master` runs the selected tests and a random sample of the other tests, whose records must agree with the map (check V5), and the full run of each night runs all tests and checks the selection against the previous full run (check V4).*
 
 ### TR-CI-FEATURE-MATRIX
 
