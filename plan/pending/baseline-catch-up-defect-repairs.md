@@ -300,7 +300,7 @@ No sealed file changes. No consumer outside INET changes.
   whether `examples/ethernet/vlan`, `showcases/ethernet/sharedcore`, `tests/module/lib/vlan-access-trunk.ini` and
   `tests/module/EthernetUnknownEtherType_1.test` keep `forwardPcp = false`.
   - `linklayer.vlan: fix: VlanReqMapper asks for no 802.1Q tag when the VLAN leaves untagged`.
-- [ ] **Step 4. R4: the constants of copper and aluminium (BD-49).** Test: a module test with a copper object and
+- [ ] **Step 4. R4: the constants of copper and aluminium (BD-49).** Repaired as C11 `ac770b1913`; waits for gate B. Test: a module test with a copper object and
   `DielectricObstacleLoss`; the factor is a number from 0 to 1 in debug mode.
   - `environment: fix: copper and aluminium have their real resistivity and a relative permittivity and permeability of 1`.
 - [ ] **Step 5. R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39).** Test: after a loss and a go-back,
@@ -880,6 +880,21 @@ checked (BD-46). The assistant has no alternative to propose; gate A approves th
 
 **Checks.** The three `ObstacleLoss_Dielectric*` unit tests in debug mode; all fingerprints in release mode (§6.1,
 step 8), which must not move.
+
+**Gate A** approved by the maintainer on 2026-11-26 ("yes"): the values above.
+
+**The results of R4 (2026-11-26).** The commit is C11 `ac770b1913`: `MaterialRegistry.cc`, the two unit tests and the
+release note `doc/whatsnew/fixes/environment-metal-constants.txt`. It sits on the branch after R3, which waits for its
+landing. No recorded result moves, so R4 re-records nothing.
+
+- The three `ObstacleLoss_Dielectric*` unit tests pass in debug mode in the editor; copper and aluminium failed at
+  the assertion before.
+- In the image of the CI at `45291e4886`, whose tree equals C11: all 1847 fingerprint runs in release mode, 1846 PASS
+  and 1 expected ERROR (`runs/r4-gate/` of the folder of D10); all statistical tests, 945 TOTAL, 934 PASS, 11 SKIP
+  (expected), 0 unexpected (`evidence/runs/45291e4886/` of the job copy).
+- The gates of "Before every push" pass, with the base `master` `7f7f77a00f`. `check-architecture.sh
+  src/inet/environment` reports one old candidate, `OsgEarthGround.cc` includes the visualizer, a file that R4 does
+  not touch. `check-naming.sh` reports 24 violations and `check-interfaces.sh` 16 classes, the same as master.
 
 #### R5: Tahoe and Westwood at the third duplicate ACK (BD-8, BD-39), prepared 2026-11-25
 

@@ -942,6 +942,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-49: copper and aluminium have NaN constants and wrong resistivities
 
+- **State (2026-11-26):** repaired by `ac770b1913` on the branch `topic/baseline-catch-up-defect-repairs` (change R4 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the unit tests `ObstacleLoss_DielectricCopper.test` and `ObstacleLoss_DielectricAluminium.test`. No stored fingerprint or statistic moves.
 - **Place:** [MaterialRegistry.cc](../../src/inet/environment/common/MaterialRegistry.cc). Older than G; found at
   step 91.
 - **Fault:** copper and aluminium have the relative permittivity and permeability NaN, and the resistivities 1.68 and
