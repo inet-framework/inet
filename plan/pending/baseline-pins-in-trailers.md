@@ -200,7 +200,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 - [x] P1 opp_repl: `34c163d` on the branch `topic/baseline-pins-in-trailers` of opp_repl, in the worktree `opp_repl-baseline-pins-in-trailers`. Not on `main`, `github_ci` and `opp_ci` yet, and not pushed. 177 self-tests pass.
 - [x] P2 opp_ci: `740d6fc` on the branch `topic/baseline-pins-in-trailers` of opp_ci, in the worktree `opp_ci-baseline-pins-in-trailers`. Not on `main`, not pushed. 476 tests pass; 4 tests fail on `main` too (I5).
 - [x] P3 INET part 1: 5 commits on `topic/baseline-pins-in-trailers`, in the worktree `inet-baseline-pins-in-trailers`. 562 enforcement tests pass, and `check-pull-request.sh` passes.
-- [ ] P4 end-to-end test
+- [x] P4 end-to-end test: 24 checks pass on 2026-11-26 (I11). The landing job against GitHub, with no `--push`, passes at `origin/master` `aa713a1ea8`: both masters are at their pins.
 - [ ] P5 land part 1
 - [ ] P6 INET part 2 and its landing
 - [ ] P7 `convert` tried on the open pull requests
@@ -222,6 +222,7 @@ What the implementation found and decided, in the order of the steps.
 | I8 | INET: the rebased commits and the mark have the committer `github-actions[bot]`; the rebased commits keep their authors. |
 | I9 | INET: the pull request audit posts `Baseline merge` in a new job `baseline-merge`, and the run by hand (`sweep`) posts it on each selected pull request. The landing job posts it only on the open pull requests with a pin trailer; the others keep their status. Before the status becomes required (P8), a run by hand with `open` gives each open pull request the status. |
 | I10 | INET: the checkouts of the test workflows and of the landing job have `fetch-depth: 0` and `filter: blob:none`: the history of all commits, and a file content only when a tool reads it. |
+| I11 | P4: bare copies of INET (the part 1 branch), statistics and media in `/var/tmp/claude-e2e-baseline-pins`, with the baseline masters at the refs of the branch; the driver script is `e2e.py` in the scratchpad of the session. A switch commit makes part 2. Three series start on it: A (one `.sca` file), B (another `.sca` file and one image) and C (the file of A). Results: the landing job after the switch has nothing to land; the baseline after the switch is the old ref; the three statuses are green before a landing; A lands by a fast-forward with a mark; then B stays green and C is red with the file of A; the merge ref of B gets B rebased onto A, with the same files as the later landing; B lands by a rebase in statistics (the mark names pull request #201) and by a fast-forward in media (no pull request line); the landing of C stops at the overlap, and the baseline of C on master is an error; a bisect over the switch gets the baseline of each commit. |
 
 ## Decisions
 
