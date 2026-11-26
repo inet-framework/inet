@@ -197,14 +197,31 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 
 ## Progress
 
-- [ ] P1 opp_repl
-- [ ] P2 opp_ci
-- [ ] P3 INET part 1
+- [x] P1 opp_repl: `34c163d` on the branch `topic/baseline-pins-in-trailers` of opp_repl, in the worktree `opp_repl-baseline-pins-in-trailers`. Not on `main`, `github_ci` and `opp_ci` yet, and not pushed. 177 self-tests pass.
+- [x] P2 opp_ci: `740d6fc` on the branch `topic/baseline-pins-in-trailers` of opp_ci, in the worktree `opp_ci-baseline-pins-in-trailers`. Not on `main`, not pushed. 476 tests pass; 4 tests fail on `main` too (I5).
+- [x] P3 INET part 1: 5 commits on `topic/baseline-pins-in-trailers`, in the worktree `inet-baseline-pins-in-trailers`. 562 enforcement tests pass, and `check-pull-request.sh` passes.
 - [ ] P4 end-to-end test
 - [ ] P5 land part 1
 - [ ] P6 INET part 2 and its landing
 - [ ] P7 `convert` tried on the open pull requests
 - [ ] P8 required check, record, plan to done
+
+## Implementation notes
+
+What the implementation found and decided, in the order of the steps.
+
+| # | Note |
+| --- | --- |
+| I1 | opp_repl: `resolve_test_baseline` is the function of section 2, and `TestBaseline` holds B, A, M, S and the result. The local rebase keeps the author, the committer, the dates and the message of each commit, so its hashes are the same on each machine; a fixed committer is not necessary. |
+| I2 | opp_repl: a baseline branch usually starts on the mark after M, not on M. The mark changes no file, so the function compares the trees of the base and of M: equal trees need no rebase, and the result is the pin itself. |
+| I3 | opp_repl: the target branch is the first of `origin/HEAD`, `origin/master`, `origin/main`, `master`, `main`, or `--target`. A cause commit on the target branch with no mark is an error (R5): the landing job did not land it yet, or it failed. |
+| I4 | opp_repl: `opp_checkout_test_baselines --commit COMMIT` checks out the baseline of another commit than `HEAD`. The attribution run needs it for a reduction run, whose tree is a parent with a patch and whose expectations are those of the cause commit. |
+| I5 | opp_ci: the trailer form goes through opp_repl: on the host, `checkout_test_baseline` in the process; in the container, `opp_checkout_test_baselines` with the project discovery of the build stage. The ref form keeps the git commands of opp_ci, which the workers use now. This is less than the plan row asked ("one function"), and it changes nothing for the ref form. The tests `test_worker_log_shipping` (3) and `test_remote_cli::test_seed_endpoints` fail on `main` too. |
+| I6 | INET: `check_baselines.py` does not check the overlap. The overlap changes when another pull request lands, so only the status `Baseline merge` reports it. The plan row "New section: the overlap" is not done for this reason. |
+| I7 | INET: the landing job computes the overlap of a step as the files of `base..pin` that also differ between the landed copy of the base and the head of the work branch. For a step on a base that the run rebased, the landed copy is the rebased commit. |
+| I8 | INET: the rebased commits and the mark have the committer `github-actions[bot]`; the rebased commits keep their authors. |
+| I9 | INET: the pull request audit posts `Baseline merge` in a new job `baseline-merge`, and the run by hand (`sweep`) posts it on each selected pull request. The landing job posts it only on the open pull requests with a pin trailer; the others keep their status. Before the status becomes required (P8), a run by hand with `open` gives each open pull request the status. |
+| I10 | INET: the checkouts of the test workflows and of the landing job have `fetch-depth: 0` and `filter: blob:none`: the history of all commits, and a file content only when a tool reads it. |
 
 ## Decisions
 
