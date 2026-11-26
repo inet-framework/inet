@@ -55,6 +55,7 @@ One row per check that exists. The table lists **machinery, not intent**, so it 
 | [check-classification.sh](check-classification.sh) | T3 | pull-request CI and by hand | `CR-TAG-TRAILER` (a note for a commit authored before 2026-09-11, the day the rule entered the tree), `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`, and a note for each mixed direction under `CR-DEPTH-DIRECTION`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
 | [check-baselines.sh](check-baselines.sh) | T3 | pull-request CI and by hand | the fingerprint store, and the statistical and chart baselines, which are in other repositories: `TR-BASELINE-PIN` (a pin trailer, or the `ref` of an older commit, names a full commit hash; the step of a pin moves forward over at most one commit that changes results, from the previous pin of the series or from the base of the baseline branch; and the commit is in the baseline repository), `TR-BASELINE-PROVENANCE` (the record of the baseline commit: the "Baseline changes:" list that [baseline_summary.py](baseline_summary.py) computes, in categories and size classes, with a reason on each line; for the fingerprint store, the list of [fingerprint_moves.py](fingerprint_moves.py) in the INET commit), `TR-BASELINE-PARENT` (each changed result file differs in a value), the form and the size limits of `TR-BASELINE-ATTRIBUTION`, also for a commit that changes fingerprint values, with its reduction after `Reduction:` in the message and one attribution for each INET commit, `PR-REQ-BASELINES` (with `--pr` or `--description-file`: the description names each commit that changes a baseline, with a summary), the pin half of `PR-SPLIT-BASELINE`, of `CR-OBL-BASELINE` and of `CR-OBL-INERT`. A result is a `.sca` file, or an image that a chart of an analysis file exports; a commit with no result, such as documentation media, needs no record; notes for a change above 30 lines and for tests that move in more than one way; through [check_baselines.py](check_baselines.py) and [baseline_pins.py](baseline_pins.py), which also writes new pin trailers into a series after a baseline commit changed (`retrail`), changes a series of the `ref` form into a series with pin trailers (`convert`), and writes new refs into an older series (`rebase`). It gets the baseline commits from the repository that `inet.opp` names at the base of the range, without the file contents that it does not read |
 | [check-baseline-attribution.sh](check-baseline-attribution.sh) | T2 | pull-request CI, through [check-baseline-attribution.yml](../../../.github/workflows/check-baseline-attribution.yml), and by hand in a checkout for this purpose such as a copy of the CI job | `TR-BASELINE-ATTRIBUTION` and `TR-BASELINE-PARENT` by a run: for each commit with a pin trailer whose step changes results, or that changes fingerprint values, it runs the moved tests at the parent against the baseline of the parent, at the commit against its own baseline, and with the reduction of the `forward` or `reverse` form; the checkout command gets `--commit` with the commit whose baseline the run uses; a run that selects other tests than the moved tests fails; through [baseline_attribution.py](baseline_attribution.py). It checks out, builds and runs content of the range, so it runs on `pull_request` with a read-only token, never in the trusted pull-request workflow |
+| [check-required-contexts.sh](check-required-contexts.sh) | T3 | pull-request CI and by hand | W1, W2, W4 and W5 of [master-guards.md](../../../plan/pending/master-guards.md): each required context of the ruleset of `master` still reports on a pull request after the series. A violation for a series that renames or removes a required context, gives a required matrix job a job-level `if:`, or gives the workflow of a required job a path filter; a note for a new job-level `if:` on another required job, for a required context that nothing reports, and for a list below that differs from the ruleset. It computes the context names as GitHub does, with the matrix values; it reads the workflows with PyYAML and the ruleset from `--required-file` or `gh api`, through [required_contexts.py](required_contexts.py) |
 | [baseline_masters.py](baseline_masters.py) | T3 | after each push to `master`, through [check-baseline-masters.yml](../../../.github/workflows/check-baseline-masters.yml), and by hand; `check` in the pull-request CI and after each landing | the end of `TR-BASELINE-PIN`: the master branch of each baseline repository holds the baseline of INET `master`. It lands the steps of the cause commits after the newest mark, the oldest first, by a fast-forward when a step starts on the head of `master` and else by a rebase, with the deploy key of its repository, and adds one mark with a line `Baseline-Of:` for each landed cause commit and `Baseline-Pull-Request:` for each rebased pull request head. An overlap stops the landing at that commit and fails the job. It never forces a push. `check COMMIT --base BASE` gives the commit status `Baseline merge`: the baseline branch of each pin trailer has no merge, no file in common with `master` of the baseline repository since its base, and no conflict |
 | [check-pull-request.sh](check-pull-request.sh) | T3 | pull-request CI and by hand | no rule of its own: it runs the seven series gates above over the range from the merge base to the head of one pull request, with one exit status and a Markdown report, through [check_pull_request.py](check_pull_request.py) |
 
@@ -87,6 +88,7 @@ doc/project/enforcement/check-commits.sh origin/master..HEAD
 doc/project/enforcement/check-pr-description.sh --pr <n> --range origin/master..refs/pr/<n>
 doc/project/enforcement/check-pull-request.sh --base origin/master --head refs/pr/<n> --pr <n>  # the seven series gates
 doc/project/enforcement/check-baselines.sh origin/master..HEAD          # the pins and the baseline records
+doc/project/enforcement/check-required-contexts.sh origin/master..HEAD # each required context still reports
 doc/project/enforcement/check-baselines.sh origin/master..HEAD --baseline-repository statistical=statistics --baseline-repository chart=media  # with local clones, before a push
 python3 doc/project/enforcement/baseline_summary.py statistics          # the "Baseline changes:" list of the staged baseline change
 python3 doc/project/enforcement/fingerprint_moves.py --list <(git show HEAD:tests/fingerprint/store.json) tests/fingerprint/store.json  # the list of the staged fingerprints
@@ -111,6 +113,32 @@ The NED/MSG checker is diff-focused by default: it checks added, copied, renamed
 The repository environment named `sealed-source-change` is part of that fail-closed path. Configure required reviewers, prevent self-review and administrator bypass, and set its environment variable `SEALED_SOURCE_APPROVAL` to `granted`. Without that exact variable the approval job fails even if an unprotected environment was created accidentally. Require `check-sealing.yml` itself through an organization ruleset's **Require workflows to pass before merging** rule, pinned to the trusted base branch. A name-only required status is not the authority, because another pull-request workflow can emit the same job name.
 
 [guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in which order.
+
+## Required checks of master
+
+The ruleset `master: required checks` of GitHub is the source; this list is its copy for the reader, and `check-required-contexts.sh` gives a note when the two differ. A pull request into `master` can merge only when each of these contexts is green:
+
+- `Mechanical audit`
+- `Baseline merge`
+- `Attribution runs`
+- `statistical-tests (release)`
+- `chart-tests (release)`
+- `fingerprint-tests (debug, 0)`
+- `fingerprint-tests (debug, 1)`
+- `fingerprint-tests (debug, 2)`
+- `fingerprint-tests (debug, 3)`
+- `fingerprint-tests (release, 0)`
+- `fingerprint-tests (release, 1)`
+- `fingerprint-tests (release, 2)`
+- `fingerprint-tests (release, 3)`
+- `Enforcement checker tests`
+
+The rules for a required job (W1 to W4 of [master-guards.md](../../../plan/pending/master-guards.md)):
+
+1. **It reports on each pull request.** Its workflow has no path filter in its pull request trigger. A job with a matrix has no job-level `if:`: GitHub reports a skipped matrix job under the name without the matrix values, so its context never reports. When the job has nothing to test, its steps skip and it reports green. A job-level `if:` on another job must be true for each event of a pull request, because a skipped job counts as passed.
+2. **A rename lands with the ruleset.** A change that renames or removes a required job or a required commit status, or changes the matrix of a required job, needs a change of the ruleset by an admin at the same landing. Otherwise each pull request waits for ever.
+3. **A new job becomes required after it reports.** It first lands and reports on pull requests; then an admin adds its context.
+4. **The gate checks rules 1 and 2.** `check-required-contexts.sh` in the pull-request audit fails a series that breaks them.
 
 ## What belongs in this folder
 

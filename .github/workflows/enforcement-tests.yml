@@ -17,5 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install the packages of the gates
+        # check-required-contexts.sh reads the workflows with PyYAML, which the system Python of the runner does not have
+        run: python3 -m pip install --quiet "pyyaml==6.0.2"
       - name: Run enforcement checker tests
         run: python3 -m unittest discover -v -s doc/project/enforcement -p 'test_*.py'
