@@ -1,6 +1,6 @@
 # Baseline pins in commit trailers
 
-**Status:** pending. Written 2026-11-25 from `master` at `28f1dc534c` (equal to `origin/master`). On 2026-11-25 the user chose this design ("yes write the trailer design as a plan"). The same day the user chose a rebase in the baseline repositories, as INET lands with "Rebase and merge" (T2), and a check that blocks the landing when that rebase would fail (T3, T4). On 2026-11-26 the user chose the mark in a commit of its own, a fast-forward when the steps are on top of baseline `master`, and a close of the other baseline pull requests by a maintainer, with no token (T2, T10). No step has started. Each step needs the approval of the user.
+**Status:** done 2026-11-26. Part 1 landed as `fef104126f`, part 2 as `4e768408d2`, and `Baseline merge` is a required check of `master`. Written 2026-11-25 from `master` at `28f1dc534c` (equal to `origin/master`). On 2026-11-25 the user chose this design ("yes write the trailer design as a plan"). The same day the user chose a rebase in the baseline repositories, as INET lands with "Rebase and merge" (T2), and a check that blocks the landing when that rebase would fail (T3, T4). On 2026-11-26 the user chose the mark in a commit of its own, a fast-forward when the steps are on top of baseline `master`, and a close of the other baseline pull requests by a maintainer, with no token (T2, T10). No step has started. Each step needs the approval of the user.
 
 This plan changes the link of the plan `baseline-updates-in-pull-requests.md` (decision D1 there: the pin in `inet.opp`). The other decisions of that plan stay.
 
@@ -203,7 +203,7 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 - [x] P5 land part 1: LANDED 2026-11-26 as `fef104126f` on `e74ac35bbf`. The first run of the landing job passed: it read the `ref` form, and both masters were at their pins (`0efeed3731`, `838086b3f9`). The statistical and chart tests of `fef104126f` started by `workflow_run` after it, and passed. The module tests fail on `master` since `d88ae6c573` (4 IEEE 802.11 tests), before part 1.
 - [x] P6 INET part 2 and its landing: LANDED 2026-11-26 as `4e768408d2` on `ffe07d6437` (I14). The landing job passed with the trailer form and had nothing to land. The statistical and chart tests of `4e768408d2` passed; their checkout gave M = the old refs `0efeed3731` and `838086b3f9`, because no mark exists yet. The README commits are pushed: statistics `17be4498`, media `ad4b9b0`.
 - [x] P7 `convert` tried on local copies of the 5 open pull requests on 2026-11-26 (I13). It works on all 5. 3 of them need a rebase of their baseline branch, which the owners do.
-- [ ] P8 required check, record, plan to done
+- [x] P8 required check, record, plan to done: on 2026-11-26 the user, now admin, let me add `Baseline merge` to the ruleset "master: required checks" (id 28155693), beside the four checks of D11. It has no `integration_id`, because the status is a commit status that a workflow posts with `GITHUB_TOKEN`, and the app that GitHub records for it was not certain. The bypass list stays: organization admins, and the repository roles maintain and admin. #1494, the first pull request with an event after part 1, has the status "success: no baseline change". The other open pull requests get the status with their next event.
 
 ## Implementation notes
 
