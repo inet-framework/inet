@@ -196,11 +196,11 @@ After part 2, the gates reject a `ref` in a new commit. opp_repl still reads a `
 
 ## Progress
 
-- [x] P1 opp_repl: `34c163d` on the branch `topic/baseline-pins-in-trailers` of opp_repl, in the worktree `opp_repl-baseline-pins-in-trailers`. Not on `main`, `github_ci` and `opp_ci` yet, and not pushed. 177 self-tests pass.
-- [x] P2 opp_ci: `740d6fc` on the branch `topic/baseline-pins-in-trailers` of opp_ci, in the worktree `opp_ci-baseline-pins-in-trailers`. Not on `main`, not pushed. 476 tests pass; 4 tests fail on `main` too (I5).
+- [x] P1 opp_repl: PUSHED 2026-11-26 as `b3ea94e` on `main` and `github_ci`, and as `175852a` on `opp_ci` (a cherry-pick of `34c163d`: local `main` holds unpushed commits of the test selection, which stay unpushed). The self-tests pass on each base.
+- [x] P2 opp_ci: PUSHED 2026-11-26 as `740d6fc` on `main`, and the worker `levy` restarted while idle. 476 tests pass; 4 tests fail on `main` too (I5).
 - [x] P3 INET part 1: 5 commits on `topic/baseline-pins-in-trailers`, in the worktree `inet-baseline-pins-in-trailers`. 562 enforcement tests pass, and `check-pull-request.sh` passes.
 - [x] P4 end-to-end test: 24 checks pass on 2026-11-26 (I11). The landing job against GitHub, with no `--push`, passes at `origin/master` `aa713a1ea8`: both masters are at their pins.
-- [ ] P5 land part 1
+- [ ] P5 land part 1: pushed 2026-11-26 onto `origin/master` `e74ac35bbf`; the first run of the landing job is to check.
 - [ ] P6 INET part 2 and its landing
 - [x] P7 `convert` tried on local copies of the 5 open pull requests on 2026-11-26 (I13). It works on all 5. 3 of them need a rebase of their baseline branch, which the owners do.
 - [ ] P8 required check, record, plan to done
