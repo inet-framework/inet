@@ -95,83 +95,105 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
 {
     if (file == nullptr)
         throw cRuntimeError("Cannot read packet: pcap input file is not open");
-    if (feof(file))
-        return { PcapRecordTime(), nullptr };
-    struct pcaprec_hdr packetHeader;
-    auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
-    if (err != 1) {
-        if (feof(file)) // clean end of file: no more records
-            return { PcapRecordTime(), nullptr };
-        throw cRuntimeError("Cannot read packetheader, errno is %u.", (unsigned int)err);
-    }
-    uint8_t buffer[1 << 16];
-    memset(buffer, 0, sizeof(buffer));
-    err = fread(buffer, packetHeader.incl_len, 1, file);
-    if (err != 1)
-        throw cRuntimeError("Cannot read packet, errno is %u.", (unsigned int)err);
-    if (swapByteOrder) {
-        packetHeader.ts_sec = swapByteOrder32(packetHeader.ts_sec);
-        packetHeader.ts_usec = swapByteOrder32(packetHeader.ts_usec);
-        packetHeader.orig_len = swapByteOrder32(packetHeader.orig_len);
-        packetHeader.incl_len = swapByteOrder32(packetHeader.incl_len);
-    }
-    PcapRecordTime time { packetHeader.ts_sec, packetHeader.ts_usec };
-    std::vector<uint8_t> bytes;
-    const Protocol *protocol = nullptr;
-    int offset = 0;
-    // Some link types tell us whether the frame carries its FCS; for those, set
-    // fcsKnown and record hasFcs so an FcsInd tag can be attached (see below).
-    bool fcsKnown = false;
-    bool hasFcs = false;
-    switch (fileHeader.network) {
-        case 0: {
-            offset = 4;
-            auto type = *((uint32_t *)buffer);
-            switch (type) {
-                case 2: protocol = &Protocol::ipv4; break;
-                case 24: case 28: case 30: protocol = &Protocol::ipv6; break;
+    while (!feof(file)) {
+        struct pcaprec_hdr packetHeader;
+        auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
+        if (err != 1) {
+            if (feof(file)) // clean end of file: no more records
+                break;
+            throw cRuntimeError("Cannot read packetheader, errno is %u.", (unsigned int)err);
+        }
+        if (swapByteOrder) {
+            packetHeader.ts_sec = swapByteOrder32(packetHeader.ts_sec);
+            packetHeader.ts_usec = swapByteOrder32(packetHeader.ts_usec);
+            packetHeader.orig_len = swapByteOrder32(packetHeader.orig_len);
+            packetHeader.incl_len = swapByteOrder32(packetHeader.incl_len);
+        }
+        constexpr uint32_t maxCaptureLength = 1 << 16;
+        if (packetHeader.incl_len > maxCaptureLength)
+            throw cRuntimeError("PCAP record exceeds the supported capture length");
+        if (packetHeader.incl_len == 0)
+            continue;
+        // A stale original length cannot invalidate link header bytes that were captured.
+        uint32_t linkHeaderLengthLimit = std::max(packetHeader.orig_len, packetHeader.incl_len);
+        std::vector<uint8_t> bytes(packetHeader.incl_len);
+        if (fread(bytes.data(), 1, bytes.size(), file) != bytes.size())
+            throw cRuntimeError("Cannot read packet, errno is %u.", errno);
+        PcapRecordTime time { packetHeader.ts_sec, packetHeader.ts_usec };
+        const Protocol *protocol = nullptr;
+        uint32_t offset = 0;
+        // Some link types say whether the original frame carries its FCS.
+        bool fcsKnown = false;
+        size_t minimumFcsLength = 0;
+        switch (fileHeader.network) {
+            case 0: {
+                offset = 4;
+                if (offset > linkHeaderLengthLimit)
+                    throw cRuntimeError("PCAP loopback header exceeds original length");
+                if (offset >= packetHeader.incl_len)
+                    continue;
+                uint32_t addressFamily;
+                memcpy(&addressFamily, bytes.data(), sizeof(addressFamily));
+                switch (addressFamily) {
+                    case 2: protocol = &Protocol::ipv4; break;
+                    case 24: case 28: case 30: protocol = &Protocol::ipv6; break;
+                }
+                break;
             }
-            break;
+            case 1: protocol = &Protocol::ethernetMac; break;
+            case 101: // DLT_RAW: a bare IP packet with no link-layer header; the IP
+                // version nibble tells IPv4 from IPv6
+                protocol = ((bytes[0] >> 4) == 6) ? &Protocol::ipv6 : &Protocol::ipv4;
+                break;
+            case 228: protocol = &Protocol::ipv4; break; // DLT_IPV4
+            case 229: protocol = &Protocol::ipv6; break; // DLT_IPV6
+            case 105: protocol = &Protocol::ieee80211Mac; break;
+            case 195: // DLT_IEEE802_15_4_WITHFCS
+                protocol = &Protocol::ieee802154;
+                fcsKnown = true;
+                minimumFcsLength = 2;
+                break;
+            case 230: protocol = &Protocol::ieee802154; fcsKnown = true; break; // DLT_IEEE802_15_4_NOFCS
+            case 127: {
+                // DLT_IEEE802_11_RADIO: a variable-length radiotap header precedes the
+                // 802.11 MAC frame. Its total length is in bytes 2-3 (it_len), stored
+                // little-endian regardless of the pcap byte order -- strip it to reach
+                // the MAC frame. The radiotap Flags field tells per frame whether the FCS
+                // is present.
+                if (linkHeaderLengthLimit < 8)
+                    throw cRuntimeError("PCAP radiotap header is shorter than its fixed fields");
+                if (packetHeader.incl_len < 4)
+                    continue;
+                offset = bytes[2] | (bytes[3] << 8);
+                if (offset < 8 || offset > linkHeaderLengthLimit)
+                    throw cRuntimeError("Invalid PCAP radiotap header length %u", offset);
+                if (offset >= packetHeader.incl_len)
+                    continue;
+                protocol = &Protocol::ieee80211Mac;
+                fcsKnown = true;
+                if (radiotapHasFcs(bytes.data(), packetHeader.incl_len))
+                    minimumFcsLength = 4;
+                break;
+            }
+            case 204: protocol = &Protocol::ppp; break;
         }
-        case 1: protocol = &Protocol::ethernetMac; break;
-        case 101: // DLT_RAW: a bare IP packet with no link-layer header; the IP
-            // version nibble tells IPv4 from IPv6
-            protocol = ((buffer[0] >> 4) == 6) ? &Protocol::ipv6 : &Protocol::ipv4;
-            break;
-        case 228: protocol = &Protocol::ipv4; break; // DLT_IPV4
-        case 229: protocol = &Protocol::ipv6; break; // DLT_IPV6
-        case 105: protocol = &Protocol::ieee80211Mac; break;
-        case 195: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = true; break; // DLT_IEEE802_15_4_WITHFCS
-        case 230: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = false; break; // DLT_IEEE802_15_4_NOFCS
-        case 127: {
-            // DLT_IEEE802_11_RADIO: a variable-length radiotap header precedes the
-            // 802.11 MAC frame. Its total length is in bytes 2-3 (it_len), stored
-            // little-endian regardless of the pcap byte order -- strip it to reach
-            // the MAC frame. The radiotap Flags field tells per frame whether the FCS
-            // is present.
-            offset = buffer[2] | (buffer[3] << 8);
-            protocol = &Protocol::ieee80211Mac;
-            fcsKnown = true;
-            hasFcs = radiotapHasFcs(buffer, packetHeader.incl_len);
-            break;
+        bytes.erase(bytes.begin(), bytes.begin() + offset);
+        const auto& data = makeShared<BytesChunk>(bytes);
+        if (packetHeader.orig_len > packetHeader.incl_len)
+            data->markIncomplete();
+        auto packet = new Packet(nullptr, data);
+        if (protocol != nullptr)
+            packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+        if (fcsKnown) {
+            bool hasFcs = minimumFcsLength != 0 && bytes.size() >= minimumFcsLength && packetHeader.orig_len == packetHeader.incl_len;
+            packet->addTag<FcsInd>()->setHasFcs(hasFcs);
         }
-        case 204: protocol = &Protocol::ppp; break;
+        // naming a packet requires dissecting it; only do so when a format was requested
+        if (packetNameFormat != nullptr)
+            packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
+        return { time, packet };
     }
-    bytes.resize(packetHeader.orig_len - offset);
-    for (size_t i = 0; i < bytes.size(); i++)
-        bytes[i] = buffer[i + offset];
-    const auto& data = makeShared<BytesChunk>(bytes);
-    if (packetHeader.orig_len > packetHeader.incl_len)
-        data->markIncomplete();
-    auto packet = new Packet(nullptr, data);
-    if (protocol != nullptr)
-        packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    if (fcsKnown)
-        packet->addTag<FcsInd>()->setHasFcs(hasFcs);
-    // naming a packet requires dissecting it; only do so when a format was requested
-    if (packetNameFormat != nullptr)
-        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
-    return { time, packet };
+    return { PcapRecordTime(), nullptr };
 }
 
 void PcapReader::closePcap()
