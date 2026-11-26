@@ -42,7 +42,9 @@ SimulationProject(
     # with a `ref` keeps that `ref`. opp_checkout_test_baselines, the CI workflows and
     # opp_ci check out the baselines. See TR-BASELINE-PIN in doc/project/rule/testing.md.
     test_parameters={
-        "smoke":       {"defaults": {"run_number": 0}},
+        # the simulation time that 1 s of CPU time reaches in each config, so that the smoke, sanitizer
+        # and feature tests stop at a deterministic event; opp_update_smoke_test_sim_time_limits writes it
+        "smoke":       {"defaults": {"run_number": 0}, "sim_time_limits": "tests/smoke/sim-time-limits.json"},
         "sanitizer":   {"defaults": {"run_number": 0}},
         "statistical": {"defaults": {"run_number": 0, "mode": "release"},
                         "baseline": {"repository": "inet-framework/statistics", "trailer": "Statistical-Baseline", "folder": "statistics"}},
