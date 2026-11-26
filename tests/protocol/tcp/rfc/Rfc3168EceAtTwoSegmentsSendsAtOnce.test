@@ -1,0 +1,125 @@
+%description:
+
+RFC 3168 -- an ECN-Echo at a congestion window of two segments halves it to one segment, and new
+data still leaves at once: the wait for the retransmission timer is only for a window of one.
+
+RFC 3168 section 6.1.2: "The value of the congestion window is bounded below by a value of one MSS.
+However, the sending TCP should still decrease its congestion window in response to the receipt of
+an ECN-Echo ACK packet. The sending TCP MUST reset the retransmit timer on receiving the ECN-Echo
+packet when the congestion window is one. The sending TCP will then be able to send a new packet
+only when the retransmit timer expires." The window is one at the ECN-Echo, before the halving: a
+halving from two segments to one is a decrease, and it needs no wait (BD-7 of the defect list).
+
+Host A starts with a congestion window of two segments and uses ECN (RFC 3168). The relay marks the
+first data segment of host A CE, and host B acknowledges both segments with one ACK with ECE, which
+acknowledges all data in flight. Host A must send its next data segment at once, in the same event.
+The run must end with the acknowledgment of all data.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static long fieldOf(const Packet *packet, const char *path)
+{
+    try {
+        return (long)evalPacketField(packet, path).intValue();
+    }
+    catch (const std::exception&) {
+        return -1;
+    }
+}
+
+// True for a data segment of host A. At host A's TCP a segment starts with its TCP header, so the
+// data is what follows it.
+static bool dataSegmentOfHostA(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr || fieldOf(packet, "tcp.destPort") != 1000)
+        return false;
+    return packet->getByteLength() > (long)evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B");
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc3168_ece_at_two_segments_sends_at_once")
+        .intercept(tap("relay").from("host1")
+                       .filterPacket("tcp.destPort == 1000 && tcp.synBit == false && ipv4.totalLengthField > 100B")
+                       .nth(1).set("ipv4.ecn", "3")
+                       .describe("the first data segment of host A: mark it CE"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host A")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.srcPort == 1000 && tcp.eceBit == true && tcp.synBit == false")
+                  .first()
+                  .describe("the first ACK with ECE arrives at host A, at a congestion window of two segments")
+                  .within(1.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterEvent(dataSegmentOfHostA)
+                  .first()
+                  .describe("the next data segment of host A, at once")
+                  .within(0.000001))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackNo >= {isn} + 1 + 100000")
+                  .first()
+                  .describe("the acknowledgment of the last byte")
+                  .within(30.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc3168_ece_at_two_segments_sends_at_once compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a relay on the link -- note: NO tester (attached at runtime).
+network EceAtTwoSegmentsNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        relay: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> relay.a;
+        relay.b     <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = EceAtTwoSegmentsNet
+sim-time-limit = 40s
+seed-set = 0
+
+**.ipv4.arp.typename = "GlobalArp"
+# host A uses ECN and starts with a congestion window of two segments
+*.host1.tcp.tcpEcnMode = "rfc3168"
+*.host1.tcp.initialCwnd = 2
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpSinkApp"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST rfc3168_ece_at_two_segments_sends_at_once: PASS

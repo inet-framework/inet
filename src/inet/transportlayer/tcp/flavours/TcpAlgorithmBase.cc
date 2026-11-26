@@ -286,6 +286,8 @@ void TcpAlgorithmBase::connectionClosed()
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
 {
     if (timer == rexmitTimer) {
+        // the expiry ends the wait after an ECN-Echo at one segment (eceHold)
+        state->eceHold = false;
         // RFC 3168, section 6.1.2: after an ECN-Echo at a congestion window of one
         // segment, "The sending TCP MUST reset the retransmit timer", also with
         // nothing in flight, and when it expires, the sender "will then be able to
@@ -686,6 +688,12 @@ void TcpAlgorithmBase::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 
 bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
 {
+    // RFC 3168 section 6.1.2: after an ECN-Echo at a congestion window of one segment, the
+    // sender "will then be able to send a new packet only when the retransmit timer expires"
+    if (state->eceHold) {
+        EV_INFO << "No new data until the retransmission timer expires, after an ECN-Echo at one segment\n";
+        return false;
+    }
     // RFC 2581, pages 7 and 8: "When TCP has not received a segment for
     // more than one retransmission timeout, cwnd is reduced to the value
     // of the restart window (RW) before transmission begins.

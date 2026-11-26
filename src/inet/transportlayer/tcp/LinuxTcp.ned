@@ -71,6 +71,9 @@ simple LinuxTcp extends Tcp
         accEcnOptionPolicy = default("linux");
         accEcnBareTimeWaitAck = default(true);
         ecnMarkAll = default(true);
+        // no reset of the retransmission timer and no wait after an ECN-Echo at a congestion
+        // window of one segment: tcp_enter_cwr() and tcp_cwnd_reduction()
+        eceAtOneSegment = default("linux");
         // TCP Fast Open: tcp_fastopen=1, tcp_fastopen_blackhole_timeout_sec=0
         fastopenClientEnabled = default(true);
         fastopenBlackholeTimeout = default(0s);

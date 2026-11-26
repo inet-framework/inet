@@ -310,6 +310,7 @@ struct TcpStateVariables
     bool ecnWillingness = false; // set if current host is willing to use ECN: it answers an ECN-setup SYN (each mode but "off")
     bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
+    bool eceHold = false; // RFC 3168 section 6.1.2: after an ECN-Echo at a congestion window of one segment, no new data until the retransmission timer expires (eceAtOneSegment)
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
 

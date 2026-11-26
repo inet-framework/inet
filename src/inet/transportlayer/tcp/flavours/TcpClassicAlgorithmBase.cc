@@ -196,6 +196,8 @@ bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
         // the slow-start threshold, ssthresh, if it has been decreased
         // within the last round trip time."
         if (simTime() - state->eceReactionTime > state->srtt) {
+            // the window is bounded below by one segment, so at one segment it cannot halve
+            bool atOneSegment = state->snd_cwnd <= state->snd_mss;
             state->snd_cwnd = calculateSsthreshForEce();
             conn->emit(cwndSignal, state->snd_cwnd);
             EV_INFO << "cwnd = cwnd / 2: received ECN-Echo ACK... new cwnd = " << state->snd_cwnd << "\n";
@@ -208,10 +210,16 @@ bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
 
             // RFC 3168, page 18
             // "The sending TCP MUST reset the retransmit timer on receiving
-            // the ECN-Echo packet when the congestion window is one."
-            if (state->snd_cwnd == state->snd_mss) {
+            // the ECN-Echo packet when the congestion window is one.  The
+            // sending TCP will then be able to send a new packet only when
+            // the retransmit timer expires."
+            // The window is one at the ECN-Echo, before the halving; a halving from up to two
+            // segments to one is a decrease and needs no wait. Linux does neither
+            // (eceAtOneSegment).
+            if (atOneSegment && !linuxEceAtOneSegment) {
                 restartRexmitTimer();
-                EV_INFO << "cwnd = 1 MSS... reset retransmit timer.\n";
+                state->eceHold = true;
+                EV_INFO << "cwnd = 1 MSS... reset retransmit timer, no new data until it expires.\n";
             }
             state->eceReactionTime = simTime();
             state->gotEce = false;

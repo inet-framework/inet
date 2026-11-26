@@ -320,6 +320,8 @@ import inet.transportlayer.contract.ITcp;
 //    a host answers an ECN request and requests nothing (`tcpEcnMode =
 //    "passive"`, as Linux `tcp_ecn = 2`), as RFC 9293 SHLD-8 asks for an
 //    implementation; "rfc3168" also requests ECN.
+//    Linux, by parameter: no wait for the retransmission timer after an ECN-Echo
+//    at a congestion window of one segment (`eceAtOneSegment`).
 //
 //  - RFC 9768 - More Accurate ECN Feedback in TCP (AccECN)
 //    The AccECN handshake, the ACE counter, and the AccECN option
@@ -501,6 +503,7 @@ simple Tcp extends SimpleModule like ITcp
         // Explicit Congestion Notification (ECN, AccECN)
         string tcpEcnMode @mutable @enum("off","passive","rfc3168","accecn","accecn-passive") = default("passive"); // ECN: "off": no ECN; "passive": answer an ECN-setup SYN (RFC 3168), but request no ECN in an active open (Linux tcp_ecn=2, its default); "rfc3168": request and answer ECN; "accecn": request Accurate ECN (RFC 9768), and answer it and ECN; "accecn-passive": answer Accurate ECN and ECN, but request nothing. Each connection reads it at its open
         bool ecnWillingness = default(false); // deprecated: true is tcpEcnMode="rfc3168", in place of "off" or "passive"
+        string eceAtOneSegment @enum("rfc","linux") = default("rfc"); // the response of the classic algorithm classes to an ECN-Echo at a congestion window of one segment, which cannot halve. "rfc": reset the retransmission timer and send no new data until it expires, as RFC 3168 section 6.1.2 says ("The sending TCP will then be able to send a new packet only when the retransmit timer expires"); "linux": neither, as Linux, which enters CWR and sends new data as the ACKs arrive (tcp_enter_cwr(), tcp_cwnd_reduction())
         bool accEcnOptionEnabled @mutable = default(true); // AccECN: send the AccECN option, which gives the byte counts of each ECN codepoint (RFC 9768 section 3.2.3: RECOMMENDED); false: only the ACE field (Linux tcp_ecn_option=0). Each connection reads it at its open
         // Linux behaviors (no RFC)
         string accEcnOptionPolicy @enum("rfc","linux") = default("rfc"); // AccECN: when the option goes out and which fields it has. "rfc": the recommended scheme of RFC 9768 section 3.2.3.3: after a byte count changed, with each field that ever changed, in the order that needs fewer fields, and with each field on the SYN-ACK and on the first segments of the client (section 3.2.3.2.1); "linux": as Linux tcp_ecn_option=2: on each segment, kind 174 with each field that fits, but only after the peer sent an option (section 3.2.3.2.3 asks to send it also then); "linux" also counts a duplicate segment that ends at RCV.NXT in the ACE field and the byte counts, as Linux
