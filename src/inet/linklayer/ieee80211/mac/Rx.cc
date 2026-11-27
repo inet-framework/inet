@@ -35,10 +35,11 @@ Rx::Rx()
 
 Rx::~Rx()
 {
-    if (networkInterface) {
+    if (radio) {
+        auto radioModule = check_and_cast<cModule *>(radio.get());
         for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
                 transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
-            networkInterface->unsubscribe(signal, this);
+            radioModule->unsubscribe(signal, this);
     }
     cancelAndDelete(endNavTimer);
     cancelAndDelete(endTxnavTimer);
@@ -50,10 +51,12 @@ void Rx::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         mib.reference(this, "mibModule", true);
         recipientAckPolicy.reference(this, "recipientAckPolicyModule", *par("recipientAckPolicyModule").stringValue() != '\0');
-        networkInterface = getContainingNicModule(this);
+        mac = check_and_cast<Ieee80211Mac *>(getParentModule());
+        auto radioModule = getConnectedGate<IRadio>(mac->gate("lowerLayerOut"))->getOwnerModule();
+        radio = check_and_cast<IRadio *>(radioModule);
         for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
                 transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
-            networkInterface->subscribe(signal, this);
+            radioModule->subscribe(signal, this);
         endNavTimer = new cMessage("NAV");
         endTxnavTimer = new cMessage("endTxnavTimer");
         WATCH(address);
@@ -65,7 +68,7 @@ void Rx::initialize(int stage)
     }
     // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        address = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
+        address = mac->getAddress();
         recomputeMediumFree();
     }
 }
@@ -419,7 +422,7 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, c
 {
     Enter_Method_Silent();
     discardExpiredReception();
-    if (source->getParentModule() == networkInterface && dynamic_cast<IRadio *>(source)) {
+    if (dynamic_cast<IRadio *>(source) == radio.getNullable()) {
         if (signalID == receptionStartedSignal)
             observeReceptionStart(check_and_cast<const IReception *>(obj));
         else if (signalID == receptionEndedSignal)
@@ -442,7 +445,7 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value,
 {
     Enter_Method_Silent();
     discardExpiredReception();
-    if (source->getParentModule() != networkInterface || !dynamic_cast<IRadio *>(source))
+    if (dynamic_cast<IRadio *>(source) != radio.getNullable())
         return;
     if (signalID == FlatRadioBase::listeningChangedSignal)
         invalidateFutureInterframeHistory();

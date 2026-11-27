@@ -71,7 +71,7 @@ void Ieee80211Mac::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
         llc = check_and_cast<IIeee80211Llc *>(llcModule);
-        cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
+        cModule *radioModule = getConnectedGate<IRadio>(gate("lowerLayerOut"))->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
