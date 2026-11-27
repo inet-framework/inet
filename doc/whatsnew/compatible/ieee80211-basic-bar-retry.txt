@@ -1,0 +1,3 @@
+The historical Basic Block Ack profile can retry an unanswered request
+
+After a missing reply, a station can contend again for the same bitmap before retransmitting unresolved DATA. basicBlockAckReqRetryLimit sets the maximum number of retransmissions per BAR (default 2). Set it to 0 to return directly to DATA recovery after the first timeout.

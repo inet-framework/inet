@@ -591,6 +591,7 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.multiple = ${multiple=false,true}
 **.wlan[*].mac.hcf.isBlockAckSupported = true
 **.wlan[*].mac.hcf.blockAckVariant = ${variant="basic","compressed"}
+**.wlan[*].mac.hcf.basicBlockAckReqRetryLimit = 0
 **.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = 1ms
 **.wlan[*].mac.hcf.originatorAckPolicy.blockAckTimeout = 1ms
 **.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 2346B

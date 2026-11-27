@@ -72,6 +72,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *inactivityTimer = nullptr;
     cMessage *dataLifetimeTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
+    int64_t basicBlockAckReqRetryLimit = 0;
     struct OwnedAction {
         MacAddress peer;
         Tid tid = -1;
@@ -176,6 +177,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
     void updateAgreementProcedures();
     void advanceOriginatorWindows();
+    void prunePendingBasicBarRetries();
     void completeTransfers();
     void updateContention();
     void scheduleAddbaResponseTimer();
