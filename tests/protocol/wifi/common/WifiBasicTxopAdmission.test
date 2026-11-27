@@ -166,7 +166,7 @@ record-scalar-results = false
 **.rtsPolicy.rtsThreshold = ${rts=500B,4096B,4096B,100B ! fragmentation}
 **.txopProcedure.protectionMechanism = ${protection="multiple","multiple","single","single" ! fragmentation}
 **.txopProcedure.txopLimit = ${limit=1024us,1024us,300us,3000us ! fragmentation}
-*.sta1.wlan[*].mac.hcf.expectContinuation = ${continues=true,true,true,false ! fragmentation}
+*.sta1.wlan[*].mac.hcf.expectContinuation = true
 **.wlan[*].radio.receiver.energyDetection = -105dBm
 **.wlan[*].radio.receiver.sensitivity = -105dBm
 **.wlan[*].radio.receiver.snirThreshold = 0dB

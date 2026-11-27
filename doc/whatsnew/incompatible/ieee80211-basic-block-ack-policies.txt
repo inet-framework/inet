@@ -1,0 +1,3 @@
+Custom IEEE 802.11 policies for protected Basic Block Ack exchanges
+
+Custom QoS originator data services must preview the first MPDU and commit the selected frames after a Basic Block Ack. See “IEEE 802.11 Basic Block Ack policy interfaces” in the migration guide.

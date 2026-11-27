@@ -270,6 +270,7 @@ module RetrySuccessorHcf extends BlockAckLifecycleHcf
 
 %inifile: test.ini
 [General]
+**.hcf.basicBlockAckReqRetryLimit = 0
 *.tester.testName = ${scenario="wifi_basic_bar_retry_successor","wifi_basic_bar_retry_successor_short","wifi_basic_bar_retry_successor_ack","wifi_basic_bar_retry_successor_rts","wifi_basic_bar_retry_successor_ordered"}
 *.sta1.wlan[0].mac.hcf.preferShortRetry = ${false,false,false,false,true ! scenario}
 *.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"

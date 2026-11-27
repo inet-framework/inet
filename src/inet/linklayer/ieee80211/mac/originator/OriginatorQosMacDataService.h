@@ -65,6 +65,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const override;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const override;
     virtual bool hasAMsduAggregation() const override { return aMsduAggregationPolicy != nullptr; }
+    virtual std::unique_ptr<Packet> previewBasicFirstMpdu(Packet *packet) override;
+    virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) override;
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) override;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const override;
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) override;

@@ -40,6 +40,8 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const = 0;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const = 0;
     virtual bool hasAMsduAggregation() const = 0;
+    virtual std::unique_ptr<Packet> previewBasicFirstMpdu(Packet *packet) = 0;
+    virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) = 0;
     // These QoS DATA methods separate reversible preparation from extraction and sequence assignment.
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) = 0;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;

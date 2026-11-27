@@ -158,6 +158,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);
     std::pair<simtime_t, simtime_t> estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
             OriginatorBlockAckAgreement *agreement);
+    simtime_t reserveBasicDataContinuation(const FrameSequenceContext *context, Packet *candidate,
+            const MacAddress& peer, Tid tid, simtime_t budget, simtime_t start, bool followsBar);
+    void commitPostBarData(const FrameSequenceContext *context, const Ptr<const Ieee80211BasicBlockAck>& response);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,

@@ -69,6 +69,15 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     auto frames = context->getInProgressFrames();
     auto qos = context->getQoSContext();
     bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);
+    if (!bar && qos->txopProcedure->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION) {
+        auto step = dynamic_cast<IReceiveStep *>(context->getLastStep());
+        bool followsBasicReply = step && step->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+            dynamicPtrCast<const Ieee80211BasicBlockAck>(step->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>());
+        if (followsBasicReply || qos->plannedBasicDataId != -1) {
+            auto next = frames->peekFrameToTransmit();
+            return next && next->getId() == qos->plannedBasicDataId && qos->txopProcedure->getRemaining() > 0;
+        }
+    }
     qos->preparedData.reset();
     if (!bar && frameSequence->getCount() != 0 && qos->txopProcedure->getLimit() == 0 &&
         context->isFragmentContinuation(frames->peekFrameToTransmit(), context->getNumSteps()))
