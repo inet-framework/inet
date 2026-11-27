@@ -74,6 +74,18 @@ Step 4 is [TR-SELECTED-PASS](../rule/testing.md#tr-selected-pass). The map of a 
 
 CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping. The fingerprint jobs of a pull request run only the selected tests, in the environment of the map; the label `full-tests` runs all of them, also for a change that needs a newer omnetpp or opp_repl than the map. A push to `master` runs the selected tests and a random sample of the other tests, and updates the map; each night when `master`, omnetpp or opp_repl changed, a scheduled run runs all tests and makes a full map.
 
+## A trivial change
+
+A trivial change goes to `master` with no pull request ([contribute-a-change.md](contribute-a-change.md#8-submit-a-reviewable-change)). The push check decides, with the gate that you can also run first:
+
+```bash
+doc/project/enforcement/check-trivial-change.sh --base origin/master  # TRIVIAL, or NOT TRIVIAL with the reasons
+git push origin HEAD:topic/<name>      # the job "Push check" marks the required checks of a trivial change
+git push origin HEAD:master            # the same commit, after the push check is done
+```
+
+GitHub refuses the push to `master` when a required check of the commit is missing; the summary of the push check gives the reasons. A push to a branch other than `master` starts no build and no test.
+
 ## When the change touches this document set
 
 ```bash
