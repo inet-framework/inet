@@ -91,4 +91,8 @@ SimulationProject(
     # The change-based test selection of opp_repl (its doc/test_map.md) selects all tests for a
     # change of a file that the CI jobs run: the workflows, and the scripts that they source.
     ci_files=[r"^_scripts/github/"],
+    # The weekly test map of the coverage workflow is in map/ of this repository. opp_checkout_test_baselines
+    # without a kind clones it into the ignored folder coverage/, and the selection takes the newest version
+    # in its history whose commit is an ancestor of the base.
+    test_map_repository={"repository": "inet-framework/coverage", "branch": "master", "folder": "coverage/map-repository"},
 )

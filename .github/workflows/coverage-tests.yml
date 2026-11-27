@@ -9,7 +9,10 @@ name: "Test: coverage"
 # https://inet-framework.github.io/coverage/ and adds one line to the history of
 # inet-framework/coverage. A manual start gives the report as an artifact only. The plan is
 # plan/done/coverage-tests.md; the test selection of opp_repl (its plan/pending/test-selection.md)
-# needs the coverage of all suites.
+# needs the coverage of all suites. The test runs also record what each run used, and the job
+# test-map writes the weekly test map of the change-based test selection of opp_repl (its
+# doc/test_map.md) as the artifact test-map-weekly. The scheduled run also commits it into map/ of
+# inet-framework/coverage, where opp_repl finds it through test_map_repository of inet.opp.
 
 on:
   schedule:
@@ -23,7 +26,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  environment:
+    name: Environment
+    runs-on: ubuntu-latest
+    outputs:
+      omnetpp_commit: ${{ steps.commits.outputs.omnetpp_commit }}
+      opp_repl_commit: ${{ steps.commits.outputs.opp_repl_commit }}
+    steps:
+      - name: Select the commits of omnetpp and opp_repl
+        id: commits
+        run: |
+          # all jobs use the same heads of the branches, which the header of the test map names
+          omnetpp=$(git ls-remote https://github.com/omnetpp/omnetpp.git refs/heads/omnetpp-6.x | cut -f1)
+          opp_repl=$(git ls-remote https://github.com/omnetpp/opp_repl.git refs/heads/github_ci | cut -f1)
+          if [ -z "$omnetpp" ] || [ -z "$opp_repl" ]; then
+            echo "error: no commit of omnetpp or opp_repl" >&2
+            exit 1
+          fi
+          echo "omnetpp_commit=$omnetpp" >> $GITHUB_OUTPUT
+          echo "opp_repl_commit=$opp_repl" >> $GITHUB_OUTPUT
+          echo "The jobs use omnetpp $omnetpp and opp_repl $opp_repl." >> $GITHUB_STEP_SUMMARY
+
   tests:
+    needs: environment
     runs-on: ubuntu-latest
     # The chart job runs the 4752 simulations of its charts in one job, because a split of the chart
     # tests does not divide the simulations. They need 15 minutes in release mode, and coverage
@@ -40,7 +65,7 @@ jobs:
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-          ref: omnetpp-6.x
+          ref: ${{ needs.environment.outputs.omnetpp_commit }}
       - uses: actions/checkout@v6
         with:
           path: inet
@@ -62,6 +87,7 @@ jobs:
         env:
           MODE: coverage
           JOB: ${{ matrix.job }}
+          OPP_REPL_COMMIT: ${{ needs.environment.outputs.opp_repl_commit }}
         run: |
           echo "::group::Installing packages"
           sudo apt update
@@ -93,7 +119,7 @@ jobs:
             # omnetpp.scave needs these packages
             statistical-*|chart|validation) python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt ;;
           esac
-          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
           python3 -m pip install pyyaml  # inet-gpl's packetdrill suite reads its YAML configuration
           echo "::endgroup::"
 
@@ -138,11 +164,20 @@ jobs:
             echo "- $suite: $(sed 's/\x1b\[[0-9;]*m//g' $GITHUB_WORKSPACE/$suite.log | grep -a '◉' | tail -1 | sed 's/^.*): //')" >> $GITHUB_STEP_SUMMARY
             du -sh $GITHUB_WORKSPACE/profiles/$suite || true
             opp_export_coverage --load $INET_ROOT -p inet -t ${suite%-*} -o $GITHUB_WORKSPACE/lcov/$suite.lcov
+            if [ "$suite" = fingerprint-0 ]; then
+              # the build tables of the test map come from the objects of this build and a profile of the
+              # pool; they go into the records, and the job test-map reads them there
+              opp_update_test_map --load $INET_ROOT -p inet --no-build --no-run --records $RECORDS -o $GITHUB_WORKSPACE/map-of-$suite
+            fi
             rm -rf $GITHUB_WORKSPACE/profiles/$suite
             unset LLVM_PROFILE_FILE
             echo "::endgroup::"
           }
 
+          # the record of each run for the test map: the functions that it ran, the files that it used,
+          # its NED types and its section chain (opp_repl doc/test_map.md); the validation tests have none
+          RECORDS=$GITHUB_WORKSPACE/records
+          mkdir -p $RECORDS
           cd $GITHUB_WORKSPACE/inet
           echo "### Test verdicts in coverage mode" >> $GITHUB_STEP_SUMMARY
           # -m coverage replaces the release mode that inet.opp gives the statistical and chart tests;
@@ -150,18 +185,22 @@ jobs:
           case $JOB in
             suites)
               for kind in unit module packet queueing protocol; do
-                run_suite $kind opp_run_${kind}_tests --load $INET_ROOT -p inet -m coverage
+                run_suite $kind opp_run_${kind}_tests --load $INET_ROOT -p inet -m coverage --test-map-records $RECORDS
               done ;;
             fingerprint-*)
-              run_suite $JOB opp_run_fingerprint_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 4 --split-index ${JOB#fingerprint-} ;;
+              run_suite $JOB opp_run_fingerprint_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 4 --split-index ${JOB#fingerprint-} \
+                --test-map-records $RECORDS ;;
             statistical-*)
               opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
-              run_suite $JOB opp_run_statistical_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 2 --split-index ${JOB#statistical-} ;;
+              run_suite $JOB opp_run_statistical_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 2 --split-index ${JOB#statistical-} \
+                --test-map-records $RECORDS ;;
             chart)
               opp_checkout_test_baselines --load $INET_ROOT -p inet chart
-              run_suite $JOB opp_run_chart_tests --load $INET_ROOT -p inet -m coverage --no-build ;;
-            smoke|validation)
-              run_suite $JOB opp_run_${JOB}_tests --load $INET_ROOT -p inet -m coverage --no-build ;;
+              run_suite $JOB opp_run_chart_tests --load $INET_ROOT -p inet -m coverage --no-build --test-map-records $RECORDS ;;
+            smoke)
+              run_suite $JOB opp_run_smoke_tests --load $INET_ROOT -p inet -m coverage --no-build --test-map-records $RECORDS ;;
+            validation)
+              run_suite $JOB opp_run_validation_tests --load $INET_ROOT -p inet -m coverage --no-build ;;
           esac
           df -h $GITHUB_WORKSPACE
       - uses: actions/cache/save@v5
@@ -175,15 +214,87 @@ jobs:
           path: lcov/*.lcov
           if-no-files-found: error
           retention-days: 7
+      - uses: actions/upload-artifact@v7
+        # the records give what the runs used, and not the verdicts, so they go also if a test failed
+        if: always() && matrix.job != 'validation'
+        with:
+          name: test-map-records-${{ matrix.job }}
+          path: records
+          if-no-files-found: error
+          retention-days: 7
+
+  test-map:
+    name: Test map
+    needs: [environment, tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPP_REPL_COMMIT: ${{ needs.environment.outputs.opp_repl_commit }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+          ref: ${{ needs.environment.outputs.omnetpp_commit }}
+      - uses: actions/checkout@v6
+        with:
+          path: inet
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: test-map-records-*
+          path: ${{ runner.temp }}/records
+      - name: Write the test map
+        run: |
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
+            python3 python3-venv jq
+          echo "::endgroup::"
+
+          # the header of the map gives the environment of the test jobs: the commits, the compiler and the features
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
+
+          echo "::group::Installing opp_repl"
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
+
+          # a full map needs the records of all jobs
+          args=()
+          for job in fingerprint-0 fingerprint-1 fingerprint-2 fingerprint-3 suites statistical-0 statistical-1 chart smoke; do
+            if [ ! -d $RUNNER_TEMP/records/test-map-records-$job ]; then
+              echo "error: no records of the job $job" >&2
+              exit 1
+            fi
+            args+=(--records $RUNNER_TEMP/records/test-map-records-$job)
+          done
+          opp_update_test_map --load $INET_ROOT -p inet --no-build --no-run "${args[@]}" \
+            --build-tables $RUNNER_TEMP/records/test-map-records-fingerprint-0/build-tables.json.gz -o $RUNNER_TEMP/test-map
+          jq . $RUNNER_TEMP/test-map/header.json
+          jq -r '"The weekly map of \(.commit) has \(.runs) runs."' $RUNNER_TEMP/test-map/header.json >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: test-map-weekly
+          path: ${{ runner.temp }}/test-map
+          if-no-files-found: error
+          retention-days: 30
 
   report:
-    needs: tests
+    needs: [environment, tests, test-map]
+    # also without a map: the coverage report does not need it
+    if: always() && needs.tests.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       # the branches of inet-framework/coverage that hold the history and the HTML report
       HISTORY_BRANCH: master
       PAGES_BRANCH: gh-pages
+      OPP_REPL_COMMIT: ${{ needs.environment.outputs.opp_repl_commit }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -193,6 +304,11 @@ jobs:
           pattern: coverage-lcov-*
           path: lcov
           merge-multiple: true
+      - uses: actions/download-artifact@v7
+        if: needs.test-map.result == 'success'
+        with:
+          name: test-map-weekly
+          path: test-map
       - name: Report
         run: |
           echo "::group::Installing packages"
@@ -200,7 +316,7 @@ jobs:
           sudo apt install -y --no-install-recommends lcov python3 python3-venv jq
           python3 -m venv $GITHUB_WORKSPACE/venv
           source $GITHUB_WORKSPACE/venv/bin/activate
-          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
           echo "::endgroup::"
 
           echo "::group::Reading the history of the earlier reports"
@@ -245,6 +361,17 @@ jobs:
           cat $GITHUB_WORKSPACE/report/history.json >> history.jsonl
           cp $GITHUB_WORKSPACE/report/summary.json latest.json
           git add history.jsonl latest.json
+          if [ -f $GITHUB_WORKSPACE/test-map/header.json ]; then
+            # The weekly test map: opp_repl takes the newest version in the history of map/ whose commit is an
+            # ancestor of the base. The build tables stay out: they change each week, and only an update of a
+            # map needs them, which starts from the map of a run of the fingerprint workflow.
+            rm -rf map
+            cp -r $GITHUB_WORKSPACE/test-map map
+            rm -f map/build-tables.json.gz
+            git add -A map
+          else
+            echo "::warning::the run has no test map, so map/ keeps the map of an earlier week"
+          fi
           git commit -q -m "coverage of inet ${GITHUB_SHA::10}"
           git push origin $HISTORY_BRANCH
           echo "::endgroup::"
