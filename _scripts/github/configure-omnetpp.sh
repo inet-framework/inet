@@ -27,6 +27,7 @@ echo "::endgroup::"
 
 echo "::group::Installing the omnetpp tools"
 # make copies opp_featuretool, opp_makemake and the other tools of src/utils into bin/, which
-# configure-inet.sh needs before the compile
-make MODE=$MODE utils
+# configure-inet.sh needs before the compile; the copy does not depend on the mode, and a job without
+# MODE, for example the job test-map, uses release
+make MODE=${MODE:-release} utils
 echo "::endgroup::"
