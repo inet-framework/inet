@@ -24,3 +24,9 @@ echo "::endgroup::"
 echo "::group::Configuring omnetpp"
 ./configure WITH_LIBXML=yes WITH_QTENV=no WITH_OSG=yes WITH_OSGEARTH=no
 echo "::endgroup::"
+
+echo "::group::Installing the omnetpp tools"
+# make copies opp_featuretool, opp_makemake and the other tools of src/utils into bin/, which
+# configure-inet.sh needs before the compile
+make MODE=$MODE utils
+echo "::endgroup::"
