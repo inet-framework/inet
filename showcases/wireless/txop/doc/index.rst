@@ -53,6 +53,19 @@ four access categories:
    :width: 60%
    :align: center
 
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     Qtenv module canvas export
+   config:   General   # ../omnetpp.ini, Qtenv with --mcp-server-address, network set up, not run
+   shows:    TxopShowcase.host1.wlan[0].mac.hcf.edca with edcaf[0..3] (Background, Best effort,
+             Video, Voice, all Idle) and collisionController
+   anchor:   the submodules of Edca.ned. If the figure and Edca.ned list different
+             submodules, capture again.
+   capture:  open_inspector graphical on the edca module, then get_canvas_image
+             module_path=TxopShowcase.host1.wlan[0].mac.hcf.edca area=module_rectangle margin=5;
+             664x314, no crop
+   stamp:    captured 2026-11-27, INET master 22df607673
+
 The default value for the :par:`txopLimit` parameter is ``-1`` for all ACs,
 meaning the 802.11 standard default values are used:
 
