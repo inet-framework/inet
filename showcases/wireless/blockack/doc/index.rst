@@ -177,7 +177,7 @@ Here are the ADDBA request and ADDBA response frames displayed in the packet tra
 It indicates that aggregate MSDUs (aMSDUs) are supported, and the buffer size in both hosts is 64.
 
 After sending five UDP packets, ``host1`` sends a block ack request, and ``host2`` replies
-with a block ack. The block ack frame acknowledges the five previous frames. Here is the block ack
+with a block ack. The block ack frame tells which of the five previous frames were received correctly. Here is the block ack
 request frame displayed in Qtenv's packet inspector:
 
 .. figure:: media/blockackreq.png
@@ -198,9 +198,19 @@ which packets were received correctly. Here is the bitmap:
    :width: 70%
    :align: center
 
-The first five entries are used. It acknowledges the five packets, starting from sequence number 1.
+..
+   FIGURE RECIPE
+   config:   NoFragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv object inspector, sorted by name, on the BasicBlockAck WirelessSignal in the radio medium (run with **.radioMedium.mediumLimitCache.maxTransmissionDuration=3ms so only this one is kept), expanded to encapsulatedPacket > content > full content > Ieee80211BasicBlockAck > blockAckBitmap;
+             stop at 0.00461 s (first BasicBlockAck on the air)
+   anchor:   entries 1111111111111111, 1000..., 0000..., 1000..., 1000... from sequence 1; Data-3 lost. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
 
-.. note:: When there is no fragmentation, only the first bit of the 16-bit entry is used to ack the frame. Here, the first three entries are all ones because the MAC has already passed those packets to the higher layers and has no information about the number of fragments, but it still indicates that the packets were successfully received. (This is an implementation detail.)
+The first five entries are used, starting from sequence number 1 (``Data-1``). The third entry is all zeros:
+``Data-3`` was not received correctly, so it is retransmitted in the next block. The other four packets are acknowledged.
+
+.. note:: When there is no fragmentation, only the first bit of the 16-bit entry is used to ack the frame. Here, the first entry is all ones because the MAC has already passed that packet to the higher layers and has no information about the number of fragments, but it still indicates that the packet was successfully received. (This is an implementation detail.)
 
 The block ack also indicates when some of the frames in a block were not received correctly.
 The MAC retransmits those in the next block. Here is a retransmission in the packet traffic view:
@@ -209,13 +219,34 @@ The MAC retransmits those in the next block. Here is a retransmission in the pac
    :width: 100%
    :align: center
 
-First, ``host1`` sends five packets, ``Data-16`` to ``Data-20``. Two of the frames, ``Data-17``
-and ``Data-18``, were not received correctly, as indicated in the block ack's bitmap (starting
-sequence number is 16, corresponding to ``Data-16``):
+..
+   FIGURE RECIPE
+   config:   NoFragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv packet traffic view (log inspector, messages mode), log font Ubuntu Mono 11,
+             no digit grouping, columns ID/Kind/Length + Source/Destination/Protocol/Type/Length
+             with widths 54,120,135,144,152,152,135,102,62 px, fast run to the stop time,
+             cropped to the header and the rows without the event number column;
+             stop at 0.0316 s; rows Data-28 to the BasicBlockAck after Data-35
+   anchor:   Data-29 and Data-30 lost and sent again before Data-33 to Data-35. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
+First, ``host1`` sends five packets, ``Data-28`` to ``Data-32``. Two of the frames, ``Data-29``
+and ``Data-30``, were not received correctly, as indicated in the block ack's bitmap (starting
+sequence number is 28, corresponding to ``Data-28``):
 
 .. figure:: media/retxblockack2.png
    :width: 70%
    :align: center
+
+..
+   FIGURE RECIPE
+   config:   NoFragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv object inspector, sorted by name, on the BasicBlockAck WirelessSignal in the radio medium (run with **.radioMedium.mediumLimitCache.maxTransmissionDuration=3ms so only this one is kept), expanded to encapsulatedPacket > content > full content > Ieee80211BasicBlockAck > blockAckBitmap;
+             stop at 0.02818 s
+   anchor:   start sequence 28; entries 1000..., 0000..., 0000..., 1000..., 1000.... If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
 
 The next block starts with ``host1`` retransmitting these two frames, and then transmitting
 three new ones.
@@ -237,20 +268,55 @@ Here is how the simulation starts displayed in the packet traffic view:
    :width: 100%
    :align: center
 
-After sending a fragment, the block ack session is negotiated. After that, ``host1`` transmits
-the remaining fragments of ``Data-0``, which are normally acked. However, the fragments of the
-next packet, ``Data-1``, are block acked:
+..
+   FIGURE RECIPE
+   config:   Fragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv packet traffic view (log inspector, messages mode), log font Ubuntu Mono 11,
+             no digit grouping, columns ID/Kind/Length + Source/Destination/Protocol/Type/Length
+             with widths 54,120,135,144,152,152,135,102,62 px, fast run to the stop time,
+             cropped to the header and the rows without the event number column;
+             stop at 0.00275 s; rows from the start to the WlanAck of the AddbaResponse
+   anchor:   all 16 fragments of Data-0 normally acked, then AddbaReq and AddbaResponse. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
+First, ``host1`` sends all fragments of ``Data-0``, which are normally acked, and then the block ack
+session is negotiated. The fragments of the next packet, ``Data-1``, are block acked:
 
 .. figure:: media/frag_blockack_messageview_.png
    :width: 100%
    :align: center
 
-In the next block, two fragments of ``Data-1`` are retransmitted, and then several fragments of ``Data-2``
+..
+   FIGURE RECIPE
+   config:   Fragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv packet traffic view (log inspector, messages mode), log font Ubuntu Mono 11,
+             no digit grouping, columns ID/Kind/Length + Source/Destination/Protocol/Type/Length
+             with widths 54,120,135,144,152,152,135,102,62 px, fast run to the stop time,
+             cropped to the header and the rows without the event number column;
+             stop at 0.00995 s; rows Data-1-frag0 to the BasicBlockAck
+   anchor:   Data-1-frag0 to frag15, BasicBlockAckReq, BasicBlockAck. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
+Later, a block starts with retransmitting a lost fragment of ``Data-2``, and then fragments of ``Data-3``
 are sent:
 
 .. figure:: media/frag_retx_messageview.png
    :width: 100%
    :align: center
+
+..
+   FIGURE RECIPE
+   config:   Fragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv packet traffic view (log inspector, messages mode), log font Ubuntu Mono 11,
+             no digit grouping, columns ID/Kind/Length + Source/Destination/Protocol/Type/Length
+             with widths 54,120,135,144,152,152,135,102,62 px, fast run to the stop time,
+             cropped to the header and the rows without the event number column;
+             stop at 0.0219 s; rows Data-2-frag12 (resent) to the BasicBlockAck
+   anchor:   Data-2-frag12 resent, then Data-3-frag0 to frag14. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
 
 Here is the block ack bitmap for this block:
 
@@ -258,9 +324,18 @@ Here is the block ack bitmap for this block:
    :width: 90%
    :align: center
 
-The first entry of the bitmap is all ones, indicating that ``Data-1`` was completely received
-(all fragments), even though only two fragments of it were sent in this block. The second
-entry has three zeros. The first zero indicates a lost fragment of ``Data-2``, and the last two correspond to fragments that haven't been sent yet.
+..
+   FIGURE RECIPE
+   config:   Fragmentation   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv object inspector, sorted by name, on the BasicBlockAck WirelessSignal in the radio medium (run with **.radioMedium.mediumLimitCache.maxTransmissionDuration=3ms so only this one is kept), expanded to encapsulatedPacket > content > full content > Ieee80211BasicBlockAck > blockAckBitmap;
+             stop at 0.02189 s
+   anchor:   entries 1111111111111111, 1111110111111110 (Data-3 frag6 lost, frag15 not sent). If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
+The first entry of the bitmap is all ones, indicating that ``Data-2`` was completely received
+(all fragments), even though only one fragment of it was sent in this block. The second
+entry has two zeros. The first zero indicates a lost fragment of ``Data-3``, and the last one corresponds to a fragment that hasn't been sent yet.
 
 Mixed Traffic
 ~~~~~~~~~~~~~
@@ -283,8 +358,20 @@ of the 700B packets). The larger packets are normally acked immediately:
    :width: 100%
    :align: center
 
+..
+   FIGURE RECIPE
+   config:   MixedTraffic   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv packet traffic view (log inspector, messages mode), log font Ubuntu Mono 11,
+             no digit grouping, columns ID/Kind/Length + Source/Destination/Protocol/Type/Length
+             with widths 54,120,135,144,152,152,135,102,62 px, fast run to the stop time,
+             cropped to the header and the rows without the event number column;
+             stop at 0.0265 s; rows Data-6 to the resent Data-10
+   anchor:   Large-6 and Large-7 sent twice; Data-10 resent after the BasicBlockAck. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
 Here, the block starts with ``Data-6``. ``Data-6`` to ``Data-10``, and also some large packets, are sent.
-``Large-8`` and ``Large-9``, for example, are sent twice because they weren't correctly received
+``Large-6`` and ``Large-7``, for example, are sent twice because they weren't correctly received
 the first time (there was no ack). The 802.11 MAC sequence numbers are contiguous between
 all the packets sent by the MAC, so the block ack bitmap contains the (already acked) large
 packets as well:
@@ -293,8 +380,17 @@ packets as well:
    :width: 80%
    :align: center
 
-Furthermore, the block ack is lost, so the not-yet-acked packets in the previous block (``Data-6``
-to ``Data-10``) are retransmitted.
+..
+   FIGURE RECIPE
+   config:   MixedTraffic   # ../omnetpp.ini, Qtenv with --mcp-server-address
+   capture:  Qtenv object inspector, sorted by name, on the BasicBlockAck WirelessSignal in the radio medium (run with **.radioMedium.mediumLimitCache.maxTransmissionDuration=3ms so only this one is kept), expanded to encapsulatedPacket > content > full content > Ieee80211BasicBlockAck > blockAckBitmap;
+             stop at 0.02591 s
+   anchor:   start sequence 12; entries [0]-[6] all ones, [7] and [8] zeros. If the run shows other frames, pick the example again
+             and rewrite the text and this recipe.
+   stamp:    captured 2026-11-27, INET master 22df607673
+
+``Data-10`` was not received correctly, so it is retransmitted after the block ack. When the block ack
+itself is lost, all the not-yet-acked packets of the block are retransmitted.
 
 .. note:: Instead of retransmitting the data frames, the originator could send the block ack request again if it didn't receive a block ack. This is currently a limitation of the implementation.
 
