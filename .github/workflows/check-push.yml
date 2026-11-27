@@ -29,6 +29,7 @@ jobs:
     if: github.event.deleted == false
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       statuses: write
     steps:
@@ -91,6 +92,9 @@ jobs:
               -f description="the push check: a trivial change (S1 to S6)" -f target_url="$run_url"
             echo "marked: $context"
           done < "$RUNNER_TEMP/required-contexts.txt"
-          { echo; echo "The change is trivial: push this commit to master with no pull request:"; echo
+          # Master green gets the real state of master: a trivial change lands only when master is green (M8)
+          python3 doc/project/enforcement/master_green.py post --on "$HEAD_SHA" --context="Master green"
+          { echo; echo "The change is trivial: push this commit to master with no pull request. If Master green is not"
+            echo "green, wait until master is green, and run this job again first:"; echo
             echo '```'; echo "git push origin $HEAD_SHA:master"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           echo "::notice title=Push check::trivial: push $HEAD_SHA to master with no pull request"
