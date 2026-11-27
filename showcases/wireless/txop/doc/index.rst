@@ -112,8 +112,8 @@ It contains two :ned:`AdhocHost` modules, an :ned:`Ipv4NetworkConfigurator`,
 an :ned:`Ieee80211RadioMedium` and an :ned:`IntegratedCanvasVisualizer` module.
 
 The simulation is defined in the ``General`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`.
-There are two UDP applications in ``host1``, sending small (1200B) and large
-(randomly 3400B or 3500B) packets to ``host2``:
+There are two UDP applications in ``host1``, sending small (400B) and large
+(randomly 1000B or 1100B) packets to ``host2``:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: host1.numApps
@@ -142,6 +142,15 @@ Block acks are enabled:
    :end-at: blockAckVariant
    :language: ini
 
+We set the TXOP protection mechanism to multiple. In this mode, each frame exchange
+reserves the channel only for itself. With the default single protection and block acks,
+INET sends only one frame exchange per TXOP:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: protectionMechanism
+   :end-at: protectionMechanism
+   :language: ini
+
 The aggregation, RTS, and block ack thresholds are also set appropriately to produce the desired frame sequences:
 
 .. literalinclude:: ../omnetpp.ini
@@ -159,6 +168,24 @@ sequence chart:
    :align: center
    :width: 100%
 
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     Sequence Chart screenshot
+   config:   General   # ../omnetpp.ini, run with --record-eventlog=true --sim-time-limit=0.22s
+   seed:     default (run 0)
+   shows:    one voice TXOP of 1444 us: small-1255+small-1259, small-1265+small-1268,
+             small-1269, RTS, CTS, large-767, WlanAck, then contention and the start of
+             the next TXOP (small-1278)
+   source:   results/General-#0.elog
+   axes:     host1 · host2   (MANUAL order), display mode NETWORK_COMMUNICATION
+   anchor:   first A-MSDU starts at 0.215170 s, WlanAck ends at 0.216615 s, small-1278
+             starts at 0.216725 s. If these move, the run changed: pick a TXOP again
+             (a multi-exchange TXOP with RTS/CTS and a large frame) and rewrite this recipe.
+   capture:  SIMULATION_TIME timeline, zoom_to_simulation_time_range 0.21512 .. 0.2168,
+             IDE window 2150x900, mouse off the chart; crop 24 px of module tree on the
+             left and the top ruler (crop box 24,238 to the bottom right); 1761x292
+   stamp:    captured 2026-11-27, INET master 22df607673
+
 The gap between the frames is a SIFS;
 the TXOP frame exchange is preceded and followed by a much longer contention period.
 This frame exchange sequence was recorded with a 24 Mbps PHY rate. When using higher rates,
@@ -166,11 +193,6 @@ more frames could fit in a TXOP, as the TXOP duration is independent of the PHY 
 
 This frame sequence is just an example. Various combinations of frames can be sent during
 a TXOP. Observe the simulation for other combinations.
-
-.. note:: The TXOP in the image is about 1.8 ms, which is longer than the 1.5 ms TXOP limit.
-          This is due to a limitation in INET's implementation: it is not checked whether
-          the last frame fits in the TXOP limit, only that its transmission can be started
-          within the limit.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TxopShowcase.ned <../TxopShowcase.ned>`
 
