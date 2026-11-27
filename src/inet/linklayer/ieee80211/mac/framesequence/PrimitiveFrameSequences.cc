@@ -445,10 +445,10 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
     switch (step) {
         case 0: {
             auto qos = context->getQoSContext();
-            auto blockAckReqParams = qos->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler);
-            auto receiverAddr = std::get<0>(blockAckReqParams);
-            auto startingSequenceNumber = std::get<1>(blockAckReqParams);
-            auto tid = std::get<2>(blockAckReqParams);
+            const auto& request = qos->openingBasicBarRetry.request;
+            auto [receiverAddr, startingSequenceNumber, tid] = context->hasOpeningBasicBarRetry() ?
+                std::make_tuple(request->getReceiverAddress(), request->getStartingSequenceNumber(), Tid(request->getTidInfo())) :
+                qos->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler);
             bool compressed = qos->blockAckVariant == BlockAckVariant::COMPRESSED;
             auto blockAckReq = compressed ? qos->blockAckProcedure->buildCompressedBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber) :
                 qos->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);

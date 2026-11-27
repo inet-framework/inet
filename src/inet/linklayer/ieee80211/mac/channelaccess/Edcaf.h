@@ -26,6 +26,12 @@
 namespace inet {
 namespace ieee80211 {
 
+struct BasicBarRetry
+{
+    Ptr<const Ieee80211BasicBlockAckReq> request;
+    int64_t number = 0;
+};
+
 /**
  * Implements IEEE 802.11 Enhanced Distributed Channel Access Function.
  */
@@ -63,6 +69,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     int cwMax = -1;
     int edcaRetryCount = 0;
     int edcaRetryLimit = -1;
+    BasicBarRetry pendingBasicBarRetry;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -109,6 +116,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     // Edcaf
     virtual bool isOwning() { return owning; }
     virtual bool isInternalCollision();
+    BasicBarRetry& getPendingBasicBarRetry() { return pendingBasicBarRetry; }
     void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
     bool hasEligibleFrames() const;
     virtual AccessCategory getAccessCategory() { return ac; }

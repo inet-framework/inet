@@ -99,6 +99,9 @@ void Hcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         if (check_and_cast<IOriginatorQosMacDataService *>(originatorDataService)->hasAMpduAggregation() && dataAndMgmtRateControl)
             throw cRuntimeError("HT A-MPDU transmission requires fixed DATA rates without a rate-control submodule");
+        basicBlockAckReqRetryLimit = par("basicBlockAckReqRetryLimit").intValue();
+        if (basicBlockAckReqRetryLimit < 0)
+            throw cRuntimeError("basicBlockAckReqRetryLimit must be nonnegative");
         if (par("isBlockAckSupported").boolValue()) {
             EV_INFO << "Block Ack profile: " << (blockAckVariant == BlockAckVariant::BASIC ? "basic" : "compressed") << endl;
             if (blockAckVariant == BlockAckVariant::COMPRESSED) {
@@ -582,6 +585,34 @@ void Hcf::advanceOriginatorWindows()
         // IEEE Std 802.11-2024, 10.25.6.7.1: resolved positions permit transmit-window progress.
         agreement->advanceWindow(next, unresolvedSequences);
     }
+    prunePendingBasicBarRetries();
+}
+
+void Hcf::prunePendingBasicBarRetries()
+{
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        auto edcaf = edca->getEdcaf(static_cast<AccessCategory>(ac));
+        auto& retry = edcaf->getPendingBasicBarRetry();
+        const auto& request = retry.request;
+        if (!request)
+            continue;
+        auto frames = edcaf->getInProgressFrames();
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(request->getReceiverAddress(), request->getTidInfo());
+        bool needed = false;
+        if (agreement && agreement->getIsAddbaResponseReceived()) {
+            for (int i = 0; i < frames->getLength() && !needed; i++) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
+                if (data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == request->getReceiverAddress() &&
+                    data->getTid() == request->getTidInfo() && agreement->containsSequence(data->getSequenceNumber()) &&
+                    OriginatorBlockAckAgreement::isInBitmap(data->getSequenceNumber(), request->getStartingSequenceNumber()))
+                    needed = edcaf->getAckHandler()->getQoSDataAckStatus(data) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK;
+            }
+        }
+        if (!needed) {
+            edcaf->getAckHandler()->processFailedBlockAckReq(request);
+            retry = {};
+        }
+    }
 }
 
 void Hcf::completeTransfers()
@@ -615,6 +646,9 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
     }
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
         auto edcaf = edca->getEdcaf(static_cast<AccessCategory>(ac));
+        auto& retry = edcaf->getPendingBasicBarRetry();
+        if (retry.request && retry.request->getReceiverAddress() == peer && retry.request->getTidInfo() == tid)
+            retry = {};
         auto frames = edcaf->getInProgressFrames();
         std::vector<Packet *> discard;
         for (int i = 0; i < frames->getLength(); i++) {
@@ -1119,7 +1153,9 @@ FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 
 void Hcf::startFrameSequence(AccessCategory ac)
 {
-    frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
+    auto context = buildContext(ac);
+    std::swap(context->getQoSContext()->openingBasicBarRetry, edca->getEdcaf(ac)->getPendingBasicBarRetry());
+    frameSequenceHandler->startFrameSequence(new HcfFs(), context, this);
 }
 
 void Hcf::frameSequenceStarted()
@@ -1133,7 +1169,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
     for (auto edcaf : internallyCollidedEdcafs) {
         AccessCategory ac = edcaf->getAccessCategory();
         auto dataRecoveryProcedure = edcaf->getRecoveryProcedure();
-        if (originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) {
+        if (edcaf->getPendingBasicBarRetry().request ||
+            originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) {
             dataRecoveryProcedure->edcaTransmissionFailed();
             edcaf->requestChannel(this);
             continue;
@@ -1222,6 +1259,9 @@ void Hcf::frameSequenceFinished()
     if (edcaf) {
         auto context = frameSequenceHandler->getContext();
         auto lastStep = context->getLastStep();
+        const auto& openingRetry = context->getQoSContext()->openingBasicBarRetry;
+        if (!lastStep && openingRetry.request)
+            edcaf->getAckHandler()->processFailedBlockAckReq(openingRetry.request);
         if (lastStep && lastStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED) {
             auto receiveStep = dynamic_cast<IReceiveStep *>(lastStep);
             auto transmitStep = check_and_cast<ITransmitStep *>(receiveStep ? context->getStepBeforeLast() : lastStep);
@@ -1666,7 +1706,15 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             edcaf->getAckHandler()->processFailedFrame(mgmtHeader);
         }
         else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(failedHeader)) {
-            edcaf->getAckHandler()->processFailedBlockAckReq(blockAckReq);
+            auto context = frameSequenceHandler->getContext();
+            auto opening = dynamic_cast<ITransmitStep *>(context->getStep(0));
+            const auto& openingRetry = context->getQoSContext()->openingBasicBarRetry;
+            auto retries = openingRetry.request && opening && opening->getFrameToTransmit() == failedPacket ? openingRetry.number : 0;
+            auto basic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq);
+            if (basic && retries < basicBlockAckReqRetryLimit)
+                edcaf->getPendingBasicBarRetry() = {basic, retries + 1};
+            else
+                edcaf->getAckHandler()->processFailedBlockAckReq(blockAckReq);
             edcaf->getRecoveryProcedure()->edcaTransmissionFailed();
             return;
         }
@@ -1838,7 +1886,7 @@ bool Hcf::hasEligibleFrameToTransmit(AccessCategory ac) const
 {
     auto edcaf = edca->getEdcaf(ac);
     if (edcaf)
-        return (originatorBlockAckAgreementHandler &&
+        return edcaf->getPendingBasicBarRetry().request || (originatorBlockAckAgreementHandler &&
             originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) ||
             edcaf->getInProgressFrames()->hasEligibleInProgressFrames() ||
             check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->peekEligibleFrame(edcaf->getPendingQueue()) != nullptr;

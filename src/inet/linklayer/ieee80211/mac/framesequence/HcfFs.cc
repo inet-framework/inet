@@ -39,7 +39,8 @@ int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext
     auto qos = context->getQoSContext();
     auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
         context->getInProgressFrames()->getFrameToTransmit();
-    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
+    if (context->hasOpeningBasicBarRetry() ||
+        qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 1;
     return frameToTransmit && frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
 }
@@ -63,6 +64,8 @@ bool HcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
+    if (context->hasOpeningBasicBarRetry())
+        return true;
     auto frames = context->getInProgressFrames();
     auto qos = context->getQoSContext();
     bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);

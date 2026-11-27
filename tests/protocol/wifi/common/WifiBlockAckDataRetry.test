@@ -1,10 +1,13 @@
 %description:
-Production DATA retransmission after one lost Block Ack must retain its sequence and TID with Retry set.
-The radio tap drops the first Block Ack or clears its bitmap at sta1.
+An unanswered Basic BAR is retried up to the configured limit, each time in a fresh TXOP with the same
+receiver, TID, and starting sequence. The radio tap clears the first bitmap, drops only the first
+reply, or drops every reply to exercise the retry limits zero through four.
+With a successful BAR retry, the original DATA needs no retransmission. When retries are exhausted
+or the bitmap reports missing DATA, DATA retransmission retains its sequence and TID with Retry set.
 Real association and ADDBA precede the DATA exchange.
 IEEE Std 802.11-2024, 9.2.4.1.6 defines Retry for retransmitted standalone DATA.
 
-%extraargs: -r 0..1
+%extraargs: -r 0..6
 
 %file: BlockAckDataRetry.cc
 // Author: Miguel González-López
@@ -28,7 +31,21 @@ static void clearBitmap(Packet *packet)
         packet->insertAtFront(*it);
 }
 
-static ProtocolTest retryProgram(const char *name, bool negative)
+static bool matchesOriginalData(const MatchContext& c)
+{
+    auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+    return data && data->getType() == ST_DATA_WITH_QOS &&
+        data->getSequenceNumber().get() == c.get("sequence").intValue() && data->getTid() == c.get("tid").intValue();
+}
+
+static cValue txopStart(const PacketEvent&)
+{
+    auto root = cSimulation::getActiveSimulation()->getSystemModule();
+    auto txop = check_and_cast<TxopProcedure *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure"));
+    return cValue(txop->getStart().dbl());
+}
+
+static ProtocolTest retryProgram(const char *name, int64_t retries, bool recoverReply, bool negativeBitmap)
 {
     auto test = ProtocolTest(name);
     const char *feedback = "ieee80211mac.type == 25 && ieee80211mac.receiverAddress.getInt() == {sta1}";
@@ -57,12 +74,15 @@ static ProtocolTest retryProgram(const char *name, bool negative)
                 return bar->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
                     bar->getTidInfo() == c.get("tid").intValue();
             })
+            .capture("barTxop0", txopStart)
             .describe("BAR requests feedback for the outstanding DATA").within(0.02));
-    auto firstFeedback = tap("radioMedium").from("ap").to("sta1").filterPacket(feedback).nth(1);
-    if (negative)
-        test.meanwhile(firstFeedback.mutate(clearBitmap).describe("clear the first feedback bitmap at the originator"));
+    auto reply = tap("radioMedium").from("ap").to("sta1").filterPacket(feedback);
+    if (negativeBitmap)
+        test.meanwhile(reply.nth(1).mutate(clearBitmap).describe("clear the first feedback bitmap at the originator"));
+    else if (recoverReply)
+        test.meanwhile(reply.nth(1).drop().describe("lose the first Block Ack at the originator"));
     else
-        test.meanwhile(firstFeedback.drop().describe("lose the first Block Ack at the originator"));
+        test.meanwhile(reply.drop().describe("lose every Block Ack at the originator"));
     test.once(on("ap.wlan[0].mac").signal("packetSentToLower")
             .filterPacket(feedback)
             .capture("feedbackTreeId", [](const PacketEvent& event) {
@@ -74,7 +94,7 @@ static ProtocolTest retryProgram(const char *name, bool negative)
                     ba->getTidInfo() == c.get("tid").intValue() && ba->getBlockAckBitmap(0).getBit(0);
             })
             .describe("the AP acknowledges the captured DATA").within(0.02));
-    if (negative)
+    if (negativeBitmap)
         test.once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
             .filterPacket(feedback)
             .assertEvent([](const MatchContext& c) {
@@ -87,30 +107,61 @@ static ProtocolTest retryProgram(const char *name, bool negative)
                 return c.event.treeId == c.get("feedbackTreeId").intValue();
             })
             .describe("sta1 receives the first Block Ack sent by the AP")));
-    return test
-        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+    for (int64_t index = 0; index < retries; index++) {
+        auto previousTxop = "barTxop" + std::to_string(index);
+        auto nextTxop = "barTxop" + std::to_string(index + 1);
+        test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                .filterEvent([](const MatchContext& c) {
+                    return c.event.packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BLOCKACK_REQ || matchesOriginalData(c);
+                })
+                .assertEvent([previousTxop](const MatchContext& c) {
+                    auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                    return bar && bar->getReceiverAddress() == MacAddress("02:00:00:00:00:01") &&
+                        bar->getTidInfo() == c.get("tid").intValue() && bar->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                        txopStart(c.event).doubleValue() > c.get(previousTxop.c_str()).doubleValue();
+                })
+                .capture(nextTxop.c_str(), txopStart)
+                .describe("retry the same BAR in a new TXOP before retrying its DATA").within(0.02));
+    }
+    if (recoverReply)
+        return test.once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                .filterPacket(feedback)
+                .assertEvent([](const MatchContext& c) {
+                    auto reply = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                    return reply->getTidInfo() == c.get("tid").intValue() &&
+                        reply->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                        reply->getBlockAckBitmap(0).getBit(0);
+                })
+                .describe("the BAR retry receives a Block Ack").within(0.01))
+            .never(on("sta1.wlan[0].mac").signal("packetSentToLower").filterEvent(matchesOriginalData)
+                .describe("DATA acknowledged by the retried BAR is not sent again").within(0.03));
+    return test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
             .filterEvent([](const MatchContext& c) {
-                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
-                return data && data->getType() == ST_DATA_WITH_QOS &&
-                    data->getSequenceNumber().get() == c.get("sequence").intValue() && data->getTid() == c.get("tid").intValue();
+                return c.event.packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BLOCKACK_REQ || matchesOriginalData(c);
             })
             .assertEvent([](const MatchContext& c) {
-                return c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry();
+                return matchesOriginalData(c) && c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry();
             })
             .describe("the same DATA identity returns with Retry set").within(0.02));
 }
 
-Define_ProtocolTest(wifi_block_ack_data_retry) { return retryProgram("wifi_block_ack_data_retry", false); }
-Define_ProtocolTest(wifi_block_ack_data_retry_negative) { return retryProgram("wifi_block_ack_data_retry_negative", true); }
+Define_ProtocolTest(wifi_block_ack_bar_retry) { return retryProgram("wifi_block_ack_bar_retry", 1, true, false); }
+Define_ProtocolTest(wifi_block_ack_data_retry)
+{
+    auto scenario = getEnvir()->getConfigEx()->getVariable("scenario");
+    return retryProgram("wifi_block_ack_data_retry", std::stoi(scenario) - 2, false, false);
+}
+Define_ProtocolTest(wifi_block_ack_data_retry_negative) { return retryProgram("wifi_block_ack_data_retry_negative", 0, false, true); }
 }
 
 %inifile: test.ini
 [General]
 cmdenv-stop-batch-on-error = false
-*.tester.testName = ${negative=false,true} ? "wifi_block_ack_data_retry_negative" : "wifi_block_ack_data_retry"
+*.tester.testName = ${scenario=0..6} == 0 ? "wifi_block_ack_data_retry_negative" : (${scenario} == 1 ? "wifi_block_ack_bar_retry" : "wifi_block_ack_data_retry")
+*.sta1.wlan[*].mac.hcf.basicBlockAckReqRetryLimit = ${scenario} < 2 ? 1 : (${scenario} - 2)
 *.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
 *.sta1.app[0].sendInterval = 0.1ms
-*.sta1.app[0].stopTime = 1.02s
+*.sta1.app[0].stopTime = 1.00016s
 # Request feedback for the first outstanding DATA before another uplink DATA is sent.
 **.hcf.originatorAckPolicy.blockAckReqThreshold = 1
 **.originatorMacDataService.msduAggregationPolicy.typename = ""
@@ -121,3 +172,7 @@ include ../../ini/_blockackLifecycle.ini
 PROTOCOLTEST wifi_block_ack_data_retry: PASS
 %contains: stdout
 PROTOCOLTEST wifi_block_ack_data_retry_negative: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_bar_retry: PASS
+%not-contains: stdout
+: FAIL

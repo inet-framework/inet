@@ -47,7 +47,8 @@ int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceCont
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
+    if (context->hasOpeningBasicBarRetry() ||
+        qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 2;
     if (qos->preparedData && qos->preparedData->batch)
         return 4;
