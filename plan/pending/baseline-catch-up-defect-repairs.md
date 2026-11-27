@@ -1348,6 +1348,23 @@ document `tests/protocol/tcp/ece-at-one-segment.md` and the release note `doc/wh
 - The re-record of these values waits for the approval of the maintainer
   ([change-a-baseline.md](../../doc/project/guide/change-a-baseline.md) §2).
 
+**The re-record (2026-11-27).** The maintainer approved the re-record of exactly these values ("yes, I approve the
+re-record"). In the image of the CI, on the series on master `22df607673`, with `statistics` at the head of its master
+`7a315175` (`runs/record-baselines.sh` and `runs/r8-record/` of the folder of D10): the three fingerprint values of
+`TcpRenoIncast` go into C15, and its statistics into the commit `593ba94baa` of the branch
+`topic/baseline-catch-up-defect-repairs` of `statistics`, after `7a315175`. C15 has the trailer `Statistical-Baseline:`
+with that commit, the obligations `fingerprint statistical test whatsnew`, and the `Baseline changes:` lines.
+
+- R7 landed in between (§6.3, R7), so the series stands on master `e2648b2c79`; C15 is `82b9ea7470`. Master changed no
+  source file after the record.
+- The gates on the head `4cd7c95000`: `check-baselines.sh` with the local clones passes, and so do
+  `check-baseline-attribution.sh plan` and its run in the job copy (`runs/r8-attribution/`): the parent against the old
+  baseline and C15 against the new one, 1 statistical test and 3 fingerprint runs each. `check-pull-request.sh` passes
+  but for the pin that is not on GitHub before the push of the `statistics` branch, with two notes: C15 changes 31
+  source lines, above 30, and no description is given. All fingerprints in release mode, 1846 PASS and 1 expected ERROR
+  (`runs/r8-gate-after-record/`); all statistical tests, 945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected
+  (`evidence/runs/4cd7c95000/` of the job copy).
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
