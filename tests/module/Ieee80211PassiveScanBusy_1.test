@@ -1,6 +1,6 @@
 %description:
 A passive scan receives its first confirmation after one full dwell, even when
-the radio only signals actual channel changes.
+the initial channel stays busy or the radio only signals actual channel changes.
 
 %file: PassiveScan.cc
 #include <iostream>
@@ -55,6 +55,7 @@ import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
 
 module ChangeOnlyRadio extends Ieee80211ScalarRadio
 {
@@ -74,6 +75,7 @@ network PassiveScanBusy
     submodules:
         station: WirelessHost;
         radioMedium: Ieee80211ScalarRadioMedium;
+        noise: NoiseSource;
 }
 
 %inifile: omnetpp.ini
@@ -93,17 +95,27 @@ record-vector-results = false
 *.station.wlan[0].mgmt.typename = "Ieee80211MgmtSta"
 *.station.wlan[0].agent.typename = "ScanAgent"
 *.station.wlan[0].agent.activeScan = false
-*.station.wlan[0].agent.expectedChannel = 0
-*.station.wlan[0].agent.channelsToScan = "0"
+*.station.wlan[0].agent.expectedChannel = ${channel=0,1}
+*.station.wlan[0].agent.channelsToScan = string(${channel})
 *.station.wlan[0].agent.startingTime = 1.5ms
 *.station.wlan[0].agent.maxChannelTime = 5ms
 *.station.wlan[0].agent.minChannelTime = 1ms
+*.noise.sleepInterval = 1ms
+*.noise.transmitter.signalAnalogRepresentation = "scalar"
+*.noise.transmitter.centerFrequency = ${frequency=5240MHz,5180MHz ! channel}
+*.noise.transmitter.bandwidth = 20MHz
+*.noise.transmitter.power = 1mW
+*.noise.transmitter.duration = 12ms
+*.radioMedium.mediumLimitCache.maxTransmissionDuration = 15ms
 **.mobility.initFromDisplayString = false
 *.station.mobility.initialX = 0m
+*.noise.mobility.initialX = 1m
 **.mobility.initialY = 0m
 **.mobility.initialZ = 0m
 
 %contains: stdout
 Passive scan completed on channel 0
+%contains: stdout
+Passive scan completed on channel 1
 %not-contains: stdout
 undisposed object:

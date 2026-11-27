@@ -342,6 +342,7 @@ void Ieee80211MgmtSta::changeChannel(int channelNum)
 
     Ieee80211ConfigureRadioCommand *configureCommand = new Ieee80211ConfigureRadioCommand();
     configureCommand->setChannelNumber(channelNum);
+    configureCommand->setPassiveScan(isScanning && !scanning.activeScan);
     auto request = new Request("changeChannel", RADIO_C_CONFIGURE);
     request->setControlInfo(configureCommand);
     send(request, "macOut");

@@ -46,6 +46,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
+    bool isOwning() const { return owning; }
     virtual queueing::IPacketQueue *getPendingQueue() const { return pendingQueue; }
     virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
 

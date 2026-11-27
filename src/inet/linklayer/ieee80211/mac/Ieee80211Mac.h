@@ -63,6 +63,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
 
     // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;
+    void trySendPendingRadioConfig();
     std::set<msgid_t> pendingRadioFrameIds;
 
   protected:
