@@ -27,23 +27,39 @@ jobs:
     name: Paths that can change a result
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       pull-requests: read
+      statuses: read
     outputs:
       relevant: ${{ steps.paths.outputs.relevant }}
       ref: ${{ steps.paths.outputs.ref }}
       head: ${{ steps.paths.outputs.head }}
       conflict: ${{ steps.paths.outputs.conflict }}
     steps:
+      - uses: actions/checkout@v6
+        # master_green.py, from master
+        if: github.event_name == 'workflow_run'
+        with:
+          sparse-checkout: doc/project/enforcement
+          persist-credentials: false
       - name: Select the paths of the pull request
         id: paths
         env:
           GH_TOKEN: ${{ github.token }}
           NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
+          LANDED: ${{ github.event.workflow_run.head_sha }}
         run: |
           # master after the landing job, and a run by hand with no pull request, test the branch; a pull request runs the
           # tests only when it changes a path that can change a chart result, and else the check passes
           if [ -z "$NUMBER" ]; then
+            # a trivial landing on master starts no test (M9): the job Landing of "Check: master green" decides
+            if [ "$GITHUB_EVENT_NAME" = workflow_run ] \
+                && [ "$(python3 doc/project/enforcement/master_green.py is-trivial --commit "$LANDED")" = trivial ]; then
+              echo "relevant=false" >> "$GITHUB_OUTPUT"
+              echo "The landing of ${LANDED:0:10} is trivial; the tests do not run." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
             echo "relevant=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi

@@ -8,6 +8,12 @@ name: "Check: master green"
 # the state changed. At each event of a pull request, the other job posts it on the head of that
 # pull request. A run of a failed job again changes the state, because the newest attempt counts.
 #
+# A trivial landing starts no full run and does not change Master green (M9): at a push to master,
+# the job `Landing` runs check-trivial-change.sh over the commits of the push. For a trivial change it
+# marks the head with the status `Trivial landing`, which names the head before the push, and cancels
+# the opp tests, the fingerprint tests and the Linux build of the head; the statistical and chart
+# tests skip. Master green then follows the head before the push.
+#
 # Each trigger runs the file of master: a push to master, workflow_run and pull_request_target. The
 # jobs read no content of a pull request.
 
@@ -50,9 +56,55 @@ permissions:
   contents: read
 
 jobs:
+  landing:
+    name: Landing
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install PyYAML
+        # check-required-contexts.sh in the audit reads the workflows with it
+        run: python3 -m pip install --quiet "pyyaml==6.0.2"
+      - name: Read the required contexts of master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/rules/branches/master" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context' \
+            > "$RUNNER_TEMP/required-contexts.txt"
+      - name: Decide if the landing is trivial
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set +e
+          git cat-file -e "$BEFORE^{commit}" 2>/dev/null || git fetch --no-tags origin "$BEFORE"
+          env -u GH_TOKEN doc/project/enforcement/check-trivial-change.sh --base "$BEFORE" --head "$GITHUB_SHA" \
+            --required-contexts-file "$RUNNER_TEMP/required-contexts.txt" | tee "$RUNNER_TEMP/check.txt"
+          status=${PIPESTATUS[0]}
+          set -e
+          { echo "## Landing"; echo; echo '```'; cat "$RUNNER_TEMP/check.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          case "$status" in
+            0) python3 doc/project/enforcement/master_green.py trivial-landing --commit "$GITHUB_SHA" --before "$BEFORE" ;;
+            1) echo "not a trivial landing: the full run counts for Master green" ;;
+            *) exit "$status" ;;
+          esac
+
   master:
     name: State of master
-    if: github.event_name != 'pull_request_target'
+    needs: landing
+    # also when the job Landing is skipped (not a push) or fails: then the full run of the head counts
+    if: always() && github.event_name != 'pull_request_target'
     # one computation at a time; a newer one replaces a waiting one, and it reads the newest state
     concurrency:
       group: master-green
