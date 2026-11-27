@@ -189,6 +189,7 @@ class SchedulingHcf : public Hcf {
     int expired = 0;
     bool expiredDuringExchange = false;
     int collisions = 0;
+    int unansweredBars = 0;
     SchedulingRecipient *recipient = nullptr;
     simtime_t responseEnd;
     simtime_t txopDeadline;
@@ -314,6 +315,7 @@ class SchedulingHcf : public Hcf {
         Hcf::channelGranted(access);
         if (scenario() == 14 && !collided.empty()) {
             auto edcaf = edca->getEdcaf(AC_VI);
+            ASSERT(edcaf->getEdcaRetryCount() == 1);
             ASSERT(edcaf->getCw() == 1);
             auto frame = edcaf->getInProgressFrames()->getFrames(0);
             bool absent = false;
@@ -431,6 +433,31 @@ class SchedulingHcf : public Hcf {
         }
         Hcf::transmissionComplete(packet, header);
     }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!bar) {
+            Hcf::originatorProcessFailedFrame(packet);
+            return;
+        }
+        auto edcaf = edca->getChannelOwner();
+        auto before = edcaf->getEdcaRetryCount();
+        auto cw = edcaf->getCw();
+        Hcf::originatorProcessFailedFrame(packet);
+        if (scenario() == 5) {
+            unansweredBars++;
+            ASSERT(edcaf->getEdcaRetryCount() == before + 1);
+            ASSERT(edcaf->getCw() > cw);
+            auto data = edcaf->getInProgressFrames()->getFrames(0);
+            bool absent = false;
+            try {
+                edcaf->getRecoveryProcedure()->getRetryCount(data, data->peekAtFront<Ieee80211DataHeader>());
+            }
+            catch (const cRuntimeError& error) {
+                absent = std::string(error.what()).find("retry counter entry doesn't exist") != std::string::npos;
+            }
+            ASSERT(absent);
+        }
+    }
     bool isReceptionInProgress() override { return responsePending || Hcf::isReceptionInProgress(); }
     void handleMessage(cMessage *message) override {
         if (message->isName("response")) {
@@ -496,6 +523,11 @@ class SchedulingHcf : public Hcf {
             ASSERT(!frameSequenceHandler->isSequenceRunning());
             if (scenario() == 5 || scenario() == 6)
                 ASSERT(retries == 1 && bars == 2);
+            if (scenario() == 5) {
+                auto edcaf = edca->getEdcaf(AC_VI);
+                ASSERT(unansweredBars == 1);
+                ASSERT(edcaf->getEdcaRetryCount() == 0);
+            }
             if (compressed() && scenario() >= 15 && scenario() <= 17)
                 ASSERT(retries == (scenario() == 15 ? 0 : scenario() == 16 ? 1 : 4) && bars == (scenario() == 15 ? 1 : 2));
             if ((scenario() == 8 && (compressed() || par("multiple").boolValue())) || scenario() == 10 || scenario() == 13)
