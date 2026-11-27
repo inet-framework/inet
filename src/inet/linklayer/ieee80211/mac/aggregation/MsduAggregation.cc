@@ -43,6 +43,12 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
     subframeHeader->setSa(sa);
 }
 
+B MsduAggregation::computeSubframePadding(b subframeLength)
+{
+    // IEEE Std 802.11-2024, 9.3.2.2.2: align all but the final subframe to four octets.
+    return B((4 - subframeLength.get<B>() % 4) % 4);
+}
+
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
     EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MSDU.\n";
@@ -65,9 +71,9 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         aggregatedFrame->insertAtBack(msduSubframeHeader);
         aggregatedFrame->insertAtBack(msdu);
         aggregatedFrame->getRegionTags().copyTags(frame->getRegionTags(), frame->getFrontOffset(), aggregatedFrame->getBackOffset() - frame->getDataLength(), frame->getDataLength());
-        int paddingLength = 4 - (msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get<B>() % 4;
-        if (i + 1 != frames->size() && paddingLength != 4) {
-            auto padding = makeShared<ByteCountChunk>(B(paddingLength));
+        auto paddingLength = computeSubframePadding(msduSubframeHeader->getChunkLength() + msdu->getChunkLength());
+        if (i + 1 != frames->size() && paddingLength != B(0)) {
+            auto padding = makeShared<ByteCountChunk>(paddingLength);
             aggregatedFrame->insertAtBack(padding);
         }
         if (i != 0)
