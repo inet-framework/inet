@@ -115,6 +115,9 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
                         *nextDeadline = std::min(*nextDeadline, deadline);
                     continue;
                 }
+                if (windowAllowsData && deadline > selectionTime && !deadlineFits &&
+                    frames->canDeferBasicFeedback(candidate, selectionTime, expiration))
+                    continue;
             }
         }
         auto start = agreement->getStartingSequenceNumber();

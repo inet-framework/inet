@@ -33,6 +33,7 @@ module Hcf extends Module like IHcf
         int basicBlockAckReqRetryLimit = default(2); // Maximum retransmissions of an unanswered Basic BAR in fresh TXOPs.
         double basicBlockAckIdleGrace @unit(s) = default(0s); // Originator grace period before completed Basic transfer teardown.
         double basicBlockAckReqMaxDelay @unit(s) = default(20ms); // Maximum wait for a Basic Block Ack batch across TXOPs. Zero disables waiting.
+        bool basicBlockAckAirtimeUrgency = default(false); // At an expiry boundary, admit a ready fragment if its feedback also fits.
         double zeroLimitFragmentRoundTripTime @unit(s) = default(0s); // Propagation allowance per response in a multiple-protection fragment burst.
 
         string rxModule;

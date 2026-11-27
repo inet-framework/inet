@@ -195,6 +195,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void updateContention();
     void scheduleAddbaResponseTimer();
     void scheduleBlockAckReqTimer();
+    bool canSendBasicFragmentBeforeFeedback(Edcaf *edcaf, Packet *candidate, simtime_t completion, simtime_t expiry);
     void actionTerminated(Packet *packet, bool acknowledged);
     void invalidateActions(MacAddress peer, Tid tid, bool originator);
     void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);

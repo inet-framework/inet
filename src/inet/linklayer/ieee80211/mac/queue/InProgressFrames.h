@@ -35,6 +35,7 @@ class INET_API InProgressFrames : public SimpleModule
     std::function<bool(Packet *)> transmissionEligible;
     simtime_t blockAckReqMaxDelay = SIMTIME_ZERO;
     std::function<simtime_t(const MacAddress&, Tid)> basicFeedbackAccessDuration;
+    std::function<bool(Packet *, simtime_t, simtime_t)> basicFeedbackAirtimeCheck;
     std::map<int64_t, simtime_t> blockAckOutstandingSince;
 
   protected:
@@ -55,6 +56,11 @@ class INET_API InProgressFrames : public SimpleModule
     simtime_t getBasicFeedbackAccessDuration(const MacAddress& peer, Tid tid) const
     {
         return basicFeedbackAccessDuration ? basicFeedbackAccessDuration(peer, tid) : SIMTIME_ZERO;
+    }
+    void setBasicFeedbackAirtimeCheck(std::function<bool(Packet *, simtime_t, simtime_t)> check) { basicFeedbackAirtimeCheck = std::move(check); }
+    bool canDeferBasicFeedback(Packet *candidate, simtime_t now, simtime_t expiry) const
+    {
+        return basicFeedbackAirtimeCheck && basicFeedbackAirtimeCheck(candidate, now, expiry);
     }
     void markBlockAckOutstanding(const Packet *packet);
     simtime_t getBlockAckOutstandingSince(const Packet *packet) const;
