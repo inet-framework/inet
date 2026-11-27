@@ -78,7 +78,7 @@ We'll examine three scenarios:
 
 * **Scenario A**: Link recovers before the timeout timer expires (at t=150s)
 * **Scenario B**: Link recovers after the timeout timer expires but before the garbage collection timer expires (at t=300s)
-* **Scenario C**: Link recovers after both timers expire and the route is purged (at t=400s)
+* **Scenario C**: Link recovers after both timers expire and the route is purged (at t=602s)
 
 These scenarios are configured in ``omnetpp.ini`` as ``Step4A``, ``Step4B``, and
 ``Step4C`` respectively, each using a different scenario script.
@@ -127,9 +127,8 @@ with a period where the routes are considered unreachable.
 Scenario C: Recovery After Complete Route Removal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this scenario, we break the link at t=50s and reconnect it at t=400s. This is
-after both the timeout timer (expires at t=230s) and the garbage collection
-timer (expires at t=350s) have expired. The scenario is defined in
+In this scenario, we break the link at t=50s and reconnect it at t=602s. This is
+after the route has timed out and has been removed from the routing table. The scenario is defined in
 ``scenario7.xml``:
 
 .. literalinclude:: ../scenario7.xml
@@ -151,11 +150,14 @@ Let's examine what happens in detail:
    :width: 80%
    :align: center
 
-4. At t=330.5929s (120 seconds after being marked unreachable), the garbage
-   collection timer expires, and the route is completely removed from the
-   routing table
+4. Split horizon is disabled in this configuration, so ``router1`` soon learns
+   the route again from ``router3``, and the metric counts to infinity,
+   growing by two every 30 seconds (see Step 6). At t=390.844s the metric
+   reaches 16 and the route is marked unreachable again. At t=510.844s
+   (120 seconds later), the garbage collection timer expires, and the route
+   is completely removed from the routing table
 
-5. When the link recovers at t=400s, the router must learn about the route from
+5. When the link recovers at t=602s, the router must learn about the route from
    scratch through new RIP updates, as if it were discovering the route for the
    first time
 
