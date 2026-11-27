@@ -120,6 +120,8 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     bool isScanning;
     cMessage *scanTimer;
     ScanningInfo scanning;
+    opp_component_ptr<cModule> passiveScanRadio;
+    int radioChannel = -1;
 
     // ApInfo list: we collect scanning results and keep track of ongoing authentications here
     // Note: there can be several ongoing authentications simultaneously
@@ -195,6 +197,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Utility function: cancels and deletes the outstanding scan timer, if any. */
     virtual void cancelScanTimer();
+
+    void unsubscribeFromPassiveScanRadio();
+    void tryStartPassiveScanDwell();
 
     /** Broadcasts a Probe Request */
     virtual void sendProbeRequest();

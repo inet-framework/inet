@@ -1,0 +1,109 @@
+%description:
+A passive scan receives its first confirmation after one full dwell, even when
+the radio only signals actual channel changes.
+
+%file: PassiveScan.cc
+#include <iostream>
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211PassiveScanBusy_1 {
+
+class ChangeOnlyRadio : public Ieee80211Radio
+{
+  protected:
+    int lastChannel = -1;
+
+    void setChannelNumber(int channel) override
+    {
+        if (lastChannel != channel) {
+            lastChannel = channel;
+            Ieee80211Radio::setChannelNumber(channel);
+        }
+    }
+};
+
+Define_Module(ChangeOnlyRadio);
+
+class ScanAgent : public Ieee80211AgentSta
+{
+  protected:
+    void processScanConfirm(Ieee80211Prim_ScanConfirm *response) override
+    {
+        auto radio = check_and_cast<IRadio *>(getModuleByPath("^.radio"));
+        auto transmitter = check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+        int channel = transmitter->getChannel()->getChannelNumber();
+        if (simTime() != SimTime(6500, SIMTIME_US) || channel != par("expectedChannel").intValue())
+            throw cRuntimeError("Unexpected passive scan completion time or channel");
+        std::cout << "Passive scan completed on channel " << channel << std::endl;
+        endSimulation();
+    }
+};
+
+Define_Module(ScanAgent);
+
+} // namespace Ieee80211PassiveScanBusy_1
+
+%file: test.ned
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module ChangeOnlyRadio extends Ieee80211ScalarRadio
+{
+    parameters:
+        @class(::Ieee80211PassiveScanBusy_1::ChangeOnlyRadio);
+}
+
+simple ScanAgent extends Ieee80211AgentSta
+{
+    parameters:
+        int expectedChannel;
+        @class(::Ieee80211PassiveScanBusy_1::ScanAgent);
+}
+
+network PassiveScanBusy
+{
+    submodules:
+        station: WirelessHost;
+        radioMedium: Ieee80211ScalarRadioMedium;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = PassiveScanBusy
+ned-path = .;../../../../src
+sim-time-limit = 10ms
+seed-set = 0
+record-scalar-results = false
+record-vector-results = false
+*.station.wlan[0].opMode = "a"
+*.station.wlan[0].bitrate = 6Mbps
+*.station.wlan[0].mac.qosStation = false
+*.station.wlan[0].radio.typename = "ChangeOnlyRadio"
+*.station.wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station.wlan[0].radio.channelNumber = 0
+*.station.wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.station.wlan[0].agent.typename = "ScanAgent"
+*.station.wlan[0].agent.activeScan = false
+*.station.wlan[0].agent.expectedChannel = 0
+*.station.wlan[0].agent.channelsToScan = "0"
+*.station.wlan[0].agent.startingTime = 1.5ms
+*.station.wlan[0].agent.maxChannelTime = 5ms
+*.station.wlan[0].agent.minChannelTime = 1ms
+**.mobility.initFromDisplayString = false
+*.station.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Passive scan completed on channel 0
+%not-contains: stdout
+undisposed object:

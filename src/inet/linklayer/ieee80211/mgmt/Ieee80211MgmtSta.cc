@@ -21,6 +21,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -98,6 +99,9 @@ static bool validateHtOperation(const IIeee80211Band *band, const Ieee80211HtOpe
 
 Ieee80211MgmtSta::~Ieee80211MgmtSta()
 {
+    unsubscribeFromPassiveScanRadio();
+    if (passiveScanRadio)
+        passiveScanRadio->unsubscribe(Ieee80211Radio::radioChannelChangedSignal, this);
     cancelAndDelete(scanTimer);
     cancelAndDelete(assocTimeoutMsg);
     for (auto& ap : apList)
@@ -162,6 +166,12 @@ void Ieee80211MgmtSta::initialize(int stage)
         numChannels = par("numChannels");
 
         host = getContainingNode(this);
+        auto mac = findModuleFromPar<cModule>(par("macModule"), this);
+        auto radio = mac && mac->hasGate("lowerLayerOut") ? findConnectedGate<IRadio>(mac->gate("lowerLayerOut")) : nullptr;
+        if (radio && radio->getOwnerModule()->getProperties()->get("signal", "radioChannelChanged")) {
+            passiveScanRadio = radio->getOwnerModule();
+            passiveScanRadio->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
+        }
 
         WATCH(isScanning);
 
@@ -300,6 +310,32 @@ void Ieee80211MgmtSta::cancelScanTimer()
     scanTimer = nullptr;
 }
 
+void Ieee80211MgmtSta::unsubscribeFromPassiveScanRadio()
+{
+    if (passiveScanRadio && passiveScanRadio->isSubscribed(IRadio::radioModeChangedSignal, this)) {
+        passiveScanRadio->unsubscribe(IRadio::radioModeChangedSignal, this);
+        passiveScanRadio->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+    }
+}
+
+void Ieee80211MgmtSta::tryStartPassiveScanDwell()
+{
+    if (scanTimer != nullptr)
+        return;
+    if (passiveScanRadio) {
+        if (radioChannel != scanning.channelList[scanning.currentChannelIndex])
+            return;
+        auto radio = check_and_cast<IRadio *>(passiveScanRadio.get());
+        auto mode = radio->getRadioMode();
+        if (mode != IRadio::RADIO_MODE_RECEIVER &&
+            (mode != IRadio::RADIO_MODE_TRANSCEIVER || radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING))
+            return;
+    }
+    // IEEE Std 802.11-2024, 11.1.4.2.1: MaxChannelTime bounds listening on this channel.
+    scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+    scheduleAfter(scanning.maxChannelTime, scanTimer);
+}
+
 void Ieee80211MgmtSta::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
@@ -402,8 +438,12 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, i
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    // Note that we are only subscribed during scanning!
-    if (signalID == IRadio::receptionStateChangedSignal) {
+    if (signalID == Ieee80211Radio::radioChannelChangedSignal)
+        radioChannel = value;
+    if (source == passiveScanRadio.getNullable() && isScanning && !scanning.activeScan) {
+        tryStartPassiveScanDwell();
+    }
+    else if (signalID == IRadio::receptionStateChangedSignal) {
         IRadio::ReceptionState newReceptionState = static_cast<IRadio::ReceptionState>(value);
         if (newReceptionState != IRadio::RECEPTION_STATE_UNDEFINED && newReceptionState != IRadio::RECEPTION_STATE_IDLE) {
             EV << "busy radio channel detected during scanning\n";
@@ -445,6 +485,10 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     // start scanning
     if (scanning.activeScan)
         host->subscribe(IRadio::receptionStateChangedSignal, this);
+    else if (passiveScanRadio) {
+        passiveScanRadio->subscribe(IRadio::radioModeChangedSignal, this);
+        passiveScanRadio->subscribe(IRadio::transmissionStateChangedSignal, this);
+    }
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -457,6 +501,8 @@ bool Ieee80211MgmtSta::scanNextChannel()
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
             host->unsubscribe(IRadio::receptionStateChangedSignal, this);
+        else
+            unsubscribeFromPassiveScanRadio();
         isScanning = false;
         return true; // we're done
     }
@@ -473,11 +519,8 @@ bool Ieee80211MgmtSta::scanNextChannel()
         scanTimer = new cMessage("sendProbe", MK_SCAN_SENDPROBE);
         scheduleAfter(scanning.probeDelay, scanTimer);
     }
-    else {
-        // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
-        scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAfter(scanning.maxChannelTime, scanTimer);
-    }
+    else
+        tryStartPassiveScanDwell();
 
     return false;
 }
@@ -665,6 +708,7 @@ void Ieee80211MgmtSta::stop()
 {
     if (host != nullptr && isScanning && scanning.activeScan)
         host->unsubscribe(IRadio::receptionStateChangedSignal, this);
+    unsubscribeFromPassiveScanRadio();
     isScanning = false;
     cancelScanTimer();
     scanning = ScanningInfo();
