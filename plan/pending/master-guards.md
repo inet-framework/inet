@@ -54,7 +54,7 @@ push to a branch ──(push check green: trivial)──► push of the same com
 
 Limit: a person with write access can always write a workflow of their own that marks the required contexts as green. The rules stop mistakes, not a collaborator who wants to break them.
 
-Not tested yet: that a green mark of the push check counts for a required context that must come from GitHub Actions (W6), and that GitHub then accepts the push of that commit to `master` from a collaborator. The path of S1 to S6 depends on both.
+Tested in step G6 of [required-checks.md](required-checks.md) (2026-11-27): a commit status of the workflow token counts for a required context that must come from GitHub Actions (W6), and GitHub accepts the push of a commit with green required contexts from a person with the role write.
 
 ## 3. Required checks
 
