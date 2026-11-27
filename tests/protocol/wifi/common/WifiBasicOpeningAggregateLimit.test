@@ -1,0 +1,80 @@
+%description:
+Fresh DATA opens a protected Basic TXOP with the largest A-MSDU that fits the Block Ack size limit and the RTS/CTS/DATA airtime.
+
+%extraargs: -r 0..1
+
+%file: BasicOpeningAggregateLimit.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+static ProtocolTest openingAggregateLimit(const char *name)
+{
+    auto outbound = [] { return on("sta1.wlan[0].mac").signal("packetSentToLower"); };
+    return ProtocolTest(name)
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211AddbaResponse)").describe("the station negotiates Basic Block Ack").within(1.019))
+        .once(outbound().filterEvent([](const MatchContext& context) {
+            auto header = context.event.packet->peekAtFront<Ieee80211MacHeader>();
+            auto root = cSimulation::getActiveSimulation()->getSystemModule();
+            auto txop = check_and_cast<TxopProcedure *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure"));
+            return context.event.time == txop->getStart() &&
+                (dynamicPtrCast<const Ieee80211RtsFrame>(header) || dynamicPtrCast<const Ieee80211DataHeader>(header));
+        }).assertPacket("has(Ieee80211RtsFrame)").describe("RTS opens the first protected grant after ADDBA").within(0.03))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211CtsFrame)").describe("the AP grants protection").within(0.001))
+        .once(outbound().filterPacket("has(Ieee80211DataHeader)").assertEvent([](const MatchContext& context) {
+            auto packet = context.event.packet;
+            auto header = packet->peekAtFront<Ieee80211DataHeader>();
+            return header->getAckPolicy() == BLOCK_ACK && header->getAMsduPresent() && packet->getByteLength() == 2132;
+        }).describe("the burst opens with a two-MSDU Basic aggregate after protection").within(0.001));
+}
+
+Define_ProtocolTest(wifi_basic_opening_aggregate_byte_limit)
+{
+    return openingAggregateLimit("wifi_basic_opening_aggregate_byte_limit");
+}
+
+Define_ProtocolTest(wifi_basic_opening_aggregate_airtime_limit)
+{
+    return openingAggregateLimit("wifi_basic_opening_aggregate_airtime_limit");
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${airtime=false,true} ? "wifi_basic_opening_aggregate_airtime_limit" : "wifi_basic_opening_aggregate_byte_limit"
+*.sta1.numApps = 3
+*.sta1.app[0].sendInterval = 0.05ms
+*.sta1.app[0].stopTime = 1.008s
+*.sta1.app[1].typename = "UdpBasicApp"
+*.sta1.app[1].destAddresses = "sta2"
+*.sta1.app[1].destPort = 5000
+*.sta1.app[1].messageLength = 1000B
+*.sta1.app[1].sendInterval = 0.05ms
+*.sta1.app[1].startTime = 1.02s
+*.sta1.app[1].stopTime = 1.0206s
+*.sta1.app[2].typename = "UdpSink"
+*.sta1.app[2].localPort = 5001
+*.sta2.numApps = 2
+*.sta2.app[1].typename = "UdpBasicApp"
+*.sta2.app[1].destAddresses = "sta1"
+*.sta2.app[1].destPort = 5001
+*.sta2.app[1].messageLength = 1500B
+*.sta2.app[1].sendInterval = 1ms
+*.sta2.app[1].startTime = 1.0195s
+*.sta2.app[1].stopTime = 1.0196s
+*.sta2.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.rtsPolicy.rtsThreshold = 100B
+*.sta1.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = ${airtime} ? 6Mbps : 54Mbps
+*.sta1.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = ${airtime} ? 10000B : 2500B
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = -1
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_opening_aggregate_byte_limit: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_opening_aggregate_airtime_limit: PASS

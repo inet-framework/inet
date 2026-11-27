@@ -79,9 +79,11 @@ class INET_API QoSContext
     std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
     std::shared_ptr<PreparedDataTransmission> preparedData;
     BasicBarRetry openingBasicBarRetry;
+    std::unique_ptr<PreparedQosData> openingBasicData;
     int64_t plannedBasicDataId = -1;
     std::unique_ptr<PreparedQosData> plannedPostBarData;
     simtime_t plannedPostBarDuration;
+    std::function<bool(Packet *)> basicOpeningFits;
 };
 
 class INET_API NonQoSContext

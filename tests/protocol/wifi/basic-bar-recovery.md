@@ -19,3 +19,19 @@ flowchart TD
 ```
 
 The parent source makes DATA eligible immediately after a missing reply. That path fails the next-BAR assertion when a positive retry limit is expected. The retry fixture does not model corruption at a second station or an association reset while a retry is pending.
+
+`WifiBasicNormalAckFallback.test` clears the first Basic bitmap and switches the station’s DATA rate from 54 to 6 Mbps. The protected retry no longer fits the 500 µs TXOP. The station must send the original sequence number with Retry set and Normal Ack policy, then receive an ACK with AARF enabled. The earlier recovery code tried to read a missing failure counter when reporting this ACK to rate control.
+
+```mermaid
+flowchart LR
+    Input["Clear the bitmap and lower the DATA rate"] --> Action["Retry the original sequence with Normal Ack"]
+    Action --> Result["Receive ACK with rate control active"]
+```
+
+`WifiBasicBitmapRecoveryCleanup.test` injects one prior RTS failure for each of at least two outstanding MPDUs, then passes a partial bitmap to HCF. Earlier bitmap processing removed acknowledged DATA from the queue while retaining its RTS failure count. The fixture reads the counters immediately after processing and observes the retry of the outstanding sibling.
+
+```mermaid
+flowchart LR
+    Input["One RTS failure per outstanding MPDU"] --> Action["Process a partial bitmap"]
+    Action --> Result["Acknowledged counters read zero and the missing MPDU retains one prior failure"]
+```

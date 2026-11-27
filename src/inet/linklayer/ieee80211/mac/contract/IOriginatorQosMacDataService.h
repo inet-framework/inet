@@ -59,6 +59,7 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) = 0;
     // These QoS DATA methods separate reversible preparation from extraction and sequence assignment.
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) = 0;
+    virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation, const std::function<bool(b)>& fitsMpdu) = 0;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;
     // Success transfers the preview to the caller. Failure retains the preview and all queued sources.
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) = 0;

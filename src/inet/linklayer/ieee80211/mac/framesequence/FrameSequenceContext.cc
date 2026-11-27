@@ -75,6 +75,8 @@ void FrameSequenceContext::removeLastStep()
 
 Packet *FrameSequenceContext::getDataFrameToTransmit() const
 {
+    if (steps.empty() && qosContext && qosContext->openingBasicData)
+        return qosContext->openingBasicData->packet.get();
     return qosContext && qosContext->preparedData ? qosContext->preparedData->frame : inProgressFrames->getFrameToTransmit();
 }
 
