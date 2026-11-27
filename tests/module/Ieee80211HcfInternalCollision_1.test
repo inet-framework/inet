@@ -27,20 +27,21 @@ class TestIeee80211HcfInternalCollision : public Hcf
         header->setReceiverAddress(receiverAddress);
         packet->insertAtFront(header);
         edcaf->getPendingQueue()->enqueuePacket(packet);
-        int before[4], counters[4];
+        int expectedCw[4], counters[4], edcaCounts[4];
         for (int i = 0; i < 4; i++) {
             auto current = edca->getEdcaf(AccessCategory(i));
-            before[i] = current->getCw();
+            expectedCw[i] = current->getCw();
             counters[i] = current->getStationRetryCounters()->getStationShortRetryCount();
+            edcaCounts[i] = current->getEdcaRetryCount();
         }
         for (int attempt = 1; attempt <= retryLimit; attempt++) {
             handleInternalCollision({edcaf});
             for (int i = 0; i < 4; i++) {
                 auto current = edca->getEdcaf(AccessCategory(i));
-                int expectedCw = before[i];
-                if (i == ac && attempt < retryLimit)
-                    expectedCw = std::min(2 * before[i] + 1, (int)current->par("cwMax").intValue());
-                ASSERT(current->getCw() == expectedCw);
+                if (i == ac)
+                    expectedCw[i] = std::min(2 * expectedCw[i] + 1, (int)current->par("cwMax").intValue());
+                ASSERT(current->getCw() == expectedCw[i]);
+                ASSERT(current->getEdcaRetryCount() == edcaCounts[i] + (i == ac ? attempt : 0));
                 ASSERT(current->getStationRetryCounters()->getStationShortRetryCount() == counters[i] + (i == ac ? attempt : 0));
                 ASSERT(current->getStationRetryCounters()->getStationLongRetryCount() == 0);
             }

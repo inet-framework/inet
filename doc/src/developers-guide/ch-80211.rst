@@ -617,10 +617,12 @@ The module hierarchy owns the procedure; the EDCAF's pointer is borrowed.
 Both recovery procedures bind their CW calculator during the last
 initialization stage, after the EDCAF initializes CW in the link-layer stage.
 
-Each ``edca.edcaf[i].mgmtAndNonQoSRecoveryProcedure`` publishes its own
-``contentionWindowChanged`` and ``retryLimitReached`` signals. Filter by
-source/AC; ancestor subscriptions receive several independent streams,
-including each procedure's initial CW sample.
+Each ``edca.edcaf[i]`` publishes ``contentionWindowChanged`` for the window
+shared by management and QoS traffic in that access category. Subscribe before
+``INITSTAGE_LAST`` to receive its initial value. Each
+``edca.edcaf[i].mgmtAndNonQoSRecoveryProcedure`` publishes
+``retryLimitReached`` for management and non-QoS frames. For ancestor
+subscriptions, filter by the source module and access category.
 
 The coordination function connects them: on an acknowledgement it resets the
 counters and drops the frame, on a failure it counts and either marks the
