@@ -319,8 +319,8 @@ No sealed file changes. No consumer outside INET changes.
   and a larger window during a transfer; the sender does not start a fast retransmit. Baselines:
   `examples/inet/bulktransfer` `inet__inet`, `inet_inet_2a`, `inet_inet_2b`.
   - `tcp: fix: condition (e) of a duplicate ACK compares the window before its update (RFC 5681)`.
-- [x] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Repaired as C15 `82b9ea7470`, with the `statistics`
-  commit `593ba94baa`; gate B approved on 2026-11-27 (§6.3, R8). It lands when the maintainer asks. Gate A decides the
+- [x] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Landed on master on 2026-11-27 as C15 `847f6348c0`, with
+  the `statistics` commit `593ba94baa` (§6.3, R8). Gate A decides the
   form of the hold of new data.
   Test: an ECN-Echo arrives at a cwnd of one MSS; no new segment leaves before the timer expires. Baselines:
   `examples/inet/dctcp` `TcpRenoIncast`.
@@ -1334,7 +1334,7 @@ variable `eceHold`, (i) the window of one segment at the ECN-Echo, before the ha
 
 **The results of R8 (2026-11-26).** Master moved to `22df607673` with three commits (two CI workflows and two plan
 files), and the series was rebased onto it, and on 2026-11-27 onto `0fec958a59` (no change of `src`): C14 is
-`e5e54f2661`, and C15 is `82b9ea7470`, with both tests, the reviewer
+`e5e54f2661`, and C15 is `847f6348c0`, with both tests, the reviewer
 document `tests/protocol/tcp/ece-at-one-segment.md` and the release note `doc/whatsnew/fixes/tcp-ece-at-one-segment.txt`.
 `check-pull-request.sh` passes; its note on the length of the first subject of C15 led to the shorter subject.
 
@@ -1357,7 +1357,7 @@ re-record"). In the image of the CI, on the series on master `22df607673`, with 
 `topic/baseline-catch-up-defect-repairs` of `statistics`, after `7a315175`. C15 has the trailer `Statistical-Baseline:`
 with that commit, the obligations `fingerprint statistical test whatsnew`, and the `Baseline changes:` lines.
 
-- R7 landed in between (§6.3, R7), so the series stands on master `e2648b2c79`; C15 is `82b9ea7470`. Master changed no
+- R7 landed in between (§6.3, R7), so the series stands on master `e2648b2c79`; C15 is `847f6348c0`. Master changed no
   source file after the record.
 - The gates on the head `4cd7c95000`: `check-baselines.sh` with the local clones passes, and so do
   `check-baseline-attribution.sh plan` and its run in the job copy (`runs/r8-attribution/`): the parent against the old
@@ -1370,6 +1370,21 @@ with that commit, the obligations `fingerprint statistical test whatsnew`, and t
 **Gate B** approved by the maintainer on 2026-11-27 ("yes"). The repair commit of BD-7 is in
 [baseline-catch-up-defects.md](baseline-catch-up-defects.md). R8 lands when the maintainer asks: first the branch of
 `statistics` goes to GitHub, then the debug fingerprints of the landing run in the image of the CI.
+
+**Landing (2026-11-27).** The maintainer said: "land R8". Master had moved to `ca27c6797d` with four commits (CI
+workflows, a plan file, and the NED packages of `aodv` and `dymo`, which declare their C++ namespace); the fingerprint
+store and the master of `statistics` did not change. The series was rebased onto it with no conflict: C15 is
+`847f6348c0`. The branch `topic/baseline-catch-up-defect-repairs` of `statistics` went to GitHub (`bbd99994..593ba94b`).
+`check-pull-request.sh` passes with three notes (C15 changes 31 source lines; no description), and
+`baseline_masters.py check` finds that the `statistics` commit applies to master `7a315175`. The debug fingerprints ran
+on the rebased head in the image of the CI: 1847 runs, 1846 PASS and 1 expected ERROR, in 9 min 48 s
+(`runs/r8-landing/` of the folder of D10). Before the push, master moved to `e979ed340d` with two commits of IEEE
+802.11 (A-MSDU padding), which change `src`, fingerprints and the statistics (master of `statistics` `f5ed0d42`). The
+series was rebased once more with no conflict: C15 is `847f6348c0`. `baseline_masters.py check` finds that the
+`statistics` commit applies to master `f5ed0d42`, and the debug fingerprints ran again on the new head: 1846 PASS and 1
+expected ERROR, in 7 min 37 s (`runs/r8-landing-2/`). Then master moved to `bcf0842b55` with two commits of documents
+and gate scripts only, and the series was rebased again. Master moves to this commit by a fast-forward, and the workflow
+`check-baseline-masters.yml` puts the `statistics` commit onto master of `statistics`.
 
 ## 7. Verification
 

@@ -350,8 +350,8 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-7: after an ECN-Echo at a cwnd of one MSS, new data leaves at once
 
-- **State (2026-11-27):** repaired by `82b9ea7470` on the branch `topic/baseline-catch-up-defect-repairs` (change R8
-  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests `Rfc3168EceAtOneSegmentWaitsForTimer.test` and
+- **State (2026-11-27):** repaired by `847f6348c0` (change R8 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on
+  2026-11-27, with the protocol tests `Rfc3168EceAtOneSegmentWaitsForTimer.test` and
   `Rfc3168EceAtTwoSegmentsSendsAtOnce.test` and the reviewer document `tests/protocol/tcp/ece-at-one-segment.md`. The wait
   starts only when cwnd is one segment at the ECN-Echo, before the halving; the new parameter
   `eceAtOneSegment = "linux"`, which `~LinuxTcp` sets, does not wait, as Linux. It moves the fingerprint and the
