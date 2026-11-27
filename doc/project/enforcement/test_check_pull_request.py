@@ -86,6 +86,8 @@ class CheckPullRequestTest(unittest.TestCase):
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("  1 commit(s); the gates are from", result.stdout)
+        # check-required-contexts.sh compares master with the head merged into master
+        self.assertIn("the gate compares the base with the head merged into it", result.stdout)
 
     def test_an_invalid_base_is_an_error(self):
         result = subprocess.run(["bash", str(CHECKER), "--base", "nothing"], cwd=self.root,

@@ -40,8 +40,12 @@ def commit_of(ref):
     return out.stdout.strip()
 
 
-def gates(commit_range, description, required_contexts_file=None):
-    """(gate, rules, arguments) for each gate, in the order of the review guide."""
+def gates(commit_range, description, required_contexts_file=None, base=None):
+    """(gate, rules, arguments) for each gate, in the order of the review guide.
+
+    check-required-contexts.sh gets base..head instead of the series: it compares master with the
+    head merged into master, because the workflows after the landing come from both."""
+    landing_range = f"{base}..{commit_range.split('..', 1)[1]}" if base else commit_range
     found = [
         ("check-commits.sh", "PR-SPLIT-*, PR-SERIES-*, PR-MSG-*", [commit_range]),
         ("check-classification.sh", "CR-*", [commit_range]),
@@ -51,7 +55,7 @@ def gates(commit_range, description, required_contexts_file=None):
         ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION, PR-REQ-BASELINES",
          [commit_range] + (["--description-file" if description[0] == "--file" else "--pr", description[1]] if description else [])),
         ("check-required-contexts.sh", "W1, W2, W4, W5 of the required checks",
-         [commit_range] + (["--required-file", required_contexts_file] if required_contexts_file else [])),
+         [landing_range] + (["--required-file", required_contexts_file] if required_contexts_file else [])),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))
@@ -147,7 +151,7 @@ def main():
     print(f"== the pull-request audit: {commit_range} ==")
     print(f"  {commits} commit(s); the gates are from {gate_commit[:10]}")
     results = []
-    for gate, rules, arguments in gates(commit_range, description, args.required_contexts_file):
+    for gate, rules, arguments in gates(commit_range, description, args.required_contexts_file, base):
         print()
         print(f"######## {gate} ({rules})")
         status, output = run(gate, arguments)

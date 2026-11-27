@@ -4,9 +4,12 @@ of the ruleset of master still reports on a pull request after the change.
 
 A required context comes from a job of a workflow that runs on pull requests into master, or from a
 commit status that a workflow posts with a literal context, such as "Baseline merge". The gate
-computes the contexts at the base and at the head of the range from the workflow files, as GitHub
-names them: the name of the job, or its id, and for a job with a matrix the values of each
-combination in parentheses, for example "fingerprint-tests (debug, 0)".
+computes the contexts from the workflow files, as GitHub names them: the name of the job, or its id,
+and for a job with a matrix the values of each combination in parentheses, for example
+"fingerprint-tests (debug, 0)". It compares the base of the range, which is master, with the head
+merged into the base, which is master after the landing. When the merge has a conflict in a workflow
+or in the README, it compares the merge base with the head, gives a note, and does not report a
+context that neither reports: both are old.
 
   W2, W4  VIOLATION: a required context that the base reports and the head does not: the range
           renames or removes it, and an admin must change the ruleset at the same landing
@@ -225,6 +228,31 @@ def readme_list(commit):
     return [m.group(1) for m in re.finditer(r"^\s*[-*] `([^`]+)`", section, re.M)]
 
 
+def landing(base, head):
+    """(the commit before, the tree after, full) the landing of head on base.
+
+    When base is not an ancestor of head, the tree after is the merge of head into base, because the
+    workflows of master after the landing come from both. A conflict in another file does not change
+    the workflows of the merge. When the merge has a conflict in a workflow or in the README, the pair
+    is the merge base and head, and full is False."""
+    if subprocess.run(["git", "merge-base", "--is-ancestor", base, head], capture_output=True).returncode == 0:
+        return base, head, True
+    out = subprocess.run(["git", "merge-tree", "--write-tree", "--name-only", "--no-messages", base, head],
+                         capture_output=True, text=True)
+    lines = out.stdout.splitlines()
+    conflicts = [line for line in lines[1:] if line.startswith(f"{WORKFLOWS}/") or line == README]
+    if out.returncode in (0, 1) and lines and not conflicts:
+        print(f"  the head is not on the base: the gate compares the base with the head merged into it (tree {lines[0][:10]})")
+        return base, lines[0], True
+    merge_base = git("merge-base", base, head).strip()
+    reason = (f"git merge-tree cannot merge the head into the base ({out.stderr.strip().splitlines()[0] if out.stderr.strip() else out.returncode})"
+              if out.returncode not in (0, 1) or not lines else
+              f"the head does not merge into the base without a conflict in {', '.join(conflicts)}")
+    print(f"  note: {reason}, so the gate compares the merge base {merge_base[:10]} with the head: "
+          f"a rebase on master gives a full check")
+    return merge_base, head, False
+
+
 def where(source):
     return f"{source.path}, job {source.job}" if source.kind == "job" else f"a commit status in {source.path}"
 
@@ -243,7 +271,8 @@ def main(argv=None):
     print(f"== the series: {args.range} ==")
     try:
         base, head = git("rev-parse", base).strip(), git("rev-parse", head).strip()
-        before, after = contexts_at(base), contexts_at(head)
+        base, landed, full = landing(base, head)
+        before, after = contexts_at(base), contexts_at(landed)
     except CannotRun as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
@@ -269,6 +298,8 @@ def main(argv=None):
         elif source:
             violations.append(f"the series renames or removes the required context '{context}' ({where(before.found[context])}): "
                               f"an admin changes the ruleset of master at the same landing (W2 of {RULES})")
+        elif not full:
+            continue
         elif after.unknown:
             notes.append(f"no workflow is known to report the required context '{context}', and the gate cannot compute "
                          f"the names of {len(after.unknown)} job(s): " + "; ".join(f"{p} {j} ({r})" for p, j, r in after.unknown))
@@ -307,8 +338,10 @@ def main(argv=None):
 
     print()
     print(f"== W5: the list of the required contexts in {README} ==")
-    listed = readme_list(head)
-    if listed is None:
+    listed = readme_list(landed)
+    if not full:
+        print("  skipped: the head does not merge into the base")
+    elif listed is None:
         print(f"  note: {README} has no section '{README_HEADING[3:]}'")
     elif sorted(listed) != sorted(required):
         missing, extra = sorted(set(required) - set(listed)), sorted(set(listed) - set(required))

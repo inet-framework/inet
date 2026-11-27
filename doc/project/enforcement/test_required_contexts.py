@@ -216,6 +216,64 @@ class RequiredContextsTest(unittest.TestCase):
         result = self.check()
         self.assertIn("not listed ['Master green']; listed but not required ['fingerprint-tests (debug, 0)']", result.stdout)
 
+    def behind_master(self, master_change):
+        """Make master_change on the master after the fixture, and check out a branch at the fixture."""
+        self.git("branch", "topic")
+        master_change()
+        self.commit("master moves on")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+        self.git("checkout", "-q", "topic")
+
+    def test_a_branch_behind_master_sees_the_new_jobs_of_master(self):
+        self.behind_master(self.add_attribution_workflow)
+        self.write("README.txt", "a document\n")
+        self.commit("doc: add a document")
+        result = self.check()
+        self.assert_pass(result)
+        self.assertIn("the gate compares the base with the head merged into it", result.stdout)
+        self.assertNotIn("no workflow", result.stdout)
+
+    def test_a_branch_behind_master_that_renames_a_job_is_a_violation(self):
+        self.behind_master(lambda: self.write("README.txt", "a document\n"))
+        self.change(".github/workflows/fingerprint-tests.yml", "  fingerprint-tests:", "  fingerprints:")
+        self.commit("build: rename the job")
+        self.assert_violation(self.check(), "'fingerprint-tests (debug, 0)'")
+
+    def add_attribution_workflow(self):
+        self.write(".github/workflows/attribution.yml",
+                   SINGLE.replace("name: Mechanical audit", "name: Attribution runs").replace("baseline-merge:", "unused:")
+                         .replace('context="Baseline merge"', 'context="Unused"'))
+        self.required(REQUIRED + ["Attribution runs"])
+
+    def test_a_conflict_in_another_file_still_compares_with_the_merge(self):
+        self.write("README.txt", "a document\n")
+        self.commit("doc: add a document")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+
+        def master_change():
+            self.add_attribution_workflow()
+            self.write("README.txt", "the document of master\n")
+        self.behind_master(master_change)
+        self.write("README.txt", "the document of the branch\n")
+        self.commit("doc: change the document")
+        result = self.check()
+        self.assert_pass(result)
+        self.assertIn("the gate compares the base with the head merged into it", result.stdout)
+        self.assertNotIn("no workflow", result.stdout)
+
+    def test_a_conflict_in_a_workflow_compares_the_merge_base_with_the_head(self):
+        def master_change():
+            self.add_attribution_workflow()
+            self.change(".github/workflows/fingerprint-tests.yml", "echo test", "echo master")
+        self.behind_master(master_change)
+        self.change(".github/workflows/fingerprint-tests.yml", "echo test", "echo topic")
+        self.commit("build: change the step")
+        result = self.check()
+        self.assert_pass(result)
+        self.assertIn("without a conflict in .github/workflows/fingerprint-tests.yml", result.stdout)
+        self.assertNotIn("no workflow", result.stdout)
+        self.assertIn("skipped: the head does not merge into the base", result.stdout)
+
     def test_a_range_without_dots_is_a_usage_error(self):
         result = subprocess.run(["bash", str(CHECKER), "HEAD"], cwd=self.root, capture_output=True, text=True)
         self.assertEqual(result.returncode, 2)
