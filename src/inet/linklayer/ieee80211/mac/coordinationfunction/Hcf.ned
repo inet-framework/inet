@@ -31,6 +31,7 @@ module Hcf extends Module like IHcf
         bool isBlockAckSupported = default(false);
         string blockAckVariant = default("compressed"); // Compressed requires usable HT state. Select Basic explicitly for historical compatibility.
         int basicBlockAckReqRetryLimit = default(2); // Maximum retransmissions of an unanswered Basic BAR in fresh TXOPs.
+        double basicBlockAckIdleGrace @unit(s) = default(0s); // Originator grace period before completed Basic transfer teardown.
         double basicBlockAckReqMaxDelay @unit(s) = default(20ms); // Maximum wait for a Basic Block Ack batch across TXOPs. Zero disables waiting.
         double zeroLimitFragmentRoundTripTime @unit(s) = default(0s); // Propagation allowance per response in a multiple-protection fragment burst.
 
