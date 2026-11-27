@@ -11,7 +11,7 @@ count, because it runs the checks V4 and V5 of the test selection. A run that is
   post      posts the state of the head of master as a commit status:
               --on SHA...  on these commits (the head of a pull request, or of a pushed branch)
               --all        on the head of master, and, when the state changed since the last post
-                           on it (or with --force), on the head of each open pull request into
+                           on master (or with --force), on the head of each open pull request into
                            master; between two posts it waits, for the limits of GitHub
 
 When the state is red, `post --all` also names the commits of omnetpp (omnetpp-6.x) and opp_repl
@@ -136,11 +136,13 @@ def state_of(github, sha):
     return State(sha, "success", f"the full run of master {short} is green", runs)
 
 
-def last_posted(github, sha, context):
-    """The state of the newest status with the context on the commit, or None."""
-    for status in github.statuses(sha):
-        if status["context"] == context:
-            return status["state"]
+def last_posted(github, context, depth=10):
+    """The state of the newest status with the context on the newest commits of master, the head first,
+    or None. A new head has no status yet, and the pull requests have the state of an older head."""
+    for sha in github.master_commits(depth):
+        for status in github.statuses(sha):
+            if status["context"] == context:
+                return status["state"]
     return None
 
 
@@ -171,8 +173,8 @@ def report(github, current, depth=30):
 def post_all(github, context, target_url, force, pause, out):
     head = github.master_head()
     current = state_of(github, head)
-    previous = last_posted(github, head, context)
-    print(f"master {head[:10]}: {current} (the last post on it: {previous or 'none'})", file=out)
+    previous = last_posted(github, context)
+    print(f"master {head[:10]}: {current} (the last post on master: {previous or 'none'})", file=out)
     github.post(head, current.state, context, current.description, target_url)
     if current.state == "failure":
         for line in report(github, current):

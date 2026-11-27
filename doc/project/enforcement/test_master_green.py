@@ -127,6 +127,14 @@ class PostTest(unittest.TestCase):
         self.post(github, "--all", "--force")
         self.assertEqual(len(github.posts), 3)
 
+    def test_a_new_head_takes_the_last_state_of_an_older_commit_of_master(self):
+        github = FakeGitHub(green()[:-1], statuses={OLD: [{"context": "Master green", "state": "pending"}]})
+        self.post(github, "--all")
+        self.assertEqual([sha[0] for sha, _, _, _ in github.posts], ["a"])
+        github = FakeGitHub(green()[:-1], statuses={OLD: [{"context": "Master green", "state": "success"}]})
+        self.post(github, "--all")
+        self.assertEqual(len(github.posts), 3)
+
     def test_a_post_on_a_commit_gives_the_state_of_master(self):
         github = FakeGitHub(green())
         self.post(github, "--on", "e" * 40, "--context=Master green")
