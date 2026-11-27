@@ -1386,6 +1386,84 @@ expected ERROR, in 7 min 37 s (`runs/r8-landing-2/`). Then master moved to `bcf0
 and gate scripts only, and the series was rebased again. Master moves to this commit by a fast-forward, and the workflow
 `check-baseline-masters.yml` puts the `statistics` commit onto master of `statistics`.
 
+#### R9: the fast retransmit of TcpReno after a timeout (BD-14), prepared 2026-11-27
+
+**Re-check.** On master `bcf0842b55`, the two counts are as the entries say: the room to send uses the count of Linux
+(`TcpClassicAlgorithmBase::getBytesInFlight()`), and the threshold of a fast retransmit uses FlightSize
+(`TcpConnection::getFlightSize()`, `snd_max - snd_una`). They did not change since `958dee5cf3`.
+
+**The fault, shown, and what it is.** `tests/protocol/tcp/rfc/Rfc6582RenoNoFastRetransmitAfterTimeout.test`, in debug
+mode on the branch: `TcpReno` without SACK, as `examples/inet/tcpwindowscale`. The relay removes every data segment of
+host A for 50 ms from its 301st segment on, so the retransmission timer expires at 1.4256 s; in the go-back it removes
+the 12th data segment, so the later segments bring duplicate ACKs. At the third one (1.42777008 s) TcpReno starts a fast
+retransmit, takes ssthresh and cwnd 68056 from the FlightSize of before the timeout, and sends 35 segments at once. All
+35 are retransmissions of the go-back, not new data. RFC 5681 section 3.1 limits only the sequence numbers to
+`snd_una + cwnd`, so it allows them too: the sentence of BD-14 that RFC 5681 lets no segment leave holds only for new
+data. The cause is the fast retransmit in the recovery of a timeout, with a FlightSize that holds the data of before
+the timeout. RFC 6582 section 6 names this problem, and its guard `recover` forbids that fast retransmit. `TcpNewReno`
+has the guard (`Rfc6582Recovery::onRexmitTimeout()`, since 2014), and R5 gave it to `TcpTahoe` and `TcpWestwood`.
+`TcpReno` and `DcTcp` without SACK (`Rfc5681Recovery`) have none. The test fails at that fast retransmit.
+
+**BD-19 and BD-20 do not follow from this.** The difference of BD-19 (a duplicate ACK does not take a segment that a
+timeout marked lost out of the count, `tcp_limit_reno_sacked()`) showed at step 16 also in runs of `TcpNewReno`, which
+had the guard then, so the guard does not remove it. The sentence of BD-20 that RFC 6675 defines its pipe only for the
+recovery is not exact: step (3) of RFC 6675 section 5, Limited Transmit before the recovery, also sends by the pipe.
+Both entries need an analysis of their own before a design.
+
+**The design before gate A (preview, 2026-11-27).** The recommended design is in the working tree, not committed; its
+diff is the preview commit `2f5409fb53` on the branch `preview/r9`, which does not land. `Rfc5681Recovery` gets the flag
+`recoverAfterTimeout`, which only `TcpReno` sets, and so `DcTcp`, which extends it: a timeout sets
+`recover = snd_max - 1`, and the third duplicate ACK starts a fast retransmit only when `snd_una - 1 > recover`.
+`TcpNewReno` builds a temporary `Rfc5681Recovery` for each step of RFC 5681 and keeps `recover` itself, so the class
+touches `recover` only with the flag; a first preview without the flag failed three tests of NewReno. 33 added and 5
+removed lines in 3 files, with the comments.
+
+- With the preview, the new test passes, and so do the 42 protocol tests of RFC 5681, RFC 6582, RFC 6298, DCTCP and the
+  algorithm classes and the 38 module tests of the algorithms, the retransmission and DCTCP, in debug mode. Without the
+  guard the new test fails at 1.42777008 s.
+- The price, as in R5: a loss inside the go-back waits for the timer. In the test, the lost retransmission leaves at a
+  second timeout (2.4273 s), and the go-back goes on in slow start with no burst.
+- In the image of the CI (`runs/r9-preview/` of the folder of D10, `evidence/runs/2f5409fb53/` of the job copy): all
+  1847 fingerprint runs in release mode give 1846 PASS and 1 expected ERROR, so no fingerprint moves; the statistical
+  tests give 933 PASS, 11 SKIP and 1 FAIL: only `examples/inet/tcpwindowscale` `WS_enabled` moves, 414 of 1451 values.
+  Its server receives 270253500 bytes in place of 180130764 in the 600 s, with the same two timeouts, because the go-back
+  makes no burst and cwnd stays higher (lowest ssthresh 163350 in place of 17424).
+
+**Design questions for gate A.**
+
+1. *The scope (a revision of the plan).* R9 repairs BD-14 alone, by the guard; BD-19 and BD-20 leave R9, and a later
+   change re-checks them and decides their count and parameter (D7). The assistant recommends it: the plan joined the
+   three by "one count", but the cause of BD-14 is the missing guard, and the premises of BD-19 and BD-20 need checks.
+2. *Where TcpReno sets recover.* (a) At a timeout only: the fast retransmit of Reno stays as RFC 5681 defines it, and a
+   second loss in a window still gets one. (b) Also at each fast retransmit, as `TcpNewReno`: then a second loss in a
+   window waits for the timer, as in R5 for Tahoe. The assistant recommends (a), as for Westwood in R5.
+
+**Commit** (with the recommended answers).
+
+- **C16: `tcp: fix: TcpReno starts no fast retransmit in the recovery of a timeout (RFC 6582 section 6)`** (BD-14).
+  `Rfc5681Recovery.h`, `Rfc5681Recovery.cc`, `TcpReno.cc`. The items of
+  [TR-PLAN-PROTOCOL](../../doc/project/rule/testing.md#tr-plan-protocol):
+  1. Requirement: RFC 6582 section 6 and the step "Retransmit timeouts" of section 3.2; RFC 5681 equation (4). Bug: a
+     fast retransmit in the go-back after a timeout takes ssthresh from the data of before the timeout. Evidence: the
+     test above; `examples/inet/tcpwindowscale` `WS_enabled` at t=22.6027 s (BD-14).
+  2. Existing tests: `Rfc5681FastRetransmit.test` and the module tests of Reno have no timeout before a fast
+     retransmit; the guard has tests only for NewReno, Tahoe and Westwood.
+  3. New: `tests/protocol/tcp/rfc/Rfc6582RenoNoFastRetransmitAfterTimeout.test`, one case.
+  4. Initial state: TcpReno without SACK, host B with a window of 1000000 bytes. Stimulus: 1000000 bytes; the relay
+     removes the data of host A for 50 ms, then the 12th segment of the go-back. Production path:
+     `onRexmitTimeout()`, `receivedDuplicateAck()` of `Rfc5681Recovery`. Observation: the ACKs and the segments of host
+     A and its `numRtos` signal. Assertion: no fast retransmit while the cumulative ACK does not cover more than the
+     highest octet that host A had sent at the timeout, and the ACK of all data.
+  5. Before C16: a fast retransmit at 1.42777008 s. After C16: none; the segment leaves at the next timeout.
+  6. Code action: a timeout sets `recover`, and the third duplicate ACK below it starts no fast retransmit, for
+     `TcpReno` and `DcTcp` only.
+  7. Runner: `run_protocol_tests!(project; file = "Rfc5681|Rfc6582|TcpAlgorithmClass|DcTcp|Rfc6298", mode = "debug")`
+     and the module tests of the algorithms, after a debug build. Limit: no test runs DcTcp without SACK.
+  8. Reviewer document: `tests/protocol/tcp/reno-no-fast-retransmit-after-timeout.md`, in C16, with the release note
+     `doc/whatsnew/fixes/tcp-reno-no-fast-retransmit-after-timeout.txt`.
+
+**Expected baselines.** The statistics of `examples/inet/tcpwindowscale` `WS_enabled`; no fingerprint.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
