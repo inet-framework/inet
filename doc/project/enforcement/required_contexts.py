@@ -6,7 +6,9 @@ A required context comes from a job of a workflow that runs on pull requests int
 commit status that a workflow posts with a literal context, such as "Baseline merge". The gate
 computes the contexts from the workflow files, as GitHub names them: the name of the job, or its id,
 and for a job with a matrix the values of each combination in parentheses, for example
-"fingerprint-tests (debug, 0)". It compares the base of the range, which is master, with the head
+"fingerprint-tests (debug, 0)". A matrix value can be an expression of literals, github.event_name,
+==, !=, &&, ||, !, parentheses and fromJSON: the gate evaluates it for each pull-request event of
+the workflow. It compares the base of the range, which is master, with the head
 merged into the base, which is master after the landing. When the merge has a conflict in a workflow
 or in the README, it compares the merge base with the head, gives a note, and does not report a
 context that neither reports: both are old.
@@ -35,6 +37,7 @@ Exit status 0 = clean, 1 = violations, 2 = invalid usage or the gate cannot run.
 """
 import argparse
 import itertools
+import json
 import os
 import re
 import subprocess
@@ -99,29 +102,146 @@ def triggers(document):
 
 
 def pull_request_trigger(on):
-    """(the workflow runs on pull requests into master, the pull request trigger has a path filter)."""
-    runs, filtered = False, False
+    """(the events that run the workflow on pull requests into master, the pull request trigger has a path filter)."""
+    events, filtered = [], False
     for event in PR_EVENTS:
         if event not in on:
             continue
         config = on[event] or {}
         branches, ignored = config.get("branches"), config.get("branches-ignore") or []
         if (branches is None or any(b in ("master", "*", "**") for b in branches)) and "master" not in ignored:
-            runs = True
+            events.append(event)
             filtered = filtered or "paths" in config or "paths-ignore" in config
-    return runs, filtered
+    return events, filtered
 
 
-def combinations(matrix):
-    """The value lists of the matrix combinations in key order, or None when the gate cannot compute them."""
+class Unknown(Exception):
+    """An expression that the gate cannot evaluate."""
+
+
+EXPRESSION = re.compile(r"^\$\{\{(.*)\}\}$", re.S)
+TOKEN = re.compile(r"\s*(?:('(?:[^']|'')*')|(-?\d+(?:\.\d+)?)|([A-Za-z_][A-Za-z0-9_.-]*)|(==|!=|&&|\|\||[!()]))")
+
+
+def evaluate(value, event):
+    """The value of a matrix entry for a pull request of the event. A text "${{ ... }}" is an
+    expression of GitHub; the gate knows literals, github.event_name, ==, !=, &&, || and ! with the
+    rules of GitHub (&& and || give one of their operands, and texts compare without case),
+    parentheses and fromJSON. Raises Unknown for any other expression."""
+    if not isinstance(value, str):
+        return value
+    match = EXPRESSION.match(value.strip())
+    if not match:
+        return value
+    source, tokens, position = match.group(1), [], 0
+    while source[position:].strip():
+        token = TOKEN.match(source, position)
+        if not token:
+            raise Unknown(source)
+        tokens.append(token.groups())
+        position = token.end()
+    index = 0
+
+    def peek(symbol):
+        return index < len(tokens) and tokens[index][3] == symbol
+
+    def take(symbol):
+        nonlocal index
+        if not peek(symbol):
+            raise Unknown(source)
+        index += 1
+
+    def truthy(x):
+        return x not in (False, 0, "", None)
+
+    def primary():
+        nonlocal index
+        if index >= len(tokens):
+            raise Unknown(source)
+        string, number, name, symbol = tokens[index]
+        if symbol == "(":
+            take("(")
+            result = disjunction()
+            take(")")
+            return result
+        index += 1
+        if string is not None:
+            return string[1:-1].replace("''", "'")
+        if number is not None:
+            return float(number) if "." in number else int(number)
+        if name in ("true", "false"):
+            return name == "true"
+        if name == "null":
+            return None
+        if name == "github.event_name":
+            return event
+        if name is not None and name.lower() == "fromjson":
+            take("(")
+            argument = disjunction()
+            take(")")
+            try:
+                return json.loads(argument)
+            except (TypeError, ValueError):
+                raise Unknown(source) from None
+        raise Unknown(source)
+
+    def comparison():
+        nonlocal index
+        left = negation()
+        while peek("==") or peek("!="):
+            equal = peek("==")
+            index += 1
+            right = negation()
+            same = left.lower() == right.lower() if isinstance(left, str) and isinstance(right, str) else left == right
+            left = same if equal else not same
+        return left
+
+    def negation():
+        nonlocal index
+        if peek("!"):
+            index += 1
+            return not truthy(negation())
+        return primary()
+
+    def conjunction():
+        nonlocal index
+        left = comparison()
+        while peek("&&"):
+            index += 1
+            right = comparison()
+            left = right if truthy(left) else left
+        return left
+
+    def disjunction():
+        nonlocal index
+        left = conjunction()
+        while peek("||"):
+            index += 1
+            right = conjunction()
+            left = left if truthy(left) else right
+        return left
+
+    result = disjunction()
+    if index != len(tokens):
+        raise Unknown(source)
+    return result
+
+
+def combinations(matrix, event):
+    """The value lists of the matrix combinations in key order for a pull request of the event, or None
+    when the gate cannot compute them."""
     if not isinstance(matrix, dict) or "include" in matrix:
         return None
     keys = [key for key in matrix if key != "exclude"]
-    if not keys or any(not isinstance(matrix[key], list) for key in keys):
+    try:
+        values_of = {key: evaluate(matrix[key], event) for key in keys}
+    except Unknown:
+        return None
+    if not keys or any(not isinstance(values_of[key], list) for key in keys):
         return None
     excluded = matrix.get("exclude") or []
     result = []
-    for values in itertools.product(*(matrix[key] for key in keys)):
+    for values in itertools.product(*(values_of[key] for key in keys)):
         combination = dict(zip(keys, values))
         if any(all(combination.get(k) == v for k, v in rule.items()) for rule in excluded):
             continue
@@ -133,8 +253,9 @@ def text(value):
     return ("true" if value else "false") if isinstance(value, bool) else str(value)
 
 
-def job_names(job_id, job):
-    """The check names of a job, or a reason why the gate cannot compute them."""
+def job_names(job_id, job, events=("pull_request",)):
+    """The check names of a job on a pull request of each of the events, or a reason why the gate
+    cannot compute them."""
     if "uses" in job:
         return None, "a reusable workflow"
     name = job.get("name", job_id)
@@ -145,9 +266,13 @@ def job_names(job_id, job):
         if "${{" in name:
             return None, "an expression in the name"
         return [name], None
-    combos = combinations(matrix)
-    if combos is None:
-        return None, "a matrix with include or with computed values"
+    combos = []
+    for event in events:
+        for combo in combinations(matrix, event) or [None]:
+            if combo is None:
+                return None, "a matrix with include or with computed values"
+            if combo not in combos:
+                combos.append(combo)
     if "${{" in name:
         names = []
         for combo in combos:
@@ -177,13 +302,13 @@ def contexts_at(commit):
         except Exception as error:  # a workflow that GitHub cannot read reports nothing
             result.unknown.append((path, "", f"the file cannot be read: {str(error).splitlines()[0] if str(error) else error}"))
             continue
-        runs, filtered = pull_request_trigger(triggers(document))
-        if not runs or not isinstance(document.get("jobs"), dict):
+        events, filtered = pull_request_trigger(triggers(document))
+        if not events or not isinstance(document.get("jobs"), dict):
             continue
         for job_id, job in document["jobs"].items():
             if not isinstance(job, dict):
                 continue
-            names, reason = job_names(job_id, job)
+            names, reason = job_names(job_id, job, events)
             if names is None:
                 result.unknown.append((path, job_id, reason))
                 continue

@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -198,6 +199,44 @@ class RequiredContextsTest(unittest.TestCase):
         result = self.check()
         self.assert_pass(result)
         self.assertIn("the gate cannot compute the names of the job 'fingerprint-tests'", result.stdout)
+
+    EVENT_MATRIX = """mode: ${{ fromJSON(github.event_name == 'push' && '["coverage", "release"]' || '["debug", "release"]') }}"""
+
+    def test_a_matrix_value_of_the_event_gives_the_names_on_a_pull_request(self):
+        self.change(".github/workflows/fingerprint-tests.yml", 'mode: ["debug", "release"]', self.EVENT_MATRIX)
+        self.commit("build: coverage on a push")
+        result = self.check()
+        self.assert_pass(result)
+        self.assertIn("still reports on a pull request ==\n  6 required context(s)\n  ok\n", result.stdout)
+
+    def test_a_rename_of_a_job_with_a_matrix_value_of_the_event_is_a_violation(self):
+        self.change(".github/workflows/fingerprint-tests.yml", 'mode: ["debug", "release"]', self.EVENT_MATRIX)
+        self.commit("build: coverage on a push")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+        self.change(".github/workflows/fingerprint-tests.yml", "  fingerprint-tests:", "  fingerprints:")
+        self.commit("build: rename the job")
+        self.assert_violation(self.check(), "'fingerprint-tests (debug, 0)'")
+
+    def test_a_matrix_value_of_a_job_output_gives_a_note(self):
+        self.change(".github/workflows/fingerprint-tests.yml", 'mode: ["debug", "release"]',
+                    "mode: ${{ fromJSON(needs.environment.outputs.modes) }}")
+        self.commit("build: modes from a job")
+        result = self.check()
+        self.assert_pass(result)
+        self.assertIn("the gate cannot compute the names of the job 'fingerprint-tests'", result.stdout)
+
+    def test_the_expressions_follow_the_rules_of_github(self):
+        sys.path.insert(0, str(HERE))
+        from required_contexts import evaluate, Unknown
+        self.assertEqual(evaluate("${{ github.event_name == 'PULL_REQUEST' }}", "pull_request"), True)
+        self.assertEqual(evaluate("${{ github.event_name == 'push' && 'a' || 'b' }}", "pull_request"), "b")
+        self.assertEqual(evaluate("${{ !(github.event_name != 'push') && 1 }}", "push"), 1)
+        self.assertEqual(evaluate("${{ fromJSON('[0, 1]') }}", "push"), [0, 1])
+        self.assertEqual(evaluate("${{ 'it''s' }}", "push"), "it's")
+        self.assertEqual(evaluate(["debug"], "push"), ["debug"])
+        for expression in ("${{ github.ref == 'master' }}", "${{ (1 }}", "${{ fromJSON('[') }}", "${{ 1 2 }}"):
+            with self.assertRaises(Unknown, msg=expression):
+                evaluate(expression, "push")
 
     def test_unknown_required_contexts_give_a_note_and_pass(self):
         result = subprocess.run(["bash", str(CHECKER), f"{self.base}..HEAD", "--required-file", str(self.root / "missing.txt")],
