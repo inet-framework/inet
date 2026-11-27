@@ -1,11 +1,12 @@
 %description:
-Preserve captured bytes, timestamps, and FCS metadata in
-complete, truncated, stale-length, and opposite-endian PCAP records.
+Preserve captured bytes, timestamps, protocol tags, and FCS metadata in
+complete, truncated, stale-length, and mixed-endian PCAP records.
 
 %includes:
 #include <fstream>
 
 #include "inet/common/FcsInd_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/recorder/PcapReader.h"
@@ -104,7 +105,7 @@ for (int snaplen : {12, 16}) {
     reader.closePcap();
 }
 
-// Supply both file byte orders and record lengths the normal writer never emits.
+// Supply both file and loopback family byte orders, including mixed-order rewrites.
 const std::vector<uint8_t> ipv4Datagram = {
     0x45, 0, 0, 28, 0, 0, 0, 0, 64, 17, 0x8e, 0x9a, 192, 0, 2, 1,
     198, 51, 100, 2, 0x30, 0x39, 0x30, 0x3a, 0, 8, 0, 0
@@ -125,19 +126,23 @@ for (bool bigEndian : {false, true}) {
     appendInteger(65535, 4); // snaplen
     appendInteger(0, 4); // LINKTYPE_NULL
     uint32_t recordLength = sizeof(uint32_t) + ipv4Datagram.size();
-    auto appendRecord = [&](uint32_t seconds, uint32_t capturedLength, uint32_t originalLength) {
+    auto appendRecord = [&](uint32_t seconds, uint32_t capturedLength, uint32_t originalLength, bool familyBigEndian) {
         appendInteger(seconds, 4);
         appendInteger(345678, 4);
         appendInteger(capturedLength, 4);
         appendInteger(originalLength, 4);
         if (capturedLength > 0) {
-            appendInteger(2, 4); // IPv4 family in capture byte order
+            if (familyBigEndian)
+                capture.insert(capture.end(), {0, 0, 0, 2});
+            else
+                capture.insert(capture.end(), {2, 0, 0, 0});
             capture.insert(capture.end(), ipv4Datagram.begin(), ipv4Datagram.end());
         }
     };
-    appendRecord(1, 0, recordLength);
-    appendRecord(2, recordLength, recordLength - 1);
-    appendRecord(3, recordLength, recordLength);
+    appendRecord(1, 0, recordLength, bigEndian);
+    appendRecord(2, recordLength, recordLength - 1, bigEndian);
+    appendRecord(3, recordLength, recordLength, bigEndian);
+    appendRecord(4, recordLength, recordLength, !bigEndian);
     const char *filename = "loopback.pcap";
     std::ofstream output(filename, std::ios::binary);
     output.write(reinterpret_cast<const char *>(capture.data()), capture.size());
@@ -147,11 +152,15 @@ for (bool bigEndian : {false, true}) {
 
     PcapReader reader;
     reader.openPcap(filename, nullptr);
-    for (int seconds : {2, 3}) {
+    for (int seconds : {2, 3, 4}) {
         auto record = reader.readPacket();
         ASSERT(record.second != nullptr);
         ASSERT(record.first.sec == seconds && record.first.usec == 345678);
         ASSERT(record.second->peekDataAsBytes()->getBytes() == ipv4Datagram);
+        auto protocolTag = record.second->findTag<PacketProtocolTag>();
+        if (protocolTag == nullptr || protocolTag->getProtocol() != &Protocol::ipv4)
+            throw cRuntimeError("Missing IPv4 protocol for loopback record %d in the %s-endian capture",
+                    seconds, bigEndian ? "big" : "little");
         delete record.second;
     }
     ASSERT(reader.readPacket().second == nullptr);

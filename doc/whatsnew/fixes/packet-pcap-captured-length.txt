@@ -1,3 +1,3 @@
 Truncated PCAP records preserve their captured bytes
 
-The PCAP reader returns only the frame bytes present in a truncated capture record and marks them as incomplete. It skips records that captured no frame bytes and reports an FCS only when the entire FCS was captured. Replay tolerates an original length smaller than the captured length.
+The PCAP reader returns only the frame bytes present in a truncated capture record and marks them as incomplete. It skips records that captured no frame bytes and reports an FCS only when the entire FCS was captured. Replay tolerates an original length smaller than the captured length and identifies IPv4 and IPv6 in loopback captures from either byte order.

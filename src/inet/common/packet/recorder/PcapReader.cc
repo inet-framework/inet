@@ -25,6 +25,15 @@ static uint32_t swapByteOrder32(uint32_t v)
     return ((v & 0xFFL) << 24) | ((v & 0xFF00L) << 8) | ((v & 0xFF0000L) >> 8) | ((v & 0xFF000000L) >> 24);
 }
 
+static const Protocol *getLoopbackProtocol(uint32_t addressFamily)
+{
+    switch (addressFamily) {
+        case 2: return &Protocol::ipv4;
+        case 24: case 28: case 30: return &Protocol::ipv6;
+        default: return nullptr;
+    }
+}
+
 // Read a little-endian 32-bit word from a radiotap header (radiotap is always
 // little-endian, regardless of the pcap byte order).
 static uint32_t radiotapReadLe32(const uint8_t *buf, size_t pos)
@@ -134,10 +143,12 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
                     continue;
                 uint32_t addressFamily;
                 memcpy(&addressFamily, bytes.data(), sizeof(addressFamily));
-                switch (addressFamily) {
-                    case 2: protocol = &Protocol::ipv4; break;
-                    case 24: case 28: case 30: protocol = &Protocol::ipv6; break;
-                }
+                if (swapByteOrder)
+                    addressFamily = swapByteOrder32(addressFamily);
+                protocol = getLoopbackProtocol(addressFamily);
+                // A capture rewrite can change the file byte order and copy the family bytes as-is.
+                if (protocol == nullptr)
+                    protocol = getLoopbackProtocol(swapByteOrder32(addressFamily));
                 break;
             }
             case 1: protocol = &Protocol::ethernetMac; break;
