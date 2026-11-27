@@ -1,0 +1,131 @@
+%description:
+A retry BAR opens a fresh TXOP after the first Block Ack is lost. A successful
+reply leaves a reservation for queued DATA. The DATA reaches the feedback
+threshold again and the next BAR and Block Ack complete in that same grant.
+The short-reservation control removes half a SIFS from the sender's local
+TXNAV before the second BAR. Its feedback must acquire another grant.
+
+%extraargs: -r 0..1
+
+%file: BasicFeedbackInBarOpenedTxop.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+class BasicFeedbackReservationHcf : public BlockAckLifecycleHcf
+{
+  private:
+    bool shortened = false;
+
+  protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        if (par("shortReservation").boolValue() && !shortened && ifs > SIMTIME_ZERO &&
+            dynamicPtrCast<const Ieee80211BasicBlockAckReq>(packet->peekAtFront<Ieee80211MacHeader>())) {
+            auto context = frameSequenceHandler->getContext();
+            auto opening = dynamic_cast<ITransmitStep *>(context->getStep(0));
+            auto precedingData = dynamic_cast<TransmitStep *>(context->getStepBeforeLast());
+            if (opening && precedingData &&
+                dynamicPtrCast<const Ieee80211BasicBlockAckReq>(opening->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()) &&
+                dynamicPtrCast<const Ieee80211DataHeader>(precedingData->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>())) {
+                auto end = precedingData->getPpduEnd();
+                auto remaining = rx->getTxnavRemaining();
+                ASSERT(remaining > ifs && end == simTime());
+                rx->successfulFrameTransmitted(end, remaining - ifs / 2);
+                shortened = true;
+            }
+        }
+        return BlockAckLifecycleHcf::transmitFrame(packet, ifs);
+    }
+};
+Define_Module(BasicFeedbackReservationHcf);
+
+static ProtocolTest runFeedbackInBarOpenedTxop(bool shortReservation)
+{
+    auto sent = [] { return on("sta1.wlan[0].mac").signal("packetSentToLower"); };
+    auto received = [] { return on("sta1.wlan[0].mac").signal("packetReceivedFromLower"); };
+    auto grant = [](const PacketEvent&) {
+        auto root = cSimulation::getActiveSimulation()->getSystemModule();
+        auto txop = check_and_cast<TxopProcedure *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure"));
+        return cValue(txop->getStart().dbl());
+    };
+    auto barStart = [](const PacketEvent& event) {
+        return cValue(event.packet->peekAtFront<Ieee80211BasicBlockAckReq>()->getStartingSequenceNumber().get());
+    };
+    auto feedback = "has(Ieee80211BasicBlockAck) && ieee80211mac.receiverAddress.getInt() == 0x020000000003";
+    return ProtocolTest(shortReservation ? "wifi_basic_feedback_needs_sifs" : "wifi_basic_feedback_in_bar_opened_txop")
+        .intercept(tap("radioMedium").from("ap").to("sta1").filterPacket(feedback).nth(1).drop())
+        .once(sent().filterPacket("has(Ieee80211BasicBlockAckReq)").capture("firstGrant", grant)
+            .capture("openingSequence", barStart).describe("send the request that loses its reply").within(1.05))
+        .once(sent().filterPacket("has(Ieee80211BasicBlockAckReq)").assertEvent([=](const MatchContext& c) {
+            auto start = grant(c.event).doubleValue();
+            return start > c.get("firstGrant").doubleValue() && SimTime(start) == c.event.time &&
+                barStart(c.event) == c.get("openingSequence");
+        }).capture("grant", grant).describe("open the fresh grant with the same request").within(0.01))
+        .once(received().filterPacket(feedback).assertEvent([=](const MatchContext& c) {
+            auto reply = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+            return grant(c.event) == c.get("grant") && reply->getDurationField() > SIMTIME_ZERO && reply->getBlockAckBitmap(0).getBit(0);
+        }).describe("accept the bitmap with a DATA reservation").within(0.001))
+        .once(sent().filterPacket("has(Ieee80211DataHeader)").assertEvent([=](const MatchContext& c) {
+            auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+            return grant(c.event) == c.get("grant") && data->getAckPolicy() == BLOCK_ACK && data->getDurationField() > SIMTIME_ZERO;
+        }).capture("sequence", [](const PacketEvent& event) {
+            return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+        }).capture("nextBar", [](const PacketEvent& event) {
+            auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            return cValue((event.time + mode->getDuration(event.packet->getDataLength()) + mode->getSifsTime()).dbl());
+        }).describe("the fresh DATA reserves another feedback exchange").within(0.00003))
+        .once(sent().assertEvent([=](const MatchContext& c) {
+            auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+            auto delta = c.event.time - SimTime(c.get("nextBar").doubleValue());
+            if (!bar || barStart(c.event).intValue() != c.get("sequence").intValue())
+                return false;
+            auto sameGrant = grant(c.event) == c.get("grant");
+            return shortReservation ? !sameGrant && delta > SimTime(2, SIMTIME_NS) :
+                sameGrant && delta >= SimTime(-2, SIMTIME_NS) && delta <= SimTime(2, SIMTIME_NS);
+        }).capture("feedbackGrant", grant).describe(shortReservation ?
+            "send the second BAR after fresh contention when SIFS does not fit" :
+            "send the second BAR at SIFS inside the opening BAR's grant").within(0.001))
+        .once(received().filterPacket(feedback).assertEvent([=](const MatchContext& c) {
+            auto reply = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+            return grant(c.event) == c.get("feedbackGrant") && reply->getStartingSequenceNumber().get() == c.get("sequence").intValue() &&
+                reply->getBlockAckBitmap(0).getBit(0);
+        }).describe("complete the second bitmap in the same grant").within(0.001));
+}
+
+Define_ProtocolTest(wifi_basic_feedback_in_bar_opened_txop) { return runFeedbackInBarOpenedTxop(false); }
+Define_ProtocolTest(wifi_basic_feedback_needs_sifs) { return runFeedbackInBarOpenedTxop(true); }
+}
+
+%file: BasicFeedbackInBarOpenedTxop.ned
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+
+module BasicFeedbackReservationHcf extends BlockAckLifecycleHcf
+{
+    parameters:
+        bool shortReservation;
+        @class(::inet::protocoltest::BasicFeedbackReservationHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${shortReservation=false,true} ? "wifi_basic_feedback_needs_sifs" : "wifi_basic_feedback_in_bar_opened_txop"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.wlan[*].mac.hcf.typename = "BasicFeedbackReservationHcf"
+*.sta1.wlan[*].mac.hcf.shortReservation = ${shortReservation}
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.003s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.basicBlockAckReqRetryLimit = 1
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_feedback_in_bar_opened_txop: PASS
+%contains: stdout
+PROTOCOLTEST wifi_basic_feedback_needs_sifs: PASS
+%not-contains: stdout
+: FAIL
