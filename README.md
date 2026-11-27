@@ -1,3 +1,5 @@
+Result of the last completed run of each workflow
+
 [![Build: Linux](https://github.com/inet-framework/inet/actions/workflows/build-linux.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-linux.yml)
 [![Build: Mac OS](https://github.com/inet-framework/inet/actions/workflows/build-macos.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-macos.yml)
 [![Build: Windows](https://github.com/inet-framework/inet/actions/workflows/build-windows.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/build-windows.yml)
