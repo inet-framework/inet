@@ -646,6 +646,15 @@ const simtime_t Ieee80211VhtDataMode::getDuration(b dataLength) const
     return numberOfSymbols * getSymbolInterval();
 }
 
+const simtime_t Ieee80211VhtMode::getDuration(b dataBitLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataBitLength);
+    // IEEE Std 802.11-2024, 21.4.3, Eq. (21-109): round the whole short-GI DATA field.
+    if (isVhtShortGuardInterval())
+        dataDuration = ceil(dataDuration, preambleMode->getSymbolInterval());
+    return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataDuration;
+}
+
 const simtime_t Ieee80211VhtMode::getSlotTime() const
 {
     if (centerFrequencyMode == BAND_5GHZ)

@@ -297,6 +297,16 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
     return numberOfSymbols * getSymbolInterval();
 }
 
+const simtime_t Ieee80211HtMode::getDuration(b dataLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataLength);
+    // IEEE Std 802.11-2024, 19.4.3: Eq. (19-90) rounds mixed-format short-GI
+    // DATA once. Eq. (19-92) uses the raw symbol duration for greenfield.
+    if (isHtShortGuardInterval() && preambleMode->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+        dataDuration = ceil(dataDuration, preambleMode->getSymbolInterval());
+    return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataDuration + getSignalExtensionTime();
+}
+
 const simtime_t Ieee80211HtMode::getSlotTime() const
 {
     if (centerFrequencyMode == BAND_2_4GHZ)

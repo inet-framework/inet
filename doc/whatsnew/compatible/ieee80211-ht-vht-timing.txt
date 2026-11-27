@@ -1,0 +1,3 @@
+Correct HT and VHT short guard interval airtime
+
+HT and VHT use 3.6 µs DATA symbols with a short guard interval. HT-mixed and VHT round the entire short-GI DATA contribution up to a 4 µs boundary, while HT-greenfield uses the raw symbol duration. The corrected DATA airtime can change transmission times in existing simulations.

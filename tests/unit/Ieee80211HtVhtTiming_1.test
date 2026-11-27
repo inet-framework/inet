@@ -1,0 +1,61 @@
+%description:
+Check HT and VHT timing against literal results from IEEE Std 802.11-2024
+(19.4.3 and 21.4.3). Check raw symbols, whole PPDUs, fixed SIGNAL duration
+and the HT 2.4 GHz signal extension.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+auto check = [this](const char *description, simtime_t actual, simtime_t expected) {
+    if (actual != expected)
+        EV << "mismatch: " << description << " was " << actual << ", expected " << expected << "\n";
+};
+auto checkTiming = [&](const IIeee80211Mode *mode, bool shortGi, B length, int symbols, int totalNs) {
+    int symbolNs = shortGi ? 3600 : 4000;
+    check("symbol interval", mode->getDataMode()->getSymbolInterval(), SimTime(symbolNs, SIMTIME_NS));
+    check("raw DATA", mode->getDataMode()->getDuration(length), SimTime(symbols * symbolNs, SIMTIME_NS));
+    check("whole PPDU", mode->getDuration(length), SimTime(totalNs, SIMTIME_NS));
+    check("SIGNAL", mode->getHeaderMode()->getDuration(), SimTime(8, SIMTIME_US));
+};
+
+for (bool shortGi : {false, true}) {
+    auto htGi = shortGi ? Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG;
+    auto vhtGi = shortGi ? Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG;
+    auto ht = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+        Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, htGi);
+    auto vht = Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, vhtGi);
+    // 49 and 50 short symbols round to the same 180 us. One short symbol
+    // occupies the same PPDU time as one long symbol in both mixed formats.
+    checkTiming(ht, shortGi, B(1), 1, 40000);
+    checkTiming(ht, shortGi, B(1560), 49, shortGi ? 216000 : 232000);
+    checkTiming(ht, shortGi, B(1602), 50, shortGi ? 216000 : 236000);
+    checkTiming(ht, shortGi, B(1623), 51, shortGi ? 220000 : 240000);
+    checkTiming(vht, shortGi, B(1), 1, 44000);
+    checkTiming(vht, shortGi, B(1560), 49, shortGi ? 220000 : 236000);
+    checkTiming(vht, shortGi, B(1602), 50, shortGi ? 220000 : 240000);
+
+    auto ht270 = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs15BW40MHz,
+        Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, htGi);
+    auto ht405 = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs23BW40MHz,
+        Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, htGi);
+    // 132 bytes plus service and one BCC tail fit in 1080 data bits.
+    checkTiming(ht270, shortGi, B(132), 1, 44000);
+    // 402 bytes plus service and two BCC tails exceed two 1620-bit symbols.
+    checkTiming(ht405, shortGi, B(402), 3, 60000);
+}
+
+auto greenfield = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+    Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+checkTiming(greenfield, true, B(1), 1, 27600);
+auto band24 = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+    Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+checkTiming(band24, true, B(1560), 49, 222000);
+
+%not-contains: stdout
+mismatch:
