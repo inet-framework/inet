@@ -1,0 +1,96 @@
+name: "Check: push"
+
+# The push check of S1 to S6 in plan/pending/master-guards.md. A push to a branch other than master
+# runs this one job, and no build and no test. check-trivial-change.sh decides if the change of the
+# branch since master is trivial. If it is, the job marks each required context of master, except
+# `Master green`, as green on the head commit, and the person pushes the same commit to master with
+# no pull request (A5). Else it marks nothing: the change needs a pull request.
+#
+# The scripts come from master, and the pushed commits are only data (S6). GitHub runs this file from
+# the pushed branch, so a branch can change it: the rules stop mistakes, not a person who wants to
+# break them (the limit in master-guards.md).
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: push-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  push-check:
+    name: Push check
+    # a push that deletes a branch has no commit to check
+    if: github.event.deleted == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: master
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch the pushed commit as data
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          git fetch --no-tags origin "$HEAD_SHA"
+          git cat-file -e "$HEAD_SHA^{commit}"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install PyYAML
+        # check-required-contexts.sh in the audit reads the workflows with it
+        run: python3 -m pip install --quiet "pyyaml==6.0.2"
+      - name: Read the required contexts of master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/rules/branches/master" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context' \
+            > "$RUNNER_TEMP/required-contexts.txt"
+          if [ ! -s "$RUNNER_TEMP/required-contexts.txt" ]; then
+            echo "error: master has no required context, or the rules cannot be read" >&2
+            exit 2
+          fi
+      - name: Decide if the change is trivial
+        id: check
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set +e
+          doc/project/enforcement/check-trivial-change.sh --base origin/master --head "$HEAD_SHA" \
+            --required-contexts-file "$RUNNER_TEMP/required-contexts.txt" | tee "$RUNNER_TEMP/check.txt"
+          status=${PIPESTATUS[0]}
+          set -e
+          { echo "## Push check"; echo; echo '```'; cat "$RUNNER_TEMP/check.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          case "$status" in
+            0) echo "trivial=true" >> "$GITHUB_OUTPUT" ;;
+            1) echo "trivial=false" >> "$GITHUB_OUTPUT"
+               echo "::notice title=Push check::this change needs a pull request; see the summary of the run for the reasons" ;;
+            *) exit "$status" ;;
+          esac
+      - name: Mark the required contexts on the head commit
+        if: steps.check.outputs.trivial == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          while IFS= read -r context; do
+            # Master green keeps its real state (S4, M8)
+            [ -z "$context" ] || [ "$context" = "Master green" ] && continue
+            gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" -f state=success -f context="$context" \
+              -f description="the push check: a trivial change (S1 to S6)" -f target_url="$run_url"
+            echo "marked: $context"
+          done < "$RUNNER_TEMP/required-contexts.txt"
+          { echo; echo "The change is trivial: push this commit to master with no pull request:"; echo
+            echo '```'; echo "git push origin $HEAD_SHA:master"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Push check::trivial: push $HEAD_SHA to master with no pull request"
