@@ -1,5 +1,14 @@
 name: "Test: fingerprint"
 
+# A pull request runs only the fingerprint tests that its change can affect: the change-based test
+# selection of opp_repl (its doc/test_map.md, and its plan plan/pending/test-selection.md, section
+# 15). A push to master runs all tests, with the debug tests in coverage mode, which has all flags
+# of the debug mode. The push run writes the test map of its commit as the artifact
+# test-map-fingerprint, for the pull requests, and checks the selection against the results of the
+# previous push run (check V4). Before the selection, the job `Paths that can change a result` reads
+# the paths of a pull request: when no path can change a fingerprint, the jobs run no selection, no
+# build and no test (step G2a of plan/pending/required-checks.md).
+
 on:
   push:
     branches:
@@ -9,6 +18,9 @@ on:
       - master
   workflow_dispatch:
     # nothing
+
+permissions:
+  contents: read
 
 jobs:
   changes:
@@ -46,17 +58,105 @@ jobs:
             echo "No path of the pull request can change a fingerprint; the tests do not run." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-  fingerprint-tests:
+  environment:
+    name: Environment and test map
     needs: changes
-    # No `if:` for the job: GitHub gives a job that its `if:` skips the name without the matrix values,
-    # and the required checks `fingerprint-tests (debug, 0)` and the others then never report. Thus the
-    # job always runs, and its steps do not run when no path of the pull request can change a fingerprint.
+    # No `if:` for the job: a skipped job skips the fingerprint jobs too. Its steps do not run for a pull request
+    # that changes no path that can change a fingerprint.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # the test maps of the push runs
+      pull-requests: read # the labels of the pull request
+    outputs:
+      map: ${{ steps.map.outputs.found }}
+      omnetpp_commit: ${{ steps.commits.outputs.omnetpp_commit }}
+      opp_repl_commit: ${{ steps.commits.outputs.opp_repl_commit }}
+    steps:
+      - uses: actions/checkout@v6
+        if: github.event_name == 'pull_request' && needs.changes.outputs.relevant == 'true'
+        with:
+          path: inet
+          # the map commit must be an ancestor of the base
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+      - name: Find the test map
+        id: map
+        if: github.event_name == 'pull_request' && needs.changes.outputs.relevant == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # the labels come from the API and not from the event, so that a new run of the jobs sees a new label
+          if gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" --jq '.labels[].name' | grep -qx full-tests; then
+            echo "The pull request has the label full-tests: the jobs run all tests." >> $GITHUB_STEP_SUMMARY
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          cd $GITHUB_WORKSPACE/inet
+          # GitHub tests the merge commit of the pull request, whose first parent is the base; without a map, the jobs
+          # run all tests
+          if ! _scripts/github/get-test-map.sh fingerprint-tests.yml fingerprint HEAD^1 $RUNNER_TEMP/test-map > $RUNNER_TEMP/map.txt; then
+            echo "The search for the test map failed: the jobs run all tests." >> $RUNNER_TEMP/map.txt
+            rm -rf $RUNNER_TEMP/test-map
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+          cat $RUNNER_TEMP/map.txt >> $GITHUB_STEP_SUMMARY
+          cat $RUNNER_TEMP/map.txt
+      - name: Select the commits of omnetpp and opp_repl
+        id: commits
+        if: needs.changes.outputs.relevant == 'true'
+        env:
+          MAP: ${{ steps.map.outputs.found }}
+          MAP_OMNETPP_COMMIT: ${{ steps.map.outputs.omnetpp_commit }}
+          MAP_OPP_REPL_COMMIT: ${{ steps.map.outputs.opp_repl_commit }}
+        run: |
+          # A pull request with a map tests in the environment of the map, so that only its own change can change a
+          # result (decision D9). Else all jobs of the run use the same heads of the branches, which the map of a push
+          # run needs.
+          if [ "$MAP" = true ]; then
+            omnetpp=$MAP_OMNETPP_COMMIT
+            opp_repl=$MAP_OPP_REPL_COMMIT
+          else
+            omnetpp=$(git ls-remote https://github.com/omnetpp/omnetpp.git refs/heads/omnetpp-6.x | cut -f1)
+            opp_repl=$(git ls-remote https://github.com/omnetpp/opp_repl.git refs/heads/github_ci | cut -f1)
+          fi
+          if [ -z "$omnetpp" ] || [ -z "$opp_repl" ]; then
+            echo "error: no commit of omnetpp or opp_repl" >&2
+            exit 1
+          fi
+          echo "omnetpp_commit=$omnetpp" >> $GITHUB_OUTPUT
+          echo "opp_repl_commit=$opp_repl" >> $GITHUB_OUTPUT
+          echo "The jobs use omnetpp $omnetpp and opp_repl $opp_repl." >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v7
+        if: steps.map.outputs.found == 'true'
+        with:
+          name: test-map-for-selection
+          path: ${{ runner.temp }}/test-map
+          if-no-files-found: error
+          retention-days: 1
+
+  fingerprint-tests:
+    needs: [changes, environment]
+    # No `if:` for the job: GitHub gives a matrix job that its `if:` skips the name without the matrix value, and
+    # the required checks `fingerprint-tests (debug|release, N)` then never report. Thus the job always runs. Its
+    # steps do not run when no path of the pull request can change a fingerprint, and they skip the build and the
+    # tests when the split has no selected test (rule T8 of plan/pending/master-guards.md).
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mode: ["debug", "release"]
+        # a push runs the debug tests in coverage mode to write the map (decision D11); the pull request jobs keep
+        # the names of the required checks
+        mode: ${{ fromJSON(github.event_name == 'push' && '["coverage", "release"]' || '["debug", "release"]') }}
         split: [0, 1, 2, 3]
       fail-fast: false
+    env:
+      MODE: ${{ matrix.mode }}
+      SPLIT: ${{ matrix.split }}
+      USE_MAP: ${{ needs.environment.outputs.map }}
+      # the records of the map: a push run in coverage mode
+      RECORDS: ${{ github.event_name == 'push' && matrix.mode == 'coverage' }}
     steps:
       - name: No test is necessary
         if: needs.changes.outputs.relevant != 'true'
@@ -66,45 +166,257 @@ jobs:
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-          ref: omnetpp-6.x
+          ref: ${{ needs.environment.outputs.omnetpp_commit }}
       - uses: actions/checkout@v6
         if: needs.changes.outputs.relevant == 'true'
         with:
           path: inet
-      - run: mkdir -p /home/runner/work/ccache
-        if: needs.changes.outputs.relevant == 'true'
-      - uses: actions/cache/restore@v5
-        if: needs.changes.outputs.relevant == 'true'
+          # the selection reads the changes from the map commit to the merge commit
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        if: needs.environment.outputs.map == 'true'
         with:
-          path: /home/runner/work/ccache
-          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
-          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
-          restore-keys: native-${{ matrix.mode }}-ccache
-      - name: Build and test
+          name: test-map-for-selection
+          path: ${{ runner.temp }}/test-map
+      - name: Select the tests
+        id: select
         if: needs.changes.outputs.relevant == 'true'
         env:
-          MODE: ${{ matrix.mode }}
+          OPP_REPL_COMMIT: ${{ needs.environment.outputs.opp_repl_commit }}
         run: |
           echo "::group::Installing packages"
           sudo apt update
           sudo apt install -y --no-install-recommends git wget curl ca-certificates \
             make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
-            python3 python3-venv
+            python3 python3-venv jq
+          if [ "$MODE" = coverage ]; then
+            # the profile runtime of the compiler and the LLVM tools of its version
+            llvm_version=$(clang -dumpversion | cut -d. -f1)
+            sudo apt install -y --no-install-recommends libclang-rt-$llvm_version-dev llvm-$llvm_version
+          fi
           echo "::endgroup::"
 
-          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+          # the selection compares the compiler and the features with the map, so it needs the configuration
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
 
           echo "::group::Installing opp_repl"
           python3 -m venv $GITHUB_WORKSPACE/venv
           source $GITHUB_WORKSPACE/venv/bin/activate
-          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
           echo "::endgroup::"
 
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
+
+          if [ "$USE_MAP" != true ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "::group::Selecting the tests"
+          # HEAD is the merge commit: the selection takes its change and the changes from the map commit to the base
+          opp_select_tests --load $INET_ROOT -p inet --kind fingerprint --changes HEAD --map $RUNNER_TEMP/test-map --json > $RUNNER_TEMP/selection.json
+          selection='.kinds.fingerprint'
+          selected=$(jq "$selection.selected | length" $RUNNER_TEMP/selection.json)
+          total=$(jq -r "$selection.tests" $RUNNER_TEMP/selection.json)
+          everything=$(jq -r "$selection.all // empty" $RUNNER_TEMP/selection.json)
+          jq -r "$selection.selected | to_entries[] | \"\(.key)\n    \(.value | join(\"\n    \"))\"" $RUNNER_TEMP/selection.json > $RUNNER_TEMP/selection.txt
+          head -400 $RUNNER_TEMP/selection.txt
+          echo "::endgroup::"
+          {
+            echo "Selected $selected of $total fingerprint tests; the map is $(jq -r .map_age $RUNNER_TEMP/selection.json) commits older than the base."
+            if [ -n "$everything" ]; then
+              echo "All tests are selected: $everything"
+            fi
+            jq -r '.environment[] | "Environment: \(.)"' $RUNNER_TEMP/selection.json
+          } > $RUNNER_TEMP/summary.txt
+          cat $RUNNER_TEMP/summary.txt
+          cat $RUNNER_TEMP/summary.txt >> $GITHUB_STEP_SUMMARY
+          if [ "$total" = null ]; then
+            # the selection does not know the tests at the merge commit, so it cannot count them
+            build=true
+          elif [ "$SPLIT" -lt "$selected" ]; then
+            # The run splits the selected tests: a split gets every fourth group of them, and a group holds at least
+            # one test. Thus a split whose number is not below the number of the selected tests runs no test.
+            build=true
+          else
+            build=false
+            echo "Split $SPLIT has no selected test: the build and the tests do not run, and the check passes." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "build=$build" >> $GITHUB_OUTPUT
+      - run: mkdir -p /home/runner/work/ccache
+        if: steps.select.outputs.build == 'true'
+      - uses: actions/cache/restore@v5
+        if: steps.select.outputs.build == 'true'
+        with:
+          path: /home/runner/work/ccache
+          key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-${{ matrix.mode }}-ccache
+      - name: Build and test
+        if: steps.select.outputs.build == 'true'
+        run: |
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
-          echo "::group::Running fingerprint tests"
-          # INET's inet.opp gives the store, the ingredients (tplx, ~tNl, ~tND) and the CPU time limit
           cd $GITHUB_WORKSPACE/inet
-          opp_run_fingerprint_tests --load $INET_ROOT -p inet -m $MODE --no-build --split-count 4 --split-index ${{ matrix.split }}
+          mkdir -p $RUNNER_TEMP/results
+          # INET's inet.opp gives the store, the ingredients (tplx, ~tNl, ~tND) and the CPU time limit
+          args=(--load $INET_ROOT -p inet -m $MODE --no-build --split-count 4 --split-index $SPLIT
+                --result-file $RUNNER_TEMP/results/fingerprint-$MODE-$SPLIT.json)
+          if [ "$USE_MAP" = true ]; then
+            args+=(--changes HEAD --test-map $RUNNER_TEMP/test-map)
+          fi
+          if [ "$RECORDS" = true ]; then
+            args+=(--test-map-records $RUNNER_TEMP/records)
+          fi
+          echo "::group::Running fingerprint tests"
+          set +e
+          opp_run_fingerprint_tests "${args[@]}"
+          status=$?
+          set -e
           echo "::endgroup::"
+
+          if [ "$RECORDS" = true ] && [ "$SPLIT" = 0 ]; then
+            echo "::group::Making the build tables of the test map"
+            # The build tables of this build go into the records. The job test-map writes the map from the records of
+            # all splits, also if a test failed, because the records give what the runs used and not the verdicts.
+            opp_update_test_map --load $INET_ROOT -p inet --no-build --no-run --records $RUNNER_TEMP/records -o $RUNNER_TEMP/map-of-split-0
+            echo "::endgroup::"
+          fi
+          exit $status
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.select.outputs.build == 'true'
+        with:
+          name: fingerprint-results-${{ matrix.mode }}-${{ matrix.split }}
+          path: ${{ runner.temp }}/results
+          if-no-files-found: ignore
+          retention-days: 30
+      - uses: actions/upload-artifact@v7
+        if: always() && env.RECORDS == 'true' && steps.select.outputs.build == 'true'
+        with:
+          name: test-map-records-${{ matrix.split }}
+          path: ${{ runner.temp }}/records
+          if-no-files-found: ignore
+          retention-days: 7
+
+  test-map:
+    name: Test map of the push
+    needs: [environment, fingerprint-tests]
+    # also if a test failed: the records give what the runs used, and not the verdicts
+    if: always() && github.event_name == 'push' && needs.environment.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # the map and the results of the previous push run
+    env:
+      OPP_REPL_COMMIT: ${{ needs.environment.outputs.opp_repl_commit }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+          ref: ${{ needs.environment.outputs.omnetpp_commit }}
+      - uses: actions/checkout@v6
+        with:
+          path: inet
+          # the check V4 reads the changes from the previous push
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: test-map-records-*
+          path: ${{ runner.temp }}/records
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: fingerprint-results-*
+          path: ${{ runner.temp }}/results
+          merge-multiple: true
+      - name: Write the test map
+        run: |
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
+            python3 python3-venv jq
+          echo "::endgroup::"
+
+          # the header of the map gives the environment of the jobs: the commits, the compiler and the features
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
+
+          echo "::group::Installing opp_repl"
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
+
+          args=()
+          for split in 0 1 2 3; do
+            if [ ! -d $RUNNER_TEMP/records/test-map-records-$split ]; then
+              echo "error: no records of split $split; the map needs the records of all splits" >&2
+              exit 1
+            fi
+            args+=(--records $RUNNER_TEMP/records/test-map-records-$split)
+          done
+          opp_update_test_map --load $INET_ROOT -p inet --no-build --no-run "${args[@]}" \
+            --build-tables $RUNNER_TEMP/records/test-map-records-0/build-tables.json.gz -o $RUNNER_TEMP/test-map
+          jq . $RUNNER_TEMP/test-map/header.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: test-map-fingerprint
+          path: ${{ runner.temp }}/test-map
+          if-no-files-found: error
+          retention-days: 30
+      - name: Check the selection against the previous push run (V4)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # Each test whose result differs from the previous push run must be in the selection of the change between
+          # the two pushes, with the map of the previous run. A test that the selection misses shows a defect of a rule.
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          cd $GITHUB_WORKSPACE/omnetpp
+          . setenv -f
+          cd $GITHUB_WORKSPACE/inet
+          . setenv -f
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "The previous push $BEFORE is not in the history: no check." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/fingerprint-tests.yml/runs?event=push&head_sha=$BEFORE" \
+            --jq '[.workflow_runs[] | select(.status == "completed")][0].id // empty')
+          previous=$RUNNER_TEMP/previous
+          if [ -z "$run" ] \
+            || ! gh run download "$run" --repo "$GITHUB_REPOSITORY" --name test-map-fingerprint --dir $previous/test-map \
+            || ! gh run download "$run" --repo "$GITHUB_REPOSITORY" --pattern 'fingerprint-results-*' --dir $previous/results; then
+            echo "The push run of $BEFORE has no map or no results: no check." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          status=0
+          for mode in coverage release; do
+            results=($RUNNER_TEMP/results/fingerprint-$mode-*.json)
+            previous_results=($previous/results/*/fingerprint-$mode-*.json)
+            if [ ! -f "${results[0]}" ] || [ ! -f "${previous_results[0]}" ]; then
+              echo "One of the runs has no results of the $mode tests: no check of them." >> $GITHUB_STEP_SUMMARY
+              continue
+            fi
+            args=()
+            for file in "${results[@]}"; do args+=(--results $file); done
+            for file in "${previous_results[@]}"; do args+=(--previous-results $file); done
+            echo "::group::Checking the selection with the $mode results"
+            if ! opp_check_test_selection --load $INET_ROOT -p inet --kind fingerprint --changes $BEFORE..$GITHUB_SHA \
+                --map $previous/test-map "${args[@]}"; then
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          if [ $status != 0 ]; then
+            echo "The selection of $BEFORE..$GITHUB_SHA missed a test whose result changed: see the log of the check." >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $status

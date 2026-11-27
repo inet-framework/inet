@@ -88,4 +88,7 @@ SimulationProject(
         "unit-tests.yml",
         "validation-tests.yml",
     ],
+    # The change-based test selection of opp_repl (its doc/test_map.md) selects all tests for a
+    # change of a file that the CI jobs run: the workflows, and the scripts that they source.
+    ci_files=[r"^_scripts/github/"],
 )
