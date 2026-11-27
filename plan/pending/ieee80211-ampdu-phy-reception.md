@@ -10,7 +10,7 @@ The feature plan defines PSDU-based RTS selection, recovery before DATA submissi
 
 The project plan procedure remains a draft.
 
-Later commits supply P0 through P4 for the declared PHY profile. The final record states verification and its limits. Only the final commit receives build and test execution. Earlier commits receive structural checks only. MAC acceptance and implicit Block Ack remain pending.
+The [execution record](ieee80211-ampdu-phy-execution.md) describes the implemented reception contract and its verification. The original stages below document the design proposal. The shared part and region decisions in #1452 and #1443 supply the error sampling that the proposal assigned to the aggregate receiver.
 
 ## 1. Problem and intended behavior
 
