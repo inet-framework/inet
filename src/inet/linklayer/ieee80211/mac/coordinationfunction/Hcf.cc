@@ -2919,10 +2919,12 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 return false;
             auto cost = computeBlockAckExchangeDuration(packet, bar, mode->getDuration(packet->getDataLength()));
             // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: a later BAR must fit both bounds.
-            if (context->getNumSteps() > 1 &&
-                ((txop->getLimit() > 0 && ifs + cost > txop->getRemaining()) ||
-                 (singleProtection && cost >= rx->getTxnavRemaining())))
-                return false;
+            if (context->getNumSteps() > 1) {
+                if (txop->getLimit() > 0 && ifs + cost > txop->getRemaining())
+                    return false;
+                if (singleProtection && (cost >= rx->getTxnavRemaining() || (basic && ifs + cost > rx->getTxnavRemaining())))
+                    return false;
+            }
         }
         simtime_t responseDuration = SIMTIME_ZERO;
         simtime_t nextFrameDuration = SIMTIME_ZERO;

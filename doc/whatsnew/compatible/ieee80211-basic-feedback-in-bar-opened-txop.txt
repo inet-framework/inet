@@ -1,0 +1,3 @@
+Basic Block Ack feedback can stay inside a TXOP that opened with a BAR
+
+When DATA in a BAR-opened grant makes another Basic BAR due, the scheduler lets that request use the remaining protected airtime if its exchange fits. This can avoid a fresh contention round.

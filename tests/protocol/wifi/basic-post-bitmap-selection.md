@@ -14,3 +14,5 @@ flowchart TD
 ```
 
 The fresh replacement must take the next unconsumed sequence number. These cases exercise one agreement at a time.
+
+For DATA after a Basic bitmap, HCF samples local TXNAV when the reply completes and requires the ensuing DATA exchange to be strictly shorter than the time left on that timer. The advertised reservation and the positive TXOP limit also cover the SIFS before DATA begins. For a second Basic BAR, the local TXNAV check covers that SIFS as well.
