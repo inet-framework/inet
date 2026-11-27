@@ -167,6 +167,7 @@ void InProgressFrames::dropFrame(Packet *packet)
 {
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
+    blockAckOutstandingSince.erase(packet->getId());
     droppedFrames.push_back(packet);
     emit(packetDequeuedSignal, packet);
 }
@@ -181,6 +182,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber().get(), dataheader->getFragmentNumber())))) != 0) {
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
+                blockAckOutstandingSince.erase(frame->getId());
                 droppedFrames.push_back(frame);
                 emit(packetDequeuedSignal, frame);
             }
@@ -206,6 +208,22 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames(simtime_t time)
             outstandingFrames.push_back(frame);
     }
     return outstandingFrames;
+}
+
+void InProgressFrames::markBlockAckOutstanding(const Packet *packet)
+{
+    blockAckOutstandingSince[packet->getId()] = simTime();
+}
+
+simtime_t InProgressFrames::getBlockAckOutstandingSince(const Packet *packet) const
+{
+    auto it = blockAckOutstandingSince.find(packet->getId());
+    return it == blockAckOutstandingSince.end() ? SIMTIME_MAX : it->second;
+}
+
+simtime_t InProgressFrames::getLifetimeDeadline(const Packet *packet) const
+{
+    return lifetimeHandler ? lifetimeHandler->getDeadline(packet) : SIMTIME_MAX;
 }
 
 void InProgressFrames::clearDroppedFrames()

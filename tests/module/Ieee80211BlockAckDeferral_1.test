@@ -386,6 +386,7 @@ record-vector-results = false
 **.wlan[*].mac.hcf.typename = "DeferralHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} != 4
 **.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 0s
 **.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.typename = ${policy="OriginatorBlockAckAgreementPolicy","LongTimeoutPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy","OriginatorBlockAckAgreementPolicy" ! scenario}
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ${aggregation="","","","","","","","","","","","BasicMsduAggregationPolicy" ! scenario}
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2

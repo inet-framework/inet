@@ -50,8 +50,16 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
     return selectBlockAckRequest(frames, agreements, data, dataEnd);
 }
 
+simtime_t OriginatorQosAckPolicy::getNextBlockAckReqDeadline(InProgressFrames *frames, IOriginatorBlockAckAgreementHandler *agreements) const
+{
+    auto deadline = SIMTIME_MAX;
+    selectBlockAckRequest(frames, agreements, nullptr, simTime(), nullptr, &deadline);
+    return deadline;
+}
+
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::selectBlockAckRequest(InProgressFrames *frames,
-        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime, Packet *precedingData) const
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime, Packet *precedingData,
+        simtime_t *nextDeadline) const
 {
     using Id = std::pair<MacAddress, Tid>;
     std::map<Id, std::vector<Packet *>> groups;
@@ -81,13 +89,34 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
     for (const auto& entry : groups) {
         const auto& id = entry.first;
         auto agreement = agreements->getAgreement(id.first, id.second);
-        if (preview && (int)entry.second.size() < blockAckReqThreshold)
-            continue;
-        // INET BAR policy defers a short group only for DATA within that group's window.
-        if ((int)entry.second.size() < blockAckReqThreshold && data &&
-            data->getReceiverAddress() == id.first && data->getTid() == id.second &&
-            agreement->containsSequence(frames->getCandidateSequenceNumber(candidate)))
-            continue;
+        if ((int)entry.second.size() < blockAckReqThreshold) {
+            if (preview)
+                continue;
+            bool sameFlow = data && data->getReceiverAddress() == id.first && data->getTid() == id.second;
+            bool windowAllowsData = sameFlow && agreement->containsSequence(frames->getCandidateSequenceNumber(candidate));
+            auto maxDelay = frames->getBlockAckReqMaxDelay();
+            if (maxDelay == SIMTIME_ZERO) {
+                if (windowAllowsData)
+                    continue;
+            }
+            else if (!sameFlow || windowAllowsData) {
+                auto deadline = SIMTIME_MAX;
+                auto expiration = agreement->getExpirationTime();
+                for (auto frame : entry.second) {
+                    auto since = frame == transmittingData ? selectionTime : frames->getBlockAckOutstandingSince(frame);
+                    deadline = std::min(deadline, since == SIMTIME_MAX ? selectionTime : since + maxDelay);
+                    expiration = std::min(expiration, frames->getLifetimeDeadline(frame));
+                }
+                // Once the batch timer fires, even an uncontested grant needs AIFS and a BAR/bitmap exchange.
+                bool deadlineFits = deadline < expiration &&
+                    (expiration == SIMTIME_MAX || frames->getBasicFeedbackAccessDuration(id.first, id.second) < expiration - deadline);
+                if (deadline > selectionTime && deadlineFits) {
+                    if (nextDeadline)
+                        *nextDeadline = std::min(*nextDeadline, deadline);
+                    continue;
+                }
+            }
+        }
         auto start = agreement->getStartingSequenceNumber();
         int oldestOffset = -1;
         simtime_t arrival = SIMTIME_MAX;

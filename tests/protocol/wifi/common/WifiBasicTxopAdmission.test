@@ -158,6 +158,7 @@ record-scalar-results = false
 *.sta1.wlan[*].mac.hcf.typename = "BasicTxopAdmissionHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = true
 **.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 0s
 **.originatorAckPolicy.blockAckReqThreshold = 5
 **.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
 **.originatorMacDataService.msduAggregationPolicy.typename = ""
