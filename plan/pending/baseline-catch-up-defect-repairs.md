@@ -1464,6 +1464,49 @@ removed lines in 3 files, with the comments.
 
 **Expected baselines.** The statistics of `examples/inet/tcpwindowscale` `WS_enabled`; no fingerprint.
 
+#### R10: a data segment of 1 byte gets a delayed ACK (BD-32), prepared 2026-11-27
+
+A background agent prepared R10 in a detached worktree of its own (`inet-cpp-r10`), and the assistant checked its work.
+
+**Re-check.** On the head of the branch, `TcpConnection::processSegment1stThru8th()` still sets `ack_now` for each
+in-order data segment of 1 byte (`TcpConnectionRcvSegment.cc`, the lines after "check for persist probe", with "TODO how
+to check if it is really a persist probe?").
+
+**The fault, shown.** `tests/protocol/tcp/rfc/Rfc9293OneByteSegmentDelayedAck.test`: host A sends one byte into the
+open window of host B, which has delayed ACKs with 200 ms. Host B sends the ACK at once, at 0.20001264 s, when the byte
+arrives; RFC 9293 SHLD-18 asks for a delayed ACK. The test fails there (checked again in the worktree of the plan).
+`Rfc9293ZeroWindowProbeAckAtOnce.test` guards the real case: a probe of 1 byte into a zero window is not acceptable
+(RFC 9293 section 3.10.7.4) and gets its ACK at once on that path; it passes before and after the repair.
+
+**The design before gate A (preview, 2026-11-27).** The plan's repair: delete the three lines of the special case. Its
+diff and the two tests are the preview commit `98fe34c6e0` on the branch `preview/r10`, which does not land.
+
+- With the repair, both tests pass; the protocol tests of RFC 9293 keep their results (24, with the one known failure
+  that a marker declares), and of 118 module tests of the delayed ACK, the persist timer, the window, the receive
+  buffer, SACK and the retransmission, 116 pass and two fail. `tcp_nagle_2.test` expects the ACK of a 1-byte segment at once, the
+  behavior of BD-32: its trace now has that ACK after the delay, at 1.203 s, and its later segments move accordingly.
+  `tcp_nagle_1.test` fails only on the line "Network hash" of the OMNeT++ of the editor, as the stress tests.
+- In the image of the CI (`runs/r10-preview/` of the folder of D10, `evidence/runs/98fe34c6e0/` of the job copy), the
+  repair moves results, which the entry did not know: 11 fingerprint runs (`examples/inet/nclients` with 6
+  configurations, `examples/ipv6/nclients` `ETH` and `PPP`, `examples/inet/shutdownrestart` `TCP` runs 0 to 2) and 9
+  statistical tests of the same examples. These examples run interactive applications, whose segments of 1 byte now
+  get a delayed ACK.
+
+**Design questions for gate A.**
+
+1. *The repair.* Delete the special case, as the plan says; a probe into a zero window keeps its ACK at once on the
+   path of a segment that is not acceptable. The assistant recommends it. Linux has no such special case either.
+2. *`tcp_nagle_2.test`.* Its expected trace changes in the same commit as the repair, to the trace with the delayed ACK.
+   The assistant recommends it.
+
+**Commit** (with the recommended answers): **C17: `tcp: fix: a data segment of 1 byte in an open window gets a delayed
+ACK (RFC 9293 SHLD-18)`** (BD-32), `TcpConnectionRcvSegment.cc`, the two tests, `tcp_nagle_2.test`, the reviewer
+document `tests/protocol/tcp/one-byte-segment-delayed-ack.md` and the release note
+`doc/whatsnew/fixes/tcp-one-byte-segment-delayed-ack.txt`.
+
+**Expected baselines.** The fingerprints and the statistics of the examples above; their re-record needs the approval of
+the exact values, after the commit.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
