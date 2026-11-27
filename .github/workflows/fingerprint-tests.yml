@@ -11,7 +11,46 @@ on:
     # nothing
 
 jobs:
+  changes:
+    name: Paths that can change a result
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.paths.outputs.relevant }}
+    steps:
+      - name: Select the paths of the pull request
+        id: paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # a push to master and a run by hand test the branch; a pull request runs the tests only when it
+          # changes a path that can change a fingerprint, and else the checks pass
+          if [ -z "$NUMBER" ]; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          paths='^(src|examples|showcases|tutorials|tests/networks|tests/validation|tests/fingerprint|python|_scripts|bin)/'
+          paths+='|^(inet\.opp|\.oppbuildspec|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
+          paths+='|^\.github/workflows/fingerprint-tests\.yml$'
+          # a renamed file has its old path in previous_filename
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[] | .filename, (.previous_filename // empty)' \
+            > "$RUNNER_TEMP/files.txt"
+          # GitHub lists at most 3000 files of a pull request; a longer list can hide a path
+          if [ "$(wc -l < "$RUNNER_TEMP/files.txt")" -ge 3000 ] || grep -qE "$paths" "$RUNNER_TEMP/files.txt"; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "No path of the pull request can change a fingerprint; the tests do not run." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   fingerprint-tests:
+    needs: changes
+    # No `if:` for the job: GitHub gives a job that its `if:` skips the name without the matrix values,
+    # and the required checks `fingerprint-tests (debug, 0)` and the others then never report. Thus the
+    # job always runs, and its steps do not run when no path of the pull request can change a fingerprint.
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,22 +58,30 @@ jobs:
         split: [0, 1, 2, 3]
       fail-fast: false
     steps:
+      - name: No test is necessary
+        if: needs.changes.outputs.relevant != 'true'
+        run: echo "No test runs; the job 'Paths that can change a result' gives the reason. The check passes."
       - uses: actions/checkout@v6
+        if: needs.changes.outputs.relevant == 'true'
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
           ref: omnetpp-6.x
       - uses: actions/checkout@v6
+        if: needs.changes.outputs.relevant == 'true'
         with:
           path: inet
       - run: mkdir -p /home/runner/work/ccache
+        if: needs.changes.outputs.relevant == 'true'
       - uses: actions/cache/restore@v5
+        if: needs.changes.outputs.relevant == 'true'
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
       - name: Build and test
+        if: needs.changes.outputs.relevant == 'true'
         env:
           MODE: ${{ matrix.mode }}
         run: |
