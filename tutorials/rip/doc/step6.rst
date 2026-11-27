@@ -87,7 +87,7 @@ breaks at t=50s, the following sequence of events occurs:
 6. This cycle continues, with hop counts incrementing with each exchange
 
 The result is that convergence takes approximately 220 seconds (from the link
-break at t=50s to the removal of invalid routes at t=270s). During this time,
+break at t=50s until the routes are marked as unreachable at t=270s). During this time,
 the hop count for routes to hosts 3, 4, and 5 gradually increases until it
 reaches 16, at which point the routes are considered unreachable.
 

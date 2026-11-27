@@ -78,7 +78,7 @@ We'll examine three scenarios:
 
 * **Scenario A**: Link recovers before the timeout timer expires (at t=150s)
 * **Scenario B**: Link recovers after the timeout timer expires but before the garbage collection timer expires (at t=300s)
-* **Scenario C**: Link recovers after both timers expire and the route is purged (at t=400s)
+* **Scenario C**: Link recovers after both timers expire and the route is purged (at t=602s)
 
 These scenarios are configured in ``omnetpp.ini`` as ``Step4A``, ``Step4B``, and
 ``Step4C`` respectively, each using a different scenario script.
@@ -106,8 +106,9 @@ Scenario B: Recovery After Timeout, Before Garbage Collection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this scenario, we break the link at t=50s and reconnect it at t=300s. This is
-after the 180-second timeout timer expires (at t=230s) but before the 120-second
-garbage collection timer expires (which would happen at t=350s). The scenario is
+after the 180-second timeout timer expires (at about t=211s, 180 seconds after
+the last update) but before the 120-second garbage collection timer expires
+(which would happen at about t=331s). The scenario is
 defined in ``scenario6.xml``:
 
 .. literalinclude:: ../scenario6.xml
@@ -127,9 +128,9 @@ with a period where the routes are considered unreachable.
 Scenario C: Recovery After Complete Route Removal
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this scenario, we break the link at t=50s and reconnect it at t=400s. This is
-after both the timeout timer (expires at t=230s) and the garbage collection
-timer (expires at t=350s) have expired. The scenario is defined in
+In this scenario, we break the link at t=50s and reconnect it at t=602s. This is
+after both the timeout timer (expires at about t=211s) and the garbage collection
+timer (expires at about t=331s) have expired. The scenario is defined in
 ``scenario7.xml``:
 
 .. literalinclude:: ../scenario7.xml
@@ -155,7 +156,7 @@ Let's examine what happens in detail:
    collection timer expires, and the route is completely removed from the
    routing table
 
-5. When the link recovers at t=400s, the router must learn about the route from
+5. When the link recovers at t=602s, the router must learn about the route from
    scratch through new RIP updates, as if it were discovering the route for the
    first time
 

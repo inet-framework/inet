@@ -55,7 +55,7 @@ The scenario manager script controls the link failure and recovery:
 This script:
 
 1. Disconnects the link between ``router2`` and ``switch1`` at t=50s
-2. Reconnects the link at t=400s (after both timeout and garbage-collection timers would have expired)
+2. Reconnects the link at t=602s (after both timeout and garbage-collection timers would have expired)
 
 We also test an alternative configuration without netmask routes:
 
