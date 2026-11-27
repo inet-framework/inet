@@ -76,6 +76,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *inactivityTimer = nullptr;
     cMessage *dataLifetimeTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
+    cMessage *blockAckReqTimer = nullptr;
     int64_t basicBlockAckReqRetryLimit = 0;
     struct OwnedAction {
         MacAddress peer;
@@ -195,6 +196,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void completeTransfers();
     void updateContention();
     void scheduleAddbaResponseTimer();
+    void scheduleBlockAckReqTimer();
     void actionTerminated(Packet *packet, bool acknowledged);
     void invalidateActions(MacAddress peer, Tid tid, bool originator);
     void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);

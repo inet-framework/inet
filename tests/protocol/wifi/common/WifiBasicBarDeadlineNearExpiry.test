@@ -1,0 +1,73 @@
+%description:
+A Basic batch deadline 100 us before DATA expiry must leave time for BAR and Block Ack.
+The fixture gives one real Basic DATA a known expiry after production submission.
+Feedback must start before the configured 20 ms batching deadline and finish before expiry.
+
+%file: BasicBarDeadlineNearExpiry.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+class DeadlineNearExpiryHcf : public BlockAckLifecycleHcf
+{
+  protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (data && data->getAckPolicy() == BLOCK_ACK) {
+            auto access = edca->getChannelOwner();
+            auto mode = rateSelection->computeMode(packet, data, access->getTxopProcedure());
+            auto lifetime = edca->getLifetimeHandler();
+            lifetime->prepareFrameReplacement({packet->getId()});
+            lifetime->registerFragments({packet}, simTime() + ifs + mode->getDuration(packet->getDataLength()) + SimTime(20100, SIMTIME_US));
+        }
+        return BlockAckLifecycleHcf::transmitFrame(packet, ifs);
+    }
+};
+Define_Module(DeadlineNearExpiryHcf);
+
+Define_ProtocolTest(wifi_basic_bar_deadline_near_expiry)
+{
+    return ProtocolTest("wifi_basic_bar_deadline_near_expiry")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+            return data && data->getAckPolicy() == BLOCK_ACK;
+        }).capture("completion", [](const PacketEvent& event) {
+            auto mode = event.packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            return cValue((event.time + mode->getDuration(event.packet->getDataLength())).dbl());
+        }).describe("one DATA starts a batch with a nearby lifetime deadline").within(1.02))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("has(Ieee80211BasicBlockAckReq)")
+            .assertEvent([](const MatchContext& c) {
+                return c.event.time < SimTime(c.get("completion").doubleValue()) + SimTime(20, SIMTIME_MS);
+            }).describe("feedback contention starts early enough to preserve feedback airtime").within(0.021))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211BasicBlockAck)")
+            .assertEvent([](const MatchContext& c) {
+                return c.event.time < SimTime(c.get("completion").doubleValue()) + SimTime(20100, SIMTIME_US);
+            }).describe("the bitmap arrives before the outstanding DATA expires").within(0.002));
+}
+}
+
+%file: BasicBarDeadlineNearExpiry.ned
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+module DeadlineNearExpiryHcf extends BlockAckLifecycleHcf
+{
+    parameters:
+        @class(::inet::protocoltest::DeadlineNearExpiryHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_bar_deadline_near_expiry"
+*.sta1.wlan[*].mac.hcf.typename = "DeadlineNearExpiryHcf"
+*.sta1.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 20ms
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.00016s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.rtsPolicy.rtsThreshold = 100B
+**.wlan[*].bitrate = 6Mbps
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_deadline_near_expiry: PASS

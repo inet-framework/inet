@@ -34,7 +34,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual bool checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
     std::tuple<MacAddress, SequenceNumberCyclic, Tid> selectBlockAckRequest(InProgressFrames *frames,
             IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime,
-            Packet *precedingData = nullptr) const;
+            Packet *precedingData = nullptr, simtime_t *nextDeadline = nullptr) const;
 
   public:
     void setProbeEligibility(std::function<bool(InProgressFrames *, Tid)> predicate) override { probeEligibility = predicate; }
@@ -44,6 +44,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const override;
     virtual bool isBlockAckPolicyEligibleFrame(b length, const Ptr<const Ieee80211DataHeader>& header) const override;
     virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const override;
+    virtual simtime_t getNextBlockAckReqDeadline(InProgressFrames *frames, IOriginatorBlockAckAgreementHandler *agreements) const override;
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const override;
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParametersAfterData(InProgressFrames *frames,
             const TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements, Packet *data, simtime_t dataEnd) const override;

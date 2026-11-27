@@ -19,7 +19,10 @@ following C++ interfaces and rebuild the library that contains them.
   to predict the recipient, starting sequence number and TID at the supplied
   completion time. Account for the candidate and any preceding DATA exactly
   once, leaving the agreement and the transmit queue untouched. Return an
-  unspecified recipient when no request is due.
+  unspecified recipient when no request is due. Implement
+  ``getNextBlockAckReqDeadline`` to return the earliest absolute simulation
+  time at which a deferred request needs attention, or ``SIMTIME_MAX`` when
+  no wake-up is needed.
 * In ``IOriginatorQosMacDataService``, add the ``prepareFrame`` overload with
   the MPDU fit predicate. Pass it to aggregate selection and keep the preview
   reversible. The existing two-argument overload can forward an empty

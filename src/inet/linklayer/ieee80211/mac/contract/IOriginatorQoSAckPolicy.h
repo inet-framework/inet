@@ -27,6 +27,7 @@ class INET_API IOriginatorQoSAckPolicy
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;
     virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
+    virtual simtime_t getNextBlockAckReqDeadline(InProgressFrames *frames, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const = 0;
     virtual bool isBlockAckPolicyEligibleFrame(b length, const Ptr<const Ieee80211DataHeader>& header) const = 0;
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;

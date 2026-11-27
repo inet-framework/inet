@@ -113,6 +113,25 @@ void Hcf::initialize(int stage)
                     EV_WARN << "Compressed Block Ack has no usable local HT support; DATA uses Normal Ack. Set blockAckVariant = basic for Basic compatibility.\n";
             }
         }
+        simtime_t maxDelay = par("basicBlockAckReqMaxDelay");
+        if (maxDelay < SIMTIME_ZERO)
+            throw cRuntimeError("basicBlockAckReqMaxDelay must be nonnegative");
+        if (originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC && maxDelay > SIMTIME_ZERO) {
+            blockAckReqTimer = new cMessage("blockAckReqDeadline");
+            for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+                auto edcaf = edca->getEdcaf(static_cast<AccessCategory>(ac));
+                auto frames = edcaf->getInProgressFrames();
+                frames->setBlockAckReqMaxDelay(maxDelay);
+                frames->setBasicFeedbackAccessDuration([this, edcaf](const MacAddress& peer, Tid tid) {
+                    auto bar = originatorBlockAckProcedure->buildBasicBlockAckReqFrame(peer, tid, SequenceNumberCyclic(0));
+                    Packet request("forecast-BAR", bar);
+                    request.insertAtBack(makeShared<Ieee80211MacTrailer>());
+                    auto mode = rateSelection->computeMode(&request, bar, edcaf->getTxopProcedure());
+                    setFrameMode(&request, bar, mode);
+                    return edcaf->getAifs() + computeBlockAckExchangeDuration(&request, bar, mode->getDuration(request.getDataLength()));
+                });
+            }
+        }
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue signal listeners after all child initialization has completed.
         auto lifetimeHandler = edca->getLifetimeHandler();
@@ -276,6 +295,10 @@ void Hcf::handleMessage(cMessage *msg)
         updateAgreementProcedures();
         updateContention();
     }
+    else if (msg == blockAckReqTimer) {
+        updateContention();
+        scheduleBlockAckReqTimer();
+    }
     else if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
@@ -401,6 +424,22 @@ void Hcf::scheduleAddbaResponseTimer()
     cancelEvent(addbaResponseTimer);
     if (deadline != SIMTIME_MAX)
         scheduleAt(std::max(simTime(), deadline), addbaResponseTimer);
+}
+
+void Hcf::scheduleBlockAckReqTimer()
+{
+    if (!blockAckReqTimer || (blockAckReqTimer->isScheduled() && blockAckReqTimer->getArrivalTime() <= simTime()))
+        return;
+    simtime_t deadline = SIMTIME_MAX;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+        deadline = std::min(deadline, originatorAckPolicy->getNextBlockAckReqDeadline(frames, originatorBlockAckAgreementHandler));
+    }
+    if (blockAckReqTimer->isScheduled() && blockAckReqTimer->getArrivalTime() == deadline)
+        return;
+    cancelEvent(blockAckReqTimer);
+    if (deadline != SIMTIME_MAX)
+        scheduleAt(deadline, blockAckReqTimer);
 }
 
 bool Hcf::isProfileAllowed(MacAddress peer, bool originator) const
@@ -1450,6 +1489,7 @@ void Hcf::frameSequenceFinished()
     }
     else
         throw cRuntimeError("Frame sequence finished but channel owner not found!");
+    scheduleBlockAckReqTimer();
     obsoleteActions.clear();
     finishingSequence = false;
 }
@@ -1782,6 +1822,8 @@ void Hcf::originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const 
 {
     auto edcaf = edca->getEdcaf(ac);
     edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(dataHeader);
+    if (blockAckReqTimer && dataHeader->getType() == ST_DATA_WITH_QOS && dataHeader->getAckPolicy() == BLOCK_ACK)
+        edcaf->getInProgressFrames()->markBlockAckOutstanding(packet);
     if (originatorBlockAckAgreementHandler)
         originatorBlockAckAgreementHandler->processTransmittedDataFrame(packet, dataHeader, originatorBlockAckAgreementPolicy, this);
     if (originatorBlockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS &&
@@ -3279,6 +3321,7 @@ Hcf::~Hcf()
 {
     if (tx)
         tx->cancelPendingAggregate(this);
+    cancelAndDelete(blockAckReqTimer);
     cancelAndDelete(addbaResponseTimer);
     cancelAndDelete(dataLifetimeTimer);
     cancelAndDelete(startRxTimer);

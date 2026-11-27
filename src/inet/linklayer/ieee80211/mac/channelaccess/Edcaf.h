@@ -125,6 +125,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     }
     bool isBasicOpeningDeferred(int64_t sourceId) const { return sourceId == deferredBasicSourceId; }
     simtime_t getBasicOpeningCtsDuration(int64_t sourceId) const { return isBasicOpeningDeferred(sourceId) ? deferredBasicCtsDuration : SIMTIME_ZERO; }
+    simtime_t getAifs() const { return ifs; }
     void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
     bool hasEligibleFrames() const;
     virtual AccessCategory getAccessCategory() { return ac; }

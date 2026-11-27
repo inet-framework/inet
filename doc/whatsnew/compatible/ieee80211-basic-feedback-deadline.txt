@@ -1,0 +1,3 @@
+Basic Block Ack can collect a partial batch before requesting feedback
+
+In the historical Basic profile, the sender can wait up to basicBlockAckReqMaxDelay (default 20 ms) for additional DATA before contending for feedback. A full batch, the transmit window or an approaching expiry can require feedback sooner. Set the parameter to 0s for immediate feedback when a partial batch runs out of eligible DATA.
