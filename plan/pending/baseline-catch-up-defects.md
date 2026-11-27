@@ -308,8 +308,8 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-4: a window update counts as a duplicate ACK
 
-- **State (2026-11-26):** repaired by `ad63065ecf` on the branch `topic/baseline-catch-up-defect-repairs` (change R7
-  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests `Rfc5681WindowUpdateNoDuplicateAck.test` and
+- **State (2026-11-27):** repaired by `e5e54f2661` (change R7 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on
+  2026-11-27, with the protocol tests `Rfc5681WindowUpdateNoDuplicateAck.test` and
   `Rfc5681SmallerWindowNoDuplicateAck.test` and the reviewer document
   `tests/protocol/tcp/window-update-no-duplicate-ack.md`. `~Tcp` takes any change of the window as a window update, as
   condition (e) says; the new parameter `duplicateAckWindowRule = "linux"`, which `~LinuxTcp` sets, takes a larger or a
