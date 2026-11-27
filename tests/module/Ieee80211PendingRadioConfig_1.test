@@ -1,0 +1,125 @@
+%description:
+Check that a passive scan's channel request made during a receiver-to-transceiver
+switch is sent once the radio is idle, even without a contention request.
+
+%file: PassiveScanProbe.cc
+#include <iostream>
+
+#include "inet/common/InitStages.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+namespace Ieee80211PendingRadioConfig_1 {
+
+class PassiveScanProbe : public cSimpleModule
+{
+  private:
+    IRadio *radio = nullptr;
+    cMessage *timer = nullptr;
+
+    int getChannelNumber() const
+    {
+        auto transmitter = check_and_cast<const Ieee80211Transmitter *>(radio->getTransmitter());
+        return transmitter->getChannel()->getChannelNumber();
+    }
+
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            radio = check_and_cast<IRadio *>(getModuleByPath("^.station.wlan[0].radio"));
+            timer = new cMessage("check passive scan channel");
+            scheduleAt(SimTime(1, SIMTIME_MS), timer);
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (simTime() == SimTime(1, SIMTIME_MS)) {
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER)
+                throw cRuntimeError("Expected the radio to start in receiver mode");
+            radio->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER);
+            scheduleAt(SimTime(2, SIMTIME_MS), message);
+        }
+        else if (simTime() == SimTime(2, SIMTIME_MS)) {
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_SWITCHING || getChannelNumber() != 0)
+                throw cRuntimeError("Radio did not stay on channel 0 while switching");
+            scheduleAt(SimTime(4, SIMTIME_MS), message);
+        }
+        else {
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER ||
+                    radio->getReceptionState() != IRadio::RECEPTION_STATE_IDLE ||
+                    radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_IDLE)
+                throw cRuntimeError("Expected an idle transceiver after the radio switch");
+            int channelNumber = getChannelNumber();
+            if (channelNumber != 1)
+                throw cRuntimeError("Passive scan stayed on channel %d after the radio switch", channelNumber);
+            std::cout << "Passive scan tuned to channel 1: PASS\n";
+            endSimulation();
+        }
+    }
+
+  public:
+    ~PassiveScanProbe() override { cancelAndDelete(timer); }
+};
+
+Define_Module(PassiveScanProbe);
+
+} // namespace Ieee80211PendingRadioConfig_1
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple PassiveScanProbe
+{
+    parameters:
+        @class(::Ieee80211PendingRadioConfig_1::PassiveScanProbe);
+}
+
+network PassiveScanDuringSwitch
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        station: WirelessHost;
+        probe: PassiveScanProbe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = PassiveScanDuringSwitch
+ned-path = .;../../../../src
+sim-time-limit = 10ms
+seed-set = 0
+record-scalar-results = false
+record-vector-results = false
+*.station.wlan[0].opMode = "a"
+*.station.wlan[0].bitrate = 6Mbps
+*.station.wlan[0].mac.initialRadioMode = "receiver"
+*.station.wlan[0].mac.qosStation = false
+*.station.wlan[0].radio.typename = "Ieee80211ScalarRadio"
+*.station.wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station.wlan[0].radio.channelNumber = 0
+# Receiver to transceiver takes 2 ms.
+*.station.wlan[0].radio.switchingTimes = "ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0"
+*.station.wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.station.wlan[0].agent.typename = "Ieee80211AgentSta"
+*.station.wlan[0].agent.activeScan = false
+*.station.wlan[0].agent.channelsToScan = "1"
+*.station.wlan[0].agent.startingTime = 1.5ms
+*.station.wlan[0].agent.minChannelTime = 1ms
+*.station.wlan[0].agent.maxChannelTime = 5ms
+*.station.mobility.initFromDisplayString = false
+*.station.mobility.initialX = 0m
+*.station.mobility.initialY = 0m
+*.station.mobility.initialZ = 0m
+
+%contains: stdout
+Passive scan tuned to channel 1: PASS
+%not-contains: stdout
+undisposed object:

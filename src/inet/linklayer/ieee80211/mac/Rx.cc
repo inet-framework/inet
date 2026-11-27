@@ -189,6 +189,7 @@ bool Rx::isFcsOk(Packet *packet) const
 
 void Rx::recomputeMediumFree()
 {
+    bool oldMediumFree = mediumFree;
     bool oldContentionFree = contentionFree;
     auto radioMode = radio->getRadioMode();
     // Mode changes are published before the matching reception and transmission states.
@@ -201,6 +202,8 @@ void Rx::recomputeMediumFree()
         for (auto contention : contentions)
             contention->mediumStateChanged(contentionFree);
     }
+    if (mediumFree && !oldMediumFree)
+        mac->sendDownPendingRadioConfigMsg();
 }
 
 void Rx::receptionStateChanged(IRadio::ReceptionState state)
