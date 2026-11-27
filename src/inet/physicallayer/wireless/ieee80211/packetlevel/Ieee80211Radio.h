@@ -38,6 +38,8 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     virtual void initialize(int stage) override;
 
     virtual void handleUpperCommand(cMessage *message) override;
+    virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part) override;
+    virtual bool isReceiverMode(IRadio::RadioMode radioMode) const override;
 
     virtual void insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const;
     virtual bool verifyFcs(const Ptr<const Ieee80211PhyHeader>& phyHeader) const;

@@ -190,8 +190,11 @@ bool Rx::isFcsOk(Packet *packet) const
 void Rx::recomputeMediumFree()
 {
     bool oldContentionFree = contentionFree;
-    // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
-    mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    auto radioMode = radio->getRadioMode();
+    // Mode changes are published before the matching reception and transmission states.
+    bool receptive = (radioMode == IRadio::RADIO_MODE_RECEIVER && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED) ||
+                     (radioMode == IRadio::RADIO_MODE_TRANSCEIVER && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
+    mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && receptive && !endNavTimer->isScheduled();
     // IEEE Std 802.11-2024, 10.23.2.2: active TXNAV excludes local contention.
     contentionFree = mediumFree && getTxnavRemaining() == 0 && !contentionBlocked;
     if (contentionFree != oldContentionFree) {
@@ -454,6 +457,7 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value,
             invalidateInterframeHistory();
         else if (value == IRadio::RADIO_MODE_SLEEP || value == IRadio::RADIO_MODE_TRANSMITTER)
             invalidateFutureInterframeHistory();
+        recomputeMediumFree();
     }
 }
 

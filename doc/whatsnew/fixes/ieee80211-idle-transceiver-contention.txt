@@ -1,0 +1,3 @@
+Wi-Fi contention works with idle transceiver radios
+
+Wi-Fi MACs can contend when their transceiver radio is idle. During a radio mode switch, channel access waits until the radio can receive and its transmission state matches the new mode.

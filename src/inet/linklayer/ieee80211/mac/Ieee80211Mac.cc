@@ -95,6 +95,10 @@ void Ieee80211Mac::initialize(int stage)
         }
         mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
+        transmissionState = radio->getTransmissionState();
+        rx->transmissionStateChanged(transmissionState);
+        rx->receptionStateChanged(radio->getReceptionState());
+        rx->receivedSignalPartChanged(radio->getReceivedSignalPart());
         if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -345,8 +349,8 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
-            EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this is in a very wrong place!!! should be done explicitly from coordination function!
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
+                configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this should be done from the coordination function
         }
         rx->transmissionStateChanged(transmissionState);
     }
@@ -389,7 +393,8 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
 {
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
-    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
+        configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
     sendDown(frame);
 }

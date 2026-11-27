@@ -1,0 +1,245 @@
+%description:
+Check that the stock MAC sends queued DCF DATA in transceiver mode, including
+when the PHY is already in that mode and switching to transmitter would take
+time. Check both delayed switches between receiver and transceiver modes.
+
+%extraargs: -r 0..2
+
+%file: RxMediumFree.cc
+#include <cstring>
+#include <iostream>
+#include <optional>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211RxMediumFree_1 {
+
+class MediumRx : public Rx
+{
+  public:
+    bool canContend() const { return contentionFree; }
+};
+Define_Module(MediumRx);
+
+class Probe : public cSimpleModule, public cListener
+{
+    enum Step { START, CHECK_DATA, CHECK_SWITCH_END, CHECK_RECEPTIVE };
+    opp_component_ptr<cModule> publisher;
+    IRadio *radio = nullptr;
+    MediumRx *rx = nullptr;
+    cMessage *timer = nullptr;
+    bool testSwitches = false;
+    int dataTransmissions = 0;
+    int transmitBusyNotifications = 0;
+    int switchingNotifications = 0;
+    int completionNotifications = 0;
+    std::optional<IRadio::RadioMode> targetMode;
+
+    static void require(bool value, const char *message) {
+        if (!value)
+            throw cRuntimeError("%s", message);
+    }
+
+    void schedule(Step step, simtime_t delay) {
+        timer->setKind(step);
+        scheduleAfter(delay, timer);
+    }
+
+    void switchMode(IRadio::RadioMode mode, simtime_t delay) {
+        targetMode = mode;
+        // Observe the completion timestamp before the radio's own timer runs.
+        schedule(CHECK_SWITCH_END, delay);
+        radio->setRadioMode(mode);
+    }
+
+    void checkUnavailable(const char *message) const {
+        require(!rx->isMediumFree() && !rx->canContend(), message);
+    }
+
+    void queueData() {
+        auto mac = check_and_cast<Ieee80211Mac *>(publisher->getSubmodule("mac"));
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("transceiver-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(32)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        mac->processUpperFrame(packet, header);
+    }
+
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LAST) {
+            publisher = getModuleByPath("^.host.wlan[0]");
+            radio = check_and_cast<IRadio *>(publisher->getSubmodule("radio"));
+            rx = check_and_cast<MediumRx *>(publisher->getModuleByPath(".mac.rx"));
+            testSwitches = par("testSwitches");
+            publisher->subscribe(IRadio::radioModeChangedSignal, this);
+            publisher->subscribe(IRadio::transmissionStateChangedSignal, this);
+            publisher->subscribe(transmissionStartedSignal, this);
+            timer = new cMessage("check Rx medium availability");
+            schedule(START, SimTime(1, SIMTIME_MS));
+        }
+    }
+
+    void receiveSignal(cComponent *, simsignal_t signal, intval_t value, cObject *) override {
+        Enter_Method_Silent();
+        if (signal == IRadio::radioModeChangedSignal && targetMode) {
+            if (value == IRadio::RADIO_MODE_SWITCHING) {
+                checkUnavailable("Rx admitted contention during a radio mode switch");
+                switchingNotifications++;
+            }
+            else if (value == *targetMode) {
+                checkUnavailable("Rx admitted contention before the new TX state was published");
+                completionNotifications++;
+            }
+        }
+        else if (signal == IRadio::transmissionStateChangedSignal && value == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
+            checkUnavailable("Rx admitted contention during DATA transmission");
+            transmitBusyNotifications++;
+        }
+    }
+
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        auto transmission = check_and_cast<const ITransmission *>(object);
+        if (std::strcmp(transmission->getPacket()->getName(), "transceiver-data") == 0) {
+            require(radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER, "DATA left the radio outside transceiver mode");
+            dataTransmissions++;
+        }
+    }
+
+    void handleMessage(cMessage *message) override {
+        switch (message->getKind()) {
+            case START:
+                if (testSwitches) {
+                    require(radio->getRadioMode() == IRadio::RADIO_MODE_RECEIVER &&
+                            rx->isMediumFree() && rx->canContend(), "Idle receiver was unavailable before the switch");
+                    switchMode(IRadio::RADIO_MODE_TRANSCEIVER, SimTime(2, SIMTIME_MS));
+                }
+                else {
+                    require(radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER &&
+                            radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_IDLE, "Test did not start with an idle transceiver");
+                    queueData();
+                    schedule(CHECK_DATA, SimTime(1, SIMTIME_MS));
+                }
+                break;
+            case CHECK_DATA:
+                require(dataTransmissions == 1, "Queued DCF DATA did not start on the idle transceiver");
+                require(transmitBusyNotifications == 1, "The DATA transmission did not close contention");
+                require(radio->getRadioMode() == IRadio::RADIO_MODE_TRANSCEIVER, "Radio left transceiver mode after DATA");
+                require(rx->isMediumFree() && rx->canContend(), "Idle transceiver did not reopen contention after DATA");
+                std::cout << "Rx transceiver DATA with PHY initially "
+                          << check_and_cast<cModule *>(radio)->par("initialRadioMode").stringValue() << ": PASS\n";
+                endSimulation();
+                break;
+            case CHECK_SWITCH_END:
+                require(radio->getRadioMode() == IRadio::RADIO_MODE_SWITCHING, "Test missed the radio switch deadline");
+                checkUnavailable("Rx admitted contention before the radio completed its switch");
+                schedule(CHECK_RECEPTIVE, SimTime(1, SIMTIME_US));
+                break;
+            case CHECK_RECEPTIVE:
+                require(radio->getRadioMode() == targetMode &&
+                        rx->isMediumFree() && rx->canContend(), "Contention did not reopen after the radio completed its switch");
+                if (targetMode == IRadio::RADIO_MODE_TRANSCEIVER)
+                    switchMode(IRadio::RADIO_MODE_RECEIVER, SimTime(3, SIMTIME_MS));
+                else {
+                    require(switchingNotifications == 2 && completionNotifications == 2, "Expected both radio transitions and completions");
+                    std::cout << "Rx receptive mode switches: PASS\n";
+                    endSimulation();
+                }
+                break;
+        }
+    }
+
+    using cListener::finish;
+
+  public:
+    ~Probe() override {
+        if (publisher) {
+            publisher->unsubscribe(IRadio::radioModeChangedSignal, this);
+            publisher->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+            publisher->unsubscribe(transmissionStartedSignal, this);
+        }
+        cancelAndDelete(timer);
+    }
+};
+Define_Module(Probe);
+
+} // namespace Ieee80211RxMediumFree_1
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple MediumRx extends Rx {
+    parameters:
+        @class(::Ieee80211RxMediumFree_1::MediumRx);
+}
+
+simple Probe {
+    parameters:
+        bool testSwitches;
+        @class(::Ieee80211RxMediumFree_1::Probe);
+}
+
+network RxMediumFreeNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        probe: Probe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RxMediumFreeNetwork
+ned-path = .;../../../../src
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-stop-batch-on-error = false
+record-vector-results = false
+record-scalar-results = false
+*.probe.testSwitches = ${testSwitches=false,false,true}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.rx.typename = "MediumRx"
+**.wlan[*].mac.initialRadioMode = ${macMode="transceiver","transceiver","receiver" ! testSwitches}
+**.wlan[*].radio.initialRadioMode = ${phyMode="off","transceiver","off" ! testSwitches}
+**.wlan[*].mac.qosStation = false
+**.wlan[*].radio.typename = "Ieee80211ScalarRadio"
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+# Receiver to transceiver takes 2 ms, the reverse takes 3 ms, and transceiver to transmitter takes 2 ms.
+**.wlan[*].radio.switchingTimes = "ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 3 2 0"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Rx transceiver DATA with PHY initially off: PASS
+%contains: stdout
+Rx transceiver DATA with PHY initially transceiver: PASS
+%contains: stdout
+Rx receptive mode switches: PASS
+%not-contains: stdout
+undisposed object:
