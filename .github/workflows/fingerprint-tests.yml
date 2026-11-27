@@ -29,6 +29,15 @@ on:
 permissions:
   contents: read
 
+# The runs of master (a push, the nightly run, a run by hand) wait for each other, and a newer run
+# cancels a run that waits. The update run of the newer push selects the changes from the commit of
+# its map, so it also tests the changes of the cancelled run, and the head of master always gets its
+# run, which `Master green` reads. A new commit of a pull request stops the old run of the pull
+# request, whose result does not count any more.
+concurrency:
+  group: fingerprint-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   changes:
     name: Paths that can change a result
