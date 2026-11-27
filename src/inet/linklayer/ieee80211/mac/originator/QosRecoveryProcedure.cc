@@ -68,9 +68,7 @@ void QosRecoveryProcedure::edcaTransmissionFailed()
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
-    auto id = getRetryKey(ackedHeader);
-    auto& retries = packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter;
-    retries.erase(id);
+    dropFrame(ackedHeader);
 }
 
 //
@@ -86,7 +84,11 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
 
 void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& header)
 {
-    auto id = getRetryKey(header);
+    clearRetryCounters(getRetryKey(header));
+}
+
+void QosRecoveryProcedure::clearRetryCounters(const RetryKey& id)
+{
     // RTS failure can leave an SRC entry even when the protected DATA uses an LRC entry.
     shortRetryCounter.erase(id);
     longRetryCounter.erase(id);
@@ -133,10 +135,14 @@ bool QosRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<const I
 
 int QosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
-    if (packet->getByteLength() >= rtsThreshold)
-        return getRc(packet, header, longRetryCounter);
-    else
-        return getRc(packet, header, shortRetryCounter);
+    return getRc(packet, header, packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter);
+}
+
+int QosRecoveryProcedure::getRetryCountOrZero(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const
+{
+    const auto& counters = packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter;
+    auto it = counters.find(getRetryKey(header));
+    return it == counters.end() ? 0 : it->second;
 }
 
 bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader)

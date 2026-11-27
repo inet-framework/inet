@@ -53,6 +53,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
 
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
+    std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation, const std::function<bool(b)>& fitsMpdu) override;
     virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 

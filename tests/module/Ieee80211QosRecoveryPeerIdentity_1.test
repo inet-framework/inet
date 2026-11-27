@@ -32,6 +32,10 @@ class QosRecoveryPeerIdentityTest : public cSimpleModule
             packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
         }
 
+        // Block Ack retransmissions can carry Retry before a Normal Ack attempt has failed.
+        if (recovery->getRetryCountOrZero(&first, firstHeader) != 0 || recovery->getRetryCountOrZero(&second, secondHeader) != 0)
+            throw cRuntimeError("Fresh DATA must have zero recorded retries");
+
         recovery->dataFrameTransmissionFailed(&first, firstHeader);
         recovery->dataFrameTransmissionFailed(&second, secondHeader);
         ASSERT(recovery->getRetryCount(&first, firstHeader) == 1);
@@ -41,6 +45,8 @@ class QosRecoveryPeerIdentityTest : public cSimpleModule
         ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
 
         recovery->ackFrameReceived(&first, firstHeader);
+        if (recovery->getRetryCountOrZero(&first, firstHeader) != 0)
+            throw cRuntimeError("Acknowledgment must retire this DATA retry count");
         ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
         recovery->dataFrameTransmissionFailed(&first, firstHeader);
         ASSERT(recovery->getRetryCount(&first, firstHeader) == 1);
@@ -52,6 +58,13 @@ class QosRecoveryPeerIdentityTest : public cSimpleModule
         recovery->retryLimitReached(&first, firstHeader);
         ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
         recovery->ackFrameReceived(&second, secondHeader);
+        if (recovery->getRetryCountOrZero(&second, secondHeader) != 0)
+            throw cRuntimeError("Acknowledgment must retire the second receiver's retry count");
+        // Resolved sequence/fragment identities can be used again after sequence wrap.
+        recovery->rtsFrameTransmissionFailed(firstHeader);
+        recovery->dropFrame(firstHeader);
+        if (recovery->getRetryCountOrZero(&first, firstHeader) != 0)
+            throw cRuntimeError("A reused DATA identity must start with zero retries");
     }
 
     void activity() override

@@ -159,8 +159,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::pair<simtime_t, simtime_t> estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
             OriginatorBlockAckAgreement *agreement);
     simtime_t reserveBasicDataContinuation(const FrameSequenceContext *context, Packet *candidate,
-            const MacAddress& peer, Tid tid, simtime_t budget, simtime_t start, bool followsBar);
+            const MacAddress& peer, Tid tid, simtime_t budget, simtime_t start, Packet *precedingData);
     void commitPostBarData(const FrameSequenceContext *context, const Ptr<const Ieee80211BasicBlockAck>& response);
+    simtime_t computeBasicOpeningDataBudget(const FrameSequenceContext *context, const Ptr<const Ieee80211DataHeader>& data);
+    void prepareBasicOpeningData(const FrameSequenceContext *context);
+    Packet *commitBasicOpeningData(const FrameSequenceContext *context, bool receivedCts);
+    simtime_t leaveBasicFeedbackAirtime(const FrameSequenceContext *context, Packet *candidate,
+            simtime_t budget, simtime_t minimumDataAirtime, simtime_t completion, Packet *precedingData);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,

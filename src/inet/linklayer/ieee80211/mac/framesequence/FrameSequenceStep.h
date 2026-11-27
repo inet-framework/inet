@@ -51,6 +51,7 @@ class INET_API RtsTransmitStep : public TransmitStep
     {}
 
     virtual const Packet *getProtectedFrame() { return protectedFrame; }
+    void setProtectedFrame(Packet *frame) { protectedFrame = frame; }
 };
 
 class INET_API ReceiveStep : public IReceiveStep

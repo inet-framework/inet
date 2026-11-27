@@ -60,6 +60,11 @@ void OriginatorQosMacDataService::initialize()
 
 std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation)
 {
+    return prepareFrame(queue, allowAggregation, {});
+}
+
+std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation, const std::function<bool(b)>& fitsMpdu)
+{
     Enter_Method("prepareFrame");
     if (expireFrames)
         expireFrames();
@@ -75,7 +80,7 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     auto module = dynamic_cast<cModule *>(queue);
     auto head = queue->canPullPacket(module ? module->gate("out") : nullptr);
     if (allowAggregation && selected == head && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(selected))) {
-        std::unique_ptr<std::vector<Packet *>> proposed(aMsduAggregationPolicy->computeAggregateFrames(queue));
+        std::unique_ptr<std::vector<Packet *>> proposed(aMsduAggregationPolicy->computeAggregateFrames(queue, fitsMpdu));
         bool valid = proposed && !proposed->empty() && proposed->front() == selected;
         std::set<Packet *> unique;
         if (proposed) {

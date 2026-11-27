@@ -9,6 +9,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 
+#include <algorithm>
 #include <tuple>
 
 namespace inet {
@@ -50,17 +51,25 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
 }
 
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::selectBlockAckRequest(InProgressFrames *frames,
-        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime) const
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime, Packet *precedingData) const
 {
     using Id = std::pair<MacAddress, Tid>;
     std::map<Id, std::vector<Packet *>> groups;
     auto outstanding = frames->getOutstandingFrames(selectionTime);
+    bool preview = transmittingData && !frames->containsFrame(transmittingData);
+    auto sequenceOf = [=](Packet *frame) {
+        return preview && frame == transmittingData ? frames->getCandidateSequenceNumber(frame) :
+            frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+    };
+    if (precedingData && !frames->isExpired(precedingData, selectionTime) &&
+        std::find(outstanding.begin(), outstanding.end(), precedingData) == outstanding.end())
+        outstanding.push_back(precedingData);
     if (transmittingData && !frames->isExpired(transmittingData, selectionTime))
         outstanding.push_back(transmittingData);
     for (auto frame : outstanding) {
         auto header = frame->peekAtFront<Ieee80211DataHeader>();
         auto agreement = agreements ? agreements->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
-        if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(header->getSequenceNumber()))
+        if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(sequenceOf(frame)))
             groups[{header->getReceiverAddress(), header->getTid()}].push_back(frame);
     }
     if (groups.empty())
@@ -72,6 +81,8 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
     for (const auto& entry : groups) {
         const auto& id = entry.first;
         auto agreement = agreements->getAgreement(id.first, id.second);
+        if (preview && (int)entry.second.size() < blockAckReqThreshold)
+            continue;
         // INET BAR policy defers a short group only for DATA within that group's window.
         if ((int)entry.second.size() < blockAckReqThreshold && data &&
             data->getReceiverAddress() == id.first && data->getTid() == id.second &&
@@ -81,7 +92,7 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
         int oldestOffset = -1;
         simtime_t arrival = SIMTIME_MAX;
         for (auto frame : entry.second) {
-            auto sequence = frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+            auto sequence = sequenceOf(frame);
             int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
             if (oldestOffset == -1 || offset < oldestOffset) {
                 oldestOffset = offset;
@@ -97,6 +108,12 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
         }
     }
     return result;
+}
+
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParametersForPreview(InProgressFrames *frames,
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *candidate, Packet *precedingData, simtime_t completion) const
+{
+    return selectBlockAckRequest(frames, agreements, candidate, completion, precedingData);
 }
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
@@ -117,7 +134,12 @@ AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<con
 
 bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const
 {
-    return header->getType() == ST_DATA_WITH_QOS && packet->getByteLength() < maxBlockAckPolicyFrameLength;
+    return isBlockAckPolicyEligibleFrame(packet->getDataLength(), header);
+}
+
+bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(b length, const Ptr<const Ieee80211DataHeader>& header) const
+{
+    return header->getType() == ST_DATA_WITH_QOS && length < B(maxBlockAckPolicyFrameLength);
 }
 
 bool OriginatorQosAckPolicy::checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const

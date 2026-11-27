@@ -49,6 +49,14 @@ B MsduAggregation::computeSubframePadding(b subframeLength)
     return B((4 - subframeLength.get<B>() % 4) % 4);
 }
 
+b MsduAggregation::computeHeaderLength(const Ptr<const Ieee80211DataHeader>& firstHeader)
+{
+    auto length = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
+    if (firstHeader->getToDS() && firstHeader->getFromDS())
+        length += B(6);
+    return length;
+}
+
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
     EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MSDU.\n";
@@ -93,10 +101,8 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     // IEEE Std 802.11-2024, 9.3.2.2.1: aggregation preserves the common RA and TA.
     amsduHeader->setTransmitterAddress(firstHeader->getTransmitterAddress());
     amsduHeader->setTid(tid);
-    amsduHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
     // IEEE Std 802.11-2024, 9.3.2.1.1, Figure 9-119.
-    if (toDS && fromDS)
-        amsduHeader->addChunkLength(B(6));
+    amsduHeader->setChunkLength(computeHeaderLength(firstHeader));
     // IEEE Std 802.11-2024, 9.3.2.1.2, Table 9-60: Basic A-MSDUs carry the
     // BSSID in Address3 and, when present, Address4. In the AP-to-AP case,
     // the BSSID is the address of the transmitting AP.

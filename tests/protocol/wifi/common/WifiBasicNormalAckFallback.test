@@ -1,0 +1,105 @@
+%description:
+A negative Basic bitmap makes DATA retryable without a Normal Ack failure counter.
+Lower the DATA mode before the next grant so the protected Basic opening cannot fit.
+The fallback keeps Retry set, uses Normal Ack, and completes with rate control enabled.
+
+%file: BasicNormalAckFallback.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+
+namespace inet::protocoltest {
+class FallbackRateSelection : public QosRateSelection
+{
+  public:
+    void lowerDataMode() { dataFrameMode = modeSet->getMode(bps(6000000)); }
+};
+Define_Module(FallbackRateSelection);
+
+class NormalAckFallbackHcf : public BlockAckLifecycleHcf
+{
+  protected:
+    void doBuildInside() override
+    {
+        BlockAckLifecycleHcf::doBuildInside();
+        getSubmodule("rateSelection")->deleteModule();
+        auto selection = cModuleType::get("FallbackRateSelection")->create("rateSelection", this);
+        selection->buildInside();
+    }
+};
+Define_Module(NormalAckFallbackHcf);
+
+Define_ProtocolTest(wifi_basic_normal_ack_fallback)
+{
+    return ProtocolTest("wifi_basic_normal_ack_fallback")
+        .intercept(tap("radioMedium").from("ap").to("sta1")
+            .filterPacket("has(Ieee80211BasicBlockAck) && ieee80211mac.receiverAddress.getInt() == 0x020000000003")
+            .nth(1).mutate([](Packet *packet) {
+                auto root = cSimulation::getActiveSimulation()->getSystemModule();
+                check_and_cast<FallbackRateSelection *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.rateSelection"))->lowerDataMode();
+                std::vector<Ptr<Chunk>> prefix;
+                while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+                    prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+                auto response = packet->removeAtFront<Ieee80211BasicBlockAck>();
+                for (int i = 0; i < 64; i++) {
+                    auto bits = response->getBlockAckBitmap(i);
+                    for (int j = 0; j < 16; j++)
+                        bits.setBit(j, false);
+                    response->setBlockAckBitmap(i, bits);
+                }
+                response->setDurationField(SIMTIME_ZERO);
+                packet->insertAtFront(response);
+                for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+                    packet->insertAtFront(*it);
+            }).describe("report missing DATA and reduce its next-grant transmission mode"))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+            return data && data->getAckPolicy() == BLOCK_ACK;
+        }).capture("sequence", [](const PacketEvent& e) {
+            return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+        }).describe("transmit the original Basic DATA").within(1.05))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211BasicBlockAck)")
+            .describe("receive the negative bitmap").within(0.002))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("has(Ieee80211DataHeader)")
+            .assertEvent([](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getSequenceNumber().get() == c.get("sequence").intValue() &&
+                    data->getRetry() && data->getAckPolicy() == NORMAL_ACK;
+            }).describe("retry the same DATA through the Normal Ack fallback").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211AckFrame)")
+            .describe("complete the retry with a successful ACK").within(0.002));
+}
+}
+
+%file: BasicNormalAckFallback.ned
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+simple FallbackRateSelection extends QosRateSelection
+{
+    parameters:
+        rateControlModule = default("^.rateControl");
+        @class(::inet::protocoltest::FallbackRateSelection);
+}
+module NormalAckFallbackHcf extends BlockAckLifecycleHcf
+{
+    parameters:
+        @class(::inet::protocoltest::NormalAckFallbackHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_normal_ack_fallback"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.wlan[*].mac.hcf.typename = "NormalAckFallbackHcf"
+*.sta1.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 54Mbps
+*.sta1.wlan[*].mac.hcf.rateControl.typename = "AarfRateControl"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.00016s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 500us
+**.hcf.rtsPolicy.rtsThreshold = 10000B
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_normal_ack_fallback: PASS

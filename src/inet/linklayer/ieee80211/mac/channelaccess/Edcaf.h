@@ -70,6 +70,8 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     int edcaRetryCount = 0;
     int edcaRetryLimit = -1;
     BasicBarRetry pendingBasicBarRetry;
+    int64_t deferredBasicSourceId = -1;
+    simtime_t deferredBasicCtsDuration;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -117,6 +119,12 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     virtual bool isOwning() { return owning; }
     virtual bool isInternalCollision();
     BasicBarRetry& getPendingBasicBarRetry() { return pendingBasicBarRetry; }
+    void deferBasicOpening(int64_t sourceId, simtime_t ctsDuration) {
+        deferredBasicSourceId = sourceId;
+        deferredBasicCtsDuration = ctsDuration;
+    }
+    bool isBasicOpeningDeferred(int64_t sourceId) const { return sourceId == deferredBasicSourceId; }
+    simtime_t getBasicOpeningCtsDuration(int64_t sourceId) const { return isBasicOpeningDeferred(sourceId) ? deferredBasicCtsDuration : SIMTIME_ZERO; }
     void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
     bool hasEligibleFrames() const;
     virtual AccessCategory getAccessCategory() { return ac; }
