@@ -62,6 +62,23 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("VIOLATION:", result.stdout)
 
+    def test_a_markdown_file_of_the_root_is_in_the_doc_area(self):
+        for path in ["README.md", "INSTALL.md"]:
+            self.write(path, "x\n")
+            self.git("add", ".")
+            self.git("commit", "-q", "-m", f"doc: change: {path}\n\nThe file changes.\n\nChange: doc | behavior.change | -")
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("VIOLATION:", result.stdout)
+
+    def test_a_markdown_file_below_the_root_keeps_its_area(self):
+        self.write("tests/x/README.md", "x\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "doc: change: a test readme\n\nThe file changes.\n\nChange: doc | behavior.change | -")
+        result = self.check()
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("claims area 'doc' and touches: tests", result.stdout)
+
     def test_a_commit_without_a_trailer_is_reported_once(self):
         self.write("src/inet/a/A.cc", "int a = 1;\n")
         self.write("tests/fingerprint/store.json", "[]\n")

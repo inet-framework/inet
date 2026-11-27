@@ -148,7 +148,7 @@ while read -r sha; do
   seen=""
   grep -q '^src/'                       <<< "$files" && seen="$seen src"
   grep -qE '^tests/'                    <<< "$files" && seen="$seen tests"
-  grep -qE '^(doc/|WHATSNEW)'           <<< "$files" && seen="$seen doc"
+  grep -qE '^(doc/|WHATSNEW|[^/]+\.md$)' <<< "$files" && seen="$seen doc"
   grep -qE '^(examples|showcases|tutorials)/' <<< "$files" && seen="$seen examples"
   grep -qE '^(bin/|python/|\.github/|_scripts/|Makefile|configure|setenv$|inet\.opp$|\.oppfeatures$|\.oppfeaturestate\.default$|\.oppbuildspec$|\.nedfolders$|\.nedexclusions\.default$)' <<< "$files" && seen="$seen build"
   grep -q '^plan/'                      <<< "$files" && seen="$seen plan"

@@ -45,7 +45,7 @@ The area is the top level of the scope. There are five, and the whole repository
 | --- | --- |
 | `src` | the model source, `src/inet` |
 | `tests` | `tests/`, of every category |
-| `doc` | `doc/`, and `WHATSNEW` |
+| `doc` | `doc/`, `WHATSNEW`, and the Markdown files of the root, such as `README.md` |
 | `examples` | `examples/`, `showcases/`, `tutorials/` |
 | `build` | Makefiles, `python/`, `.github/`, the scripts |
 | `plan` | `plan/pending/` and `plan/done/` — the working material of a change, not its record |
