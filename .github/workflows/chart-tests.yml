@@ -76,12 +76,16 @@ jobs:
             fi
           fi
           paths='^(src|examples|showcases|tutorials|tests/networks|tests/validation|python|_scripts|bin)/'
-          paths+='|^(inet\.opp|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
+          paths+='|^(inet\.opp|\.oppbuildspec|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
           paths+='|^\.github/workflows/chart-tests\.yml$|^doc/project/enforcement/baseline_'
-          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[].filename' > "$RUNNER_TEMP/files.txt"
+          # a renamed file has its old path in previous_filename
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[] | .filename, (.previous_filename // empty)' \
+            > "$RUNNER_TEMP/files.txt"
           # a pin trailer moves the baseline with no change of inet.opp
           gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/commits" --jq '.[].commit.message' > "$RUNNER_TEMP/messages.txt"
-          if grep -qE "$paths" "$RUNNER_TEMP/files.txt" || grep -qiE '^Chart-Baseline:' "$RUNNER_TEMP/messages.txt"; then
+          # GitHub lists at most 3000 files of a pull request; a longer list can hide a path
+          if [ "$(wc -l < "$RUNNER_TEMP/files.txt")" -ge 3000 ] || grep -qE "$paths" "$RUNNER_TEMP/files.txt" \
+            || grep -qiE '^Chart-Baseline:' "$RUNNER_TEMP/messages.txt"; then
             echo "relevant=true" >> "$GITHUB_OUTPUT"
           else
             echo "relevant=false" >> "$GITHUB_OUTPUT"
