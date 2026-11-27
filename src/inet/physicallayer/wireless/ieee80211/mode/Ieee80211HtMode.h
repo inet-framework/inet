@@ -201,6 +201,7 @@ class INET_API Ieee80211HtDataMode : public IIeee80211DataMode, public Ieee80211
     bps computeNetBitrate() const override;
     unsigned int computeNumberOfSpatialStreams(const Ieee80211OfdmModulation *stream1Modulation, const Ieee80211OfdmModulation *stream2Modulation, const Ieee80211OfdmModulation *stream3Modulation, const Ieee80211OfdmModulation *stream4Modulation) const;
     unsigned int computeNumberOfCodedBitsPerSubcarrierSum() const;
+    unsigned int computeNumberOfDataBitsPerSymbol() const;
     unsigned int computeNumberOfBccEncoders() const;
 
   public:

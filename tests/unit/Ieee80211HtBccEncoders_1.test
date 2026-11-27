@@ -1,0 +1,40 @@
+%description:
+Check HT BCC tail length and DATA symbol count with both guard intervals.
+IEEE Std 802.11-2024, 19.3.11.4 and Tables 19-32, 19-33 and 19-40 specify
+the encoder count using the PHY data rate with an 800 ns guard interval.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+struct TestCase {
+    const Ieee80211Htmcs *mcs;
+    int psduBytes;
+    int tailBits;
+    int symbols;
+};
+const TestCase cases[] = {
+    {&Ieee80211HtmcsTable::htMcs15BW40MHz, 132, 6, 1},
+    // MCS 50 crosses 300 Mb/s (283.5 with long GI, 315 with short GI).
+    // The PSDU plus service and one tail uses exactly 1134 data bits.
+    {&Ieee80211HtmcsTable::htMcs50BW40MHz, 139, 6, 1},
+    {&Ieee80211HtmcsTable::htMcs23BW40MHz, 402, 12, 3},
+};
+for (auto gi : {Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT}) {
+    for (const auto& test : cases) {
+        Ieee80211HtDataMode mode(test.mcs, MHz(40), gi);
+        auto tailLength = mode.getTailFieldLength();
+        auto duration = mode.getDuration(B(test.psduBytes));
+        auto expectedDuration = test.symbols * mode.getSymbolInterval();
+        if (tailLength != b(test.tailBits) || duration != expectedDuration)
+            EV << "mismatch: MCS " << test.mcs->getMcsIndex() << " short GI "
+               << (gi == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) << ", tail "
+               << tailLength << ", DATA duration " << duration << "\n";
+    }
+}
+
+%not-contains: stdout
+mismatch:

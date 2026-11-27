@@ -1,0 +1,3 @@
+Count HT BCC encoders using the long-guard-interval PHY data rate
+
+The HT PHY counts BCC encoders using the net PHY data rate with an 800 ns guard interval. Correcting the number of tail bits can change transmission times in existing simulations.
