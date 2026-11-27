@@ -3,8 +3,10 @@ Check lifetime replacement through production HCF and the QoS data service.
 With qOsCheck false, aggregation accepts non-QoS and mixed sources.
 The resulting QoS aggregate starts a new lifetime at construction.
 With qOsCheck true, non-QoS sources retain ordinary extraction behavior.
+The 4065-byte A-MSDU cap includes alignment padding.
+The configured minimum aggregate length remains based on unpadded subframes.
 
-%extraargs: -r 0..4
+%extraargs: -r 0..8
 
 %file: LifetimeAggregationTest.cc
 // Author: Miguel González-López
@@ -47,7 +49,7 @@ class LifetimeAggregationTest : public cSimpleModule, public cListener
         hcf->subscribe(packetDroppedSignal, this);
         rx->setContentionBlocked(true);
         for (int i = 0; i < 2; i++) {
-            bool qos = scenario == 3 || (scenario == 1 && i == 1) || (scenario == 2 && i == 0);
+            bool qos = scenario >= 5 || scenario == 3 || (scenario == 1 && i == 1) || (scenario == 2 && i == 0);
             auto header = makeShared<Ieee80211DataHeader>();
             header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
             if (qos)
@@ -57,7 +59,10 @@ class LifetimeAggregationTest : public cSimpleModule, public cListener
             header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
             header->setAddress3(header->getReceiverAddress());
             auto frame = new Packet(qos ? "qos-source" : "non-qos-source", header);
-            frame->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+            auto payloadLength = scenario == 5 || scenario == 6 ? (i == 0 ? 2001 : 2035 + (scenario == 6)) : 100;
+            if (scenario >= 7 && i == 0)
+                payloadLength = 101;
+            frame->insertAtBack(makeShared<ByteCountChunk>(B(payloadLength)));
             frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
             sourceIds[i] = frame->getId();
             hcf->processUpperFrame(frame, header);
@@ -70,6 +75,16 @@ class LifetimeAggregationTest : public cSimpleModule, public cListener
         auto selected = frames->getFrameToTransmit();
         ASSERT(selected != nullptr);
         auto header = selected->peekAtFront<Ieee80211DataHeader>();
+        if (scenario >= 5) {
+            bool fits = scenario == 5 || scenario == 8;
+            auto expectedLength = scenario == 5 ? 4095 : scenario == 6 ? 2031 : scenario == 7 ? 131 : 260;
+            if (header->getAMsduPresent() != fits || selected->getDataLength() != B(expectedLength) ||
+                pending->getNumPackets() != (fits ? 0 : 1))
+                throw cRuntimeError("A-MSDU padding limit violated in scenario %d", scenario);
+            hcf->unsubscribe(packetDroppedSignal, this);
+            std::cout << "Padded aggregation scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
         if (scenario == 4) {
             ASSERT(header->getType() == ST_DATA && !header->getAMsduPresent());
             ASSERT(pending->getNumPackets() == 1 && frames->getLength() == 1);
@@ -130,7 +145,7 @@ cmdenv-express-mode = true
 result-dir = results
 **.scalar-recording = true
 **.vector-recording = false
-*.test.scenario = ${scenario=0..4}
+*.test.scenario = ${scenario=0..8}
 **.wlan[*].agent.typename = ""
 **.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
 **.wlan[*].opMode = "a"
@@ -138,6 +153,8 @@ result-dir = results
 **.wlan[*].mac.qosStation = true
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "BasicMsduAggregationPolicy"
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+# These two subframes total 229 bytes before alignment and 230 bytes on air.
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = ${scenario} == 7 ? 230 : ${scenario} == 8 ? 229 : -1
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.qOsCheck = ${scenario} == 4
 **.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
 *.host.wlan[0].address = "02:00:00:00:00:01"
@@ -154,6 +171,18 @@ result-dir = results
 
 %contains: stdout
 Lifetime aggregation scenario 4 passed.
+
+%contains: stdout
+Padded aggregation scenario 5 passed.
+
+%contains: stdout
+Padded aggregation scenario 6 passed.
+
+%contains: stdout
+Padded aggregation scenario 7 passed.
+
+%contains: stdout
+Padded aggregation scenario 8 passed.
 
 %contains: results/General-scenario=0-#0.sca
 scalar LifetimeAggregationNetwork.host.wlan[0].mac.hcf packetDropLifetimeExpired:count 1

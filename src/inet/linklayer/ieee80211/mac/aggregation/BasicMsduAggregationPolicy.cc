@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -60,7 +61,9 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
 {
     Enter_Method("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
-    b aMsduLength = b(0);
+    b unpaddedLength = b(0);
+    b encodedLength = b(0);
+    B tailPadding = B(0);
     Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
     auto frames = new std::vector<Packet *>();
     for (int i = 0; i < queue->getNumPackets(); i++) {
@@ -71,15 +74,19 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
         if (firstHeader == nullptr)
             firstHeader = dataHeader;
         const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>(B(4));
-        if (!isEligible(dataPacket, staticPtrCast<const Ieee80211DataHeader>(dataHeader), dataTrailer, firstHeader, aMsduLength)) {
+        auto paddedPrefixLength = encodedLength + tailPadding;
+        if (!isEligible(dataPacket, dataHeader, dataTrailer, firstHeader, paddedPrefixLength)) {
             EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
             break;
         }
         EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        auto subframeLength = dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER);
+        unpaddedLength += subframeLength;
+        encodedLength = paddedPrefixLength + subframeLength;
+        tailPadding = MsduAggregation::computeSubframePadding(subframeLength);
     }
-    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {
+    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), unpaddedLength.get<B>())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;
         return nullptr;

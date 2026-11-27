@@ -1,0 +1,3 @@
+IEEE 802.11 A-MSDU size limits include subframe padding
+
+The Wi-Fi MAC now counts alignment padding between subframes when selecting packets for an A-MSDU. A packet that would take the aggregate over the configured limit stays queued for a later transmission.
