@@ -1,0 +1,80 @@
+%description:
+Replay classic PCAP 2.3 captures with reversed and standard record length fields,
+in both file byte orders, while preserving record boundaries and timestamps.
+
+%includes:
+#include <fstream>
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapReader.h"
+using namespace inet;
+
+%activity:
+const std::vector<uint8_t> ipv4Datagram = {
+    0x45, 0, 0, 28, 0, 0, 0, 0, 64, 17, 0x8e, 0x9a, 192, 0, 2, 1,
+    198, 51, 100, 2, 0x30, 0x39, 0x30, 0x3a, 0, 8, 0, 0
+};
+uint32_t originalLength = ipv4Datagram.size();
+struct Record
+{
+    int seconds;
+    uint32_t capturedLength;
+    bool lengthsReversed;
+};
+const Record records[] = {
+    {1, 24, true},
+    {2, originalLength, false},
+    {3, 24, false},
+};
+
+for (bool bigEndian : {false, true}) {
+    std::vector<uint8_t> capture;
+    auto appendInteger = [&](uint32_t value, int byteCount) {
+        for (int i = 0; i < byteCount; i++) {
+            int byteIndex = bigEndian ? byteCount - 1 - i : i;
+            capture.push_back((value >> (8 * byteIndex)) & 0xff);
+        }
+    };
+    appendInteger(0xa1b2c3d4, 4);
+    appendInteger(2, 2);
+    appendInteger(3, 2);
+    appendInteger(0, 4); // reserved fields
+    appendInteger(0, 4);
+    appendInteger(originalLength, 4); // snaplen also accommodates the complete record
+    appendInteger(101, 4); // LINKTYPE_RAW
+    for (const auto& record : records) {
+        appendInteger(record.seconds, 4);
+        appendInteger(345678, 4);
+        appendInteger(record.lengthsReversed ? originalLength : record.capturedLength, 4);
+        appendInteger(record.lengthsReversed ? record.capturedLength : originalLength, 4);
+        capture.insert(capture.end(), ipv4Datagram.begin(), ipv4Datagram.begin() + record.capturedLength);
+    }
+    const char *filename = "pcap-2-3.pcap";
+    std::ofstream output(filename, std::ios::binary);
+    output.write(reinterpret_cast<const char *>(capture.data()), capture.size());
+    output.close();
+    if (!output)
+        throw cRuntimeError("Cannot write the PCAP 2.3 capture fixture");
+
+    PcapReader reader;
+    reader.openPcap(filename, nullptr);
+    for (const auto& expected : records) {
+        auto record = reader.readPacket();
+        if (record.second == nullptr || record.first.sec != expected.seconds || record.first.usec != 345678)
+            throw cRuntimeError("Missing record or unexpected timestamp for PCAP 2.3 record %d", expected.seconds);
+        auto data = record.second->peekDataAsBytes(Chunk::PF_ALLOW_INCOMPLETE);
+        auto expectedBytes = std::vector<uint8_t>(ipv4Datagram.begin(), ipv4Datagram.begin() + expected.capturedLength);
+        if (data->getBytes() != expectedBytes || data->isComplete() != (expected.capturedLength == originalLength))
+            throw cRuntimeError("Unexpected captured bytes or completeness for PCAP 2.3 record %d", expected.seconds);
+        ASSERT(record.second->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4);
+        delete record.second;
+    }
+    ASSERT(reader.readPacket().second == nullptr);
+    reader.closePcap();
+}
+std::cout << "PCAP 2.3 replay preserves capture bytes and record boundaries.\n";
+
+%contains: stdout
+PCAP 2.3 replay preserves capture bytes and record boundaries.

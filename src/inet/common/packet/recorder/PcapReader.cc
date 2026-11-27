@@ -8,6 +8,7 @@
 #include "inet/common/packet/recorder/PcapReader.h"
 
 #include <cerrno>
+#include <utility>
 
 #include "inet/common/FcsInd_m.h"
 #include "inet/common/INETUtils.h"
@@ -118,6 +119,9 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
             packetHeader.orig_len = swapByteOrder32(packetHeader.orig_len);
             packetHeader.incl_len = swapByteOrder32(packetHeader.incl_len);
         }
+        // Some PCAP 2.3 writers stored the original length before the captured length.
+        if (fileHeader.version_major == 2 && fileHeader.version_minor == 3 && packetHeader.incl_len > packetHeader.orig_len)
+            std::swap(packetHeader.incl_len, packetHeader.orig_len);
         constexpr uint32_t maxCaptureLength = 1 << 16;
         if (packetHeader.incl_len > maxCaptureLength)
             throw cRuntimeError("PCAP record exceeds the supported capture length");
