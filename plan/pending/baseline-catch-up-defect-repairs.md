@@ -319,7 +319,9 @@ No sealed file changes. No consumer outside INET changes.
   and a larger window during a transfer; the sender does not start a fast retransmit. Baselines:
   `examples/inet/bulktransfer` `inet__inet`, `inet_inet_2a`, `inet_inet_2b`.
   - `tcp: fix: condition (e) of a duplicate ACK compares the window before its update (RFC 5681)`.
-- [ ] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Gate A decides the form of the hold of new data.
+- [x] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Repaired as C15 `82b9ea7470`, with the `statistics`
+  commit `593ba94baa`; gate B approved on 2026-11-27 (§6.3, R8). It lands when the maintainer asks. Gate A decides the
+  form of the hold of new data.
   Test: an ECN-Echo arrives at a cwnd of one MSS; no new segment leaves before the timer expires. Baselines:
   `examples/inet/dctcp` `TcpRenoIncast`.
   - `tcp: fix: at an ECN-Echo with a cwnd of one MSS, new data waits for the retransmission timer (RFC 3168 section 6.1.2)`.
@@ -1364,6 +1366,10 @@ with that commit, the obligations `fingerprint statistical test whatsnew`, and t
   source lines, above 30, and no description is given. All fingerprints in release mode, 1846 PASS and 1 expected ERROR
   (`runs/r8-gate-after-record/`); all statistical tests, 945 TOTAL, 934 PASS, 11 SKIP (expected), 0 unexpected
   (`evidence/runs/4cd7c95000/` of the job copy).
+
+**Gate B** approved by the maintainer on 2026-11-27 ("yes"). The repair commit of BD-7 is in
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md). R8 lands when the maintainer asks: first the branch of
+`statistics` goes to GitHub, then the debug fingerprints of the landing run in the image of the CI.
 
 ## 7. Verification
 
