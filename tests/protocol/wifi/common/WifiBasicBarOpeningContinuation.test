@@ -1,0 +1,60 @@
+%description:
+A short protected grant can send Basic DATA but has no room left for its BAR.
+The BAR opens the next grant and its reply protects pending DATA for the same agreement.
+
+%file: BasicBarOpeningContinuation.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(wifi_basic_bar_opening_continuation)
+{
+    auto sent = [] { return on("sta1.wlan[0].mac").signal("packetSentToLower"); };
+    auto received = [] { return on("sta1.wlan[0].mac").signal("packetReceivedFromLower"); };
+    auto grant = [](const PacketEvent&) {
+        auto root = cSimulation::getActiveSimulation()->getSystemModule();
+        auto txop = check_and_cast<TxopProcedure *>(root->getModuleByPath("sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure"));
+        return cValue(txop->getStart().dbl());
+    };
+    auto data = [](const MatchContext& c) {
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+        return header && header->getAckPolicy() == BLOCK_ACK;
+    };
+    return ProtocolTest("wifi_basic_bar_opening_continuation")
+        .once(sent().filterEvent(data).capture("previousGrant", grant)
+            .describe("Basic DATA uses the first grant").within(1.05))
+        .once(sent().filterPacket("has(Ieee80211BasicBlockAckReq)").assertEvent([=](const MatchContext& c) {
+            auto start = grant(c.event).doubleValue();
+            return start > c.get("previousGrant").doubleValue() && SimTime(start) == c.event.time;
+        }).capture("barGrant", grant).capture("tid", [](const PacketEvent& event) {
+            return cValue(event.packet->peekAtFront<Ieee80211BasicBlockAckReq>()->getTidInfo());
+        }).capture("peer", [](const PacketEvent& event) {
+            return cValue(static_cast<intval_t>(event.packet->peekAtFront<Ieee80211BasicBlockAckReq>()->getReceiverAddress().getInt()));
+        }).describe("the due BAR opens a new grant").within(0.01))
+        .once(received().filterPacket("has(Ieee80211BasicBlockAck)").assertEvent([=](const MatchContext& c) {
+            auto reply = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+            return reply->getTidInfo() == c.get("tid").intValue() && reply->getTransmitterAddress().getInt() == c.get("peer").intValue() &&
+                reply->getDurationField() > SIMTIME_ZERO &&
+                grant(c.event) == c.get("barGrant");
+        }).describe("the reply leaves time for the reserved DATA").within(0.001))
+        .once(sent().filterEvent(data).assertEvent([=](const MatchContext& c) {
+            auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+            return grant(c.event) == c.get("barGrant") && !header->getRetry() &&
+                header->getTid() == c.get("tid").intValue() && header->getReceiverAddress().getInt() == c.get("peer").intValue();
+        }).describe("fresh DATA for the agreement follows in the BAR grant").within(0.00003));
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_bar_opening_continuation"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.003s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 350us
+**.hcf.rtsPolicy.rtsThreshold = 100B
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bar_opening_continuation: PASS

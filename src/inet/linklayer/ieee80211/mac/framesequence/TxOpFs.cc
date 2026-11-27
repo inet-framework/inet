@@ -80,6 +80,8 @@ bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
     auto prepared = context->getQoSContext()->preparedData.get();
     if (prepared && prepared->batch)
         return prepared->rtsMode != nullptr;
+    if (protectedFrame->getId() == context->getQoSContext()->plannedBasicDataId)
+        return false; // The previous exchange reserved a direct DATA transmission.
     // IEEE Std 802.11-2024, 10.23.2.9(a)(1) and (c)(1): a zero-limit fragment burst shares one protection exchange.
     if (context->getQoSContext()->txopProcedure->getLimit() == 0 &&
         context->isFragmentContinuation(protectedFrame, context->getNumSteps()))

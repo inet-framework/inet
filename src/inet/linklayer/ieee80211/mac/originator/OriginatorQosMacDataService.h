@@ -73,6 +73,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual bool isBatchValid(const PreparedQosBatch& batch, simtime_t start) const override;
     virtual bool commitPreparedBatch(PreparedQosBatch& batch, std::vector<Packet *>& committed) override;
     virtual Packet *buildAggregate(const PreparedQosBatch& batch, const MpduAggregationLimits& limits) const override;
+    virtual std::unique_ptr<Packet> previewBasicFirstMpdu(Packet *packet) override;
+    virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) override;
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) override;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const override;
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) override;

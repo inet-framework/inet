@@ -55,6 +55,8 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     // Success transfers each new member to the caller; canonical members remain borrowed.
     virtual bool commitPreparedBatch(PreparedQosBatch& batch, std::vector<Packet *>& committed) = 0;
     virtual Packet *buildAggregate(const PreparedQosBatch& batch, const MpduAggregationLimits& limits) const = 0;
+    virtual std::unique_ptr<Packet> previewBasicFirstMpdu(Packet *packet) = 0;
+    virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) = 0;
     // These QoS DATA methods separate reversible preparation from extraction and sequence assignment.
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) = 0;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;
