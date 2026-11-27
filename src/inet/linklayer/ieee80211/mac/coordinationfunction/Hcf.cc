@@ -113,6 +113,11 @@ void Hcf::initialize(int stage)
                     EV_WARN << "Compressed Block Ack has no usable local HT support; DATA uses Normal Ack. Set blockAckVariant = basic for Basic compatibility.\n";
             }
         }
+        basicBlockAckIdleGrace = par("basicBlockAckIdleGrace");
+        if (basicBlockAckIdleGrace < SIMTIME_ZERO)
+            throw cRuntimeError("basicBlockAckIdleGrace must be nonnegative");
+        if (originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC && basicBlockAckIdleGrace > SIMTIME_ZERO)
+            basicBlockAckIdleTimer = new cMessage("basicBlockAckIdleGrace");
         simtime_t maxDelay = par("basicBlockAckReqMaxDelay");
         if (maxDelay < SIMTIME_ZERO)
             throw cRuntimeError("basicBlockAckReqMaxDelay must be nonnegative");
@@ -295,6 +300,12 @@ void Hcf::handleMessage(cMessage *msg)
         updateAgreementProcedures();
         updateContention();
     }
+    else if (msg == basicBlockAckIdleTimer) {
+        if (!frameSequenceHandler->isSequenceRunning()) {
+            completeTransfers();
+            updateContention();
+        }
+    }
     else if (msg == blockAckReqTimer) {
         updateContention();
         scheduleBlockAckReqTimer();
@@ -363,6 +374,14 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     if (header->getType() == ST_DATA_WITH_QOS)
         edca->getLifetimeHandler()->registerFrame(packet, ac);
     pendingQueue->enqueuePacket(packet);
+    if (!basicBlockAckIdleDeadlines.empty() && header->getType() == ST_DATA_WITH_QOS) {
+        auto data = staticPtrCast<const Ieee80211DataHeader>(header);
+        auto idle = basicBlockAckIdleDeadlines.find({data->getReceiverAddress(), data->getTid()});
+        if (idle != basicBlockAckIdleDeadlines.end() && hasQueuedData(idle->first.first, idle->first.second)) {
+            basicBlockAckIdleDeadlines.erase(idle);
+            scheduleBasicBlockAckIdleTimer();
+        }
+    }
     updateAgreementProcedures();
     if (!pendingQueue->isEmpty() && !handlingAgreementAction && hasFrameToTransmit(ac)) {
         auto edcaf = edca->getChannelOwner();
@@ -662,12 +681,34 @@ void Hcf::completeTransfers()
     for (const auto& entry : originatorBlockAckAgreementHandler->getAgreements()) {
         auto agreement = entry.second;
         if (agreement->getIsAddbaResponseReceived() && agreement->getFirstDataTransmitted() &&
-            !hasNumberedData(entry.first.first, entry.first.second) && !hasQueuedData(entry.first.first, entry.first.second))
-            completed.push_back(entry.first);
+            !hasNumberedData(entry.first.first, entry.first.second) && !hasQueuedData(entry.first.first, entry.first.second)) {
+            if (!basicBlockAckIdleTimer ||
+                basicBlockAckIdleDeadlines.try_emplace(entry.first, simTime() + basicBlockAckIdleGrace).first->second <= simTime())
+                completed.push_back(entry.first);
+        }
+        else
+            basicBlockAckIdleDeadlines.erase(entry.first);
     }
     // IEEE Std 802.11-2024, 10.25.4; INET uses the accepted queue predicate at an exchange boundary.
-    for (const auto& id : completed)
+    for (const auto& id : completed) {
+        basicBlockAckIdleDeadlines.erase(id);
         beginTeardown(id.first, id.second, true, 37);
+    }
+    scheduleBasicBlockAckIdleTimer();
+}
+
+void Hcf::scheduleBasicBlockAckIdleTimer()
+{
+    if (!basicBlockAckIdleTimer)
+        return;
+    simtime_t deadline = SIMTIME_MAX;
+    for (const auto& entry : basicBlockAckIdleDeadlines)
+        deadline = std::min(deadline, entry.second);
+    if (basicBlockAckIdleTimer->isScheduled() && basicBlockAckIdleTimer->getArrivalTime() == deadline)
+        return;
+    cancelEvent(basicBlockAckIdleTimer);
+    if (deadline != SIMTIME_MAX)
+        scheduleAt(std::max(simTime(), deadline), basicBlockAckIdleTimer);
 }
 
 void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highestTransmittedDataIndex)
@@ -813,6 +854,8 @@ void Hcf::retireAgreement(MacAddress peer, Tid tid, bool originator, bool associ
     if (!originator)
         rx->invalidateInterframeHistory();
     if (originator) {
+        if (basicBlockAckIdleDeadlines.erase({peer, tid}))
+            scheduleBasicBlockAckIdleTimer();
         auto agreement = originatorBlockAckAgreementHandler->detachAgreement(peer, tid);
         invalidateActions(peer, tid, originator);
         discardAgreementData(peer, tid, associationReset, agreement ? agreement->getHighestTransmittedDataIndex() : -1);
@@ -915,10 +958,12 @@ void Hcf::resetPeer(MacAddress peer)
     auto originators = originatorBlockAckAgreementHandler->detachPeer(peer);
     auto recipients = recipientBlockAckAgreementHandler->detachPeer(peer);
     for (int tid = 0; tid < 16; tid++) {
+        basicBlockAckIdleDeadlines.erase({peer, tid});
         invalidateActions(peer, tid, true);
         invalidateActions(peer, tid, false);
         discardAgreementData(peer, tid, true);
     }
+    scheduleBasicBlockAckIdleTimer();
     for (auto agreement : recipients)
         sendUp(recipientDataService->retireAgreement(agreement, true));
     recipientDataService->clearPeer(peer);
@@ -3321,6 +3366,7 @@ Hcf::~Hcf()
 {
     if (tx)
         tx->cancelPendingAggregate(this);
+    cancelAndDelete(basicBlockAckIdleTimer);
     cancelAndDelete(blockAckReqTimer);
     cancelAndDelete(addbaResponseTimer);
     cancelAndDelete(dataLifetimeTimer);

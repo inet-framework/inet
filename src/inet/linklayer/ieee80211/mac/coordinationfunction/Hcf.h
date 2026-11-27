@@ -77,6 +77,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *dataLifetimeTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
     cMessage *blockAckReqTimer = nullptr;
+    cMessage *basicBlockAckIdleTimer = nullptr;
+    simtime_t basicBlockAckIdleGrace;
+    std::map<std::pair<MacAddress, Tid>, simtime_t> basicBlockAckIdleDeadlines;
     int64_t basicBlockAckReqRetryLimit = 0;
     struct OwnedAction {
         MacAddress peer;
@@ -194,6 +197,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void advanceOriginatorWindows();
     void prunePendingBasicBarRetries();
     void completeTransfers();
+    void scheduleBasicBlockAckIdleTimer();
     void updateContention();
     void scheduleAddbaResponseTimer();
     void scheduleBlockAckReqTimer();
