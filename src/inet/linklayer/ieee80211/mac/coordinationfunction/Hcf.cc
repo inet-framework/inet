@@ -9,8 +9,6 @@
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
-#include <utility>
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -2337,7 +2335,6 @@ simtime_t Hcf::reserveBasicDataContinuation(const FrameSequenceContext *context,
     if (duration > budget)
         return SIMTIME_ZERO;
     if (followsBar) {
-        qos->plannedBasicDataId = numbered ? candidate->getId() : -1;
         qos->plannedPostBarData = std::move(preview);
         return duration;
     }
@@ -2357,20 +2354,45 @@ void Hcf::commitPostBarData(const FrameSequenceContext *context, const Ptr<const
 {
     auto qos = context->getQoSContext();
     auto preview = std::move(qos->plannedPostBarData);
-    auto plannedId = std::exchange(qos->plannedBasicDataId, -1);
     auto budget = std::min({qos->plannedPostBarDuration, qos->txopProcedure->getRemaining(), response->getDurationField()});
     auto ifs = modeSet->getSifsTime();
     if (budget <= ifs)
         return;
     auto frames = context->getInProgressFrames();
     auto candidate = frames->peekFrameToTransmit();
-    if (!candidate || candidate->getId() != (preview ? preview->sourceIds.front() : plannedId) ||
+    if (!candidate ||
         originatorAckPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler))
+        return;
+    auto candidateHeader = dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>());
+    auto peer = response->getTransmitterAddress();
+    auto tid = response->getTidInfo();
+    if (!candidateHeader || candidateHeader->getType() != ST_DATA_WITH_QOS ||
+        candidateHeader->getReceiverAddress() != peer || candidateHeader->getTid() != tid)
+        return;
+    auto agreement = qos->blockAckAgreementHandler->getAgreement(peer, tid);
+    if (!agreement || !agreement->getIsAddbaResponseReceived())
         return;
     auto service = check_and_cast<IOriginatorQosMacDataService *>(originatorDataService);
     auto start = simTime() + ifs;
-    if (preview ? !service->isPreparationValid(*preview, start) : frames->isExpired(candidate, start))
-        return;
+    if (frames->containsFrame(candidate)) {
+        if (frames->isExpired(candidate, start))
+            return;
+        preview.reset();
+    }
+    else if (!preview || preview->sourceIds.front() != candidate->getId() || !service->isPreparationValid(*preview, start)) {
+        auto candidateId = candidate->getId();
+        auto queue = edca->getChannelOwner()->getPendingQueue();
+        auto mode = rateSelection->computeMode(candidate, candidateHeader, qos->txopProcedure);
+        auto fits = [this, candidateHeader, mode, ifs, budget](b length) {
+            return originatorAckPolicy->isBlockAckPolicyEligibleFrame(length, candidateHeader) &&
+                encodeDuration(ifs + mode->getDuration(length), false) <= budget;
+        };
+        preview = service->prepareFrame(queue, true, fits);
+        if (preview && preview->aggregate && !service->isPreparationValid(*preview, start))
+            preview = service->prepareFrame(queue, false, fits);
+        if (!preview || preview->sourceIds.front() != candidateId || !service->isPreparationValid(*preview, start))
+            return;
+    }
     auto firstFragment = preview ? service->previewBasicFirstMpdu(preview->packet.get()) : nullptr;
     if (firstFragment)
         take(firstFragment.get());
@@ -2378,9 +2400,7 @@ void Hcf::commitPostBarData(const FrameSequenceContext *context, const Ptr<const
     if (preview)
         packet = firstFragment ? firstFragment.get() : preview->packet.get();
     auto header = packet->peekAtFront<Ieee80211DataHeader>();
-    auto agreement = qos->blockAckAgreementHandler->getAgreement(response->getTransmitterAddress(), response->getTidInfo());
-    if (header->getReceiverAddress() != response->getTransmitterAddress() || header->getTid() != response->getTidInfo() || !agreement ||
-        (header->getAMsduPresent() && !agreement->isAMsduPermitted()) ||
+    if ((header->getAMsduPresent() && !agreement->isAMsduPermitted()) ||
         qos->ackPolicy->computeAckPolicy(packet, header, agreement) != BLOCK_ACK)
         return;
     auto mode = rateSelection->computeMode(packet, header, qos->txopProcedure);
