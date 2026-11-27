@@ -1,0 +1,98 @@
+name: "Check: master green"
+
+# M8 and M10 of plan/pending/master-guards.md: the commit status `Master green` is green only when
+# the full run of the head of master is finished and green. While that run is in progress or red,
+# nothing else lands. master_green.py computes the state from the newest attempt of each of the ten
+# workflows of the full run. At each push to master and at the end of each of these workflows, the
+# job `State of master` posts the state on the head of master, and on each open pull request when
+# the state changed. At each event of a pull request, the other job posts it on the head of that
+# pull request. A run of a failed job again changes the state, because the newest attempt counts.
+#
+# Each trigger runs the file of master: a push to master, workflow_run and pull_request_target. The
+# jobs read no content of a pull request.
+
+on:
+  push:
+    branches:
+      - master
+  workflow_run:
+    workflows:
+      - "Check: baseline masters"
+      - "Test: unit"
+      - "Test: module"
+      - "Test: queueing"
+      - "Test: protocol"
+      - "Test: packet"
+      - "Test: validation"
+      - "Test: fingerprint"
+      - "Test: statistical"
+      - "Test: chart"
+    types:
+      - completed
+    # not the runs of a pull request
+    branches:
+      - master
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Post on each open pull request also when the state did not change"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  master:
+    name: State of master
+    if: github.event_name != 'pull_request_target'
+    # one computation at a time; a newer one replaces a waiting one, and it reads the newest state
+    concurrency:
+      group: master-green
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: master
+          sparse-checkout: doc/project/enforcement
+          persist-credentials: false
+      - name: Post the state of master
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force && '--force' || '' }}
+        run: |
+          python3 doc/project/enforcement/master_green.py post --all $FORCE --context="Master green" | tee "$RUNNER_TEMP/state.txt"
+          { echo "## Master green"; echo; echo '```'; cat "$RUNNER_TEMP/state.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  pull-request:
+    name: State of master on the pull request
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: doc/project/enforcement
+          persist-credentials: false
+      - name: Post the state of master on the head of the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 doc/project/enforcement/master_green.py post --on "$HEAD_SHA" --context="Master green"

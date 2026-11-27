@@ -144,5 +144,23 @@ class PostTest(unittest.TestCase):
             main(["post"], github=FakeGitHub(green()), out=io.StringIO())
 
 
+class WorkflowTest(unittest.TestCase):
+    """A renamed workflow would keep Master green pending for ever."""
+
+    def test_each_workflow_of_the_full_run_exists_and_triggers_the_check(self):
+        try:
+            import yaml
+        except ImportError:
+            self.skipTest("needs PyYAML")
+        root = Path(__file__).resolve().parents[3]
+        names = {}
+        for path in sorted((root / ".github/workflows").glob("*.yml")):
+            names[yaml.safe_load(path.read_text(encoding="utf-8")).get("name")] = path.name
+        for name in FULL_RUN:
+            self.assertIn(name, names, f"no workflow has the name {name!r}")
+        check = yaml.safe_load((root / ".github/workflows/check-master-green.yml").read_text(encoding="utf-8"))
+        self.assertEqual(tuple(check[True]["workflow_run"]["workflows"]), FULL_RUN)
+
+
 if __name__ == "__main__":
     unittest.main()
