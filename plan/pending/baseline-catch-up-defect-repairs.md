@@ -76,7 +76,7 @@ found on master.
 | R6 | BD-35 | TCP: a loss that RACK found waits | new (default from `eca05a10b4`) | no: needs the place of the start | `Rfc6675Recovery.cc:554-555`, `:17-52` |
 | R7 | BD-4 | TCP: a window update counts as a duplicate ACK | new (`45199ea23d`) | yes: 5 to 10 lines, with a change of `ITcpRecovery::isDuplicateAck` or a state variable | `TcpConnectionRcvSegment.cc:1726`, `Rfc5681Recovery.cc:46` |
 | R8 | BD-7 | TCP: after an ECN-Echo at a cwnd of one MSS, new data leaves at once | new (`c875220148`) | no: needs the form of the hold | `TcpClassicAlgorithmBase.cc:199-210` |
-| R9 | BD-14, BD-19, BD-20 | TCP: the count of the bytes in flight | new (`b2313324ef`, `5414ba0b34`, `958dee5cf3`) | no: one or two parameters | `TcpClassicAlgorithmBase.cc:259-265`, `TcpConnectionUtil.cc:3777` |
+| R9 | BD-14 (BD-19 and BD-20 left R9 at gate A, §6.3) | TCP: the fast retransmit of TcpReno after a timeout | new (`b2313324ef`, `5414ba0b34`, `958dee5cf3`) | yes: 33 lines in 3 files | `Rfc5681Recovery.cc`, `TcpReno.cc` |
 | R10 | BD-32 | TCP: a data segment of 1 byte gets an ACK at once | new (default from `fce9274b35`) | yes: delete 3 lines | `TcpConnectionRcvSegment.cc:666-668` |
 | R11 | BD-15 | TCP: the ACK of the SYN-ACK grows cwnd on the passive side | older; its form changed in `a653d3bfbc` | yes: 3 to 8 lines | `TcpConnectionRcvSegment.cc:750-756` |
 | R12 | BD-24 | the queue length of the compound `REDQueue` becomes negative | older | yes, if the run confirms the cause of §2.4 | `netperfmeter.ned:41-43`, `CompoundPacketQueueBase.cc:51-80` |
@@ -325,12 +325,12 @@ No sealed file changes. No consumer outside INET changes.
   Test: an ECN-Echo arrives at a cwnd of one MSS; no new segment leaves before the timer expires. Baselines:
   `examples/inet/dctcp` `TcpRenoIncast`.
   - `tcp: fix: at an ECN-Echo with a cwnd of one MSS, new data waits for the retransmission timer (RFC 3168 section 6.1.2)`.
-- [ ] **Step 9. R9: one count of the bytes in flight (BD-14, BD-19, BD-20).** Gate A decides one parameter or two,
-  and its name (D7). Test: a timeout, then three duplicate ACKs during the go-back; the segments after the fast
-  retransmit fit in the room of RFC 5681; with SACK outside a recovery, `~Tcp` does not use the count of Linux; each
-  value of the parameter. Baselines: the 6 tests of step 16 of the catch-up and `inet_inet_2b`.
-  - `tcp: add: a parameter for the count of the bytes in flight of Linux, set by LinuxTcp` (no result moves).
-  - `tcp: change: ~Tcp counts the bytes in flight as RFC 5681 and RFC 6675 do` (results move).
+- [ ] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Gate A on 2026-11-27
+  revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
+  in flight, so R9 repairs BD-14 alone, and BD-19 and BD-20 leave R9 for an analysis of their own. Test: a timeout,
+  then three duplicate ACKs during the go-back; no fast retransmit before the ACK covers more than recover. Baselines:
+  `examples/inet/tcpwindowscale` `WS_enabled`.
+  - `tcp: fix: TcpReno starts no fast retransmit in the recovery of a timeout (RFC 6582 section 6)`.
 - [ ] **Step 10. R10: a data segment of 1 byte gets a delayed ACK (BD-32).** Test: with delayed ACKs, a segment of 1
   byte in an open window gets a delayed ACK, and a zero-window probe still gets its ACK at once.
   - `tcp: fix: a data segment of 1 byte in an open window gets a delayed ACK (RFC 9293 SHLD-18)`.
@@ -1438,7 +1438,19 @@ removed lines in 3 files, with the comments.
    second loss in a window still gets one. (b) Also at each fast retransmit, as `TcpNewReno`: then a second loss in a
    window waits for the timer, as in R5 for Tahoe. The assistant recommends (a), as for Westwood in R5.
 
-**Commit** (with the recommended answers).
+**Gate A (2026-11-27).** The owner accepted both recommendations: R9 repairs BD-14 alone, by the guard, and `TcpReno`
+sets recover at a timeout only. BD-19 and BD-20 stay open in the defect list; a later change re-checks them and decides
+their count and parameter (D7). No parameter of Linux: Linux has the same guard (the state `TCP_CA_Loss` ends only when
+`snd_una` passes `high_seq`), and `LinuxTcp` does not use `TcpReno`.
+
+**The figures** (editor tab "R9 charts"; runs `runs/r9/today` and `runs/r9/after` of the folder of D10, by
+`runs/r9-run.sh`, debug build of the worktree). In `examples/inet/tcpwindowscale` `WS_enabled`, both runs are equal
+until the cumulative ACK at 22.602707 s in the go-back of the timeout at 14.34 s, where the client sends 28 segments in
+both. At the third duplicate ACK, 22.602743 s, the client of today starts a fast retransmit with ssthresh 217800 and sends
+123 segments (178 kB) at once; with the guard it sends none. Its second timeout moves from 25.50 s to 30.22 s, and in
+the 600 s the server acknowledges 269.4 MB in place of 179.4 MB.
+
+**Commit** (with the answers of gate A).
 
 - **C16: `tcp: fix: TcpReno starts no fast retransmit in the recovery of a timeout (RFC 6582 section 6)`** (BD-14).
   `Rfc5681Recovery.h`, `Rfc5681Recovery.cc`, `TcpReno.cc`. The items of

@@ -430,6 +430,11 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-14: a fast retransmit after a timeout gives a burst
 
+- **State (2026-11-27):** the cause is the missing guard of RFC 6582 section 6 in `Rfc5681Recovery`, which `TcpReno`
+  and `DcTcp` without SACK use: a fast retransmit in the go-back of a timeout. The burst is go-back retransmissions,
+  which RFC 5681 section 3.1 allows, so the sentence below that no new segment can leave holds only for new data. Gate
+  A of change R9 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) decided to repair BD-14
+  alone, by the guard, at a timeout only; C16 does it.
 - **Place:** `TcpConnection::getFlightSize()` and `TcpClassicAlgorithmBase::getBytesInFlight()`. From `b2313324ef`
   (step 8); found at step 16.
 - **Fault:** after a timeout, the go-back-N slow start sends the window again. A fast retransmit of Reno or NewReno
@@ -496,6 +501,9 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-19: without SACK, the classic flavours count the bytes in flight as Linux does
 
+- **State (2026-11-27):** open. It left change R9 at its gate A: the guard of BD-14 does not remove it, because the
+  difference showed at step 16 also in runs of `TcpNewReno`, which had the guard then. It needs an analysis of its own
+  before a design.
 - **Place:** `TcpClassicAlgorithmBase::getBytesInFlight()`. From `5414ba0b34` (step 16).
 - **Fault:** the count has an inferred SACK for each duplicate ACK and lost marks, always. The room to send equals the
   room of RFC 5681, except after a timeout, where the lost marks keep the room smaller. That difference is a mechanism
@@ -507,6 +515,9 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-20: with SACK, outside a recovery, `~Tcp` counts the bytes in flight as Linux does
 
+- **State (2026-11-27):** open. It left change R9 at its gate A. The sentence below that RFC 6675 defines its pipe only
+  for the recovery is not exact: step (3) of RFC 6675 section 5, Limited Transmit before the recovery, also sends by the
+  pipe. It needs an analysis of its own before a design.
 - **Place:** the count of the bytes in flight with SACK. From `958dee5cf3` (step 21).
 - **Fault:** the count is the outstanding bytes less the SACKed and lost bytes, plus the retransmitted bytes, always.
   RFC 6675 defines its pipe only for the recovery, so this is a mechanism of Linux with no parameter. The maintainer
