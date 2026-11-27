@@ -59,6 +59,10 @@ void Edcaf::initialize(int stage)
         rx->registerContention(contention);
         calculateTimingParameters();
     }
+    else if (stage == INITSTAGE_LAST) {
+        contentionWindowSignalReady = true;
+        emit(IRecoveryProcedure::contentionWindowChangedSignal, cw);
+    }
 }
 
 void Edcaf::calculateTimingParameters()
@@ -93,8 +97,17 @@ void Edcaf::resetCw()
 {
     Enter_Method("resetCw");
     edcaRetryCount = 0;
-    cw = cwMin;
+    setContentionWindow(cwMin);
     EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
+}
+
+void Edcaf::setContentionWindow(int window)
+{
+    if (cw != window) {
+        cw = window;
+        if (contentionWindowSignalReady)
+            emit(IRecoveryProcedure::contentionWindowChangedSignal, cw);
+    }
 }
 
 void Edcaf::updateContentionWindow()
@@ -103,7 +116,7 @@ void Edcaf::updateContentionWindow()
     int64_t window = cwMin;
     for (int i = 0; i < edcaRetryCount && window < cwMax; ++i)
         window = 2 * window + 1;
-    cw = std::min<int64_t>(window, cwMax);
+    setContentionWindow(std::min<int64_t>(window, cwMax));
 }
 
 int Edcaf::getAifsNumber(AccessCategory ac)

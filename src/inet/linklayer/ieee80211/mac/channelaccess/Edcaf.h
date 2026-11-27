@@ -58,6 +58,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
     AccessCategory ac = AccessCategory(-1);
     int cw = -1;
+    bool contentionWindowSignalReady = false;
     int cwMin = -1;
     int cwMax = -1;
     int edcaRetryCount = 0;
@@ -75,6 +76,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     virtual int getCwMin(AccessCategory ac, int aCwMin);
 
     virtual void calculateTimingParameters();
+    void setContentionWindow(int window);
     void updateContentionWindow();
 
   public:

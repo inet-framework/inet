@@ -27,7 +27,6 @@ void QosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
         WATCH(rtsThreshold);
         WATCH(shortRetryCounter);
         WATCH(longRetryCounter);
@@ -52,18 +51,12 @@ void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>
 
 void QosRecoveryProcedure::txopCompleted()
 {
-    auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
-    if (oldCw != cwCalculator->getCw())
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
 }
 
 void QosRecoveryProcedure::edcaTransmissionFailed()
 {
-    auto oldCw = cwCalculator->getCw();
     cwCalculator->incrementCw();
-    if (oldCw != cwCalculator->getCw())
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
 }
 
 //

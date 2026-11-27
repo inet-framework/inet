@@ -131,14 +131,14 @@ class Ieee80211MgmtApHcfRtsTimeoutTest : public cSimpleModule, public cListener
         apHcf->subscribe(packetDroppedSignal, this);
         apRecoveryProcedure->subscribe(IRecoveryProcedure::retryLimitReachedSignal, this);
         apQosEdcaf->subscribe(packetSentToPeerSignal, this);
-        apRecoveryProcedure->subscribe(IRecoveryProcedure::contentionWindowChangedSignal, this);
+        apQosEdcaf->subscribe(IRecoveryProcedure::contentionWindowChangedSignal, this);
         for (int i = 0; i < 4; i++)
             edcafs[i] = check_and_cast<Edcaf *>(apHcf->getSubmodule("edca")->getSubmodule("edcaf", i));
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override
     {
-        if (source == apRecoveryProcedure && signalID == IRecoveryProcedure::contentionWindowChangedSignal)
+        if (source == apQosEdcaf && signalID == IRecoveryProcedure::contentionWindowChangedSignal)
             cwSamples.push_back(value);
     }
 
@@ -198,15 +198,18 @@ class Ieee80211MgmtApHcfRtsTimeoutTest : public cSimpleModule, public cListener
 
         int retryLimit = apRecoveryProcedure->par("shortRetryLimit");
         ASSERT(rtsAttempts == retryLimit);
+        std::vector<long> expectedSamples = {initialCw[3]};
+        int cwMax = edcafs[3]->par("cwMax").intValue();
+        for (int attempt = 0; attempt < retryLimit; attempt++) {
+            long nextCw = std::min(2 * expectedSamples.back() + 1, (long)cwMax);
+            if (nextCw != expectedSamples.back())
+                expectedSamples.push_back(nextCw);
+        }
         for (int i = 0; i < 4; i++) {
-            ASSERT(edcafs[i]->getCw() == initialCw[i]);
+            ASSERT(edcafs[i]->getCw() == (i == 3 ? expectedSamples.back() : initialCw[i]));
+            ASSERT(edcafs[i]->getEdcaRetryCount() == (i == 3 ? retryLimit : 0));
             ASSERT(edcafs[i]->getStationRetryCounters()->getStationShortRetryCount() == (i == 3 ? retryLimit : 0));
             ASSERT(edcafs[i]->getStationRetryCounters()->getStationLongRetryCount() == 0);
-        }
-        std::vector<long> expectedSamples = {initialCw[3]};
-        if (retryLimit == 2 && edcafs[3]->par("cwMax").intValue() > initialCw[3]) {
-            expectedSamples.push_back(2 * initialCw[3] + 1);
-            expectedSamples.push_back(initialCw[3]);
         }
         ASSERT(cwSamples == expectedSamples);
         ASSERT(retryLimitNotifications == 1);

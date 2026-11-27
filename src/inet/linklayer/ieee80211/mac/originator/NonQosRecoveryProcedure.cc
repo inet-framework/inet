@@ -34,7 +34,8 @@ void NonQosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
+        if (!dynamic_cast<IEdcaCwCalculator *>(cwCalculator))
+            emit(contentionWindowChangedSignal, cwCalculator->getCw());
         WATCH(rtsThreshold);
         WATCH(shortRetryCounter);
         WATCH(longRetryCounter);
@@ -221,7 +222,7 @@ void NonQosRecoveryProcedure::incrementContentionWindow()
     auto oldCw = cwCalculator->getCw();
     cwCalculator->incrementCw();
     auto newCw = cwCalculator->getCw();
-    if (oldCw != newCw)
+    if (oldCw != newCw && !dynamic_cast<IEdcaCwCalculator *>(cwCalculator))
         emit(contentionWindowChangedSignal, newCw);
 }
 
@@ -230,7 +231,7 @@ void NonQosRecoveryProcedure::resetContentionWindow()
     auto oldCw = cwCalculator->getCw();
     cwCalculator->resetCw();
     auto newCw = cwCalculator->getCw();
-    if (oldCw != newCw)
+    if (oldCw != newCw && !dynamic_cast<IEdcaCwCalculator *>(cwCalculator))
         emit(contentionWindowChangedSignal, newCw);
 }
 
