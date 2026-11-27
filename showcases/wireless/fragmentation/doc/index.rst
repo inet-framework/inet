@@ -213,11 +213,11 @@ Here are the results from the simulations:
    :align: center
 
 In our setup, the throughput is the lowest when packets are not fragmented
-(``DFCnofrag`` line), because very few packets are received correctly.
+(``DCFnofrag`` line), because very few packets are received correctly.
 Throughput improves considerably (by a factor of 20) when fragmentation
 is turned on (``DCFfrag`` line). The use of TXOPs (``HCFfrag`` line) again brings
-a two-fold increase in througput by eliminating contention periods.
-The use of block ACKs (``HCFfragblockack`` line) brings another two-fold improvement.
+a 2.5-fold increase in throughput by eliminating contention periods.
+The use of block ACKs (``HCFfragblockack`` line) brings a further, smaller improvement.
 
 Further Analysis
 ~~~~~~~~~~~~~~~~
