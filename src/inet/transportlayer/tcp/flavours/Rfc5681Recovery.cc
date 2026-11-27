@@ -17,6 +17,26 @@
 namespace inet {
 namespace tcp {
 
+Rfc5681Recovery::Rfc5681Recovery(TcpStateVariables *state, TcpConnection *conn, bool recoverAfterTimeout) :
+    state(check_and_cast<TcpClassicAlgorithmBaseStateVariables *>(state)), conn(conn), recoverAfterTimeout(recoverAfterTimeout)
+{
+    // the guard of RFC 6582 section 6 after a timeout (onRexmitTimeout()): recover starts
+    // one below the ISS, as in Rfc6582Recovery, so the first fast retransmit is free
+    if (recoverAfterTimeout)
+        this->state->recover = this->state->iss - 1;
+}
+
+void Rfc5681Recovery::onRexmitTimeout()
+{
+    // RFC 6582 section 6: after a timeout, the go-back sends again segments that the
+    // receiver can already have, and their duplicate ACKs must not start a fast
+    // retransmit, whose ssthresh would come from the FlightSize of before the timeout. At
+    // a timeout "record the highest sequence number transmitted in the variable recover";
+    // the fast retransmit of Reno itself stays as RFC 5681 defines it.
+    if (recoverAfterTimeout)
+        state->recover = state->snd_max - 1;
+}
+
 bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
     //"
@@ -75,7 +95,11 @@ void Rfc5681Recovery::receivedDuplicateAck()
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
     //    to no more than the value given in equation (4).
     //"
-    if (state->dupacks == state->dupthresh && !state->lossRecovery) {
+    // RFC 6582 section 6: no fast retransmit before the cumulative ACK covers more than
+    // recover, the highest sequence number sent before the last timeout
+    if (recoverAfterTimeout && state->dupacks == state->dupthresh && !state->lossRecovery && !seqGreater(state->snd_una - 1, state->recover))
+        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << "): the cumulative ACK does not cover more than recover=" << state->recover << ", no Fast Retransmit\n";
+    else if (state->dupacks == state->dupthresh && !state->lossRecovery) {
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         //"

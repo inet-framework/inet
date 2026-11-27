@@ -36,7 +36,7 @@ ITcpRecovery *TcpReno::createRecovery()
     if (state->sack_enabled)
         return new Rfc6675Recovery(state, conn);
     else
-        return new Rfc5681Recovery(state, conn);
+        return new Rfc5681Recovery(state, conn, true);
 }
 
 } // namespace tcp
