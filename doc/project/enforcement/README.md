@@ -132,6 +132,7 @@ The ruleset `master: required checks` of GitHub is the source; this list is its 
 - `fingerprint-tests (release, 2)`
 - `fingerprint-tests (release, 3)`
 - `Enforcement checker tests`
+- `Source seal policy`
 
 The rules for a required job (W1 to W4 of [master-guards.md](../../../plan/pending/master-guards.md)):
 
