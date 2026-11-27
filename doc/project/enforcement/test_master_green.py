@@ -29,6 +29,7 @@ class FakeGitHub:
         self.heads = list(heads)
         self.commits = list(commits)
         self.posts = []
+        self.cancelled = []
 
     def master_head(self):
         return HEAD
@@ -53,6 +54,9 @@ class FakeGitHub:
 
     def post(self, sha, state, context, description, target_url):
         self.posts.append((sha, state, context, description))
+
+    def cancel(self, run_id):
+        self.cancelled.append(run_id)
 
 
 def green(sha=HEAD):
@@ -150,6 +154,49 @@ class PostTest(unittest.TestCase):
     def test_post_needs_all_or_on(self):
         with self.assertRaises(SystemExit):
             main(["post"], github=FakeGitHub(green()), out=io.StringIO())
+
+
+MARK = {"context": "Trivial landing", "state": "success", "description": f"Master green follows {OLD}"}
+
+
+class TrivialLandingTest(unittest.TestCase):
+    def test_master_green_follows_a_trivial_landing(self):
+        github = FakeGitHub(green(OLD), statuses={HEAD: [MARK]})
+        head, current = master_green.master_state(github)
+        self.assertEqual((head, current.sha, current.state), (HEAD, OLD, "success"))
+        self.assertIn(f"{HEAD[:10]} is a trivial landing", current.description)
+        runs = green(OLD)
+        runs[1] = run(FULL_RUN[1], "failure", sha=OLD)
+        self.assertEqual(master_green.master_state(FakeGitHub(runs, statuses={HEAD: [MARK]}))[1].state, "failure")
+
+    def test_a_trivial_landing_does_not_change_the_pull_requests(self):
+        github = FakeGitHub(green(OLD), statuses={HEAD: [MARK], OLD: [{"context": "Master green", "state": "success"}]},
+                            commits=(HEAD, OLD))
+        out = io.StringIO()
+        self.assertEqual(main(["post", "--all"], github=github, out=out, pause=0), 0)
+        self.assertEqual([(sha[0], state) for sha, state, _, _ in github.posts], [("a", "success")])
+        self.assertIn("no post on the pull requests", out.getvalue())
+
+    def test_the_mark_cancels_the_opp_tests_and_the_fingerprint_tests_but_not_the_landing_job(self):
+        runs = [run(name, status="in_progress") for name in FULL_RUN] + [dict(run("Test: unit"), name="Build: Linux", id=500, status="queued")]
+        github = FakeGitHub(runs)
+        self.assertEqual(main(["trivial-landing", "--commit", HEAD, "--before", OLD], github=github, out=io.StringIO()), 0)
+        self.assertEqual(github.posts, [(HEAD, "success", "Trivial landing", f"Master green follows {OLD}")])
+        cancelled = {r["name"] for r in runs if r["id"] in github.cancelled}
+        self.assertEqual(cancelled, set(master_green.CANCELLED_ON_TRIVIAL))
+        self.assertNotIn("Check: baseline masters", cancelled)
+        self.assertNotIn("Test: statistical", cancelled)
+
+    def test_is_trivial_waits_for_the_job_landing(self):
+        decider = dict(run("Test: unit"), name="Check: master green", id=700)
+        github = FakeGitHub([decider], jobs={700: [{"name": "Landing", "status": "completed", "conclusion": "success"}]},
+                            statuses={HEAD: [MARK]})
+        out = io.StringIO()
+        master_green.is_trivial(github, HEAD, timeout=0, out=out, poll=0)
+        self.assertEqual(out.getvalue().strip(), "trivial")
+        out = io.StringIO()
+        master_green.is_trivial(FakeGitHub([decider], jobs={700: [{"name": "Landing", "status": "completed"}]}), HEAD, 0, out, 0)
+        self.assertEqual(out.getvalue().strip(), "not trivial")
 
 
 class WorkflowTest(unittest.TestCase):
