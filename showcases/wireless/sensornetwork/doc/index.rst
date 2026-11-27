@@ -437,11 +437,12 @@ seconds).
    :width: 100%
 
 It is apparent from the results that the network can carry almost all
-the traffic in this scenario (as opposed to the :ned:`XMac` and :ned:`LMac`
+the traffic in this scenario (as opposed to the :ned:`BMac`
 results). The best performing value for :par:`slotDuration` is 40ms. Note
-that the lowest :par:`slotDuration` values up until 120ms yield
+that the :par:`slotDuration` values from 30ms up to 100ms yield
 approximately the same results (around 100 packets), with the 40ms
-value performing marginally better. Choosing the higher :par:`slotDuration`
+value performing marginally better. The 10ms and 20ms values are too
+short: with 10ms, no packet is received. Choosing the higher :par:`slotDuration`
 value would result in about the same performance but lower power
 consumption, but we are optimizing for the number of packets here.
 
