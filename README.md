@@ -15,7 +15,7 @@
 [![Test: unit](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml)
 [![Test: validation](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml/badge.svg)](https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml)
 
-<!-- A badge above shows the result of the last completed run of its workflow. The collapsed table shows the state of each job on the current master head: queued, pending, passing or failing. The label of a small badge is the matrix part of the job name. A small badge finds its job by the exact name, so a change of a job name or of a matrix needs the same change here. The three build workflows all have the jobs main (debug) and main (release), so on a head with a weekly build, the small build badges also show the macOS and Windows jobs. The weekly workflows do not run on each head, so they have no row. The speed test needs CPU performance counters, which GitHub runners do not have. -->
+<!-- A badge above shows the result of the last completed run of its workflow. The collapsed table shows the state of each job on the current master head: queued, pending, passing or failing. All small badges are blue, because shields.io can change the color only for all states together, and its default grey for queued and pending looks inactive. The label of a small badge is the matrix part of the job name. A small badge finds its job by the exact name, so a change of a job name or of a matrix needs the same change here. The three build workflows all have the jobs main (debug) and main (release), so on a head with a weekly build, the small build badges also show the macOS and Windows jobs. The weekly workflows do not run on each head, so they have no row. The speed test needs CPU performance counters, which GitHub runners do not have. -->
 
 <details>
 <summary>State of each job on the master head</summary>
@@ -36,33 +36,33 @@
 </details>
 
 [build-linux-runs]: https://github.com/inet-framework/inet/actions/workflows/build-linux.yml?query=branch%3Amaster
-[build-linux-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=main%20%28debug%29&label=debug
-[build-linux-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=main%20%28release%29&label=release
+[build-linux-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=main%20%28debug%29&label=debug&color=0969da
+[build-linux-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=main%20%28release%29&label=release&color=0969da
 [chart-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/chart-tests.yml?query=branch%3Amaster
-[chart-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=chart-tests%20%28release%29&label=release
+[chart-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=chart-tests%20%28release%29&label=release&color=0969da
 [fingerprint-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/fingerprint-tests.yml?query=branch%3Amaster
-[fingerprint-tests-head-debug-0]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%200%29&label=debug%200
-[fingerprint-tests-head-debug-1]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%201%29&label=debug%201
-[fingerprint-tests-head-debug-2]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%202%29&label=debug%202
-[fingerprint-tests-head-debug-3]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%203%29&label=debug%203
-[fingerprint-tests-head-release-0]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%200%29&label=release%200
-[fingerprint-tests-head-release-1]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%201%29&label=release%201
-[fingerprint-tests-head-release-2]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%202%29&label=release%202
-[fingerprint-tests-head-release-3]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%203%29&label=release%203
+[fingerprint-tests-head-debug-0]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%200%29&label=debug%200&color=0969da
+[fingerprint-tests-head-debug-1]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%201%29&label=debug%201&color=0969da
+[fingerprint-tests-head-debug-2]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%202%29&label=debug%202&color=0969da
+[fingerprint-tests-head-debug-3]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28debug%2C%203%29&label=debug%203&color=0969da
+[fingerprint-tests-head-release-0]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%200%29&label=release%200&color=0969da
+[fingerprint-tests-head-release-1]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%201%29&label=release%201&color=0969da
+[fingerprint-tests-head-release-2]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%202%29&label=release%202&color=0969da
+[fingerprint-tests-head-release-3]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=fingerprint-tests%20%28release%2C%203%29&label=release%203&color=0969da
 [module-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/module-tests.yml?query=branch%3Amaster
-[module-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=module-tests%20%28debug%29&label=debug
+[module-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=module-tests%20%28debug%29&label=debug&color=0969da
 [packet-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/packet-tests.yml?query=branch%3Amaster
-[packet-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=packet-tests%20%28debug%29&label=debug
+[packet-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=packet-tests%20%28debug%29&label=debug&color=0969da
 [protocol-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/protocol-tests.yml?query=branch%3Amaster
-[protocol-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=protocol-tests%20%28debug%29&label=debug
+[protocol-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=protocol-tests%20%28debug%29&label=debug&color=0969da
 [queueing-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/queueing-tests.yml?query=branch%3Amaster
-[queueing-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=queueing-tests%20%28debug%29&label=debug
+[queueing-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=queueing-tests%20%28debug%29&label=debug&color=0969da
 [statistical-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/statistical-tests.yml?query=branch%3Amaster
-[statistical-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=statistical-tests%20%28release%29&label=release
+[statistical-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=statistical-tests%20%28release%29&label=release&color=0969da
 [unit-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/unit-tests.yml?query=branch%3Amaster
-[unit-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=unit-tests%20%28debug%29&label=debug
+[unit-tests-head-debug]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=unit-tests%20%28debug%29&label=debug&color=0969da
 [validation-tests-runs]: https://github.com/inet-framework/inet/actions/workflows/validation-tests.yml?query=branch%3Amaster
-[validation-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=validation-tests%20%28release%29&label=release
+[validation-tests-head-release]: https://img.shields.io/github/check-runs/inet-framework/inet/master?nameFilter=validation-tests%20%28release%29&label=release&color=0969da
 
 INET Framework for OMNEST/OMNeT++
 =================================
