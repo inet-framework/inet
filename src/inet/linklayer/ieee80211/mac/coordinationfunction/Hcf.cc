@@ -123,6 +123,7 @@ void Hcf::initialize(int stage)
             throw cRuntimeError("basicBlockAckReqMaxDelay must be nonnegative");
         if (originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC && maxDelay > SIMTIME_ZERO) {
             blockAckReqTimer = new cMessage("blockAckReqDeadline");
+            bool airtimeUrgency = par("basicBlockAckAirtimeUrgency").boolValue();
             for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
                 auto edcaf = edca->getEdcaf(static_cast<AccessCategory>(ac));
                 auto frames = edcaf->getInProgressFrames();
@@ -135,6 +136,10 @@ void Hcf::initialize(int stage)
                     setFrameMode(&request, bar, mode);
                     return edcaf->getAifs() + computeBlockAckExchangeDuration(&request, bar, mode->getDuration(request.getDataLength()));
                 });
+                if (airtimeUrgency)
+                    frames->setBasicFeedbackAirtimeCheck([this, edcaf](Packet *candidate, simtime_t completion, simtime_t expiry) {
+                        return canSendBasicFragmentBeforeFeedback(edcaf, candidate, completion, expiry);
+                    });
             }
         }
         // Edca resolves its Edcaf array at the link-layer stage. Install the
@@ -2836,6 +2841,41 @@ simtime_t Hcf::reserveBasicDataContinuation(const FrameSequenceContext *context,
     }
     qos->plannedBasicDataId = candidate->getId();
     return duration;
+}
+
+bool Hcf::canSendBasicFragmentBeforeFeedback(Edcaf *edcaf, Packet *candidate, simtime_t completion, simtime_t expiry)
+{
+    auto frames = edcaf->getInProgressFrames();
+    if (edca->getChannelOwner() != edcaf || !frameSequenceHandler->isSequenceRunning() || !frames->containsFrame(candidate))
+        return false;
+    auto txop = edcaf->getTxopProcedure();
+    if (txop->getLimit() <= SIMTIME_ZERO || txop->getProtectionMechanism() != TxopProcedure::SINGLE_PROTECTION)
+        return false;
+    auto header = candidate->peekAtFront<Ieee80211DataHeader>();
+    if (header->getFragmentNumber() == 0 && !header->getMoreFragments())
+        return false;
+    auto qos = frameSequenceHandler->getContext()->getQoSContext();
+    if (qos->plannedBasicDataId != candidate->getId() && rtsPolicy->isRtsNeeded(candidate, header))
+        return false;
+    auto peer = header->getReceiverAddress();
+    auto tid = header->getTid();
+    auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+    if (originatorAckPolicy->computeAckPolicy(candidate, header, agreement) != BLOCK_ACK)
+        return false;
+    auto dataMode = rateSelection->computeMode(candidate, header, txop);
+    auto dataAirtime = dataMode->getDuration(candidate->getDataLength());
+    auto sifs = modeSet->getSifsTime();
+    if (completion == simTime() && (dataAirtime >= rx->getTxnavRemaining() || sifs + dataAirtime > rx->getTxnavRemaining()))
+        return false;
+    auto bar = originatorBlockAckProcedure->buildBasicBlockAckReqFrame(peer, tid, agreement->getStartingSequenceNumber());
+    Packet request("forecast-BAR", bar);
+    request.insertAtBack(makeShared<Ieee80211MacTrailer>());
+    auto mode = rateSelection->computeMode(&request, bar, txop);
+    setFrameMode(&request, bar, mode);
+    auto feedback = encodeDuration(sifs + computeBlockAckExchangeDuration(&request, bar, mode->getDuration(request.getDataLength())), false);
+    auto end = completion + sifs + dataAirtime + feedback;
+    return end < std::min(expiry, frames->getLifetimeDeadline(candidate)) &&
+        end <= txop->getStart() + txop->getLimit();
 }
 
 void Hcf::commitPostBarData(const FrameSequenceContext *context, const Ptr<const Ieee80211BasicBlockAck>& response)
