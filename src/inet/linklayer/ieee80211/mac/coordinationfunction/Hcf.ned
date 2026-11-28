@@ -31,6 +31,7 @@ module Hcf extends Module like IHcf
         bool isBlockAckSupported = default(false);
         string blockAckVariant = default("compressed"); // Compressed requires usable HT state. Select Basic explicitly for historical compatibility.
         double zeroLimitFragmentRoundTripTime @unit(s) = default(0s); // Propagation allowance per response in a multiple-protection fragment burst.
+        double multipleProtectionResponseAirtimeBound @unit(s) = default(0s); // Upper bound on each ACK or CTS PPDU from any peer, including PHY overhead. Zero uses the longest response in the local mode set.
 
         string rxModule;
         string txModule;

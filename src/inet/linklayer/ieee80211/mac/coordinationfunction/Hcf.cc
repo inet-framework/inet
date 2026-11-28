@@ -1774,6 +1774,20 @@ simtime_t Hcf::computeImmediateResponseDuration(Packet *packet, const Ptr<const 
         rateSelection->computeResponseAckFrameMode(packet, header, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
 }
 
+static simtime_t computeMultipleProtectionResponseAirtimeBound(const Ieee80211ModeSet *modeSet, b responseLength, simtime_t configuredBound)
+{
+    if (configuredBound < SIMTIME_ZERO)
+        throw cRuntimeError("multipleProtectionResponseAirtimeBound must be nonnegative");
+    if (configuredBound > SIMTIME_ZERO)
+        return configuredBound;
+    // INET modeling simplification: bound the airtime by the longest response the local PHY can decode.
+    // The sender's configured response rate controls the responses it transmits.
+    simtime_t bound;
+    for (int i = 0; i < modeSet->getNumModes(); i++)
+        bound = std::max(bound, modeSet->getMode(i)->getDuration(responseLength));
+    return bound;
+}
+
 simtime_t Hcf::computeBlockAckExchangeDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, simtime_t ppduDuration)
 {
     auto responseMode = rateSelection->computeResponseBlockAckFrameMode(packet, header, ResponseQueryRole::PREDICT);
@@ -2149,6 +2163,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         if (scopedSingle || scopedMultiple || basicContinuation || zeroLimitFragment) {
             cost = mode->getDuration(packet->getDataLength());
             auto sifs = modeSet->getSifsTime();
+            simtime_t configuredResponseBound = scopedMultiple ? par("multipleProtectionResponseAirtimeBound").doubleValue() : 0;
             if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
                 retainedPacket = const_cast<Packet *>(rtsStep->getProtectedFrame());
                 retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
@@ -2156,15 +2171,18 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 auto protectedHeader = retainedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
                 auto dataMode = rateSelection->computeMode(retainedPacket, protectedHeader, txop);
                 setFrameMode(retainedPacket, protectedHeader, dataMode);
-                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
+                responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_CTS, configuredResponseBound) :
+                    rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
                 nextFrameDuration = dataMode->getDuration(retainedPacket->getDataLength());
                 if (recipientAckPolicy->isAckNeeded(protectedHeader))
-                    nextFrameDuration += sifs + computeImmediateResponseDuration(retainedPacket, protectedHeader);
+                    nextFrameDuration += sifs + (scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
+                        computeImmediateResponseDuration(retainedPacket, protectedHeader));
                 cost += sifs + responseDuration + sifs + nextFrameDuration;
             }
             else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
                 if (recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
-                    responseDuration = computeImmediateResponseDuration(packet, dataOrMgmt);
+                    responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
+                        computeImmediateResponseDuration(packet, dataOrMgmt);
                     cost += sifs + responseDuration;
                 }
             }

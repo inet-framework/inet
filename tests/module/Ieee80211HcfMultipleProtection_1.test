@@ -7,8 +7,9 @@ Reject a second RTS when its complete exchange exceeds the remaining time.
 Check an exact fit and a one-microsecond shortage for unprotected DATA and ACK.
 Retain the DATA rate selected before RTS when the rate selector changes on CTS.
 Recheck the remaining exchange after CTS when propagation consumes the margin.
+Bound ACK and CTS airtime without using the holder's own response bitrate.
 
-%extraargs: -r 0..22
+%extraargs: -r 0..27
 
 %file: MultipleProtection.cc
 // Author: Miguel González-López
@@ -302,7 +303,7 @@ class ProtectionTest : public cSimpleModule {
         int scenario = sender->scenario();
         if (scenario == 8)
             receiverRx->injectReceivedReservation(SimTime(2, SIMTIME_MS));
-        int count = scenario == 2 || scenario == 5 || (scenario >= 14 && scenario <= 19) || scenario == 22 ? 2 :
+        int count = scenario == 2 || scenario == 5 || (scenario >= 14 && scenario <= 19) || scenario >= 22 ? 2 :
             scenario <= 4 || scenario == 11 || scenario == 12 ? 3 : 1;
         for (int i = 0; i < count; i++)
             sender->inject(scenario == 5 ? 100 : ((scenario == 3 || scenario == 4) && i > 0 ? 66 : 26),
@@ -467,6 +468,32 @@ class ProtectionTest : public cSimpleModule {
             ASSERT(freshRts.start - firstRts.start > SimTime(596, SIMTIME_US));
             ASSERT(!senderMac->transmissions[4].retry);
         }
+        if (scenario >= 23) {
+            bool protectedExchange = scenario >= 26;
+            bool oneGrant = scenario == 23 || scenario == 26;
+            int transmissionsPerExchange = protectedExchange ? 2 : 1;
+            ASSERT(sender->burstData == (oneGrant ? std::vector<int>({2}) : std::vector<int>({1, 1})));
+            ASSERT(senderMac->transmissions.size() == 2 * transmissionsPerExchange);
+            ASSERT(receiverMac->transmissions.size() == 2 * transmissionsPerExchange);
+            auto expectedAckDuration = SimTime(scenario == 24 ? 44 : 28, SIMTIME_US);
+            auto expectedCtsDuration = SimTime(scenario == 27 ? 44 : 28, SIMTIME_US);
+            for (int i = 0; i < 2; i++) {
+                int ackIndex = (i + 1) * transmissionsPerExchange - 1;
+                auto data = senderMac->transmissions[ackIndex];
+                auto ack = receiverMac->transmissions[ackIndex];
+                ASSERT(data.type == ST_DATA_WITH_QOS && !data.retry);
+                ASSERT(ack.type == ST_ACK && ack.airtime == expectedAckDuration);
+                if (protectedExchange) {
+                    auto cts = receiverMac->transmissions[ackIndex - 1];
+                    ASSERT(cts.type == ST_CTS && cts.airtime == expectedCtsDuration);
+                }
+                auto grantStart = senderMac->transmissions[oneGrant ? 0 : i * transmissionsPerExchange].start;
+                auto elapsed = ack.start + ack.airtime - grantStart;
+                ASSERT(elapsed <= SimTime(sender->txop()->par("txopLimit").doubleValue()));
+                if (i == 1 && oneGrant)
+                    ASSERT(elapsed == SimTime(protectedExchange ? 360 : 184, SIMTIME_US));
+            }
+        }
         if (scenario != 6 && scenario != 7 && scenario != 11 && scenario != 12) {
             // The declined exchanges select modes for both RTS and DATA in run 17,
             // and for DATA in runs 19 and 22.
@@ -475,7 +502,8 @@ class ProtectionTest : public cSimpleModule {
                 if (transmission.type == ST_RTS)
                     unusedDataModes++;
             unusedDataModes -= sender->cts;
-            int declinedQueries = scenario == 17 ? 2 : (scenario == 19 || scenario == 22 ? 1 : 0);
+            int declinedQueries = scenario == 17 || scenario == 27 ? 2 :
+                (scenario == 19 || scenario == 22 || scenario == 24 || scenario == 25 ? 1 : 0);
             ASSERT(sender->tracedSelection.modeQueries == (int)senderMac->transmissions.size() + unusedDataModes + declinedQueries);
         }
         ASSERT(receiver->failures == 0);
@@ -540,7 +568,7 @@ record-scalar-results = false
 **.wlan[*].opMode = "a"
 **.wlan[*].bitrate = 6Mbps
 **.wlan[*].mac.typename = "ProtectionMac"
-**.wlan[*].mac.scenario = ${scenario=0..22}
+**.wlan[*].mac.scenario = ${scenario=0..27}
 **.wlan[*].mac.qosStation = ${scenario} != 13
 **.wlan[*].mac.dcf.typename = "ProtectionDcf"
 **.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
@@ -554,18 +582,24 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.isBlockAckSupported = false
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
-**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} >= 23 ? 24Mbps : 6Mbps
 **.wlan[*].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
-**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = ${scenario} >= 26 ? 24Mbps : 6Mbps
+*.sender.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = ${scenario} == 24 || ${scenario} == 27 ? 24Mbps : 6Mbps
+*.receiver.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = ${scenario} >= 23 && ${scenario} != 24 ? 24Mbps : 6Mbps
+*.sender.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = ${scenario} == 27 ? 24Mbps : 6Mbps
+*.receiver.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = ${scenario} == 26 ? 24Mbps : 6Mbps
 **.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps
 **.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6Mbps
-**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 2 || ${scenario} == 17 || ${scenario} >= 20 || ${scenario} >= 8 && ${scenario} <= 9 ? 0B : (${scenario} == 3 || ${scenario} == 4 ? 75B : 4096B)
+*.sender.wlan[*].mac.hcf.multipleProtectionResponseAirtimeBound = ${scenario} == 23 || ${scenario} == 26 ? 28us : 0s
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 2 || ${scenario} == 17 || (${scenario} >= 20 && ${scenario} <= 22) || ${scenario} >= 26 || ${scenario} >= 8 && ${scenario} <= 9 ? 0B : (${scenario} == 3 || ${scenario} == 4 ? 75B : 4096B)
 *.observer.wlan[0].mac.hcf.edca.edcaf[*].cwMin = 31
 *.observer.wlan[0].mac.hcf.edca.edcaf[*].cwMax = 31
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
 *.observer.wlan[0].mac.hcf.edca.edcaf[0].aifsn = 10
-**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 6 || ${scenario} == 7 ? 0s : (${scenario} == 17 ? 384us : (${scenario} == 14 ? 164us : (${scenario} == 15 || ${scenario} == 16 ? 176us : (${scenario} == 18 ? 336us : (${scenario} == 19 ? 335us : (${scenario} == 22 ? 596us : 1024us))))))
+# Scenario 27 isolates CTS: the fast CTS estimate gives 392 us and the conservative bound gives 408 us.
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${limit=1024,1024,1024,1024,1024,1024,0,0,1024,1024,1024,1024,1024,1024,164,176,176,384,336,335,1024,1024,596,190,210,190,365,400 ! scenario}us
 *.sender.wlan[0].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = ${scenario} == 11 || ${scenario} == 12 ? "single" : "multiple"
 *.sender.wlan[0].address = "02:00:00:00:00:01"
 *.receiver.wlan[0].address = "02:00:00:00:00:02"
