@@ -1653,6 +1653,29 @@ older than the repair, and the defect list has no entry for it.
 
 The re-record of these values needs the approval of the maintainer.
 
+**The re-record (2026-11-28).** The maintainer approved the re-record of exactly these values ("yes"). In the image of
+the CI, at C17 on master `1a8c5fe519`, with `statistics` at `afc1807da3` of R9 (`runs/record-baselines.sh` in five
+sets, `runs/r10-record-a/` to `runs/r10-record-e/` of the folder of D10). The script got the filter `INI_FILTER`
+(`-i`), because several ini files of `examples/inet/nclients` have a configuration `General`.
+
+- The 11 fingerprint runs go into C17, and the 9 statistics files into the commit `76f97c7fa4` of the branch
+  `topic/baseline-catch-up-defect-repairs` of `statistics`, after `afc1807da3`.
+- The new values equal the tables above: the same fingerprints, and the same frames and application data.
+- C17 has the trailer `Statistical-Baseline:`, the obligations `fingerprint statistical test whatsnew` and the
+  `Baseline changes:` lines. It is now `bed9589880`.
+
+**The gates (2026-11-28)**, on the head `1b615d4559`:
+
+- `check-baselines.sh` with the local clones passes, and so does `check-baseline-attribution.sh plan`.
+- The attribution run in the job copy passes (`runs/r10-attribution/`). For C16 and for C17, the parent matches the
+  stored values, and the commit matches the new values: 1 statistical test for C16, and 9 statistical tests and 11
+  fingerprint runs for C17.
+- All 1847 release fingerprints give 1846 PASS and 1 expected ERROR (`runs/r10-gate-after-record/`).
+- The statistical tests give 934 PASS and 11 expected SKIP (`evidence/runs/1b615d4559/` of the job copy).
+- `check-pull-request.sh --base origin/master` has two expected violations: the `statistics` commits `afc1807da3` and
+  `76f97c7fa4` are not on GitHub yet. Its two notes ask whether the fingerprint moves of C17 in two ways, with and
+  without `~tND`, have one cause. They have: the delayed ACK of a segment of 1 byte.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
