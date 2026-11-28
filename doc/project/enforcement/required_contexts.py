@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""W1, W2, W4 and W5 of plan/pending/master-guards.md over a range of commits: each required context
+"""TR-REQ-REPORTS and TR-REQ-GREEN of doc/project/rule/testing.md over a range of commits: each required context
 of the ruleset of master still reports on a pull request after the change.
 
 A required context comes from a job of a workflow that runs on pull requests into master, or from a
@@ -13,16 +13,16 @@ merged into the base, which is master after the landing. When the merge has a co
 or in the README, it compares the merge base with the head, gives a note, and does not report a
 context that neither reports: both are old.
 
-  W2, W4  VIOLATION: a required context that the base reports and the head does not: the range
+  VIOLATION: a required context that the base reports and the head does not: the range
           renames or removes it, and an admin must change the ruleset at the same landing
-  W1      VIOLATION: the range gives a required job with a matrix a job-level `if:` (GitHub then
+  VIOLATION: the range gives a required job with a matrix a job-level `if:` (GitHub then
           reports the skipped job under the name without the matrix values), or it gives the
           workflow of a required job a path filter in its pull request trigger
           note: the range adds or changes the job-level `if:` of another required job, which must
           be true for each event of a pull request
   note    a required context that neither the base nor the head reports, a job whose names the
           gate cannot compute, and a list in doc/project/enforcement/README.md that differs from
-          the ruleset (W5)
+          the ruleset (TR-REQ-GREEN)
 
 The required contexts come from --required-file (one context on each line), or else from the rules
 of master through `gh api`. Without them the gate gives a note and passes. It reads the workflows
@@ -47,7 +47,7 @@ from dataclasses import dataclass, field
 WORKFLOWS = ".github/workflows"
 README = "doc/project/enforcement/README.md"
 README_HEADING = "## Required checks of master"
-RULES = "plan/pending/master-guards.md"
+RULES = "doc/project/rule/testing.md"
 STATUS = re.compile(r"""\bcontext=["']([^"'$\n]+)["']""")
 MATRIX_EXPRESSION = re.compile(r"\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}")
 PR_EVENTS = ("pull_request", "pull_request_target")
@@ -405,12 +405,12 @@ def main(argv=None):
         required = required_contexts(args)
     except CannotRun as error:
         print()
-        print("== W2 and W4: each required context of master still reports on a pull request ==")
+        print("== TR-REQ-REPORTS: each required context of master still reports on a pull request ==")
         print(f"  note: the required contexts of master are unknown, so the gate checks nothing: {error}")
         return 0
 
     print()
-    print("== W2 and W4: each required context of master still reports on a pull request ==")
+    print("== TR-REQ-REPORTS: each required context of master still reports on a pull request ==")
     print(f"  {len(required)} required context(s)")
     for context in required:
         if context in after.found:
@@ -422,7 +422,7 @@ def main(argv=None):
                          f"({unknown_now[0][2]}), so it cannot see if the required context '{context}' still reports")
         elif source:
             violations.append(f"the series renames or removes the required context '{context}' ({where(before.found[context])}): "
-                              f"an admin changes the ruleset of master at the same landing (W2 of {RULES})")
+                              f"an admin changes the ruleset of master at the same landing (TR-REQ-REPORTS of {RULES})")
         elif not full:
             continue
         elif after.unknown:
@@ -438,7 +438,7 @@ def main(argv=None):
         print("  ok")
 
     print()
-    print("== W1: a required job reports a result on each pull request ==")
+    print("== TR-REQ-REPORTS: a required job reports a result on each pull request ==")
     quiet = True
     for context in required:
         now, then = after.found.get(context), before.found.get(context)
@@ -446,23 +446,23 @@ def main(argv=None):
             continue
         if now.matrix and now.job_if is not None and (then is None or then.job_if is None):
             violations.append(f"the series gives the job '{now.job}' of {now.path} a job-level if:, and the job has a matrix: "
-                              f"a skipped job reports under the name without the matrix values, so '{context}' never reports (W1)")
+                              f"a skipped job reports under the name without the matrix values, so '{context}' never reports (TR-REQ-REPORTS)")
             print(f"  VIOLATION: {violations[-1]}")
             quiet = False
         elif now.job_if is not None and (then is None or then.job_if != now.job_if):
             print(f"  note: the series adds or changes the job-level if: of the required job '{now.job}' of {now.path}: "
-                  f"it must be true for each event of a pull request, because a skipped job counts as passed (W1)")
+                  f"it must be true for each event of a pull request, because a skipped job counts as passed (TR-REQ-REPORTS)")
             quiet = False
         if now.path_filter and (then is None or not then.path_filter):
             violations.append(f"the series gives {now.path} a path filter in its pull request trigger: the required context "
-                              f"'{context}' then never reports for a pull request outside the paths (W1)")
+                              f"'{context}' then never reports for a pull request outside the paths (TR-REQ-REPORTS)")
             print(f"  VIOLATION: {violations[-1]}")
             quiet = False
     if quiet:
         print("  ok")
 
     print()
-    print(f"== W5: the list of the required contexts in {README} ==")
+    print(f"== TR-REQ-GREEN: the list of the required contexts in {README} ==")
     listed = readme_list(landed)
     if not full:
         print("  skipped: the head does not merge into the base")

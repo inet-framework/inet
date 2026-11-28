@@ -84,7 +84,7 @@ git push origin HEAD:topic/<name>      # the job "Push check" marks the required
 git push origin HEAD:master            # the same commit, after the push check is done
 ```
 
-GitHub refuses the push to `master` when a required check of the commit is missing; the summary of the push check gives the reasons. A push to a branch other than `master` starts no build and no test. A trivial landing on `master` starts no full run, and `Master green` keeps the state of the commit before it (M9), so it does not block the next landing.
+GitHub refuses the push to `master` when a required check of the commit is missing; the summary of the push check gives the reasons. A push to a branch other than `master` starts no build and no test. A trivial landing on `master` starts no full run, and `Master green` keeps the state of the commit before it ([TR-CI-FULL-RUN](../rule/testing.md#tr-ci-full-run)), so it does not block the next landing.
 
 ## When the change touches this document set
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests of master_green.py: the context `Master green` of M8 and M10 in plan/pending/master-guards.md."""
+"""Tests of master_green.py: the context `Master green` of PR-LAND-WAIT and TR-CI-FULL-RUN in doc/project/rule/pull-request.md and doc/project/rule/testing.md."""
 
 import io
 from pathlib import Path

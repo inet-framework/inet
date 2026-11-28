@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# The push check of S1 to S6 in plan/pending/master-guards.md: is the change of a branch trivial, so
+# The push check of PR-LAND-TRIVIAL in doc/project/rule/pull-request.md: is the change of a branch trivial, so
 # that it can go to master with no pull request? The work is in trivial_change.py.
 #
 # Usage (from the INET repository root):

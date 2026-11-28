@@ -26,7 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 GUIDE = "doc/project/guide/review-a-pull-request.md"
 RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md", "doc/project/rule/release.md",
-         "doc/project/rule/testing.md", "plan/pending/master-guards.md"]
+         "doc/project/rule/testing.md"]
 
 
 def git(*args, cwd=None):
@@ -54,7 +54,7 @@ def gates(commit_range, description, required_contexts_file=None, base=None):
         ("check-whatsnew.sh", "RR-WHATSNEW-FILE, RR-MIGRATE-FILE", [commit_range]),
         ("check-baselines.sh", "TR-BASELINE-PIN, TR-BASELINE-PROVENANCE, TR-BASELINE-ATTRIBUTION, PR-REQ-BASELINES",
          [commit_range] + (["--description-file" if description[0] == "--file" else "--pr", description[1]] if description else [])),
-        ("check-required-contexts.sh", "W1, W2, W4, W5 of the required checks",
+        ("check-required-contexts.sh", "TR-REQ-REPORTS, TR-REQ-GREEN",
          [landing_range] + (["--required-file", required_contexts_file] if required_contexts_file else [])),
     ]
     if description:

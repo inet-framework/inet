@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The context `Master green`: M8 and M10 of plan/pending/master-guards.md.
+"""The context `Master green`: PR-LAND-WAIT of doc/project/rule/pull-request.md and TR-CI-FULL-RUN of doc/project/rule/testing.md.
 
 `Master green` is green only when the full run of the head of master is finished and green. While
 that run is in progress or red, nothing else lands. The full run is the newest attempt of each of
@@ -15,9 +15,9 @@ count, because it runs the checks V4 and V5 of the test selection. A run that is
                            master; between two posts it waits, for the limits of GitHub
 
 When the state is red, `post --all` also names the commits of omnetpp (omnetpp-6.x) and opp_repl
-(github_ci) at the start of the run, and the same for the newest green commit of master (M10).
+(github_ci) at the start of the run, and the same for the newest green commit of master (TR-CI-FULL-RUN).
 
-A trivial landing starts no full run and does not change `Master green` (M9). The job `Landing` of
+A trivial landing starts no full run and does not change `Master green` (TR-CI-FULL-RUN). The job `Landing` of
 the workflow `Check: master green` decides it with check-trivial-change.sh for each push to master,
 and then runs `trivial-landing`:
 
@@ -54,7 +54,6 @@ FULL_RUN = ("Check: baseline masters", "Test: unit", "Test: module", "Test: queu
 EVENTS = ("push", "workflow_run")
 NOT_COUNTED_JOBS = {"Test: fingerprint": {"Test map"}}
 GOOD = {"success", "skipped", "neutral"}
-RULES = "plan/pending/master-guards.md"
 ENVIRONMENT = (("omnetpp", "omnetpp/omnetpp", "omnetpp-6.x"), ("opp_repl", "omnetpp/opp_repl", "github_ci"))
 PAUSE = 1.0   # seconds between two posts: GitHub allows about 80 writes in a minute
 TRIVIAL_CONTEXT = "Trivial landing"
@@ -179,7 +178,7 @@ def environment(github, state):
 
 
 def report(github, current, depth=30):
-    """The lines of M10 for a red state: the environment of this run and of the newest green commit."""
+    """The lines of TR-CI-FULL-RUN for a red state: the environment of this run and of the newest green commit."""
     lines = [f"{current.sha[:10]} (red): {environment(github, current)}"]
     for sha in github.master_commits(depth):
         if sha == current.sha:

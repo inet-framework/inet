@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""The push check of S1 to S6 in plan/pending/master-guards.md: is the change of a branch trivial?
+"""The push check of PR-LAND-TRIVIAL in doc/project/rule/pull-request.md: is the change of a branch trivial?
 
-A trivial change can go to master with no pull request (A5). The gate looks at the commits from the
+A trivial change can go to master with no pull request (PR-LAND-WAYS). The gate looks at the commits from the
 merge base of BASE and HEAD to HEAD:
 
-  S3  each changed file is trivial: a change of an .rst or .md file, or a change of a .cc, .h or .ned
-      file that changes only comments and keeps the line number of each line of code. Never trivial:
-      a file under .github/, _scripts/, doc/project/enforcement/ or tests/, a .txt, .ini or .msg
-      file, a document with a seal unit, the seal registry, a sealed source path, a new, removed or
-      renamed C++ or NED file, and a change of the file mode
-  S2  no commit has a pin trailer, such as Statistical-Baseline:, because it moves a baseline at the
-      landing; and the gates of the pull-request audit pass, without the description
+  files     each changed file is trivial: a change of an .rst or .md file, or a change of a .cc, .h or .ned
+            file that changes only comments and keeps the line number of each line of code. Never trivial:
+            a file under .github/, _scripts/, doc/project/enforcement/ or tests/, a .txt, .ini or .msg
+            file, a document with a seal unit, the seal registry, a sealed source path, a new, removed or
+            renamed C++ or NED file, and a change of the file mode
+  commits   no commit has a pin trailer, such as Statistical-Baseline:, because it moves a baseline at the
+            landing; and the gates of the pull-request audit pass, without the description
 
 For C++, the lexer knows line comments (also when a backslash at the end continues them), block
 comments, strings, character literals, raw strings and digit separators. For NED, it knows line
@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-RULES = "plan/pending/master-guards.md"
+RULES = "doc/project/rule/pull-request.md"
 NEVER_FOLDERS = (".github/", "_scripts/", "doc/project/enforcement/", "tests/")
 NEVER_SUFFIXES = (".txt", ".ini", ".msg")
 DOCUMENT_SUFFIXES = (".rst", ".md")
@@ -273,12 +273,12 @@ def main(argv=None):
         commits = git("rev-list", f"{base}..{head}").stdout.decode().split()
         print(f"== the push check: {base[:10]}..{head[:10]}, {len(commits)} commit(s) ==")
         if base != tip:
-            print(f"  note: master moved since the branch started; rebase the branch on master before the push to master (S5)")
+            print(f"  note: master moved since the branch started; rebase the branch on master before the push to master (PR-LAND-TRIVIAL)")
         if not commits:
             reasons.append("the branch has no commit that master does not have")
 
         print()
-        print("== S3: each changed file is trivial ==")
+        print("== PR-LAND-TRIVIAL: each changed file is trivial ==")
         files = changed_files(base, head)
         for old_mode, new_mode, status, path in files:
             trivial, reason = file_verdict(base, head, old_mode, new_mode, status, path)
@@ -289,7 +289,7 @@ def main(argv=None):
             print("  no changed file")
 
         print()
-        print("== S2: no pin trailer ==")
+        print("== PR-LAND-TRIVIAL: no pin trailer ==")
         quiet = True
         for commit in commits:
             message = git("log", "-1", "--format=%B", commit).stdout.decode("utf-8", "replace")
@@ -304,7 +304,7 @@ def main(argv=None):
         return 2
 
     print()
-    print("== S3: no sealed source path ==")
+    print("== PR-LAND-TRIVIAL: no sealed source path ==")
     status, output = run_gate("check-source-seals.sh", "--base", base, "--head", head)
     if status == 0:
         print("  ok")
@@ -317,7 +317,7 @@ def main(argv=None):
         return 2
 
     print()
-    print("== S2: the gates of the pull-request audit, without the description ==")
+    print("== PR-LAND-TRIVIAL: the gates of the pull-request audit, without the description ==")
     audit = ["--base", tip, "--head", head]
     if args.required_contexts_file:
         audit += ["--required-contexts-file", args.required_contexts_file]
@@ -333,9 +333,9 @@ def main(argv=None):
 
     print()
     if reasons:
-        print(f"NOT TRIVIAL: this change needs a pull request ({len(reasons)} reason(s), S1 to S6 of {RULES}).")
+        print(f"NOT TRIVIAL: this change needs a pull request ({len(reasons)} reason(s), PR-LAND-TRIVIAL of {RULES}).")
         return 1
-    print("TRIVIAL: the change can go to master with no pull request (A5); push the same commit to master.")
+    print("TRIVIAL: the change can go to master with no pull request (PR-LAND-WAYS); push the same commit to master.")
     return 0
 
 

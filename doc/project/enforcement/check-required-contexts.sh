@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# W1, W2, W4 and W5 of plan/pending/master-guards.md over a range of commits: each required context
+# TR-REQ-REPORTS and TR-REQ-GREEN of doc/project/rule/testing.md over a range of commits: each required context
 # of the ruleset of master still reports on a pull request after the change. A range that renames or
 # removes a required job, or changes its matrix, needs a change of the ruleset by an admin at the same
 # landing; otherwise each pull request waits for ever. The work is in required_contexts.py.

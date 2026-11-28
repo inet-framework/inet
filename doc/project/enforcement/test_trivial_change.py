@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests of check-trivial-change.sh: the push check of S1 to S6 in plan/pending/master-guards.md."""
+"""Tests of check-trivial-change.sh: the push check of PR-LAND-TRIVIAL in doc/project/rule/pull-request.md."""
 
 from pathlib import Path
 import subprocess

@@ -250,7 +250,7 @@ class RequiredContextsTest(unittest.TestCase):
         self.commit("doc: list the required checks")
         result = self.check()
         self.assert_pass(result)
-        self.assertIn("== W5: the list of the required contexts in doc/project/enforcement/README.md ==\n  ok", result.stdout)
+        self.assertIn("== TR-REQ-GREEN: the list of the required contexts in doc/project/enforcement/README.md ==\n  ok", result.stdout)
         self.required(REQUIRED[1:] + ["Master green"])
         result = self.check()
         self.assertIn("not listed ['Master green']; listed but not required ['fingerprint-tests (debug, 0)']", result.stdout)
