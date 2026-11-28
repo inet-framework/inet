@@ -273,6 +273,11 @@ jobs:
           # the selection compares the compiler and the features with the map, so it needs the configuration
           source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
 
+          echo "::group::Compiling opp_nedtool"
+          # the selection parses the changed NED files with opp_nedtool, which only the make of omnetpp gives
+          make -C $GITHUB_WORKSPACE/omnetpp MODE=release -j $(nproc) nedxml
+          echo "::endgroup::"
+
           echo "::group::Installing opp_repl"
           python3 -m venv $GITHUB_WORKSPACE/venv
           source $GITHUB_WORKSPACE/venv/bin/activate
@@ -438,6 +443,12 @@ jobs:
 
           # the header of the map gives the environment of the jobs: the commits, the compiler and the features
           source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
+
+          echo "::group::Compiling opp_nedtool"
+          # an update and check V4 select the changes since an earlier map, and the selection parses the changed NED
+          # files with opp_nedtool, which only the make of omnetpp gives
+          make -C $GITHUB_WORKSPACE/omnetpp MODE=release -j $(nproc) nedxml
+          echo "::endgroup::"
 
           echo "::group::Installing opp_repl"
           python3 -m venv $GITHUB_WORKSPACE/venv
