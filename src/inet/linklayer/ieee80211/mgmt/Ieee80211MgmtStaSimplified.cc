@@ -110,6 +110,8 @@ void Ieee80211MgmtStaSimplified::receiveSignal(cComponent *source, simsignal_t s
     if (available)
         configureAssociation();
     else {
+        if (mib->getBssStationData().isAssociated)
+            resetPeerAssociationContext(mib->getBssData().bssid);
         mib->clearBss();
         mib->publishStateChange();
     }
@@ -129,6 +131,8 @@ void Ieee80211MgmtStaSimplified::stop()
     bool wasAssociated = mib->getBssStationData().isAssociated;
     const auto accessPointAddress = mib->getBssData().bssid;
     unsubscribeFromAccessPoint();
+    if (wasAssociated)
+        resetPeerAssociationContext(accessPointAddress);
     mib->clearBss();
     auto apMib = wasAssociated ? findAccessPointMib(accessPointAddress, false) : nullptr;
     if (apMib != nullptr) {

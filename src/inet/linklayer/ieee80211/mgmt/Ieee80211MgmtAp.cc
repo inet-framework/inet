@@ -622,7 +622,6 @@ void Ieee80211MgmtAp::stop()
     cancelEvent(beaconTimer);
     staList.clear();
     nextAssociationTransactionId = 0;
-    mib->clearAccessPointState();
     Ieee80211MgmtApBase::stop();
 }
 

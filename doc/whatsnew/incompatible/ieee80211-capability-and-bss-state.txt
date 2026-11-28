@@ -1,5 +1,5 @@
 IEEE 802.11 capability and BSS state ownership
 
-HT capability preparation now operates independently of active BSS operation. When both peers are up, simplified association prepares them before network configuration, regardless of node order. A simplified station waits for an initially down AP and re-associates when its AP restarts. Management publishes `bssStateChanged` and `rateStateChanged` after it completes each state change.
+HT capability preparation now operates independently of active BSS operation. When both peers are up, simplified association prepares them before network configuration, regardless of node order. A simplified station waits for an initially down AP and re-associates when its AP restarts. When a simplified association ends, both peers discard its Block Ack state. Management publishes `bssStateChanged` and `rateStateChanged` after it completes each state change.
 
 Custom WLAN modules must replace `ModeSetListener` and `modesetChanged` with an explicit `modeSetModule` that implements `IIeee80211ModeSetProvider`. Management must use the MIB methods instead of direct writes to BSS or capability fields. Custom HT transmitters and receivers must implement the capability contracts. The migration guide gives the required changes.

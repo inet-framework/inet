@@ -61,6 +61,9 @@ void Ieee80211MgmtApBase::handleStartOperation(LifecycleOperation *operation)
 
 void Ieee80211MgmtApBase::stop()
 {
+    for (const auto& [address, status] : mib->getBssAccessPointData().stations)
+        if (status == Ieee80211Mib::ASSOCIATED)
+            resetPeerAssociationContext(address);
     Ieee80211MgmtBase::stop();
     emit(simplifiedAssociationAvailabilityChangedSignal, false);
 }
@@ -91,6 +94,8 @@ void Ieee80211MgmtApBase::installSimplifiedPeer(const MacAddress& address, const
 void Ieee80211MgmtApBase::removeSimplifiedPeer(const MacAddress& address)
 {
     Enter_Method("removeSimplifiedPeer");
+    if (mib->getPeerAssociationStatus(address) == Ieee80211Mib::ASSOCIATED)
+        resetPeerAssociationContext(address);
     mib->removePeerAssociation(address);
     mib->publishStateChange();
 }
