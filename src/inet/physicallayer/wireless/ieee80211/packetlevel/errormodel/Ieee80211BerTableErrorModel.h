@@ -31,7 +31,9 @@ class INET_API Ieee80211BerTableErrorModel : public ErrorModelBase
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211BerTableErrorModel"; }
 
     virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    using ErrorModelBase::computePacketErrorRate;
     virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override;
     virtual double computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
 };
 
