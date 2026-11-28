@@ -15,12 +15,22 @@ namespace ieee80211 {
 
 class Ieee80211DataOrMgmtHeader;
 
+enum class FragmentPartitionStatus { UNFRAGMENTED, FRAGMENTED, IMPOSSIBLE };
+
+struct INET_API FragmentPartition
+{
+    FragmentPartitionStatus status = FragmentPartitionStatus::IMPOSSIBLE;
+    std::vector<int> payloadSizes;
+};
+
 class INET_API IFragmentationPolicy
 {
   public:
     virtual ~IFragmentationPolicy() {}
 
     virtual std::vector<int> computeFragmentSizes(Packet *frame) = 0;
+    // The bound includes the MAC header and FCS. An impossible partition consumes no source.
+    virtual FragmentPartition computeBoundedFragmentSizes(Packet *frame, int maxMpduBytes) = 0;
 };
 
 } // namespace ieee80211
