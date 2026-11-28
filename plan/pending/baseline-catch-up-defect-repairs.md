@@ -1476,6 +1476,43 @@ the 600 s the server acknowledges 269.4 MB in place of 179.4 MB.
 
 **Expected baselines.** The statistics of `examples/inet/tcpwindowscale` `WS_enabled`; no fingerprint.
 
+**The re-record (2026-11-27).** In the image of the CI, on the series on master `af8748b1a6`, with `statistics` at the
+head of its master `9c8912f0` (`runs/record-baselines.sh` and `runs/r9-record/` of the folder of D10): the statistics
+of `WS_enabled` go into the commit `afc1807da3` of the branch `topic/baseline-catch-up-defect-repairs` of
+`statistics`, after `9c8912f0`. 470 of its 1969 values move. C16 has the trailer `Statistical-Baseline:` with that
+commit and the obligations `statistical test whatsnew`. It changes no fingerprint, so it has no `Baseline changes:`
+lines; the `statistics` commit has them. The assistant recorded the values before the maintainer approved them, so gate
+B asks for the approval of these exact values.
+
+| value of `WS_enabled` | stored | new |
+| --- | --- | --- |
+| `server.app[0]` `packetReceived:sum(packetBytes)` | 180130764 | 270253500 |
+| `client.tcp.conn-4` `ssthresh:vector:min` | 17424 | 163350 |
+| `client.tcp.conn-4` `cwnd:vector:mean` | 457910 | 597805 |
+| `client.tcp.conn-4` `cwnd:vector:max` | 681097 | 835043 |
+| `client.tcp.conn-4` `dupAcks:vector:count` | 123866 | 185834 |
+| `client.tcp.conn-4` `numRtos:vector:count` | 2 | 2 |
+
+- INET master `184493ebeb` added the aspect `sim_time_limits` to `inet.opp`, which the `opp_repl` `155ac508b9` of the
+  job copy does not know. The job copy now installs `opp_repl` `78dcb602f7` of its branch `github_ci`, in the venv
+  `venv-78dcb602f7`; the venv `venv` keeps `155ac508b9`, with which R1 to R8 were recorded. The record before the
+  rebase, with the old `opp_repl`, and the record after it, with the new one, give the same values.
+- On 2026-11-28 master was at `8aa6f3148f`: 13 commits of CI files and of the test selection in `inet.opp`, and no
+  source file or fingerprint store. The series is rebased on it, and C16 is `5374672b81`. No file that a simulation
+  reads changed, so the record stays valid.
+
+**The gates (2026-11-28)**, on the head `e12e818039`:
+
+- `check-baselines.sh` with the local clones passes, and so does `check-baseline-attribution.sh plan`.
+- The attribution run in the job copy passes (`runs/r9-attribution/`): the parent of C16 matches the stored values of
+  `WS_enabled`, and C16 matches the new values.
+- All 1847 release fingerprints in the image of the CI give 1846 PASS and 1 expected ERROR
+  (`runs/r9-gate-after-record/`).
+- The statistical tests give 934 PASS and 11 expected SKIP (`evidence/runs/e12e818039/` of the job copy).
+- `check-pull-request.sh --base origin/master` has one expected violation: the `statistics` commit is not on GitHub
+  yet. Its branch goes there at the landing. The branch on GitHub holds `593ba94b` of R8, which landed on the master of
+  `statistics` as `4882aeb9`, so the push replaces it with a lease.
+
 #### R10: a data segment of 1 byte gets a delayed ACK (BD-32), prepared 2026-11-27
 
 A background agent prepared R10 in a detached worktree of its own (`inet-cpp-r10`), and the assistant checked its work.
@@ -1503,6 +1540,24 @@ diff and the two tests are the preview commit `98fe34c6e0` on the branch `previe
   configurations, `examples/ipv6/nclients` `ETH` and `PPP`, `examples/inet/shutdownrestart` `TCP` runs 0 to 2) and 9
   statistical tests of the same examples. These examples run interactive applications, whose segments of 1 byte now
   get a delayed ACK.
+
+**The effect in a run (2026-11-28).** `examples/inet/nclients` `inet__inet` (Telnet over `Tcp`, 3000 s), in debug
+mode: the head of the branch, today, against the worktree `inet-cpp-r10`, with the repair (`runs/r10-run.sh` and
+`runs/r10/` of the folder of D10; editor tab "R10 charts"). R9 moves nothing in `nclients`, so only the repair makes
+the difference. The data segments are the same in both runs: the clients send 304, all of 1 byte, and the server sends
+304, which are 268 echoes of 1 byte and 36 outputs of commands.
+
+| segments that TCP sends in 3000 s | today | with the repair |
+| --- | --- | --- |
+| server: pure ACKs | 316 | 12 |
+| clients: pure ACKs | 320 | 95 |
+| all, with the 608 data segments | 1244 | 715 |
+
+- Today each data segment of 1 byte gets a pure ACK at once.
+- With the repair, the server sends its ACK with the echo. A client sends the ACK of an echo with its next keystroke,
+  or when the delayed-ACK timer expires: a median of 72 ms after the echo, and 43 of the 268 echoes wait the full
+  200 ms.
+- A data segment larger than 1 byte gets its ACK after 200 ms in both runs.
 
 **Design questions for gate A.**
 
