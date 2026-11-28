@@ -215,10 +215,8 @@ optional, and it is only used when the simulation of energy consumption
 is necessary.
 
 The radio model has an operational mode that is called the radio mode.
-The radio mode is externally controlled usually by the MAC model. In
-transceiver mode, the radio can simultaneously transmit and receive a
-signal. Changing the radio mode may optionally take a non-zero amount of
-time. The supported radio modes are the following:
+The radio mode is usually controlled by the MAC model. Changing the radio
+mode may take a non-zero amount of time. The supported radio modes are:
 
 -  *off*: communication isn’t possible, energy consumption is zero
 
@@ -229,8 +227,11 @@ time. The supported radio modes are the following:
 -  *transmitter*: only transmission is possible, energy consumption is
    high
 
--  *transceiver*: reception and transmission is simultaneously possible,
-   energy consumption is high
+-  *transceiver*: the radio can receive or transmit without a mode switch.
+   The radio model determines whether reception and transmission can
+   overlap. Packet-level IEEE 802.11 radios operate half-duplex. Local
+   transmission abandons a reception in progress and prevents new
+   reception attempts until transmission ends.
 
 -  *switching*: communication isn’t possible, energy consumption is
    minimal

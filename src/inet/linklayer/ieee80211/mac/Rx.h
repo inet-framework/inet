@@ -27,6 +27,7 @@ namespace ieee80211 {
 class ITx;
 class IContention;
 class IStatistics;
+class Ieee80211Mac;
 
 /**
  * The default implementation of IRx.
@@ -68,7 +69,8 @@ class INET_API Rx : public ModeSetListener, public IRx
         bool rifsPermitted = false;
         simtime_t rifs;
     };
-    opp_component_ptr<cModule> networkInterface;
+    opp_component_ptr<Ieee80211Mac> mac;
+    opp_component_ptr<physicallayer::IRadio> radio;
     std::optional<PrecedingFrame> precedingFrame;
     std::optional<ReceptionEvidence> activeReception;
     std::optional<ReceptionEvidence> completedReception;

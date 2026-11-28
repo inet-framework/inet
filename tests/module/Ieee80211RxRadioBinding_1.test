@@ -1,0 +1,76 @@
+%description:
+Check that the Wi-Fi MAC and Rx initialize with the connected PHY placed under
+the name phy in a replacement network interface.
+
+%file: test.ned
+import inet.linklayer.contract.IWirelessInterface;
+import inet.linklayer.ieee80211.llc.Ieee80211LlcLpd;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAdhoc;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.networklayer.common.NetworkInterface;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module RenamedRadioInterface extends NetworkInterface like IWirelessInterface
+{
+    parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = absPath(this.interfaceTableModule);
+        *.mibModule = absPath(".mib");
+        @display("i=block/ifcard");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input radioIn;
+    submodules:
+        llc: Ieee80211LlcLpd;
+        mib: Ieee80211Mib;
+        mac: Ieee80211Mac;
+        mgmt: Ieee80211MgmtAdhoc {
+            macModule = "^.mac";
+        }
+        phy: Ieee80211ScalarRadio;
+    connections:
+        upperLayerIn --> llc.upperLayerIn;
+        llc.upperLayerOut --> upperLayerOut;
+        llc.lowerLayerOut --> mac.upperLayerIn;
+        mac.upperLayerOut --> llc.lowerLayerIn;
+        mgmt.macOut --> mac.mgmtIn;
+        mac.mgmtOut --> mgmt.macIn;
+        mac.lowerLayerOut --> phy.upperLayerIn;
+        phy.upperLayerOut --> mac.lowerLayerIn;
+        radioIn --> phy.radioIn;
+}
+
+network RenamedRadioNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        station: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RenamedRadioNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1ms
+seed-set = 0
+record-scalar-results = false
+record-vector-results = false
+*.station.wlan[0].typename = "RenamedRadioInterface"
+*.station.wlan[0].mac.modeSet = "a"
+*.station.wlan[0].phy.opMode = "a"
+*.station.wlan[0].phy.transmitter.bitrate = 6Mbps
+*.station.wlan[0].phy.bandName = "5 GHz (mapped 20 MHz)"
+*.station.wlan[0].phy.antenna.mobilityModule = "^.^.^.mobility"
+*.station.mobility.initFromDisplayString = false
+*.station.mobility.initialX = 0m
+*.station.mobility.initialY = 0m
+*.station.mobility.initialZ = 0m
+
+%contains: stdout
+Simulation time limit reached
+%not-contains: stdout
+undisposed object:

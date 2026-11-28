@@ -1,0 +1,253 @@
+%description:
+Check half-duplex reception on the Wi-Fi transceiver through DCF and HCF.
+Two peer frames start during the local DATA transmission, one ending before
+it and one ending afterward. A subsequent peer frame reaches the local PHY's
+upper gate after the local transmission completes. A final case starts local
+transmission while a peer frame is already being received and requires that
+reception to stay abandoned after local transmission ends.
+
+%extraargs: -r 0..1
+
+%file: TransceiverOverlapProbe.cc
+#include <iostream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211TransceiverOverlap_1 {
+
+class TransceiverOverlapProbe : public cSimpleModule, public cListener
+{
+  private:
+    enum Step { LOCAL_DATA, PEER_INSIDE, PEER_STRADDLES, PEER_AFTER, PEER_ACTIVE, LOCAL_INTERRUPT, CHECK };
+    opp_component_ptr<cModule> localRadio;
+    opp_component_ptr<cModule> peerRadio;
+    cMessage *timer = nullptr;
+    simtime_t localStart = -1;
+    simtime_t localEnd = -1;
+    bool localFinished = false;
+    bool peerInside = false;
+    bool peerStraddled = false;
+    bool peerAfterReceived = false;
+    simtime_t activeReceptionEnd = -1;
+    bool localInterruptedReception = false;
+
+    void schedule(Step step, int microseconds)
+    {
+        timer->setKind(step);
+        scheduleAt(SimTime(microseconds, SIMTIME_US), timer);
+    }
+
+    void submitFrame(bool local, const char *name, B dataLength = B(0), bool transmitImmediately = false)
+    {
+        auto mac = check_and_cast<Ieee80211Mac *>(getModuleByPath(local ? "^.local.wlan[0].mac" : "^.peer.wlan[0].mac"));
+        Ptr<Ieee80211DataOrMgmtHeader> header;
+        auto packet = new Packet(name);
+        if (dataLength != B(0)) {
+            header = makeShared<Ieee80211DataHeader>();
+            packet->insertAtBack(makeShared<ByteCountChunk>(dataLength));
+        }
+        else {
+            header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(ST_PROBEREQUEST);
+            auto request = makeShared<Ieee80211ProbeRequestFrame>();
+            request->setChunkLength(B(2));
+            packet->insertAtBack(request);
+        }
+        header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        packet->insertAtFront(header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        if (transmitImmediately)
+            mac->sendDownFrame(packet);
+        else
+            mac->processUpperFrame(packet, header);
+    }
+
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            localRadio = getModuleByPath("^.local.wlan[0].radio");
+            peerRadio = getModuleByPath("^.peer.wlan[0].radio");
+            localRadio->subscribe(transmissionStartedSignal, this);
+            localRadio->subscribe(transmissionEndedSignal, this);
+            localRadio->subscribe(packetSentToUpperSignal, this);
+            localRadio->subscribe(receptionStartedSignal, this);
+            peerRadio->subscribe(transmissionStartedSignal, this);
+            timer = new cMessage("transceiver overlap");
+            schedule(LOCAL_DATA, 1000);
+        }
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override
+    {
+        Enter_Method_Silent();
+        if (signal == packetSentToUpperSignal) {
+            auto packet = check_and_cast<const Packet *>(object);
+            if (packet->isName("peer-inside") || packet->isName("peer-straddles"))
+                throw cRuntimeError("The Wi-Fi PHY delivered an overlapping peer frame");
+            if (packet->isName("peer-after"))
+                peerAfterReceived = !packet->hasBitError();
+            if (packet->isName("peer-active"))
+                throw cRuntimeError("The Wi-Fi PHY delivered a reception interrupted by local transmission");
+        }
+        else if (signal == receptionStartedSignal) {
+            auto reception = check_and_cast<const IReception *>(object);
+            if (reception->getTransmission()->getPacket()->isName("peer-active"))
+                activeReceptionEnd = reception->getEndTime();
+        }
+        else {
+            auto transmission = check_and_cast<const ITransmission *>(object);
+            auto packet = transmission->getPacket();
+            if (source == localRadio && packet->isName("local-data")) {
+                if (signal == transmissionStartedSignal) {
+                    localStart = transmission->getStartTime();
+                    localEnd = transmission->getEndTime();
+                }
+                else
+                    localFinished = true;
+            }
+            else if (source == peerRadio && transmission->getStartTime() > localStart && transmission->getStartTime() < localEnd) {
+                if (packet->isName("peer-inside"))
+                    peerInside = transmission->getEndTime() < localEnd;
+                if (packet->isName("peer-straddles"))
+                    peerStraddled = transmission->getEndTime() > localEnd;
+            }
+            else if (source == localRadio && packet->isName("local-interrupt") && signal == transmissionEndedSignal)
+                localInterruptedReception = activeReceptionEnd > transmission->getEndTime();
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        switch (message->getKind()) {
+            case LOCAL_DATA:
+                submitFrame(true, "local-data", B(1200));
+                schedule(PEER_INSIDE, 1120);
+                break;
+            case PEER_INSIDE:
+                submitFrame(false, "peer-inside");
+                schedule(PEER_STRADDLES, 2650);
+                break;
+            case PEER_STRADDLES:
+                submitFrame(false, "peer-straddles");
+                schedule(PEER_AFTER, 3500);
+                break;
+            case PEER_AFTER:
+                submitFrame(false, "peer-after");
+                schedule(PEER_ACTIVE, 4100);
+                break;
+            case PEER_ACTIVE:
+                submitFrame(false, "peer-active", B(1200));
+                schedule(LOCAL_INTERRUPT, 4350);
+                break;
+            case LOCAL_INTERRUPT: {
+                auto radio = check_and_cast<IRadio *>(localRadio.get());
+                if (radio->getReceptionState() != IRadio::RECEPTION_STATE_RECEIVING || activeReceptionEnd <= simTime())
+                    throw cRuntimeError("Expected active reception before starting the local transmission");
+                // Submit a frame that has already been granted transmission.
+                submitFrame(true, "local-interrupt", B(32), true);
+                schedule(CHECK, 6200);
+                break;
+            }
+            case CHECK:
+                if (!peerInside || !peerStraddled || !localFinished || !peerAfterReceived)
+                    throw cRuntimeError("Expected both overlaps, local TX completion, and successful reception after TX");
+                if (!localInterruptedReception || activeReceptionEnd >= simTime())
+                    throw cRuntimeError("Expected the active peer reception to outlast the local transmission");
+                std::cout << "Wi-Fi transceiver overlap with " << (par("qos").boolValue() ? "HCF" : "DCF") << ": PASS\n";
+                endSimulation();
+                break;
+            default:
+                throw cRuntimeError("Unexpected test step");
+        }
+    }
+
+    using cListener::finish;
+
+  public:
+    ~TransceiverOverlapProbe() override
+    {
+        if (localRadio) {
+            localRadio->unsubscribe(transmissionStartedSignal, this);
+            localRadio->unsubscribe(transmissionEndedSignal, this);
+            localRadio->unsubscribe(packetSentToUpperSignal, this);
+            localRadio->unsubscribe(receptionStartedSignal, this);
+        }
+        if (peerRadio)
+            peerRadio->unsubscribe(transmissionStartedSignal, this);
+        cancelAndDelete(timer);
+    }
+};
+
+Define_Module(TransceiverOverlapProbe);
+
+} // namespace Ieee80211TransceiverOverlap_1
+
+%file: test.ned
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TransceiverOverlapProbe
+{
+    parameters:
+        bool qos;
+        @class(::Ieee80211TransceiverOverlap_1::TransceiverOverlapProbe);
+}
+
+network TransceiverOverlapNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        local: AdhocHost;
+        peer: AdhocHost;
+        probe: TransceiverOverlapProbe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TransceiverOverlapNetwork
+ned-path = .;../../../../src
+sim-time-limit = 7ms
+seed-set = 0
+cmdenv-stop-batch-on-error = false
+record-scalar-results = false
+record-vector-results = false
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+*.probe.qos = ${qos=false,true}
+**.wlan[*].mac.qosStation = ${qosEnabled=false,true ! qos}
+**.wlan[*].radio.typename = "Ieee80211ScalarRadio"
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+*.local.wlan[0].mac.initialRadioMode = "transceiver"
+# The peer's CCA cannot hear local DATA, so it starts during the local PPDU.
+*.local.wlan[0].radio.transmitter.power = 1nW
+*.peer.wlan[0].radio.transmitter.power = 100mW
+**.mobility.initFromDisplayString = false
+*.peer.mobility.initialX = 10m
+*.local.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Wi-Fi transceiver overlap with DCF: PASS
+%contains: stdout
+Wi-Fi transceiver overlap with HCF: PASS
+%not-contains: stdout
+undisposed object:

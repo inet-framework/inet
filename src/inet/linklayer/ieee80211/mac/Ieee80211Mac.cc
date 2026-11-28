@@ -14,6 +14,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -71,11 +72,12 @@ void Ieee80211Mac::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
         llc = check_and_cast<IIeee80211Llc *>(llcModule);
-        cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
+        cModule *radioModule = getConnectedGate<IRadio>(gate("lowerLayerOut"))->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
+        radioModule->subscribe(packetSentToUpperSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -95,6 +97,10 @@ void Ieee80211Mac::initialize(int stage)
         }
         mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
+        transmissionState = radio->getTransmissionState();
+        rx->transmissionStateChanged(transmissionState);
+        rx->receptionStateChanged(radio->getReceptionState());
+        rx->receivedSignalPartChanged(radio->getReceivedSignalPart());
         if (isUp())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -159,8 +165,12 @@ void Ieee80211Mac::handleMessageWhenUp(cMessage *message)
         else
             handleMgmtPacket(check_and_cast<Packet *>(message));
     }
-    else
+    else {
+        auto messageId = message->getId();
         LayeredProtocolBase::handleMessageWhenUp(message);
+        if (pendingRadioFrameIds.erase(messageId))
+            trySendPendingRadioConfig();
+    }
 }
 
 void Ieee80211Mac::handleSelfMessage(cMessage *msg)
@@ -231,27 +241,18 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
             // merge contents of the old command into the new one, then delete it
             Ieee80211ConfigureRadioCommand *oldConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
             Ieee80211ConfigureRadioCommand *newConfigureCommand = check_and_cast<Ieee80211ConfigureRadioCommand *>(msg->getControlInfo());
-            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
+            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1) {
                 newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
+                newConfigureCommand->setPassiveScan(oldConfigureCommand->getPassiveScan());
+            }
             if (std::isnan(newConfigureCommand->getBitrate().get<bps>()) && !std::isnan(oldConfigureCommand->getBitrate().get<bps>()))
                 newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
             delete pendingRadioConfigMsg;
             pendingRadioConfigMsg = nullptr;
         }
 
-        if (rx->isMediumFree() && !tx->hasTransmission()) { // TODO this should be just the physical channel sense!!!!
-            EV_DEBUG << "Sending it down immediately\n";
-//            PhyControlInfo *phyControlInfo = dynamic_cast<PhyControlInfo *>(msg->getControlInfo());
-//            if (phyControlInfo)
-//                phyControlInfo->setAdaptiveSensitivity(true);
-            // end dynamic power
-            sendDown(msg);
-        }
-        else {
-            // TODO waiting potentially indefinitely?! wtf?!
-            EV_DEBUG << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
-            pendingRadioConfigMsg = msg;
-        }
+        pendingRadioConfigMsg = msg;
+        trySendPendingRadioConfig();
     }
     else {
         throw cRuntimeError("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
@@ -338,6 +339,8 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
 
     if (signalID == IRadio::receptionStateChangedSignal) {
         rx->receptionStateChanged(static_cast<IRadio::ReceptionState>(value));
+        if (value == IRadio::RECEPTION_STATE_BUSY)
+            trySendPendingRadioConfig();
     }
     else if (signalID == IRadio::transmissionStateChangedSignal) {
         auto oldTransmissionState = transmissionState;
@@ -345,14 +348,28 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
-            EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this is in a very wrong place!!! should be done explicitly from coordination function!
+            if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
+                configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME this should be done from the coordination function
         }
         rx->transmissionStateChanged(transmissionState);
+        if (transmissionFinished)
+            trySendPendingRadioConfig();
     }
     else if (signalID == IRadio::receivedSignalPartChangedSignal) {
         rx->receivedSignalPartChanged(static_cast<IRadioSignal::SignalPart>(value));
     }
+}
+
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *object, cObject *details)
+{
+    if (signalID == packetSentToUpperSignal) {
+        Enter_Method_Silent();
+        // The PHY can report idle before the frame reaches the MAC and reserves its response.
+        if (dynamic_cast<IRadio *>(source) == radio.getNullable() && isUp())
+            pendingRadioFrameIds.insert(check_and_cast<Packet *>(object)->getId());
+    }
+    else
+        MacProtocolBase::receiveSignal(source, signalID, object, details);
 }
 
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)
@@ -389,14 +406,30 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
 {
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
-    configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    if (radio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
+        configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
     sendDown(frame);
 }
 
+void Ieee80211Mac::trySendPendingRadioConfig()
+{
+    if (pendingRadioConfigMsg == nullptr)
+        return;
+    auto command = dynamic_cast<const Ieee80211ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
+    if (rx->isMediumFree() || (command && command->getPassiveScan() && radio->getReceptionState() == IRadio::RECEPTION_STATE_BUSY &&
+            radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING))
+        sendDownPendingRadioConfigMsg();
+}
+
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigMsg != nullptr && !tx->hasTransmission()) {
+    if (pendingRadioConfigMsg != nullptr && pendingRadioFrameIds.empty() && !tx->hasTransmission()) {
+        auto command = dynamic_cast<const Ieee80211ConfigureRadioCommand *>(pendingRadioConfigMsg->getControlInfo());
+        // The originator keeps channel ownership while it waits for the peer's response.
+        if (command && command->getPassiveScan() && (mib->qos ? hcf->isOwningChannel() : dcf->isOwningChannel()))
+            return;
+        Enter_Method_Silent();
         auto message = pendingRadioConfigMsg;
         pendingRadioConfigMsg = nullptr;
         sendDown(message);
@@ -438,11 +471,13 @@ void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
 // FIXME
 void Ieee80211Mac::handleStopOperation(LifecycleOperation *operation)
 {
+    pendingRadioFrameIds.clear();
 }
 
 // FIXME
 void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
+    pendingRadioFrameIds.clear();
 }
 
 } // namespace ieee80211

@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211MAC_H
 #define __INET_IEEE80211MAC_H
 
+#include <set>
+
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/IIeee80211Mac.h"
@@ -61,6 +63,8 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
 
     // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;
+    void trySendPendingRadioConfig();
+    std::set<msgid_t> pendingRadioFrameIds;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -68,6 +72,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void initializeRadioMode();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *object, cObject *details) override;
     using MacProtocolBase::receiveSignal;
     virtual void configureRadioMode(physicallayer::IRadio::RadioMode radioMode);
     virtual void configureNetworkInterface() override;

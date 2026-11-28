@@ -234,6 +234,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Hcf();
+    bool isOwningChannel() const { return edca->getChannelOwner() != nullptr || hcca->isOwning(); }
     void resetPeer(MacAddress peer);
 
     // ICoordinationFunction

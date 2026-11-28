@@ -124,6 +124,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Dcf();
+    bool isOwningChannel() const { return channelAccess->isOwning(); }
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

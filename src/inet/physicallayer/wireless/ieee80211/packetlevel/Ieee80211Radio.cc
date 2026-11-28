@@ -93,6 +93,20 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
     FlatRadioBase::handleUpperCommand(message);
 }
 
+void Ieee80211Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
+{
+    if (radioMode == RADIO_MODE_TRANSCEIVER)
+        abandonAttemptedReceptions();
+    FlatRadioBase::startTransmission(macFrame, part);
+}
+
+bool Ieee80211Radio::isReceiverMode(IRadio::RadioMode radioMode) const
+{
+    // Transceiver mode keeps both directions available between half-duplex exchanges.
+    return FlatRadioBase::isReceiverMode(radioMode) &&
+           (radioMode != RADIO_MODE_TRANSCEIVER || transmissionState != TRANSMISSION_STATE_TRANSMITTING);
+}
+
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));

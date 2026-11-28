@@ -163,6 +163,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         // TODO always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
+            cancelEvent(startRxTimer);
         }
         else {
             EV_INFO << "This frame is not for us" << std::endl;
@@ -171,7 +172,6 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
-        cancelEvent(startRxTimer);
     }
     else if (isForUs(header))
         recipientProcessReceivedFrame(packet, header);

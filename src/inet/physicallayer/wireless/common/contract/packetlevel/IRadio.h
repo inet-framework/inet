@@ -106,9 +106,11 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
         RADIO_MODE_TRANSMITTER,
 
         /**
-         * The radio is prepared for simultaneous frame reception and transmission,
-         * power consumption is low when transceiver is idle, medium when receiving
-         * and high when transmitting.
+         * The radio is prepared for frame reception and transmission. The radio
+         * model determines whether these can overlap. For example, packet-level
+         * IEEE 802.11 radios disable frame reception during local transmission.
+         * Power consumption is low when idle, medium when receiving and high
+         * when transmitting.
          */
         RADIO_MODE_TRANSCEIVER,
 

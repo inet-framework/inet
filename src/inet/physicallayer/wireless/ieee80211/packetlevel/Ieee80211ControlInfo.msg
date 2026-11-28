@@ -23,4 +23,5 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     IIeee80211Band *band;                  // new default band or nullptr if not set.
     Ieee80211Channel *channel;             // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
+    bool passiveScan = false;              // allow a passive channel scan to leave a channel occupied by energy alone
 }

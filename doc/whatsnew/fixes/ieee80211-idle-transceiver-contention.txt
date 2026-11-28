@@ -1,0 +1,5 @@
+Wi-Fi contention works with idle transceiver radios
+
+Wi-Fi MACs can contend when their transceiver radio is idle. During a radio mode switch, channel access waits until the radio can receive and its transmission state matches the new mode. A passive scan's queued channel change can then reach the radio even without traffic to trigger contention. With a packet-level Wi-Fi radio, the passive scan dwell starts when the radio is tuned to the requested channel and can receive.
+
+A passive scan can leave a channel occupied by interference. If the station is waiting for a peer response, it completes the exchange or times out before retuning. The station also recognizes its current channel when the radio reports channel changes only on an actual retune.

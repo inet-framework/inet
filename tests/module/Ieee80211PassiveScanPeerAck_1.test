@@ -1,0 +1,279 @@
+%description:
+A passive scan requests channel 1 while the station is transmitting unicast DATA
+on channel 0. Interference continues past the end of DATA. For DCF and HCF,
+check that the station retunes after receiving the ACK, or after the frame
+response deadline when the peer is out of range. Check the timeout both on its
+own, with an unrelated ACK injected at the MAC, and with an unrelated ACK
+received over the air from a nearby transmitter during the response window.
+
+%extraargs: -r 0..7
+
+%file: ScanExchangeProbe.cc
+#include <iostream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211PassiveScanPeerAck_1 {
+
+class ScanExchangeProbe : public cSimpleModule, public cListener
+{
+  private:
+    opp_component_ptr<cModule> mac;
+    opp_component_ptr<cModule> radio;
+    bool receivedAck = false;
+    bool finishedExchange = false;
+    bool retuned = false;
+    bool transmitting = false;
+    bool deliveredUnrelatedAck = false;
+    msgid_t receivedUnrelatedAckId = -1;
+    bool droppedOverheardAck = false;
+    simtime_t responseDeadline = -1;
+
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            mac = getModuleByPath("^.local.wlan[0].mac");
+            radio = getModuleByPath("^.local.wlan[0].radio");
+            mac->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
+            mac->subscribe(packetDroppedSignal, this);
+            radio->subscribe(packetSentToUpperSignal, this);
+            radio->subscribe(IRadio::transmissionStateChangedSignal, this);
+            radio->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
+            scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("submit unicast DATA"));
+            scheduleAt(SimTime(1500, SIMTIME_US), new cMessage("check DATA transmission"));
+        }
+    }
+
+    void handleMessage(cMessage *message) override
+    {
+        if (message->isName("deliver unrelated ACK")) {
+            delete message;
+            auto packet = new Packet("WlanAck");
+            auto ack = makeShared<Ieee80211AckFrame>();
+            ack->setDurationField(SIMTIME_ZERO);
+            ack->setReceiverAddress(MacAddress("02:00:00:00:00:fe"));
+            packet->insertAtFront(ack);
+            if (par("overAir").boolValue()) {
+                auto transmitter = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.other.wlan[0].mac"));
+                auto trailer = makeShared<Ieee80211MacTrailer>();
+                trailer->setFcsMode(transmitter->getFcsMode());
+                packet->insertAtBack(trailer);
+                transmitter->sendDownFrame(packet);
+            }
+            else {
+                deliveredUnrelatedAck = true;
+                check_and_cast<Ieee80211Mac *>(mac.get())->processLowerFrame(packet, ack);
+            }
+            return;
+        }
+        delete message;
+        if (simTime() == SimTime(1500, SIMTIME_US)) {
+            if (check_and_cast<IRadio *>(radio.get())->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING)
+                throw cRuntimeError("Expected an ongoing DATA transmission at scan start");
+            return;
+        }
+        auto sender = check_and_cast<Ieee80211Mac *>(mac.get());
+        auto peer = check_and_cast<Ieee80211Mac *>(getModuleByPath("^.peer.wlan[0].mac"));
+        auto packet = new Packet("unicast-data");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setReceiverAddress(peer->getAddress());
+        header->setTransmitterAddress(sender->getAddress());
+        header->setAddress3(sender->getAddress());
+        auto llc = makeShared<Ieee8022LlcHeader>();
+        llc->setDsap(0x42);
+        llc->setSsap(0x42);
+        packet->insertAtBack(header);
+        packet->insertAtBack(llc);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(1200)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        sender->processUpperFrame(packet, header);
+    }
+
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        if (signal == IFrameSequenceHandler::frameSequenceFinishedSignal) {
+            if (!par("expectAck").boolValue() && simTime() != responseDeadline)
+                throw cRuntimeError("Exchange finished at %s, expected timeout at %s",
+                        simTime().str().c_str(), responseDeadline.str().c_str());
+            finishedExchange = true;
+        }
+        else if (signal == packetDroppedSignal) {
+            if (check_and_cast<Packet *>(object)->getId() == receivedUnrelatedAckId &&
+                    check_and_cast<PacketDropDetails *>(details)->getReason() == NOT_ADDRESSED_TO_US)
+                droppedOverheardAck = true;
+        }
+        else {
+            auto packet = check_and_cast<Packet *>(object);
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ACK && header->getReceiverAddress() == check_and_cast<Ieee80211Mac *>(mac.get())->getAddress())
+                receivedAck = true;
+            else if (header->getType() == ST_ACK && header->getReceiverAddress() == MacAddress("02:00:00:00:00:fe")) {
+                if (responseDeadline < SIMTIME_ZERO || simTime() >= responseDeadline)
+                    throw cRuntimeError("Unrelated ACK arrived outside the response window");
+                receivedUnrelatedAckId = packet->getId();
+            }
+        }
+    }
+
+    void receiveSignal(cComponent *, simsignal_t signal, intval_t value, cObject *) override
+    {
+        Enter_Method_Silent();
+        if (signal == IRadio::transmissionStateChangedSignal) {
+            if (transmitting && responseDeadline < SIMTIME_ZERO) {
+                responseDeadline = simTime() + par("ackTimeout");
+                if (par("unrelatedAck").boolValue() || par("overAir").boolValue())
+                    scheduleAfter(SimTime(10, SIMTIME_US), new cMessage("deliver unrelated ACK"));
+            }
+            transmitting = value == IRadio::TRANSMISSION_STATE_TRANSMITTING;
+        }
+        else if (value == 1) {
+            if (droppedOverheardAck != par("overAir").boolValue())
+                throw cRuntimeError("Unexpected over-the-air ACK outcome at retune");
+            if (!finishedExchange || receivedAck != par("expectAck").boolValue() || deliveredUnrelatedAck != par("unrelatedAck").boolValue())
+                throw cRuntimeError("Passive retune preceded the expected exchange outcome");
+            retuned = true;
+        }
+    }
+
+    using cListener::finish;
+
+    void finish() override
+    {
+        if (!retuned)
+            throw cRuntimeError("Passive scan failed to retune after the exchange");
+        std::cout << (par("qos").boolValue() ? "HCF" : "DCF");
+        if (deliveredUnrelatedAck)
+            std::cout << " unrelated ACK then";
+        if (droppedOverheardAck)
+            std::cout << " over-the-air unrelated ACK then";
+        std::cout << (receivedAck ? " ACK" : " timeout") << " before retune: PASS\n";
+    }
+
+  public:
+    ~ScanExchangeProbe() override
+    {
+        if (mac) {
+            mac->unsubscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
+            mac->unsubscribe(packetDroppedSignal, this);
+        }
+        if (radio) {
+            radio->unsubscribe(packetSentToUpperSignal, this);
+            radio->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+            radio->unsubscribe(Ieee80211Radio::radioChannelChangedSignal, this);
+        }
+    }
+};
+
+Define_Module(ScanExchangeProbe);
+
+} // namespace Ieee80211PassiveScanPeerAck_1
+
+%file: test.ned
+import inet.node.inet.AdhocHost;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+
+simple ScanExchangeProbe
+{
+    parameters:
+        @class(::Ieee80211PassiveScanPeerAck_1::ScanExchangeProbe);
+        bool expectAck;
+        bool unrelatedAck;
+        bool overAir;
+        double ackTimeout @unit(s);
+        bool qos;
+}
+
+network PassiveScanPeerAck
+{
+    parameters:
+        bool overAir;
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        local: WirelessHost;
+        peer: AdhocHost;
+        other: AdhocHost if overAir;
+        noise: NoiseSource;
+        probe: ScanExchangeProbe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = PassiveScanPeerAck
+ned-path = .;../../../../src
+sim-time-limit = 3.5ms
+seed-set = 0
+cmdenv-stop-batch-on-error = false
+record-scalar-results = false
+record-vector-results = false
+*.probe.qos = ${qos=false,true}
+*.probe.expectAck = ${ack=true,false,false,false}
+*.probe.unrelatedAck = ${false,false,true,false ! ack}
+*.probe.overAir = parent.overAir
+*.overAir = ${false,false,false,true ! ack}
+*.probe.ackTimeout = ${timeout=100us}
+*.local.wlan[0].mac.*.originatorAckPolicy.ackTimeout = ${ack} ? -1s : ${timeout}
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = ${qos}
+**.wlan[*].radio.typename = "Ieee80211ScalarRadio"
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.transmitter.power = 100mW
+*.local.wlan[0].mac.initialRadioMode = "transceiver"
+*.local.wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.local.wlan[0].agent.typename = "Ieee80211AgentSta"
+*.local.wlan[0].agent.activeScan = false
+*.local.wlan[0].agent.channelsToScan = "1"
+*.local.wlan[0].agent.startingTime = 1.5ms
+*.local.wlan[0].agent.minChannelTime = 1ms
+*.local.wlan[0].agent.maxChannelTime = 5ms
+*.peer.mobility.initialX = ${distance=10m,100000m,100000m,100000m ! ack}
+*.other.mobility.initialX = 10m
+*.noise.mobility.initialX = 1m
+*.local.mobility.initialX = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+*.noise.sleepInterval = 1.6ms
+*.noise.transmitter.signalAnalogRepresentation = "scalar"
+*.noise.transmitter.centerFrequency = 5180MHz
+*.noise.transmitter.bandwidth = 20MHz
+*.noise.transmitter.power = 10uW
+*.noise.transmitter.duration = 5ms
+**.ignorePartialInterference = true
+
+%contains: stdout
+DCF ACK before retune: PASS
+%contains: stdout
+DCF timeout before retune: PASS
+%contains: stdout
+HCF ACK before retune: PASS
+%contains: stdout
+HCF timeout before retune: PASS
+%contains: stdout
+DCF unrelated ACK then timeout before retune: PASS
+%contains: stdout
+HCF unrelated ACK then timeout before retune: PASS
+%contains: stdout
+DCF over-the-air unrelated ACK then timeout before retune: PASS
+%contains: stdout
+HCF over-the-air unrelated ACK then timeout before retune: PASS
+%not-contains: stdout
+undisposed object:
