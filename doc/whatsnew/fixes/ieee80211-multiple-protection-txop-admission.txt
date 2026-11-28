@@ -2,4 +2,4 @@ Wi-Fi multiple-protection continuations respect the transmission opportunity lim
 
 With Block Ack disabled, HCF now checks each additional exchange against the remaining transmission opportunity and transmitted reservation. The check includes RTS/CTS and the immediate ACK when required. A frame that cannot fit waits for another channel grant. DATA after CTS uses the mode selected when admitting its RTS.
 
-HCF budgets the longest ACK or CTS airtime supported by the local PHY mode set. Configure multipleProtectionResponseAirtimeBound to supply a tighter bound that still covers every peer response, including the PHY overhead. The budget assumes nominal interframe timing and zero propagation for responses that have yet to arrive.
+HCF budgets the longest ACK or CTS airtime supported by the local PHY mode set. Configure multipleProtectionResponseAirtimeBound to supply a tighter bound that still covers every peer response, including the PHY overhead. Configure multipleProtectionResponseRoundTripTimeBound to cover outbound plus return propagation for each immediate ACK or CTS.

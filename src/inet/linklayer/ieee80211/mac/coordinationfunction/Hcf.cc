@@ -2164,6 +2164,10 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             cost = mode->getDuration(packet->getDataLength());
             auto sifs = modeSet->getSifsTime();
             simtime_t configuredResponseBound = scopedMultiple ? par("multipleProtectionResponseAirtimeBound").doubleValue() : 0;
+            // INET modeling simplification: use a configured bound on propagation to and from any peer.
+            simtime_t responseRoundTripTime = scopedMultiple ? par("multipleProtectionResponseRoundTripTimeBound").doubleValue() : 0;
+            if (responseRoundTripTime < SIMTIME_ZERO)
+                throw cRuntimeError("multipleProtectionResponseRoundTripTimeBound must be nonnegative");
             if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
                 retainedPacket = const_cast<Packet *>(rtsStep->getProtectedFrame());
                 retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
@@ -2174,16 +2178,18 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_CTS, configuredResponseBound) :
                     rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
                 nextFrameDuration = dataMode->getDuration(retainedPacket->getDataLength());
-                if (recipientAckPolicy->isAckNeeded(protectedHeader))
+                if (recipientAckPolicy->isAckNeeded(protectedHeader)) {
                     nextFrameDuration += sifs + (scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
                         computeImmediateResponseDuration(retainedPacket, protectedHeader));
-                cost += sifs + responseDuration + sifs + nextFrameDuration;
+                    cost += responseRoundTripTime;
+                }
+                cost += sifs + responseDuration + responseRoundTripTime + sifs + nextFrameDuration;
             }
             else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
                 if (recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
                     responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
                         computeImmediateResponseDuration(packet, dataOrMgmt);
-                    cost += sifs + responseDuration;
+                    cost += sifs + responseDuration + responseRoundTripTime;
                 }
             }
             else
@@ -2194,9 +2200,9 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             bool checkContinuation = basicContinuation || (!dataAfterCts && context->getNumSteps() > 1);
             bool insufficientContinuationTime = checkContinuation && (cost >= rx->getTxnavRemaining() ||
                 (zeroLimit ? !fragmentContinuation : ifs + cost > txop->getRemaining()));
-            // Recheck the remaining part of an admitted continuation after CTS. Propagation
-            // can consume time beyond the nominal RTS/CTS estimate. The opening exchange
-            // retains the existing model's initial-frame allowance.
+            // Recheck the remaining part of an admitted continuation after CTS. The time
+            // waiting for CTS has already elapsed, so only the DATA and its ACK are budgeted here.
+            // The opening exchange retains the existing model's initial-frame allowance.
             bool insufficientTimeAfterCts = scopedMultiple && dataAfterCts && context->getNumSteps() > 3 &&
                 ifs + cost > txop->getRemaining();
             // IEEE Std 802.11-2024, 9.2.5.2(b)(2): subtract the leading SIFS and DATA PPDU
