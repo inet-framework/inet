@@ -1,0 +1,78 @@
+%description:
+Tests that a repeated Prefix Information option refreshes the lifetimes of the
+address the host already holds from that prefix (RFC 4862 Section 5.5.3 step e).
+
+The router advertises a prefix whose valid lifetime (20 s) and preferred
+lifetime (10 s) are much shorter than the 60 s run, and re-advertises it every
+4 s to 6 s. The host forms one address from the prefix and must then keep it
+alive from the repeated advertisements, instead of forming a second address or
+letting the first one lapse at the lifetime the first advertisement carried.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network PrefixLifetimeRefreshNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+<config>
+    <interface among="host router" prefix="aaaa:1::/64" advValidLifetime="20" advPreferredLifetime="10"/>
+</config>
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = PrefixLifetimeRefreshNetwork
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.configurator.assignAddressesToHosts = false
+*.configurator.config = xmldoc("config.xml")
+
+# Advertise far more often than the advertised lifetimes, so that the address
+# would lapse many times over if the advertisements did not refresh it.
+**.neighbourDiscovery.minIntervalBetweenRAs = 4s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 6s
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PrefixLifetimeRefreshNetwork.host.ipv6.neighbourDiscovery: DAD completed for address aaaa:1::
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PrefixLifetimeRefreshNetwork.host.ipv6.neighbourDiscovery: Prefix already assigned to the interface, refreshing lifetimes: valid 20, preferred 10
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -c "Assigning new address to: eth0" test.out > test_newaddr.out || true
+%contains: test_newaddr.out
+1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
