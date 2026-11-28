@@ -57,6 +57,28 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
+Route selection uses 32-bit serial sequence ordering. An older control message
+cannot replace newer route information. Values separated by exactly half the
+sequence range are treated as ambiguous and do not establish freshness.
+Rejected replies do not forward their advertised path or release queued data.
+
+RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
+sequence updates. This model follows the freshness rule of section 6.1: the
+destination adopts a known fresher requested sequence before replying, without
+an additional unconditional increment. An unknown requested sequence does not
+advance the destination's sequence.
+
+Reply and Hello lifetimes are relative durations encoded in whole milliseconds,
+truncated downward. Configured advertisement durations must yield a count in
+``1..4294967295``. A cached route whose remaining duration rounds to zero or
+exceeds that range does not generate a reply. The request continues forwarding
+when its TTL permits. Gratuitous replies likewise advertise the remaining
+reverse-route duration, so their lease remains meaningful late in a simulation.
+
+A nonduplicate request refreshes its reverse-route lifetime independently of
+whether its sequence or hop count improves the selected path. Refresh and path
+replacement preserve an already later expiry.
+
 :ned:`AodvRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Aodv`.
 
