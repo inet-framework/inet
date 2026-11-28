@@ -69,6 +69,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         if (header->getToDS() && header->getFromDS())
             header->addChunkLength(B(6));
         header->setTid(tid);
+        header->setDurationField(amsduHeader->getDurationField());
         header->setSequenceNumber(SequenceNumberCyclic(0));
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
         frame->insertAtFront(header);

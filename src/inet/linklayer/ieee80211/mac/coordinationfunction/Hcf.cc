@@ -7,6 +7,7 @@
 //
 
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -2294,6 +2295,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                     duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
             }
             auto header = packet->removeAtFront<Ieee80211MacHeader>();
+            duration = normalizeIeee80211Duration(duration);
             header->setDurationField(duration);
             EV_DEBUG << "Duration for " << packet->getName() << " is set to " << duration << " s.\n";
             packet->insertAtFront(header);
