@@ -325,8 +325,9 @@ No sealed file changes. No consumer outside INET changes.
   Test: an ECN-Echo arrives at a cwnd of one MSS; no new segment leaves before the timer expires. Baselines:
   `examples/inet/dctcp` `TcpRenoIncast`.
   - `tcp: fix: at an ECN-Echo with a cwnd of one MSS, new data waits for the retransmission timer (RFC 3168 section 6.1.2)`.
-- [ ] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Gate A on 2026-11-27
-  revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
+- [x] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Repaired as C16
+  `5374672b81`, with the `statistics` commit `afc1807da3`; gate B approved on 2026-11-28 (§6.3, R9). It lands when the
+  maintainer asks. Gate A on 2026-11-27 revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
   in flight, so R9 repairs BD-14 alone, and BD-19 and BD-20 leave R9 for an analysis of their own. Test: a timeout,
   then three duplicate ACKs during the go-back; no fast retransmit before the ACK covers more than recover. Baselines:
   `examples/inet/tcpwindowscale` `WS_enabled`.
@@ -1512,6 +1513,11 @@ B asks for the approval of these exact values.
 - `check-pull-request.sh --base origin/master` has one expected violation: the `statistics` commit is not on GitHub
   yet. Its branch goes there at the landing. The branch on GitHub holds `593ba94b` of R8, which landed on the master of
   `statistics` as `4882aeb9`, so the push replaces it with a lease.
+
+**Gate B** approved by the maintainer on 2026-11-28 ("yes, I approve R9 results"), with the re-record of the values
+above. The repair commit of BD-14 is in [baseline-catch-up-defects.md](baseline-catch-up-defects.md). R9 lands when the
+maintainer asks: first the branch of `statistics` goes to GitHub, then the debug fingerprints of the landing run in the
+image of the CI.
 
 #### R10: a data segment of 1 byte gets a delayed ACK (BD-32), prepared 2026-11-27
 
