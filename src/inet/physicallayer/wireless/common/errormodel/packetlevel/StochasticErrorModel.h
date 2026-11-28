@@ -16,6 +16,11 @@ namespace physicallayer {
 
 /**
  * Implements the StochasticErrorModel model, see the NED file for details.
+ *
+ * The three rates are consistent under the assumption of independent errors:
+ * PER = 1 - (1 - BER)^L over L bits, SER = 1 - (1 - BER)^k with k bits per
+ * symbol. A rate that is not set is derived from the others, or it is NaN if
+ * that is not possible.
  */
 class INET_API StochasticErrorModel : public ErrorModelBase
 {

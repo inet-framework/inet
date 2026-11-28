@@ -1,0 +1,19 @@
+%description:
+StochasticErrorModel: packetErrorRate only, IEEE 802.15.4 narrowband radio.
+
+packetErrorRate = 0.3.
+Two IEEE 802.15.4 narrowband hosts, 20 m apart, 250 kbit/s, unicast UDP packets of 50 bytes (87 byte MAC frames) with the MAC acknowledgement but no retransmission. The modulation is DSSS-OQPSK-16 (4 bits per symbol). Every frame has 16 header bits and 696 data bits.
+Each frame is received with probability 1 - PER = 0.7000, so that the number of packets the sink receives is binomial with mean 350.0 and standard deviation 10.2; the test requires it to be within 4 standard deviations of the mean, [310, 390] (a correct model misses that with probability of about 6e-5, and the run is deterministic).
+The run must end without an error. The error rates that the sink's radio records from the ErrorRateInd tags, and the rates of the whole frame, of its header and of its data that the error model returns (recorded by the StochasticErrorModelProbe), must equal, to a relative precision of 1e-6, the values of the closure that the NED documentation of StochasticErrorModel gives (computed independently of the C++ code).
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.packetErrorRate = 0.3
+include ../../lib/stochastic-errormodel-ieee802154.ini
+
+%postrun-command: awk -v lo=310 -v hi=390 -v rate="packetErrorRate=0.29999999999999999 bitErrorRate=0.0005008225014927481 symbolErrorRate=0.0020017855693116315" -v want="bitErrorRate.DATA=0.0005008225014927481 bitErrorRate.HEADER=0.0005008225014927481 bitErrorRate.WHOLE=0.0005008225014927481 packetErrorRate.DATA=0.29436683769275962 packetErrorRate.HEADER=0.0079831314741803938 packetErrorRate.WHOLE=0.29999999999999999 symbolErrorRate.DATA=0.0020017855693116315 symbolErrorRate.HEADER=0.0020017855693116315 symbolErrorRate.WHOLE=0.0020017855693116315" -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error

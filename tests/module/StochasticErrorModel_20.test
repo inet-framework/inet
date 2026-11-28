@@ -1,0 +1,20 @@
+%description:
+ErrorModelBase: a bit error rate of 0 cannot corrupt a lost packet
+
+The error model loses every frame (packetErrorRate = 1) but returns a bit error rate of 0. With corruptionMode = "chunk" the frame cannot be corrupted: without the check, ErrorModelBase::computeCorruptedPacket() looped forever, because no chunk is ever corrupted with probability 0. The run now stops with an error that names the error model and the corruption mode. (If this test hangs, the check is missing.)
+
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, multicast frames.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.typename = "inet.test.moduletest.lib.ConstantRatesErrorModel"
+**.radio.receiver.errorModel.packetErrorRate = 1
+**.radio.receiver.errorModel.bitErrorRate = 0
+**.radio.receiver.errorModel.corruptionMode = "chunk"
+include ../../lib/stochastic-errormodel-80211.ini
+
+%exitcode: 1
+%postrun-command: grep -h '<!>' test.out test.err > errors.out || true
+%contains: errors.out
+Error model inet::ConstantRatesErrorModel lost a packet but returned a bit error rate of 0, with which corruptionMode = "chunk" cannot corrupt it

@@ -9,13 +9,14 @@
 #define __INET_IEEE802154TRANSMISSION_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IFlatTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee802154Transmission : public TransmissionBase
+class INET_API Ieee802154Transmission : public TransmissionBase, public IFlatTransmission
 {
   protected:
     const b headerLength = b(-1);
@@ -29,8 +30,11 @@ class INET_API Ieee802154Transmission : public TransmissionBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-    virtual b getHeaderLength() const { return headerLength; }
-    virtual b getDataLength() const { return dataLength; }
+    // b(-1) if unknown (the lengths of UWB-IR transmissions are not known)
+    virtual b getHeaderLength() const override { return headerLength; }
+    virtual b getDataLength() const override { return dataLength; }
+    virtual const IModulation *getHeaderModulation() const override { return modulation; }
+    virtual const IModulation *getDataModulation() const override { return modulation; }
     virtual const IModulation *getModulation() const { return modulation; }
     virtual const Hz getBandwidth() const { return bandwidth; }
     virtual bps getBitrate() const { return bitrate; }

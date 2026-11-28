@@ -36,6 +36,12 @@ class INET_API IModulation : public virtual IPrintableObject, public cObject
      * and interference ratio, the bandwidth, and the gross (physical) bitrate.
      */
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const = 0;
+
+    /**
+     * Returns the number of (coded) bits that a symbol of this modulation
+     * carries, or 0 if it is unknown.
+     */
+    virtual unsigned int getBitsPerSymbol() const { return 0; }
 };
 
 } // namespace physicallayer

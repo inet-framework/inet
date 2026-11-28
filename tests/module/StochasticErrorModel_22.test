@@ -1,0 +1,19 @@
+%description:
+ErrorModelBase: corruptionMode packet needs no bit error rate
+
+The error model returns a packet error rate of 0.3 and a NaN bit error rate (and NaN symbol error rate). With corruptionMode = "packet" the lost frames are corrupted as a whole, so that the checks of the other corruption modes must not fire. Each frame is received with probability 0.7, so that the number of packets the sink receives is binomial with mean 350.0 and standard deviation 10.2; the test requires it to be within 4 standard deviations of the mean, [310, 390] (a correct model misses that with probability of about 6e-5, and the run is deterministic).
+
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, multicast frames.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.typename = "inet.test.moduletest.lib.ConstantRatesErrorModel"
+**.radio.receiver.errorModel.packetErrorRate = 0.3
+include ../../lib/stochastic-errormodel-80211.ini
+
+%postrun-command: awk -v lo=310 -v hi=390 -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error

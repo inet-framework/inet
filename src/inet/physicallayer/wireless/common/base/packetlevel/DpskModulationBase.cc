@@ -16,6 +16,14 @@ DpskModulationBase::DpskModulationBase(unsigned int constellationSize) :
 {
 }
 
+unsigned int DpskModulationBase::getBitsPerSymbol() const
+{
+    unsigned int bits = 0;
+    for (unsigned int size = constellationSize; size > 1; size >>= 1)
+        bits++;
+    return bits;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

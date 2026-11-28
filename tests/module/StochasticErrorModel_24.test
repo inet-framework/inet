@@ -1,0 +1,19 @@
+%description:
+ErrorModelBase: an error model that does not initialize the base
+
+The error model loses every frame (packetErrorRate = 1) but does not call ErrorModelBase::initialize(), so that its corruption mode stays undefined, as that of StochasticErrorModel did in #1429. The run stops with an error that names the error model and the missing call (before, it was "Unknown corruption mode" from the corruption loop, and with the checks of this change but without this one it would have been a misleading message about corruptionMode = "packet").
+
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, multicast frames.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.typename = "inet.test.moduletest.lib.ConstantRatesErrorModel"
+**.radio.receiver.errorModel.packetErrorRate = 1
+**.radio.receiver.errorModel.initializeBase = false
+include ../../lib/stochastic-errormodel-80211.ini
+
+%exitcode: 1
+%postrun-command: grep -h '<!>' test.out test.err > errors.out || true
+%contains: errors.out
+Error model inet::ConstantRatesErrorModel did not initialize its corruption mode, its initialize() must call ErrorModelBase::initialize()

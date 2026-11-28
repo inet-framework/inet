@@ -1,0 +1,20 @@
+%description:
+StochasticErrorModel: packetErrorRate and bitErrorRate set (precedence).
+
+packetErrorRate = 0.3 and bitErrorRate = 1e-4. Both are returned as set, the symbol error rate is derived from the bit error rate, and the reception decision uses the packet error rate (0.3, not the 0.58 that the bit error rate gives).
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, ERP (g) at 24 Mbit/s (OFDM, 16-QAM data, BPSK header), multicast frames, so that there are no acknowledgements or retransmissions. Every frame has 40 header bits (the SIGNAL field of the mode) and 8528 data bits (1064 byte PSDU, 6 tail and 10 padding bits).
+Each frame is received with probability 1 - PER = 0.7000, so that the number of packets the sink receives is binomial with mean 350.0 and standard deviation 10.2; the test requires it to be within 4 standard deviations of the mean, [310, 390] (a correct model misses that with probability of about 6e-5, and the run is deterministic).
+The run must end without an error. The error rates that the sink's radio records from the ErrorRateInd tags, and the rates of the whole frame, of its header and of its data that the error model returns (recorded by the StochasticErrorModelProbe), must equal, to a relative precision of 1e-6, the values of the closure that the NED documentation of StochasticErrorModel gives (computed independently of the C++ code).
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.packetErrorRate = 0.3
+**.radio.receiver.errorModel.bitErrorRate = 0.0001
+include ../../lib/stochastic-errormodel-80211.ini
+
+%postrun-command: awk -v lo=310 -v hi=390 -v rate="packetErrorRate=0.29999999999999999 bitErrorRate=0.0001 symbolErrorRate=0.00039994000399989904" -v want="bitErrorRate.DATA=0.0001 bitErrorRate.HEADER=0.0001 bitErrorRate.WHOLE=0.0001 packetErrorRate.DATA=0.29883342461659934 packetErrorRate.HEADER=0.0016637635397307449 packetErrorRate.WHOLE=0.29999999999999999 symbolErrorRate.DATA=0.00039994000399989904 symbolErrorRate.HEADER=9.9999999999988987e-05 symbolErrorRate.WHOLE=0.00039994000399989904" -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error

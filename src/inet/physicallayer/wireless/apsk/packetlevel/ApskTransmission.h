@@ -9,12 +9,13 @@
 #define __INET_APSKTRANSMISSION_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IFlatTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ApskTransmission : public TransmissionBase
+class INET_API ApskTransmission : public TransmissionBase, public IFlatTransmission
 {
   protected:
     const b headerLength = b(-1);
@@ -32,11 +33,14 @@ class INET_API ApskTransmission : public TransmissionBase
 
     virtual bps getBitrate() const { return bitrate; }
     virtual double getCodeRate() const { return codeRate; }
-    virtual b getHeaderLength() const { return headerLength; }
+    virtual b getHeaderLength() const override { return headerLength; }
     virtual const IModulation *getModulation() const { return modulation; }
     virtual const Hz getBandwidth() const { return bandwidth; }
-    virtual b getDataLength() const { return dataLength; }
+    virtual b getDataLength() const override { return dataLength; }
     virtual const simtime_t& getSymbolTime() const { return symbolTime; }
+
+    virtual const IModulation *getHeaderModulation() const override { return modulation; }
+    virtual const IModulation *getDataModulation() const override { return modulation; }
 };
 
 } // namespace physicallayer

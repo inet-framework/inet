@@ -1,0 +1,21 @@
+%description:
+StochasticErrorModel: packetErrorRate only, 802.11b 11 Mbit/s (CCK).
+
+packetErrorRate = 0.3 with 802.11b at 11 Mbit/s, whose CCK data modulation has no number of bits per symbol: the packet and bit error rates are derived, the symbol error rate of the data is NaN.
+Two ad-hoc IEEE 802.11b hosts, 20 m apart, 11 Mbit/s CCK with the long preamble, multicast frames. Every frame has 48 header bits (the DBPSK PLCP header) and 8512 data bits (1064 byte PSDU, no tail or padding).
+Each frame is received with probability 1 - PER = 0.7000, so that the number of packets the sink receives is binomial with mean 350.0 and standard deviation 10.2; the test requires it to be within 4 standard deviations of the mean, [310, 390] (a correct model misses that with probability of about 6e-5, and the run is deterministic).
+The run must end without an error. The error rates that the sink's radio records from the ErrorRateInd tags, and the rates of the whole frame, of its header and of its data that the error model returns (recorded by the StochasticErrorModelProbe), must equal, to a relative precision of 1e-6, the values of the closure that the NED documentation of StochasticErrorModel gives (computed independently of the C++ code).
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+*.*.wlan[*].opMode = "b"
+*.*.wlan[*].bitrate = 11Mbps
+**.radio.receiver.errorModel.packetErrorRate = 0.3
+include ../../lib/stochastic-errormodel-80211.ini
+
+%postrun-command: awk -v lo=310 -v hi=390 -v rate="packetErrorRate=0.29999999999999999 bitErrorRate=4.1666765553949325e-05" -v want="bitErrorRate.DATA=4.1666765553949325e-05 bitErrorRate.HEADER=4.1666765553949325e-05 bitErrorRate.WHOLE=4.1666765553949325e-05 packetErrorRate.DATA=0.29859856651092687 packetErrorRate.HEADER=0.0019980476545391479 packetErrorRate.WHOLE=0.29999999999999999 symbolErrorRate.HEADER=4.1666765553949325e-05 symbolErrorRate.DATA=nan symbolErrorRate.WHOLE=nan" -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error
