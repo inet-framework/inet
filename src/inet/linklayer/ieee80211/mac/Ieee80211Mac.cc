@@ -385,6 +385,18 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
         ds->processDataFrame(frame, dynamicPtrCast<const Ieee80211DataHeader>(header));
 }
 
+bool Ieee80211Mac::shouldDeferTransmissionStart(int64_t requestId, simtime_t admittedStart)
+{
+    Enter_Method_Silent();
+    return deferTransmissionStart(requestId, admittedStart);
+}
+
+void Ieee80211Mac::notifyTransmissionWithdrawn(int64_t requestId)
+{
+    Enter_Method_Silent();
+    pendingTransmissionWithdrawn(requestId);
+}
+
 void Ieee80211Mac::sendDownFrame(Packet *frame)
 {
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
@@ -396,6 +408,7 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
 
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
+    Enter_Method_Silent();
     if (pendingRadioConfigMsg != nullptr && !tx->hasTransmission()) {
         auto message = pendingRadioConfigMsg;
         pendingRadioConfigMsg = nullptr;

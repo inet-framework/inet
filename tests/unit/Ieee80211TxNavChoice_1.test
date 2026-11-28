@@ -33,9 +33,11 @@ class ForwardingTx : public Tx {
     bool choice = false;
     simtime_t delay = -1;
     void transmitFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, simtime_t ifs,
-            bool updateLocalNav, ITx::ICallback *) override {
+            bool updateLocalNav, ITx::ICallback *, int64_t *requestId = nullptr) override {
         choice = updateLocalNav;
         delay = ifs;
+        if (requestId)
+            *requestId = 42;
     }
 };
 
@@ -66,6 +68,8 @@ class CompletionCallback : public ITx::ICallback {
         ASSERT(!tx->hasTransmission());
         tx->replaceChoice(replacementChoice);
     }
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
 };
 }
 
@@ -94,7 +98,9 @@ ITx *interface = &forwarding;
 auto header = makeShared<Ieee80211AckFrame>();
 Packet packet("overloads", header);
 for (bool choice : {false, true}) {
-    interface->transmitFrame(&packet, header, choice, nullptr);
+    int64_t requestId = -1;
+    interface->transmitFrame(&packet, header, choice, nullptr, &requestId);
+    ASSERT(requestId == 42);
     ASSERT(forwarding.choice == choice && forwarding.delay == 0);
     forwarding.transmitFrame(&packet, header, choice, nullptr);
     ASSERT(forwarding.choice == choice && forwarding.delay == 0);

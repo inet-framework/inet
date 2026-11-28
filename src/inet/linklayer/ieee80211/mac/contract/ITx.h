@@ -27,7 +27,11 @@ class INET_API ITx
       public:
         virtual ~ICallback() {}
 
+        // Tx has committed to radio handoff. The packet copy is borrowed for this call.
+        virtual void transmissionStarted(const Packet& packet) = 0;
         virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        // Tx releases the pending request before reporting an expired readiness deadline.
+        virtual void transmissionStartFailed() = 0;
     };
 
   public:
@@ -35,6 +39,8 @@ class INET_API ITx
 
     /**
      * The caller retains the frame. Tx sets its addresses and FCS. Tx retains a copy until completion.
+     * If requested, Tx supplies a distinct submission ID before invoking the MAC start hook,
+     * including when the caller submits the same packet again.
      * With updateLocalNav=true, Tx extends local NAV from the encoded duration after the completion callback.
      * With updateLocalNav=false, Tx does not update local NAV.
      * Custom callers select this flag by the required local NAV effect, independently of whether the frame is a holder frame.
@@ -56,8 +62,15 @@ class INET_API ITx
      * Clause 10.3.2.9 defines CTS responses when NAV indicates idle, with holder and PHY conditions.
      * The CTS policy does not apply the exception for received reservations from the same TXOP holder.
      */
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback) = 0;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ICallback *callback) = 0;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback, int64_t *requestId = nullptr) = 0;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ICallback *callback, int64_t *requestId = nullptr) = 0;
+    // Withdraw the identified request before radio handoff. Notify the MAC for radio cleanup.
+    // Explicit withdrawal has no caller callback.
+    virtual bool cancelPendingTransmission(int64_t requestId) = 0;
+    // Hand the identified request to the radio at its admitted start time.
+    // Stale, early, late and repeated notifications return false.
+    // If the MAC deferred the start and the deadline expires, Tx reports transmissionStartFailed().
+    virtual bool startPendingTransmission(int64_t requestId) = 0;
     /**
      * The query returns true while Tx retains an accepted frame,
      * including any wait before transmission and the transmission itself.

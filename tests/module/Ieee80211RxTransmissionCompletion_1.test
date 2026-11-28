@@ -56,6 +56,8 @@ class CompletionDriver : public cSimpleModule, public cListener, public ITx::ICa
         ASSERT(!tx->hasTransmission());
         ASSERT(!rx->hasAck());
     }
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
     void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *) override {
         Enter_Method_Silent();
         if (signal == transmissionStartedSignal) {

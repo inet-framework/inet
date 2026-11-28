@@ -97,6 +97,11 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
 
+    // An override may wake the radio and schedule readiness in MAC context.
+    virtual bool deferTransmissionStart(int64_t requestId, simtime_t admittedStart) { return false; }
+    // A MAC that prepared the radio for this ID releases that preparation here.
+    virtual void pendingTransmissionWithdrawn(int64_t requestId) {}
+
   public:
     Ieee80211Mac();
     virtual ~Ieee80211Mac();
@@ -105,6 +110,9 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual const MacAddress& getAddress() const { return mib->address; }
     virtual void sendUp(cMessage *message) override;
     virtual void sendUpFrame(Packet *frame);
+    // Returning true lets the MAC start this request at its admitted time.
+    bool shouldDeferTransmissionStart(int64_t requestId, simtime_t admittedStart);
+    void notifyTransmissionWithdrawn(int64_t requestId);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
     virtual void resetPeerAssociationContext(const MacAddress& peer) override;

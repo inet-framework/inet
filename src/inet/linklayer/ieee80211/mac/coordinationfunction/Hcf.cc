@@ -604,13 +604,6 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
             auto packet = frames->getFrames(i);
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
             bool transmitted = data && edcaf->getAckHandler()->getQoSDataAckStatus(data) != QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED;
-            if (data && frameSequenceHandler->isSequenceRunning()) {
-                auto context = frameSequenceHandler->getContext();
-                for (int j = 0; j < context->getNumSteps(); j++) {
-                    if (auto step = dynamic_cast<ITransmitStep *>(context->getStep(j)))
-                        transmitted |= step->getFrameToTransmit() == packet;
-                }
-            }
             // IEEE Std 802.11-2024, 11.5.3.4: the next MPDU must follow the highest transmitted sequence.
             // Include unsent fragments even if ACK processing already removed an earlier fragment.
             // Local allocation indices preserve order across gaps and wire sequence wraparound.
@@ -1301,6 +1294,18 @@ bool Hcf::dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header)
     return false;
 }
 
+void Hcf::transmissionStarted(const Packet& packet)
+{
+    Enter_Method_Silent();
+    if (originatorBlockAckAgreementHandler) {
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(packet.peekAtFront<Ieee80211MacHeader>())) {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
+            if (agreement && agreement->getIsAddbaResponseReceived())
+                agreement->recordTransmittedData(packet.getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+        }
+    }
+}
+
 void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
@@ -1317,6 +1322,13 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
         recipientProcessTransmittedControlResponseFrame(packet, header);
         mac->sendDownPendingRadioConfigMsg();
     }
+}
+
+void Hcf::transmissionStartFailed()
+{
+    Enter_Method_Silent();
+    if (frameSequenceHandler->isSequenceRunning())
+        frameSequenceHandler->transmissionWithdrawn();
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
@@ -2332,13 +2344,6 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         RateSelection::emitDatarateSelected(this, header, mode);
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
-        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            if (originatorBlockAckAgreementHandler) {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
-                if (agreement && agreement->getIsAddbaResponseReceived())
-                    agreement->recordTransmittedData(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
-            }
-        }
         auto action = ownedActions.find(packet->getId());
         if (action != ownedActions.end()) {
             action->second.attempted = true;

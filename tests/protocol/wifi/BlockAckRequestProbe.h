@@ -79,6 +79,8 @@ class BlockAckRequestProbeMac : public Ieee80211Mac, public ITx::ICallback
         else
             emit(registerSignal("probeDelbaAcknowledged"), 1L);
     }
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
 };
 namespace request_probe_mac_registration { Define_Module(::inet::protocoltest::BlockAckRequestProbeMac); }
 
@@ -97,6 +99,8 @@ class BlockAckRequestProbeStimulus : public cSimpleModule, public ITx::ICallback
             ->sendProbeRequest(SimTime(par("timeout").doubleValue()), this);
     }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
 };
 namespace request_probe_stimulus_registration { Define_Module(::inet::protocoltest::BlockAckRequestProbeStimulus); }
 }
