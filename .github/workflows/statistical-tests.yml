@@ -1,5 +1,10 @@
 name: "Test: statistical"
 
+# A pull request that changes a path that can change a statistical result runs only the statistical tests that its
+# change can affect: the change-based test selection of opp_repl (its doc/test_map.md, and its plan
+# plan/pending/test-selection.md, section 15.7), with the map that statistical-test-map.yml writes on master. A run of
+# master after the landing job, and a run by hand, run all tests in release mode with the newest omnetpp and opp_repl.
+
 on:
   # master: after the landing job, so that the baseline repositories hold the baseline of the pushed commit
   workflow_run:
@@ -108,17 +113,102 @@ jobs:
             echo "No path of the pull request can change a statistical result; the tests do not run." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-  statistical-tests:
+  environment:
+    name: Environment and test map
     needs: changes
+    # No `if:` for the job: a skipped job skips the statistical job too. Its steps run only for a pull request that
+    # changes a path that can change a statistical result.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # the test maps of the runs of master
+      pull-requests: read # the labels of the pull request
+    outputs:
+      map: ${{ steps.map.outputs.found }}
+      omnetpp_commit: ${{ steps.commits.outputs.omnetpp_commit }}
+      opp_repl_commit: ${{ steps.commits.outputs.opp_repl_commit }}
+    steps:
+      - uses: actions/checkout@v6
+        if: github.event_name == 'pull_request' && needs.changes.outputs.relevant == 'true'
+        with:
+          path: inet
+          # the map commit must be an ancestor of the base
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+      - name: Find the test map
+        id: map
+        if: github.event_name == 'pull_request' && needs.changes.outputs.relevant == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # the labels come from the API and not from the event, so that a new run of the jobs sees a new label
+          if gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" --jq '.labels[].name' | grep -qx full-tests; then
+            echo "The pull request has the label full-tests: the job runs all tests." >> $GITHUB_STEP_SUMMARY
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          cd $GITHUB_WORKSPACE/inet
+          # GitHub tests the merge commit of the pull request, whose first parent is the base; the map comes from
+          # statistical-test-map.yml, and without a map the job runs all tests
+          if ! _scripts/github/get-test-map.sh statistical-test-map.yml statistical HEAD^1 $RUNNER_TEMP/test-map > $RUNNER_TEMP/map.txt; then
+            echo "The search for the test map failed: the job runs all tests." >> $RUNNER_TEMP/map.txt
+            rm -rf $RUNNER_TEMP/test-map
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+          cat $RUNNER_TEMP/map.txt >> $GITHUB_STEP_SUMMARY
+          cat $RUNNER_TEMP/map.txt
+      - name: Select the commits of omnetpp and opp_repl
+        id: commits
+        if: github.event_name == 'pull_request' && needs.changes.outputs.relevant == 'true'
+        env:
+          MAP: ${{ steps.map.outputs.found }}
+          MAP_OMNETPP_COMMIT: ${{ steps.map.outputs.omnetpp_commit }}
+          MAP_OPP_REPL_COMMIT: ${{ steps.map.outputs.opp_repl_commit }}
+        run: |
+          # A pull request with a map tests in the environment of the map, so that only its own change can change a
+          # result (decision D9); without a map, it tests with the heads of the branches, as a run of master does.
+          if [ "$MAP" = true ]; then
+            omnetpp=$MAP_OMNETPP_COMMIT
+            opp_repl=$MAP_OPP_REPL_COMMIT
+          else
+            omnetpp=$(git ls-remote https://github.com/omnetpp/omnetpp.git refs/heads/omnetpp-6.x | cut -f1)
+            opp_repl=$(git ls-remote https://github.com/omnetpp/opp_repl.git refs/heads/github_ci | cut -f1)
+          fi
+          if [ -z "$omnetpp" ] || [ -z "$opp_repl" ]; then
+            echo "error: no commit of omnetpp or opp_repl" >&2
+            exit 1
+          fi
+          echo "omnetpp_commit=$omnetpp" >> $GITHUB_OUTPUT
+          echo "opp_repl_commit=$opp_repl" >> $GITHUB_OUTPUT
+          echo "The job uses omnetpp $omnetpp and opp_repl $opp_repl." >> $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v7
+        if: steps.map.outputs.found == 'true'
+        with:
+          name: test-map-for-selection
+          path: ${{ runner.temp }}/test-map
+          if-no-files-found: error
+          retention-days: 1
+
+  statistical-tests:
+    needs: [changes, environment]
     # No `if:` for the job: GitHub gives a job that its `if:` skips the name without the matrix value,
     # and the required check `statistical-tests (release)` then never reports. Thus the job always runs, and
-    # its steps do not run when no path of the pull request can change a statistical result.
+    # its steps do not run when no path of the pull request can change a statistical result. A pull request with a
+    # map runs only the selected tests, and it skips the build when the selection gives none (rule T8 of
+    # plan/pending/master-guards.md).
     runs-on: ubuntu-latest
     # runs-on: [self-hosted, linux]
     strategy:
       matrix:
         mode: ["release"]
       fail-fast: false
+    env:
+      # the selection of a pull request with a map: its merge commit against the map
+      SELECT: ${{ github.event_name == 'pull_request' && needs.environment.outputs.map == 'true' }}
+      # a pull request tests in the environment of the map (decision D9); master and a run by hand test with the heads
+      OPP_REPL_COMMIT: ${{ github.event_name == 'pull_request' && needs.environment.outputs.opp_repl_commit || 'github_ci' }}
     steps:
       - name: No test is necessary
         if: needs.changes.outputs.relevant != 'true'
@@ -128,7 +218,7 @@ jobs:
         with:
           repository: omnetpp/omnetpp
           path: omnetpp
-          ref: omnetpp-6.x
+          ref: ${{ github.event_name == 'pull_request' && needs.environment.outputs.omnetpp_commit || 'omnetpp-6.x' }}
       - uses: actions/checkout@v6
         if: needs.changes.outputs.relevant == 'true'
         with:
@@ -140,17 +230,80 @@ jobs:
           fetch-depth: 0
           filter: blob:none
           persist-credentials: false
+      - uses: actions/download-artifact@v7
+        if: env.SELECT == 'true' && needs.changes.outputs.relevant == 'true'
+        with:
+          name: test-map-for-selection
+          path: ${{ runner.temp }}/test-map
+      - name: Select the tests
+        id: select
+        if: needs.changes.outputs.relevant == 'true'
+        run: |
+          if [ "$SELECT" != true ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
+            python3 python3-venv jq
+          echo "::endgroup::"
+
+          # the selection compares the compiler and the features with the map, so it needs the configuration
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-omnetpp.sh
+
+          echo "::group::Compiling opp_nedtool"
+          # the selection parses the changed NED files with opp_nedtool, which only the make of omnetpp gives
+          make -C $GITHUB_WORKSPACE/omnetpp MODE=release -j $(nproc) nedxml
+          echo "::endgroup::"
+
+          echo "::group::Installing opp_repl"
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
+
+          echo "::group::Selecting the tests"
+          # HEAD is the merge commit: the selection takes its change and the changes from the map commit to the base
+          opp_select_tests --load $INET_ROOT -p inet --kind statistical --changes HEAD --map $RUNNER_TEMP/test-map --json > $RUNNER_TEMP/selection.json
+          selection='.kinds.statistical'
+          selected=$(jq "$selection.selected | length" $RUNNER_TEMP/selection.json)
+          total=$(jq -r "$selection.tests" $RUNNER_TEMP/selection.json)
+          everything=$(jq -r "$selection.all // empty" $RUNNER_TEMP/selection.json)
+          jq -r "$selection.selected | to_entries[] | \"\(.key)\n    \(.value | join(\"\n    \"))\"" $RUNNER_TEMP/selection.json > $RUNNER_TEMP/selection.txt
+          head -400 $RUNNER_TEMP/selection.txt
+          echo "::endgroup::"
+          {
+            echo "Selected $selected of $total statistical tests; the map is $(jq -r .map_age $RUNNER_TEMP/selection.json) commits older than the base."
+            if [ -n "$everything" ]; then
+              echo "All tests are selected: $everything"
+            fi
+            jq -r '.environment[] | "Environment: \(.)"' $RUNNER_TEMP/selection.json
+          } > $RUNNER_TEMP/summary.txt
+          cat $RUNNER_TEMP/summary.txt
+          cat $RUNNER_TEMP/summary.txt >> $GITHUB_STEP_SUMMARY
+          if [ "$total" = null ] || [ "$selected" -gt 0 ]; then
+            # without the tests at the merge commit, the selection cannot count them
+            echo "build=true" >> $GITHUB_OUTPUT
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
+            echo "No statistical test is selected: the build and the tests do not run, and the check passes." >> $GITHUB_STEP_SUMMARY
+          fi
       - run: mkdir -p /home/runner/work/ccache
-        if: needs.changes.outputs.relevant == 'true'
+        if: steps.select.outputs.build == 'true'
       - uses: actions/cache/restore@v5
-        if: needs.changes.outputs.relevant == 'true'
+        if: steps.select.outputs.build == 'true'
         with:
           path: /home/runner/work/ccache
           key: native-${{ matrix.mode }}-ccache-${{ github.run_id }}
           # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
           restore-keys: native-${{ matrix.mode }}-ccache
       - name: Build and test
-        if: needs.changes.outputs.relevant == 'true'
+        if: steps.select.outputs.build == 'true'
         env:
           MODE: ${{ matrix.mode }}
         run: |
@@ -170,7 +323,7 @@ jobs:
           source $GITHUB_WORKSPACE/venv/bin/activate
           # the statistical test reads the results with omnetpp.scave, which needs these packages
           python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt
-          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@$OPP_REPL_COMMIT"
           echo "::endgroup::"
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
@@ -184,10 +337,14 @@ jobs:
 
           echo "::group::Running statistical tests"
           # INET's inet.opp gives the baseline folder (statistics) and run 0 of each config
-          opp_run_statistical_tests --load $INET_ROOT -p inet -m $MODE
+          args=(--load $INET_ROOT -p inet -m $MODE)
+          if [ "$SELECT" = true ]; then
+            args+=(--changes HEAD --test-map $RUNNER_TEMP/test-map)
+          fi
+          opp_run_statistical_tests "${args[@]}"
           echo "::endgroup::"
       - uses: actions/upload-artifact@v7
-        if: always() && needs.changes.outputs.relevant == 'true' # even if the test failed, of course
+        if: always() && steps.select.outputs.build == 'true' # even if the test failed, of course
         with:
           name: statistical-test-results
           path: ${{ github.workspace }}/inet/statistics/**/*.diff
