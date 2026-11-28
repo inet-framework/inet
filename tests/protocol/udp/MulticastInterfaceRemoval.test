@@ -1,0 +1,112 @@
+%description:
+A real UDP socket joins a multicast group on eth0, deletes eth0 through the public
+interface-table API, leaves the group and rejoins on eth1. A multicast datagram
+must then reach the socket on eth1. The parent fails during leave at its throwing
+lookup of the deleted interface. See multicast-interface-removal.md.
+
+%file: Peer.cc
+#include "inet/common/SimpleModule.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+
+using namespace inet;
+class MulticastRemovalApp : public SimpleModule, public UdpSocket::ICallback
+{
+    UdpSocket socket;
+    cMessage *timer = nullptr;
+    int step = 0;
+    int received = 0;
+    bool sender = false;
+    IInterfaceTable *interfaces = nullptr;
+    L3Address group = Ipv4Address("239.1.2.3");
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_APPLICATION_LAYER) return;
+        sender = par("sender");
+        interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
+        socket.bind(5000);
+        timer = new cMessage("multicast-removal");
+        scheduleAt(sender ? 0.25 : 0.05, timer);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message != timer) { socket.processMessage(message); return; }
+        if (sender) {
+            auto packet = new Packet("after-multicast-rejoin", makeShared<ByteCountChunk>(B(20)));
+            packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("eth1")->getInterfaceId());
+            socket.sendTo(packet, group, 5000);
+            return;
+        }
+        if (step == 0) {
+            socket.joinMulticastGroup(group, interfaces->findInterfaceByName("eth0")->getInterfaceId());
+            scheduleAt(0.1, timer);
+        }
+        else if (step == 1) {
+            interfaces->deleteInterface(interfaces->findInterfaceByName("eth0"));
+            scheduleAt(0.15, timer);
+        }
+        else if (step == 2) {
+            socket.leaveMulticastGroup(group);
+            socket.joinMulticastGroup(group, interfaces->findInterfaceByName("eth1")->getInterfaceId());
+            scheduleAt(0.4, timer);
+        }
+        else {
+            ASSERT(received == 1);
+            std::cout << "UDP MulticastInterfaceRemoval: PASS\n";
+        }
+        ++step;
+    }
+    void socketDataArrived(UdpSocket *, Packet *packet) override { ++received; delete packet; }
+    void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
+    void socketClosed(UdpSocket *) override {}
+  public:
+    ~MulticastRemovalApp() { cancelAndDelete(timer); }
+};
+Define_Module(MulticastRemovalApp);
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+simple MulticastRemovalApp like IApp
+{
+    parameters:
+        bool sender = default(false);
+        @class(::MulticastRemovalApp);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network MulticastRemovalNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        hostA: StandardHost;
+        hostB: StandardHost;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MulticastRemovalNetwork
+sim-time-limit = 0.5s
+seed-set = 0
+**.vector-recording = false
+**.arp.typename = "GlobalArp"
+*.host*.numApps = 1
+*.host*.app[0].typename = "MulticastRemovalApp"
+*.hostB.app[0].sender = true
+
+%contains: stdout
+UDP MulticastInterfaceRemoval: PASS

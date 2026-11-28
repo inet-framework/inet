@@ -100,6 +100,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     virtual SourceType getSourceType() const override { return _sourceType; }
     const Ipv6Address& getNextHop() const { return _nextHop; }
     simtime_t getExpiryTime() const { return _expiryTime; }
+    simtime_t getNativeExpiryTime() const override { return _expiryTime; }
     virtual int getMetric() const override { return _metric; }
     unsigned int getAdminDist() const { return _adminDist; }
     virtual IRoutingTable *getRoutingTableAsGeneric() const override;

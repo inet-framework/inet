@@ -1,0 +1,128 @@
+%description:
+Discovery RepairFailure: native UDP/IP production-path assertions for the remaining AODV features.
+See the matching reviewer document for setup, observations and coverage limits.
+
+%file: Peer.cc
+#include "../../AodvRemainingFeaturePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvFeatureSource like IApp
+{
+    parameters:
+        @class(::AodvFeatureSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvRemainingFeaturePeer like IApp
+{
+    parameters:
+        string family;
+        string scenario;
+        bool usingIpv6;
+        bool twoLinks;
+        @class(::AodvRemainingFeaturePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network RemainingFeatureNetwork
+{
+    parameters:
+        bool usingIpv6 = default(true);
+    submodules:
+        configurator4: Ipv4NetworkConfigurator if !usingIpv6;
+        configurator6: Ipv6NetworkConfigurator if usingIpv6;
+        radioMedium: UnitDiskRadioMedium;
+        radioMedium1: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RemainingFeatureNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.5s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.dut.hasStatus = true
+*.dut.tcp.stopOperationTimeout = 0s
+*.dut.tcp.stopOperationExtraTime = 0s
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.ttlStart = 1
+*.dut.aodv.ttlThreshold = 1
+*.dut.aodv.rreqRetries = 0
+*.dut.aodv.rreqRatelimit = 10
+*.dut.aodv.activeRouteTimeout = 1s
+*.dut.aodv.deletePeriod = 5s
+*.dut.numApps = 1
+*.dut.app[0].typename = "AodvFeatureSource"
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvRemainingFeaturePeer"
+*.peer.numWlanInterfaces = 2
+*.peer.forwarding = false
+*.configurator4.addStaticRoutes = false
+*.configurator4.addDefaultRoutes = false
+*.configurator4.addSubnetRoutes = false
+**.ipv4.configurator.networkConfiguratorModule = "configurator4"
+*.configurator6.addStaticRoutes = false
+*.configurator6.addDefaultRoutes = false
+*.configurator6.addDirectRoutes = false
+**.ipv6.ipv6.sendRedirects = false
+**.ipv6.configurator.networkConfiguratorModule = "configurator6"
+**.ipv6.neighbourDiscovery.routerBootupTime = 0s
+**.ipv6.neighbourDiscovery.hostBootupTime = 0s
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.initialRadioMode = "receiver"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].mac.ackTimeout = 0.005s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.radioMedium1.sameTransmissionStartTimeCheck = "ignore"
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+*.dut.numWlanInterfaces = 1
+*.usingIpv6 = true
+*.*.hasIpv4 = false
+*.*.hasIpv6 = true
+*.dut.aodv.routingTableModule = "^.ipv6.routingTable"
+*.dut.aodv.networkProtocolModule = "^.ipv6.ipv6"
+*.configurator6.config = xml("<config><interface hosts='dut' names='wlan0' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='dut' names='wlan1' address='2001:db8:2::1' dupAddrDetectTransmits='0'/><interface hosts='peer' names='wlan0' address='2001:db8:1::2' dupAddrDetectTransmits='0'/><interface hosts='peer' names='wlan1' address='2001:db8:1::3' dupAddrDetectTransmits='0'/></config>")
+
+*.peer.app[0].family = "Discovery"
+*.peer.app[0].scenario = "RepairFailure"
+*.peer.app[0].usingIpv6 = true
+*.peer.app[0].twoLinks = false
+*.dut.aodv.netDiameter = 10
+*.dut.aodv.nodeTraversalTime = 0.05s
+*.dut.aodv.useLocalRepair = true
+*.dut.aodv.maxRepairTTL = 3
+
+
+%contains: stdout
+AODV Remaining Discovery RepairFailure: PASS

@@ -1,0 +1,146 @@
+%description:
+A public IPv6 LOCALOUT hook pins a unicast next hop on an Ethernet output.
+The final IP destination is an off-link host, while the Ethernet receiver must
+be the actual next-hop neighbor. One pre-pinned ACCEPT path and one queued /
+re-injected path must both resolve that neighbor instead of broadcasting.
+See pinned-unicast-next-hop.md for the production path and evidence limits.
+
+%file: Pinned.cc
+#include "inet/common/SimpleModule.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include <set>
+using namespace inet;
+
+class PinnedNativeIpv6Test : public SimpleModule, public NetfilterBase::HookBase, public cListener
+{
+    UdpSocket socket;
+    INetfilter *ip = nullptr;
+    NetworkInterface *output = nullptr;
+    MacAddress expectedReceiver;
+    cMessage *directTimer = nullptr, *queueTimer = nullptr, *releaseTimer = nullptr, *checkTimer = nullptr;
+    const Packet *queued = nullptr;
+    std::set<std::string> received;
+    int pinned = 0, reinjected = 0;
+    Ipv6Address target = Ipv6Address("2001:db8:9::99");
+    Ipv6Address nextHop = Ipv6Address("2001:db8:1::2");
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    Result datagramPreRoutingHook(Packet *) override { return ACCEPT; }
+    Result datagramForwardHook(Packet *) override { return ACCEPT; }
+    Result datagramPostRoutingHook(Packet *) override { return ACCEPT; }
+    Result datagramLocalInHook(Packet *) override { return ACCEPT; }
+    Result datagramLocalOutHook(Packet *packet) override {
+        Enter_Method("pinNativeUnicast");
+        auto header = packet->peekAtFront<Ipv6Header>();
+        if (header->getDestAddress() != target) return ACCEPT;
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(output->getInterfaceId());
+        packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHop);
+        pinned++;
+        if (!strcmp(packet->getName(), "pinned-queued")) {
+            ASSERT(queued == nullptr); queued = packet; scheduleAfter(0.05, releaseTimer); return QUEUE;
+        }
+        return ACCEPT;
+    }
+  protected:
+    void initialize(int stage) override {
+        if (stage != INITSTAGE_APPLICATION_LAYER) return;
+        ip = check_and_cast<INetfilter *>(getModuleByPath("^.ipv6.ipv6"));
+        output = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"))->findInterfaceByName("eth0");
+        expectedReceiver = check_and_cast<IInterfaceTable *>(getModuleByPath("^.^.peer.interfaceTable"))->findInterfaceByName("eth0")->getMacAddress();
+        ip->registerHook(0, this);
+        getModuleByPath("^.^.peer.ipv6.ipv6")->subscribe(packetReceivedFromLowerSignal, this);
+        socket.setOutputGate(gate("socketOut")); socket.bind(12345);
+        directTimer = new cMessage("direct"); queueTimer = new cMessage("queue"); releaseTimer = new cMessage("release"); checkTimer = new cMessage("check");
+        scheduleAt(0.1, directTimer); scheduleAt(0.3, queueTimer); scheduleAt(0.8, checkTimer);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message == directTimer || message == queueTimer) {
+            bool direct = message == directTimer;
+            auto packet = new Packet(direct ? "pinned-direct" : "pinned-queued", makeShared<ByteCountChunk>(B(8)));
+            // Force the ACCEPT path to retain an output selected before IP calls
+            // the hook. The queued path obtains its output only from the hook.
+            if (direct) packet->addTag<InterfaceReq>()->setInterfaceId(output->getInterfaceId());
+            socket.sendTo(packet, target, 9999);
+        }
+        else if (message == releaseTimer) {
+            ASSERT(queued); auto packet = queued; queued = nullptr; reinjected++;
+            ip->reinjectQueuedDatagram(packet);
+        }
+        else if (message == checkTimer) {
+            ASSERT(queued == nullptr && pinned == 2 && reinjected == 1);
+            ASSERT(received == std::set<std::string>({"pinned-direct", "pinned-queued"}));
+            std::cout << "IPv6 pinned unicast next hop: PASS\n";
+        }
+        else delete message;
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        Enter_Method("observePinnedReceiver");
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        auto header = packet->peekAtFront<Ipv6Header>(); if (header->getDestAddress() != target) return;
+        ASSERT(header->getSrcAddress() == Ipv6Address("2001:db8:1::1"));
+        ASSERT(packet->getTag<MacAddressInd>()->getDestAddress() == expectedReceiver);
+        ASSERT(!expectedReceiver.isBroadcast() && !expectedReceiver.isMulticast());
+        auto udp = packet->peekDataAt<UdpHeader>(header->getChunkLength()); ASSERT(udp->getSrcPort() == 12345 && udp->getDestPort() == 9999);
+        ASSERT(received.insert(packet->getName()).second);
+    }
+  public:
+    ~PinnedNativeIpv6Test() { cancelAndDelete(directTimer); cancelAndDelete(queueTimer); cancelAndDelete(releaseTimer); cancelAndDelete(checkTimer); }
+};
+Define_Module(PinnedNativeIpv6Test);
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+simple PinnedNativeIpv6Test like IApp
+{
+    parameters:
+        @class(::PinnedNativeIpv6Test);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network PinnedNativeNetwork
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        source: StandardHost;
+        peer: StandardHost;
+    connections:
+        source.ethg++ <--> Eth100M <--> peer.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = PinnedNativeNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.*.hasIpv4 = false
+*.*.hasIpv6 = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.neighbourDiscovery.routerBootupTime = 0s
+**.ipv6.neighbourDiscovery.hostBootupTime = 0s
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addDirectRoutes = false
+*.configurator.config = xml("<config><interface hosts='source' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='peer' address='2001:db8:1::2' dupAddrDetectTransmits='0'/></config>")
+*.source.numApps = 1
+*.source.app[0].typename = "PinnedNativeIpv6Test"
+*.peer.numApps = 0
+*.peer.forwarding = false
+
+%contains: stdout
+IPv6 pinned unicast next hop: PASS

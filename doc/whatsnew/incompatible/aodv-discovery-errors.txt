@@ -1,0 +1,3 @@
+AODV reports exhausted discovery to applications
+
+When bounded originating discovery is exhausted, AODV asks IP to fail the queued datagrams. Eligible UDP sources receive native destination-unreachable indications quoting the actual packet destination. Stop, crash, local-repair disposal and output-constraint cancellation retain their separate silent cleanup behavior.

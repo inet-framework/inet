@@ -18,14 +18,14 @@ std::string AodvRouteData::str() const
         << ", destNum = " << getDestSeqNum()
         << ", lifetime = " << getLifeTime();
 
-    const std::set<L3Address>& preList = getPrecursorList();
+    const auto& preList = getPrecursorList();
 
     if (!preList.empty()) {
         out << ", precursor list: ";
-        std::set<L3Address>::const_iterator iter = preList.begin();
-        out << *iter;
+        auto iter = preList.begin();
+        out << iter->first << "@" << iter->second;
         for (++iter; iter != preList.end(); ++iter)
-            out << "; " << *iter;
+            out << "; " << iter->first << "@" << iter->second;
     }
     return out.str();
 };

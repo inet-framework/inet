@@ -1,0 +1,129 @@
+%description:
+Live AODV secondary-interface reconciliation: UnaffectedLink.
+The peer uses real UDP/IP control, public interface operations and wire data observations.
+See interface-changes.md for assertions and coverage limits.
+
+%file: Peer.cc
+#include "../../AodvLiveInterfacePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.routing.aodv.Aodv;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvDataSource like IApp
+{
+    parameters:
+        string destinations = default("10.0.0.99");
+        double emitTime @unit(s) = default(0.36s);
+        int localPort = default(12345);
+        string nextHop = default("");
+        string outputInterface = default("wlan0");
+        @class(::AodvDataSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvLiveInterfacePeer like IApp
+{
+    parameters:
+        string scenario;
+        bool primaryCase = default(false);
+        bool ipv6 = default(false);
+        double startTime @unit(s) = default(0.1s);
+        @class(::AodvLiveInterfacePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple LiveAodv extends Aodv
+{
+    parameters:
+        @lifecycleSupport;
+}
+module LiveInterfaceRouter extends AdhocHost
+{
+    submodules:
+        aodv: LiveAodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
+}
+network AodvLiveInterfaceTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        radioMedium1: UnitDiskRadioMedium;
+        dut: LiveInterfaceRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvLiveInterfaceTest
+sim-time-limit = 1.4s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='dut' names='wlan1' address='10.1.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.1.0.2' netmask='255.255.255.0'/></config>")
+*.dut.aodv.interfaces = "wlan1 wlan0"
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.rreqRatelimit = 100
+*.dut.aodv.rerrRatelimit = 100
+*.dut.aodv.netDiameter = 1
+*.dut.aodv.ttlStart = 1
+*.dut.aodv.ttlThreshold = 1
+*.dut.aodv.rreqRetries = 0
+*.dut.aodv.nodeTraversalTime = 0.1s
+*.dut.aodv.activeRouteTimeout = 0.3s
+*.dut.aodv.helloInterval = 0.1s
+*.dut.aodv.deletePeriod = 0.4s
+*.dut.aodv.blacklistTimeout = 1s
+*.dut.aodv.nextHopWait = 0.3s
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvLiveInterfacePeer"
+*.dut.numApps = 3
+*.dut.app[*].typename = "AodvDataSource"
+*.dut.app[0].emitTime = 0.36s
+*.dut.app[1].emitTime = 0.64s
+*.dut.app[1].localPort = 12346
+*.dut.app[2].emitTime = 0.95s
+*.dut.app[2].localPort = 12347
+*.peer.numWlanInterfaces = 2
+*.dut.numWlanInterfaces = 2
+*.peer.forwarding = false
+*.dut.wlan[1].radio.radioMediumModule = "radioMedium1"
+*.peer.wlan[1].radio.radioMediumModule = "radioMedium1"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.radioMedium1.sameTransmissionStartTimeCheck = "ignore"
+ned-path = .;../../../../../src;../../../lib
+*.peer.app[0].scenario = "UnaffectedLink"
+*.peer.app[0].primaryCase = false
+
+%contains: stdout
+AODV LiveInterface UnaffectedLink: PASS

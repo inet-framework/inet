@@ -1,0 +1,123 @@
+%description:
+RFC 3561 sections 6.11/6.12: error state, notifications and actual precursor delivery.
+
+%file: Peer.cc
+#include "../../AodvRecoveryPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.routing.aodv.Aodv;
+import inet.networklayer.ipv4.Ipv4;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvDataSource like IApp
+{
+    parameters:
+        string destinations = default("10.0.0.99");
+        double emitTime @unit(s) = default(0.16s);
+        int localPort = default(12345);
+        string nextHop = default("10.0.0.1");
+        string outputInterface = default("wlan1");
+        @class(::AodvDataSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvRecoveryPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        double startTime @unit(s) = default(0s);
+        @class(::AodvRecoveryPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple RecoveryAodv extends Aodv
+{
+    parameters:
+        @lifecycleSupport;
+}
+simple AodvRecoveryIpv4 extends Ipv4
+{
+    parameters:
+        bool reenter = default(false);
+        @class(::AodvRecoveryIpv4);
+}
+module RecoveryRouter extends AdhocHost
+{
+    submodules:
+        aodv: RecoveryAodv;
+    connections:
+        aodv.socketOut --> at.in++;
+        aodv.socketIn <-- at.out++;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: RecoveryRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1.5s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.peer.forwarding = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.peer.numApps = 1
+*.dut.numApps = 1
+*.dut.app[0].typename = "AodvDataSource"
+*.dut.app[0].nextHop = ""
+*.dut.app[0].destinations = "10.0.0.99"
+*.dut.app[0].emitTime = 0.05s
+*.peer.app[0].scenario = "QueueCrash"
+*.dut.hasStatus = true
+*.dut.ipv4.ip.typename = "AodvRecoveryIpv4"
+*.dut.ipv4.ip.reenter = false
+*.dut.aodv.activeRouteTimeout = 0.1s
+*.dut.aodv.deletePeriod = 0.3s
+*.dut.aodv.helloInterval = 0.05s
+*.dut.aodv.netDiameter = 3
+*.dut.aodv.ttlStart = 1
+*.dut.aodv.ttlThreshold = 1
+*.dut.aodv.nodeTraversalTime = 0.02s
+*.dut.aodv.myRouteTimeout = 0.5s
+*.peer.numWlanInterfaces = 2
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.peer.app[0].typename = "AodvRecoveryPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV RebootRecoveryQueueCrash: PASS

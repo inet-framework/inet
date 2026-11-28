@@ -1,0 +1,27 @@
+%description:
+RFC 3561 section 6.1 serial arithmetic, with an explicit model decision to reject
+the exactly-half-range comparison in both directions. Helper coverage supplements
+the production UDP/IP sequence tests.
+
+%includes:
+#include "inet/routing/aodv/AodvSequence.h"
+
+%activity:
+using inet::aodv::AodvSequence;
+ASSERT(AodvSequence::isNewer(0, 0xffffffffu));
+ASSERT(!AodvSequence::isNewer(0xffffffffu, 0));
+ASSERT(AodvSequence::isNewer(0x80000000u, 0x7fffffffu));
+ASSERT(!AodvSequence::isNewer(0x7fffffffu, 0x80000000u));
+const uint32_t values[] = {0, 1, 0x7fffffffu, 0x80000000u, 0xfffffffeu, 0xffffffffu};
+for (auto value : values) {
+    ASSERT(!AodvSequence::isNewer(value, value));
+    ASSERT(AodvSequence::isAtLeast(value, value));
+    ASSERT(!AodvSequence::isAtLeast(value + 0x80000000u, value));
+    ASSERT(!AodvSequence::isAtLeast(value, value + 0x80000000u));
+    ASSERT(AodvSequence::isNewer(value + 1, value));
+    ASSERT(!AodvSequence::isNewer(value, value + 1));
+}
+std::cout << "AODV serial arithmetic PASS\n";
+
+%contains: stdout
+AODV serial arithmetic PASS

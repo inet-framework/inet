@@ -1,0 +1,97 @@
+%description:
+RFC 3561 section 6.12: bounded local repair through real UDP/IP and MAC failure paths.
+
+%file: Peer.cc
+#include "../../../protocol/aodv/AodvRepairPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.ipv4.Ipv4;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvRepairIpv4 extends Ipv4
+{
+    parameters:
+        @class(::AodvRepairIpv4);
+}
+simple AodvRepairPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        @class(::AodvRepairPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvSubnetSource like IApp
+{
+    parameters:
+        double emitTime @unit(s) = default(10s);
+        @class(::AodvSubnetSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/><interface hosts='peer' names='wlan2' address='10.0.0.4' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.ipv4.ip.typename = "AodvRepairIpv4"
+*.dut.aodv.netDiameter = 10
+*.dut.aodv.nodeTraversalTime = 0.01s
+*.dut.aodv.activeRouteTimeout = 0.5s
+*.dut.aodv.deletePeriod = 0.5s
+*.dut.aodv.pathDiscoveryTime = 0.4s
+*.dut.wlan[0].mac.ackTimeout = 0.005s
+*.dut.wlan[*].radio.initialRadioMode = "receiver"
+*.dut.aodv.useLocalRepair = true
+*.peer.app[0].scenario = "Restart"
+*.dut.numApps = 1
+*.peer.forwarding = false
+*.dut.app[0].typename = "AodvSubnetSource"
+*.peer.numWlanInterfaces = 3
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvRepairPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV LocalRepair Restart: PASS

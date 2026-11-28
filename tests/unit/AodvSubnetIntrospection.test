@@ -1,0 +1,110 @@
+%description:
+Checks the registered AODV subnet serializer, dissector and printer using an
+independent wire oracle for IPv4 and IPv6 announcements. Both eligible/known
+sequence and unavailable/unknown sequence renderings are exercised.
+
+%includes:
+#include "inet/routing/aodv/AodvSubnetProtocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
+#include "inet/routing/aodv/AodvControlPackets_m.h"
+#include <vector>
+
+using namespace inet;
+using namespace inet::aodv;
+
+%global:
+class SubnetInspectionCallback : public PacketDissector::ICallback
+{
+  public:
+    int starts = 0;
+    int ends = 0;
+    int chunks = 0;
+    Ptr<const AodvSubnetAnnouncement> announcement;
+    bool shouldDissectProtocolDataUnit(const Protocol *protocol) override {
+        ASSERT(protocol == &aodv::aodvSubnetProtocol);
+        return true;
+    }
+    void startProtocolDataUnit(const Protocol *protocol) override {
+        ASSERT(protocol == &aodv::aodvSubnetProtocol);
+        ++starts;
+    }
+    void endProtocolDataUnit(const Protocol *protocol) override {
+        ASSERT(protocol == &aodv::aodvSubnetProtocol);
+        ++ends;
+    }
+    void markIncorrect() override { ASSERT(false); }
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override {
+        ASSERT(protocol == &aodv::aodvSubnetProtocol);
+        announcement = dynamicPtrCast<const AodvSubnetAnnouncement>(chunk);
+        ASSERT(announcement != nullptr);
+        ASSERT(announcement->isCorrect());
+        ++chunks;
+    }
+};
+
+%activity:
+ASSERT(Protocol::getProtocol("aodvSubnet") == &aodv::aodvSubnetProtocol);
+const auto& dissectors = ProtocolDissectorRegistry::getInstance();
+ASSERT(dissectors.findProtocolDissector(&aodv::aodvSubnetProtocol) != nullptr);
+const auto *printer = ProtocolPrinterRegistry::getInstance().findProtocolPrinter(&aodv::aodvSubnetProtocol);
+ASSERT(printer != nullptr);
+for (bool ipv6 : {false, true}) {
+    const L3Address candidate(ipv6 ? "2001:db8:1::9" : "192.0.2.9");
+    const L3Address prefix(ipv6 ? "2001:db8:100::" : "198.51.100.0");
+    const unsigned int prefixLength = ipv6 ? 64 : 24;
+    const std::vector<uint8_t> addresses = ipv6 ? std::vector<uint8_t>{
+        0x20, 0x01, 0x0d, 0xb8, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        0x20, 0x01, 0x0d, 0xb8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    } : std::vector<uint8_t>{192, 0, 2, 9, 198, 51, 100, 0};
+    for (bool available : {false, true}) {
+        const uint32_t sequence = available ? 0x01020304u : 0xdeadbeefu;
+        auto announcement = makeShared<AodvSubnetAnnouncement>();
+        announcement->setAddressFamily(ipv6 ? 6 : 4);
+        announcement->setEligible(available);
+        announcement->setPrefixLength(prefixLength);
+        announcement->setSequenceValid(available);
+        announcement->setSequenceNumber(sequence);
+        announcement->setCandidateAddress(candidate);
+        announcement->setPrefix(prefix);
+        announcement->setChunkLength(B(ipv6 ? 40 : 16));
+        Packet fields("subnet-fields", announcement);
+        std::vector<uint8_t> expected = {
+            uint8_t(ipv6 ? 6 : 4), uint8_t(available ? 3 : 0), uint8_t(prefixLength), 0,
+            uint8_t(sequence >> 24), uint8_t(sequence >> 16), uint8_t(sequence >> 8), uint8_t(sequence)
+        };
+        expected.insert(expected.end(), addresses.begin(), addresses.end());
+        ASSERT(fields.peekAllAsBytes()->getBytes() == expected);
+
+        Packet wire("subnet-wire", makeShared<BytesChunk>(expected));
+        wire.addTag<PacketProtocolTag>()->setProtocol(&aodv::aodvSubnetProtocol);
+        SubnetInspectionCallback callback;
+        PacketDissector(dissectors, callback).dissectPacket(&wire);
+        ASSERT(callback.starts == 1 && callback.ends == 1 && callback.chunks == 1);
+        const auto& decoded = callback.announcement;
+        ASSERT(decoded->getAddressFamily() == (ipv6 ? 6 : 4));
+        ASSERT(decoded->getEligible() == available);
+        ASSERT(decoded->getSequenceValid() == available);
+        ASSERT(decoded->getSequenceNumber() == sequence);
+        ASSERT(decoded->getCandidateAddress() == candidate);
+        ASSERT(decoded->getPrefix() == prefix);
+        ASSERT(decoded->getPrefixLength() == prefixLength);
+        ASSERT(decoded->getChunkLength() == B(ipv6 ? 40 : 16));
+
+        ProtocolPrinter::Context context;
+        printer->print(decoded, &aodv::aodvSubnetProtocol, nullptr, context);
+        ASSERT(context.sourceColumn.str() == candidate.str());
+        ASSERT(context.destinationColumn.str().empty());
+        ASSERT(context.typeColumn.str() == "AODV subnet");
+        const std::string expectedInfo = prefix.str() + "/" + std::to_string(prefixLength)
+            + (available ? " eligible seq=16909060" : " unavailable seq=unknown");
+        ASSERT(context.infoColumn.str() == expectedInfo);
+    }
+}
+std::cout << "AODV subnet introspection PASS\n";
+
+%contains: stdout
+AODV subnet introspection PASS

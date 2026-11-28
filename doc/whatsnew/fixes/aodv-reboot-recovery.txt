@@ -1,0 +1,3 @@
+AODV holds traffic safely after restart
+
+Restart now begins the RFC recovery interval, including at time zero. Local data waits while routes can be learned; transit data produces the applicable route error and extends recovery. ACKs and route errors remain permitted. Stop/crash removes owned routes, cancels pending work and disposes of queued packets safely, including during reentrant cleanup. Each restart uses a fresh UDP socket identity.

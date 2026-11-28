@@ -1,0 +1,3 @@
+Generic route readers can inspect native expiry
+
+IRoute now exposes getNativeExpiryTime(): zero means no native expiry, and a nonzero absolute time remains valid through that time. IPv6 exposes its existing expiry while IPv4 and next-hop routes return zero. Custom route implementations must implement the new query; protocol-specific metadata lifetimes remain independent.

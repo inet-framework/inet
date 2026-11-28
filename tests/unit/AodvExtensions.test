@@ -1,0 +1,38 @@
+%description:
+RFC 3561 section 9 TLV structural checks and section 9.1 interval byte order.
+This helper check supplements the native UDP/IP Hello interval tests.
+
+%includes:
+#include "inet/routing/aodv/AodvExtensions.h"
+#include "inet/routing/aodv/AodvControlPacketsSerializer.h"
+#include <vector>
+
+%activity:
+using namespace inet;
+using namespace inet::aodv;
+auto check = [](const std::vector<uint8_t>& bytes, bool expected, uint32_t expectedInterval = 0) {
+    auto header = makeShared<Rrep>();
+    header->setExtensionsArraySize(bytes.size());
+    for (size_t i = 0; i < bytes.size(); ++i) header->setExtensions(i, bytes[i]);
+    uint32_t interval = 999;
+    ASSERT(readAodvExtensions(*header, interval) == expected);
+    if (expected) ASSERT(interval == expectedInterval);
+};
+check({}, true);
+check({1, 4, 0, 0, 0, 1}, true, 1);
+check({1, 4, 1, 2, 3, 4}, true, 0x01020304u);
+check({1, 4, 255, 255, 255, 255}, true, UINT32_MAX);
+check({55, 3, 7, 8, 9, 1, 4, 0, 0, 0, 100}, true, 100);
+check({55, 0}, true);
+check({1}, false);
+check({1, 4, 0, 0}, false);
+check({1, 3, 0, 0, 1}, false);
+check({1, 4, 0, 0, 0, 0}, false);
+check({1, 4, 0, 0, 0, 1, 1, 4, 0, 0, 0, 2}, false);
+check({0, 0}, false);
+check({128, 0}, false);
+check({255, 1, 0}, false);
+std::cout << "AODV extensions PASS\n";
+
+%contains: stdout
+AODV extensions PASS

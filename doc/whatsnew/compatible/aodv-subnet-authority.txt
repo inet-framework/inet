@@ -1,0 +1,3 @@
+AODV can advertise explicitly attached subnets
+
+The opt-in advertisedSubnets profile answers requests for attached IPv4 or IPv6 aggregate members using a subnet-owned counter. A scenario-local mandatory extension carries exact-prefix freshness through discovery and relays, including recovery after repeated failures. Native forwarding and ICMP handle individual members. Existing peers and the legacy gateway adapter retain their default profiles when subnetExtensionType is zero.

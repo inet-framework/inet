@@ -1,0 +1,50 @@
+%description:
+Public netfilter queued failure through native IPV4: UnknownPointer.
+See queued-datagram-failure.md for ownership, wire error and parent-comparison limits.
+
+%file: Peer.cc
+#include "../../QueuedDatagramFailurePeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+simple QueuedDatagramFailurePeer like IApp
+{
+    parameters:
+        string scenario = default("UnknownPointer");
+        bool usingIpv6 = default(false);
+        @class(::QueuedDatagramFailurePeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network QueuedFailureNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        hostA: StandardHost;
+        router: Router;
+        hostB: StandardHost;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = QueuedFailureNetwork
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "QueuedDatagramFailurePeer"
+*.hostB.numApps = 0
+**.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+QUEUED DATAGRAM FAILURE UnknownPointer: PASS

@@ -81,6 +81,8 @@ class INET_API NextHopRoute : public cObject, public IRoute
     /** Cost to reach the destination */
     virtual int getMetric() const override { return metric; }
 
+    simtime_t getNativeExpiryTime() const override { return SIMTIME_ZERO; }
+
     virtual cObject *getProtocolData() const override { return protocolData; }
 };
 
