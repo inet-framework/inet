@@ -16,6 +16,8 @@ void StationaryMobility::initialize(int stage)
     StationaryMobilityBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         updateFromDisplayString = par("updateFromDisplayString");
+    else if (stage == INITSTAGE_SINGLE_MOBILITY && updateFromDisplayString)
+        rememberDisplayStringPosition();
 }
 
 void StationaryMobility::refreshDisplay() const
@@ -24,6 +26,17 @@ void StationaryMobility::refreshDisplay() const
         const_cast<StationaryMobility *>(this)->updateMobilityStateFromDisplayString();
     }
     StationaryMobilityBase::refreshDisplay();
+    if (updateFromDisplayString)
+        rememberDisplayStringPosition();
+}
+
+void StationaryMobility::rememberDisplayStringPosition() const
+{
+    if (subjectModule != nullptr) {
+        cDisplayString& displayString = subjectModule->getDisplayString();
+        displayStringPositionX = displayString.getTagArg("p", 0);
+        displayStringPositionY = displayString.getTagArg("p", 1);
+    }
 }
 
 void StationaryMobility::updateMobilityStateFromDisplayString()
@@ -31,13 +44,19 @@ void StationaryMobility::updateMobilityStateFromDisplayString()
     char *end;
     double depth;
     cDisplayString& displayString = subjectModule->getDisplayString();
-    canvasProjection->computeCanvasPoint(lastPosition, depth);
-    double x = strtod(displayString.getTagArg("p", 0), &end);
-    double y = strtod(displayString.getTagArg("p", 1), &end);
-    auto newPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(x, y), depth);
-    if (lastPosition != newPosition) {
-        lastPosition = newPosition;
-        emit(mobilityStateChangedSignal, const_cast<StationaryMobility *>(this));
+    const char *xText = displayString.getTagArg("p", 0);
+    const char *yText = displayString.getTagArg("p", 1);
+    // an unchanged p tag is not a drag, and it may have been written through an earlier canvas
+    // projection, e.g. before GeoMapCanvasVisualizer installed its map projection in INITSTAGE_LAST
+    if (displayStringPositionX != xText || displayStringPositionY != yText) {
+        canvasProjection->computeCanvasPoint(lastPosition, depth);
+        double x = strtod(xText, &end);
+        double y = strtod(yText, &end);
+        auto newPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(x, y), depth);
+        if (lastPosition != newPosition) {
+            lastPosition = newPosition;
+            emit(mobilityStateChangedSignal, const_cast<StationaryMobility *>(this));
+        }
     }
     Quaternion swing;
     Quaternion twist;
