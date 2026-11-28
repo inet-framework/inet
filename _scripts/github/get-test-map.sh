@@ -3,14 +3,14 @@
 # This script finds the test map of the change-based test selection for a job of GitHub Actions
 # Workflows (the test selection plan of opp_repl, plan/pending/test-selection.md, sections 15.2 and
 # 15.6). The selection is correct with any map whose commit is an ancestor of the base, but a newer
-# map selects fewer tests. The script takes the map of the newest finished push or scheduled run of
-# the workflow on master whose commit is an ancestor of the base. If no such run has the map, it
+# map selects fewer tests. The script takes the map of the newest finished run of the workflow on
+# master (a push, a scheduled run, or a run after the landing job) whose commit is an ancestor of the base. If no such run has the map, it
 # takes the newest map of the history of the map repository (the weekly map). It needs no opp_repl,
 # because the header of the map names the opp_repl commit that the job installs.
 #
 # Usage: get-test-map.sh WORKFLOW KIND BASE FOLDER
-#    WORKFLOW               - the file name of the workflow of the push and scheduled runs, for example
-#                             fingerprint-tests.yml
+#    WORKFLOW               - the file name of the workflow that writes the map on master, for example
+#                             fingerprint-tests.yml or statistical-test-map.yml
 #    KIND                   - the kind of the tests; the artifact of the map is test-map-KIND
 #    BASE                   - the base commit of the change, for a pull request the first parent
 #                             of its merge commit
@@ -96,10 +96,11 @@ use_map() {
   return 1
 }
 
-# 1. The map of the newest finished push or scheduled run whose commit is an ancestor of the base.
-# A run that failed can have the map too: the map job writes the map also if a test fails.
+# 1. The map of the newest finished run of master whose commit is an ancestor of the base: a push, a
+# scheduled run, or a run after the landing job (workflow_run). A run that failed can have the map too:
+# the map job writes the map also if a test fails.
 runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=master&status=completed&per_page=50" \
-  --jq '.workflow_runs[] | select(.event == "push" or .event == "schedule") | "\(.id) \(.head_sha)"' || true)
+  --jq '.workflow_runs[] | select(.event == "push" or .event == "schedule" or .event == "workflow_run") | "\(.id) \(.head_sha)"' || true)
 while read -r run_id head_sha; do
   [ -n "$run_id" ] || continue
   is_ancestor "$head_sha" || continue
