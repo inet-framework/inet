@@ -1,0 +1,113 @@
+%description:
+Tests ECN (Explicit Congestion Notification) across an Ipv6TunnelInterface (RFC 6040).
+
+Topology: A --- R --- B --- H. Host A tunnels its traffic for H to router B;
+router R is inside the tunnel and sets Congestion Experienced (CE) on the outer
+header of every tunnelled UDP datagram it forwards.
+
+A sends two flows, both with DSCP 46: "ect" with ECN ECT(0) (traffic class 186)
+and "notect" with ECN Not-ECT (traffic class 184). We verify that
+- the tunnel entry point copies the inner ECN field to the outer header (RFC 6040 Section 4.1),
+- the tunnel exit point carries CE into an ECT inner header, so H receives
+  traffic class 187 (RFC 6040 Section 4.2), and
+- the tunnel exit point drops a Not-ECT datagram whose outer header is CE (RFC 6040 Section 4.2).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.test.moduletest.lib.TunnelCeMarker;
+import ned.DatarateChannel;
+
+module CeMarkingRouter6 extends Router6
+{
+    submodules:
+        ceMarker: TunnelCeMarker {
+            networkProtocolModule = "^.ipv6.ipv6";
+        }
+}
+
+network Ipv6TunnelEcnTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        A: StandardHost6;
+        R: CeMarkingRouter6;
+        B: Router6;
+        H: StandardHost6;
+    connections:
+        A.ethg++ <--> ethline <--> R.ethg++;
+        R.ethg++ <--> ethline <--> B.ethg++;
+        B.ethg++ <--> ethline <--> H.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelEcnTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.config = xml("<config> \
+    <interface among='A R' prefix='2001:db8:1::/64'/> \
+    <interface among='R B' prefix='2001:db8:2::/64'/> \
+    <interface among='B H' prefix='2001:db8:3::/64'/> \
+    <route hosts='A' destination='2001:db8:2::' prefixLength='64' gateway='fe80::8aa:ff:fe00:2' interface='eth0'/> \
+    <route hosts='A' destination='2001:db8:3:0:8aa:ff:fe00:6' prefixLength='128' interface='tun0'/> \
+  </config>")
+
+**.A.numTunInterfaces = 1
+**.A.tun[0].typename = "Ipv6TunnelInterface"
+**.A.tun[0].source = "2001:db8:1:0:8aa:ff:fe00:1"
+**.A.tun[0].destination = "2001:db8:2:0:8aa:ff:fe00:4"
+
+**.A.numApps = 2
+**.A.app[*].typename = "UdpBasicApp"
+**.A.app[*].destAddresses = "2001:db8:3:0:8aa:ff:fe00:6"
+**.A.app[*].messageLength = 100B
+**.A.app[*].sendInterval = 0.5s
+**.A.app[*].startTime = 3s
+**.A.app[*].stopTime = 3.9s
+**.A.app[0].packetName = "ect"
+**.A.app[0].destPort = 5000
+**.A.app[0].tos = 186
+**.A.app[1].packetName = "notect"
+**.A.app[1].destPort = 5001
+**.A.app[1].tos = 184
+
+**.H.numApps = 2
+**.H.app[*].typename = "UdpSink"
+**.H.app[0].localPort = 5000
+**.H.app[1].localPort = 5001
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# entry point: the outer header carries the inner ECT(0)
+%contains: stdout
+Ipv6TunnelEcnTestNetwork.R.ceMarker: Outer ECN of ect-0 is 2, setting Congestion Experienced
+%#--------------------------------------------------------------------------------------------------------------
+%# exit point: the CE that R set on the outer header reaches H in the inner header (184 + 3)
+%contains-regex: stdout
+Ipv6TunnelEcnTestNetwork\.H\.app\[0\]: Received packet: \(inet::Packet\)ect-0 .* TOS=187 
+%#--------------------------------------------------------------------------------------------------------------
+%# exit point: a Not-ECT datagram under a CE outer header is dropped
+%contains: stdout
+Ipv6TunnelEcnTestNetwork.H.app[1]: received 0 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
