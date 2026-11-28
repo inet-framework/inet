@@ -1705,6 +1705,31 @@ one of this plan.
   `afc1807da3` and `76f97c7fa4`, and added the mark `8f59814f91`.
 - This plan commit is a trivial change, and it goes to master by the push check.
 
+**Master is red after the landing (2026-11-28).** The full run of master `cca7bf83a8` failed in the module tests
+`tcp_stresstest_3` and `tcp_stresstest_msgq_1`, and GitHub refused the push of the plan commit above, because
+`Master green` waited for that run. Runs of the module tests in the image of the CI (`runs/module-in-ci-image.sh`,
+`runs/stress-*` of the folder of D10) attribute the moves: both tests pass at the parent of C16, C16 moves both, and
+C17 moves `tcp_stresstest_msgq_1` again.
+
+| test | expected | after C16 and C17 |
+| --- | --- | --- |
+| `tcp_stresstest_3` | 655360 bytes in 410 packets, end at 270.685 s, A:822 B:955 | 655360 bytes in 366 packets, end at 452.961 s, A:815 B:936 |
+| `tcp_stresstest_msgq_1` | 252372 bytes in 141 packets, end at 135.977 s, A:335 B:401 | 252372 bytes in 146 packets, end at 106.345 s, A:311 B:362 |
+
+- The tests are regression snapshots of a long transfer of `TcpReno` over a channel with 5 % loss, 20 % delays and 20
+  % duplicates. The guard of R9 lets a loss in a go-back wait for the next timeout, so `tcp_stresstest_3` ends 182 s
+  later, with 73 expiries of the retransmission timer. The script of `tcp_stresstest_msgq_1` writes single bytes, so
+  R10 moves it too.
+- Nobody saw the moves before the landing: the pull request ran no module tests, and on the machine of the change
+  each `tcp_stresstest` fails on the line "Network hash" that its OMNeT++ prints, before the traces are compared.
+  The module tests of a TCP change must run in the image of the CI before its landing.
+- The repair `tests: fix: two TCP stress tests expect the new recovery after a timeout and the delayed ACK` sets the new
+  expected texts. In the image of the CI the four stress tests pass with it, and so do the 385 TCP protocol tests of
+  `tcp/rfc`, `tcp/parameter` and `tcp/app`, apart from the one marked failure.
+- The protocol job of master passed, in about 68 minutes, where it took 26 to 38 minutes before. All other workflows
+  of the full run passed, so the two stress tests are the only failures.
+- Master is red, so the repair lands through a pull request with the bypass (PR-LAND-BYPASS), with this plan commit.
+
 ## 7. Verification
 
 ### 7.1 The checks of each change
