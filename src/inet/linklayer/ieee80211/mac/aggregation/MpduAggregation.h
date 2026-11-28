@@ -15,8 +15,15 @@ namespace ieee80211 {
 
 class INET_API MpduAggregation : public IMpduAggregation, public cObject
 {
+  protected:
+    Packet *buildAggregate(const std::vector<Packet *>& frames, B minimumStartDistance) const;
+
   public:
     virtual Packet *aggregateFrames(std::vector<Packet *> *frames) override;
+    virtual B computeAggregateLength(const std::vector<Packet *>& frames, const physicallayer::IIeee80211Mode *mode,
+            int minimumMpduStartSpacing) const override;
+    virtual Packet *aggregateFrames(const std::vector<Packet *>& frames, const physicallayer::IIeee80211Mode *mode,
+            int minimumMpduStartSpacing, B maxAggregateLength) override;
 };
 
 } /* namespace ieee80211 */

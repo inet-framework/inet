@@ -33,6 +33,26 @@ bool ApskReceiver::computeIsReceptionPossible(const IListening *listening, const
     return apksTransmission && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
 }
 
+std::optional<FlatReceiverBase::PartRange> ApskReceiver::computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    auto apskTransmission = check_and_cast<const ApskTransmission *>(transmission);
+    PartRange range;
+    range.isInPacket = true;
+    if (part == IRadioSignal::SIGNAL_PART_HEADER) {
+        range.offset = b(0);
+        range.length = apskTransmission->getHeaderLength();
+    }
+    else if (part == IRadioSignal::SIGNAL_PART_DATA) {
+        // the data part also holds the padding of the modulation
+        range.offset = apskTransmission->getHeaderLength();
+        range.length = apskTransmission->getDataLength();
+    }
+    else
+        throw cRuntimeError("Only the header part and the data part have regions, not the %s part", IRadioSignal::getSignalPartName(part));
+    if (range.offset + range.length > transmission->getPacket()->getTotalLength())
+        return std::nullopt;
+    return range;
+}
 
 } // namespace physicallayer
 

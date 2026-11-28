@@ -30,6 +30,7 @@ class INET_API ReceiverBase : public Module, public virtual IReceiver
     virtual W computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const;
 
     virtual Packet *computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const;
+    virtual Packet *computeReceivedPacket(const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const;
 
   public:
     ReceiverBase() {}

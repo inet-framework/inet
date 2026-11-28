@@ -1,0 +1,3 @@
+The IEEE 802.11 radio supports all corruption modes
+
+The IEEE 802.11 error models refused the chunk, byte, and bit corruption modes. Ieee80211Receiver now decides the PHY header and the PSDU region by region, and the NIST, Yans, and BER table error models give the error rate of each chunk with the SNIR of its time, in the DSSS, HR/DSSS, OFDM, ERP-OFDM, HT, and VHT modes. With corruptionMode = "chunk", interference over the end of a PPDU thus marks only the late chunks of the PSDU incorrect, and a failed PHY header gives a packet-level bit error. The tail and pad chunk after the PSDU stays as it was sent; each chunk of the PSDU carries its share of the error rate of the SERVICE, tail, and pad bits.

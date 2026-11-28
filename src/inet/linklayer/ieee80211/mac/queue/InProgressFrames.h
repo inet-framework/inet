@@ -68,6 +68,7 @@ class INET_API InProgressFrames : public SimpleModule
     virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
     bool isExpired(const Packet *packet, simtime_t time) const;
     virtual std::vector<Packet *> getOutstandingFrames(simtime_t time = simTime());
+    std::vector<Packet *> getEligibleFrames();
 
     virtual void clearDroppedFrames();
 };
