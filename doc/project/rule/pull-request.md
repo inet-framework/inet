@@ -523,7 +523,7 @@ The required check `Master green` is green only then ([TR-CI-FULL-RUN](testing.m
 
 The pull request shows each use of the bypass. Nobody pushes directly to `master`, except a trivial change. Only an admin changes the ruleset, the environments and the secrets.
 
-*Enforced at T2 — the bypass mode "pull requests only" of the ruleset of `master`. Until step G10 of [required-checks.md](../../../plan/pending/required-checks.md), the mode is still "always", and a maintainer or an admin can also push directly.*
+*Enforced at T2 — the bypass mode "pull requests only" of the ruleset of `master`.*
 
 ### PR-LAND-REVIEW
 
