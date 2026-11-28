@@ -1,6 +1,6 @@
 # INET `master`: guards and automated tests (target state)
 
-This file describes how the system works when all agreed and proposed parts are in place. It gives no steps and no current state.
+This file describes how the system works when all agreed and proposed parts are in place. It gives no steps and no current state. Since 2026-11-28 all parts are in place, except the jobs of the test selection for the opp tests (R7, and T1 to T4 and T8 for them), and the rules are in `doc/project/rule/pull-request.md` (area `PR-LAND`) and `doc/project/rule/testing.md`; the steps are in [required-checks.md](required-checks.md).
 
 **Notation.** Each rule has an ID. The state column says:
 
