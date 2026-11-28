@@ -1,0 +1,91 @@
+%description:
+IPv6 source fragmentation honors the existing FragmentationReq tag. One oversized
+forbidden UDP datagram drops; one small tagged datagram and one untagged oversized
+datagram deliver. Neighbor-resolution delay preserves the tag through its queue.
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+static int drops = 0, small = 0, forbidden = 0;
+static std::vector<int> delivered;
+static std::vector<uint64_t> ids;
+static std::vector<int> offsets;
+static std::vector<int> firstPorts;
+static std::vector<bool> more;
+static simtime_t droppedAt;
+return ProtocolTest("ipv6_dont_fragment_delayed")
+    .meanwhile(tap("tap").from("host2").filterPacket("icmpv6.type == 136").nth(1).delay(0.3))
+    .meanwhile(anyNumberOfTimes(on("host1.ipv6.ipv6").signal("packetDropped").filterEvent([](const MatchContext& c) {
+        if (matchesExpression(c.event.packet, "udp.destPort == 5001")) { ++drops; droppedAt = c.event.time; }
+        return false;
+    }).within(2)))
+    .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+        if (matchesExpression(c.event.packet, "udp.destPort == 5000")) { ASSERT(ipv6NextHeader(c.event.packet) == 17); ++small; }
+        if (matchesExpression(c.event.packet, "udp.destPort == 5001")) ++forbidden;
+        if (ipv6NextHeader(c.event.packet) == 44) {
+            ids.push_back(evalPacketField(c.event.packet, "Ipv6FragmentHeader.identification").intValue());
+            offsets.push_back(evalPacketField(c.event.packet, "Ipv6FragmentHeader.fragmentOffset").intValue());
+            more.push_back(evalPacketField(c.event.packet, "Ipv6FragmentHeader.moreFragments").boolValue());
+            if (offsets.back() == 0) firstPorts.push_back(udpDestinationPortInFragment(c.event.packet));
+        }
+        return false;
+    }).within(2)))
+    .meanwhile(anyNumberOfTimes(on("host2.udp").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+        auto h = c.event.packet->peekAtFront<UdpHeader>();
+        delivered.push_back(h->getDestinationPort());
+        ASSERT(h->getTotalLengthField() == (h->getDestinationPort() == 5000 ? B(40) : B(1460)));
+        return false;
+    }).within(2)))
+    .act(action().after(1.5).run("host1", [](cModule *) {
+        ASSERT(drops == 1 && forbidden == 0 && small == 1);
+        ASSERT(delivered == std::vector<int>({5000,5002}));
+        ASSERT(firstPorts == std::vector<int>{5002});
+        ASSERT(ids.size() == 2 && ids[0] == ids[1]);
+        ASSERT(offsets == std::vector<int>({0,1232}) && more == std::vector<bool>({true,false}));
+        ASSERT(droppedAt >= SimTime(0.5));
+    }));
+}
+%activity:
+EV << "IPv6 fragmentation request compiled\n";
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+ned-path = .;../..;../../../lib;../../../../../src
+ned-package-exclusions = work
+sim-time-limit = 2s
+seed-set = 0
+**.checksumMode = "declared"
+**.fcsMode = "declared"
+*.linkDelay = 1ms
+*.host*.hasIpv4 = false
+*.host*.hasIpv6 = true
+*.host*.ipv6.configurator.networkConfiguratorModule = "^.^.^.configurator"
+*.configurator.typename = "Ipv6NetworkConfigurator"
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='2001:db8:1::1' dupAddrDetectTransmits='0'/><interface hosts='host2' names='eth0' address='2001:db8:1::2' dupAddrDetectTransmits='0'/></config>")
+*.host1.eth[0].mac.mtu = 1280B
+*.host1.numApps = 3
+*.host1.app[*].typename = "UdpBasicApp"
+*.host1.app[*].destAddresses = "host2"
+*.host1.app[*].sendInterval = 10s
+*.host1.app[0].destPort = 5001
+*.host1.app[0].messageLength = 1452B
+*.host1.app[0].dontFragment = true
+*.host1.app[0].startTime = 0.2s
+*.host1.app[1].destPort = 5000
+*.host1.app[1].messageLength = 32B
+*.host1.app[1].dontFragment = true
+*.host1.app[1].startTime = 0.3s
+*.host1.app[2].destPort = 5002
+*.host1.app[2].messageLength = 1452B
+*.host1.app[2].startTime = 0.4s
+*.host2.numApps = 3
+*.host2.app[*].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+*.host2.app[1].localPort = 5001
+*.host2.app[2].localPort = 5002
+%contains: stdout
+PROTOCOLTEST ipv6_dont_fragment_delayed: PASS

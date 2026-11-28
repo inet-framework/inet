@@ -19,6 +19,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -1177,6 +1178,15 @@ void Ipv6::fragmentAndSend(Packet *packet)
         // RFC 4443 section 3.2: the report carries the MTU of the link the datagram did
         // not fit, which is the one this interface has.
         sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0, mtu);
+        return;
+    }
+
+    if (auto request = packet->findTag<FragmentationReq>(); request && request->getDontFragment()) {
+        PacketDropDetails details;
+        details.setReason(PACKET_TOO_BIG);
+        emit(packetDroppedSignal, packet, &details);
+        numDropped++;
+        delete packet;
         return;
     }
 
