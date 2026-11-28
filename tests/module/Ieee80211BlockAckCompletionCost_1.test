@@ -190,6 +190,7 @@ record-scalar-results = false
 *.host*.wlan[*].mac.hcf.typename = "CompletionCostHcf"
 *.host*.wlan[*].mac.hcf.isBlockAckSupported = true
 *.host*.wlan[*].mac.hcf.blockAckVariant = "basic"
+*.host*.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 0s
 **.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2346B
 *.host*.wlan[*].radio.receiver.energyDetection = -105dBm

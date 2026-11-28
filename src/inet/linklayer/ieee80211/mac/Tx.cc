@@ -47,9 +47,21 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
 void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback)
 {
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
-    ASSERT(this->txCallback == nullptr);
+    ASSERT(!hasTransmission());
     this->txCallback = txCallback;
     this->updateLocalNav = updateLocalNav;
+    finalizeMpdu(packet);
+    this->frame = packet->dup();
+    ASSERT(!endIfsTimer->isScheduled() && !transmitting);
+    if (ifs == 0)
+        startTransmission();
+    else
+        scheduleAfter(ifs, endIfsTimer);
+}
+
+void Tx::finalizeMpdu(Packet *packet)
+{
+    Enter_Method("finalizeMpdu");
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
@@ -72,15 +84,46 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         delete[] buffer;
     }
     packet->insertAtBack(updatedTrailer);
-    this->frame = packet->dup();
-    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
-    if (ifs == 0) {
-        // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
-    }
+}
+
+void Tx::transmitAggregate(simtime_t ifs, IAggregateCallback *callback)
+{
+    Enter_Method("transmitAggregate");
+    ASSERT(!hasTransmission() && !endIfsTimer->isScheduled() && !transmitting && !frame);
+    aggregateCallback = callback;
+    updateLocalNav = false;
+    if (ifs == 0)
+        startTransmission();
     else
         scheduleAfter(ifs, endIfsTimer);
+}
+
+bool Tx::cancelPendingAggregate(IAggregateCallback *callback)
+{
+    Enter_Method("cancelPendingAggregate");
+    if (aggregateCallback != callback || transmitting)
+        return false;
+    cancelEvent(endIfsTimer);
+    aggregateCallback = nullptr;
+    return true;
+}
+
+void Tx::startTransmission()
+{
+    if (aggregateCallback) {
+        auto packet = aggregateCallback->prepareAggregateTransmission();
+        if (!packet) {
+            auto callback = aggregateCallback;
+            aggregateCallback = nullptr;
+            callback->aggregateTransmissionCancelled();
+            return;
+        }
+        frame = packet->dup();
+    }
+    transmitting = true;
+    if (txCallback)
+        txCallback->frameTransmissionStarted(frame);
+    mac->sendDownFrame(frame->dup());
 }
 
 void Tx::radioTransmissionFinished()
@@ -89,6 +132,15 @@ void Tx::radioTransmissionFinished()
     if (transmitting) {
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;
+        if (aggregateCallback) {
+            auto completedFrame = frame;
+            auto callback = aggregateCallback;
+            frame = nullptr;
+            aggregateCallback = nullptr;
+            callback->transmissionComplete(completedFrame, nullptr);
+            delete completedFrame;
+            return;
+        }
         ASSERT(txCallback != nullptr);
         const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
         auto duration = header->getDurationField();
@@ -109,8 +161,7 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        startTransmission();
     }
     else
         ASSERT(false);

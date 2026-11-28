@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
@@ -39,6 +40,12 @@ enum class DataPreparationResult { LEGACY, READY, DEFERRED };
 struct INET_API PreparedDataTransmission : public cObject
 {
     std::unique_ptr<PreparedQosData> preparation;
+    std::unique_ptr<PreparedQosFragments> fragments;
+    std::unique_ptr<PreparedQosBatch> batch;
+    MpduAggregationLimits limits;
+    std::unique_ptr<Packet> envelope;
+    simtime_t duration = 0;
+    bool submitted = false;
     Packet *frame = nullptr; // Borrowed from preparation, or from InProgressFrames after commitment.
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     const physicallayer::IIeee80211Mode *dataMode = nullptr;
@@ -51,6 +58,7 @@ struct INET_API PreparedDataTransmission : public cObject
 
     ~PreparedDataTransmission() override;
     void setRtsPrediction(Packet *packet);
+    void setEnvelope(Packet *packet);
 };
 
 class INET_API QoSContext
@@ -70,7 +78,13 @@ class INET_API QoSContext
     TxopProcedure *txopProcedure = nullptr;
     const BlockAckVariant blockAckVariant;
     std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
-    std::unique_ptr<PreparedDataTransmission> preparedData;
+    std::shared_ptr<PreparedDataTransmission> preparedData;
+    BasicBarRetry openingBasicBarRetry;
+    std::unique_ptr<PreparedQosData> openingBasicData;
+    int64_t plannedBasicDataId = -1;
+    std::unique_ptr<PreparedQosData> plannedPostBarData;
+    simtime_t plannedPostBarDuration;
+    std::function<bool(Packet *)> basicOpeningFits;
 };
 
 class INET_API NonQoSContext
@@ -121,6 +135,7 @@ class INET_API FrameSequenceContext : public cObject
 
     virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
     virtual QoSContext *getQoSContext() const { return qosContext; }
+    bool hasOpeningBasicBarRetry() const { return steps.empty() && qosContext && qosContext->openingBasicBarRetry.request; }
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;

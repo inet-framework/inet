@@ -1,0 +1,63 @@
+%description:
+Check bounded nondynamic partition sizes against IEEE Std 802.11-2024, Clause 10.4.
+The production policy must combine both bounds, preserve even nonfinal lengths, and enforce sixteen fragments.
+
+%includes:
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicFragmentationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy;
+network TestNetwork {
+    submodules:
+        test: Test;
+        policy: BasicFragmentationPolicy { fragmentationThreshold = 101B; }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+
+%activity:
+auto policy = check_and_cast<BasicFragmentationPolicy *>(getModuleByPath("^.policy"));
+auto header = makeShared<Ieee80211DataHeader>();
+header->setType(ST_DATA_WITH_QOS);
+header->addChunkLength(QOSCONTROL_PART_LENGTH);
+auto overhead = B(header->getChunkLength()).get() + 4;
+auto makeFrame = [&](int payload) {
+    auto packet = new Packet("msdu", header);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(payload)));
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    return std::unique_ptr<Packet>(packet);
+};
+auto frame = makeFrame(100);
+for (int bound : {overhead - 1, overhead, overhead + 1})
+    ASSERT(policy->computeBoundedFragmentSizes(frame.get(), bound).status == FragmentPartitionStatus::IMPOSSIBLE);
+auto partition = policy->computeBoundedFragmentSizes(frame.get(), overhead + 21);
+ASSERT(partition.status == FragmentPartitionStatus::FRAGMENTED);
+ASSERT(partition.payloadSizes == std::vector<int>({20, 20, 20, 20, 20}));
+auto odd = makeFrame(101);
+ASSERT(policy->computeBoundedFragmentSizes(odd.get(), overhead + 21).payloadSizes == std::vector<int>({20, 20, 20, 20, 20, 1}));
+auto sixteen = makeFrame(320);
+ASSERT(policy->computeBoundedFragmentSizes(sixteen.get(), overhead + 20).payloadSizes.size() == 16);
+auto seventeen = makeFrame(321);
+ASSERT(policy->computeBoundedFragmentSizes(seventeen.get(), overhead + 20).status == FragmentPartitionStatus::IMPOSSIBLE);
+auto small = makeFrame(20);
+ASSERT(policy->computeBoundedFragmentSizes(small.get(), overhead + 20).status == FragmentPartitionStatus::UNFRAGMENTED);
+ASSERT(policy->computeBoundedFragmentSizes(small.get(), overhead + 19).payloadSizes == std::vector<int>({18, 2}));
+auto configured = policy->computeBoundedFragmentSizes(frame.get(), 1000);
+ASSERT(configured.status == FragmentPartitionStatus::FRAGMENTED);
+ASSERT(configured.payloadSizes.front() == (101 - overhead) / 2 * 2);
+auto aggregate = frame->removeAtFront<Ieee80211DataHeader>();
+aggregate->setAMsduPresent(true);
+frame->insertAtFront(aggregate);
+ASSERT(policy->computeBoundedFragmentSizes(frame.get(), 60).status == FragmentPartitionStatus::IMPOSSIBLE);
+EV << "Bounded fragmentation assertions passed.\n";
+
+%contains: stdout
+Bounded fragmentation assertions passed.

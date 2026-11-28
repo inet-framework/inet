@@ -1,0 +1,3 @@
+IEEE 802.11 QoS recovery changes EDCA contention windows
+
+The Wi-Fi MAC derives the EDCA contention window from the access category's retry counter. The EDCAF records the window for both management and QoS traffic. Update result selectors, custom recovery procedures, and contention-window calculators as described in the migration guide.

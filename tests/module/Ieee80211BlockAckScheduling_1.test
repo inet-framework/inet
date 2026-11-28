@@ -184,11 +184,13 @@ class SchedulingHcf : public Hcf {
     int dataInTxop = 0;
     bool responsePending = false;
     Ptr<const Ieee80211BlockAckReq> pendingBar;
+    Ptr<const Ieee80211RtsFrame> pendingRts;
     const physicallayer::IIeee80211Mode *pendingResponseMode = nullptr;
     bool firstBarWasStandalone = false;
     int expired = 0;
     bool expiredDuringExchange = false;
     int collisions = 0;
+    int unansweredBars = 0;
     SchedulingRecipient *recipient = nullptr;
     simtime_t responseEnd;
     simtime_t txopDeadline;
@@ -314,6 +316,7 @@ class SchedulingHcf : public Hcf {
         Hcf::channelGranted(access);
         if (scenario() == 14 && !collided.empty()) {
             auto edcaf = edca->getEdcaf(AC_VI);
+            ASSERT(edcaf->getEdcaRetryCount() == 1);
             ASSERT(edcaf->getCw() == 1);
             auto frame = edcaf->getInProgressFrames()->getFrames(0);
             bool absent = false;
@@ -352,12 +355,9 @@ class SchedulingHcf : public Hcf {
             auto txop = edca->getChannelOwner()->getTxopProcedure();
             if (!par("multiple").boolValue() && txop->getLimit() == 0 && data->getAckPolicy() == BLOCK_ACK)
                 ASSERT(data->getDurationField() == SIMTIME_ZERO);
-            if (!par("multiple").boolValue() && scenario() == 3) {
+            if (!par("multiple").boolValue() && scenario() == 3 && compressed()) {
                 ASSERT(dataInTxop == 0);
-                int sent = dataCount + 1;
-                bool basicBarDue = !compressed() && (sent % window() == 0 || sent == burst());
-                // Basic BAR (32 us), Basic Block Ack (72 us), and two SIFS intervals (32 us).
-                ASSERT(data->getDurationField() == SimTime(basicBarDue ? 136 : 0, SIMTIME_US));
+                ASSERT(data->getDurationField() == SIMTIME_ZERO);
             }
             if (scenario() == 4 && data->getReceiverAddress() == other)
                 ASSERT(bars >= 1);
@@ -370,6 +370,8 @@ class SchedulingHcf : public Hcf {
                 ASSERT(agreement != nullptr && agreement->containsSequence(data->getSequenceNumber()));
             if (scenario() != 7 && data->getSequenceNumber().get() >= window() && data->getReceiverAddress() == peer)
                 ASSERT(bars >= 1);
+            if (scenario() == 13 && !compressed() && !par("multiple").boolValue())
+                ASSERT(data->getAckPolicy() == NORMAL_ACK);
             if (data->getRetry())
                 retries++;
             dataCount++;
@@ -380,7 +382,7 @@ class SchedulingHcf : public Hcf {
             if (bars == 1) {
                 firstBarWasStandalone = dataInTxop == 0;
                 if (!compressed() && !par("multiple").boolValue() && (scenario() == 3 || scenario() == 8)) {
-                    ASSERT(dataInTxop == 1);
+                    ASSERT(scenario() == 3 ? dataInTxop > 0 : dataInTxop == 1);
                     ASSERT(ifs == modeSet->getSifsTime());
                 }
                 ASSERT(bar->getReceiverAddress() == peer);
@@ -416,14 +418,19 @@ class SchedulingHcf : public Hcf {
         if (recipient && (data || bar || dynamicPtrCast<const Ieee80211Delba>(header)))
             recipient->receive(packet->dup());
         bool ack = dynamicPtrCast<const Ieee80211MgmtHeader>(header) || (data && data->getAckPolicy() == NORMAL_ACK);
-        if (bar || ack) {
+        auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header);
+        if (bar || rts || ack) {
             if (!(bar && scenario() == 5 && bars == 1)) {
                 pendingBar = bar;
+                pendingRts = rts;
                 responsePending = true;
-                pendingResponseMode = bar ?
-                    rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT) :
-                    rateSelection->computeResponseAckFrameMode(packet, dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header), ResponseQueryRole::PREDICT);
-                auto duration = pendingResponseMode->getDuration(bar ? responseLength() : LENGTH_ACK);
+                if (rts)
+                    pendingResponseMode = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT);
+                else if (bar)
+                    pendingResponseMode = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT);
+                else
+                    pendingResponseMode = rateSelection->computeResponseAckFrameMode(packet, dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header), ResponseQueryRole::PREDICT);
+                auto duration = pendingResponseMode->getDuration(rts ? LENGTH_CTS : bar ? responseLength() : LENGTH_ACK);
                 responseEnd = simTime() + modeSet->getSifsTime() + duration;
                 txopDeadline = edca->getChannelOwner()->getTxopProcedure()->getStart() + edca->getChannelOwner()->getTxopProcedure()->getLimit();
                 scheduleAt(responseEnd, new cMessage("response"));
@@ -431,13 +438,44 @@ class SchedulingHcf : public Hcf {
         }
         Hcf::transmissionComplete(packet, header);
     }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!bar) {
+            Hcf::originatorProcessFailedFrame(packet);
+            return;
+        }
+        auto edcaf = edca->getChannelOwner();
+        auto before = edcaf->getEdcaRetryCount();
+        auto cw = edcaf->getCw();
+        Hcf::originatorProcessFailedFrame(packet);
+        if (scenario() == 5) {
+            unansweredBars++;
+            ASSERT(edcaf->getEdcaRetryCount() == before + 1);
+            ASSERT(edcaf->getCw() > cw);
+            auto data = edcaf->getInProgressFrames()->getFrames(0);
+            bool absent = false;
+            try {
+                edcaf->getRecoveryProcedure()->getRetryCount(data, data->peekAtFront<Ieee80211DataHeader>());
+            }
+            catch (const cRuntimeError& error) {
+                absent = std::string(error.what()).find("retry counter entry doesn't exist") != std::string::npos;
+            }
+            ASSERT(absent);
+        }
+    }
     bool isReceptionInProgress() override { return responsePending || Hcf::isReceptionInProgress(); }
     void handleMessage(cMessage *message) override {
         if (message->isName("response")) {
             delete message;
             responsePending = false;
             Ptr<Ieee80211MacHeader> header;
-            if (pendingBar) {
+            if (pendingRts) {
+                auto cts = makeShared<Ieee80211CtsFrame>();
+                auto duration = modeSet->getSifsTime() + pendingResponseMode->getDuration(LENGTH_CTS);
+                cts->setDurationField(std::max(SIMTIME_ZERO, pendingRts->getDurationField() - duration));
+                header = cts;
+            }
+            else if (pendingBar) {
                 if (compressed()) {
                     auto response = makeShared<Ieee80211CompressedBlockAck>();
                     response->setTransmitterAddress(pendingBar->getReceiverAddress());
@@ -473,12 +511,14 @@ class SchedulingHcf : public Hcf {
             packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
             packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(pendingResponseMode);
             pendingBar = nullptr;
+            pendingRts = nullptr;
             processLowerFrame(packet, header);
         }
         else if (message->isName("verify")) {
             delete message;
             std::cout << "Scheduling totals: data=" << dataCount << " bars=" << bars << " delbas=" << delbas << " refused=" << refusedBars << "\n";
-            ASSERT(bars > 0);
+            bool normalFallback = scenario() == 13 && !compressed() && !par("multiple").boolValue();
+            ASSERT(normalFallback ? bars == 0 : bars > 0);
             ASSERT(delbas == (scenario() == 4 || scenario() == 18 ? 2 : 1));
             if (scenario() != 9)
                 ASSERT(dataCount == burst() + (scenario() == 4 || scenario() == 18 ? 8 : scenario() == 5 || scenario() == 6 || scenario() == 12 || scenario() == 14 || (compressed() && scenario() == 16) ? 1 : compressed() && scenario() == 17 ? 4 : 0));
@@ -496,9 +536,16 @@ class SchedulingHcf : public Hcf {
             ASSERT(!frameSequenceHandler->isSequenceRunning());
             if (scenario() == 5 || scenario() == 6)
                 ASSERT(retries == 1 && bars == 2);
+            if (scenario() == 5) {
+                auto edcaf = edca->getEdcaf(AC_VI);
+                ASSERT(unansweredBars == 1);
+                ASSERT(edcaf->getEdcaRetryCount() == 0);
+            }
             if (compressed() && scenario() >= 15 && scenario() <= 17)
                 ASSERT(retries == (scenario() == 15 ? 0 : scenario() == 16 ? 1 : 4) && bars == (scenario() == 15 ? 1 : 2));
-            if ((scenario() == 8 && (compressed() || par("multiple").boolValue())) || scenario() == 10 || scenario() == 13)
+            if (scenario() == 8 && !compressed() && !par("multiple").boolValue())
+                ASSERT(!firstBarWasStandalone);
+            else if (scenario() == 8 || scenario() == 10 || (scenario() == 13 && !normalFallback))
                 ASSERT(firstBarWasStandalone);
             if (scenario() == 12 || scenario() == 14)
                 ASSERT(collisions == 1 && retries == 0);
@@ -559,6 +606,8 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.multiple = ${multiple=false,true}
 **.wlan[*].mac.hcf.isBlockAckSupported = true
 **.wlan[*].mac.hcf.blockAckVariant = ${variant="basic","compressed"}
+**.wlan[*].mac.hcf.basicBlockAckReqRetryLimit = 0
+**.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 0s
 **.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = 1ms
 **.wlan[*].mac.hcf.originatorAckPolicy.blockAckTimeout = 1ms
 **.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 2346B

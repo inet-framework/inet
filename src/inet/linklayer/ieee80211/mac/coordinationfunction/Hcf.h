@@ -41,6 +41,7 @@
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
+#include "inet/linklayer/ieee80211/mac/contract/AmpduReception.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -51,7 +52,7 @@ class Ieee80211Mib;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::IAggregateCallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
@@ -59,6 +60,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool validateBlockAckRequest(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& bar) const;
 
   public:
+    Packet *prepareAggregateTransmission() override;
+    void aggregateTransmissionCancelled() override;
+    void frameTransmissionStarted(Packet *packet) override;
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
@@ -72,6 +76,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *inactivityTimer = nullptr;
     cMessage *dataLifetimeTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
+    cMessage *blockAckReqTimer = nullptr;
+    cMessage *basicBlockAckIdleTimer = nullptr;
+    simtime_t basicBlockAckIdleGrace;
+    std::map<std::pair<MacAddress, Tid>, simtime_t> basicBlockAckIdleDeadlines;
+    int64_t basicBlockAckReqRetryLimit = 0;
     struct OwnedAction {
         MacAddress peer;
         Tid tid = -1;
@@ -148,15 +157,36 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     simtime_t computeBlockAckExchangeDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, simtime_t ppduDuration);
     DataPreparationResult prepareDataTransmission(FrameSequenceContext *context);
+    bool usesMsduRecovery(Packet *packet) const;
+    void registerMsduRecovery(Edcaf *edcaf, Packet *packet);
+    Packet *findFragmentSource(const PreparedQosFragments& preparation) const;
+    void prepareDataModes(PreparedDataTransmission& prepared, TxopProcedure *txop,
+            const physicallayer::IIeee80211Mode *&selectedRtsMode);
+    int computeFreshMpduBound(PreparedDataTransmission& prepared, TxopProcedure *txop,
+            const physicallayer::IIeee80211Mode *&selectedRtsMode);
+    bool commitPreparedData(const FrameSequenceContext *context, PreparedDataTransmission& prepared);
+    void disposeMsdu(Edcaf *edcaf, Packet *packet);
+    simtime_t forecastPreparedSuccessor(const FrameSequenceContext *context,
+            const PreparedDataTransmission& prepared, simtime_t ifs);
+    bool prepareAggregateData(FrameSequenceContext *context, const PreparedDataTransmission& selected);
+    void processAggregateOutcome(const Ptr<const Ieee80211CompressedBlockAck>& response);
     bool validatePreparedData(const PreparedDataTransmission& prepared, simtime_t start) const;
     simtime_t computePreparedDataCost(const PreparedDataTransmission& prepared, bool protect) const;
     bool canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
-            simtime_t ifs, bool protect) const;
+            simtime_t ifs, bool protect, simtime_t elapsedIfs = 0) const;
     bool isInitialDataException(const FrameSequenceContext *context, const PreparedDataTransmission& prepared) const;
     simtime_t forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);
     std::pair<simtime_t, simtime_t> estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
             OriginatorBlockAckAgreement *agreement);
+    simtime_t reserveBasicDataContinuation(const FrameSequenceContext *context, Packet *candidate,
+            const MacAddress& peer, Tid tid, simtime_t budget, simtime_t start, Packet *precedingData);
+    void commitPostBarData(const FrameSequenceContext *context, const Ptr<const Ieee80211BasicBlockAck>& response);
+    simtime_t computeBasicOpeningDataBudget(const FrameSequenceContext *context, const Ptr<const Ieee80211DataHeader>& data);
+    void prepareBasicOpeningData(const FrameSequenceContext *context);
+    Packet *commitBasicOpeningData(const FrameSequenceContext *context, bool receivedCts);
+    simtime_t leaveBasicFeedbackAirtime(const FrameSequenceContext *context, Packet *candidate,
+            simtime_t budget, simtime_t minimumDataAirtime, simtime_t completion, Packet *precedingData);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
@@ -176,9 +206,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
     void updateAgreementProcedures();
     void advanceOriginatorWindows();
+    void prunePendingBasicBarRetries();
     void completeTransfers();
+    void scheduleBasicBlockAckIdleTimer();
     void updateContention();
     void scheduleAddbaResponseTimer();
+    void scheduleBlockAckReqTimer();
+    bool canSendBasicFragmentBeforeFeedback(Edcaf *edcaf, Packet *candidate, simtime_t completion, simtime_t expiry);
     void actionTerminated(Packet *packet, bool acknowledged);
     void invalidateActions(MacAddress peer, Tid tid, bool originator);
     void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);
@@ -189,7 +223,10 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool isProfileAllowed(MacAddress peer, bool originator) const;
 
     // Recipient
-    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false);
+    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false,
+            const BlockAckReceiveContext *context = nullptr);
+    void sendImplicitBlockAck(Packet *envelope, const Ptr<const Ieee80211DataHeader>& header,
+            RecipientBlockAckAgreement *agreement);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
@@ -239,6 +276,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    virtual void processLowerAggregate(Packet *packet, AmpduReception reception);
     virtual void corruptedFrameReceived() override;
 };
 

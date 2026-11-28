@@ -1,0 +1,262 @@
+%description:
+The separate error decisions of the header and the data with ApskScalarRadio.
+Sender 1 sends one UDP packet to the receiver at a high SNIR. In the runs with
+interference, sender 2 starts to transmit close to the receiver, either during
+the last part of the data or during the header. At the end of each reception, a
+listener prints the decision of the header, the data, and the whole signal, and
+the packet-level bit error of the received frame. At the end of the run, it
+prints the number of random draws of the receiver, which uses its own random
+number generator.
+
+Run 0, late interference: the header is successful, because the SNIR of its own
+time is high. The data fails the SNIR threshold, so the frame has a bit error,
+and the receiver draws no number.
+Run 1, the same with separate reception parts: the same decisions and draws.
+Run 2, interference over the header: the header fails, and the data is not
+decided.
+Runs 3 and 4, without interference, with an error model that gives the rate 0
+to the header and the rate 0.5 to the data, without and with separate reception
+parts: only the data draws a number, and the data passes its draw.
+Run 5, the error model of run 3 with the late interference of run 0: the
+listener also asks for the decision of the frame of sender 2 when its arrival
+starts. The receiver does not attempt that reception, because it receives the
+frame of sender 1. Its decision is not successful, and it draws no number,
+although the data of that frame has the rate 0.5 and passes the SNIR threshold.
+
+%file: test.cc
+#include "inet/common/Simsignals.h"
+#include "inet/common/stlutils.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/errormodel/ApskErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+
+namespace PartErrorDecisions_ApskScalarRadio_1 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Prints the decisions of the parts of each reception of the radio.
+class DecisionPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    using cListener::finish;
+
+    cModule *radioModule = nullptr;
+
+  protected:
+    virtual void initialize() override
+    {
+        radioModule = getModuleByPath(par("radioModule"));
+        radioModule->subscribe(receptionEndedSignal, this);
+        if (par("askAtArrivalStart"))
+            getModuleByPath(par("radioMediumModule"))->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
+    }
+
+    const IReceptionDecision *getDecision(const IReception *reception, IRadioSignal::SignalPart part)
+    {
+        auto radio = reception->getReceiverRadio();
+        auto medium = radio->getMedium();
+        auto transmission = reception->getTransmission();
+        return medium->getReceptionDecision(radio, medium->getListening(radio, transmission), transmission, part);
+    }
+
+    const char *getResult(const IReception *reception, IRadioSignal::SignalPart part)
+    {
+        return getDecision(reception, part)->isReceptionSuccessful() ? "successful" : "not successful";
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto reception = check_and_cast<const IReception *>(object);
+        auto name = reception->getTransmission()->getPacket()->getName();
+        if (signal == receptionEndedSignal) {
+            auto packet = check_and_cast<Packet *>(details);
+            std::cout << par("label").stdstringValue() << ": " << name << ": header " << getResult(reception, IRadioSignal::SIGNAL_PART_HEADER)
+                      << ", data " << getResult(reception, IRadioSignal::SIGNAL_PART_DATA) << ", whole " << getResult(reception, IRadioSignal::SIGNAL_PART_WHOLE)
+                      << ", " << (packet->hasBitError() ? "bit error" : "no bit error") << std::endl;
+        }
+        else if (check_and_cast<const cModule *>(reception->getReceiverRadio()) == radioModule && !contains(reception->getReceiverRadio()->getReceptionsInProgress(), reception->getTransmission())) {
+            // the radio does not receive this frame: it receives another frame when this arrival starts
+            auto decision = getDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE);
+            std::cout << par("label").stdstringValue() << ": " << name << " at the start of its arrival: " << (decision->isReceptionAttempted() ? "attempted" : "not attempted")
+                      << ", whole " << (decision->isReceptionSuccessful() ? "successful" : "not successful") << std::endl;
+        }
+    }
+
+    virtual void finish() override
+    {
+        std::cout << par("label").stdstringValue() << ": receiver draws " << getModuleByPath(par("receiverModule"))->getRNG(0)->getNumbersDrawn() << std::endl;
+    }
+};
+
+Define_Module(DecisionPrinter);
+
+// Gives the rate 0 to the header regions and the rate 0.5 to the data regions.
+class HalfDataRateErrorModel : public ApskErrorModel
+{
+  public:
+    using ApskErrorModel::computePacketErrorRate;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override
+    {
+        return part == IRadioSignal::SIGNAL_PART_HEADER ? 0 : 0.5;
+    }
+};
+
+Define_Module(HalfDataRateErrorModel);
+
+} // namespace PartErrorDecisions_ApskScalarRadio_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.apsk.packetlevel.errormodel.ApskErrorModel;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+simple DecisionPrinter
+{
+    parameters:
+        string radioModule;
+        string radioMediumModule;
+        string receiverModule;
+        string label;
+        bool askAtArrivalStart;
+        @class(DecisionPrinter);
+}
+
+module HalfDataRateErrorModel extends ApskErrorModel
+{
+    parameters:
+        @class(HalfDataRateErrorModel);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+        printer: DecisionPrinter;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 8000us
+ned-path = .;../../../../src
+num-rngs = 2
+# all runs use the same random numbers
+seed-set = 6
+*.hostReceiver.wlan[0].radio.receiver.rng-0 = 1
+
+*.printer.radioModule = "hostReceiver.wlan[0].radio"
+*.printer.radioMediumModule = "radioMedium"
+*.printer.receiverModule = "hostReceiver.wlan[0].radio.receiver"
+*.printer.label = "run ${run=0..5}"
+
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobility.typename = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostReceiver.mobility.initialX = 400m
+*.hostSender2.mobility.initialX = 450m
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.modulation = "BPSK"
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.host*.wlan[*].radio.transmitter.power = 10mW
+
+# the variants of the runs
+*.host*.wlan[*].radio.separateReceptionParts = ${parts=false, true, false, false, true, false ! run}
+*.hostReceiver.wlan[*].radio.receiver.errorModel.typename = ${model="ApskErrorModel", "ApskErrorModel", "ApskErrorModel", "HalfDataRateErrorModel", "HalfDataRateErrorModel", "HalfDataRateErrorModel" ! run}
+*.printer.askAtArrivalStart = ${ask=false, false, false, false, false, true ! run}
+
+# sender 1 sends one packet to the receiver
+*.hostSender1.numApps = 1
+*.hostSender1.app[0].typename = "UdpBasicApp"
+*.hostSender1.app[0].destAddresses = "hostReceiver"
+*.hostSender1.app[0].destPort = 1000
+*.hostSender1.app[0].messageLength = 1000B
+*.hostSender1.app[0].startTime = 0s
+*.hostSender1.app[0].stopTime = 1us
+*.hostSender1.app[0].sendInterval = 1s
+
+# sender 2 interferes: late in the data, over the header, or not at all
+*.hostSender2.numApps = 1
+*.hostSender2.app[0].typename = "UdpBasicApp"
+*.hostSender2.app[0].destAddresses = "hostSender1"
+*.hostSender2.app[0].destPort = 1000
+*.hostSender2.app[0].messageLength = 1000B
+*.hostSender2.app[0].startTime = ${interference=3500us, 3500us, 20us, 1s, 1s, 3500us ! run}
+*.hostSender2.app[0].stopTime = ${interference} + 1us
+*.hostSender2.app[0].sendInterval = 1s
+
+*.hostReceiver.numApps = 1
+*.hostReceiver.app[0].typename = "UdpSink"
+*.hostReceiver.app[0].localPort = 1000
+
+%extraargs: -r 0..5
+
+%contains: stdout
+run 0: UdpBasicAppData-0: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 0: receiver draws 0
+%contains: stdout
+run 1: UdpBasicAppData-0: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 1: receiver draws 0
+%contains: stdout
+run 2: UdpBasicAppData-0: header not successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 2: receiver draws 0
+%contains: stdout
+run 3: UdpBasicAppData-0: header successful, data successful, whole successful, no bit error
+%contains: stdout
+run 3: receiver draws 1
+%contains: stdout
+run 4: UdpBasicAppData-0: header successful, data successful, whole successful, no bit error
+%contains: stdout
+run 4: receiver draws 1
+%contains: stdout
+run 5: UdpBasicAppData-0 at the start of its arrival: not attempted, whole not successful
+%contains: stdout
+run 5: UdpBasicAppData-0: header successful, data not successful, whole not successful, bit error
+%contains: stdout
+run 5: receiver draws 0
+
+%not-contains: stdout
+it doesn't own
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

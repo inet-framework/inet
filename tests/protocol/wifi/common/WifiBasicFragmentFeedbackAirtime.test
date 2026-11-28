@@ -1,0 +1,85 @@
+%description:
+A 10 ms DATA lifetime makes a partial batch urgent in the 2,500 B payload,
+250 B threshold scenario. Without the airtime check the sender asks for a bitmap
+after the first fragment. With it the next fragment fits in the same protected
+grant before expiry. Both modes use seed 9.
+
+%extraargs: -r 0..1
+
+%file: BasicFragmentFeedbackAirtime.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(wifi_basic_fragment_feedback_airtime)
+{
+    auto sent = [] { return on("wifiHost1.wlan[0].mac").signal("packetSentToLower"); };
+    auto txopStart = [] {
+        auto root = cSimulation::getActiveSimulation()->getSystemModule();
+        auto txop = check_and_cast<TxopProcedure *>(root->getModuleByPath("wifiHost1.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure"));
+        return txop->getStart();
+    };
+    return ProtocolTest("wifi_basic_fragment_feedback_airtime")
+        .once(sent().filterEvent([](const MatchContext& context) {
+            auto header = dynamicPtrCast<const Ieee80211DataHeader>(context.event.packet->peekAtFront<Ieee80211MacHeader>());
+            return header && header->getAckPolicy() == BLOCK_ACK && header->getFragmentNumber() == 0;
+        }).capture("sequence", [](const PacketEvent& event) {
+            return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+        }).capture("txop", [=](const PacketEvent&) { return cValue(txopStart().dbl()); })
+            .describe("the originator sends the first Basic fragment under single protection").within(0.007))
+        .once(sent().assertEvent([=](const MatchContext& context) {
+            auto root = cSimulation::getActiveSimulation()->getSystemModule();
+            auto hcf = root->getModuleByPath("wifiHost1.wlan[0].mac.hcf");
+            auto header = context.event.packet->peekAtFront<Ieee80211MacHeader>();
+            if (txopStart() != SimTime(context.get("txop").doubleValue()))
+                return false;
+            if (hcf->par("basicBlockAckAirtimeUrgency").boolValue()) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+                return data && data->getSequenceNumber().get() == context.get("sequence").intValue() && data->getFragmentNumber() == 1;
+            }
+            auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header);
+            return bar && bar->getStartingSequenceNumber().get() == context.get("sequence").intValue();
+        }).describe("the next step in the same grant is DATA with the airtime check or BAR with the original rule").within(0.001));
+}
+}
+
+%file: BasicFragmentFeedbackAirtime.ned
+import inet.protocoltest.ProtocolTester;
+import inet.showcases.wireless.fragmentation.FragmentationShowcase;
+
+network BasicFragmentFeedbackNetwork extends FragmentationShowcase
+{
+    submodules:
+        tester: ProtocolTester;
+}
+
+%inifile: test.ini
+[General]
+cmdenv-express-mode = true
+cmdenv-event-banners = false
+**.cmdenv-log-level = warn
+network = BasicFragmentFeedbackNetwork
+abstract = false
+seed-set = 9
+sim-time-limit = 0.008s
+**.edcaf[*].msduLifetime = 10ms
+ned-path = ../../../../../showcases
+*.tester.testName = "wifi_basic_fragment_feedback_airtime"
+*.wifiHost1.app[0].messageLength = 2500B
+**.mtu = 12500B
+**.fragmentationThreshold = 250B
+*.wifiHost*.wlan[*].mac.qosStation = true
+**.wlan[*].classifier.typename = "QosClassifier"
+**.mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.maxBlockAckPolicyFrameLength = 2000B
+*.wifiHost*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.wifiHost*.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.hcf.basicBlockAckReqMaxDelay = 20ms
+**.hcf.basicBlockAckIdleGrace = 0ms
+**.hcf.basicBlockAckAirtimeUrgency = ${airtimeAware=false,true}
+include ../../../../../showcases/wireless/fragmentation/omnetpp.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_fragment_feedback_airtime: PASS
+
+%not-contains: stdout
+PROTOCOLTEST wifi_basic_fragment_feedback_airtime: FAIL

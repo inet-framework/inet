@@ -11,6 +11,7 @@
 
 #include <algorithm>
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosMacDataService.h"
 
 namespace inet {
@@ -71,6 +72,15 @@ bool InProgressFrames::isEligibleToTransmit(Packet *packet, simtime_t time)
         ackHandler->isEligibleToTransmit(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
 }
 
+std::vector<Packet *> InProgressFrames::getEligibleFrames()
+{
+    std::vector<Packet *> eligible;
+    for (auto packet : inProgressFrames)
+        if (isEligibleToTransmit(packet))
+            eligible.push_back(packet);
+    return eligible;
+}
+
 void InProgressFrames::ensureHasFrameToTransmit()
 {
     if (!hasEligibleFrameToTransmit()) {
@@ -97,6 +107,98 @@ void InProgressFrames::adoptPreparedFrame(Packet *packet)
     inProgressFrames.push_back(packet);
     packet->setArrivalTime(simTime());
     emit(packetEnqueuedSignal, packet);
+}
+
+void InProgressFrames::adoptPreparedFragments(const std::vector<Packet *>& fragments)
+{
+    Enter_Method("adoptPreparedFragments");
+    ASSERT(!fragments.empty());
+    fragmentHistory[fragments.front()->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex()].count = fragments.size();
+    for (auto packet : fragments)
+        adoptPreparedFrame(packet);
+}
+
+void InProgressFrames::replaceWithPreparedFragments(Packet *source, const std::vector<Packet *>& fragments)
+{
+    Enter_Method("replaceWithPreparedFragments");
+    auto position = std::find(inProgressFrames.begin(), inProgressFrames.end(), source);
+    ASSERT(position != inProgressFrames.end() && !fragments.empty());
+    auto index = position - inProgressFrames.begin();
+    auto allocation = source->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+    for (auto packet : fragments)
+        ASSERT(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == allocation);
+    ackHandler->dropFrame(source->peekAtFront<Ieee80211DataOrMgmtHeader>());
+    dropFrame(source);
+    fragmentHistory[allocation].count = fragments.size();
+    for (auto packet : fragments) {
+        take(packet);
+        ackHandler->frameGotInProgress(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        inProgressFrames.insert(inProgressFrames.begin() + index++, packet);
+        packet->setArrivalTime(simTime());
+        emit(packetEnqueuedSignal, packet);
+    }
+}
+
+std::vector<Packet *> InProgressFrames::getAllocationFrames(Packet *packet) const
+{
+    std::vector<Packet *> result;
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    if (tag) {
+        for (auto candidate : inProgressFrames) {
+            auto other = candidate->findTag<Ieee80211DataSequenceTag>();
+            if (other && other->getAllocationIndex() == tag->getAllocationIndex())
+                result.push_back(candidate);
+        }
+    }
+    return result;
+}
+
+void InProgressFrames::recordDataTransmission(Packet *packet)
+{
+    auto allocation = packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+    auto fragment = packet->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber();
+    auto& history = fragmentHistory[allocation];
+    auto result = history.transmittedLengths.emplace(fragment, packet->getDataLength());
+    if (!result.second) {
+        ASSERT(result.first->second == packet->getDataLength());
+        history.retransmitted.insert(fragment);
+    }
+}
+
+bool InProgressFrames::isSameSizeDataRetry(Packet *packet) const
+{
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    auto it = tag ? fragmentHistory.find(tag->getAllocationIndex()) : fragmentHistory.end();
+    if (it == fragmentHistory.end())
+        return false;
+    auto length = it->second.transmittedLengths.find(packet->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber());
+    return length != it->second.transmittedLengths.end() && length->second == packet->getDataLength();
+}
+
+bool InProgressFrames::hasRetriedPreviousFragment(Packet *packet) const
+{
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    auto it = tag ? fragmentHistory.find(tag->getAllocationIndex()) : fragmentHistory.end();
+    return it != fragmentHistory.end() && !it->second.retransmitted.empty() &&
+        *it->second.retransmitted.begin() < packet->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber();
+}
+
+int InProgressFrames::getFragmentCount(Packet *packet) const
+{
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    auto it = tag ? fragmentHistory.find(tag->getAllocationIndex()) : fragmentHistory.end();
+    return it == fragmentHistory.end() ? 1 : it->second.count;
+}
+
+void InProgressFrames::dropAllocation(Packet *packet)
+{
+    Enter_Method("dropAllocation");
+    for (auto member : getAllocationFrames(packet)) {
+        ackHandler->dropFrame(member->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        if (lifetimeHandler)
+            lifetimeHandler->forgetFrame(member->getId());
+        dropFrame(member);
+    }
 }
 
 Packet *InProgressFrames::getFrameToTransmit()
@@ -167,6 +269,10 @@ void InProgressFrames::dropFrame(Packet *packet)
 {
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
     inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
+    blockAckOutstandingSince.erase(packet->getId());
+    if (auto tag = packet->findTag<Ieee80211DataSequenceTag>())
+        if (getAllocationFrames(packet).empty())
+            fragmentHistory.erase(tag->getAllocationIndex());
     droppedFrames.push_back(packet);
     emit(packetDequeuedSignal, packet);
 }
@@ -181,6 +287,10 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber().get(), dataheader->getFragmentNumber())))) != 0) {
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
+                blockAckOutstandingSince.erase(frame->getId());
+                if (auto tag = frame->findTag<Ieee80211DataSequenceTag>())
+                    if (getAllocationFrames(frame).empty())
+                        fragmentHistory.erase(tag->getAllocationIndex());
                 droppedFrames.push_back(frame);
                 emit(packetDequeuedSignal, frame);
             }
@@ -206,6 +316,22 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames(simtime_t time)
             outstandingFrames.push_back(frame);
     }
     return outstandingFrames;
+}
+
+void InProgressFrames::markBlockAckOutstanding(const Packet *packet)
+{
+    blockAckOutstandingSince[packet->getId()] = simTime();
+}
+
+simtime_t InProgressFrames::getBlockAckOutstandingSince(const Packet *packet) const
+{
+    auto it = blockAckOutstandingSince.find(packet->getId());
+    return it == blockAckOutstandingSince.end() ? SIMTIME_MAX : it->second;
+}
+
+simtime_t InProgressFrames::getLifetimeDeadline(const Packet *packet) const
+{
+    return lifetimeHandler ? lifetimeHandler->getDeadline(packet) : SIMTIME_MAX;
 }
 
 void InProgressFrames::clearDroppedFrames()

@@ -65,11 +65,13 @@ class DeferredCollisionHcf : public Hcf {
         Hcf::processMgmtFrame(packet, header);
     }
     bool transmitFrame(Packet *frame, simtime_t ifs) override {
-        auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
+        bool opens = dynamicPtrCast<const Ieee80211DataHeader>(header) || dynamicPtrCast<const Ieee80211RtsFrame>(header);
+        auto owner = edca->getChannelOwner();
         bool accepted = Hcf::transmitFrame(frame, ifs);
-        if (accepted && header) {
-            if (header->getTid() == 5) videoAccepted++;
-            if (header->getTid() == 0) bestEffortAccepted++;
+        if (opens && accepted) {
+            if (owner->getAccessCategory() == AC_VI) videoAccepted++;
+            if (owner->getAccessCategory() == AC_BE) bestEffortAccepted++;
         }
         return accepted;
     }
@@ -122,8 +124,8 @@ class DeferredCollisionTest : public cSimpleModule, public cListener {
             << ", BE pending request=" << hcf->contending(AC_BE)
             << ", VO pending request=" << hcf->contending(AC_VO) << ".\n";
         wait(SimTime(16500, SIMTIME_NS));
-        std::cout << "At " << simTime() << ": VI DATA accepted=" << hcf->videoAccepted
-            << ", BE DATA accepted=" << hcf->bestEffortAccepted
+        std::cout << "At " << simTime() << ": VI DATA or opening RTS accepted=" << hcf->videoAccepted
+            << ", BE DATA or opening RTS accepted=" << hcf->bestEffortAccepted
             << ", collisions=" << collisions << ", BE retry drops=" << bestEffortRetryDrops << ".\n";
         ASSERT(hcf->videoAccepted == (expire ? 0 : 1));
         ASSERT(hcf->bestEffortAccepted == (expire ? 1 : 0));

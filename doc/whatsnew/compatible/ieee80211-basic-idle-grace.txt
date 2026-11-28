@@ -1,0 +1,3 @@
+Completed Basic Block Ack agreements can survive a short idle gap
+
+The originator can keep an agreement ready for the next burst of DATA after the final Block Ack and after the queue for that agreement empties. Set basicBlockAckIdleGrace to a positive duration to enable this behavior. The default of 0s retains immediate teardown.

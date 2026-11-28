@@ -1,0 +1,102 @@
+%description:
+Successful Basic bitmap bits retire the acknowledged DATA's RTS retry state.
+The first bitmap leaves one sibling unacknowledged. Its retry state must survive.
+The fixture injects one prior RTS failure per outstanding MPDU immediately before
+processing this feedback through production HCF and recovery code.
+
+%file: BasicBitmapRecoveryCleanup.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+class BitmapRecoveryCleanupHcf : public BlockAckLifecycleHcf
+{
+  private:
+    bool checked = false;
+
+  protected:
+    void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *lastPacket, const Ptr<const Ieee80211MacHeader>& lastHeader, AccessCategory ac) override
+    {
+        auto bitmap = dynamicPtrCast<const Ieee80211BasicBlockAck>(header);
+        if (checked || !bitmap) {
+            BlockAckLifecycleHcf::originatorProcessReceivedControlFrame(packet, header, lastPacket, lastHeader, ac);
+            return;
+        }
+        auto access = edca->getEdcaf(ac);
+        auto frames = access->getInProgressFrames();
+        auto recovery = access->getRecoveryProcedure();
+        std::vector<std::unique_ptr<Packet>> outstanding;
+        for (int i = 0; i < frames->getLength(); i++) {
+            auto frame = frames->getFrames(i);
+            auto data = frame->peekAtFront<Ieee80211DataHeader>();
+            if (data->getReceiverAddress() == bitmap->getTransmitterAddress() && data->getTid() == bitmap->getTidInfo() &&
+                access->getAckHandler()->getQoSDataAckStatus(data) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK) {
+                outstanding.emplace_back(frame->dup());
+                recovery->msduTransmissionFailed(frame, true);
+                if (recovery->getRetryCount(frame, data) != 1)
+                    throw cRuntimeError("The fixture failed to establish one RTS retry");
+            }
+        }
+        if (outstanding.size() < 2)
+            throw cRuntimeError("The bitmap fixture requires two outstanding DATA MPDUs");
+        auto partial = makeShared<Ieee80211BasicBlockAck>(*bitmap);
+        auto unresolved = outstanding.back()->peekAtFront<Ieee80211DataHeader>();
+        int offset = OriginatorBlockAckAgreement::computeSequenceDistance(bitmap->getStartingSequenceNumber(), unresolved->getSequenceNumber());
+        if (offset < 0 || offset >= 64)
+            throw cRuntimeError("The unresolved DATA lies outside the feedback bitmap");
+        auto bits = partial->getBlockAckBitmap(offset);
+        bits.setBit(unresolved->getFragmentNumber(), false);
+        partial->setBlockAckBitmap(offset, bits);
+        BlockAckLifecycleHcf::originatorProcessReceivedControlFrame(packet, partial, lastPacket, lastHeader, ac);
+        for (const auto& frame : outstanding) {
+            auto data = frame->peekAtFront<Ieee80211DataHeader>();
+            bool missing = data->getSequenceNumber() == unresolved->getSequenceNumber() &&
+                data->getFragmentNumber() == unresolved->getFragmentNumber();
+            if (recovery->getRetryCountOrZero(frame.get(), data) != (missing ? 1 : 0))
+                throw cRuntimeError("The bitmap retired the wrong DATA recovery state");
+        }
+        checked = true;
+    }
+
+  public:
+    bool hasCheckedBitmap() const { return checked; }
+};
+Define_Module(BitmapRecoveryCleanupHcf);
+
+Define_ProtocolTest(wifi_basic_bitmap_recovery_cleanup)
+{
+    return ProtocolTest("wifi_basic_bitmap_recovery_cleanup")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211BasicBlockAck)")
+            .describe("receive feedback for at least two outstanding DATA MPDUs").within(1.05))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("has(Ieee80211DataHeader)")
+            .assertEvent([](const MatchContext& c) {
+                auto root = cSimulation::getActiveSimulation()->getSystemModule();
+                auto hcf = check_and_cast<BitmapRecoveryCleanupHcf *>(root->getModuleByPath("sta1.wlan[0].mac.hcf"));
+                return hcf->hasCheckedBitmap() && c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry();
+            }).describe("retry the unresolved sibling after acknowledged counters were cleared").within(0.01));
+}
+}
+
+%file: BasicBitmapRecoveryCleanup.ned
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+module BitmapRecoveryCleanupHcf extends BlockAckLifecycleHcf
+{
+    parameters:
+        @class(::inet::protocoltest::BitmapRecoveryCleanupHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_bitmap_recovery_cleanup"
+*.sta1.wlan[*].mac.hcf.typename = "BitmapRecoveryCleanupHcf"
+*.sta1.app[0].sendInterval = 0.05ms
+*.sta1.app[0].stopTime = 1.004s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.rtsPolicy.rtsThreshold = 10000B
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 2
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_bitmap_recovery_cleanup: PASS

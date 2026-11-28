@@ -10,6 +10,7 @@ These helper checks supplement the HCF module fixture.
 // Author: Miguel González-López
 #include <type_traits>
 #include <utility>
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
@@ -35,17 +36,19 @@ static_assert(!ImplicitBarParameters<IOriginatorQoSAckPolicy>::value, "The inter
 static_assert(!ImplicitBarParameters<OriginatorQosAckPolicy>::value, "The concrete policy requires an explicit agreement handler");
 static_assert(!ImplicitBarWindow<QosAckHandler>::value, "The ACK handler requires an explicit agreement window");
 
-class SchedulingCw : public IRecoveryProcedure::ICwCalculator {
+class SchedulingCw : public Edcaf {
   public:
-    int cw = 0;
-    void incrementCw() override { cw = std::min(7, 2 * cw + 1); }
-    void resetCw() override { cw = 0; }
-    int getCw() override { return cw; }
+    void configure(int minimum, int maximum, int limit) { cw = cwMin = minimum; cwMax = maximum; edcaRetryLimit = limit; }
 };
 class SchedulingRecovery : public QosRecoveryProcedure {
   public:
-    void configure(ICwCalculator *calculator) { cwCalculator = calculator; shortRetryLimit = 1; }
-    int getStationSrc() const { return stationShortRetryCounter; }
+    void configure(IEdcaCwCalculator *calculator, int limit) {
+        cwCalculator = calculator;
+        shortRetryLimit = limit;
+        longRetryLimit = 4;
+        rtsThreshold = 500;
+    }
+    int getStationSrc() const { return cwCalculator->getEdcaRetryCount(); }
     bool hasDataRetry() const { return !shortRetryCounter.empty() || !longRetryCounter.empty(); }
 };
 class SchedulingPolicy : public OriginatorQosAckPolicy {
@@ -118,14 +121,54 @@ class OrderedPeekFrames : public SchedulingFrames {
 %activity:
 SchedulingCw cw;
 SchedulingRecovery recovery;
-recovery.configure(&cw);
-recovery.controlFrameTransmissionFailed();
-ASSERT(recovery.getStationSrc() == 1 && cw.getCw() == 1);
-recovery.controlFrameTransmissionFailed();
-ASSERT(recovery.getStationSrc() == 0 && cw.getCw() == 0);
-recovery.controlFrameTransmissionFailed();
-recovery.blockAckFrameReceived();
-ASSERT(recovery.getStationSrc() == 0 && cw.getCw() == 0 && !recovery.hasDataRetry());
+cw.configure(15, 63, 3);
+recovery.configure(&cw, 3);
+auto verifyRecovery = [&](int expectedRetries, int expectedWindow) {
+    if (recovery.getStationSrc() != expectedRetries || cw.getCw() != expectedWindow)
+        throw cRuntimeError("Expected QSRC %d and CW %d, got QSRC %d and CW %d",
+                            expectedRetries, expectedWindow, recovery.getStationSrc(), cw.getCw());
+};
+recovery.edcaTransmissionFailed();
+verifyRecovery(1, 31);
+recovery.edcaTransmissionFailed();
+verifyRecovery(2, 63);
+recovery.edcaTransmissionFailed();
+verifyRecovery(3, 63);
+recovery.edcaTransmissionFailed();
+verifyRecovery(0, 15);
+
+auto shortHeader = makeShared<Ieee80211DataHeader>();
+shortHeader->setType(ST_DATA_WITH_QOS);
+shortHeader->setTid(5);
+shortHeader->setSequenceNumber(SequenceNumberCyclic(1));
+auto longHeader = makeShared<Ieee80211DataHeader>(*shortHeader);
+longHeader->setSequenceNumber(SequenceNumberCyclic(2));
+Packet shortData("short", shortHeader);
+shortData.insertAtBack(makeShared<ByteCountChunk>(B(100)));
+Packet longData("long", longHeader);
+longData.insertAtBack(makeShared<ByteCountChunk>(B(1000)));
+
+recovery.dataFrameTransmissionFailed(&shortData, shortHeader);
+verifyRecovery(1, 31);
+recovery.dataFrameTransmissionFailed(&longData, longHeader);
+verifyRecovery(2, 63);
+recovery.ackFrameReceived(&longData, longHeader);
+verifyRecovery(2, 63); // This exchange can have a successor in the same TXOP.
+recovery.txopCompleted();
+verifyRecovery(0, 15);
+recovery.edcaTransmissionFailed();
+verifyRecovery(1, 31);
+if (recovery.getRetryCount(&shortData, shortHeader) != 1)
+    throw cRuntimeError("TXOP completion and BAR failure changed the outstanding DATA retry count");
+recovery.dropFrame(shortHeader);
+if (recovery.hasDataRetry())
+    throw cRuntimeError("Both DATA retry entries should have been cleared");
+
+// Resetting the shared window also resets the access-category retry count.
+cw.resetCw();
+verifyRecovery(0, 15);
+recovery.edcaTransmissionFailed();
+verifyRecovery(1, 31);
 const MacAddress peer("02:00:00:00:00:02");
 const MacAddress other("02:00:00:00:00:03");
 SchedulingPolicy policy;
@@ -299,6 +342,47 @@ ASSERT(policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
 wait(duration);
 ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
 ASSERT(ack.getQoSDataAckStatus(unrelated.front()) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+// A pending probe survives complete member expiry. The caller's EDCA predicate limits its owner.
+agreements.getAgreement(peer, 2)->setPendingProbe(true);
+selectedAgreement->setPendingProbe(true);
+otherAgreement->setPendingProbe(true);
+policy.setProbeEligibility([](InProgressFrames *, Tid) { return false; });
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+policy.setProbeEligibility([&frames](InProgressFrames *candidate, Tid tid) { return candidate == &frames && tid == 5; });
+choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 5);
+ASSERT(std::get<1>(choice) == selectedAgreement->getStartingSequenceNumber());
+selectedAgreement->setPendingProbe(false);
+choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == other && std::get<2>(choice) == 5);
+otherAgreement->setPendingProbe(false);
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+// A probe wait includes failed transmitted members, but excludes a numbered unsent member.
+QosAckHandler implicitAck;
+SchedulingFrames implicitFrames;
+implicitFrames.configure(&implicitAck);
+OriginatorBlockAckAgreement implicitAgreement(peer, 5, SequenceNumberCyclic(4095), 2, false, false);
+auto attempted = implicitFrames.add(peer, 5, 4095, false);
+auto numberedUnsent = implicitFrames.add(peer, 5, 0, false);
+implicitAck.processTransmittedImplicitBlockAckMember(attempted);
+implicitAck.processFailedImplicitBlockAckMember(attempted);
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+auto probe = makeShared<Ieee80211CompressedBlockAckReq>();
+probe->setReceiverAddress(peer);
+probe->setTidInfo(5);
+probe->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+implicitAck.processTransmittedBlockAckReq(probe, &implicitAgreement);
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+ASSERT(implicitAck.getQoSDataAckStatus(numberedUnsent) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+auto zeroResponse = makeShared<Ieee80211CompressedBlockAck>();
+zeroResponse->setTransmitterAddress(peer);
+zeroResponse->setTidInfo(5);
+zeroResponse->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+zeroResponse->setBlockAckBitmap(BitVector(0, 64));
+ASSERT(implicitAck.processReceivedCompressedBlockAck(zeroResponse, &implicitAgreement).empty());
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED);
+ASSERT(implicitAck.isEligibleToTransmit(attempted));
+ASSERT(implicitAck.getQoSDataAckStatus(numberedUnsent) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
 std::cout << "Block Ack scheduling isolation assertions passed.\n";
 
 %contains: stdout

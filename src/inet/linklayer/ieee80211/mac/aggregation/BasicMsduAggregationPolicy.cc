@@ -57,7 +57,7 @@ bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee
     return true;
 }
 
-std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue)
+std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue, const std::function<bool(b)>& fitsMpdu)
 {
     Enter_Method("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
@@ -79,9 +79,12 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
             EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
             break;
         }
+        auto subframeLength = dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER);
+        if (!frames->empty() && fitsMpdu &&
+            !fitsMpdu(paddedPrefixLength + subframeLength + MsduAggregation::computeHeaderLength(firstHeader) + dataTrailer->getChunkLength()))
+            break;
         EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
         frames->push_back(dataPacket);
-        auto subframeLength = dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER);
         unpaddedLength += subframeLength;
         encodedLength = paddedPrefixLength + subframeLength;
         tailPadding = MsduAggregation::computeSubframePadding(subframeLength);

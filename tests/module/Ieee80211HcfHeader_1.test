@@ -55,7 +55,7 @@ class HeaderMac : public Ieee80211Mac {
                 ASSERT(dataHeader->getAckPolicy() == BLOCK_ACK);
                 if (par("builtin").boolValue()) {
                     // Basic BAR (56 us), Basic Block Ack (228 us), and two SIFS intervals (32 us).
-                    ASSERT(header->getDurationField() == SimTime(316, SIMTIME_US));
+                    ASSERT(header->getDurationField() == (rts ? SimTime(316, SIMTIME_US) : SIMTIME_ZERO));
                 }
                 else {
                     ASSERT(header->getDurationField() == SIMTIME_ZERO);
@@ -164,10 +164,12 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.typename = "HeaderHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = true
 **.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.basicBlockAckReqMaxDelay = 0s
 *.sender.wlan[0].mac.hcf.originatorAckPolicy.typename = ${policy}
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${rts} ? 0B : 4096B
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${rts} ? 10ms : 0s
 **.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
 **.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
 **.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6Mbps

@@ -26,10 +26,16 @@
 namespace inet {
 namespace ieee80211 {
 
+struct BasicBarRetry
+{
+    Ptr<const Ieee80211BasicBlockAckReq> request;
+    int64_t number = 0;
+};
+
 /**
  * Implements IEEE 802.11 Enhanced Distributed Channel Access Function.
  */
-class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetListener
+class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::IEdcaCwCalculator, public ModeSetListener
 {
   protected:
     IContention *contention = nullptr;
@@ -58,8 +64,14 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
     AccessCategory ac = AccessCategory(-1);
     int cw = -1;
+    bool contentionWindowSignalReady = false;
     int cwMin = -1;
     int cwMax = -1;
+    int edcaRetryCount = 0;
+    int edcaRetryLimit = -1;
+    BasicBarRetry pendingBasicBarRetry;
+    int64_t deferredBasicSourceId = -1;
+    simtime_t deferredBasicCtsDuration;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -73,6 +85,8 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     virtual int getCwMin(AccessCategory ac, int aCwMin);
 
     virtual void calculateTimingParameters();
+    void setContentionWindow(int window);
+    void updateContentionWindow();
 
   public:
     virtual ~Edcaf();
@@ -98,11 +112,20 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     // IRecoveryProcedure::ICallback
     virtual void incrementCw() override;
     virtual void resetCw() override;
+    virtual int getEdcaRetryCount() const override { return edcaRetryCount; }
     virtual int getCw() override { return cw; }
 
     // Edcaf
     virtual bool isOwning() { return owning; }
     virtual bool isInternalCollision();
+    BasicBarRetry& getPendingBasicBarRetry() { return pendingBasicBarRetry; }
+    void deferBasicOpening(int64_t sourceId, simtime_t ctsDuration) {
+        deferredBasicSourceId = sourceId;
+        deferredBasicCtsDuration = ctsDuration;
+    }
+    bool isBasicOpeningDeferred(int64_t sourceId) const { return sourceId == deferredBasicSourceId; }
+    simtime_t getBasicOpeningCtsDuration(int64_t sourceId) const { return isBasicOpeningDeferred(sourceId) ? deferredBasicCtsDuration : SIMTIME_ZERO; }
+    simtime_t getAifs() const { return ifs; }
     void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
     bool hasEligibleFrames() const;
     virtual AccessCategory getAccessCategory() { return ac; }

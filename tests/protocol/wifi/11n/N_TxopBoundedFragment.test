@@ -1,0 +1,62 @@
+%description:
+An ordinary QoS MSDU below the configured fragmentation threshold cannot fit
+in a positive TXOP at the selected data rate. Its first exchange must fit
+the grant, and the next MPDU must continue the same sequence.
+
+%extraargs: -r 0..1
+
+%file: N_TxopBoundedFragment.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+
+namespace inet::protocoltest {
+
+Define_ProtocolTest(wifi_txop_bounded_fragment)
+{
+    using namespace ieee80211;
+    auto sequence = std::make_shared<int>(-1);
+    auto deadline = std::make_shared<simtime_t>();
+    return ProtocolTest("wifi_txop_bounded_fragment")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([sequence, deadline](const MatchContext& c) {
+                auto txop = check_and_cast<TxopProcedure *>(c.event.node->getModuleByPath(".wlan[0].mac.hcf.edca.edcaf[1].txopProcedure"));
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                *deadline = txop->getStart() + txop->getLimit();
+                *sequence = data->getSequenceNumber().get();
+                return data->getFragmentNumber() == 0 && data->getMoreFragments() && data->getAckPolicy() == NORMAL_ACK;
+            }).describe("split the queued MSDU to fit the fresh grant").within(2))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 29")
+            .assertEvent([deadline](const MatchContext& c) { return c.event.time <= *deadline; })
+            .describe("finish the first ACK within the grant").within(0.002))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+            .assertEvent([sequence](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return data->getSequenceNumber().get() == *sequence && data->getFragmentNumber() == 1;
+            }).describe("send fragment one of the same MSDU").within(0.02));
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_txop_bounded_fragment"
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.sta1.app[0].messageLength = 1500B
+*.sta1.app[0].stopTime = 1.000001s
+*.sta1.wlan[0].classifier.udpPortUpMap = "5000 BE"
+*.sta1.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.sta1.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 1ms
+*.sta1.wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.protectionMechanism = "multiple"
+*.sta1.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${100B,3000B}
+*.sta1.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2346B
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.hcf.isBlockAckSupported = false
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_txop_bounded_fragment: PASS
+
+%not-contains: stdout
+PROTOCOLTEST wifi_txop_bounded_fragment: FAIL

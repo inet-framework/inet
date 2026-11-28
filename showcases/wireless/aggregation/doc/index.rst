@@ -17,7 +17,7 @@ the network.
 In this showcase, we will demonstrate frame aggregation in INET's 802.11 model
 and examine its effect on performance when sending a large number of small packets.
 
-| Verified with INET version: ``4.6``
+| Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/wireless/aggregation <https://github.com/inet-framework/inet/tree/master/showcases/wireless/aggregation>`__
 
 About Aggregation
@@ -54,7 +54,7 @@ acknowledged with a block acknowledgment frame, making
 MPDU aggregation more useful in a high error rate environment
 (the performance gain from using a-MSDUs might be negated by
 the higher error rate in such an environment).
-Because a-MSDUs lack a global FCS, they can only be acknowledged with block ACKs.
+A standalone QoS Data MPDU carrying an A-MSDU can receive a Normal Ack. This showcase uses that exchange.
 
 Here is an a-MSDU of three subframes displayed in qtenv's packet view:
 
@@ -62,7 +62,7 @@ Here is an a-MSDU of three subframes displayed in qtenv's packet view:
    :width: 100%
    :align: center
 
-INET's 802.11 model currently only features MSDU aggregation. Aggregation is
+In this showcase, MSDU aggregation is
 controlled by the aggregation policy in :ned:`Ieee80211Mac`. The aggregation
 policy is a submodule of the MAC's :ned:`Hcf` submodule. The aggregation policy
 submodule is located at ``mac.hcf.originatorMacDataService.msduAggregationPolicy``
@@ -79,185 +79,96 @@ When the MAC creates an a-MSDU, the resulting a-MSDU complies with all three of 
 parameters (if it didn't comply with any of them, then no a-MSDU would be created,
 and the frames would be sent without aggregation).
 
-To summarize, by default, the MAC aggregates frames when using HCF
-(``qosStation=true`` in the MAC). It aggregates any number of packets
-present in the queue at the time it decides to transmit, making sure
-the aggregated frame's length doesn't exceed 4065 bytes. By default,
-the MAC doesn't aggregate when using DCF.
+IEEE Std 802.11-2024 clause 10.11 requires a station operating in this band to implement HT
+and to have received an HT Capabilities element from its peer before sending an A-MSDU.
+A legacy ERP station can use QoS channel access and transmit multiple frames in a TXOP.
+Enabling the aggregation policy alone leaves its A-MSDU count at zero.
 
 The Model
 ---------
 
-In the example simulation for this showcase, a host sends small UDP
-packets to another host via 802.11. We will run the simulation with and without
-aggregation (and also with and without the use of TXOP), and examine the number
-of received packets, the application-level throughput, and the end-to-end delay.
-
-The Network
-~~~~~~~~~~~
-
-The simulation uses the following network, defined in
-:download:`AggregationShowcase.ned <../AggregationShowcase.ned>`:
+The network has two hosts. In the ERP control they communicate in ad hoc mode.
+For the HT cases, host1 associates with host2, which runs access point management
+and the UDP sink. Association establishes peer HT capabilities before the traffic starts.
 
 .. figure:: media/network.png
    :width: 60%
    :align: center
 
-It contains two :ned:`AdhocHost`'s, ``host1`` and ``host2``.
-It also contains an :ned:`Ipv4NetworkConfigurator` and an
-:ned:`Ieee80211RadioMedium` module.
-
 Configurations
 ~~~~~~~~~~~~~~
 
-``host1`` is configured to send small, 100-byte UDP packets to ``host2``.
-Here are the traffic settings in the ``General`` configuration in
-:download:`omnetpp.ini <../omnetpp.ini>`:
+All four configurations send 100-byte UDP payloads from host1 to host2 every
+72.7 microseconds, starting at 0.2 s in a 10 s simulation. They use the same
+configured 54 Mbit/s bitrate. The table identifies the comparison each run supports.
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: numApps
-   :end-at: localPort
-   :language: ini
+.. list-table::
+   :header-rows: 1
 
-Here are the 802.11 settings in the ``General`` configuration in
-:download:`omnetpp.ini <../omnetpp.ini>`:
+   * - Configuration
+     - Operating mode
+     - A-MSDU policy
+     - Access category
+   * - ErpAggregationControl
+     - 802.11g ad hoc
+     - Enabled, 1,500 B limit
+     - Best effort
+   * - NoAggregation
+     - 802.11n infrastructure
+     - Disabled
+     - Best effort
+   * - Aggregation
+     - 802.11n infrastructure
+     - Enabled, 1,500 B limit
+     - Best effort
+   * - VoicePriorityAggregation
+     - 802.11n infrastructure
+     - Enabled, 1,500 B limit
+     - Voice
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: opMode
-   :end-at: qosStation
-   :language: ini
-
-We set the mode to 802.11g ERP mode and 54 Mbps to increase the data transfer rate.
-Note that the ``qosStation=true`` key makes the MAC use HCF, but a classifier
-is also needed in order for the MAC to create QoS frames (required for aggregation).
-
-There are three scenarios, defined in the following configurations,
-in a progression to improve throughput:
-
-- ``NoAggregation``: Aggregation is turned off, the MAC sends UDP packets in the best effort access category (no TXOP). This configuration functions as a baseline to compare the effects of aggregation to. We expect that when no aggregation is used, throughput will be low because of the small packets and the large protocol overhead.
-- ``Aggregation``: Aggregation is on, and the MAC sends UDP packets in the best effort access category. Throughput is expected to increase substantially.
-- ``VoicePriorityAggregation``: Aggregation is on, and the MAC sends UDP packets in the voice access category in a TXOP. The use of TXOP reduces contention periods; throughput is expected to increase even further.
-
-In all cases with aggregation, we use MSDU aggregation.
-
-To negate the effect of queue length on the delay of packets, we set the amount of
-traffic to match the possible throughput in each configuration. This way we can concentrate on the effect
-aggregation has on the delay. (We measured the maximum possible throughput by running the simulations with very high traffic.)
-
-Here is the ``NoAggregation`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
-
-.. literalinclude:: ../omnetpp.ini
-   :start-at: NoAggregation
-   :end-at: sendInterval
-   :language: ini
-
-The configuration turns off aggregation.
-
-Here is the ``Aggregation`` configuration in :download:`omnetpp.ini <../omnetpp.ini>`:
-
-.. literalinclude:: ../omnetpp.ini
-   :start-at: Config Aggregation
-   :end-at: sendInterval
-   :language: ini
-
-Aggregation is turned on by default. This configuration sets the aggregated frame size to 1500B,
-so that the small packets are aggregated into a 1500B frame.
-
-Here is the ``VoicePriorityAggregation`` in :download:`omnetpp.ini <../omnetpp.ini>`:
-
-.. literalinclude:: ../omnetpp.ini
-   :start-at: VoicePriorityAggregation
-   :end-at: sendInterval
-   :language: ini
-
-To ensure that the UDP packets belong to the voice priority access category,
-the UDP app's source port is set to 5000 (the default port for voice priority
-in :ned:`QosClassifier`).
+Compare ``NoAggregation`` and ``Aggregation`` to measure the effect of A-MSDU formation
+with the same association, offered load, access category and PHY settings.
+Compare ``Aggregation`` and ``VoicePriorityAggregation`` to examine the effect of
+classifying the same traffic into the voice access category. The ERP run checks capability eligibility.
 
 Results
 -------
 
-Number of received packets and throughput
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For run 0, read ``packetAggregated:count`` from the sender's HCF originator data service,
+``packetDeaggregated:count`` from the receiver's HCF recipient data service, and
+``packetReceived:count`` from the receiver's UDP sink. Each aggregate counter counts
+complete A-MSDUs. The sink counts the individual application datagrams they deliver.
 
-We run the simulations for 10 seconds.
-We measure the number of packets received by ``host2``, and the application-level throughput.
-Here are the results from the simulations:
+All four senders offered 134,801 datagrams in run 0. The two HT best-effort runs
+delivered 28,135 datagrams with aggregation disabled and 134,794 with aggregation enabled.
 
-.. figure:: media/receivedpackets_t.png
-   :width: 80%
-   :align: center
+.. list-table:: Run 0, 10 s simulation
+   :header-rows: 1
 
-.. figure:: media/avgthroughput_t.png
-   :width: 90%
-   :align: center
+   * - Configuration
+     - A-MSDUs formed
+     - A-MSDUs deaggregated
+     - UDP datagrams received
+   * - ErpAggregationControl
+     - 0
+     - 0
+     - 48,014
+   * - NoAggregation
+     - 0
+     - 0
+     - 28,135
+   * - Aggregation
+     - 20,281
+     - 20,281
+     - 134,794
+   * - VoicePriorityAggregation
+     - 35,705
+     - 35,704
+     - 134,797
 
-As expected, the throughput is low in the ``NoAggregation`` case, about 2.5 Mbps.
-Each 100-byte UDP packet has an IP header, an LLC header, a MAC header, a MAC trailer,
-and a PHY header. The MAC contends for the channel before sending each packet.
-There is a SIFS period and an ACK after each packet transmission.
-These amount to a lot of overhead.
-
-In the ``Aggregation`` case, throughput increases by more than 400% (compared to
-the ``NoAggregation`` case), to about 11 Mbps.
-In this case, multiple (up to ten) 100-byte UDP packets are aggregated into a single 802.11
-frame. Each UDP packet has an IP header, an LLC header, and an MSDU subframe header,
-but the whole aggregate frame has just one MAC header and MAC trailer, and PHY header,
-so overhead is smaller. Also, there is no contention between the subframes
-(the MAC still has to contend for channel access before transmitting the aggregate frame).
-There is also a SIFS period and an ACK after each packet transmission (though there
-are fewer of these compared to the previous case, as ten packets are acknowledged with an ACK).
-
-In the ``VoicePriorityAggregation``, throughput increases by another 190%
-(compared to the ``Aggregation`` case), to about 21 Mbps. The MAC doesn't have
-to contend for channel access during the TXOP, which decreases overhead even more.
-
-The following image shows frame exchanges for the three configurations on a sequence chart,
-on the same time scale:
-
-.. figure:: media/elog5_1.png
-   :width: 100%
-   :align: center
-
-End-to-end delay
-~~~~~~~~~~~~~~~~
-
-In this section, we examine how aggregation affects the end-to-end delay of packets.
-The length of packet queues in the MAC can significantly affect delay, as packets can
-wait in the queue for some time before being sent. If the traffic is greater than the
-maximum possible throughput, queues are going to fill up, and the delay increases.
-If traffic is less than the maximum possible throughput, queues won't fill up
-(no increased delay), but the performance would be less than
-the maximum possible. If traffic is the same as the maximum possible throughput,
-the performance is optimal, and the delay is minimized (we configured traffic this way).
-
-Here is the end-to-end delay of received packets in ``host2``'s UDP app:
-
-.. figure:: media/delay8_t.png
-   :width: 100%
-   :align: center
-
-Without aggregation, delay is the lowest, because the packets don't wait in the queue
-as much to be part of an aggregate frame. With the best effort priority aggregation,
-the delay is higher. The multiple data points above each other signify the reception
-of an aggregate frame, as the packets making up the aggregate frame are sent to the
-UDP app at the same time. The earliest packet in the aggregate frame has been in the
-transmission queue for the longest, so it has the most delay. In the voice priority
-aggregation case, the delay is lower, because the MAC waits less before acquiring the
-channel when sending the packets.
-
-Note that the voice priority aggregate frames are
-spaced closer to each other horizontally than the best effort ones,
-because multiple aggregate frames are sent during a TXOP,
-and there is no contention between them. The vertical spacing of the data points
-in aggregate frames corresponds to the send interval of the UDP app.
-
-Thus, aggregation actually increases delay while increasing throughput.
-
-When aggregation is used, another column of aggregate frame data points could
-fit on the chart below the existing aggregate frame data points. This is because
-the MAC actually assembles an additional aggregate frame before sending the current one,
-thus increasing delay. This is an implementation detail.
+Open ``Aggregation.anf`` after running all four configurations to plot sink deliveries,
+throughput and end-to-end delay. The delay chart shows arrivals between 2.39 and 2.40 s.
+Packets carried in one A-MSDU arrive together even though their send times differ.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AggregationShowcase.ned <../AggregationShowcase.ned>`
 

@@ -37,9 +37,9 @@ HcfFs::HcfFs() :
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
-        context->getInProgressFrames()->getFrameToTransmit();
-    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
+    auto frameToTransmit = context->getInProgressFrames()->peekFrameToTransmit();
+    if (context->hasOpeningBasicBarRetry() ||
+        qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 1;
     return frameToTransmit && frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
 }
@@ -63,10 +63,25 @@ bool HcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
+    if (context->hasOpeningBasicBarRetry())
+        return true;
     auto frames = context->getInProgressFrames();
     auto qos = context->getQoSContext();
     bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);
     qos->preparedData.reset();
+    if (bar && qos->blockAckVariant == BlockAckVariant::BASIC &&
+        qos->txopProcedure->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION)
+        // BAR has its own admission check, independent of the reserved DATA identity.
+        return frameSequence->getCount() == 0 || qos->txopProcedure->getRemaining() > 0;
+    if (qos->txopProcedure->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION) {
+        auto step = dynamic_cast<IReceiveStep *>(context->getLastStep());
+        bool followsBasicReply = step && step->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
+            dynamicPtrCast<const Ieee80211BasicBlockAck>(step->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>());
+        if (followsBasicReply || qos->plannedBasicDataId != -1) {
+            auto next = frames->peekFrameToTransmit();
+            return next && next->getId() == qos->plannedBasicDataId && qos->txopProcedure->getRemaining() > 0;
+        }
+    }
     if (!bar && frameSequence->getCount() != 0 && qos->txopProcedure->getLimit() == 0 &&
         context->isFragmentContinuation(frames->peekFrameToTransmit(), context->getNumSteps()))
         return true;
@@ -77,8 +92,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
         if (preparation == DataPreparationResult::DEFERRED)
             return false;
     }
-    bool hasFrameToTransmit = qos->blockAckAgreementHandler ?
-        bar || frames->peekFrameToTransmit() != nullptr : frames->hasInProgressFrames();
+    bool hasFrameToTransmit = bar || frames->peekFrameToTransmit() != nullptr;
     if (hasFrameToTransmit) {
         auto nextFrameToTransmit = qos->blockAckAgreementHandler ? frames->peekFrameToTransmit() : frames->getFrameToTransmit();
         if (frameSequence->getCount() == 0)

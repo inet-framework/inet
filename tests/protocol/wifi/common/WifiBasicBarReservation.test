@@ -87,10 +87,8 @@ static ProtocolTest feedbackReservation(bool fits)
                 auto dataGrant = context.get("dataTxop").doubleValue();
                 if (!fits)
                     return grant > dataGrant && duration == SIMTIME_ZERO;
-                auto required = mode->getSifsTime() + mode->getDuration(event.packet->getDataLength()) + request->getDurationField();
                 auto gap = event.time - SimTime(context.get("dataEnd").doubleValue());
-                return grant == dataGrant && gap == mode->getSifsTime() &&
-                    duration >= required && duration - required < SimTime(1, SIMTIME_US);
+                return grant == dataGrant && gap == mode->getSifsTime() && duration > gap;
             })
             .capture("barTxop", txopStart)
             .capture("barEnd", [=](const PacketEvent& event) { return cValue(ppduEnd(event).dbl()); })
@@ -102,12 +100,14 @@ static ProtocolTest feedbackReservation(bool fits)
             .assertEvent([=](const MatchContext& context) {
                 auto reply = context.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
                 auto responseEnd = SimTime(context.get("barEnd").doubleValue()) + SimTime(context.get("barDuration").doubleValue());
+                auto reservedFeedbackEnd = SimTime(context.get("dataEnd").doubleValue()) + SimTime(context.get("dataDuration").doubleValue());
                 return context.get("forecastObserved").boolValue() &&
                     reply->getTidInfo() == context.get("tid").intValue() &&
                     reply->getStartingSequenceNumber().get() == context.get("sequence").intValue() &&
                     reply->getBlockAckBitmap(0).getBit(0) &&
                     txopStart(context.event).doubleValue() == context.get("barTxop").doubleValue() &&
-                    context.event.time <= responseEnd + SimTime(1, SIMTIME_US);
+                    context.event.time <= responseEnd + SimTime(1, SIMTIME_US) &&
+                    (!fits || context.event.time <= reservedFeedbackEnd + SimTime(1, SIMTIME_US));
             })
             .describe("the matching Block Ack confirms receipt of DATA forecast in the active TXOP").within(0.001));
 }

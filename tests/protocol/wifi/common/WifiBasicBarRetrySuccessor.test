@@ -30,8 +30,41 @@ class RetrySuccessorHcf : public BlockAckLifecycleHcf
 {
   private:
     msgid_t replacementTreeId = -1;
+    SequenceNumberCyclic expiringSequence;
+    bool expirySet = false;
 
   protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto access = edca->getChannelOwner();
+        if (!expirySet && expiringSequence.isSpecified() && data && data->getType() == ST_DATA_WITH_QOS &&
+            data->getFragmentNumber() == 0 && data->getSequenceNumber().isSpecified() &&
+            data->getSequenceNumber() == expiringSequence &&
+            access->getAckHandler()->getQoSDataAckStatus(data) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED) {
+            std::vector<Packet *> fragments;
+            std::vector<int64_t> ids;
+            auto frames = access->getInProgressFrames();
+            for (int i = 0; i < frames->getLength(); i++) {
+                auto sibling = frames->getFrames(i);
+                auto header = dynamicPtrCast<const Ieee80211DataHeader>(sibling->peekAtFront<Ieee80211MacHeader>());
+                if (header && header->getTid() == data->getTid() && header->getReceiverAddress() == data->getReceiverAddress() &&
+                    header->getSequenceNumber() == data->getSequenceNumber()) {
+                    fragments.push_back(sibling);
+                    ids.push_back(sibling->getId());
+                }
+            }
+            ASSERT(fragments.size() == 2);
+            auto mode = rateSelection->computeMode(packet, data, access->getTxopProcedure());
+            auto lifetime = edca->getLifetimeHandler();
+            lifetime->prepareFrameReplacement(ids);
+            // Expire this MSDU during its first retry regardless of earlier contention.
+            lifetime->registerFragments(fragments, simTime() + ifs + mode->getDuration(packet->getDataLength()) / 2);
+            expirySet = true;
+        }
+        return BlockAckLifecycleHcf::transmitFrame(packet, ifs);
+    }
+
     void doBuildInside() override
     {
         BlockAckLifecycleHcf::doBuildInside();
@@ -44,6 +77,7 @@ class RetrySuccessorHcf : public BlockAckLifecycleHcf
     }
 
   public:
+    void recordExpiringSequence(const Packet *packet) { expiringSequence = packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber(); }
     void recordReplacement(const Packet *packet) { replacementTreeId = packet->getTreeId(); }
     bool isReplacement(const Packet *packet) const { return replacementTreeId == packet->getTreeId(); }
 
@@ -141,7 +175,10 @@ static ProtocolTest retrySuccessor(const char *name, Replacement replacement)
         .once(on(sender).signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)").within(1.02));
     auto secondFragment = firstFragment;
     test
-        .once(firstFragment.capture("first", sequence).describe("fragment 0 of the first MSDU").within(0.01))
+        .once(firstFragment.capture("first", [sequence](const PacketEvent& event) {
+                retrySuccessorHcf()->recordExpiringSequence(event.packet);
+                return sequence(event);
+            }).describe("fragment 0 of the first MSDU").within(0.01))
         .once(secondFragment.capture("second", [sequence](const PacketEvent& event) {
                 retrySuccessorHcf()->recordReplacement(event.packet);
                 return sequence(event);
@@ -270,14 +307,15 @@ module RetrySuccessorHcf extends BlockAckLifecycleHcf
 
 %inifile: test.ini
 [General]
+**.hcf.basicBlockAckReqRetryLimit = 0
 *.tester.testName = ${scenario="wifi_basic_bar_retry_successor","wifi_basic_bar_retry_successor_short","wifi_basic_bar_retry_successor_ack","wifi_basic_bar_retry_successor_rts","wifi_basic_bar_retry_successor_ordered"}
 *.sta1.wlan[0].mac.hcf.preferShortRetry = ${false,false,false,false,true ! scenario}
 *.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
 *.sta1.app[0].sendInterval = 0.1ms
 *.sta1.app[0].stopTime = 1.003s
 *.sta1.wlan[0].mac.hcf.typename = "RetrySuccessorHcf"
-*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = ${2260us,2710us,2710us,3140us,2260us ! scenario}
-*.sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure.txopLimit = ${4ms,300us,350us,4ms,4ms ! scenario}
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].msduLifetime = 100ms
+*.sta1.wlan[0].mac.hcf.edca.edcaf[3].txopProcedure.txopLimit = ${4ms,380us,450us,4ms,4ms ! scenario}
 *.sta1.wlan[0].mac.hcf.originatorAckPolicy.typename = ${"OriginatorQosAckPolicy","OriginatorQosAckPolicy","RetrySuccessorAckPolicy","OriginatorQosAckPolicy","OriginatorQosAckPolicy" ! scenario}
 *.sta1.wlan[0].mac.hcf.rtsPolicy.typename = ${"QosRtsPolicy","QosRtsPolicy","QosRtsPolicy","RetrySuccessorRtsPolicy","QosRtsPolicy" ! scenario}
 *.sta1.wlan[0].mac.hcf.rateSelection.responseAckFrameBitrate = ${-1bps,-1bps,6Mbps,-1bps,-1bps ! scenario}

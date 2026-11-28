@@ -38,6 +38,7 @@ module Edcaf extends Module
         @display("i=block/queue");
         @signal[packetSentToPeer](type=inet::Packet);
         @signal[channelOwnershipChanged](type=bool);
+        @signal[contentionWindowChanged](type=long);
         @statistic[packetSentToPeer](title="packets sent"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerUnicast](title="packets sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerMulticast](title="packets sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -45,6 +46,7 @@ module Edcaf extends Module
         @statistic[packetSentToPeerWithRetry](title="packets sent: with retry"; source=ieee80211Retry(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerWithoutRetry](title="packets sent: without retry"; source=ieee80211NotRetry(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[channelOwnershipChanged](title="channel ownership"; record=count,vector?; interpolationmode=sample-hold);
+        @statistic[contentionWindowChanged](title="contention window"; record=vector; interpolationmode=sample-hold);
     submodules:
         pendingQueue: <default("PendingQueue")> like IPacketQueue {
             parameters:
