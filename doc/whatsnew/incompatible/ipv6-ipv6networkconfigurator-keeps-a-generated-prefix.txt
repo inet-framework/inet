@@ -1,0 +1,3 @@
+Ipv6NetworkConfigurator keeps a generated prefix clear of an explicit address
+
+A link that takes its prefix from an explicit address could share it with an earlier link that had generated the same prefix from a template, and traffic between the two links was lost. A prefix generated from a template with an 'x' group now avoids every prefix that an explicit address fixes, so the template link that collided, and every link after it that uses the same template, get other prefixes and other global addresses. See the migration guide.
