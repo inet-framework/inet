@@ -1,0 +1,3 @@
+Wi-Fi multiple-protection continuations respect the transmission opportunity limit
+
+With Block Ack disabled, HCF now checks each additional exchange against the remaining transmission opportunity and transmitted reservation. The check includes RTS/CTS and the immediate ACK when required. A frame that cannot fit waits for another channel grant. DATA after CTS uses the mode selected when admitting its RTS.
