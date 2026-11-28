@@ -319,21 +319,21 @@ No sealed file changes. No consumer outside INET changes.
   and a larger window during a transfer; the sender does not start a fast retransmit. Baselines:
   `examples/inet/bulktransfer` `inet__inet`, `inet_inet_2a`, `inet_inet_2b`.
   - `tcp: fix: condition (e) of a duplicate ACK compares the window before its update (RFC 5681)`.
-- [x] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Landed on master on 2026-11-27 as C15 `847f6348c0`, with
+- [x] **Step 8. R8: the ECN-Echo at a cwnd of one MSS (BD-7).** Landed on master on 2026-11-27 as C15 `bf536e41bb`, with
   the `statistics` commit `593ba94baa` (§6.3, R8). Gate A decides the
   form of the hold of new data.
   Test: an ECN-Echo arrives at a cwnd of one MSS; no new segment leaves before the timer expires. Baselines:
   `examples/inet/dctcp` `TcpRenoIncast`.
   - `tcp: fix: at an ECN-Echo with a cwnd of one MSS, new data waits for the retransmission timer (RFC 3168 section 6.1.2)`.
-- [x] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Repaired as C16
-  `1a1b3e79f4`, with the `statistics` commit `afc1807da3`; gate B approved on 2026-11-28 (§6.3, R9). It lands when the
-  maintainer asks. Gate A on 2026-11-27 revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
+- [x] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Landed on master on
+  2026-11-28 as C16 `bcf0735586` through the pull request #1508, with the `statistics` commit `afc1807da3` (§6.3, R9 and
+  R10). Gate A on 2026-11-27 revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
   in flight, so R9 repairs BD-14 alone, and BD-19 and BD-20 leave R9 for an analysis of their own. Test: a timeout,
   then three duplicate ACKs during the go-back; no fast retransmit before the ACK covers more than recover. Baselines:
   `examples/inet/tcpwindowscale` `WS_enabled`.
   - `tcp: fix: TcpReno starts no fast retransmit in the recovery of a timeout (RFC 6582 section 6)`.
-- [x] **Step 10. R10: a data segment of 1 byte gets a delayed ACK (BD-32).** Repaired as C17 `bed9589880`, with the
-  `statistics` commit `76f97c7fa4`; gate B approved on 2026-11-28 (§6.3, R10). It lands when the maintainer asks. It
+- [x] **Step 10. R10: a data segment of 1 byte gets a delayed ACK (BD-32).** Landed on master on 2026-11-28
+  as C17 `2a2c1cdc28` through the pull request #1508, with the `statistics` commit `76f97c7fa4` (§6.3, R10). It
   moves 11 fingerprint runs and 9 statistical tests of Telnet examples. Test: with delayed ACKs, a segment of 1
   byte in an open window gets a delayed ACK, and a zero-window probe still gets its ACK at once.
   - `tcp: fix: a data segment of 1 byte in an open window gets a delayed ACK (RFC 9293 SHLD-18)`.
@@ -1387,7 +1387,8 @@ series was rebased once more with no conflict: C15 is `847f6348c0`. `baseline_ma
 `statistics` commit applies to master `f5ed0d42`, and the debug fingerprints ran again on the new head: 1846 PASS and 1
 expected ERROR, in 7 min 37 s (`runs/r8-landing-2/`). Then master moved to `bcf0842b55` with two commits of documents
 and gate scripts only, and the series was rebased again. Master moves to this commit by a fast-forward, and the workflow
-`check-baseline-masters.yml` puts the `statistics` commit onto master of `statistics`.
+`check-baseline-masters.yml` puts the `statistics` commit onto master of `statistics`. C15 is `bf536e41bb` on master,
+and its `statistics` commit is `4882aeb9` on master of `statistics`, with the mark `9c8912f0`.
 
 #### R9: the fast retransmit of TcpReno after a timeout (BD-14), prepared 2026-11-27
 
@@ -1681,6 +1682,28 @@ sets, `runs/r10-record-a/` to `runs/r10-record-e/` of the folder of D10). The sc
 **Gate B** approved by the maintainer on 2026-11-28 ("yes I do"). The repair commit of BD-32 is in
 [baseline-catch-up-defects.md](baseline-catch-up-defects.md). R10 lands when the maintainer asks, with R9: first the
 branch of `statistics` goes to GitHub, then the debug fingerprints of the landing run in the image of the CI.
+
+**Landing of R9 and R10 (2026-11-28).** The maintainer said: "wait with R11, land R9 and R10 instead". Since master
+`1a8c5fe519`, the rules PR-LAND of [pull-request.md](../../doc/project/rule/pull-request.md#landing-on-master-pr-land)
+hold: a change that is not trivial lands only through a pull request with "Rebase and merge", a direct push to master
+is refused, and a landing waits for the status `Master green`. So R9 and R10 landed through a pull request, the first
+one of this plan.
+
+- Master had moved to `fa90659167` (two CI workflows). The series was rebased onto it with no conflict, and the debug
+  fingerprints of its head `d13170987e` in the image of the CI gave 1846 PASS and 1 expected ERROR
+  (`runs/r9-r10-landing/` of the folder of D10).
+- The branch `topic/baseline-catch-up-defect-repairs` of `statistics` started again on master `9c8912f0`, as
+  [change-a-baseline.md](../../doc/project/guide/change-a-baseline.md) says for a baseline branch whose steps landed by
+  a rebase. Its push replaced `593ba94b` of R8 with a lease: that commit is on master of `statistics` as `4882aeb9`,
+  and the mark `9c8912f0` names it.
+- R9 and R10 went into one pull request: they are the TCP entries of this plan, with the same reviewers, and each has
+  its own commit, design approval and result approval. `check-pull-request.sh` with the description passed, and
+  `baseline_masters.py check` found that both `statistics` commits apply to master `9c8912f012`.
+- The pull request [#1508](https://github.com/inet-framework/inet/pull/1508) passed its 28 checks, and `Master green`
+  was green. "Rebase and merge" on 2026-11-28 made C16 `bcf0735586` and C17 `2a2c1cdc28`, on master `cca7bf83a8`.
+- The workflow `check-baseline-masters.yml` (run 46172833687) moved master of `statistics` by a fast-forward over
+  `afc1807da3` and `76f97c7fa4`, and added the mark `8f59814f91`.
+- This plan commit is a trivial change, and it goes to master by the push check.
 
 ## 7. Verification
 
