@@ -32,7 +32,7 @@ class BitmapRecoveryCleanupHcf : public BlockAckLifecycleHcf
             if (data->getReceiverAddress() == bitmap->getTransmitterAddress() && data->getTid() == bitmap->getTidInfo() &&
                 access->getAckHandler()->getQoSDataAckStatus(data) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK) {
                 outstanding.emplace_back(frame->dup());
-                recovery->rtsFrameTransmissionFailed(data);
+                recovery->msduTransmissionFailed(frame, true);
                 if (recovery->getRetryCount(frame, data) != 1)
                     throw cRuntimeError("The fixture failed to establish one RTS retry");
             }

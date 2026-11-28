@@ -1,0 +1,8 @@
+Wi-Fi fits Normal Ack exchanges and QoS fragments within a TXOP
+
+Wi-Fi QoS transmitters now check the complete Normal Ack exchange against
+the available TXOP before taking a queued MSDU. When a fresh grant needs
+smaller fragments, the fragments share their sequence number, lifetime and
+retry accounting. Protected Basic Block Ack uses its CTS reservation and
+feedback rules. The fragmentation size sweep allows even nonfinal fragment
+payloads when it divides an MSDU among sixteen MPDUs.

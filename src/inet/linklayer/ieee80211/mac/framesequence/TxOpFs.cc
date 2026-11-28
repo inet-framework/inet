@@ -84,7 +84,7 @@ bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 {
     auto protectedFrame = context->getDataFrameToTransmit();
     auto prepared = context->getQoSContext()->preparedData.get();
-    if (prepared && prepared->batch)
+    if (prepared)
         return prepared->rtsMode != nullptr;
     if (protectedFrame->getId() == context->getQoSContext()->plannedBasicDataId)
         return false; // The previous exchange reserved a direct DATA transmission.

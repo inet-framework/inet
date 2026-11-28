@@ -593,7 +593,7 @@ class AdmissionTest : public cSimpleModule {
                         throw cRuntimeError("The Basic fallback must transmit a single MSDU");
                 }
                 if (scenario == 16)
-                    ASSERT(hcf->service()->preparations == 0);
+                    ASSERT(hcf->service()->preparations > 0 && hcf->service()->commits == 1);
                 if (scenario == 17) {
                     ASSERT(hcf->data == 2 && hcf->aggregates == 0);
                     ASSERT(hcf->queriesAtData[0] == 1 && hcf->queriesAtData[1] == 2);

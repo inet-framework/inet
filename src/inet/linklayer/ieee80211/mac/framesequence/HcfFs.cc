@@ -37,8 +37,7 @@ HcfFs::HcfFs() :
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
-        context->getInProgressFrames()->getFrameToTransmit();
+    auto frameToTransmit = context->getInProgressFrames()->peekFrameToTransmit();
     if (context->hasOpeningBasicBarRetry() ||
         qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 1;
@@ -93,8 +92,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
         if (preparation == DataPreparationResult::DEFERRED)
             return false;
     }
-    bool hasFrameToTransmit = qos->blockAckAgreementHandler ?
-        bar || frames->peekFrameToTransmit() != nullptr : frames->hasInProgressFrames();
+    bool hasFrameToTransmit = bar || frames->peekFrameToTransmit() != nullptr;
     if (hasFrameToTransmit) {
         auto nextFrameToTransmit = qos->blockAckAgreementHandler ? frames->peekFrameToTransmit() : frames->getFrameToTransmit();
         if (frameSequence->getCount() == 0)
