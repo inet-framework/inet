@@ -8,7 +8,10 @@ so packets A->H are encapsulated (outer A->B), forwarded to B, decapsulated ther
 
 We verify that B receives an IPv6-in-IPv6 ("Tunnelled IP datagram") packet,
 i.e. the new tunnel interface encapsulated correctly, and that the UDP traffic
-reaches H.
+reaches H. The application binds no source address, and the tunnel interface
+has only its link-local address fe80::, so A must take its global address on
+eth0 as the inner source: a link-local source must not leave its link
+(RFC 4291 Section 2.5.6).
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -84,6 +87,10 @@ Tunnelled IP datagram
 %# the UDP traffic completed the trip A -(tunnel)-> B -(decap)-> H
 %contains: stdout
 received 8 packets
+%#--------------------------------------------------------------------------------------------------------------
+%# the inner source is A's global address, not the tunnel interface's fe80::
+%contains: stdout
+2001:db8:1:0:8aa:ff:fe00:1:1025 --> 2001:db8:2:0:8aa:ff:fe00:4:5000
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
