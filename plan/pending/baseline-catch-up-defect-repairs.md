@@ -1572,6 +1572,11 @@ the difference. The data segments are the same in both runs: the clients send 30
 2. *`tcp_nagle_2.test`.* Its expected trace changes in the same commit as the repair, to the trace with the delayed ACK.
    The assistant recommends it.
 
+**Gate A (2026-11-28).** The owner accepted both recommendations ("I approve R9 and R10 changes too"): the repair
+deletes the special case, and the expected trace of `tcp_nagle_2.test` changes in C17. No parameter of Linux: Linux has
+no special case for a segment of 1 byte. The unused helper `fieldOf()` of `Rfc9293OneByteSegmentDelayedAck.test`
+leaves the test.
+
 **Commit** (with the recommended answers): **C17: `tcp: fix: a data segment of 1 byte in an open window gets a delayed
 ACK (RFC 9293 SHLD-18)`** (BD-32), `TcpConnectionRcvSegment.cc`, the two tests, `tcp_nagle_2.test`, the reviewer
 document `tests/protocol/tcp/one-byte-segment-delayed-ack.md` and the release note
