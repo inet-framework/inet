@@ -232,6 +232,7 @@ simple IPsec extends SimpleModule
         @signal[outDrop](type=long);
         @signal[inProcessDelay](type=double);
         @signal[outProcessDelay](type=double);
+        @signal[packetDropped](type=inet::Packet);
 
         @statistic[inProtectedAccept](title="Incoming Protected Packet Accepted"; record=count,vector);
         @statistic[inProtectedDrop](title="Incoming Protected Packet Dropped"; record=count,vector);
@@ -242,6 +243,8 @@ simple IPsec extends SimpleModule
         @statistic[outDrop](title="Outgoing Packet Dropped"; record=count,vector);
         @statistic[inProcessDelay](title="Incoming Processing Delay"; record=vector,stats);
         @statistic[outProcessDelay](title="Outgoing Processing Delay"; record=vector,stats);
+        @statistic[packetDropLifetimeExpired](title="packet drop: lifetime expired"; source=packetDropReasonIsLifetimeExpired(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
         input ipIn;   // unused: nothing is dispatched up to IPsec

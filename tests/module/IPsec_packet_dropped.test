@@ -1,0 +1,79 @@
+%description:
+Tests that IPsec emits packetDropped when it discards a datagram, so that the
+packetDropUndefined statistic of the IPsec module counts the discards that its
+outDrop, inUnprotectedDrop and inProtectedDrop statistics count.
+
+client sends three UDP datagrams to each of three ports of server.
+- Port 2000: the client's Security Policy Database (SPD) has an OUT entry with
+  the action DISCARD, so the client's IPsec discards the datagrams.
+- Port 2001: the client's SPD has an OUT entry with the action BYPASS, and the
+  server's SPD has no entry for them, so the server's IPsec discards them on
+  arrival.
+- Port 2002: the client's SPD protects the datagrams with the Encapsulating
+  Security Payload (ESP) under Security Parameters Index (SPI) 7, and the
+  server has no Security Association (SA) and no SPD entry for them, so the server's IPsec
+  discards them after removing their network and ESP headers.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network IpsecDropNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.pppg++ <--> { datarate = 10Mbps; delay = 0.1us; } <--> server.pppg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = ../../../../src
+network = IpsecDropNetwork
+sim-time-limit = 5s
+record-vector-results = false
+cmdenv-express-mode = true
+
+**.hasIpsec = true
+**.client.**.spdConfig = xml("<Device>\
+    <SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2000</RemotePort></Selector><Direction>OUT</Direction><Action>DISCARD</Action></SecurityPolicy>\
+    <SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2001</RemotePort></Selector><Direction>OUT</Direction><Action>BYPASS</Action></SecurityPolicy>\
+    <SecurityPolicy><Selector><Protocol>UDP</Protocol><RemotePort>2002</RemotePort></Selector><Direction>OUT</Direction><Action>PROTECT</Action><Protection>ESP</Protection><EspMode>CONFIDENTIALITY</EspMode><EncryptionAlg>AES_CBC_128</EncryptionAlg><SecurityAssociation><SPI>7</SPI></SecurityAssociation></SecurityPolicy>\
+    </Device>")
+**.server.**.spdConfig = xml("<Device></Device>")
+
+**.client.numApps = 3
+**.client.app[*].typename = "UdpBasicApp"
+**.client.app[*].destAddresses = "server"
+**.client.app[0].destPort = 2000
+**.client.app[1].destPort = 2001
+**.client.app[2].destPort = 2002
+**.client.app[*].messageLength = 100B
+**.client.app[*].startTime = 1s
+**.client.app[*].sendInterval = 1s
+**.client.app[*].stopTime = 3.5s
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: gawk '$1 == "scalar" && $2 ~ /\.ipv4\.ipsec$/ && ($3 == "outDrop:count" || $3 == "inUnprotectedDrop:count" || $3 == "inProtectedDrop:count" || $3 == "packetDropUndefined:count") { print $2, $3, $4 }' results/*.sca > drops.out
+%contains: drops.out
+IpsecDropNetwork.client.ipv4.ipsec outDrop:count 3
+%#--------------------------------------------------------------------------------------------------------------
+%contains: drops.out
+IpsecDropNetwork.client.ipv4.ipsec packetDropUndefined:count 3
+%#--------------------------------------------------------------------------------------------------------------
+%contains: drops.out
+IpsecDropNetwork.server.ipv4.ipsec inUnprotectedDrop:count 3
+%#--------------------------------------------------------------------------------------------------------------
+%contains: drops.out
+IpsecDropNetwork.server.ipv4.ipsec inProtectedDrop:count 3
+%#--------------------------------------------------------------------------------------------------------------
+%contains: drops.out
+IpsecDropNetwork.server.ipv4.ipsec packetDropUndefined:count 6
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
