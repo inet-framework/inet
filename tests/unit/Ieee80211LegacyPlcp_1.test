@@ -1,0 +1,110 @@
+%description:
+Production radio DSSS/HR-DSSS SIGNAL/LENGTH/CRC and FHSS PLW/PSF; independent
+DSSS CRC vector and 11 Mbit/s length-extension boundary from IEEE PLCP examples.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211FhssMode.h"
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+class TestRadio : public Ieee80211Radio {
+  public:
+    using Ieee80211Radio::encapsulate;
+    using Ieee80211Radio::decapsulate;
+    using Ieee80211Radio::insertFcs;
+    using Ieee80211Radio::verifyFcs;
+    void configure(const ITransmitter *tx, FcsMode mode = FCS_COMPUTED) { transmitter = tx; fcsMode = mode; }
+};
+
+%activity:
+Ieee80211Transmitter transmitter;
+TestRadio radio;
+radio.configure(&transmitter);
+const IIeee80211Mode *modes[] = {
+    &Ieee80211DsssCompliantModes::dsssMode1Mbps,
+    &Ieee80211DsssCompliantModes::dsssMode2Mbps,
+    &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble,
+    &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble
+};
+const int signals[] = {10, 20, 55, 110};
+const int lengths[] = {192, 96, 35, 18};
+for (int i = 0; i < 4; i++) {
+    Packet packet("plcp", makeShared<ByteCountChunk>(B(24)));
+    packet.addTag<Ieee80211ModeReq>()->setMode(modes[i]);
+    radio.encapsulate(&packet);
+    auto header = packet.peekAtFront<Ieee80211DsssPhyHeader>();
+    ASSERT(header->getSignal() == signals[i]);
+    ASSERT(header->getPlcpLength() == lengths[i]);
+    ASSERT(header->getLengthField() == B(24));
+    auto bytes = packet.peekDataAt<BytesChunk>(b(0), B(6))->getBytes();
+    if (i == 0)
+        ASSERT(bytes == std::vector<uint8_t>({0x0a, 0, 0xc0, 0, 0xda, 0xea}));
+    // Exercise wire decoding and the real receive CRC check, including every
+    // protected field and both CRC octets. Bit errors must reach the MAC packet.
+    for (int corruptByte = -1; corruptByte < 6; corruptByte++) {
+        auto receivedBytes = bytes;
+        if (corruptByte >= 0)
+            receivedBytes[corruptByte] ^= 1;
+        Packet received("received", makeShared<BytesChunk>(receivedBytes));
+        received.insertAtBack(makeShared<ByteCountChunk>(B(24)));
+        received.addTag<PacketProtocolTag>()->setProtocol(i < 2 ? &Protocol::ieee80211DsssPhy : &Protocol::ieee80211HrDsssPhy);
+        received.addTag<Ieee80211ModeInd>()->setMode(modes[i]);
+        radio.decapsulate(&received);
+        ASSERT(received.hasBitError() == (corruptByte >= 0));
+    }
+}
+for (int length = 1023; length <= 1026; length++) {
+    Packet packet("extension", makeShared<ByteCountChunk>(B(length)));
+    packet.addTag<Ieee80211ModeReq>()->setMode(modes[3]);
+    radio.encapsulate(&packet);
+    auto header = packet.peekAtFront<Ieee80211HrDsssPhyHeader>();
+    ASSERT(header->getPlcpLength() == length - 279);
+    ASSERT(bool(header->getService() & 0x80) == (length == 1026));
+    Packet wire("wire", packet.peekDataAt<BytesChunk>(b(0), B(6)));
+    ASSERT(wire.peekAtFront<Ieee80211HrDsssPhyHeader>()->getLengthField() == B(length));
+}
+for (int index = 0; index < 2; index++) {
+    const IIeee80211Mode *mode = index == 0 ? &Ieee80211FhssCompliantModes::fhssMode1Mbps : &Ieee80211FhssCompliantModes::fhssMode2Mbps;
+    Packet packet("fhss", makeShared<ByteCountChunk>(B(0x123)));
+    packet.addTag<Ieee80211ModeReq>()->setMode(mode);
+    radio.encapsulate(&packet);
+    auto header = packet.peekAtFront<Ieee80211FhssPhyHeader>();
+    ASSERT(header->getPlw() == 0x123 && header->getPsf() == (index == 0 ? 0 : 4));
+    auto bytes = packet.peekDataAt<BytesChunk>(b(0), B(4))->getBytes();
+    ASSERT(bytes[0] == 0x23 && bytes[1] == (index == 0 ? 0x01 : 0x41));
+    for (int corruptByte = -1; corruptByte < 4; corruptByte++) {
+        auto receivedBytes = bytes;
+        if (corruptByte >= 0) receivedBytes[corruptByte] ^= 1;
+        Packet received("fhss-received", makeShared<BytesChunk>(receivedBytes));
+        received.insertAtBack(makeShared<ByteCountChunk>(B(0x123)));
+        received.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211FhssPhy);
+        received.addTag<Ieee80211ModeInd>()->setMode(mode);
+        radio.decapsulate(&received);
+        ASSERT(received.hasBitError() == (corruptByte >= 0));
+    }
+}
+// Declared modes retain their explicit pass/fail semantics.
+for (auto mode : {FCS_DECLARED_CORRECT, FCS_DECLARED_INCORRECT}) {
+    radio.configure(&transmitter, mode);
+    auto header = makeShared<Ieee80211DsssPhyHeader>();
+    radio.insertFcs(header);
+    ASSERT(radio.verifyFcs(header) == (mode == FCS_DECLARED_CORRECT));
+}
+radio.configure(&transmitter);
+auto ir = makeShared<Ieee80211IrPhyHeader>();
+bool unsupported = false;
+try { radio.insertFcs(ir); } catch (const cRuntimeError&) { unsupported = true; }
+ASSERT(unsupported);
+EV << "Legacy PLCP fields and computed CRC verified.\n";
+
+%contains: stdout
+Legacy PLCP fields and computed CRC verified.
