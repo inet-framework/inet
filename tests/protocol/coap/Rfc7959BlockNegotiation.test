@@ -1,0 +1,221 @@
+%description:
+
+RFC 7959 Sections 2.5 & 3.3 -- Block1/Block2 size down-negotiation (64B -> 32B)
+with byte-offset NUM recomputation, 4.13 single restart vs unqualified 4.13 failure,
+and combined Block1 POST upload + retained Block2 multi-block response.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class NegClient : public CoapClient
+{
+  public:
+    uint64_t sendReq(const std::string& host, int port, uint8_t method, const std::string& uri,
+            const std::vector<uint8_t>& body = {}, int cf = -1) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, method, true, uri, body, cf);
+    }
+};
+
+Define_Module(NegClient);
+
+Define_ProtocolTest(coap_block_negotiation)
+{
+    return ProtocolTest("coap_block_negotiation")
+        // 1. Block1 down-negotiation: client starts SZX=2 (64B), server enforces SZX=1 (32B) -> NUM=2 at offset 64
+        .act(action().at(1.0).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            cli.sendReq("hostB", 5683, COAP_CODE_PUT, "/negput", std::vector<uint8_t>(128, 'N'), 0);
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b1 = 0;
+                      auto b1v = getRawOptionValues(raw, COAP_OPT_BLOCK1);
+                      return b1v.size() == 1 && rawDecodeUint(b1v[0], b1) && b1 == 0x0AU; // NUM=0, M=1, SZX=2
+                  }).within(0.5))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b1 = 0;
+                      auto b1v = getRawOptionValues(raw, COAP_OPT_BLOCK1);
+                      return b1v.size() == 1 && rawDecodeUint(b1v[0], b1)
+                              && b1 == ((2U << 4U) | 0x09U); // NUM=2, M=1, SZX=1 (32B at offset 64!)
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getResources().at("negput").payload != std::vector<uint8_t>(128, 'N'))
+                throw cRuntimeError("Block1 negotiated PUT payload mismatch");
+        }))
+        // 2. Block2 down-negotiation: client requests GET /negread (pref 64B), server responds 32B (SZX=1)
+        .act(action().at(2.0).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            cli.sendReq("hostB", 5683, COAP_CODE_GET, "/negread");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b2 = 0;
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      return raw.code == COAP_CODE_CONTENT && raw.payload.size() == 32
+                              && b2v.size() == 1 && rawDecodeUint(b2v[0], b2) && b2 == 0x09U; // NUM=0, M=1, SZX=1
+                  }).within(0.5))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      uint32_t b2 = 0;
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      return b2v.size() == 1 && rawDecodeUint(b2v[0], b2)
+                              && b2 == ((1U << 4U) | 0x01U); // Follow-up NUM=1, SZX=1
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.01).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            if (cli.getCompletedResponses().back().payload != std::vector<uint8_t>(96, 'R'))
+                throw cRuntimeError("Block2 negotiated GET payload mismatch");
+        }))
+        // 3. Combined Block1 upload (96B) + Block2 response (120B) via POST /compute
+        .act(action().at(3.0).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            cli.sendReq("hostB", 5683, COAP_CODE_POST, "/compute", std::vector<uint8_t>(96, 'P'), 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.code == COAP_CODE_CONTINUE;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto b1v = getRawOptionValues(raw, COAP_OPT_BLOCK1);
+                      auto b2v = getRawOptionValues(raw, COAP_OPT_BLOCK2);
+                      return raw.code == COAP_CODE_CHANGED && b1v.size() == 1 && b2v.size() == 1;
+                  }).within(1.0))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      // Follow-up POST Block2 request must carry Block2(NUM>=1) and NO Block1
+                      return raw.code == COAP_CODE_POST
+                              && getRawOptionValues(raw, COAP_OPT_BLOCK1).empty()
+                              && getRawOptionValues(raw, COAP_OPT_BLOCK2).size() == 1;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.01).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            const auto& r = cli.getCompletedResponses().back();
+            std::vector<uint8_t> expected(24, 'I');
+            expected.insert(expected.end(), 96, 'P');
+            if (r.code != COAP_CODE_CHANGED || r.payload != expected)
+                throw cRuntimeError("Combined Block1+Block2 POST response mismatch (size=%zu)", r.payload.size());
+        }))
+        // 4. 4.13 single restart with smaller Block1 (peer enforces SZX=1 on a 60B PUT) vs unqualified 4.13 failure
+        .act(action().at(4.0).run<NegClient>("hostA.app[0]", [](NegClient& cli) {
+            cli.sendReq("hostB", 5684, COAP_CODE_PUT, "/retry413", std::vector<uint8_t>(60, 'Q'), 0);
+        }))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req, resp;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      resp.type = 2; resp.code = COAP_CODE_REQUEST_ENTITY_TOO_LARGE;
+                      resp.messageId = req.messageId; resp.token = req.token;
+                      resp.options.push_back({COAP_OPT_BLOCK1, coapUintBytes(0x01U)}); // suggest SZX=1 (32B)
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(resp), "Resp413Sug");
+                      return true;
+                  }).within(0.5))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req, resp;
+                      uint32_t b1 = 0;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      auto b1v = getRawOptionValues(req, COAP_OPT_BLOCK1);
+                      if (b1v.size() != 1 || !rawDecodeUint(b1v[0], b1) || b1 != 0x09U) // NUM=0, M=1, SZX=1
+                          return false;
+                      resp.type = 2; resp.code = COAP_CODE_CONTINUE;
+                      resp.messageId = req.messageId; resp.token = req.token;
+                      resp.options.push_back({COAP_OPT_BLOCK1, coapUintBytes(0x09U)});
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(resp), "Cont413");
+                      return true;
+                  }).within(0.5))
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[1]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req, resp;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+                      resp.type = 2; resp.code = COAP_CODE_CHANGED;
+                      resp.messageId = req.messageId; resp.token = req.token;
+                      resp.options.push_back({COAP_OPT_BLOCK1, coapUintBytes((1U << 4U) | 0x01U)});
+                      peer->sendRawNow(last.srcAddr, last.srcPort, encodeRawCoap(resp), "Done413");
+                      return true;
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(0.5));
+}
+
+%activity:
+EV << "coap_block_negotiation compiled\n";
+
+%file: NegClient.ned
+import inet.applications.coap.CoapClient;
+
+simple NegClient extends CoapClient
+{
+    parameters:
+        @class(NegClient);
+}
+
+%file: resources.xml
+<resources>
+    <resource path="/negput" contentFormat="0" maxAge="60" methods="GET,PUT">old</resource>
+    <resource path="/negread" contentFormat="0" maxAge="60" methods="GET">RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR</resource>
+    <resource path="/compute" contentFormat="0" maxAge="60" methods="GET,POST">IIIIIIIIIIIIIIIIIIIIIIII</resource>
+</resources>
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_block_negotiation"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "NegClient"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].preferredBlockSize = 64B
+
+*.hostB.numApps = 2
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 32B
+*.hostB.app[0].resources = xmldoc("resources.xml")
+
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+
+%contains: stdout
+PROTOCOLTEST coap_block_negotiation: PASS

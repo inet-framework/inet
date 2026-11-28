@@ -1,0 +1,198 @@
+%description:
+
+RFC 7252 Sections 4.7, 4.8.2 -- NSTART=1 serialization, Empty ACK release
+for concurrent separate exchanges, cross-peer queue progress past a blocked
+queue head, queue capacity rejection (64), PROBING_RATE delay after failure,
+and full MID reservation defer until expiry.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class CongestionTestClient : public CoapClient
+{
+  public:
+    simtime_t failureTime = SIMTIME_ZERO;
+    simtime_t postFailureSendTime = SIMTIME_ZERO;
+    size_t failedBytes = 0;
+
+    uint64_t sendReq(const std::string& host, int port, bool confirmable, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port,
+                COAP_CODE_GET, confirmable, uri, {});
+    }
+
+    void reserveAllMids(simtime_t duration) {
+        configureMidGeneratorForTest(0x3000, true, duration);
+    }
+
+    void clearConFailuresForPhase3() {
+        failureTime = SIMTIME_ZERO;
+        postFailureSendTime = SIMTIME_ZERO;
+    }
+
+  protected:
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        if (failureTime == SIMTIME_ZERO)
+            failedBytes = packet->peekDataAsBytes()->getBytes().size();
+        else if (postFailureSendTime == SIMTIME_ZERO)
+            postFailureSendTime = simTime();
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+
+    virtual void onRequestFailed(uint64_t requestId, const char *reason, uint8_t coapCode) override {
+        failureTime = simTime();
+        CoapClient::onRequestFailed(requestId, reason, coapCode);
+    }
+};
+
+Define_Module(CongestionTestClient);
+
+Define_ProtocolTest(coap_congestion_admission)
+{
+    return ProtocolTest("coap_congestion_admission")
+        // Phase 1 (t=1.0s): NSTART=1 to hostB:5684. Queue Req1(5684), Req2(5684), Req3(5685 responsive server).
+        // Req1 sends immediately; Req2 stays at queue head; Req3 skips blocked queue head and completes immediately!
+        .act(action().at(1.0).run<CongestionTestClient>("hostA.app[0]", [](CongestionTestClient& cli) {
+            if (cli.sendReq("hostB", 5684, true, "/q1") == 0)
+                throw cRuntimeError("Req1 failed");
+            if (cli.sendReq("hostB", 5684, true, "/q2") == 0)
+                throw cRuntimeError("Req2 failed");
+            if (cli.sendReq("hostB", 5685, true, "/fast") == 0)
+                throw cRuntimeError("Req3 failed");
+        }))
+        // Req3 completes cleanly from responsive server port 5685 WHILE Req2 stays queued behind Req1!
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        // Now verify hostB.app[1] (5684) has received ONLY Req1 so far, and answer Req1 with Empty ACK only!
+        .act(action().after(0.05).run<CoapTestPeer>("hostB.app[1]", [](CoapTestPeer& peer) {
+            if (peer.getReceivedDatagrams().size() != 1)
+                throw cRuntimeError("Expected NSTART=1 to hold Req2, got %zu datagrams on 5684",
+                        peer.getReceivedDatagrams().size());
+            const auto& d1 = peer.getReceivedDatagrams()[0];
+            RawCoapMessage r1;
+            decodeRawCoap(d1.bytes, r1);
+            RawCoapMessage eack;
+            eack.type = 2; eack.code = 0; eack.messageId = r1.messageId;
+            peer.sendRawNow(d1.srcAddr, d1.srcPort, encodeRawCoap(eack), "Req1EmptyAck");
+        }))
+        // Empty ACK releases NSTART slot so Req2 transmits immediately while Req1 awaits separate response!
+        .once(on("hostB.app[1]").signal("packetReceivedFromLower").within(1.0))
+        // Answer both Req1 and Req2 cleanly from hostB.app[1] to clear pending state.
+        .act(action().after(0.02).run<CoapTestPeer>("hostB.app[1]", [](CoapTestPeer& peer) {
+            for (const auto& d : peer.getReceivedDatagrams()) {
+                RawCoapMessage req;
+                decodeRawCoap(d.bytes, req);
+                RawCoapMessage resp;
+                resp.type = (d.bytes == peer.getReceivedDatagrams()[0].bytes) ? 0 : 2;
+                resp.code = COAP_CODE_CONTENT;
+                resp.messageId = (resp.type == 2) ? req.messageId : static_cast<uint16_t>(req.messageId + 100);
+                resp.token = req.token;
+                resp.payload = asciiBytes("done");
+                peer.sendRawNow(d.srcAddr, d.srcPort, encodeRawCoap(resp), "ClearPhase1");
+            }
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+
+        // Phase 2 (t=2.0s): Queue depth limit = 64 -> enqueue 1 in-flight + 64 queued + 1 overflow (capacityRejected).
+        .meanwhile(exactlyTimes(1, on("hostA.app[0]").signal("capacityRejected").within(2.0)))
+        .act(action().at(2.0).run<CongestionTestClient>("hostA.app[0]", [](CongestionTestClient& cli) {
+            if (cli.sendReq("hostB", 5684, true, "/fill-0") == 0)
+                throw cRuntimeError("Expected active CON 0 to succeed");
+            for (int i = 1; i <= 64; ++i) {
+                if (cli.sendReq("hostB", 5684, true, "/fill") == 0)
+                    throw cRuntimeError("Expected queued slot %d to fit in 64-entry queue", i);
+            }
+            if (cli.sendReq("hostB", 5684, true, "/overflow") != 0)
+                throw cRuntimeError("Expected 65th queued item to fail with capacityRejected");
+        }))
+        .act(action().after(0.02).run<CongestionTestClient>("hostA.app[0]", [](CongestionTestClient& cli) {
+            // Reset peer 5684 active exchange and flush queue synchronously via RSTs from peer 5684?
+            // Actually answer with ACK for each as they drain by scheduling peer responses? Even simpler:
+            // reuse a dedicated hostA.app[1] client for Phase 3/4 so Phase 2 overflow stays clean!
+            (void)cli;
+        }))
+
+        // Phase 3 (t=10.0s, on clean client hostA.app[1]): PROBING_RATE delay after silent CON timeout.
+        // Client sends CON to silent port 5686 -> exhausts 4 retries (0..31T). 1s after failureTime, queue a follow-up CON
+        // to port 5686 -> verify delay >= failedBytes / 1.0 B/s!
+        .act(action().at(10.0).run<CongestionTestClient>("hostA.app[1]", [](CongestionTestClient& cli) {
+            cli.clearConFailuresForPhase3();
+            cli.sendReq("hostB", 5686, true, "/silent");
+        }))
+        .once(on("hostA.app[1]").signal("requestFailed").within(96.0))
+        .act(action().after(1.0).run<CongestionTestClient>("hostA.app[1]", [](CongestionTestClient& cli) {
+            cli.sendReq("hostB", 5686, true, "/probe-next");
+        }))
+        .once(on("hostA.app[1]").signal("packetSentToLower").within(40.0))
+        .act(action().after(0.01).run<CongestionTestClient>("hostA.app[1]", [](CongestionTestClient& cli) {
+            simtime_t requiredDelay = SimTime(static_cast<double>(cli.failedBytes)); // probingRate = 1 B/s
+            simtime_t elapsed = cli.postFailureSendTime - cli.failureTime;
+            if (elapsed + SimTime(1, SIMTIME_US) < requiredDelay)
+                throw cRuntimeError("Probing follow-up sent too early: elapsed=%s required=%s",
+                        elapsed.str().c_str(), requiredDelay.str().c_str());
+        }))
+
+        // Phase 4 (t=150.0s, on hostA.app[2]): Reserve ALL 65536 MIDs for 10s -> queue request -> defers until expiry, then completes!
+        .act(action().at(150.0).run<CongestionTestClient>("hostA.app[2]", [](CongestionTestClient& cli) {
+            cli.reserveAllMids(10.0);
+            if (cli.sendReq("hostB", 5685, true, "/fast") == 0)
+                throw cRuntimeError("Expected request with exhausted MID pool to enqueue & defer, not reject");
+        }))
+        .never(on("hostA.app[2]").signal("packetSentToLower").within(9.8))
+        .once(on("hostA.app[2]").signal("packetSentToLower").within(1.0))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.0));
+}
+
+%activity:
+EV << "coap_congestion_admission compiled\n";
+
+%file: CongestionTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple CongestionTestClient extends CoapClient
+{
+    parameters:
+        @class(CongestionTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 175s
+seed-set = 0
+*.tester.testName = "coap_congestion_admission"
+
+*.hostA.numApps = 3
+*.hostA.app[0].typename = "CongestionTestClient"
+*.hostA.app[0].localPort = 16000
+*.hostA.app[0].maxPendingRequests = 100
+*.hostA.app[0].maxPendingOutboundPerEndpoint = 64
+*.hostA.app[1].typename = "CongestionTestClient"
+*.hostA.app[1].localPort = 16001
+*.hostA.app[1].probingRate = 8bps
+*.hostA.app[2].typename = "CongestionTestClient"
+*.hostA.app[2].localPort = 16002
+
+*.hostB.numApps = 3
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[1].typename = "CoapTestPeer"
+*.hostB.app[1].localPort = 5684
+*.hostB.app[2].typename = "CoapServer"
+*.hostB.app[2].localPort = 5685
+*.hostB.app[2].resources = xml("<resources><resource path='/fast' contentFormat='0'>fast-ok</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_congestion_admission: PASS

@@ -1,0 +1,204 @@
+%description:
+
+RFC 7641 Sections 3.5, 3.6, 4.2, 4.5 -- Explicit cancellation via GET Observe=1
+retaining token/URI/Accept without ETag, local cancellation triggering RST on
+next CON notification, server deletion emitting terminal 4.04 without Observe,
+incompatible format mutation emitting terminal 4.06 without Observe, and
+MAX_RETRANSMIT CON failure removing server observer.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class CancelTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+    std::vector<std::pair<uint64_t, uint8_t>> terminations;
+    int dropNextNotifs = 0;
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri, int accept = -1) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, accept);
+    }
+
+    bool cancel(uint64_t consumerId, bool sendExplicit) {
+        return unsubscribeObserve(consumerId, sendExplicit);
+    }
+
+  protected:
+    virtual void socketDataArrived(UdpSocket *arrivedSocket, Packet *packet) override {
+        if (dropNextNotifs > 0) {
+            RawCoapMessage raw;
+            if (decodeRawCoap(extractAppCoapWireBytes(packet), raw) && raw.type == 0) {
+                --dropNextNotifs;
+                delete packet;
+                return;
+            }
+        }
+        CoapClient::socketDataArrived(arrivedSocket, packet);
+    }
+
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+
+    virtual void onObserveTerminated(uint64_t relationId, uint8_t code, const char *reason) override {
+        terminations.emplace_back(relationId, code);
+    }
+};
+
+Define_Module(CancelTestClient);
+
+Define_ProtocolTest(coap_observe_cancellation)
+{
+    return ProtocolTest("coap_observe_cancellation")
+        // 1. Explicit Observe=1 cancellation: copies Accept=0 and relation token, omits ETag; response omits Observe; update emits nothing.
+        .act(action().at(1.0).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.startObs("hostB", 5683, "/res1?k=1", 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.cancel(1, true);
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                          return false;
+                      auto obs = getRawOptionValues(raw, COAP_OPT_OBSERVE);
+                      auto acc = getRawOptionValues(raw, COAP_OPT_ACCEPT);
+                      auto queries = getRawOptionStrings(raw, COAP_OPT_URI_QUERY);
+                      return raw.code == COAP_CODE_GET && obs.size() == 1 && coapDecodedUint(obs[0]) == 1
+                              && acc.size() == 1 && coapDecodedUint(acc[0]) == 0
+                              && queries.size() == 1 && queries[0] == "k=1"
+                              && getRawOptionValues(raw, COAP_OPT_ETAG).empty();
+                  }).within(0.5))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_CONTENT
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).empty();
+                  }).within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (!srv.getObservers().empty())
+                throw cRuntimeError("Expected 0 observers after Observe=1");
+            srv.updateResourceValue("/res1", {'x'});
+        }))
+
+        // 2. Local silent cancellation -> next CON notification elicits RST from client and removes observer
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.startObs("hostB", 5683, "/res1", 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.cancel(2, false);
+        }))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/res1", {'r', 's', 't'});
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw) && raw.type == 3; // RST
+                  }).within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (!srv.getObservers().empty())
+                throw cRuntimeError("Expected 0 observers after RST");
+        }))
+
+        // 3. Server resource deletion -> terminal 4.04 without Observe removes both sides
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.startObs("hostB", 5683, "/res2", 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.deleteResourceValue("/res2");
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_NOT_FOUND
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).empty();
+                  }).within(0.5))
+
+        // 4. Server incompatible Content-Format update -> terminal 4.06 without Observe removes both sides
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.startObs("hostB", 5683, "/res1", 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/res1", {'j', 's', 'o', 'n'}, 50);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.code == COAP_CODE_NOT_ACCEPTABLE
+                              && getRawOptionValues(raw, COAP_OPT_OBSERVE).empty();
+                  }).within(0.5))
+
+        // 5. Max retransmissions (5 dropped CON notification attempts) removes server observer!
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.startObs("hostB", 5683, "/res3", 0);
+        }))
+        .once(on("hostA.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            cli.dropNextNotifs = 5;
+        }))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            srv.updateResourceValue("/res3", {'l', 'o', 's', 't'});
+        }))
+        .act(action().after(96.0).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (!srv.getObservers().empty())
+                throw cRuntimeError("Expected server observer removed after MAX_RETRANSMIT exhaustion");
+        }))
+        .act(action().after(0.05).run<CancelTestClient>("hostA.app[0]", [](CancelTestClient& cli) {
+            if (cli.terminations.size() < 2
+                    || cli.terminations[0].second != COAP_CODE_NOT_FOUND
+                    || cli.terminations[1].second != COAP_CODE_NOT_ACCEPTABLE)
+                throw cRuntimeError("Expected 4.04 and 4.06 terminations on client (got %zu)", cli.terminations.size());
+        }));
+}
+
+%activity:
+EV << "coap_observe_cancellation compiled\n";
+
+%file: CancelTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple CancelTestClient extends CoapClient
+{
+    parameters:
+        @class(CancelTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 120s
+seed-set = 0
+*.tester.testName = "coap_observe_cancellation"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "CancelTestClient"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].resources = xml("<resources><resource path='/res1' methods='GET,PUT' contentFormat='0' obs='true'>init1</resource><resource path='/res2' methods='GET,DELETE' contentFormat='0' obs='true'>init2</resource><resource path='/res3' methods='GET,PUT' contentFormat='0' obs='true'>init3</resource></resources>")
+
+%contains: stdout
+PROTOCOLTEST coap_observe_cancellation: PASS

@@ -1,0 +1,413 @@
+%description:
+
+CoAP endpoint lifecycle recovery (C8): ModuleStopOperation and
+ModuleCrashOperation abort unfinished CON, Block1, Block2, and initial Observe
+registrations (one requestAborted each), terminate already established
+observations via onObserveTerminated without a second requestAborted, emit no
+packets while stopped, preserve timer/token/MID/ETag identity across restarts,
+reject injected stale pre-stop replies, retain server resources and duplicate
+tombstones across ordinary stop/start, and reset resources and receive
+duplicate history on crash.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTester.h"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class LifeClient : public CoapClient
+{
+  public:
+    int txCount = 0;
+    int txWhileDown = 0;
+    std::vector<uint64_t> abortedIds;
+    std::vector<uint64_t> terminatedRelationIds;
+    std::vector<CoapClientObserveNotification> obsNotes;
+    cMessage *initialTimerPtr = nullptr;
+
+    uint64_t reqGet(const std::string& host, int port, const std::string& uri, bool con = true) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, con, uri, {});
+    }
+
+    uint64_t reqPutLarge(const std::string& host, int port, const std::string& uri, size_t len) {
+        std::vector<uint8_t> body(len, 'U');
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_PUT, true, uri, body, 0);
+    }
+
+    uint64_t reqGetBlock2(const std::string& host, int port, const std::string& uri) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_GET, true, uri, {});
+    }
+
+    uint64_t reqObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true, 0);
+    }
+
+    const cMessage *getDeadlinePtr() const { return deadlineTimer; }
+    bool isOperating() const { return operationalState == State::OPERATING; }
+    int getAbortedCount() const { return abortedCount; }
+
+  protected:
+    virtual void initialize(int stage) override {
+        CoapClient::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            initialTimerPtr = deadlineTimer;
+    }
+
+    virtual void sendCoapPacket(Packet *packet, const L3Address& destAddr, int destPort) override {
+        ++txCount;
+        if (operationalState != State::OPERATING)
+            ++txWhileDown;
+        CoapClient::sendCoapPacket(packet, destAddr, destPort);
+    }
+
+    virtual void onRequestAborted(uint64_t requestId) override {
+        abortedIds.push_back(requestId);
+        CoapClient::onRequestAborted(requestId);
+    }
+
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        obsNotes.push_back(notification);
+    }
+
+    virtual void onObserveTerminated(uint64_t relationId, uint8_t code, const char *reason) override {
+        terminatedRelationIds.push_back(relationId);
+    }
+};
+
+Define_Module(LifeClient);
+
+class DelayNum1Server : public CoapServer
+{
+  public:
+    bool dropAllInbound = false;
+    bool delayBlock1Mid = false;
+    bool delayBlock2Num1 = false;
+    int rxCount = 0;
+
+  protected:
+    virtual void handleInboundRequest(const CoapPeerEndpoint& peer, bool destIsMulticast,
+            const Ptr<const CoapHeader>& header, const std::vector<uint8_t>& payload) override {
+        ++rxCount;
+        if (dropAllInbound)
+            return;
+
+        if (delayBlock1Mid && header->getCode() == COAP_CODE_PUT) {
+            for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
+                if (header->getOptions(i).getNumber() == COAP_OPT_BLOCK1) {
+                    simtime_t saved = responseDelay;
+                    responseDelay = 5.0;
+                    CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+                    responseDelay = saved;
+                    return;
+                }
+            }
+        }
+        if (delayBlock2Num1 && header->getCode() == COAP_CODE_GET) {
+            for (size_t i = 0; i < header->getOptionsArraySize(); ++i) {
+                const auto& opt = header->getOptions(i);
+                if (opt.getNumber() == COAP_OPT_BLOCK2) {
+                    uint32_t bv = 0;
+                    for (size_t j = 0; j < opt.getValueArraySize(); ++j)
+                        bv = (bv << 8) | opt.getValue(j);
+                    if ((bv >> 4) == 1U) {
+                        simtime_t saved = responseDelay;
+                        responseDelay = 5.0;
+                        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+                        responseDelay = saved;
+                        return;
+                    }
+                }
+            }
+        }
+        CoapServer::handleInboundRequest(peer, destIsMulticast, header, payload);
+    }
+};
+
+Define_Module(DelayNum1Server);
+
+Define_ProtocolTest(coap_lifecycle)
+{
+    return ProtocolTest("coap_lifecycle")
+        // Part 1: Stop hostA.app[0] during 4 unfinished operations (CON GET, initial Observe, Block1 PUT, Block2 GET)
+        // Start Block2 GET first at t=1.0 while delayBlock2Num1 delays NUM=1; wait 0.05s for NUM=0 to complete and NUM=1 to hang.
+        .act(action().at(1.0).run<DelayNum1Server>("hostB.app[0]", [](DelayNum1Server& srv) {
+            srv.delayBlock2Num1 = true;
+            srv.delayBlock1Mid = true;
+        }))
+        .act(action().at(1.0).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            cli.reqGetBlock2("hostB", 5683, "/large");
+        }))
+        .act(action().at(1.05).run<DelayNum1Server>("hostB.app[0]", [](DelayNum1Server& srv) {
+            srv.dropAllInbound = true; // cause CON GET, init Observe, and wait-for-Block1 to stay unfinished
+        }))
+        .act(action().at(1.06).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            cli.reqPutLarge("hostB", 5683, "/upload", 96);
+            cli.reqGet("hostB", 5683, "/sensors/temp", true);
+            cli.reqObs("hostB", 5683, "/sensors/temp");
+        }))
+        // Stop hostA.app[0] at t=1.2 while all 4 logical operations are unfinished
+        .act(action().at(1.2).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *cli = check_and_cast<LifeClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(cli, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().at(1.25).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            if (cli.isOperating())
+                throw cRuntimeError("Expected hostA.app[0] to have finished ModuleStopOperation synchronously via socketClosed");
+            if (cli.abortedIds.size() != 4 || cli.getAbortedCount() != 4)
+                throw cRuntimeError("Expected 4 aborted unfinished operations, got %zu (%d)",
+                        cli.abortedIds.size(), cli.getAbortedCount());
+            // Admission guard while stopped:
+            if (cli.reqGet("hostB", 5683, "/sensors/temp", true) != 0 || cli.reqObs("hostB", 5683, "/sensors/temp") != 0)
+                throw cRuntimeError("Stopped CoapClient must refuse new requests");
+            cli.txCount = 0;
+        }))
+        // Observe 0 transmissions while stopped until t=2.0, then restart and re-use timer + stale reply isolation
+        .act(action().at(2.0).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            if (cli.txCount != 0 || cli.txWhileDown != 0)
+                throw cRuntimeError("Expected 0 sends while stopped, got txCount=%d txWhileDown=%d",
+                        cli.txCount, cli.txWhileDown);
+        }))
+        .act(action().at(2.0).run<DelayNum1Server>("hostB.app[0]", [](DelayNum1Server& srv) {
+            srv.dropAllInbound = false;
+            srv.delayBlock1Mid = false;
+            srv.delayBlock2Num1 = false;
+        }))
+        .act(action().at(2.0).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *cli = check_and_cast<LifeClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(cli, params);
+            lc.initiateOperation(startOp);
+        }))
+        // Inject stale pre-stop responses/notifications/blocks from peer hostC while client runs fresh GET
+        .act(action().at(2.05).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage stale;
+            stale.type = 2; stale.code = COAP_CODE_CONTENT; stale.messageId = 0x9001;
+            stale.token = {0xAA, 0xBB, 0xCC, 0xDD};
+            stale.payload = asciiBytes("stale-reply");
+            peer.sendRawNow("hostA", 16000, encodeRawCoap(stale), "StaleReply");
+        }))
+        .act(action().at(2.08).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            if (cli.initialTimerPtr == nullptr || cli.getDeadlinePtr() != cli.initialTimerPtr)
+                throw cRuntimeError("Expected deadlineTimer pointer reuse on ordinary restart");
+            if (!cli.getCompletedResponses().empty() || !cli.obsNotes.empty())
+                throw cRuntimeError("Stale pre-stop reply delivered after restart");
+            cli.reqGet("hostB", 5683, "/sensors/temp", true);
+        }))
+        .once(on("hostA.app[0]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.02).run<LifeClient>("hostA.app[0]", [](LifeClient& cli) {
+            if (cli.getCompletedResponses().size() != 1
+                    || cli.getCompletedResponses()[0].payload != asciiBytes("20C"))
+                throw cRuntimeError("Fresh GET after restart failed");
+        }))
+
+        // Part 2: Established Observe on hostA.app[1] across stop AND hostA.app[2] across crash
+        .act(action().at(3.0).run<LifeClient>("hostA.app[1]", [](LifeClient& cli) {
+            cli.reqObs("hostB", 5683, "/sensors/temp");
+        }))
+        .once(on("hostA.app[1]").signal("notificationReceived").within(0.5))
+        .act(action().after(0.02).run<LifeClient>("hostA.app[2]", [](LifeClient& cli) {
+            cli.reqObs("hostB", 5683, "/sensors/temp");
+        }))
+        .once(on("hostA.app[2]").signal("notificationReceived").within(0.5))
+        .act(action().at(3.19).run<LifeClient>("hostA.app[2]", [](LifeClient& cli) {
+            cli.reqGet("hostB", 5699, "/missing-pending", true); // unfinished CON GET to blackhole port 5699
+        }))
+        .act(action().at(3.2).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            LifecycleOperation::StringMap params;
+            auto *c1 = check_and_cast<LifeClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 1));
+            auto *stop1 = new ModuleStopOperation();
+            stop1->initialize(c1, params);
+            lc.initiateOperation(stop1);
+
+            auto *c2 = check_and_cast<LifeClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 2));
+            auto *crash2 = new ModuleCrashOperation();
+            crash2->initialize(c2, params);
+            lc.initiateOperation(crash2);
+        }))
+        .act(action().at(3.3).run<LifeClient>("hostA.app[1]", [](LifeClient& cli) {
+            // Established obs terminated with 0 requestAborted outcomes!
+            if (cli.terminatedRelationIds.size() != 1 || cli.getAbortedCount() != 0)
+                throw cRuntimeError("Established observation stop expected 1 termination & 0 aborted, got %zu term / %d aborted",
+                        cli.terminatedRelationIds.size(), cli.getAbortedCount());
+        }))
+        .act(action().at(3.3).run<LifeClient>("hostA.app[2]", [](LifeClient& cli) {
+            // Crash with 1 established obs + 1 unfinished CON GET -> 1 termination + 1 aborted!
+            if (cli.terminatedRelationIds.size() != 1 || cli.getAbortedCount() != 1)
+                throw cRuntimeError("Crash expected 1 termination & 1 aborted, got %zu term / %d aborted",
+                        cli.terminatedRelationIds.size(), cli.getAbortedCount());
+        }))
+        // Crash & restart hostA.app[2] -> fresh GET still works after socket destroy + rebind!
+        .act(action().at(3.35).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *c2 = check_and_cast<LifeClient *>(lc.getSystemModule()->getSubmodule("hostA")->getSubmodule("app", 2));
+            LifecycleOperation::StringMap params;
+            auto *start2 = new ModuleStartOperation();
+            start2->initialize(c2, params);
+            lc.initiateOperation(start2);
+        }))
+        .act(action().at(3.4).run<LifeClient>("hostA.app[2]", [](LifeClient& cli) {
+            cli.reqGet("hostB", 5683, "/sensors/temp", true);
+        }))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.0))
+
+        // Part 3: Server ordinary restart vs crash: duplicate tombstones & resource persistence
+        .act(action().at(4.0).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            // Mutate /sensors/temp via PUT -> "99C", and append "+1" to /items/counter with MID 0x4401
+            RawCoapMessage putReq;
+            putReq.type = 0; putReq.code = COAP_CODE_PUT; putReq.messageId = 0x4400; putReq.token = {0x40};
+            putReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("sensors")});
+            putReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("temp")});
+            putReq.payload = asciiBytes("99C");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(putReq), "PutTemp");
+        }))
+        .once(on("hostC.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().at(4.1).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage postReq;
+            postReq.type = 0; postReq.code = COAP_CODE_POST; postReq.messageId = 0x4401; postReq.token = {0x41};
+            postReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("items")});
+            postReq.options.push_back({COAP_OPT_URI_PATH, asciiBytes("counter")});
+            postReq.payload = asciiBytes("+1");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(postReq), "PostCounter");
+        }))
+        .once(on("hostC.app[0]").signal("packetReceivedFromLower").within(0.5))
+        // Ordinary Stop & Start hostB.app[0] (allow UDP_I_SOCKET_CLOSED to complete stop between 4.2s and 4.25s)
+        .act(action().at(4.2).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *srv = check_and_cast<DelayNum1Server *>(lc.getSystemModule()->getSubmodule("hostB")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *stopOp = new ModuleStopOperation();
+            stopOp->initialize(srv, params);
+            lc.initiateOperation(stopOp);
+        }))
+        .act(action().at(4.25).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *srv = check_and_cast<DelayNum1Server *>(lc.getSystemModule()->getSubmodule("hostB")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(srv, params);
+            lc.initiateOperation(startOp);
+        }))
+        // Replay exact same MID 0x4401 POST -> suppressed by retained duplicate tombstone, resource preserved ("+1", "99C")
+        .act(action().at(4.3).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage postDup;
+            postDup.type = 0; postDup.code = COAP_CODE_POST; postDup.messageId = 0x4401; postDup.token = {0x41};
+            postDup.options.push_back({COAP_OPT_URI_PATH, asciiBytes("items")});
+            postDup.options.push_back({COAP_OPT_URI_PATH, asciiBytes("counter")});
+            postDup.payload = asciiBytes("+1");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(postDup), "PostCounterDupAfterStop");
+        }))
+        .once(on("hostC.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.02).run<DelayNum1Server>("hostB.app[0]", [](DelayNum1Server& srv) {
+            const auto& res = srv.getResources();
+            if (res.at("sensors/temp").payload != asciiBytes("99C")
+                    || res.at("items/counter").payload != asciiBytes("base+1"))
+                throw cRuntimeError("Ordinary restart did not preserve resources/tombstone (counter='%s')",
+                        std::string(res.at("items/counter").payload.begin(), res.at("items/counter").payload.end()).c_str());
+        }))
+        // Crash & Start hostB.app[0] -> resets resources to XML defaults & clears duplicate history
+        .act(action().at(4.5).run<ProtocolTester>("tester", [](ProtocolTester& lc) {
+            auto *srv = check_and_cast<DelayNum1Server *>(lc.getSystemModule()->getSubmodule("hostB")->getSubmodule("app", 0));
+            LifecycleOperation::StringMap params;
+            auto *crashOp = new ModuleCrashOperation();
+            crashOp->initialize(srv, params);
+            lc.initiateOperation(crashOp);
+            auto *startOp = new ModuleStartOperation();
+            startOp->initialize(srv, params);
+            lc.initiateOperation(startOp);
+        }))
+        .act(action().at(4.6).run<CoapTestPeer>("hostC.app[0]", [](CoapTestPeer& peer) {
+            RawCoapMessage postReplay;
+            postReplay.type = 0; postReplay.code = COAP_CODE_POST; postReplay.messageId = 0x4401; postReplay.token = {0x41};
+            postReplay.options.push_back({COAP_OPT_URI_PATH, asciiBytes("items")});
+            postReplay.options.push_back({COAP_OPT_URI_PATH, asciiBytes("counter")});
+            postReplay.payload = asciiBytes("+1");
+            peer.sendRawNow("hostB", 5683, encodeRawCoap(postReplay), "PostCounterAfterCrash");
+        }))
+        .once(on("hostC.app[0]").signal("packetReceivedFromLower").within(0.5))
+        .act(action().after(0.02).run<DelayNum1Server>("hostB.app[0]", [](DelayNum1Server& srv) {
+            const auto& res = srv.getResources();
+            if (res.at("sensors/temp").payload != asciiBytes("20C")
+                    || res.at("items/counter").payload != asciiBytes("base+1"))
+                throw cRuntimeError("Crash restart expected reset temp=20C & re-executed counter=base+1");
+        }));
+}
+
+%activity:
+EV << "coap_lifecycle compiled\n";
+
+%file: CoapLifecycleNet.ned
+import inet.applications.coap.CoapClient;
+import inet.applications.coap.CoapServer;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.protocoltest.ProtocolTester;
+
+simple LifeClient extends CoapClient
+{
+    parameters:
+        @class(LifeClient);
+}
+
+simple DelayNum1Server extends CoapServer
+{
+    parameters:
+        @class(DelayNum1Server);
+}
+
+network CoapLifecycleNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=80,50"); }
+        tester: ProtocolTester { @display("p=80,150"); }
+        hostA: StandardHost { @display("p=250,80"); }
+        hostB: StandardHost { @display("p=450,80"); }
+        hostC: StandardHost { @display("p=350,200"); }
+    connections:
+        hostA.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+        hostC.ethg++ <--> EthernetLink { datarate = 100Mbps; delay = 0.1ms; } <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CoapLifecycleNet
+sim-time-limit = 10s
+seed-set = 0
+*.tester.testName = "coap_lifecycle"
+
+*.hostA.numApps = 3
+*.hostA.app[*].typename = "LifeClient"
+*.hostA.app[*].preferredBlockSize = 32B
+*.hostA.app[*].stopOperationExtraTime = 0s
+*.hostA.app[0].localPort = 16000
+*.hostA.app[1].localPort = 16001
+*.hostA.app[2].localPort = 16002
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "DelayNum1Server"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 32B
+*.hostB.app[0].stopOperationExtraTime = 0s
+*.hostB.app[0].resources = xml("<resources><resource path='/sensors/temp' methods='GET,PUT' contentFormat='0' obs='true' maxAge='60'>20C</resource><resource path='/items/counter' methods='GET,PUT,POST' contentFormat='0' maxAge='60'>base</resource><resource path='/upload' methods='GET,PUT' contentFormat='0' maxAge='60'>old</resource><resource path='/large' methods='GET' contentFormat='0' maxAge='60'>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</resource></resources>")
+
+*.hostC.numApps = 1
+*.hostC.app[0].typename = "CoapTestPeer"
+*.hostC.app[0].localPort = 17000
+
+%contains: stdout
+PROTOCOLTEST coap_lifecycle: PASS

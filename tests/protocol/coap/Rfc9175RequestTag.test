@@ -1,0 +1,195 @@
+%description:
+
+RFC 9175 Request-Tag (option 292) -- Concurrent interleaved Block1 uploads
+from the same client keyed by Request-Tag, unseen tag at NUM>0 -> 4.08,
+tag > 8 octets -> 4.02, Request-Tag never echoed in responses,
+CoapClient useRequestTag automatic monotonic tagging, and serialization of untagged uploads.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/applications/coap/CoapServer.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class TagClient : public CoapClient
+{
+  public:
+    uint64_t putResource(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_PUT, true, uri, body, 0);
+    }
+    uint64_t postResource(const std::string& host, int port, const std::string& uri, const std::vector<uint8_t>& body) {
+        return submitCoapRequest(L3AddressResolver().resolve(host.c_str()), port, COAP_CODE_POST, true, uri, body, 0);
+    }
+};
+
+Define_Module(TagClient);
+
+Define_ProtocolTest(coap_request_tag)
+{
+    auto sendRaw = [](uint16_t mid, uint8_t tok, uint32_t b1Val, const std::vector<uint8_t>& tag,
+            const std::vector<uint8_t>& body, const char *name) {
+        auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostA.app[0]"));
+        RawCoapMessage m;
+        m.type = 0; m.code = COAP_CODE_PUT; m.messageId = mid; m.token = {tok};
+        m.options.push_back({COAP_OPT_URI_PATH, asciiBytes("data")});
+        m.options.push_back({COAP_OPT_CONTENT_FORMAT, coapUintBytes(0)});
+        m.options.push_back({COAP_OPT_BLOCK1, coapUintBytes(b1Val)});
+        m.options.push_back({COAP_OPT_REQUEST_TAG, tag});
+        m.payload = body;
+        peer->sendRawNow(L3AddressResolver().resolve("hostB"), 5683, encodeRawCoap(m), name);
+    };
+
+    auto expectResp = [](uint8_t tok, uint8_t code) {
+        return on("hostA.app[0]").signal("packetReceivedFromLower")
+            .assertEvent([tok, code](const MatchContext& ctx) {
+                RawCoapMessage raw;
+                if (!extractRawCoapFromAppEvent(ctx.event, raw))
+                    return false;
+                // Request-Tag must never be echoed in responses!
+                if (!getRawOptionValues(raw, COAP_OPT_REQUEST_TAG).empty())
+                    return false;
+                return raw.token == std::vector<uint8_t>{tok} && raw.code == code;
+            }).within(0.5);
+    };
+
+    return ProtocolTest("coap_request_tag")
+        // 1. Interleave two tagged Block1 uploads ("tagA", "tagB") from the same client endpoint
+        .act(action().at(1.0).run<CoapTestPeer>("hostA.app[0]", [sendRaw](CoapTestPeer&) {
+            sendRaw(0x4001, 0x01, 0x09U, asciiBytes("tagA"), std::vector<uint8_t>(32, 'A'), "TagANum0");
+            sendRaw(0x4002, 0x02, 0x09U, asciiBytes("tagB"), std::vector<uint8_t>(32, 'B'), "TagBNum0");
+        }))
+        .once(expectResp(0x01, COAP_CODE_CONTINUE))
+        .once(expectResp(0x02, COAP_CODE_CONTINUE))
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [sendRaw](CoapTestPeer&) {
+            sendRaw(0x4003, 0x03, (1U << 4U) | 0x01U, asciiBytes("tagB"), std::vector<uint8_t>(16, 'B'), "TagBNum1");
+        }))
+        .once(expectResp(0x03, COAP_CODE_CHANGED))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getResources().at("data").payload != std::vector<uint8_t>(48, 'B'))
+                throw cRuntimeError("Expected complete 48-byte 'B' payload from tagB");
+        }))
+        .act(action().after(0.01).run<CoapTestPeer>("hostA.app[0]", [sendRaw](CoapTestPeer&) {
+            sendRaw(0x4004, 0x04, (1U << 4U) | 0x01U, asciiBytes("tagA"), std::vector<uint8_t>(16, 'A'), "TagANum1");
+        }))
+        .once(expectResp(0x04, COAP_CODE_CHANGED))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getResources().at("data").payload != std::vector<uint8_t>(48, 'A'))
+                throw cRuntimeError("Expected complete 48-byte 'A' payload from tagA without B corruption");
+        }))
+        // 2. Unseen Request-Tag "tagC" starting at NUM=1 -> 4.08 Request Entity Incomplete
+        .act(action().at(1.5).run<CoapTestPeer>("hostA.app[0]", [sendRaw](CoapTestPeer&) {
+            sendRaw(0x4005, 0x05, (1U << 4U) | 0x01U, asciiBytes("tagC"), std::vector<uint8_t>(16, 'C'), "TagCNum1");
+        }))
+        .once(expectResp(0x05, COAP_CODE_REQUEST_ENTITY_INCOMPLETE))
+        // 3. 9-octet Request-Tag -> 4.02 Bad Option
+        .act(action().at(1.7).run<CoapTestPeer>("hostA.app[0]", [sendRaw](CoapTestPeer&) {
+            sendRaw(0x4006, 0x06, 0x01U, std::vector<uint8_t>(9, 'Z'), std::vector<uint8_t>(16, 'Z'), "TagTooLong");
+        }))
+        .once(expectResp(0x06, COAP_CODE_BAD_OPTION))
+        // 4. CoapClient useRequestTag=true concurrent Block1 uploads attach distinct Request-Tags
+        .act(action().at(2.0).run<TagClient>("hostA.app[1]", [](TagClient& cli) {
+            cli.putResource("hostB", 5683, "/data", std::vector<uint8_t>(64, 'X'));
+            cli.putResource("hostB", 5683, "/data", std::vector<uint8_t>(64, 'Y'));
+        }))
+        .once(on("hostA.app[1]").signal("requestCompleted").within(1.0))
+        .once(on("hostA.app[1]").signal("requestCompleted").within(1.0))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            const auto& p = srv.getResources().at("data").payload;
+            if (p != std::vector<uint8_t>(64, 'X') && p != std::vector<uint8_t>(64, 'Y'))
+                throw cRuntimeError("Expected uncorrupted concurrent useRequestTag upload");
+        }))
+        // 5. Two concurrent untagged CoapClient uploads serialize cleanly without interleaving corruption
+        .act(action().at(3.0).run<TagClient>("hostA.app[2]", [](TagClient& cli) {
+            cli.putResource("hostB", 5683, "/untagged", std::vector<uint8_t>(64, 'U'));
+            cli.putResource("hostB", 5683, "/untagged", std::vector<uint8_t>(64, 'V'));
+        }))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.5))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.5))
+        .act(action().after(0.01).run<CoapServer>("hostB.app[0]", [](CoapServer& srv) {
+            if (srv.getResources().at("untagged").payload != std::vector<uint8_t>(64, 'V'))
+                throw cRuntimeError("Expected serialized second untagged PUT payload (64x'V')");
+        }))
+        // 6. Concurrent untagged short POSTs hitting pre-existing multi-block representation serialize through Block2
+        .act(action().at(4.0).run<TagClient>("hostA.app[2]", [](TagClient& cli) {
+            cli.postResource("hostB", 5683, "/shortpost", {'A'});
+            cli.postResource("hostB", 5683, "/shortpost", {'B'});
+        }))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.5))
+        .once(on("hostA.app[2]").signal("requestCompleted").within(1.5))
+        .act(action().after(0.01).run<TagClient>("hostA.app[2]", [](TagClient& cli) {
+            const auto& done = cli.getCompletedResponses();
+            if (done.size() != 4)
+                throw cRuntimeError("Expected 4 completed untagged operations, got %zu", done.size());
+            std::vector<uint8_t> expA(100, 'P'); expA.push_back('A');
+            std::vector<uint8_t> expB = expA; expB.push_back('B');
+            if (done[2].payload != expA || done[3].payload != expB)
+                throw cRuntimeError("Concurrent short POST responses corrupted or misordered");
+        }))
+        // 7. Concurrent short POSTs with useRequestTag=true complete independently without collision
+        .act(action().at(5.0).run<TagClient>("hostA.app[1]", [](TagClient& cli) {
+            cli.postResource("hostB", 5683, "/taggedpost", {'1'});
+            cli.postResource("hostB", 5683, "/taggedpost", {'2'});
+        }))
+        .once(on("hostA.app[1]").signal("requestCompleted").within(1.5))
+        .once(on("hostA.app[1]").signal("requestCompleted").within(1.5));
+}
+
+%activity:
+EV << "coap_request_tag compiled\n";
+
+%file: TagClient.ned
+import inet.applications.coap.CoapClient;
+
+simple TagClient extends CoapClient
+{
+    parameters:
+        @class(TagClient);
+}
+
+%file: resources.xml
+<resources>
+    <resource path="/data" contentFormat="0" maxAge="60" methods="GET,PUT">init</resource>
+    <resource path="/untagged" contentFormat="0" maxAge="60" methods="GET,PUT">init</resource>
+    <resource path="/shortpost" contentFormat="0" maxAge="60" methods="GET,POST">PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP</resource>
+    <resource path="/taggedpost" contentFormat="0" maxAge="60" methods="GET,POST">QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ</resource>
+</resources>
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 8s
+seed-set = 0
+*.tester.testName = "coap_request_tag"
+
+*.hostA.numApps = 3
+*.hostA.app[0].typename = "CoapTestPeer"
+*.hostA.app[0].localPort = 16000
+
+*.hostA.app[1].typename = "TagClient"
+*.hostA.app[1].localPort = 16001
+*.hostA.app[1].preferredBlockSize = 32B
+*.hostA.app[1].useRequestTag = true
+
+*.hostA.app[2].typename = "TagClient"
+*.hostA.app[2].localPort = 16002
+*.hostA.app[2].preferredBlockSize = 32B
+*.hostA.app[2].useRequestTag = false
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapServer"
+*.hostB.app[0].localPort = 5683
+*.hostB.app[0].preferredBlockSize = 32B
+*.hostB.app[0].resources = xmldoc("resources.xml")
+
+%contains: stdout
+PROTOCOLTEST coap_request_tag: PASS

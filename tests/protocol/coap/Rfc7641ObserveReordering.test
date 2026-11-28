@@ -1,0 +1,177 @@
+%description:
+
+RFC 7641 Section 3.4 -- Client Observe 24-bit serial arithmetic ordering,
+stale CON notification ACK without state delivery, exact-MID duplicate suppression,
+24-bit boundary wrap (16777210 -> 5), and strict T2 > T1 + 128s elapsed-time rule.
+
+%includes:
+#include "inet/applications/coap/CoapClient.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "CoapChecks.h"
+#include "CoapTestPeer.h"
+#include "CoapTestPeer.cc"
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::coap;
+using namespace inet::protocoltest;
+
+class OrderTestClient : public CoapClient
+{
+  public:
+    std::vector<CoapClientObserveNotification> notes;
+
+    uint64_t startObs(const std::string& host, int port, const std::string& uri) {
+        return subscribeObserve(L3AddressResolver().resolve(host.c_str()), port, uri, true);
+    }
+
+  protected:
+    virtual void onObserveNotification(const CoapClientObserveNotification& notification) override {
+        notes.push_back(notification);
+    }
+};
+
+Define_Module(OrderTestClient);
+
+Define_ProtocolTest(coap_observe_reordering)
+{
+    return ProtocolTest("coap_observe_reordering")
+        // Client subscribes at t=1.0s to peer hostB.app[0]; peer replies V=10 (maxAge=1000s so no refresh)
+        .act(action().at(1.0).run<OrderTestClient>("hostA.app[0]", [](OrderTestClient& cli) {
+            cli.startObs("hostB", 5683, "/order");
+        }))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .capture("tokenHex", [](const PacketEvent& ev) {
+                      RawCoapMessage req;
+                      if (!extractRawCoapFromAppEvent(ev, req))
+                          return cValue("");
+                      return cValue(bytesToHexString(req.token).c_str());
+                  })
+                  .assertEvent([](const MatchContext& ctx) {
+                      auto *peer = check_and_cast<CoapTestPeer *>(getSimulation()->getModuleByPath("hostB.app[0]"));
+                      const auto& last = peer->getReceivedDatagrams().back();
+                      RawCoapMessage req;
+                      if (!decodeRawCoap(last.bytes, req))
+                          return false;
+
+                      auto makeNotif = [&](uint8_t type, uint16_t mid, uint32_t obsVal, const std::string& body) {
+                          RawCoapMessage n;
+                          n.type = type; n.code = COAP_CODE_CONTENT; n.messageId = mid; n.token = req.token;
+                          n.options.push_back({COAP_OPT_OBSERVE, coapUintBytes(obsVal)});
+                          n.options.push_back({COAP_OPT_MAX_AGE, coapUintBytes(1000U)});
+                          n.payload = asciiBytes(body);
+                          return encodeRawCoap(n);
+                      };
+
+                      // Initial response V=10 (piggybacked ACK)
+                      peer->sendRawNow(last.srcAddr, last.srcPort,
+                              makeNotif(2, req.messageId, 10U, "v10"), "NotifInit10");
+
+                      // t=+0.1s: Stale CON V=9 (fresh MID=0x6001) -> MUST receive Empty ACK, but MUST NOT update state!
+                      peer->scheduleRawSend(simTime() + 0.1, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6001, 9U, "stale9"), "StaleCon9");
+
+                      // t=+0.2s: Step via V=8388600 (diff < 2^23), THEN V=16777200 (diff < 2^23), THEN 24-bit wrap V=5!
+                      peer->scheduleRawSend(simTime() + 0.2, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6002, 8388600U, "mid"), "WrapStep1");
+                      peer->scheduleRawSend(simTime() + 0.3, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6003, 16777200U, "high"), "WrapStep2");
+                      peer->scheduleRawSend(simTime() + 0.4, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6004, 5U, "wrap-v05"), "Wrapped5");
+
+                      // Strict 128s boundary relative to T1 (~1.4s when Wrapped5 arrived):
+                      // Same wire length as "wrap-v05" -> arrives at exact T1 + 128.0s -> V=4 < V=5 MUST still be discarded (Tnew > Told + 128s is strict)!
+                      // Then at T1 + 128.05s -> V=4 < V=5 MUST be accepted!
+                      peer->scheduleRawSend(simTime() + 0.4 + 128.0, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6005, 4U, "bnd-eq04"), "BoundaryEqual128");
+                      peer->scheduleRawSend(simTime() + 0.4 + 128.05, last.srcAddr.str(), last.srcPort,
+                              makeNotif(0, 0x6006, 4U, "after-128"), "After128Strict");
+                      return true;
+                  }).within(0.5))
+        // Expect Empty ACK to stale CON 0x6001!
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6001;
+                  }).within(0.5))
+        // Expect Empty ACKs to accepted CONs 0x6002, 0x6003, 0x6004
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6002;
+                  }).within(0.5))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6003;
+                  }).within(0.5))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6004;
+                  }).within(0.5))
+        // Expect Empty ACK to 0x6005 (stale at exact 128s) and 0x6006 (accepted after 128s)
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6005;
+                  }).within(130.0))
+        .once(on("hostB.app[0]").signal("packetReceivedFromLower")
+                  .assertEvent([](const MatchContext& ctx) {
+                      RawCoapMessage raw;
+                      return extractRawCoapFromAppEvent(ctx.event, raw)
+                              && raw.type == 2 && raw.code == COAP_CODE_EMPTY && raw.messageId == 0x6006;
+                  }).within(1.0))
+        .act(action().after(0.05).run<OrderTestClient>("hostA.app[0]", [](OrderTestClient& cli) {
+            // Expected accepted sequence: "v10", "mid", "high", "wrap-v05", "after-128" (5 notifications)
+            std::vector<std::string> got;
+            for (const auto& n : cli.notes)
+                got.emplace_back(n.payload.begin(), n.payload.end());
+            std::vector<std::string> expected = {"v10", "mid", "high", "wrap-v05", "after-128"};
+            if (got != expected) {
+                std::string gotStr;
+                for (size_t i = 0; i < got.size(); ++i)
+                    gotStr += (i ? "," : "") + got[i];
+                throw cRuntimeError("Unexpected accepted Observe sequence (%s)", gotStr.c_str());
+            }
+        }));
+}
+
+%activity:
+EV << "coap_observe_reordering compiled\n";
+
+%file: OrderTestClient.ned
+import inet.applications.coap.CoapClient;
+
+simple OrderTestClient extends CoapClient
+{
+    parameters:
+        @class(OrderTestClient);
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.coap.CoapPairNetwork
+sim-time-limit = 150s
+seed-set = 0
+**.arp.cacheTimeout = 300s
+*.tester.testName = "coap_observe_reordering"
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "OrderTestClient"
+*.hostA.app[0].localPort = 16000
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "CoapTestPeer"
+*.hostB.app[0].localPort = 5683
+
+%contains: stdout
+PROTOCOLTEST coap_observe_reordering: PASS
