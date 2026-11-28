@@ -1,0 +1,43 @@
+%description:
+Production MQTT client and broker establish a clean MQTT session over TCP.
+Admission is observed through CONNECT, CONNACK and the client's active transition.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_connect")
+        .once(on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType() == CONNECT; }).within(1))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p = c.event.packet->peekAtFront<MqttPacket>();
+                return p->getType() == CONNACK && p->getReturnCode() == 0 && !p->getSessionPresent();
+            }).within(1))
+        .once(on("publisher.app[0]").signal("connectionChanged").filterValue(1).within(0.1));
+}
+
+%activity:
+EV << "MQTT connection fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST mqtt_connect: PASS

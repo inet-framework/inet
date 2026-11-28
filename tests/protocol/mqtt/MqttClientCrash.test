@@ -1,0 +1,87 @@
+%description:
+A production persistent client loses its local session on crash. Rejected reset
+connections keep Clean Session true until acceptance. The accepted reset session
+discards an unfinished QoS 1 send before the next configured persistent connection.
+The XML workload restarts after crash and does not restart after ordinary reconnect.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+struct CrashState { int connections=0; int publications=0; int subscriptions=0; };
+Define_ProtocolTestProgram()
+{
+    auto state=std::make_shared<CrashState>();
+    return ProtocolTest("mqtt_client_crash")
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[0]",[state](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder=[state](auto& peer,auto& socket,const auto& p) {
+                if (p->getType()==CONNECT) {
+                    int connection=++state->connections;
+                    ASSERT(connection<=4);
+                    ASSERT(p->getCleanSession()==(connection==2 || connection==3));
+                    auto answer=makeShared<MqttPacket>(); answer->setType(CONNACK);
+                    answer->setReturnCode(connection==2 ? 3:0); peer.sendMqtt(socket,answer);
+                }
+                else if (p->getType()==SUBSCRIBE) {
+                    state->subscriptions++;
+                    auto answer=makeShared<MqttPacket>(); answer->setType(SUBACK); answer->setPacketIdentifier(p->getPacketIdentifier());
+                    answer->setResultsArraySize(1); answer->setResults(0,1); peer.sendMqtt(socket,answer);
+                    if (state->connections==4) {
+                        ASSERT(state->publications==2 && state->subscriptions==3);
+                        peer.emit(peer.registerSignal("scenarioComplete"),1L);
+                    }
+                }
+                else if (p->getType()==PUBLISH) {
+                    ASSERT(state->connections==1 || state->connections==3);
+                    ASSERT(!p->getDuplicate() && p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==65);
+                    state->publications++;
+                    if (state->connections==3) socket.close();
+                }
+                else throw cRuntimeError("Unexpected control in client crash fixture");
+            };
+        }))
+        .act(action().at(1).run<MqttScriptedPeer>("broker.app[0]",[](auto&) {}))
+        .never(on("publisher.app[0]").signal("packetSentToLower").within(0.19))
+        .once(on("broker.app[0]").signal("scenarioComplete").filterValue(1).within(3))
+        .never(on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PUBLISH; }).within(1));
+}
+
+%activity:
+EV << "MQTT client crash fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+import inet.tests.mqtt.MqttTestNetwork;
+import inet.common.scenario.ScenarioManager;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+network CrashNetwork extends MqttTestNetwork { submodules: scenarioManager: ScenarioManager; }
+
+%inifile: omnetpp.ini
+[General]
+network = CrashNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.scenarioManager.script = xml("<scenario><at t='1'><crash module='publisher.app[0]'/></at><at t='1.2'><startup module='publisher.app[0]'/></at></scenario>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].cleanSession = false
+*.publisher.app[0].reconnectInterval = 0.1s
+*.publisher.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='1'/><publish at='0.1s' topic='factory/value' qos='1' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_client_crash: PASS

@@ -1,0 +1,89 @@
+%description:
+Production broker preserves inbound QoS 2 duplicate state across reconnect.
+A repeated PUBLISH must not route twice; a repeated PUBREL still gets PUBCOMP.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate typeIs(int type) {
+    return [type](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType() == type; };
+}
+static void connectMqtt(MqttScriptedPeer& app) {
+    auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier("sender"); p->setCleanSession(false);
+    app.sendMqtt(app.socket(),p);
+}
+static void publish(MqttScriptedPeer& app, bool duplicate) {
+    auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setQos(2); p->setPacketIdentifier(17); p->setDuplicate(duplicate);
+    p->setTopic("factory/value"); p->setPayloadArraySize(1); p->setPayload(0,65); app.sendMqtt(app.socket(),p);
+}
+static void release(MqttScriptedPeer& app) {
+    auto p=makeShared<MqttPacket>(); p->setType(PUBREL); p->setPacketIdentifier(17); app.sendMqtt(app.socket(),p);
+}
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_qos2_reconnect")
+        .meanwhile(exactlyTimes(2,on("subscriber.app[0]").signal("packetSentToUpper").within(4)))
+        .act(action().at(0.3).run<MqttScriptedPeer>("publisher.app[0]", [](auto& app) { app.socket().connect(app.addressOf("broker"),1883); }))
+        .once(on("publisher.app[0]").signal("socketEstablished").within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",connectMqtt))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { publish(app,false); }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBREC)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.socket().close(); }))
+        .once(on("publisher.app[0]").signal("socketClosed").within(1))
+        .act(action().after(0.1).run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.renew(); app.socket().connect(app.addressOf("broker"),1883); }))
+        .once(on("publisher.app[0]").signal("socketEstablished").within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",connectMqtt))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getSessionPresent(); }).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { publish(app,true); }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBREC)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
+        // PUBCOMP completes ownership: the same identifier now denotes a new publication.
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { publish(app,false); }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBREC)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",release))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBCOMP)).within(1))
+        .never(on("subscriber.app[0]").signal("packetSentToUpper").within(1));
+}
+
+%activity:
+EV << "MQTT QoS 2 reconnect fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp {
+    parameters:
+        @class(::inet::mqtttest::MqttScriptedPeer);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttScriptedPeer"
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='2'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_qos2_reconnect: PASS

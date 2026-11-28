@@ -1,0 +1,31 @@
+%description:
+The default client is inactive until a destination is configured. Its default
+parameters and the default broker initialize without prompts, invalid resolution,
+or an attempted MQTT exchange. This checks the minimal configuration contract.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_defaults")
+        .never(on("publisher.app[0]").signal("packetSentToLower").within(1));
+}
+
+%activity:
+EV << "MQTT default configuration compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+
+%contains: stdout
+PROTOCOLTEST mqtt_defaults: PASS

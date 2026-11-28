@@ -1,0 +1,101 @@
+%description:
+Production broker deadlines ignore incomplete packets, renew on complete pings,
+and stay disabled for keepalive zero. Wills are published after expiry/takeover
+but suppressed by a valid DISCONNECT. All timing checks observe remote closure.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate willTopic(const std::string& topic) {
+    return [topic](const MatchContext& c) {
+        auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getType()==PUBLISH && std::string(p->getTopic())==topic;
+    };
+}
+Define_ProtocolTestProgram()
+{
+    auto silentAt=std::make_shared<double>(0);
+    auto renewedAt=std::make_shared<double>(0);
+    ProtocolTest test("mqtt_broker_liveness");
+    for (auto topic : {"factory/silent","factory/renewed","factory/takeover","factory/protocol"})
+        test.meanwhile(exactlyTimes(1,on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(willTopic(topic)).within(6)));
+    for (auto topic : {"factory/zero","factory/normal"})
+        test.meanwhile(never(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(willTopic(topic)).within(6)));
+    test.meanwhile(exactlyTimes(1,on("publisher.app[4]").signal("socketPeerClosed").within(6)))
+        .act(action().at(0.3).run<MqttScriptedPeer>("publisher.app[0]",[](auto&) {}));
+    std::vector<std::string> ids={"silent","zero","renewed","normal","takeover","takeover","protocol"};
+    std::vector<std::string> topics={"factory/silent","factory/zero","factory/renewed","factory/normal","factory/takeover","","factory/protocol"};
+    for (int i=0;i<7;i++) {
+        std::string path="publisher.app["+std::to_string(i)+"]";
+        test.act(action().run<MqttScriptedPeer>(path.c_str(),[](auto& app) { app.socket().connect(app.addressOf("broker"),1883); }))
+            .once(on(path.c_str()).signal("socketEstablished").within(1))
+            .act(action().run<MqttScriptedPeer>(path.c_str(),[i,ids,topics](auto& app) {
+                auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier(ids[i].c_str()); p->setKeepAlive(i==0 || i==2 ? 2:0);
+                if (!topics[i].empty()) {
+                    p->setWill(true); p->setWillTopic(topics[i].c_str()); p->setWillPayloadArraySize(1); p->setWillPayload(0,65+i);
+                }
+                app.sendMqtt(app.socket(),p);
+            }))
+            .once(on(path.c_str()).signal("packetReceivedFromLower")
+                .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==CONNACK; }).within(1));
+        if (i==0) test.act(action().run<MqttScriptedPeer>(path.c_str(),[silentAt](auto&) { *silentAt=simTime().dbl(); }));
+    }
+    test.act(action().run<MqttScriptedPeer>("publisher.app[6]",[](auto& app) { app.sendBytes(app.socket(),{0xc1,0}); }))
+        .once(on("publisher.app[6]").signal("socketPeerClosed").within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[7]",[](auto& app) { app.socket().connect(app.addressOf("broker"),1883); }))
+        .once(on("publisher.app[7]").signal("socketEstablished").within(1))
+        .meanwhile(never(on("publisher.app[7]").signal("packetReceivedFromLower").within(0.6)))
+        .once(on("publisher.app[7]").signal("socketPeerClosed").within(0.6))
+        .act(action().run<MqttScriptedPeer>("publisher.app[3]",[](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(DISCONNECT); app.sendMqtt(app.socket(),p); app.socket().close();
+        }))
+        .once(on("publisher.app[3]").signal("socketClosed").within(1))
+        .act(action().at(1.5).run<MqttScriptedPeer>("publisher.app[2]",[](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(PINGREQ); app.sendMqtt(app.socket(),p);
+        }))
+        .once(on("publisher.app[2]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PINGRESP; }).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[2]",[renewedAt](auto&) { *renewedAt=simTime().dbl(); }))
+        .act(action().at(2).run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.sendBytes(app.socket(),{0x30,8,0,1,'t'}); }))
+        .once(on("publisher.app[0]").signal("socketPeerClosed")
+            .assertEvent([silentAt](const MatchContext& c) { auto elapsed=c.event.time.dbl()-*silentAt; return elapsed>=2.999 && elapsed<=3.001; }).within(1.5))
+        .once(on("publisher.app[2]").signal("socketPeerClosed")
+            .assertEvent([renewedAt](const MatchContext& c) { auto elapsed=c.event.time.dbl()-*renewedAt; return elapsed>=2.999 && elapsed<=3.001; }).within(2))
+        .never(on("publisher.app[1]").signal("socketPeerClosed").within(1));
+    return test;
+}
+
+%activity:
+EV << "MQTT broker liveness matrix compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 8s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.broker.app[0].connectTimeout = 0.5s
+*.publisher.numApps = 8
+*.publisher.app[*].typename = "MqttScriptedPeer"
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_broker_liveness: PASS

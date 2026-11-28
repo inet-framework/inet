@@ -1,0 +1,41 @@
+%description:
+An idle production client sends PINGREQ and receives the production broker's
+PINGRESP. The active connection remains open over the next keepalive interval.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_keepalive")
+        .once(on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PINGREQ; }).within(3))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PINGRESP; }).within(1))
+        .never(on("publisher.app[0]").signal("connectionChanged").filterValue(0).within(2));
+}
+
+%activity:
+EV << "MQTT keepalive fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].keepAlive = 2s
+
+%contains: stdout
+PROTOCOLTEST mqtt_keepalive: PASS

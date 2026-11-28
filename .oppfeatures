@@ -1086,6 +1086,31 @@
         linkerFlags = ""
         />
     <feature
+        id = "Mqtt"
+        name = "MQTT 3.1.1"
+        description = "MQTT clients and broker over the existing TCP socket contract."
+        initiallyEnabled = "true"
+        requires = "TcpCommon"
+        nedPackages = "inet.applications.mqtt"
+        compileFlags = "-DINET_WITH_MQTT"
+        />
+    <feature
+        id = "MqttExamples"
+        name = "MQTT examples"
+        description = "Wired publish/subscribe, QoS, retained value and reconnect examples."
+        initiallyEnabled = "true"
+        requires = "Mqtt TcpInet Ipv4 Ethernet LinkLayerConfiguratorsCommon"
+        nedPackages = "inet.examples.mqtt"
+        />
+    <feature
+        id = "MqttTests"
+        name = "MQTT tests"
+        description = "Deterministic MQTT protocol and lifecycle fixtures."
+        initiallyEnabled = "true"
+        requires = "Mqtt TcpInet Ipv4 Ipv6 Ethernet Loopback LinkLayerConfiguratorsCommon Ieee80211 Ieee8021q PhysicalLayerWirelessCommon"
+        nedPackages = "inet.tests.mqtt"
+        />
+    <feature
         id = "OtherApplications"
         name = "Other applications"
         description = "A collection of unsorted applications"

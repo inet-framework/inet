@@ -7,7 +7,7 @@
 //
 // Chunk fillers for the physical-layer headers: the generic/shortcut/APSK PHY
 // headers, the Ethernet PHY preamble headers, and the IEEE 802.11 PHY headers
-// (FHSS, IR, DSSS/HR-DSSS, OFDM/ERP-OFDM, HT, VHT).
+// (FHSS, IR, DSSS/HR-DSSS, OFDM/ERP-OFDM, HT, VHT), plus Radiotap capture headers.
 //
 
 #include "../ChunkFillers.h"
@@ -16,12 +16,64 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
 #include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapHeaderSerializer.h"
+#include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapHeader_m.h"
 #include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
 
 namespace inet {
 
 void addFillers_phy(std::vector<ChunkFiller>& fillers)
 {
+    // Radiotap fields are optional. The full variant covers every represented
+    // field; the sparse variant adds padding before Channel and A-MPDU Status.
+    fillers.push_back({"inet::physicallayer::Ieee80211RadiotapHeader", "empty", [](Chunk *c) {
+        check_and_cast<physicallayer::Ieee80211RadiotapHeader *>(c);
+    }});
+    fillers.push_back({"inet::physicallayer::Ieee80211RadiotapHeader", "all-fields", [](Chunk *c) {
+        using namespace physicallayer;
+        auto p = check_and_cast<Ieee80211RadiotapHeader *>(c);
+        FillValues v;
+        p->setPresent((1u << RADIOTAP_TSFT) | (1u << RADIOTAP_FLAGS) | (1u << RADIOTAP_RATE) |
+                (1u << RADIOTAP_CHANNEL) | (1u << RADIOTAP_DBM_ANTSIGNAL) | (1u << RADIOTAP_DBM_ANTNOISE) |
+                (1u << RADIOTAP_DBM_TX_POWER) | (1u << RADIOTAP_MCS) | (1u << RADIOTAP_AMPDU_STATUS) | (1u << RADIOTAP_VHT));
+        p->setTsft(v.u64());
+        p->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+        p->setRate(12);
+        p->setChannelFrequency(5180);
+        p->setChannelFlags(RADIOTAP_CHANNEL_OFDM | RADIOTAP_CHANNEL_5GHZ);
+        p->setAntennaSignal(-43);
+        p->setAntennaNoise(-92);
+        p->setTxPower(-7);
+        p->setMcsKnown(RADIOTAP_MCS_KNOWN_BANDWIDTH | RADIOTAP_MCS_KNOWN_INDEX);
+        p->setMcsFlags(RADIOTAP_MCS_FLAG_BANDWIDTH_40);
+        p->setMcsIndex(7);
+        p->setAmpduReference(v.u32());
+        p->setAmpduFlags(v.u16());
+        p->setAmpduDelimiterCrc(v.u8());
+        p->setVhtKnown(RADIOTAP_VHT_KNOWN_BANDWIDTH | RADIOTAP_VHT_KNOWN_GUARD_INTERVAL);
+        p->setVhtFlags(RADIOTAP_VHT_FLAG_SHORT_GUARD_INTERVAL);
+        p->setVhtBandwidth(4);
+        for (int user = 0; user < 4; user++)
+            p->setVhtMcsNss(user, ((user + 1) << 4) | (user + 1));
+        p->setVhtCoding(5);
+        p->setVhtGroupId(17);
+        p->setVhtPartialAid(0x123);
+        setChunkLength(c, computeIeee80211RadiotapHeaderLength(p->getPresent()));
+    }});
+    fillers.push_back({"inet::physicallayer::Ieee80211RadiotapHeader", "aligned-fields", [](Chunk *c) {
+        using namespace physicallayer;
+        auto p = check_and_cast<Ieee80211RadiotapHeader *>(c);
+        FillValues v;
+        p->setPresent((1u << RADIOTAP_FLAGS) | (1u << RADIOTAP_CHANNEL) | (1u << RADIOTAP_AMPDU_STATUS));
+        p->setFlags(RADIOTAP_FLAG_SHORT_PREAMBLE);
+        p->setChannelFrequency(2412);
+        p->setChannelFlags(RADIOTAP_CHANNEL_CCK | RADIOTAP_CHANNEL_2GHZ);
+        p->setAmpduReference(v.u32());
+        p->setAmpduFlags(v.u16());
+        p->setAmpduDelimiterCrc(v.u8());
+        setChunkLength(c, computeIeee80211RadiotapHeaderLength(p->getPresent()));
+    }});
+
     // --- ApskPhyHeader: a self-sizing header (like Generic/ShortcutPhyHeader below) --
     // headerLengthField is not free data: on deserialize it becomes the chunk's own
     // chunkLength (ApskPhyHeaderSerializer.cc), so it must be pinned to the header's

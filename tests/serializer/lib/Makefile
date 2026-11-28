@@ -38,6 +38,7 @@ OBJS = \
     $O/fillers/ChunkFillers_ipv6.o \
     $O/fillers/ChunkFillers_linklayer.o \
     $O/fillers/ChunkFillers_mipv6.o \
+    $O/fillers/ChunkFillers_mqtt.o \
     $O/fillers/ChunkFillers_mrp.o \
     $O/fillers/ChunkFillers_ospf.o \
     $O/fillers/ChunkFillers_phy.o \

@@ -1,0 +1,3 @@
+MQTT 3.1.1 client and broker applications
+
+Add MQTT clients and an in-memory broker over the existing TCP socket interface, with binary packet serialization, topic filters, QoS 0–2, persistent sessions, retained publications, keepalive and Will messages. Examples demonstrate ordinary publish/subscribe, delivery handshakes, retained values and subscriber restart. The model excludes TLS and durable storage across broker crash; the user guide describes configuration, lifecycle behavior and measurement limits.

@@ -1,0 +1,90 @@
+%description:
+A persistent subscriber disconnects before publication, then resumes and receives
+the queued QoS 1 publication. The broker is the production MqttBroker.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate typeIs(int type) {
+    return [type](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType() == type; };
+}
+static void requestSession(MqttScriptedPeer& app) {
+    auto p = makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier("persistent"); p->setCleanSession(false);
+    app.sendMqtt(app.socket(),p);
+}
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_session")
+        .act(action().at(0.1).run<MqttScriptedPeer>("subscriber.app[0]", [](auto& app) {
+            app.socket().connect(app.addressOf("broker"),1883);
+        }))
+        .once(on("subscriber.app[0]").signal("socketEstablished").within(1))
+        .act(action().run<MqttScriptedPeer>("subscriber.app[0]", requestSession))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK)).within(1))
+        .act(action().run<MqttScriptedPeer>("subscriber.app[0]", [](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(SUBSCRIBE); p->setPacketIdentifier(1);
+            p->setFiltersArraySize(1); p->setFilters(0,"factory/#"); p->setResultsArraySize(1); p->setResults(0,1);
+            app.sendMqtt(app.socket(),p);
+        }))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(SUBACK)).within(1))
+        .act(action().run<MqttScriptedPeer>("subscriber.app[0]", [](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(DISCONNECT); app.sendMqtt(app.socket(),p); app.socket().close();
+        }))
+        .once(on("subscriber.app[0]").signal("socketClosed").within(1))
+        .act(action().at(2).run<MqttScriptedPeer>("subscriber.app[0]", [](auto& app) {
+            app.renew(); app.socket().connect(app.addressOf("broker"),1883);
+        }))
+        .once(on("subscriber.app[0]").signal("socketEstablished").within(1))
+        .act(action().run<MqttScriptedPeer>("subscriber.app[0]", requestSession))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getSessionPresent(); }).within(1))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH))
+            .assertEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>();
+                return p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==0x41;
+            }).within(1))
+        .once(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH))
+            .assertEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==0x42;
+            }).within(1))
+        .never(on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH)).within(0.5));
+}
+
+%activity:
+EV << "MQTT session fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp {
+    parameters:
+        @class(::inet::mqtttest::MqttScriptedPeer);
+        @signal[packetReceivedFromLower](type=inet::Packet);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 5s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.5s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='1' payload='41'/><publish at='0.6s' topic='factory/value' payload='44'/><publish at='0.7s' topic='factory/value' qos='1' payload='42'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_session: PASS

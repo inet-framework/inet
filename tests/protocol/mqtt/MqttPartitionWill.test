@@ -1,0 +1,59 @@
+%description:
+A real link partition drops all frames through a tap. The production broker's
+keepalive detection, rather than partition onset, causes a Will. An observer on
+the broker host stays reachable and receives exactly one QoS 1 notification.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttClient.h"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_partition_will")
+        .once(on("host2.app[1]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==SUBACK; }).within(1))
+        .act(action().at(1).run<MqttClient>("host1.app[0]",[](auto&) {}))
+        .meanwhile(tap("tap").drop().within(3))
+        .never(on("host2.app[1]").signal("packetSentToUpper").within(0.5))
+        .once(on("host2.app[1]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PUBLISH; })
+            .assertEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>();
+                return std::string(p->getTopic())=="factory/liveness" && p->getQos()==1 && p->getPayloadArraySize()==1 && p->getPayload(0)==255;
+            }).within(0.6))
+        .once(on("host2.app[1]").signal("packetSentToUpper").within(0.1))
+        .never(on("host2.app[1]").signal("packetSentToUpper").within(1));
+}
+
+%activity:
+EV << "MQTT partition Will fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.protocoltest.TapPairNetwork
+seed-set = 0
+sim-time-limit = 5s
+*.linkDelay = 1ms
+*.host1.numApps = 1
+*.host1.app[0].typename = "MqttClient"
+*.host1.app[0].clientIdentifier = "publisher"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].startTime = 0.3s
+*.host1.app[0].keepAlive = 1s
+*.host1.app[0].willTopic = "factory/liveness"
+*.host1.app[0].willPayload = "ff"
+*.host1.app[0].willQos = 1
+*.host2.numApps = 2
+*.host2.app[0].typename = "MqttBroker"
+*.host2.app[1].typename = "MqttClient"
+*.host2.app[1].clientIdentifier = "observer"
+*.host2.app[1].connectAddress = "host2"
+*.host2.app[1].startTime = 0.1s
+*.host2.app[1].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='1'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_partition_will: PASS
