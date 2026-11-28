@@ -1,0 +1,3 @@
+PCAP 2.3 replay preserves record boundaries
+
+The PCAP reader recognizes the reversed captured and original length fields used by some PCAP 2.3 writers and can replay subsequent records after a truncated packet.

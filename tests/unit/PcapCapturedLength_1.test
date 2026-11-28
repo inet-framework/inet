@@ -1,0 +1,172 @@
+%description:
+Preserve captured bytes, timestamps, protocol tags, and FCS metadata in
+complete, truncated, stale-length, and mixed-endian PCAP records.
+
+%includes:
+#include <fstream>
+
+#include "inet/common/FcsInd_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapReader.h"
+#include "inet/common/packet/recorder/PcapWriter.h"
+using namespace inet;
+
+%activity:
+const std::vector<uint8_t> payload = {2, 0, 0x6a, 0xe4, 0x79};
+struct Snapshot
+{
+    size_t frameLength;
+    size_t capturedFrameLength;
+    bool staleOriginalLength;
+    bool expectedFcs;
+};
+for (auto linkType : {LINKTYPE_IEEE802_15_4_NOFCS, LINKTYPE_IEEE802_15_4, LINKTYPE_IEEE802_11_RADIOTAP}) {
+    bool radiotap = linkType == LINKTYPE_IEEE802_11_RADIOTAP;
+    bool advertisesFcs = linkType != LINKTYPE_IEEE802_15_4_NOFCS;
+    std::vector<Snapshot> snapshots = {
+        {payload.size(), payload.size(), false, advertisesFcs},
+        {payload.size(), 3, false, false},
+    };
+    if (advertisesFcs) {
+        // Vary trailer space and length agreement independently.
+        size_t shortFrameLength = radiotap ? 3 : 1;
+        snapshots.push_back({shortFrameLength, shortFrameLength, false, false});
+        snapshots.push_back({payload.size(), payload.size(), true, false});
+        snapshots.push_back({shortFrameLength, shortFrameLength, true, false});
+    }
+    for (const auto& snapshot : snapshots) {
+        std::vector<uint8_t> bytes;
+        if (radiotap)
+            bytes = {0, 0, 9, 0, 2, 0, 0, 0, 0x10};
+        size_t linkHeaderLength = bytes.size();
+        bytes.insert(bytes.end(), payload.begin(), payload.begin() + snapshot.frameLength);
+        const char *filename = "captured-length.pcap";
+        Packet packet("capture", makeShared<BytesChunk>(bytes));
+        PcapWriter writer;
+        writer.open(filename, linkHeaderLength + snapshot.capturedFrameLength, 6);
+        writer.writePacket(SimTime(1.25), &packet, b(0), b(0), DIRECTION_INBOUND, nullptr, linkType);
+        writer.close();
+        if (snapshot.staleOriginalLength) {
+            // The writer uses native byte order and puts the original length
+            // 12 bytes into the record header, after the 24-byte file header.
+            std::fstream output(filename, std::ios::in | std::ios::out | std::ios::binary);
+            uint32_t originalLength = bytes.size() - 1;
+            output.seekp(24 + 12);
+            output.write(reinterpret_cast<const char *>(&originalLength), sizeof(originalLength));
+            output.close();
+            if (!output)
+                throw cRuntimeError("Cannot update the original length in the FCS fixture");
+        }
+
+        PcapReader reader;
+        reader.openPcap(filename, nullptr);
+        auto record = reader.readPacket();
+        ASSERT(record.second != nullptr);
+        ASSERT(record.first.sec == 1 && record.first.usec == 250000);
+        if (record.second->getTag<FcsInd>()->getHasFcs() != snapshot.expectedFcs)
+            throw cRuntimeError("Unexpected FCS flag for %zu frame bytes, link type %d, stale original length %d",
+                    snapshot.capturedFrameLength, linkType, snapshot.staleOriginalLength);
+        auto captured = record.second->peekDataAsBytes(Chunk::PF_ALLOW_INCOMPLETE);
+        auto expected = std::vector<uint8_t>(payload.begin(), payload.begin() + snapshot.capturedFrameLength);
+        if (captured->getBytes() != expected)
+            throw cRuntimeError("Expected %zu captured bytes, got %zu", expected.size(), captured->getBytes().size());
+        ASSERT(captured->isComplete() == (snapshot.capturedFrameLength == snapshot.frameLength));
+        delete record.second;
+        ASSERT(reader.readPacket().second == nullptr);
+        reader.closePcap();
+    }
+}
+// The first record has no frame bytes at either snaplen. The second has a
+// shorter capture header and still supplies at least part of its frame.
+for (int snaplen : {12, 16}) {
+    std::vector<uint8_t> longHeader = {0, 0, 16, 0, 2, 0, 0, 0, 0x10};
+    longHeader.resize(16);
+    std::vector<uint8_t> shortHeader = {0, 0, 9, 0, 2, 0, 0, 0, 0x10};
+    longHeader.insert(longHeader.end(), payload.begin(), payload.end());
+    shortHeader.insert(shortHeader.end(), payload.begin(), payload.end());
+    Packet first("long-header", makeShared<BytesChunk>(longHeader));
+    Packet second("short-header", makeShared<BytesChunk>(shortHeader));
+    PcapWriter writer;
+    writer.open("header-only.pcap", snaplen, 6);
+    writer.writePacket(SimTime(1), &first, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_IEEE802_11_RADIOTAP);
+    writer.writePacket(SimTime(2), &second, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_IEEE802_11_RADIOTAP);
+    writer.close();
+    PcapReader reader;
+    reader.openPcap("header-only.pcap", nullptr);
+    auto record = reader.readPacket();
+    ASSERT(record.second != nullptr && record.first.sec == 2);
+    auto captured = record.second->peekDataAsBytes(Chunk::PF_ALLOW_INCOMPLETE);
+    auto expectedLength = std::min<size_t>(snaplen - 9, payload.size());
+    ASSERT(captured->getBytes() == std::vector<uint8_t>(payload.begin(), payload.begin() + expectedLength));
+    delete record.second;
+    ASSERT(reader.readPacket().second == nullptr);
+    reader.closePcap();
+}
+
+// Supply both file and loopback family byte orders, including mixed-order rewrites.
+const std::vector<uint8_t> ipv4Datagram = {
+    0x45, 0, 0, 28, 0, 0, 0, 0, 64, 17, 0x8e, 0x9a, 192, 0, 2, 1,
+    198, 51, 100, 2, 0x30, 0x39, 0x30, 0x3a, 0, 8, 0, 0
+};
+for (bool bigEndian : {false, true}) {
+    std::vector<uint8_t> capture;
+    auto appendInteger = [&](uint32_t value, int byteCount) {
+        for (int i = 0; i < byteCount; i++) {
+            int byteIndex = bigEndian ? byteCount - 1 - i : i;
+            capture.push_back((value >> (8 * byteIndex)) & 0xff);
+        }
+    };
+    appendInteger(0xa1b2c3d4, 4);
+    appendInteger(2, 2);
+    appendInteger(4, 2);
+    appendInteger(0, 4); // reserved fields
+    appendInteger(0, 4);
+    appendInteger(65535, 4); // snaplen
+    appendInteger(0, 4); // LINKTYPE_NULL
+    uint32_t recordLength = sizeof(uint32_t) + ipv4Datagram.size();
+    auto appendRecord = [&](uint32_t seconds, uint32_t capturedLength, uint32_t originalLength, bool familyBigEndian) {
+        appendInteger(seconds, 4);
+        appendInteger(345678, 4);
+        appendInteger(capturedLength, 4);
+        appendInteger(originalLength, 4);
+        if (capturedLength > 0) {
+            if (familyBigEndian)
+                capture.insert(capture.end(), {0, 0, 0, 2});
+            else
+                capture.insert(capture.end(), {2, 0, 0, 0});
+            capture.insert(capture.end(), ipv4Datagram.begin(), ipv4Datagram.end());
+        }
+    };
+    appendRecord(1, 0, recordLength, bigEndian);
+    appendRecord(2, recordLength, recordLength - 1, bigEndian);
+    appendRecord(3, recordLength, recordLength, bigEndian);
+    appendRecord(4, recordLength, recordLength, !bigEndian);
+    const char *filename = "loopback.pcap";
+    std::ofstream output(filename, std::ios::binary);
+    output.write(reinterpret_cast<const char *>(capture.data()), capture.size());
+    output.close();
+    if (!output)
+        throw cRuntimeError("Cannot write the loopback capture fixture");
+
+    PcapReader reader;
+    reader.openPcap(filename, nullptr);
+    for (int seconds : {2, 3, 4}) {
+        auto record = reader.readPacket();
+        ASSERT(record.second != nullptr);
+        ASSERT(record.first.sec == seconds && record.first.usec == 345678);
+        ASSERT(record.second->peekDataAsBytes()->getBytes() == ipv4Datagram);
+        auto protocolTag = record.second->findTag<PacketProtocolTag>();
+        if (protocolTag == nullptr || protocolTag->getProtocol() != &Protocol::ipv4)
+            throw cRuntimeError("Missing IPv4 protocol for loopback record %d in the %s-endian capture",
+                    seconds, bigEndian ? "big" : "little");
+        delete record.second;
+    }
+    ASSERT(reader.readPacket().second == nullptr);
+    reader.closePcap();
+}
+std::cout << "Complete and truncated PCAP records preserve their captured bytes.\n";
+
+%contains: stdout
+Complete and truncated PCAP records preserve their captured bytes.
