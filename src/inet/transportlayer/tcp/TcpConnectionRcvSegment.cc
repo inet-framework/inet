@@ -663,10 +663,6 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + (tcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get<B>() == state->snd_mss)
                 state->full_sized_segment_counter++;
 
-            // check for persist probe
-            if (payloadLength == 1)
-                state->ack_now = true; // TODO how to check if it is really a persist probe?
-
             updateRcvQueueVars();
 
             if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?

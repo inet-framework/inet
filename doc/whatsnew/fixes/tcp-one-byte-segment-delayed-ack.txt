@@ -1,0 +1,3 @@
+A data segment of 1 byte in an open window gets a delayed ACK
+
+RFC 9293 asks a receiver with delayed ACKs to delay the ACK of a data segment that is in order and not a full segment (SHLD-18). Tcp sent the ACK of each data segment of 1 byte at once, because it took such a segment for a zero-window probe. A real probe arrives in a zero window, so it is not acceptable, and it gets its ACK at once on that path. Now a segment of 1 byte in an open window gets a delayed ACK, as other small segments do, and the ACK can leave with the next data. Simulations with interactive applications that send single bytes over Tcp with delayed ACKs change, for example examples/inet/nclients, examples/ipv6/nclients and examples/inet/shutdownrestart TCP: they send fewer pure ACKs.
