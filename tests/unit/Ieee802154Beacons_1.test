@@ -1,0 +1,80 @@
+%description:
+Legacy beacon content and complete framing: independent little-endian vectors,
+bounded GTS/pending offsets, reserved bits, native identities and truncation.
+Structural codec coverage does not establish scan or periodic beacon operation.
+
+%includes:
+#include "inet/linklayer/ieee802154/Ieee802154BeaconCodec.h"
+#include "inet/linklayer/ieee802154/Ieee802154FrameCodec.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+using namespace inet;
+
+%activity:
+using Codec = Ieee802154BeaconCodec;
+using Content = Codec::Content;
+using Error = Codec::Error;
+using Address = Ieee802154Address;
+Content content;
+content.superframeSpecification = 0xcfff; // BO/SO 15, final CAP 15, PAN coordinator, association permit.
+ASSERT(Codec::encode(content) == std::vector<uint8_t>({0xff, 0xcf, 0, 0}));
+content.gtsPermit = true;
+content.gtsDirections = 1;
+content.gtsDescriptors = {0x78, 0x56, 0x23};
+content.pendingAddresses = {Address::fromShort(0x1234), Address::fromExtended(0x0201123456789abcULL)};
+content.payload = {0xde, 0xad};
+// Figures 7-7/9/12/13: one GTS, one short and one extended pending address.
+const std::vector<uint8_t> golden = {0xff, 0xcf, 0x81, 1, 0x78, 0x56, 0x23, 0x11,
+    0x34, 0x12, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12, 1, 2, 0xde, 0xad};
+ASSERT(Codec::encode(content) == golden);
+auto decoded = std::get<Content>(Codec::decode(golden));
+ASSERT(decoded.pendingAddresses == content.pendingAddresses);
+ASSERT(decoded.gtsDescriptors == content.gtsDescriptors && decoded.payload == content.payload);
+ASSERT(Codec::encode(decoded) == golden);
+for (size_t length = 0; length < golden.size() - 2; ++length)
+    ASSERT(std::get<Error>(Codec::decode(std::vector<uint8_t>(golden.begin(), golden.begin() + length))) == Error::TRUNCATED);
+auto reserved = golden;
+reserved[2] |= 0x78;
+reserved[3] |= 0x80;
+reserved[7] |= 0x88;
+ASSERT(Codec::encode(std::get<Content>(Codec::decode(reserved))) == golden);
+ASSERT(std::get<Error>(Codec::decode({0xff, 0x0f, 0, 0x77})) == Error::MALFORMED);
+ASSERT(std::get<Error>(Codec::decode({0xff, 0x0f, 0, 1, 0xff, 0xff})) == Error::MALFORMED);
+for (auto badAddresses : std::vector<std::vector<Address>>{
+        {Address::SHORT_BROADCAST_ADDRESS}, {Address()},
+        {Address::fromExtended(1), Address::fromShort(2)}}) {
+    Content invalid;
+    invalid.pendingAddresses = badAddresses;
+    bool rejected = false;
+    try { Codec::encode(invalid); } catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+Content maximum;
+maximum.pendingAddresses.assign(7, Address::fromShort(0x1234));
+ASSERT(std::get<Content>(Codec::decode(Codec::encode(maximum))).pendingAddresses.size() == 7);
+maximum.pendingAddresses.push_back(Address::fromShort(0x5678));
+bool rejected = false;
+try { Codec::encode(maximum); } catch (const cRuntimeError&) { rejected = true; }
+ASSERT(rejected);
+
+// Independent short source-only version-0 beacon, BSN 255, no FCS in this vector.
+const std::vector<uint8_t> beacon = {0, 0x80, 0xff, 0x34, 0x12, 0x78, 0x56, 0xff, 0xcf, 0, 0};
+auto frame = Ieee802154FrameCodec::decode(beacon, false);
+ASSERT(frame->getDecodeStatus() == Ieee802154FrameCodec::OK);
+ASSERT(frame->getFrameType() == 0 && frame->getSourceAddress() == Address::fromShort(0x5678));
+ASSERT(frame->getDestinationAddress().isNone() && frame->getDsn() == 255);
+ASSERT(Ieee802154FrameCodec::encode(*frame) == beacon);
+frame->setFcsPresent(true);
+frame->setComputeFcs(true);
+Ieee802154FrameCodec::finalize(*frame);
+Packet packet("beacon");
+packet.insertAtBack(frame);
+auto serialized = packet.peekDataAsBytes();
+Packet raw("beacon bytes");
+raw.insertAtBack(serialized);
+auto converted = raw.peekAtFront<Ieee802154Frame>(raw.getDataLength());
+ASSERT(converted->getFcsValid() && converted->getFrameType() == 0 && converted->getDsn() == 255);
+std::cout << "Legacy beacon content, native pending identities and complete framing verified.\n";
+
+%contains: stdout
+Legacy beacon content, native pending identities and complete framing verified.

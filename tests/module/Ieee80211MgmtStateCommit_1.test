@@ -154,7 +154,7 @@ class StateCommitTest : public cSimpleModule, public cListener
         Enter_Method("rateStateChanged");
         if (source == simpleApMib || source == simpleStaMib) {
             bool isSimpleAp = source == simpleApMib;
-            if (!simpleStaMib->bssStationData.isAssociated)
+            if (!simpleStaMib->getBssStationData().isAssociated)
                 return;
             auto mib = isSimpleAp ? simpleApMib : simpleStaMib;
             auto peer = isSimpleAp ? simpleStaMib->address : simpleApMib->address;
@@ -172,7 +172,7 @@ class StateCommitTest : public cSimpleModule, public cListener
         }
         bool isAp = source == apMib;
         if (isAp && checkRefusal) {
-            ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::AUTHENTICATED);
+            ASSERT(apMib->getBssAccessPointData().stations.at(staMib->address) == Ieee80211Mib::AUTHENTICATED);
             ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
             ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
             ASSERT(ap->transaction(staMib->address) == 0);
@@ -180,9 +180,9 @@ class StateCommitTest : public cSimpleModule, public cListener
             refusalNotifications++;
             return;
         }
-        if (isAp && apMib->bssAccessPointData.stations[staMib->address] != Ieee80211Mib::ASSOCIATED)
+        if (isAp && apMib->getPeerAssociationStatus(staMib->address) != Ieee80211Mib::ASSOCIATED)
             return;
-        if (!isAp && !staMib->bssStationData.isAssociated)
+        if (!isAp && !staMib->getBssStationData().isAssociated)
             return;
         if (!isAp && !par("checkSta").boolValue()) {
             staNotifications++;
@@ -222,26 +222,27 @@ class StateCommitTest : public cSimpleModule, public cListener
         auto request = makeShared<Ieee80211AssociationRequestFrame>(*sta->request);
         request->setSupportedRates(rates);
         request->setExtendedSupportedRatesPresent(false);
-        auto capabilities = staMib->localHtCapabilities;
+        auto capabilities = staMib->getLocalHtCapabilities();
         capabilities.shortGi20 = !capabilities.shortGi20;
         expectedShortGi = capabilities.shortGi20;
         setHtCapabilities(request, capabilities);
         int before = apNotifications;
         ap->completeRequest(staMib->address, request);
         ASSERT(apNotifications == before + 1);
+        // An acknowledged replacement starts a new relationship, even for equal capabilities.
         ap->completeRequest(staMib->address, request);
-        ASSERT(apNotifications == before + 1);
+        ASSERT(apNotifications == before + 2);
         expectHt = false;
         request = makeShared<Ieee80211AssociationRequestFrame>(*request);
         request->setHtCapabilitiesPresent(false);
         ap->completeRequest(staMib->address, request);
-        ASSERT(apNotifications == before + 2);
+        ASSERT(apNotifications == before + 3);
 
         expectHt = true;
         auto beacon = makeShared<Ieee80211BeaconFrame>(*ap->beacon);
         beacon->setSupportedRates(rates);
         beacon->setExtendedSupportedRatesPresent(false);
-        capabilities = apMib->localHtCapabilities;
+        capabilities = apMib->getLocalHtCapabilities();
         capabilities.shortGi20 = !capabilities.shortGi20;
         expectedShortGi = capabilities.shortGi20;
         setHtCapabilities(beacon, capabilities);
@@ -306,7 +307,7 @@ class StateCommitTest : public cSimpleModule, public cListener
         auto refused = makeShared<Ieee80211ReassociationRequestFrame>();
         refused->setCurrentAP(apMib->address);
         refused->setSupportedRates(rates);
-        auto malformed = makeHtCapabilitiesElement(staMib->localHtCapabilities);
+        auto malformed = makeHtCapabilitiesElement(staMib->getLocalHtCapabilities());
         malformed.maxAmpduLengthExponent = 4;
         refused->setHtCapabilitiesPresent(true);
         refused->setHtCapabilities(malformed);

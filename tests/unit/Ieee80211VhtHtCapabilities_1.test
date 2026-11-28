@@ -1,13 +1,14 @@
 %description:
-Verify production MIB assembly for inherited HT modes in the ac catalog.
+Verify production MAC assembly for inherited HT modes in the ac catalog.
 Operational width 20 MHz excludes HT40 and its short GI capability.
 Stream limits 1, 2, 3, 4, and 8 expose exact MCS sets through MCS 31.
-This fixture does not establish antenna propagation through the radio.
+The fixture uses configured radio antennas and receiver contributions; no frames are exchanged.
 
 %includes:
 // Author: Miguel González-López
 #include <algorithm>
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 using namespace inet;
@@ -15,13 +16,26 @@ using namespace inet::ieee80211;
 using namespace inet::physicallayer;
 using namespace inet::units::values;
 
+%global:
+class Ht20Receiver : public Ieee80211Receiver
+{
+  public:
+    bool isHtChannelWidthSupported(Hz width) const override { return width == MHz(20); }
+    bool isHtShortGuardIntervalSupported(Hz width) const override { return width == MHz(20); }
+};
+Define_Module(Ht20Receiver);
+
 %file: TestNetwork.ned
-import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module Ht20Receiver extends Ieee80211Receiver { parameters: @class(Ht20Receiver); }
 network TestNetwork
 {
     submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap[5]: AccessPoint;
         test: Test;
-        mib: Ieee80211Mib;
 }
 
 %inifile: omnetpp.ini
@@ -31,15 +45,32 @@ ned-path = .;../../../../src;../../lib
 seed-set = 0
 record-vector-results = false
 record-scalar-results = false
+**.wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified"
+**.wlan[*].opMode = "ac"
+**.wlan[*].radio.receiver.typename = "Ht20Receiver"
+*.ap[0].wlan[*].radio.antenna.numAntennas = 1
+*.ap[1].wlan[*].radio.antenna.numAntennas = 2
+*.ap[2].wlan[*].radio.antenna.numAntennas = 3
+*.ap[3].wlan[*].radio.antenna.numAntennas = 4
+*.ap[4].wlan[*].radio.antenna.numAntennas = 8
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
 
 %activity:
-auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-const auto *catalog = Ieee80211ModeSet::getModeSet("ac");
-mib->setPrimaryChannel(36);
+int index = 0;
 for (int streamLimit : {1, 2, 3, 4, 8}) {
-    mib->updateLocalHtCapabilities(catalog, {MHz(20)}, streamLimit);
-    ASSERT(mib->isHtOperationSupported());
-    const auto& capabilities = mib->localHtCapabilities;
+    auto path = std::string("ap[") + std::to_string(index++) + "].wlan[0].mib";
+    auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath(path.c_str()));
+    ASSERT(mib->isLocalHtCapable());
+    const auto& capabilities = mib->getLocalHtCapabilities();
     int supportedStreams = std::min(streamLimit, 4);
     ASSERT(capabilities.supportedChannelWidths.size() == 1);
     ASSERT(capabilities.supportedChannelWidths.count(MHz(20)) == 1);

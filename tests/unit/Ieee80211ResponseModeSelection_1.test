@@ -81,13 +81,12 @@ static void assertPeerUnchanged(const Ieee80211Mib::PeerHtState& before,
         const Ieee80211Mib::PeerHtState& after)
 {
     ASSERT(before.valid == after.valid);
-    ASSERT(before.generation == after.generation);
+    ASSERT(before.negotiatedCapabilities == after.negotiatedCapabilities);
     ASSERT(before.advertisedCapabilities == after.advertisedCapabilities);
-    ASSERT(before.negotiatedCapabilities.localAdvertisement == after.negotiatedCapabilities.localAdvertisement);
-    ASSERT(before.negotiatedCapabilities.peerAdvertisement == after.negotiatedCapabilities.peerAdvertisement);
-    ASSERT(before.negotiatedCapabilities.operation == after.negotiatedCapabilities.operation);
-    assertDirectionUnchanged(before.negotiatedCapabilities.localTxPeerRx, after.negotiatedCapabilities.localTxPeerRx);
-    assertDirectionUnchanged(before.negotiatedCapabilities.localRxPeerTx, after.negotiatedCapabilities.localRxPeerTx);
+    ASSERT(before.negotiatedCapabilities->localAdvertisement == after.negotiatedCapabilities->localAdvertisement);
+    ASSERT(before.negotiatedCapabilities->peerAdvertisement == after.negotiatedCapabilities->peerAdvertisement);
+    assertDirectionUnchanged(before.negotiatedCapabilities->localTxPeerRx, after.negotiatedCapabilities->localTxPeerRx);
+    assertDirectionUnchanged(before.negotiatedCapabilities->localRxPeerTx, after.negotiatedCapabilities->localRxPeerTx);
 }
 
 } // namespace Ieee80211ResponseModeSelection_1
@@ -162,12 +161,16 @@ operation.primaryChannel = 1;
 operation.operatingChannelWidth = MHz(20);
 
 auto install = [&]() {
-    aMib->localHtCapabilitiesValid = bMib->localHtCapabilitiesValid = true;
-    aMib->localHtCapabilities = aCapabilities;
-    bMib->localHtCapabilities = bCapabilities;
-    aMib->bssStationData.isAssociated = bMib->bssStationData.isAssociated = true;
-    aMib->setPeerHtCapabilities(b, bCapabilities, operation);
-    bMib->setPeerHtCapabilities(a, aCapabilities, operation);
+    aMib->clearBss();
+    bMib->clearBss();
+    aMib->installLocalHtCapabilities(aCapabilities, true);
+    bMib->installLocalHtCapabilities(bCapabilities, true);
+    aMib->commitBss("test", b, nullptr, 1, &operation);
+    bMib->commitBss("test", b, nullptr, 1, &operation);
+    aMib->setAssociated(true);
+    bMib->setAssociated(true);
+    aMib->setPeerHtCapabilities(b, bCapabilities);
+    bMib->setPeerHtCapabilities(a, aCapabilities);
     ASSERT(aMib->findPeerHtState(b)->valid);
     ASSERT(bMib->findPeerHtState(a)->valid);
 };
@@ -234,8 +237,8 @@ auto checkExchange = [&](bool reverse, const IIeee80211Mode *input,
         assertPeerUnchanged(senderBefore, *senderMib->findPeerHtState(recipientAddress));
     if (recipientPeer)
         assertPeerUnchanged(recipientBefore, *recipientMib->findPeerHtState(senderAddress));
-    ASSERT(senderMib->bssStationData.isAssociated);
-    ASSERT(recipientMib->bssStationData.isAssociated);
+    ASSERT(senderMib->getBssStationData().isAssociated);
+    ASSERT(recipientMib->getBssStationData().isAssociated);
 };
 
 install();
@@ -273,9 +276,9 @@ for (bool undefined : {true, false}) {
     bCapabilities.txMcsSetDefined = !undefined;
     bCapabilities.txRxMcsSetNotEqual = !undefined;
     install();
-    ASSERT(aMib->findPeerHtState(b)->negotiatedCapabilities.localRxPeerTx.valid);
-    ASSERT(!aMib->findPeerHtState(b)->negotiatedCapabilities.localRxPeerTx.supportedMcs[0]);
-    ASSERT(bMib->findPeerHtState(a)->negotiatedCapabilities.localTxPeerRx.supportedMcs[0]);
+    ASSERT(aMib->findPeerHtState(b)->negotiatedCapabilities->localRxPeerTx.valid);
+    ASSERT(!aMib->findPeerHtState(b)->negotiatedCapabilities->localRxPeerTx.supportedMcs[0]);
+    ASSERT(bMib->findPeerHtState(a)->negotiatedCapabilities->localTxPeerRx.supportedMcs[0]);
     checkExchange(false, mcs0Long, legacy6, mcs0Short);
 }
 bCapabilities.txMcsSetDefined = true;

@@ -2,7 +2,7 @@
 Use real association and management rate publication for two Compressed Block Ack hops.
 The STA sends thirty UDP payloads through the AP to the other STA.
 Observe accepted ADDBA dialogs, matched Compressed BAR/BA, positive receipt bits, and final agreement retirement.
-After setup, remove one BSS basic rate through the MIB API. Require the agreement and HT generation to remain unchanged.
+After setup, remove one BSS basic rate through the MIB API. Require the agreement and retained HT capability snapshot to remain unchanged.
 Record actual frame modes, lengths, airtime, IFS, and TXOP bounds for both protection modes at 6 and 24 Mbps.
 The medium uses zero propagation time. Compare local receipt completion with the exact TXOP endpoint without a timing allowance.
 The fixture enforces DATA and ACK bounds under active Compressed agreements, with the permitted initial MSDU and same-size retry exceptions.
@@ -89,7 +89,7 @@ class ExchangeHcf : public Hcf {
         auto rates = mib->findPeerRateSet(peer);
         ASSERT(rates && rates->operational.known && !rates->operational.legacyRates.empty());
         auto ht = mib->findPeerHtState(peer);
-        ASSERT(mib->isHtOperationSupported() && ht && ht->valid);
+        ASSERT(mib->isLocalHtCapable() && ht && ht->valid);
     }
   protected:
     void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader,
@@ -270,14 +270,14 @@ class ExchangeHcf : public Hcf {
             auto tid = response->getTid();
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
             ASSERT(agreement && agreement->getIsAddbaResponseReceived());
-            auto generation = mib->findPeerHtState(peer)->generation;
+            auto capabilities = mib->findPeerHtState(peer)->negotiatedCapabilities;
             auto rates = mib->getBssRateSet();
             ASSERT(rates.basic.legacyRates.size() > 1);
             rates.basic.legacyRates.erase(std::prev(rates.basic.legacyRates.end()));
             // Association supplies the initial rates. This rate-only update exercises the production subscriber.
             mib->setBssRateSet(rates);
             ASSERT(originatorBlockAckAgreementHandler->getAgreement(peer, tid) == agreement);
-            ASSERT(mib->findPeerHtState(peer)->generation == generation);
+            ASSERT(mib->findPeerHtState(peer)->negotiatedCapabilities == capabilities);
             refreshedRates = true;
         }
     }

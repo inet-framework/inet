@@ -1,0 +1,3 @@
+IEEE 802.15.4 address value type
+
+Ieee802154Address represents absent, short and full 64-bit extended addresses with strict parsing, formatting and identity comparisons. It is not yet used by the existing IEEE 802.15.4 MAC.

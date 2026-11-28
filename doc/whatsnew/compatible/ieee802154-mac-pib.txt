@@ -1,0 +1,3 @@
+IEEE 802.15.4 selected MAC PIB store
+
+Ieee802154MacPib provides validated selected-profile MAC attributes, startup configuration and reset defaults for new MAC implementations. It does not yet replace parameter storage in the existing IEEE 802.15.4 MAC.

@@ -18,7 +18,8 @@ namespace ieee80211 {
 
 /** Checks the retained transmit mode without a new rate-control decision. */
 INET_API bool isPeerCompatibleMode(const physicallayer::Ieee80211ModeSet *modeSet,
-        const Ieee80211Mib::PeerHtState *peerHtState, const physicallayer::IIeee80211Mode *mode);
+        const Ieee80211Mib::PeerHtState *peerHtState, const physicallayer::IIeee80211Mode *mode,
+        const Ieee80211HtOperation *operation, bool htEligible);
 
 /**
  * Selects a mode compatible with local transmission to the peer.
@@ -29,7 +30,8 @@ INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleMode(
         const physicallayer::Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState,
         const physicallayer::IIeee80211Mode *mode,
-        const MacAddress& peerAddress);
+        const MacAddress& peerAddress,
+        const Ieee80211HtOperation *operation, bool htEligible);
 
 /**
  * Selects a compatible response mode from the directional negotiated state.
@@ -41,7 +43,8 @@ INET_API const physicallayer::IIeee80211Mode *selectPeerCompatibleResponseMode(
         const Ieee80211Mib::PeerHtState *peerHtState,
         const physicallayer::IIeee80211Mode *mode,
         const MacAddress& peerAddress,
-        ResponseQueryRole role);
+        ResponseQueryRole role,
+        const Ieee80211HtOperation *operation, bool htEligible);
 
 } // namespace ieee80211
 } // namespace inet

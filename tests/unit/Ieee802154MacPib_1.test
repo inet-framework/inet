@@ -1,0 +1,263 @@
+%description:
+Verify the selected IEEE 802.15.4 MAC PIB defaults, exact-name access,
+validation atomicity, O-QPSK backoff default, and PIB reset semantics.
+Expected standard values come from IEEE Std 802.15.4-2024 Tables 8-36 and
+8-37, clauses 8.2.5 and 8.2.6, clause 11.1.4, Table 12-1, and clause 13.3.3.
+
+%includes:
+#include "inet/linklayer/ieee802154/Ieee802154MacPib.h"
+
+#include <limits>
+#include <string>
+#include <utility>
+#include <vector>
+
+using namespace inet;
+
+%activity:
+
+using Value = Ieee802154MacPibValue;
+using Status = Ieee802154MacStatus;
+const auto identity = Ieee802154Address::fromExtended(0x1022334455667788ULL);
+const auto otherIdentity = Ieee802154Address::fromExtended(0xAA22334455667788ULL);
+const auto coordinator = Ieee802154Address::fromExtended(0x1020304050607080ULL);
+
+struct ExpectedAttribute {
+    const char *name;
+    Value value;
+    bool readOnly;
+};
+
+const std::vector<ExpectedAttribute> expected = {
+    {"macExtendedAddress", identity, true},
+    {"macCoordExtendedAddress", Ieee802154Address::NONE_ADDRESS, false},
+    {"macShortAddress", uint64_t{0xffff}, false},
+    {"macCoordShortAddress", uint64_t{0xffff}, false},
+    {"macPanId", uint64_t{0xffff}, false},
+    {"macDsn", uint64_t{37}, false},
+    {"macMinBe", uint64_t{3}, false},
+    {"macMaxBe", uint64_t{5}, false},
+    {"macMaxCsmaBackoffs", uint64_t{4}, false},
+    {"macMaxFrameRetries", uint64_t{3}, false},
+    {"macSifsPeriod", uint64_t{12}, true},
+    {"macLifsPeriod", uint64_t{40}, true},
+    {"macUnitBackoffPeriod", uint64_t{20}, false},
+    {"macRxOnWhenIdle", false, false},
+    {"macImplicitBroadcast", false, false},
+    {"macGroupRxMode", false, false},
+    {"macSecurityEnabled", false, false},
+    {"macBeaconOrder", uint64_t{15}, false},
+    {"macTimestampSupported", false, true},
+    {"macSyncSymbolOffset", uint64_t{0}, true},
+    {"macPromiscuousMode", false, false},
+    {"macDsmeCapable", false, true},
+    {"macDsmeEnabled", false, false},
+    {"macDaCapable", false, true},
+    {"macDaEnabled", false, false},
+    {"macExtendedDsmeCapable", false, true},
+    {"macExtendedDsmeEnabled", false, false},
+    {"macHoppingCapable", false, true},
+    {"macHoppingEnabled", false, false},
+    {"macLeCapable", false, true},
+    {"macLeEnabled", false, false},
+    {"macLeHsEnabled", false, false},
+    {"macMetricsCapable", false, true},
+    {"macMetricsEnabled", false, false},
+    {"macRccnCapable", false, true},
+    {"macRccnEnabled", false, false},
+    {"macSrmCapable", false, true},
+    {"macSrmEnabled", false, false},
+    {"macTrleCapable", false, true},
+    {"macTrleEnabled", false, false},
+    {"macTrleRelayingMode", false, false},
+    {"macTschCapable", false, true},
+    {"macTschEnabled", false, false},
+};
+
+ASSERT(expected.size() == 43);
+Ieee802154MacPib pib(identity, 37);
+
+auto read = [](const Ieee802154MacPib& target, const std::string& name) -> Value {
+    const auto confirm = target.get(name);
+    ASSERT(confirm.attribute == name);
+    ASSERT(std::get<Status>(confirm.result) == Status::SUCCESS);
+    ASSERT(confirm.value.has_value());
+    return *confirm.value;
+};
+auto snapshot = [&](const Ieee802154MacPib& target) {
+    std::vector<std::pair<std::string, Value>> values;
+    for (const auto& attribute : expected)
+        values.emplace_back(attribute.name, read(target, attribute.name));
+    return values;
+};
+
+for (const auto& attribute : expected) {
+    const auto confirm = pib.get(attribute.name);
+    ASSERT(confirm.attribute == attribute.name);
+    ASSERT(std::get<Status>(confirm.result) == Status::SUCCESS);
+    ASSERT(confirm.value.has_value());
+    ASSERT(*confirm.value == attribute.value);
+    const auto setValue = std::string(attribute.name) == "macCoordExtendedAddress" ? Value(coordinator) : attribute.value;
+    const auto setStatus = pib.set(attribute.name, setValue);
+    const auto expectedStatus = attribute.readOnly ? Status::READ_ONLY : Status::SUCCESS;
+    ASSERT(setStatus == expectedStatus);
+}
+
+// Exact spelling is preserved; names outside this selected MAC surface are unsupported.
+auto beforeUnknownAttributes = snapshot(pib);
+for (const auto& name : {std::string("MacPanId"), std::string("macAutoRequest"), std::string("phyCcaDuration"), std::string("macLinkTable[0]")}) {
+    const auto confirm = pib.get(name);
+    ASSERT(confirm.attribute == name);
+    ASSERT(std::get<Status>(confirm.result) == Status::UNSUPPORTED_ATTRIBUTE);
+    ASSERT(!confirm.value.has_value());
+    ASSERT(pib.set(name, uint64_t{1}) == Status::UNSUPPORTED_ATTRIBUTE);
+}
+ASSERT(snapshot(pib) == beforeUnknownAttributes);
+
+auto beforeFailure = snapshot(pib);
+ASSERT(pib.set("macShortAddress", false) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macShortAddress", int64_t{-1}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macShortAddress", uint64_t{0x10000}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macPanId", identity) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macRxOnWhenIdle", uint64_t{1}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macSecurityEnabled", true) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macBeaconOrder", uint64_t{14}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macCoordExtendedAddress", Ieee802154Address::NONE_ADDRESS) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macCoordExtendedAddress", Ieee802154Address::fromExtended(std::numeric_limits<uint64_t>::max())) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macExtendedAddress", false) == Status::READ_ONLY);
+ASSERT(pib.set("macMaxBe", uint64_t{2}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macMaxBe", uint64_t{9}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macMaxCsmaBackoffs", uint64_t{6}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macMaxFrameRetries", uint64_t{8}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macUnitBackoffPeriod", uint64_t{0}) == Status::INVALID_PARAMETER);
+ASSERT(pib.set("macUnitBackoffPeriod", std::numeric_limits<uint64_t>::max()) == Status::INVALID_PARAMETER);
+for (const auto& name : {"macDsmeEnabled", "macDaEnabled", "macExtendedDsmeEnabled", "macHoppingEnabled",
+        "macLeEnabled", "macLeHsEnabled", "macMetricsEnabled", "macRccnEnabled", "macSrmEnabled",
+        "macTrleEnabled", "macTrleRelayingMode", "macTschEnabled"})
+    ASSERT(pib.set(name, true) == Status::INVALID_PARAMETER);
+ASSERT(snapshot(pib) == beforeFailure);
+ASSERT(pib.set("macRxOnWhenIdle", true) == Status::SUCCESS);
+
+// SET accepts nonnegative signed integers and keeps exact 64-bit address identity.
+ASSERT(pib.set("macShortAddress", int64_t{0xfffe}) == Status::SUCCESS);
+ASSERT(pib.set("macPanId", uint64_t{0x1234}) == Status::SUCCESS);
+ASSERT(pib.set("macCoordExtendedAddress", coordinator) == Status::SUCCESS);
+ASSERT(read(pib, "macCoordExtendedAddress") == Value(coordinator));
+Ieee802154MacPib secondAddressPib(otherIdentity, 38);
+ASSERT(read(pib, "macExtendedAddress") == Value(identity));
+ASSERT(read(secondAddressPib, "macExtendedAddress") == Value(otherIdentity));
+ASSERT(identity != otherIdentity);
+ASSERT((identity.getExtended() & 0x0000ffffffffffffULL) == (otherIdentity.getExtended() & 0x0000ffffffffffffULL));
+
+Ieee802154MacPib boundaries(identity, 0);
+ASSERT(boundaries.set("macShortAddress", int64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macShortAddress", int64_t{0xffff}) == Status::SUCCESS);
+ASSERT(boundaries.set("macCoordShortAddress", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macCoordShortAddress", uint64_t{0xffff}) == Status::SUCCESS);
+ASSERT(boundaries.set("macPanId", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macPanId", uint64_t{0xffff}) == Status::SUCCESS);
+ASSERT(boundaries.set("macDsn", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macDsn", uint64_t{255}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMinBe", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMaxBe", uint64_t{8}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMinBe", uint64_t{8}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMaxCsmaBackoffs", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMaxCsmaBackoffs", uint64_t{5}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMaxFrameRetries", uint64_t{0}) == Status::SUCCESS);
+ASSERT(boundaries.set("macMaxFrameRetries", uint64_t{7}) == Status::SUCCESS);
+ASSERT(boundaries.set("macUnitBackoffPeriod", uint64_t{std::numeric_limits<uint32_t>::max()}) == Status::SUCCESS);
+
+// Cross-attribute BE changes are atomic; changing the pair through startup configuration is order-independent.
+ASSERT(pib.set("macMinBe", uint64_t{5}) == Status::SUCCESS);
+beforeFailure = snapshot(pib);
+ASSERT(pib.set("macMaxBe", uint64_t{4}) == Status::INVALID_PARAMETER);
+ASSERT(snapshot(pib) == beforeFailure);
+ASSERT(pib.set("macMaxBe", uint64_t{8}) == Status::SUCCESS);
+ASSERT(pib.set("macMinBe", uint64_t{8}) == Status::SUCCESS);
+beforeFailure = snapshot(pib);
+ASSERT(pib.set("macMinBe", uint64_t{9}) == Status::INVALID_PARAMETER);
+ASSERT(snapshot(pib) == beforeFailure);
+
+Ieee802154MacPib startupMinFirst(identity, 1, 128, {
+    {"macMinBe", uint64_t{6}},
+    {"macMaxBe", uint64_t{7}},
+});
+ASSERT(read(startupMinFirst, "macMinBe") == Value(uint64_t{6}));
+ASSERT(read(startupMinFirst, "macMaxBe") == Value(uint64_t{7}));
+Ieee802154MacPib startupMaxFirst(identity, 1, 128, {
+    {"macMaxBe", uint64_t{7}},
+    {"macMinBe", uint64_t{6}},
+});
+ASSERT(read(startupMaxFirst, "macMinBe") == Value(uint64_t{6}));
+ASSERT(read(startupMaxFirst, "macMaxBe") == Value(uint64_t{7}));
+
+auto rejectsConfiguration = [](auto configure) {
+    try {
+        configure();
+    }
+    catch (const cRuntimeError&) {
+        return true;
+    }
+    return false;
+};
+ASSERT(rejectsConfiguration([&] { Ieee802154MacPib invalid(Ieee802154Address::fromExtended(std::numeric_limits<uint64_t>::max()), 0); (void)invalid; }));
+ASSERT(rejectsConfiguration([&] { Ieee802154MacPib invalid(Ieee802154Address::fromShort(1), 0); (void)invalid; }));
+ASSERT(rejectsConfiguration([&] { Ieee802154MacPib invalid(identity, 0, 0); (void)invalid; }));
+ASSERT(rejectsConfiguration([&] { Ieee802154MacPib invalid(identity, 0, 1000001); (void)invalid; }));
+ASSERT(rejectsConfiguration([&] {
+    Ieee802154MacPib invalid(identity, 0, 128, {{"macMinBe", uint64_t{6}}});
+    (void)invalid;
+}));
+ASSERT(rejectsConfiguration([&] {
+    Ieee802154MacPib invalid(identity, 0, 128, {{"macMinBe", uint64_t{6}}, {"macMinBe", uint64_t{5}}});
+    (void)invalid;
+}));
+ASSERT(rejectsConfiguration([&] {
+    Ieee802154MacPib invalid(identity, 0, 128, {{"macPanID", uint64_t{7}}});
+    (void)invalid;
+}));
+ASSERT(rejectsConfiguration([&] {
+    Ieee802154MacPib invalid(identity, 0, 128, {{"macSifsPeriod", uint64_t{12}}});
+    (void)invalid;
+}));
+
+// O-QPSK default: 12 turnaround symbols + ceil(CCA duration / 16 us).
+ASSERT(read(Ieee802154MacPib(identity, 0, 1), "macUnitBackoffPeriod") == Value(uint64_t{13}));
+ASSERT(read(Ieee802154MacPib(identity, 0, 16), "macUnitBackoffPeriod") == Value(uint64_t{13}));
+ASSERT(read(Ieee802154MacPib(identity, 0, 17), "macUnitBackoffPeriod") == Value(uint64_t{14}));
+ASSERT(read(Ieee802154MacPib(identity, 0, 1000000), "macUnitBackoffPeriod") == Value(uint64_t{62512}));
+ASSERT(read(Ieee802154MacPib(identity, 0), "macDsn") == Value(uint64_t{0}));
+ASSERT(read(Ieee802154MacPib(identity, 255), "macDsn") == Value(uint64_t{255}));
+
+// RESET(false) retains the whole state. RESET(true) restores selected defaults, not startup overrides.
+Ieee802154MacPib resetPib(identity, 9, 17, {{"macShortAddress", uint64_t{0x1234}}});
+ASSERT(resetPib.set("macCoordExtendedAddress", coordinator) == Status::SUCCESS);
+ASSERT(resetPib.set("macShortAddress", uint64_t{0x4321}) == Status::SUCCESS);
+ASSERT(resetPib.set("macCoordShortAddress", uint64_t{0x1111}) == Status::SUCCESS);
+ASSERT(resetPib.set("macPanId", uint64_t{0x2222}) == Status::SUCCESS);
+ASSERT(resetPib.set("macDsn", uint64_t{200}) == Status::SUCCESS);
+ASSERT(resetPib.set("macMinBe", uint64_t{2}) == Status::SUCCESS);
+ASSERT(resetPib.set("macMaxCsmaBackoffs", uint64_t{2}) == Status::SUCCESS);
+ASSERT(resetPib.set("macMaxFrameRetries", uint64_t{1}) == Status::SUCCESS);
+ASSERT(resetPib.set("macUnitBackoffPeriod", uint64_t{33}) == Status::SUCCESS);
+ASSERT(resetPib.set("macRxOnWhenIdle", true) == Status::SUCCESS);
+ASSERT(resetPib.set("macImplicitBroadcast", true) == Status::SUCCESS);
+ASSERT(resetPib.set("macGroupRxMode", true) == Status::SUCCESS);
+ASSERT(resetPib.set("macPromiscuousMode", true) == Status::SUCCESS);
+const auto beforeReset = snapshot(resetPib);
+resetPib.reset(false, 42);
+ASSERT(snapshot(resetPib) == beforeReset);
+resetPib.reset(true, 255);
+ASSERT(snapshot(resetPib) == [&] {
+    Ieee802154MacPib defaults(identity, 255, 17);
+    return snapshot(defaults);
+}());
+ASSERT(read(resetPib, "macShortAddress") == Value(uint64_t{0xffff}));
+ASSERT(read(resetPib, "macUnitBackoffPeriod") == Value(uint64_t{14}));
+ASSERT(read(resetPib, "macDsn") == Value(uint64_t{255}));
+ASSERT(read(resetPib, "macExtendedAddress") == Value(identity));
+
+EV << "Selected IEEE 802.15.4 MAC PIB checks passed.\n";
+
+%contains: stdout
+Selected IEEE 802.15.4 MAC PIB checks passed.

@@ -1,0 +1,125 @@
+%description:
+Exercise the selected legacy frame codec with independent wire octets, all
+native address/PAN presence combinations, sequence boundaries and malformed input.
+Exercise the registered serializer through real Packet chunk conversions.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee802154/Ieee802154FrameCodec.h"
+#include <vector>
+using namespace inet;
+
+%activity:
+using Codec = Ieee802154FrameCodec;
+using Address = Ieee802154Address;
+auto frame = makeShared<Ieee802154Frame>();
+frame->setFrameVersion(1);
+frame->setDsn(0xff);
+frame->setAckRequest(true);
+frame->setPanCompression(true);
+frame->setDestinationPanId(0x1234);
+frame->setSourcePanId(0x1234);
+frame->setDestinationAddress(Address::fromExtended(0x0401123456789abcULL));
+frame->setSourceAddress(Address::fromExtended(0x0201123456789abcULL));
+frame->setFcsPresent(false);
+frame->setPayloadArraySize(2);
+frame->setPayload(0, 0xde);
+frame->setPayload(1, 0xad);
+const std::vector<uint8_t> golden = {
+    0x61, 0xdc, 0xff, 0x34, 0x12,
+    0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12, 0x01, 0x04,
+    0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12, 0x01, 0x02, 0xde, 0xad
+};
+ASSERT(Codec::encode(*frame) == golden);
+auto decoded = Codec::decode(golden, false);
+ASSERT(decoded->getDecodeStatus() == Codec::OK);
+ASSERT(decoded->getDestinationAddress() == frame->getDestinationAddress());
+ASSERT(decoded->getSourceAddress() == frame->getSourceAddress());
+ASSERT(decoded->getSourcePanId() == 0x1234);
+ASSERT(Codec::encode(*decoded) == golden);
+
+// Independent short-address uncompressed form, unequal PANs.
+const std::vector<uint8_t> shortGolden = {0x01, 0x88, 0x07, 0x34, 0x12, 0x78, 0x56, 0xbc, 0x9a, 0xf0, 0xde};
+decoded = Codec::decode(shortGolden, false);
+ASSERT(decoded->getDecodeStatus() == Codec::OK);
+ASSERT(decoded->getDestinationAddress() == Address::fromShort(0x5678));
+ASSERT(decoded->getSourceAddress() == Address::fromShort(0xdef0));
+ASSERT(decoded->getSourcePanId() == 0x9abc && decoded->getDestinationPanId() == 0x1234);
+ASSERT(Codec::encode(*decoded) == shortGolden);
+
+const Address addresses[] = {Address(), Address::fromShort(0x5678), Address::fromExtended(0x0201123456789abcULL)};
+for (int version : {0, 1}) {
+    for (int d = 0; d < 3; ++d) {
+        for (int s = 0; s < 3; ++s) {
+            for (bool compressed : {false, true}) {
+                if (compressed && (!d || !s))
+                    continue;
+                auto value = makeShared<Ieee802154Frame>();
+                value->setFrameVersion(version);
+                value->setDestinationAddress(addresses[d]);
+                value->setSourceAddress(addresses[s]);
+                value->setPanCompression(compressed);
+                value->setDestinationPanId(0x1234);
+                value->setSourcePanId(compressed ? 0x1234 : 0xabcd);
+                auto expectedLength = 3 + (d ? 2 + (d == 1 ? 2 : 8) : 0) + (s ? (compressed ? 0 : 2) + (s == 1 ? 2 : 8) : 0) + 2;
+                for (int sequence : {254, 255, 0, 1}) {
+                    value->setDsn(sequence);
+                    Codec::finalize(*value);
+                    ASSERT(value->getChunkLength() == B(expectedLength));
+                    Packet packet("typed");
+                    packet.insertAtBack(value);
+                    auto byteChunk = packet.peekDataAsBytes();
+                    const auto& bytes = byteChunk->getBytes();
+                    ASSERT(bytes.size() == size_t(expectedLength));
+                    ASSERT(bytes[2] == sequence);
+                    Packet raw("raw");
+                    raw.insertAtBack(makeShared<BytesChunk>(bytes));
+                    auto converted = raw.peekAtFront<Ieee802154Frame>(raw.getDataLength());
+                    ASSERT(converted->getDsn() == sequence);
+                    ASSERT(converted->getSourceAddress() == addresses[s]);
+                    ASSERT(converted->getDestinationAddress() == addresses[d]);
+                    ASSERT(converted->getFcsPresent() && converted->getFcsValid());
+                    ASSERT(Codec::encode(*converted) == bytes);
+                    // Packet holds an immutable chunk; replace before the next sequence.
+                    value = makeShared<Ieee802154Frame>(*value);
+                }
+            }
+        }
+    }
+}
+
+// Prefixes inside a required header are safely rejected, not read out of bounds.
+for (size_t length = 0; length < 21; ++length) {
+    auto prefix = std::vector<uint8_t>(golden.begin(), golden.begin() + length);
+    ASSERT(Codec::decode(prefix, false)->getDecodeStatus() == Codec::TRUNCATED);
+}
+for (auto bytes : std::vector<std::vector<uint8_t>>{{0x01, 0x04, 0}, {0x01, 0x30, 0}, {0x01, 0x01, 0}, {0x01, 0x02, 0}, {0x41, 0, 0}, {0x04, 0, 0}, {0, 0, 0}}) {
+    auto rejected = Codec::decode(bytes, false);
+    ASSERT(rejected->getDecodeStatus() == Codec::MALFORMED);
+    ASSERT(Codec::encode(*rejected) == bytes);
+}
+ASSERT(Codec::decode({0x03, 0, 0}, false)->getDecodeStatus() == Codec::TRUNCATED);
+for (auto bytes : std::vector<std::vector<uint8_t>>{{0x01, 0x20, 0}}) {
+    auto unsupported = Codec::decode(bytes, false);
+    ASSERT(unsupported->getDecodeStatus() == Codec::UNSUPPORTED);
+    ASSERT(Codec::encode(*unsupported) == bytes);
+}
+auto ack = Codec::decode({0x12, 0, 0xff}, false);
+ASSERT(ack->getDecodeStatus() == Codec::OK && ack->getFrameType() == 2 && ack->getFramePending());
+ASSERT(ack->getDestinationAddress().isNone() && ack->getSourceAddress().isNone());
+ASSERT(Codec::decode({2, 0, 0, 0}, false)->getDecodeStatus() == Codec::MALFORMED);
+auto reserved = shortGolden;
+reserved[0] |= 0x80;
+auto ignored = Codec::decode(reserved, false);
+ASSERT(ignored->getDecodeStatus() == Codec::OK && ignored->getReservedBit7());
+ASSERT(Codec::encode(*ignored) == reserved);
+auto secured = shortGolden;
+secured[0] |= 8;
+auto protectedFrame = Codec::decode(secured, false);
+ASSERT(protectedFrame->getDecodeStatus() == Codec::OK && protectedFrame->getSecurityEnabled());
+ASSERT(Codec::encode(*protectedFrame) == secured); // Common framing only; no plaintext claim.
+std::cout << "Legacy frame fields, native identities, presence matrix and registered byte conversion verified.\n";
+
+%contains: stdout
+Legacy frame fields, native identities, presence matrix and registered byte conversion verified.

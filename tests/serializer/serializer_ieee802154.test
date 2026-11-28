@@ -1,0 +1,34 @@
+%description:
+Admitted M1 IEEE 802.15.4 wire vectors round-trip through the production PCAP
+reader, registered protocol dissector and serializer. Both FCS presence modes
+must yield typed frames, exact bytes, no parse exception and no raw fallback.
+The independently generated fixture/provenance is beside the captures.
+
+%includes:
+#include "SerializerTestLib.h"
+using namespace inet;
+
+%activity:
+cLog::logLevel = LOGLEVEL_WARN;
+beginSerializerCoverage();
+testPcapSerialization("../../pcap/generated/ieee802154-m1-with-fcs.pcap", true);
+testPcapSerialization("../../pcap/generated/ieee802154-m1-no-fcs.pcap", false);
+reportSerializerCoverage();
+
+%contains: stdout
+Files:  2 tested, 2 clean, 0 with differences
+
+%contains: stdout
+Frames: 4 total, 4 same, 0 differ, 0 error, 0 truncated
+
+%contains: stdout
+USED inet::Ieee802154Frame
+
+%not-contains: stdout
+TOPLEVEL-RAWBYTES
+
+%not-contains: stdout
+EXCEPTION
+
+%not-contains: stdout
+Some frames differ in file

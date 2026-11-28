@@ -2,7 +2,7 @@
 Check reversible DATA preparation and Compressed TXOP admission through HCF, EDCA, frame sequences, and Tx.
 The fixture supplies accepted agreements and peer capabilities. It injects timed CTS, ACK, and Block Ack responses at HCF.
 Service cases check queue ownership, deadlines, sequence assignment, and allocation before refusal and after commitment.
-Runtime cases check ordinary fallback, one mode decision, RTS recovery, expiry, capability loss, and mode-set changes.
+Runtime cases check ordinary fallback, one mode decision, RTS recovery, expiry, capability loss, and accepted BSS removal.
 Ordinary commitment preserves elapsed queueing time and one queue pull; retransmission retains that measurement without another pull.
 This fixture does not establish association behavior. The infrastructure exchange fixture supplies that evidence.
 
@@ -72,7 +72,7 @@ class AdmissionRecovery : public QosRecoveryProcedure {
 };
 Define_Module(AdmissionRecovery);
 
-class AdmissionRateControl : public ModeSetListener, public IRateControl {
+class AdmissionRateControl : public ModeSetModuleBase, public IRateControl {
   public:
     int queries = 0;
     int failedDataFeedback = 0;
@@ -160,8 +160,12 @@ class AdmissionHcf : public Hcf {
             auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
             auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
             auto channel = transmitter->getChannel();
-            mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
-            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+            {
+                Ieee80211HtOperation operation;
+                operation.primaryChannel = channel->getChannelNumber();
+                mib->commitBss("test", mib->address, channel->getBand(), operation.primaryChannel, &operation);
+            }
+            mib->setPeerHtCapabilities(peer, mib->getLocalHtCapabilities());
             delete originatorBlockAckAgreementHandler;
             auto agreements = new AdmissionAgreements();
             originatorBlockAckAgreementHandler = agreements;
@@ -456,12 +460,9 @@ class AdmissionHcf : public Hcf {
                 mib->setBssRateSet(rates);
             }
             else {
-                auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.^.radio"));
-                radio->setMode(modeSet->getMode(Mbps(24)));
-                auto replacement = physicallayer::Ieee80211ModeSet::getModeSet("g(mixed)");
-                radio->setModeSet(replacement);
-                getContainingNicModule(this)->emit(modesetChangedSignal, replacement);
+                mib->clearBss();
             }
+            mib->publishStateChange();
             ASSERT(control()->queries == queries);
             if (scenario() != 11)
                 rx->setContentionBlocked(true);
@@ -610,7 +611,7 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 module AdmissionService extends OriginatorQosMacDataService { parameters: @class(::inet::ieee80211::AdmissionService); }
 simple AdmissionRecovery extends QosRecoveryProcedure { parameters: @class(::inet::ieee80211::AdmissionRecovery); }
-simple AdmissionRateControl like IRateControl { parameters: @class(::inet::ieee80211::AdmissionRateControl); }
+simple AdmissionRateControl like IRateControl { parameters: string modeSetModule; @class(::inet::ieee80211::AdmissionRateControl); }
 module AdmissionHcf extends Hcf { parameters: int scenario; @class(::inet::ieee80211::AdmissionHcf); }
 simple AdmissionTest { parameters: int scenario; @class(::inet::ieee80211::AdmissionTest); @display("i=block/cogwheel"); }
 network AdmissionNetwork {

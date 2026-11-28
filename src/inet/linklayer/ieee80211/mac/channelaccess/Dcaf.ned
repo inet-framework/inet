@@ -18,6 +18,7 @@ import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 module Dcaf extends Module
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         int difsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);

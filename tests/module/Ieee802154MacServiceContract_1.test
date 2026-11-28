@@ -1,0 +1,890 @@
+%description:
+Exercise the bounded IEEE 802.15.4 MAC service contract. The fixture proves
+typed gate-free binding, request admission, packet ownership, request identity,
+terminal callback ordering, reset/cancellation, indications, and lifecycle
+stop/start. It is a contract fixture and does not claim production MAC support.
+
+%file: Ieee802154MacServiceContract.cc
+
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/common/SimpleModule.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee802154/Ieee802154MacDataRequest.h"
+#include "inet/linklayer/ieee802154/Ieee802154MacGetRequest.h"
+#include "inet/linklayer/ieee802154/contract/IIeee802154MacServiceClient.h"
+#include "inet/linklayer/ieee802154/contract/IIeee802154MacServiceProvider.h"
+
+namespace inet {
+
+class ContractClient;
+
+class OwnedTestPacket : public Packet
+{
+  public:
+    static int destroyed;
+
+    explicit OwnedTestPacket(const char *name) : Packet(name) {}
+    virtual ~OwnedTestPacket() { destroyed++; }
+};
+
+int OwnedTestPacket::destroyed = 0;
+
+class ContractProvider : public SimpleModule, public IIeee802154MacServiceProvider, public ILifecycle
+{
+  private:
+    enum class PendingKind { DATA, GET, SET };
+
+    struct Pending {
+        PendingKind kind;
+        Ieee802154MacServiceRequestId requestId;
+        Packet *packet = nullptr;
+        uint8_t msduHandle = 0;
+        std::string attribute;
+        std::optional<Ieee802154MacPibValue> value;
+    };
+
+    ModuleRefByPar<IIeee802154MacServiceClient> client;
+    std::map<Ieee802154MacServiceRequestId, Pending> pending;
+    Ieee802154MacServiceRequestId lastRequestId = IEEE802154_INVALID_REQUEST_ID;
+    Ieee802154MacServiceRequestId resetRequestId = IEEE802154_INVALID_REQUEST_ID;
+    Ieee802154Address sourceIdentity = Ieee802154Address::fromExtended(0xa1b2c3d4e5f60708ULL);
+    int orphanCleanupCount = 0;
+    bool started = true;
+    bool resetting = false;
+    bool resetDefaultPib = false;
+
+    bool acceptRequestId(Ieee802154MacServiceRequestId requestId)
+    {
+        if (requestId == IEEE802154_INVALID_REQUEST_ID || requestId <= lastRequestId)
+            return false;
+        lastRequestId = requestId;
+        return true;
+    }
+
+    Ieee802154MacServiceAdmission admit(Ieee802154MacServiceRequestId requestId)
+    {
+        if (!acceptRequestId(requestId))
+            return Ieee802154MacServiceAdmission::INVALID_REQUEST;
+        if (!started)
+            return Ieee802154MacServiceAdmission::UNAVAILABLE;
+        if (resetting)
+            return Ieee802154MacServiceAdmission::BUSY;
+        return Ieee802154MacServiceAdmission::ACCEPTED;
+    }
+
+    void deletePacket(Pending& operation)
+    {
+        if (operation.packet != nullptr) {
+            delete operation.packet;
+            operation.packet = nullptr;
+        }
+    }
+
+    void abort(Pending operation, Ieee802154MacServiceAbortReason reason)
+    {
+        deletePacket(operation);
+        if (!client)
+            return;
+        if (operation.kind == PendingKind::DATA)
+            client->handleDataConfirm(operation.requestId, Ieee802154MacDataConfirm(operation.msduHandle, reason));
+        else if (operation.kind == PendingKind::GET)
+            client->handleGetConfirm(operation.requestId, Ieee802154MacGetConfirm(operation.attribute, reason));
+        else
+            client->handleSetConfirm(operation.requestId, Ieee802154MacSetConfirm(operation.attribute, reason));
+    }
+
+  public:
+    Ieee802154Address lastDestination;
+    std::optional<Ieee802154MacPibValue> lastSetValue;
+    int acceptedPackets = 0;
+
+    virtual ~ContractProvider()
+    {
+        for (auto& entry : pending) {
+            deletePacket(entry.second);
+            orphanCleanupCount++;
+        }
+        pending.clear();
+    }
+
+    bool isStarted() const { return started; }
+    bool hasClient() const { return bool(client); }
+    size_t pendingCount() const { return pending.size(); }
+    Packet *getPendingPacket(Ieee802154MacServiceRequestId requestId) const
+    {
+        auto it = pending.find(requestId);
+        return it == pending.end() ? nullptr : it->second.packet;
+    }
+    int getOrphanCleanupCount() const { return orphanCleanupCount; }
+    Ieee802154Address getSourceIdentity() const { return sourceIdentity; }
+
+    virtual void initialize() override
+    {
+        client.reference(this, "clientModule", true);
+    }
+
+    virtual Ieee802154MacServiceAdmission submitData(Ieee802154MacServiceRequestId requestId,
+            Packet *msdu, const Ieee802154MacDataRequest& request) override
+    {
+        Enter_Method("submitData");
+        auto admission = admit(requestId);
+        if (admission != Ieee802154MacServiceAdmission::ACCEPTED)
+            return admission;
+        if (msdu == nullptr)
+            return Ieee802154MacServiceAdmission::INVALID_REQUEST;
+        take(msdu);
+        acceptedPackets++;
+        lastDestination = request.destinationAddress;
+        pending.emplace(requestId, Pending{PendingKind::DATA, requestId, msdu, request.msduHandle, "", std::nullopt});
+        if (msdu->isName("inline"))
+            completeData(requestId, Ieee802154MacStatus::SUCCESS);
+        return admission;
+    }
+
+    virtual Ieee802154MacServiceAdmission submitGet(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacGetRequest& request) override
+    {
+        Enter_Method("submitGet");
+        auto admission = admit(requestId);
+        if (admission != Ieee802154MacServiceAdmission::ACCEPTED)
+            return admission;
+        pending.emplace(requestId, Pending{PendingKind::GET, requestId, nullptr, 0, request.attribute, std::nullopt});
+        return admission;
+    }
+
+    virtual Ieee802154MacServiceAdmission submitSet(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacSetRequest& request) override
+    {
+        Enter_Method("submitSet");
+        auto admission = admit(requestId);
+        if (admission != Ieee802154MacServiceAdmission::ACCEPTED)
+            return admission;
+        if (request.attribute == "unsupportedOperation")
+            return Ieee802154MacServiceAdmission::UNSUPPORTED_OPERATION;
+        lastSetValue = request.value;
+        pending.emplace(requestId, Pending{PendingKind::SET, requestId, nullptr, 0, request.attribute, request.value});
+        return admission;
+    }
+
+    virtual Ieee802154MacServiceAdmission submitReset(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacResetRequest& request) override
+    {
+        Enter_Method("submitReset");
+        auto admission = admit(requestId);
+        if (admission != Ieee802154MacServiceAdmission::ACCEPTED)
+            return admission;
+        resetting = true;
+        resetRequestId = requestId;
+        resetDefaultPib = request.setDefaultPib;
+        auto operations = std::move(pending);
+        pending.clear();
+        for (auto& entry : operations)
+            abort(std::move(entry.second), Ieee802154MacServiceAbortReason::RESET);
+        return admission;
+    }
+
+    virtual Ieee802154MacServiceCancelResult cancel(Ieee802154MacServiceRequestId requestId) override
+    {
+        Enter_Method("cancel");
+        if (resetting && requestId == resetRequestId)
+            return Ieee802154MacServiceCancelResult::NOT_CANCELLABLE;
+        auto it = pending.find(requestId);
+        if (it == pending.end())
+            return Ieee802154MacServiceCancelResult::NOT_PENDING;
+        auto operation = std::move(it->second);
+        pending.erase(it);
+        abort(std::move(operation), Ieee802154MacServiceAbortReason::CANCELLED);
+        return Ieee802154MacServiceCancelResult::CANCELLED;
+    }
+
+    void completeData(Ieee802154MacServiceRequestId requestId, Ieee802154MacServiceResult result)
+    {
+        Enter_Method("completeData");
+        auto it = pending.find(requestId);
+        if (it == pending.end())
+            return;
+        ASSERT(it->second.kind == PendingKind::DATA);
+        auto operation = std::move(it->second);
+        pending.erase(it);
+        deletePacket(operation);
+        if (client) {
+            Ieee802154MacDataConfirm confirm(operation.msduHandle, std::move(result));
+            if (std::holds_alternative<Ieee802154MacStatus>(confirm.result) && std::get<Ieee802154MacStatus>(confirm.result) == Ieee802154MacStatus::SUCCESS)
+                confirm.numBackoffs = 0;
+            client->handleDataConfirm(requestId, confirm);
+        }
+        else
+            orphanCleanupCount++;
+    }
+
+    void completeGet(Ieee802154MacServiceRequestId requestId, Ieee802154MacServiceResult result,
+            std::optional<Ieee802154MacPibValue> value = std::nullopt)
+    {
+        Enter_Method("completeGet");
+        auto it = pending.find(requestId);
+        if (it == pending.end())
+            return;
+        ASSERT(it->second.kind == PendingKind::GET);
+        auto operation = std::move(it->second);
+        pending.erase(it);
+        if (client) {
+            Ieee802154MacGetConfirm confirm(operation.attribute, std::move(result));
+            confirm.value = std::move(value);
+            client->handleGetConfirm(requestId, confirm);
+        }
+        else
+            orphanCleanupCount++;
+    }
+
+    void completeSet(Ieee802154MacServiceRequestId requestId, Ieee802154MacServiceResult result)
+    {
+        Enter_Method("completeSet");
+        auto it = pending.find(requestId);
+        if (it == pending.end())
+            return;
+        ASSERT(it->second.kind == PendingKind::SET);
+        auto operation = std::move(it->second);
+        pending.erase(it);
+        if (client)
+            client->handleSetConfirm(requestId, Ieee802154MacSetConfirm(operation.attribute, std::move(result)));
+        else
+            orphanCleanupCount++;
+    }
+
+    void completeReset()
+    {
+        Enter_Method("completeReset");
+        ASSERT(resetting);
+        auto requestId = resetRequestId;
+        auto setDefaultPib = resetDefaultPib;
+        resetting = false;
+        resetRequestId = IEEE802154_INVALID_REQUEST_ID;
+        if (client)
+            client->handleResetConfirm(requestId, Ieee802154MacResetConfirm(setDefaultPib, Ieee802154MacStatus::SUCCESS));
+    }
+
+    void emitIndications()
+    {
+        Enter_Method("emitIndications");
+        auto carriedPacket = new Packet("carriedMsdu");
+        Ieee802154MacDataIndication carried;
+        carried.sourcePanId = 0x1234;
+        carried.destinationPanId = 0x5678;
+        carried.effectiveSourcePanId = 0x1234;
+        carried.sourceAddress = Ieee802154Address::fromExtended(0x0102030405060708ULL);
+        carried.destinationAddress = Ieee802154Address::fromExtended(0x0102030405060709ULL);
+        carried.dsn = 7;
+        carried.framePending = true;
+        carried.ackSent = true;
+        carried.frameVersion = 1;
+        carried.dataRate = 0;
+        carried.lqi = 42;
+        carried.rssi = 43;
+        if (client)
+            client->handleDataIndication(carriedPacket, carried);
+        else
+            delete carriedPacket;
+
+        auto inferredPacket = new Packet("inferredMsdu");
+        Ieee802154MacDataIndication inferred = carried;
+        inferred.sourcePanId.reset();
+        inferred.effectiveSourcePanId = 0x1234;
+        if (client)
+            client->handleDataIndication(inferredPacket, inferred);
+        else
+            delete inferredPacket;
+
+        auto rawPacket = new Packet("rawMhrAndPayload");
+        Ieee802154MacPromiscuousIndication promiscuous;
+        promiscuous.lqi = 45;
+        promiscuous.rssi = 46;
+        if (client)
+            client->handlePromiscuousIndication(rawPacket, promiscuous);
+        else
+            delete rawPacket;
+
+        if (client)
+            client->handleCommStatusIndication(nullptr, Ieee802154MacCommStatusIndication(Ieee802154MacStatus::SECURITY_ERROR));
+    }
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *) override
+    {
+        Enter_Method("handleOperationStage");
+        if (dynamic_cast<ModuleStopOperation *>(operation) != nullptr && operation->getCurrentStage() == ModuleStopOperation::STAGE_LOCAL)
+            stop(Ieee802154MacServiceAbortReason::STOPPED);
+        else if (dynamic_cast<ModuleCrashOperation *>(operation) != nullptr && operation->getCurrentStage() == ModuleCrashOperation::STAGE_CRASH)
+            stop(Ieee802154MacServiceAbortReason::STOPPED);
+        else if (dynamic_cast<ModuleStartOperation *>(operation) != nullptr && operation->getCurrentStage() == ModuleStartOperation::STAGE_LOCAL)
+            started = true;
+        return true;
+    }
+
+    void stop(Ieee802154MacServiceAbortReason reason)
+    {
+        started = false;
+        auto operations = std::move(pending);
+        pending.clear();
+        for (auto& entry : operations)
+            abort(std::move(entry.second), reason);
+        if (resetting) {
+            auto requestId = resetRequestId;
+            auto setDefaultPib = resetDefaultPib;
+            resetting = false;
+            resetRequestId = IEEE802154_INVALID_REQUEST_ID;
+            if (client)
+                client->handleResetConfirm(requestId, Ieee802154MacResetConfirm(setDefaultPib, reason));
+        }
+    }
+};
+
+Define_Module(ContractProvider);
+
+class ContractClient : public SimpleModule, public IIeee802154MacServiceClient, public ILifecycle
+{
+  private:
+    ModuleRefByPar<IIeee802154MacServiceProvider> service;
+    Ieee802154MacServiceRequestId nextRequestId = 1;
+
+  public:
+    static int destroyed;
+    int dataConfirms = 0;
+    int getConfirms = 0;
+    int setConfirms = 0;
+    int resetConfirms = 0;
+    int stoppedConfirms = 0;
+    int resetDataAborts = 0;
+    int resetGetAborts = 0;
+    int resetSetAborts = 0;
+    int normalIndications = 0;
+    int promiscuousIndications = 0;
+    int commStatusIndications = 0;
+    bool probeResetReentrancy = false;
+    bool probeCompletionReentrancy = false;
+    Ieee802154MacServiceRequestId reentrantRequestId = IEEE802154_INVALID_REQUEST_ID;
+    std::optional<Ieee802154MacServiceAdmission> reentrantAdmission;
+    std::optional<Ieee802154MacServiceResult> lastDataResult;
+    Ieee802154MacServiceRequestId lastDataConfirmRequestId = IEEE802154_INVALID_REQUEST_ID;
+    uint8_t lastDataConfirmMsduHandle = 0;
+    std::optional<Ieee802154MacServiceResult> lastResetResult;
+    std::optional<Ieee802154MacGetConfirm> lastGetConfirm;
+    std::optional<Ieee802154MacSetConfirm> lastSetConfirm;
+    Ieee802154MacServiceRequestId lastGetConfirmRequestId = IEEE802154_INVALID_REQUEST_ID;
+    Ieee802154MacServiceRequestId lastSetConfirmRequestId = IEEE802154_INVALID_REQUEST_ID;
+    Ieee802154MacServiceRequestId lastResetConfirmRequestId = IEEE802154_INVALID_REQUEST_ID;
+    std::optional<Ieee802154MacDataIndication> lastCarriedIndication;
+    std::optional<Ieee802154MacDataIndication> lastInferredIndication;
+    std::optional<Ieee802154MacPromiscuousIndication> lastPromiscuousIndication;
+    std::optional<Ieee802154MacCommStatusIndication> lastCommStatus;
+    std::vector<std::string> callbackEvents;
+
+    virtual ~ContractClient() { destroyed++; }
+
+    virtual void initialize() override
+    {
+        service.reference(this, "serviceModule", true);
+    }
+
+    Ieee802154MacServiceRequestId allocateRequestId()
+    {
+        ASSERT(nextRequestId != IEEE802154_INVALID_REQUEST_ID);
+        auto id = nextRequestId;
+        nextRequestId = id == UINT64_MAX ? IEEE802154_INVALID_REQUEST_ID : id + 1;
+        return id;
+    }
+
+    void setNextRequestIdForTest(Ieee802154MacServiceRequestId requestId)
+    {
+        ASSERT(requestId != IEEE802154_INVALID_REQUEST_ID);
+        nextRequestId = requestId;
+    }
+
+    IIeee802154MacServiceProvider *getService() { return service.get(); }
+
+    virtual void handleDataConfirm(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacDataConfirm& confirm) override
+    {
+        Enter_Method("handleDataConfirm");
+        if (std::holds_alternative<Ieee802154MacStatus>(confirm.result) && std::get<Ieee802154MacStatus>(confirm.result) == Ieee802154MacStatus::SUCCESS) {
+            ASSERT(confirm.numBackoffs.has_value());
+            ASSERT(*confirm.numBackoffs == 0);
+        }
+        else
+            ASSERT(!confirm.numBackoffs.has_value());
+        dataConfirms++;
+        lastDataConfirmRequestId = requestId;
+        lastDataConfirmMsduHandle = confirm.msduHandle;
+        callbackEvents.push_back("data");
+        lastDataResult = confirm.result;
+        if (std::holds_alternative<Ieee802154MacServiceAbortReason>(confirm.result)) {
+            auto reason = std::get<Ieee802154MacServiceAbortReason>(confirm.result);
+            if (reason == Ieee802154MacServiceAbortReason::RESET) {
+                resetDataAborts++;
+                if (probeResetReentrancy && !reentrantAdmission.has_value()) {
+                    auto id = allocateRequestId();
+                    reentrantRequestId = id;
+                    reentrantAdmission = service->submitGet(id, Ieee802154MacGetRequest{"macShortAddress"});
+                }
+            }
+            if (reason == Ieee802154MacServiceAbortReason::STOPPED)
+                stoppedConfirms++;
+        }
+        else if (probeCompletionReentrancy && std::get<Ieee802154MacStatus>(confirm.result) == Ieee802154MacStatus::SUCCESS && !reentrantAdmission.has_value()) {
+            auto id = allocateRequestId();
+            reentrantRequestId = id;
+            reentrantAdmission = service->submitGet(id, Ieee802154MacGetRequest{"macShortAddress"});
+        }
+        (void)requestId;
+    }
+
+    virtual void handleGetConfirm(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacGetConfirm& confirm) override
+    {
+        Enter_Method("handleGetConfirm");
+        getConfirms++;
+        lastGetConfirmRequestId = requestId;
+        callbackEvents.push_back("get");
+        lastGetConfirm = confirm;
+        if (std::holds_alternative<Ieee802154MacServiceAbortReason>(confirm.result) && std::get<Ieee802154MacServiceAbortReason>(confirm.result) == Ieee802154MacServiceAbortReason::RESET)
+            resetGetAborts++;
+        (void)requestId;
+    }
+
+    virtual void handleSetConfirm(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacSetConfirm& confirm) override
+    {
+        Enter_Method("handleSetConfirm");
+        setConfirms++;
+        lastSetConfirmRequestId = requestId;
+        callbackEvents.push_back("set");
+        lastSetConfirm = confirm;
+        if (std::holds_alternative<Ieee802154MacServiceAbortReason>(confirm.result) && std::get<Ieee802154MacServiceAbortReason>(confirm.result) == Ieee802154MacServiceAbortReason::RESET)
+            resetSetAborts++;
+        (void)requestId;
+    }
+
+    virtual void handleResetConfirm(Ieee802154MacServiceRequestId requestId,
+            const Ieee802154MacResetConfirm& confirm) override
+    {
+        Enter_Method("handleResetConfirm");
+        resetConfirms++;
+        lastResetConfirmRequestId = requestId;
+        callbackEvents.push_back("reset");
+        lastResetResult = confirm.result;
+        ASSERT(confirm.setDefaultPib);
+        (void)requestId;
+    }
+
+    virtual void handleDataIndication(Packet *msdu,
+            const Ieee802154MacDataIndication& indication) override
+    {
+        Enter_Method("handleDataIndication");
+        ASSERT(msdu->getOwner() == getModuleByPath("^.provider"));
+        take(msdu);
+        ASSERT(msdu->getOwner() == this);
+        delete msdu;
+        normalIndications++;
+        if (indication.sourcePanId.has_value())
+            lastCarriedIndication = indication;
+        else
+            lastInferredIndication = indication;
+    }
+
+    virtual void handlePromiscuousIndication(Packet *rawFrame,
+            const Ieee802154MacPromiscuousIndication& indication) override
+    {
+        Enter_Method("handlePromiscuousIndication");
+        ASSERT(rawFrame->getOwner() == getModuleByPath("^.provider"));
+        take(rawFrame);
+        ASSERT(rawFrame->getOwner() == this);
+        delete rawFrame;
+        promiscuousIndications++;
+        lastPromiscuousIndication = indication;
+    }
+
+    virtual void handleCommStatusIndication(Packet *plaintext,
+            const Ieee802154MacCommStatusIndication& indication) override
+    {
+        Enter_Method("handleCommStatusIndication");
+        if (plaintext != nullptr) {
+            take(plaintext);
+            delete plaintext;
+        }
+        commStatusIndications++;
+        lastCommStatus = indication;
+    }
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *) override
+    {
+        Enter_Method("handleOperationStage");
+        (void)operation;
+        return true;
+    }
+};
+
+int ContractClient::destroyed = 0;
+
+Define_Module(ContractClient);
+
+class ContractObserver : public SimpleModule
+{
+  protected:
+    ContractProvider *provider = nullptr;
+    ContractClient *client = nullptr;
+    cMessage *checkUnavailable = nullptr;
+    cMessage *checkAfterStop = nullptr;
+    cMessage *checkAfterCrash = nullptr;
+    cMessage *deleteClient = nullptr;
+    cMessage *completeOrphan = nullptr;
+    cMessage *finalCheck = nullptr;
+    Ieee802154MacServiceRequestId crashRequestId = IEEE802154_INVALID_REQUEST_ID;
+    Ieee802154MacServiceRequestId maxRequestId = IEEE802154_INVALID_REQUEST_ID;
+    int destroyedAtStart = 0;
+    int clientDestroyedAtStart = 0;
+
+    Ieee802154MacDataRequest makeRequest(uint64_t destination)
+    {
+        Ieee802154MacDataRequest request;
+        request.sourceAddressMode = Ieee802154Address::AddressType::EXTENDED;
+        request.destinationAddress = Ieee802154Address::fromExtended(destination);
+        request.destinationPanId = 0x1234;
+        request.msduHandle = 7;
+        request.ackTx = true;
+        return request;
+    }
+
+    static void checkStatus(const std::optional<Ieee802154MacServiceResult>& result, Ieee802154MacStatus status)
+    {
+        ASSERT(result.has_value());
+        ASSERT(std::holds_alternative<Ieee802154MacStatus>(*result));
+        ASSERT(std::get<Ieee802154MacStatus>(*result) == status);
+    }
+
+    static void checkAbort(const std::optional<Ieee802154MacServiceResult>& result, Ieee802154MacServiceAbortReason reason)
+    {
+        ASSERT(result.has_value());
+        ASSERT(std::holds_alternative<Ieee802154MacServiceAbortReason>(*result));
+        ASSERT(std::get<Ieee802154MacServiceAbortReason>(*result) == reason);
+    }
+
+    void runContract()
+    {
+        auto request = makeRequest(0x0102030405060708ULL);
+        ASSERT(provider->getSourceIdentity() != request.destinationAddress);
+
+        auto refusedPacket = new OwnedTestPacket("refused");
+        auto destroyedBeforeRefusal = OwnedTestPacket::destroyed;
+        auto confirmsBeforeRefusal = client->dataConfirms;
+        auto refusedOwner = refusedPacket->getOwner();
+        ASSERT(refusedOwner == this);
+        ASSERT(provider->submitData(IEEE802154_INVALID_REQUEST_ID, refusedPacket, request) == Ieee802154MacServiceAdmission::INVALID_REQUEST);
+        ASSERT(OwnedTestPacket::destroyed == destroyedBeforeRefusal);
+        ASSERT(client->dataConfirms == confirmsBeforeRefusal);
+        ASSERT(refusedPacket->getOwner() == refusedOwner);
+        delete refusedPacket;
+        ASSERT(OwnedTestPacket::destroyed == destroyedBeforeRefusal + 1);
+
+        auto nullDataId = client->allocateRequestId();
+        ASSERT(provider->submitData(nullDataId, nullptr, request) == Ieee802154MacServiceAdmission::INVALID_REQUEST);
+        ASSERT(client->dataConfirms == confirmsBeforeRefusal);
+
+        auto cancelId = client->allocateRequestId();
+        auto cancelPacket = new OwnedTestPacket("cancelled");
+        ASSERT(provider->submitData(cancelId, cancelPacket, request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->acceptedPackets == 1);
+        ASSERT(provider->getPendingPacket(cancelId)->getOwner() == provider);
+        auto originalDestination = request.destinationAddress;
+        request.destinationAddress = Ieee802154Address::fromExtended(0x0908070605040302ULL);
+        ASSERT(provider->lastDestination == originalDestination);
+        request.destinationAddress = originalDestination;
+        ASSERT(provider->cancel(cancelId) == Ieee802154MacServiceCancelResult::CANCELLED);
+        checkAbort(client->lastDataResult, Ieee802154MacServiceAbortReason::CANCELLED);
+        ASSERT(client->lastDataConfirmRequestId == cancelId);
+        ASSERT(client->lastDataConfirmMsduHandle == request.msduHandle);
+        ASSERT(provider->cancel(cancelId) == Ieee802154MacServiceCancelResult::NOT_PENDING);
+        ASSERT(OwnedTestPacket::destroyed == destroyedBeforeRefusal + 2);
+
+        client->probeCompletionReentrancy = true;
+        auto completeId = client->allocateRequestId();
+        auto completePacket = new OwnedTestPacket("inline");
+        auto destroyedBeforeComplete = OwnedTestPacket::destroyed;
+        ASSERT(provider->submitData(completeId, completePacket, request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(client->lastDataConfirmRequestId == completeId);
+        ASSERT(client->lastDataConfirmMsduHandle == request.msduHandle);
+        ASSERT(OwnedTestPacket::destroyed == destroyedBeforeComplete + 1);
+        ASSERT(client->reentrantAdmission == Ieee802154MacServiceAdmission::ACCEPTED);
+        provider->completeGet(client->reentrantRequestId, Ieee802154MacServiceResult(Ieee802154MacStatus::SUCCESS), uint64_t(7));
+        ASSERT(client->lastGetConfirm->value.has_value());
+        ASSERT(std::holds_alternative<uint64_t>(*client->lastGetConfirm->value));
+        ASSERT(std::get<uint64_t>(*client->lastGetConfirm->value) == 7);
+        client->probeCompletionReentrancy = false;
+        client->reentrantAdmission.reset();
+        client->reentrantRequestId = IEEE802154_INVALID_REQUEST_ID;
+
+        request.security.securityLevel = 1;
+        auto unsupportedSecurityId = client->allocateRequestId();
+        ASSERT(provider->submitData(unsupportedSecurityId, new OwnedTestPacket("security"), request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        provider->completeData(unsupportedSecurityId, Ieee802154MacStatus::UNSUPPORTED_SECURITY);
+        checkStatus(client->lastDataResult, Ieee802154MacStatus::UNSUPPORTED_SECURITY);
+        request.security.securityLevel = 0;
+
+        auto unknownGetId = client->allocateRequestId();
+        ASSERT(provider->submitGet(unknownGetId, Ieee802154MacGetRequest{"unknownAttribute"}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        provider->completeGet(unknownGetId, Ieee802154MacStatus::UNSUPPORTED_ATTRIBUTE);
+        ASSERT(client->lastGetConfirmRequestId == unknownGetId);
+        ASSERT(client->lastGetConfirm->attribute == "unknownAttribute");
+        ASSERT(!client->lastGetConfirm->value.has_value());
+
+        auto setId = client->allocateRequestId();
+        auto setRequest = Ieee802154MacSetRequest{"macExtendedAddress", Ieee802154Address::fromExtended(0x1122334455667788ULL)};
+        ASSERT(provider->submitSet(setId, setRequest) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->lastSetValue.has_value());
+        ASSERT(std::holds_alternative<Ieee802154Address>(*provider->lastSetValue));
+        ASSERT(std::get<Ieee802154Address>(*provider->lastSetValue) == std::get<Ieee802154Address>(setRequest.value));
+        provider->completeSet(setId, Ieee802154MacStatus::SUCCESS);
+        ASSERT(client->lastSetConfirmRequestId == setId);
+        ASSERT(client->lastSetConfirm->attribute == "macExtendedAddress");
+        checkStatus(client->lastSetConfirm->result, Ieee802154MacStatus::SUCCESS);
+
+        auto unsupportedOperationId = client->allocateRequestId();
+        ASSERT(provider->submitSet(unsupportedOperationId, Ieee802154MacSetRequest{"unsupportedOperation", true}) == Ieee802154MacServiceAdmission::UNSUPPORTED_OPERATION);
+
+        auto cancelGetId = client->allocateRequestId();
+        ASSERT(provider->submitGet(cancelGetId, Ieee802154MacGetRequest{"cancelGet"}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->cancel(cancelGetId) == Ieee802154MacServiceCancelResult::CANCELLED);
+        checkAbort(client->lastGetConfirm->result, Ieee802154MacServiceAbortReason::CANCELLED);
+        auto cancelSetId = client->allocateRequestId();
+        ASSERT(provider->submitSet(cancelSetId, Ieee802154MacSetRequest{"cancelSet", uint64_t(8)}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->cancel(cancelSetId) == Ieee802154MacServiceCancelResult::CANCELLED);
+        checkAbort(client->lastSetConfirm->result, Ieee802154MacServiceAbortReason::CANCELLED);
+
+        auto staleId = client->allocateRequestId();
+        ASSERT(provider->submitData(staleId, new OwnedTestPacket("stale"), request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->cancel(staleId) == Ieee802154MacServiceCancelResult::CANCELLED);
+        auto replacementId = client->allocateRequestId();
+        ASSERT(provider->submitData(replacementId, new OwnedTestPacket("replacement"), request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        auto confirmsBeforeStale = client->dataConfirms;
+        provider->completeData(staleId, Ieee802154MacStatus::SUCCESS);
+        ASSERT(provider->pendingCount() == 1);
+        ASSERT(client->dataConfirms == confirmsBeforeStale);
+        provider->completeData(replacementId, Ieee802154MacStatus::SUCCESS);
+
+        client->probeResetReentrancy = true;
+        auto resetDataId = client->allocateRequestId();
+        ASSERT(provider->submitData(resetDataId, new OwnedTestPacket("resetData"), request) == Ieee802154MacServiceAdmission::ACCEPTED);
+        auto resetGetId = client->allocateRequestId();
+        ASSERT(provider->submitGet(resetGetId, Ieee802154MacGetRequest{"macShortAddress"}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        auto resetSetId = client->allocateRequestId();
+        ASSERT(provider->submitSet(resetSetId, Ieee802154MacSetRequest{"macPanId", uint64_t(0x1234)}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        auto resetId = client->allocateRequestId();
+        auto eventsBeforeReset = client->callbackEvents.size();
+        ASSERT(provider->submitReset(resetId, Ieee802154MacResetRequest{true}) == Ieee802154MacServiceAdmission::ACCEPTED);
+        ASSERT(provider->pendingCount() == 0);
+        ASSERT(client->resetDataAborts == 1);
+        ASSERT(client->resetGetAborts == 1);
+        ASSERT(client->resetSetAborts == 1);
+        ASSERT(client->reentrantAdmission == Ieee802154MacServiceAdmission::BUSY);
+        ASSERT(provider->cancel(resetId) == Ieee802154MacServiceCancelResult::NOT_CANCELLABLE);
+        provider->completeReset();
+        ASSERT(client->resetConfirms == 1);
+        ASSERT(client->lastResetConfirmRequestId == resetId);
+        checkStatus(client->lastResetResult, Ieee802154MacStatus::SUCCESS);
+        ASSERT(client->callbackEvents.size() > eventsBeforeReset);
+        ASSERT(client->callbackEvents.back() == "reset");
+        client->probeResetReentrancy = false;
+        client->reentrantAdmission.reset();
+
+        provider->emitIndications();
+        ASSERT(client->normalIndications == 2);
+        ASSERT(client->promiscuousIndications == 1);
+        ASSERT(client->commStatusIndications == 1);
+        ASSERT(client->lastCarriedIndication->sourcePanId == 0x1234);
+        ASSERT(client->lastCarriedIndication->effectiveSourcePanId == 0x1234);
+        ASSERT(client->lastInferredIndication->sourcePanId == std::nullopt);
+        ASSERT(client->lastInferredIndication->effectiveSourcePanId == 0x1234);
+        ASSERT(client->lastCarriedIndication->dsn == 7);
+        ASSERT(!client->lastCarriedIndication->timestamp.has_value());
+        ASSERT(!client->lastPromiscuousIndication->timestamp.has_value());
+        ASSERT(client->lastCommStatus->status == Ieee802154MacStatus::SECURITY_ERROR);
+        ASSERT(!client->lastCommStatus->security.has_value());
+
+        auto lifecycleId = client->allocateRequestId();
+        ASSERT(provider->submitData(lifecycleId, new OwnedTestPacket("lifecycle"), makeRequest(9)) == Ieee802154MacServiceAdmission::ACCEPTED);
+        checkUnavailable = new cMessage("checkUnavailable");
+        checkAfterStop = new cMessage("checkAfterStop");
+        checkAfterCrash = new cMessage("checkAfterCrash");
+        deleteClient = new cMessage("deleteClient");
+        completeOrphan = new cMessage("completeOrphan");
+        finalCheck = new cMessage("finalCheck");
+        scheduleAt(SimTime(1200, SIMTIME_NS), checkUnavailable);
+        scheduleAt(SimTime(2, SIMTIME_US), checkAfterStop);
+        scheduleAt(SimTime(4, SIMTIME_US), checkAfterCrash);
+        scheduleAt(SimTime(5, SIMTIME_US), deleteClient);
+        scheduleAt(SimTime(5500, SIMTIME_NS), completeOrphan);
+        scheduleAt(SimTime(6, SIMTIME_US), finalCheck);
+    }
+
+    virtual void initialize() override
+    {
+        provider = check_and_cast<ContractProvider *>(getModuleByPath("^.provider"));
+        client = check_and_cast<ContractClient *>(getModuleByPath("^.client"));
+        destroyedAtStart = OwnedTestPacket::destroyed;
+        clientDestroyedAtStart = ContractClient::destroyed;
+        runContract();
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message == checkUnavailable) {
+            auto id = client->allocateRequestId();
+            ASSERT(provider->submitGet(id, Ieee802154MacGetRequest{"macShortAddress"}) == Ieee802154MacServiceAdmission::UNAVAILABLE);
+            delete message;
+            checkUnavailable = nullptr;
+        }
+        else if (message == checkAfterStop) {
+            ASSERT(provider->isStarted());
+            ASSERT(client->stoppedConfirms == 1);
+            crashRequestId = client->allocateRequestId();
+            ASSERT(provider->submitData(crashRequestId, new OwnedTestPacket("crash"), makeRequest(10)) == Ieee802154MacServiceAdmission::ACCEPTED);
+            delete message;
+            checkAfterStop = nullptr;
+        }
+        else if (message == checkAfterCrash) {
+            ASSERT(provider->isStarted());
+            ASSERT(client->stoppedConfirms == 2);
+            ASSERT(provider->pendingCount() == 0);
+            ASSERT(crashRequestId != IEEE802154_INVALID_REQUEST_ID);
+            delete message;
+            checkAfterCrash = nullptr;
+
+            client->setNextRequestIdForTest(UINT64_MAX);
+            maxRequestId = client->allocateRequestId();
+            ASSERT(maxRequestId == UINT64_MAX);
+            ASSERT(provider->submitData(maxRequestId, new OwnedTestPacket("orphan"), makeRequest(11)) == Ieee802154MacServiceAdmission::ACCEPTED);
+            ASSERT(provider->submitGet(IEEE802154_INVALID_REQUEST_ID, Ieee802154MacGetRequest{"invalid"}) == Ieee802154MacServiceAdmission::INVALID_REQUEST);
+            ASSERT(provider->submitGet(maxRequestId, Ieee802154MacGetRequest{"reused"}) == Ieee802154MacServiceAdmission::INVALID_REQUEST);
+            ASSERT(provider->submitGet(maxRequestId - 1, Ieee802154MacGetRequest{"lower"}) == Ieee802154MacServiceAdmission::INVALID_REQUEST);
+        }
+        else if (message == deleteClient) {
+            ASSERT(provider->pendingCount() == 1);
+            ASSERT(client != nullptr);
+            client->deleteModule();
+            client = nullptr;
+            ASSERT(!provider->hasClient());
+            delete message;
+            deleteClient = nullptr;
+        }
+        else if (message == completeOrphan) {
+            auto destroyedBefore = OwnedTestPacket::destroyed;
+            auto pendingBefore = provider->pendingCount();
+            provider->completeData(maxRequestId, Ieee802154MacStatus::SUCCESS);
+            ASSERT(OwnedTestPacket::destroyed == destroyedBefore + 1);
+            ASSERT(provider->pendingCount() == 0);
+            ASSERT(pendingBefore == 1);
+            ASSERT(provider->getOrphanCleanupCount() == 1);
+            delete message;
+            completeOrphan = nullptr;
+        }
+        else if (message == finalCheck) {
+            ASSERT(OwnedTestPacket::destroyed == destroyedAtStart + 10);
+            ASSERT(ContractClient::destroyed == clientDestroyedAtStart + 1);
+            ASSERT(provider->pendingCount() == 0);
+            std::cout << "IEEE 802.15.4 MAC service contract ownership, terminal ordering, indications, and lifecycle verified.\n";
+            delete message;
+            finalCheck = nullptr;
+        }
+        else
+            throw cRuntimeError("Unexpected contract observer message");
+    }
+
+  public:
+    virtual ~ContractObserver()
+    {
+        cancelAndDelete(checkUnavailable);
+        cancelAndDelete(checkAfterStop);
+        cancelAndDelete(checkAfterCrash);
+        cancelAndDelete(deleteClient);
+        cancelAndDelete(completeOrphan);
+        cancelAndDelete(finalCheck);
+    }
+};
+
+Define_Module(ContractObserver);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee802154.contract.IIeee802154MacServiceClient;
+import inet.linklayer.ieee802154.contract.IIeee802154MacServiceProvider;
+
+simple ContractProvider like IIeee802154MacServiceProvider
+{
+    parameters:
+        @class(::inet::ContractProvider);
+        string clientModule = default("");
+        @lifecycleSupport;
+}
+
+simple ContractClient like IIeee802154MacServiceClient
+{
+    parameters:
+        @class(::inet::ContractClient);
+        string serviceModule = default("");
+        @lifecycleSupport;
+}
+
+simple ContractObserver extends SimpleModule
+{
+    parameters:
+        @class(::inet::ContractObserver);
+}
+
+network MacServiceContractTest
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        provider: <default("ContractProvider")> like IIeee802154MacServiceProvider {
+            parameters:
+                clientModule = "^.client";
+        }
+        client: <default("ContractClient")> like IIeee802154MacServiceClient {
+            parameters:
+                serviceModule = "^.provider";
+        }
+        observer: ContractObserver;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MacServiceContractTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 7us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: scenario.xml
+
+<scenario>
+    <at t="1us"><shutdown module="provider"/></at>
+    <at t="1500ns"><startup module="provider"/></at>
+    <at t="2500ns"><crash module="provider"/></at>
+    <at t="3us"><startup module="provider"/></at>
+</scenario>
+
+%contains: stdout
+IEEE 802.15.4 MAC service contract ownership, terminal ordering, indications, and lifecycle verified.
