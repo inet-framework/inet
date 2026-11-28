@@ -1015,7 +1015,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
         AccessCategory ac = edcaf->getAccessCategory();
         auto dataRecoveryProcedure = edcaf->getRecoveryProcedure();
         if (originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) {
-            dataRecoveryProcedure->controlFrameTransmissionFailed();
+            dataRecoveryProcedure->edcaTransmissionFailed();
             edcaf->requestChannel(this);
             continue;
         }
@@ -1101,6 +1101,19 @@ void Hcf::frameSequenceFinished()
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        auto context = frameSequenceHandler->getContext();
+        auto lastStep = context->getLastStep();
+        if (lastStep && lastStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED) {
+            auto receiveStep = dynamic_cast<IReceiveStep *>(lastStep);
+            auto transmitStep = check_and_cast<ITransmitStep *>(receiveStep ? context->getStepBeforeLast() : lastStep);
+            auto transmitted = transmitStep->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>();
+            bool rtsCompleted = transmitted->getType() == ST_RTS && receiveStep &&
+                receiveStep->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_CTS;
+            if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmitted) || dynamicPtrCast<const Ieee80211BlockAckReq>(transmitted) || rtsCompleted)
+                // IEEE Std 802.11-2024, 10.23.2.2(b): the final successful PPDU may be RTS when DATA is refused.
+                // Select the next backoff at CWmin. RX keeps the countdown frozen until TXNAV expires.
+                edcaf->getRecoveryProcedure()->txopCompleted();
+        }
         // The context still owns references. dropFrame defers deletion until context disposal.
         expireDataFrames(false);
         advanceOriginatorWindows();
@@ -1330,7 +1343,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
         // IEEE Std 802.11-2024, 10.23.2.2 and 10.23.2.12.1: BA RTS failure updates QSRC/CW.
         // The uncommitted sources retain their lifetimes. No provisional sequence owns an SRC entry.
         if (validatePreparedData(*prepared, simTime()))
-            edcaf->getRecoveryProcedure()->controlFrameTransmissionFailed();
+            edcaf->getRecoveryProcedure()->edcaTransmissionFailed();
         return;
     }
     if (obsoleteActions.count(packet->getId()) || !edcaf->getInProgressFrames()->containsFrame(packet))
@@ -1402,8 +1415,6 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader))
                 edcaf->getMgmtAndNonQoSRecoveryProcedure()->multicastFrameTransmitted(edcaf->getStationRetryCounters());
-            else
-                edcaf->getRecoveryProcedure()->multicastFrameTransmitted();
             if (auto transmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(transmittedHeader))
                 edcaf->getInProgressFrames()->dropFrame(packet);
         }
@@ -1509,7 +1520,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
         }
         else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(failedHeader)) {
             edcaf->getAckHandler()->processFailedBlockAckReq(blockAckReq);
-            edcaf->getRecoveryProcedure()->controlFrameTransmissionFailed();
+            edcaf->getRecoveryProcedure()->edcaTransmissionFailed();
             return;
         }
         else
@@ -1623,7 +1634,6 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         if (!agreement)
             return;
         EV_INFO << "BlockAck has arrived" << std::endl;
-        edcaf->getRecoveryProcedure()->blockAckFrameReceived();
         auto ackedSeqAndFragNums = compressed ? edcaf->getAckHandler()->processReceivedCompressedBlockAck(compressed, agreement) :
             edcaf->getAckHandler()->processReceivedBlockAck(blockAck);
         if (originatorBlockAckAgreementHandler)
@@ -1647,8 +1657,6 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         auto protectedHeader = rtsStep->getProtectedFrame()->peekAtFront<Ieee80211DataOrMgmtHeader>();
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader))
             edcaf->getMgmtAndNonQoSRecoveryProcedure()->ctsFrameReceived(edcaf->getStationRetryCounters());
-        else
-            edcaf->getRecoveryProcedure()->ctsFrameReceived();
     }
     else if (header->getType() == ST_DATA_WITH_QOS)
         ; // void

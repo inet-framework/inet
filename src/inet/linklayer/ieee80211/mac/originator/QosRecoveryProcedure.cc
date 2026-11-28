@@ -19,52 +19,18 @@ Define_Module(QosRecoveryProcedure);
 
 inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
 
-//
-// Contention window management
-// ============================
-//
-// The CW shall take the next value in the series every time an
-// unsuccessful attempt to transmit an MPDU causes either STA retry
-// counter to increment, until the CW reaches the value of aCWmax.
-//
-// The CW shall be reset to aCWmin after [...] when SLRC reaches
-// dot11LongRetryLimit, or when SSRC reaches dot11ShortRetryLimit.
-//
 void QosRecoveryProcedure::initialize(int stage)
 {
     if (stage == INITSTAGE_LAST) {
         auto rtsPolicy = check_and_cast<IRtsPolicy *>(getModuleByPath(par("rtsPolicyModule")));
-        cwCalculator = check_and_cast<ICwCalculator *>(getModuleByPath(par("cwCalculatorModule")));
+        cwCalculator = check_and_cast<IEdcaCwCalculator *>(getModuleByPath(par("cwCalculatorModule")));
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
         WATCH(rtsThreshold);
-        WATCH(stationLongRetryCounter);
-        WATCH(stationShortRetryCounter);
         WATCH(shortRetryCounter);
         WATCH(longRetryCounter);
     }
-}
-
-void QosRecoveryProcedure::incrementStationSrc()
-{
-    stationShortRetryCounter++;
-    EV_INFO << "Incremented station SRC: stationShortRetryCounter = " << stationShortRetryCounter << ".\n";
-    if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
-        resetContentionWindow();
-    else
-        incrementContentionWindow();
-}
-
-void QosRecoveryProcedure::incrementStationLrc()
-{
-    stationLongRetryCounter++;
-    EV_INFO << "Incremented station LRC: stationLongRetryCounter = " << stationLongRetryCounter << ".\n";
-    if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
-        resetContentionWindow();
-    else
-        incrementContentionWindow();
 }
 
 QosRecoveryProcedure::RetryKey QosRecoveryProcedure::getRetryKey(const Ptr<const Ieee80211DataHeader>& header) const
@@ -83,78 +49,28 @@ void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>
         retryCounter[id] = 1;
 }
 
-//
-// The SSRC shall be reset to 0 [...] when a frame with a group address in the
-// Address1 field is transmitted. The SLRC shall be reset to 0 when [...] a
-// frame with a group address in the Address1 field is transmitted.
-//
-void QosRecoveryProcedure::multicastFrameTransmitted()
+void QosRecoveryProcedure::txopCompleted()
 {
-    resetStationLrc();
-    resetStationSrc();
+    cwCalculator->resetCw();
+}
+
+void QosRecoveryProcedure::edcaTransmissionFailed()
+{
+    cwCalculator->incrementCw();
 }
 
 //
-// The SSRC shall be reset to 0 when a CTS frame is received in response to an RTS
-// frame, when a BlockAck frame is received in response to a BlockAckReq frame, when
-// an ACK frame is received in response to the transmission of a frame of length greater*
-// than dot11RTSThreshold containing all or part of an MSDU or MMPDU, [...]
-// The SLRC shall be reset to 0 when an ACK frame is received in response to transmission
-// of a frame containing all or part of an MSDU or MMPDU of [...]
-//
-// Note: * This is obviously wrong.
-//
-void QosRecoveryProcedure::ctsFrameReceived()
-{
-    resetStationSrc();
-}
-
-void QosRecoveryProcedure::blockAckFrameReceived()
-{
-    resetStationSrc();
-    resetContentionWindow();
-}
-
-void QosRecoveryProcedure::controlFrameTransmissionFailed()
-{
-    // IEEE Std 802.11-2024, 10.23.2.2: control failures update EDCA backoff without DATA retry feedback.
-    if (stationShortRetryCounter < shortRetryLimit) {
-        stationShortRetryCounter++;
-        incrementContentionWindow();
-    }
-    else {
-        resetStationSrc();
-        resetContentionWindow();
-    }
-}
-
-//
-// This SRC and the SSRC shall be reset when a MAC frame of length less than or equal
+// This SRC shall be reset when a MAC frame of length less than or equal
 // to dot11RTSThreshold succeeds for that MPDU of type Data or MMPDU.
 
-// This LRC and the SLRC shall be reset when a MAC frame of length greater than dot11RTSThreshold
+// This LRC shall be reset when a MAC frame of length greater than dot11RTSThreshold
 // succeeds for that MPDU of type Data or MMPDU.
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
     auto id = getRetryKey(ackedHeader);
-    if (packet->getByteLength() >= rtsThreshold) {
-        resetStationLrc();
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        resetStationSrc();
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
-    //
-    // The CW shall be reset to aCWmin after every successful attempt to transmit a frame containing
-    // all or part of an MSDU or MMPDU
-    //
-    resetContentionWindow();
+    auto& retries = packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter;
+    retries.erase(id);
 }
 
 //
@@ -177,32 +93,27 @@ void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& heade
 }
 
 //
-// The SRC for an MPDU of type Data or MMPDU and the SSRC shall be incremented every
+// The SRC for an MPDU of type Data or MMPDU shall be incremented every
 // time transmission of a MAC frame of length less than or equal to dot11RTSThreshold
 // fails for that MPDU of type Data or MMPDU.
 
-// The LRC for an MPDU of type Data or MMPDU and the SLRC shall be incremented every time
+// The LRC for an MPDU of type Data or MMPDU shall be incremented every time
 // transmission of a MAC frame of length greater than dot11RTSThreshold fails for that MPDU
 // of type Data or MMPDU.
 //
 void QosRecoveryProcedure::dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader)
 {
-    if (packet->getByteLength() >= rtsThreshold) {
-        incrementStationLrc();
-        incrementCounter(failedHeader, longRetryCounter);
-    }
-    else {
-        incrementStationSrc();
-        incrementCounter(failedHeader, shortRetryCounter);
-    }
+    edcaTransmissionFailed();
+    auto& retries = packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter;
+    incrementCounter(failedHeader, retries);
 }
 
 //
-// If the RTS transmission fails, the SRC for the MSDU or MMPDU and the SSRC are incremented.
+// If RTS transmission fails, also charge the protected DATA's short retry count.
 //
 void QosRecoveryProcedure::rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& protectedHeader)
 {
-    incrementStationSrc();
+    edcaTransmissionFailed();
     incrementCounter(protectedHeader, shortRetryCounter);
 }
 
@@ -226,24 +137,6 @@ int QosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee8021
         return getRc(packet, header, longRetryCounter);
     else
         return getRc(packet, header, shortRetryCounter);
-}
-
-void QosRecoveryProcedure::incrementContentionWindow()
-{
-    auto oldCw = cwCalculator->getCw();
-    cwCalculator->incrementCw();
-    auto newCw = cwCalculator->getCw();
-    if (oldCw != newCw)
-        emit(contentionWindowChangedSignal, cwCalculator->getCw());
-}
-
-void QosRecoveryProcedure::resetContentionWindow()
-{
-    auto oldCw = cwCalculator->getCw();
-    cwCalculator->resetCw();
-    auto newCw = cwCalculator->getCw();
-    if (oldCw != newCw)
-        emit(contentionWindowChangedSignal, newCw);
 }
 
 bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader)
