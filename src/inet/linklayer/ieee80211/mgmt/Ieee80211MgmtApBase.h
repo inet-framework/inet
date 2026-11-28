@@ -31,6 +31,7 @@ namespace ieee80211 {
 class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase, public IIeee80211BssProvider
 {
   public:
+    bool isAcceptingSimplifiedPeers() const override;
     void prepareBss() override;
     void installSimplifiedPeer(const MacAddress& address, const Ieee80211HtCapabilities *capabilities, const Ieee80211RateSetState& rates) override;
     void removeSimplifiedPeer(const MacAddress& address) override;
@@ -46,6 +47,8 @@ class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase, public IIeee80211
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     void prepareLocalOperation() override;
+    void handleStartOperation(LifecycleOperation *operation) override;
+    void stop() override;
     using Ieee80211MgmtBase::receiveSignal;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 };

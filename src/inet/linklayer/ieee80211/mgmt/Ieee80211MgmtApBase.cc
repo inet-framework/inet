@@ -32,6 +32,9 @@ const simsignal_t ieee80211RadioChannelChangedSignal = cComponent::registerSigna
 
 namespace ieee80211 {
 
+const simsignal_t IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal =
+        cComponent::registerSignal("simplifiedAssociationAvailabilityChanged");
+
 void Ieee80211MgmtApBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
@@ -44,10 +47,28 @@ void Ieee80211MgmtApBase::initialize(int stage)
 
 }
 
+bool Ieee80211MgmtApBase::isAcceptingSimplifiedPeers() const
+{
+    return operationalState == OPERATING || operationalState == STARTING_OPERATION;
+}
+
+void Ieee80211MgmtApBase::handleStartOperation(LifecycleOperation *operation)
+{
+    Ieee80211MgmtBase::handleStartOperation(operation);
+    if (operation != nullptr)
+        emit(simplifiedAssociationAvailabilityChangedSignal, true);
+}
+
+void Ieee80211MgmtApBase::stop()
+{
+    Ieee80211MgmtBase::stop();
+    emit(simplifiedAssociationAvailabilityChangedSignal, false);
+}
+
 void Ieee80211MgmtApBase::prepareBss()
 {
     Enter_Method("prepareBss");
-    if (!isUp())
+    if (!isAcceptingSimplifiedPeers())
         throw cRuntimeError("Cannot prepare a BSS while AP management is down");
     prepareConfiguration();
     prepareLocalOperation();

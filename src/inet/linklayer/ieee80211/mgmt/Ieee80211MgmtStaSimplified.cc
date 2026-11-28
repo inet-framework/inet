@@ -70,7 +70,18 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
     L3AddressResolver addressResolver;
     auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
     auto apMib = findAccessPointMib(accessPointAddress);
-    auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apMib->getParentModule()->getSubmodule("mgmt"));
+    auto *apModule = apMib->getParentModule()->getSubmodule("mgmt");
+    auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apModule);
+    if (accessPointManagementId != apModule->getId()) {
+        unsubscribeFromAccessPoint();
+        apModule->subscribe(IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal, this);
+        accessPointManagementId = apModule->getId();
+    }
+    if (!apManagement->isAcceptingSimplifiedPeers()) {
+        // The configurator uses the SSID to group the wireless interfaces even if the AP starts down.
+        mib->configureBssRole(Ieee80211Mib::STATION, apMib->getBssData().ssid);
+        return;
+    }
     apManagement->prepareBss();
     mib->commitBss(apMib->getBssData().ssid, accessPointAddress, apMib->getOperationBand(),
             apMib->hasPrimaryChannel() ? apMib->requirePrimaryChannel() : -1,
@@ -89,11 +100,37 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
     mib->publishStateChange();
 }
 
+void Ieee80211MgmtStaSimplified::receiveSignal(cComponent *source, simsignal_t signal, bool available, cObject *details)
+{
+    if (signal != IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal ||
+        source->getId() != accessPointManagementId)
+        return;
+
+    Enter_Method("simplifiedAssociationAvailabilityChanged");
+    if (available)
+        configureAssociation();
+    else {
+        mib->clearBss();
+        mib->publishStateChange();
+    }
+}
+
+void Ieee80211MgmtStaSimplified::unsubscribeFromAccessPoint()
+{
+    if (accessPointManagementId != -1) {
+        if (auto *apModule = getSimulation()->getModule(accessPointManagementId))
+            apModule->unsubscribe(IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal, this);
+        accessPointManagementId = -1;
+    }
+}
+
 void Ieee80211MgmtStaSimplified::stop()
 {
-    auto accessPointAddress = mib->getBssData().bssid;
+    bool wasAssociated = mib->getBssStationData().isAssociated;
+    const auto accessPointAddress = mib->getBssData().bssid;
+    unsubscribeFromAccessPoint();
     mib->clearBss();
-    auto apMib = findAccessPointMib(accessPointAddress, false);
+    auto apMib = wasAssociated ? findAccessPointMib(accessPointAddress, false) : nullptr;
     if (apMib != nullptr) {
         auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apMib->getParentModule()->getSubmodule("mgmt"));
         apManagement->removeSimplifiedPeer(mib->address);

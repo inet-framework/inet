@@ -11,7 +11,7 @@ Custom transmitters must implement ``IIeee80211TransmitterCapabilities`` in C++ 
 
 Replace direct reads of MIB fields with ``getBssData()``, ``getBssStationData()``, ``getBssAccessPointData()``, and ``getLocalHtCapabilities()``. Management uses ``commitBss()``, ``clearBss()``, and the association and peer methods for writes. Use ``installLocalHtCapabilities()`` to install a profile. A changed profile requires an inactive BSS with no peer relationships.
 
-Custom simplified AP management must implement ``IIeee80211BssProvider``. This contract supplies AP preparation and peer installation and removal. ``installSimplifiedPeer()`` receives the peer address, optional HT capabilities, and rate state. Another module must not change the AP MIB directly.
+Custom simplified AP management must implement ``IIeee80211BssProvider``. This contract supplies AP preparation and peer installation and removal. ``installSimplifiedPeer()`` receives the peer address, optional HT capabilities, and rate state. Expose whether the AP can accept peers through ``isAcceptingSimplifiedPeers()``. Declare and emit the Boolean ``simplifiedAssociationAvailabilityChanged`` signal after runtime startup prepares the BSS and after shutdown or crash clears it. Station management uses the provider to change AP peer state.
 
 The MIB retains the Boolean signals ``bssStateChanged`` and ``rateStateChanged``. Management calls ``publishStateChange()`` after it completes the state change, timers, and transactions. Both signals describe complete state. Query the MIB during the synchronous callback. Do not change the MIB during signal delivery. Do not retain raw BSS or peer references across a mutation.
 

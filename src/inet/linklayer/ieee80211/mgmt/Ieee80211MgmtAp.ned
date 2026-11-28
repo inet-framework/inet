@@ -33,6 +33,7 @@ simple Ieee80211MgmtAp extends SimpleModule like IIeee80211Mgmt, IIeee80211BssPr
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
+        @signal[simplifiedAssociationAvailabilityChanged](type=bool);
         @signal[l2ApAssociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
         @signal[l2ApDisassociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
     gates:

@@ -15,7 +15,11 @@ namespace inet::ieee80211 {
 class INET_API IIeee80211BssProvider
 {
   public:
+    // Boolean availability after AP startup has prepared the BSS or shutdown has cleared it.
+    static const simsignal_t simplifiedAssociationAvailabilityChangedSignal;
+
     virtual ~IIeee80211BssProvider() = default;
+    virtual bool isAcceptingSimplifiedPeers() const = 0;
     virtual void prepareBss() = 0;
     virtual void installSimplifiedPeer(const MacAddress& address, const Ieee80211HtCapabilities *capabilities, const Ieee80211RateSetState& rates) = 0;
     virtual void removeSimplifiedPeer(const MacAddress& address) = 0;

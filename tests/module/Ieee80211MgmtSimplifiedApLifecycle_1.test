@@ -1,0 +1,95 @@
+%description:
+
+A wired sender delivers one UDP datagram to a simplified wireless station through a simplified AP.
+The station stays up. The AP either restarts or starts late. In both cases the station must receive
+the datagram after AP startup.
+
+%extraargs: -r 0..1
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network Ieee80211MgmtSimplifiedApLifecycleTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        scenarioManager: ScenarioManager;
+        ap: AccessPoint;
+        sta: WirelessHost;
+        source: StandardHost;
+    connections:
+        source.ethg++ <--> Eth100M <--> ap.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtSimplifiedApLifecycleTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 4s
+seed-set = 0
+record-vector-results = false
+
+*.ap.hasStatus = true
+*.ap.status.initialStatus = "${apStatus=UP,DOWN}"
+*.scenarioManager.script = xmldoc("${apStatus}.xml")
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].agent.typename = ""
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+**.wlan[0].radio.channelNumber = 6
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 10m
+*.sta.mobility.initialX = 11m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+**.arp.typename = "GlobalArp"
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "sta"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 128B
+*.source.app[0].startTime = 3s
+*.source.app[0].stopTime = 3.5s
+*.source.app[0].sendInterval = 1s
+*.sta.numApps = 1
+*.sta.app[0].typename = "UdpSink"
+*.sta.app[0].localPort = 5000
+
+%file: UP.xml
+
+<scenario>
+    <at t="1s">
+        <shutdown module="ap"/>
+    </at>
+    <at t="2s">
+        <startup module="ap"/>
+    </at>
+</scenario>
+
+%file: DOWN.xml
+
+<scenario>
+    <at t="2s">
+        <startup module="ap"/>
+    </at>
+</scenario>
+
+%contains: results/General-apStatus=UP-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%contains: results/General-apStatus=DOWN-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%exitcode: 0
