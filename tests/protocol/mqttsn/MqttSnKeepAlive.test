@@ -1,0 +1,37 @@
+%description:
+Production client sends PINGREQ at its keepalive boundary, retries missing PINGRESP with bounded count, and handles a valid response.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnKeepAlive").once(on("gateway.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN deterministic scenario compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 1.45s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].script = xml("<script><expect type='4'/><send type='5'/><expect type='22' timeout='1500ms'/><expect type='22'/><send type='23'/><wait timeout='100ms' forbidType='22'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].workload = xml("<mqttsn></mqttsn>")
+*.sensor.app[0].keepAlive = 1s
+
+%contains: stdout
+PROTOCOLTEST MqttSnKeepAlive: PASS

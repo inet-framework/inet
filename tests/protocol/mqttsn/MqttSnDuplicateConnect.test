@@ -1,0 +1,47 @@
+%description:
+Duplicate CONNECT while upstream setup is pending and after CONNACK replays acceptance without a second MQTT connection.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqtt/MqttProtocol.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+#include "inet/common/ProtocolTag_m.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnDuplicateConnect")
+        .meanwhile(exactlyTimes(1,on("gateway.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            if (c.event.packet->getTag<PacketProtocolTag>()->getProtocol() != &mqtt::mqttProtocol) return false;
+            auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>(); return p->getType() == mqtt::CONNECT && std::string(p->getClientIdentifier()) == "script";
+        }).within(1)))
+        .once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN deterministic scenario compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='4' duration='30' clientId='script'/><send type='4' flags='4' duration='30' clientId='script'/><expect type='5'/><send type='4' flags='4' duration='30' clientId='script'/><expect type='5'/><send type='24'/><expect type='24'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+
+%contains: stdout
+PROTOCOLTEST MqttSnDuplicateConnect: PASS

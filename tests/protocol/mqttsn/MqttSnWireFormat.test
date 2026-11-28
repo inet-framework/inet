@@ -1,0 +1,94 @@
+%description:
+Golden MQTT-SN datagrams traverse production UDP and invoke the production codec.
+Reject a truncated CONNECT, then decode a valid following datagram without contamination.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnPacketSerializer.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+
+%file: vectors.cc
+#include "../../../../serializer/lib/fillers/ChunkFillers_mqttsn.cc"
+
+%file: WireApp.ned
+simple WireApp like inet.applications.contract.IApp {
+    parameters:
+        bool sender = default(false);
+        @class(::inet::mqttsntest::WireApp);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+%file: WireApp.cc
+#include "inet/applications/mqttsn/MqttSnPacketSerializer.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+namespace inet { std::vector<std::vector<uint8_t>> mqttSnWireVectors(); }
+namespace inet::mqttsntest {
+class WireApp : public cSimpleModule, public UdpSocket::ICallback {
+    UdpSocket socket;
+    int valid = 0;
+    int rejected = 0;
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_APPLICATION_LAYER) {
+            socket.setOutputGate(gate("socketOut")); socket.setCallback(this);
+            socket.bind(par("sender").boolValue() ? -1 : 1884);
+            if (par("sender")) scheduleAt(0.1, new cMessage("send"));
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (!message->isSelfMessage()) { socket.processMessage(message); return; }
+        delete message;
+        auto vectors = mqttSnWireVectors();
+        vectors.push_back({2,4}); vectors.push_back({2,23});
+        for (auto bytes : vectors)
+            socket.sendTo(new Packet("golden", makeShared<BytesChunk>(bytes)), L3AddressResolver().resolve("subscriber"), 1884);
+    }
+    void socketDataArrived(UdpSocket *, Packet *packet) override {
+        auto bytes = packet->peekDataAsBytes()->getBytes(); delete packet;
+        try {
+            auto parsed = mqttsn::MqttSnPacketSerializer::decode(bytes);
+            ASSERT(mqttsn::MqttSnPacketSerializer::encode(*parsed) == bytes);
+            valid++;
+        }
+        catch (cRuntimeError&) { rejected++; }
+        if (valid == int(mqttSnWireVectors().size()) + 1 && rejected == 1)
+            emit(registerSignal("validated"), 1L);
+    }
+    void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
+    void socketClosed(UdpSocket *) override {}
+    void finish() override {
+        if (!par("sender")) { ASSERT(valid == int(mqttSnWireVectors().size()) + 1); ASSERT(rejected == 1); }
+    }
+};
+Define_Module(WireApp);
+}
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("mqttsn_wire").once(on("subscriber.app[0]").signal("validated").filterValue(1).within(2));
+}
+
+%activity:
+EV << "MQTT-SN wire fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "WireApp"
+*.publisher.app[0].sender = true
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "WireApp"
+
+%contains: stdout
+PROTOCOLTEST mqttsn_wire: PASS

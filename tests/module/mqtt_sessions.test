@@ -1,0 +1,42 @@
+%description:
+Session helper boundaries supplement the production TCP recovery cases. Retry
+order follows send order across identifier wrap; allocation never reuses a live
+identifier; repeated PUBREC retains the PUBREL phase until PUBCOMP.
+
+%includes:
+#include "inet/applications/mqtt/MqttSession.h"
+
+%activity:
+using namespace inet;
+using namespace inet::mqtt;
+MqttSession session;
+session.nextIdentifier=65534;
+for (int i=0;i<3;i++) {
+    auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setQos(1); p->setTopic("ordered");
+    p->setPayloadArraySize(1); p->setPayload(0,i); session.enqueue(p);
+}
+auto sent=session.flush();
+ASSERT(sent.size()==3 && sent[0]->getPacketIdentifier()==65534 && sent[1]->getPacketIdentifier()==65535 && sent[2]->getPacketIdentifier()==1);
+auto ack=makeShared<MqttPacket>(); ack->setType(PUBACK); ack->setPacketIdentifier(65534); session.acknowledge(ack);
+auto retried=session.retry();
+ASSERT(retried.size()==2 && retried[0]->getPacketIdentifier()==65535 && retried[1]->getPacketIdentifier()==1);
+ASSERT(retried[0]->getDuplicate() && retried[0]->getPayload(0)==1 && retried[1]->getPayload(0)==2);
+MqttSession exhausted;
+for (int i=1;i<=65535;i++) ASSERT(exhausted.allocateIdentifier()==i);
+ASSERT(exhausted.allocateIdentifier()==0);
+exhausted.releaseIdentifier(65535);
+ASSERT(exhausted.allocateIdentifier()==65535 && exhausted.allocateIdentifier()==0);
+MqttSession qos2;
+auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setQos(2); p->setTopic("qos2"); qos2.enqueue(p);
+int id=qos2.flush()[0]->getPacketIdentifier();
+ack=makeShared<MqttPacket>(); ack->setType(PUBREC); ack->setPacketIdentifier(id);
+ASSERT(qos2.acknowledge(ack)->getType()==PUBREL);
+ASSERT(qos2.acknowledge(ack)->getType()==PUBREL);
+retried=qos2.retry();
+ASSERT(retried.size()==1 && retried[0]->getType()==PUBREL && !retried[0]->getDuplicate());
+ack=makeShared<MqttPacket>(); ack->setType(PUBCOMP); ack->setPacketIdentifier(id); qos2.acknowledge(ack);
+ASSERT(qos2.outgoing.empty() && qos2.allocatedIdentifiers.empty() && qos2.retry().empty());
+EV << "MQTT session boundaries PASS\n";
+
+%contains: stdout
+MQTT session boundaries PASS

@@ -1,0 +1,71 @@
+%description:
+Real UDP advertisements and client-originated GWINFO populate production candidate
+state. A neighboring GWINFO cancels the delayed client response to SEARCHGW.
+GWINFO-only candidates expire independently of the advertisement missed-count bound.
+The test-only subclass exposes observations; no production timing or state is changed.
+
+%includes:
+#include "ProtocolTest.h"
+#include "client.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%file: client.h
+#include "inet/applications/mqttsn/MqttSnClient.h"
+namespace inet::mqttsntest {
+class ObservedClient : public mqttsn::MqttSnClient {
+  public:
+    void checkCandidates(int count) {
+        Enter_Method("checkCandidates"); ASSERT(candidates.size() == size_t(count));
+        if (count == 3) {
+            ASSERT(candidates.at(4).address == L3Address(Ipv4Address("10.0.0.3")));
+            ASSERT(gatewayInfoAt < SIMTIME_ZERO);
+        }
+        if (count == 1) ASSERT(candidates.count(2));
+    }
+};
+}
+
+%file: client.cc
+#include "client.h"
+namespace inet::mqttsntest { Define_Module(ObservedClient); }
+
+%file: test.ned
+import inet.applications.mqttsn.MqttSnClient;
+module ObservedClient extends MqttSnClient { parameters: @class(::inet::mqttsntest::ObservedClient); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnDiscoveryExpiry")
+        .meanwhile(never(on("sensor.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::GWINFO;
+        }).within(2.3)))
+        .act(action().at(.4).run<mqttsntest::ObservedClient>("sensor.app[0]",[](auto& app) { app.checkCandidates(3); }))
+        .act(action().at(.8).run<mqttsntest::ObservedClient>("sensor.app[0]",[](auto& app) { app.checkCandidates(1); }))
+        .act(action().at(2.2).run<mqttsntest::ObservedClient>("sensor.app[0]",[](auto& app) { app.checkCandidates(0); }));
+}
+
+%activity:
+EV << "Discovery candidate expiry fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2.4s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "ObservedClient"
+*.sensor.app[0].startTime = 5s
+*.sensor.app[0].gatewayInfoDelay = 1s
+*.sensor.app[0].gatewayInfoLifetime = 500ms
+*.sensor.app[0].missedAdvertisements = 2
+*.alternative.numApps = 1
+*.alternative.app[0].typename = "MqttSnScriptedPeer"
+*.alternative.app[0].remoteAddress = "sensor"
+*.alternative.app[0].script = xml("<script><send after='100ms' type='2' gatewayId='3'/><send type='0' gatewayId='2' duration='1'/><send type='1' radius='1'/><send raw='080204040a000003'/></script>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnDiscoveryExpiry: PASS

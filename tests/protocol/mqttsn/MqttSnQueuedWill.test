@@ -1,0 +1,70 @@
+%description:
+Only the shared gateway MQTT connection is interrupted. A clean-session sensor
+is then lost. Its queued Will survives sensor cleanup and is published once the
+shared connection recovers. The per-sensor broker connection stays established
+until sensor supervision expires.
+
+%includes:
+#include "ProtocolTest.h"
+#include "gateway.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%file: gateway.h
+#include "inet/applications/mqttsn/MqttSnGateway.h"
+namespace inet::mqttsntest {
+class PausedGateway : public mqttsn::MqttSnGateway {
+  public:
+    void pauseShared() {
+        Enter_Method("pauseShared"); closeBroker(shared); sharedReconnectAt = simTime() + SimTime(2); scheduleTimer();
+    }
+};
+}
+
+%file: gateway.cc
+#include "gateway.h"
+namespace inet::mqttsntest { Define_Module(PausedGateway); }
+
+%file: test.ned
+import inet.applications.mqttsn.MqttSnGateway;
+module PausedGateway extends MqttSnGateway { parameters: @class(::inet::mqttsntest::PausedGateway); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnQueuedWill")
+        .meanwhile(never(on("observer.app[0]").signal("packetSentToUpper").within(2.4)))
+        .meanwhile(exactlyTimes(1,on("observer.app[0]").signal("packetSentToUpper").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({65});
+        }).within(3.4)))
+        .act(action().at(.5).run<mqttsntest::PausedGateway>("gateway.app[0]",[](auto& app) { app.pauseShared(); }));
+}
+
+%activity:
+EV << "MQTT-SN queued Will fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 4s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "PausedGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].remoteAddress = "gateway"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='12' duration='1' clientId='script'/><expect type='6'/><send type='7' flags='32' topic='status'/><expect type='8'/><send type='9' payload='41'/><expect type='5'/><wait timeout='3s' forbidType='12'/></script>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='status' qos='1'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnQueuedWill: PASS

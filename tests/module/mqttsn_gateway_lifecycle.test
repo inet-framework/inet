@@ -1,0 +1,80 @@
+%description:
+Stop/start and crash/start the production gateway while its broker sockets,
+advertisement and sensor keepalive timers are active. Down windows must be quiet;
+the production sensor must recover subscription delivery after each restart.
+
+%file: check.cc
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+namespace inet::mqttsntest {
+class GatewayLifecycleCheck : public cSimpleModule, public cListener {
+    std::set<int> delivered;
+    simsignal_t sent, upper;
+    void initialize() override {
+        sent = registerSignal("packetSentToLower"); upper = registerSignal("packetSentToUpper");
+        getSimulation()->getSystemModule()->subscribe(sent, this);
+        getSimulation()->getSystemModule()->subscribe(upper, this);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *) override {
+        std::string path = source->getFullPath();
+        bool down = (simTime() > SimTime(1.01) && simTime() < SimTime(2)) || (simTime() > SimTime(3.01) && simTime() < SimTime(4));
+        if (path.find("gateway.app[0]") != std::string::npos && signal == sent && down)
+            throw cRuntimeError("Gateway callback sent while down");
+        if (path.find("sensor.app[0]") != std::string::npos && signal == upper) {
+            auto bytes = check_and_cast<Packet *>(value)->peekDataAsBytes()->getBytes();
+            ASSERT(bytes.size() == 1); delivered.insert(bytes[0]);
+        }
+    }
+    void finish() override {
+        ASSERT(delivered.count(65) && delivered.count(67) && delivered.count(69));
+        getSimulation()->getSystemModule()->unsubscribe(sent, this);
+        getSimulation()->getSystemModule()->unsubscribe(upper, this);
+        EV << "MQTTSN GATEWAY LIFECYCLE PASS\n";
+    }
+};
+Define_Module(GatewayLifecycleCheck);
+}
+
+%activity:
+EV << "Gateway lifecycle fixture compiled\n";
+
+%file: test.ned
+import inet.tests.mqttsn.MqttSnTestNetwork;
+import inet.common.scenario.ScenarioManager;
+simple GatewayLifecycleCheck { parameters: @class(::inet::mqttsntest::GatewayLifecycleCheck); }
+network GatewayLifecycleNetwork extends MqttSnTestNetwork {
+    submodules: scenarioManager: ScenarioManager; check: GatewayLifecycleCheck;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = GatewayLifecycleNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.scenarioManager.script = xml("<scenario><at t='1'><shutdown module='gateway.app[0]'/></at><at t='2'><startup module='gateway.app[0]'/></at><at t='3'><crash module='gateway.app[0]'/></at><at t='4'><startup module='gateway.app[0]'/></at></scenario>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertisementInterval = 1s
+*.gateway.app[0].retryInterval = 100ms
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].cleanSession = false
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].keepAlive = 1s
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='data' qos='1'/></mqttsn>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "publisher"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><publish at='0.5s' topic='data' qos='1' payload='41'/><publish at='2.5s' topic='data' qos='1' payload='43'/><publish at='4.8s' topic='data' qos='1' payload='45'/></mqtt>")
+
+%contains: stdout
+MQTTSN GATEWAY LIFECYCLE PASS

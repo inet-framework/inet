@@ -1,0 +1,90 @@
+%description:
+A production broker retries QoS 1 PUBLISH and QoS 2 PUBREL on reconnect using
+the original recipient identifiers. The scripted persistent subscriber checks
+the resumed phase; production publishers supply the two original publications.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+struct ReceiverState { int connection=0; int qos1=0; int qos2=0; };
+static void acknowledge(MqttScriptedPeer& peer,TcpSocket& socket,int type,int id) {
+    auto p=makeShared<MqttPacket>(); p->setType(type); p->setPacketIdentifier(id); peer.sendMqtt(socket,p);
+}
+Define_ProtocolTestProgram()
+{
+    auto state=std::make_shared<ReceiverState>();
+    ProtocolTest test("mqtt_broker_recovery");
+    test.act(action().at(0.1).run<MqttScriptedPeer>("subscriber.app[0]",[state](auto& app) {
+        app.responder=[state](auto& peer,auto& socket,const auto& p) {
+            if (p->getType()==CONNACK) {
+                state->connection++;
+                ASSERT(p->getSessionPresent()==(state->connection>1));
+                if (state->connection==1) {
+                    auto s=makeShared<MqttPacket>(); s->setType(SUBSCRIBE); s->setPacketIdentifier(1);
+                    s->setFiltersArraySize(1); s->setFilters(0,"factory/#"); s->setResultsArraySize(1); s->setResults(0,2); peer.sendMqtt(socket,s);
+                }
+            }
+            else if (p->getType()==SUBACK) {}
+            else if (p->getType()==PUBLISH && p->getQos()==1) {
+                if (state->connection==1) { ASSERT(!p->getDuplicate()); state->qos1=p->getPacketIdentifier(); socket.close(); }
+                else { ASSERT(state->connection==2 && p->getDuplicate() && p->getPacketIdentifier()==state->qos1); acknowledge(peer,socket,PUBACK,state->qos1); }
+            }
+            else if (p->getType()==PUBLISH && p->getQos()==2) {
+                ASSERT(state->connection==2 && !p->getDuplicate()); state->qos2=p->getPacketIdentifier(); acknowledge(peer,socket,PUBREC,state->qos2);
+            }
+            else if (p->getType()==PUBREL) {
+                ASSERT(p->getPacketIdentifier()==state->qos2 && MqttPacketSerializer::encode(*p)[0]==0x62);
+                if (state->connection==2) socket.close();
+                else { ASSERT(state->connection==3); acknowledge(peer,socket,PUBCOMP,state->qos2); peer.emit(peer.registerSignal("scenarioComplete"),1L); }
+            }
+            else throw cRuntimeError("Unexpected packet in broker recovery script");
+        };
+        app.socket().connect(app.addressOf("broker"),1883);
+    }));
+    for (int connection=0;connection<3;connection++) {
+        test.once(on("subscriber.app[0]").signal("socketEstablished").within(2))
+            .act(action().run<MqttScriptedPeer>("subscriber.app[0]",[](auto& app) {
+                auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier("subscriber"); p->setCleanSession(false); app.sendMqtt(app.socket(),p);
+            }));
+        if (connection<2)
+            test.once(on("subscriber.app[0]").signal("socketClosed").within(3))
+                .act(action().after(0.1).run<MqttScriptedPeer>("subscriber.app[0]",[](auto& app) { app.renew(); app.socket().connect(app.addressOf("broker"),1883); }));
+    }
+    test.once(on("subscriber.app[0]").signal("scenarioComplete").filterValue(1).within(2));
+    return test;
+}
+
+%activity:
+EV << "MQTT broker recovery matrix compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 10s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='1' payload='41'/><publish at='1.5s' topic='factory/value' qos='2' payload='42'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_broker_recovery: PASS

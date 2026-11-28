@@ -1,0 +1,38 @@
+%description:
+Production initialization rejects invalid port/timing/keepalive/Will bounds.
+Only the local initialization stage is needed for these configuration checks;
+the protocol defaults case separately initializes complete applications in hosts.
+
+%includes:
+#include "inet/common/InitStages.h"
+
+%activity:
+struct Invalid { const char *type; const char *parameter; double value; };
+for (auto row:std::vector<Invalid>{
+        {"MqttClient","connectPort",0},{"MqttClient","connectPort",65536},
+        {"MqttClient","startTime",-1},{"MqttClient","reconnectInterval",0},
+        {"MqttClient","connectTimeout",0},{"MqttClient","pingResponseTimeout",0},
+        {"MqttClient","stopOperationTimeout",0},{"MqttClient","stopOperationTimeout",-1},
+        {"MqttClient","keepAlive",-1},{"MqttClient","keepAlive",65536},
+        {"MqttClient","willQos",-1},{"MqttClient","willQos",3},
+        {"MqttBroker","localPort",0},{"MqttBroker","localPort",65536},
+        {"MqttBroker","connectTimeout",0},{"MqttBroker","stopOperationTimeout",0},
+        {"MqttBroker","stopOperationTimeout",-1}}) {
+    auto type=cModuleType::get((std::string("inet.applications.mqtt.")+row.type).c_str());
+    auto probe=type->create("probe",getSimulation()->getSystemModule());
+    auto& parameter=probe->par(row.parameter);
+    if (parameter.getType()==cPar::INT) parameter.setIntValue(row.value);
+    else parameter.setDoubleValue(row.value);
+    probe->finalizeParameters(); probe->buildInside();
+    bool rejected=false;
+    try { probe->callInitialize(inet::INITSTAGE_LOCAL); }
+    catch (cRuntimeError& error) {
+        rejected=std::string(error.what()).find("Invalid MQTT")!=std::string::npos;
+    }
+    probe->deleteModule();
+    ASSERT(rejected);
+}
+EV << "MQTT parameter boundaries PASS\n";
+
+%contains: stdout
+MQTT parameter boundaries PASS

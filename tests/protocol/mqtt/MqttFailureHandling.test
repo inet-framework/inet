@@ -1,0 +1,44 @@
+%description:
+A reserved fixed-header bit in CONNECT is rejected by the production broker.
+No CONNACK or publication is emitted before the malformed connection is closed.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_failure")
+        .act(action().at(0.1).run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.socket().connect(app.addressOf("broker"),1883); }))
+        .once(on("publisher.app[0]").signal("socketEstablished").within(1))
+        .meanwhile(never(on("broker.app[0]").signal("packetSentToLower").within(1)))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.sendBytes(app.socket(),{0x11,0}); }))
+        .once(on("publisher.app[0]").signal("socketPeerClosed").within(1));
+}
+
+%activity:
+EV << "MQTT malformed fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttScriptedPeer"
+
+%contains: stdout
+PROTOCOLTEST mqtt_failure: PASS

@@ -1,0 +1,162 @@
+%description:
+Production broker admission, malformed packets, wildcard boundaries, overlapping
+subscriptions and binary payloads. Each rejected connection is followed by a new
+connection, so stale stream bytes cannot influence the next case.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate typeIs(int type) {
+    return [type](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==type; };
+}
+static Ptr<MqttPacket> connectPacket(const std::string& id="boundary") {
+    auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier(id.c_str()); return p;
+}
+static void finishConnection(ProtocolTest& test) {
+    test.once(on("publisher.app[0]").signal("socketPeerClosed").within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.socket().close(); }))
+        .once(on("publisher.app[0]").signal("socketClosed").within(1))
+        .act(action().after(0.15).run<MqttScriptedPeer>("publisher.app[0]",[](auto&) {}));
+}
+static void openTcp(ProtocolTest& test,int port=1883) {
+    test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[port](auto& app) {
+        app.renew(); app.socket().connect(app.addressOf("broker"),port);
+    })).once(on("publisher.app[0]").signal("socketEstablished").within(1));
+}
+static void openMqtt(ProtocolTest& test) {
+    openTcp(test);
+    test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.sendMqtt(app.socket(),connectPacket()); }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getReturnCode()==0; }).within(1));
+}
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("mqtt_boundaries");
+    test.act(action().at(0.1).run<MqttScriptedPeer>("publisher.app[0]",[](auto&) {}));
+    struct Admission { std::string id; int level; int port; std::string user; std::string password; int result; };
+    for (auto scenario : std::vector<Admission>{{"",4,1883,"","",2},{"bad-id",4,1883,"","",2},
+            {"abcdefghijklmnopqrstuvwx",4,1883,"","",2},{"valid",5,1883,"","",1},
+            {"valid",4,1884,"","",4},{"valid",4,1884,"u","bad",4},{"valid",4,1884,"u","p",0}}) {
+        openTcp(test,scenario.port);
+        test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[scenario](auto& app) {
+            auto p=connectPacket(scenario.id); p->setProtocolLevel(scenario.level);
+            p->setUserNamePresent(!scenario.user.empty()); p->setUserName(scenario.user.c_str());
+            p->setPasswordPresent(!scenario.password.empty()); p->setPasswordArraySize(scenario.password.size());
+            for (size_t i=0;i<scenario.password.size();i++) p->setPassword(i,scenario.password[i]);
+            app.sendMqtt(app.socket(),p);
+        })).once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(CONNACK))
+            .assertEvent([scenario](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getReturnCode()==scenario.result && !p->getSessionPresent();
+            }).within(1));
+        if (scenario.result==0)
+            test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) {
+                auto p=makeShared<MqttPacket>(); p->setType(DISCONNECT); app.sendMqtt(app.socket(),p);
+            }));
+        finishConnection(test);
+    }
+    // Malformed CONNECT is rejected before activation, with no success response.
+    for (auto bytes : std::vector<std::vector<uint8_t>>{{0x11,0},{0x00,0},
+            {0x30,0x80,0x80,0x80,0x80},
+            {0x10,0x0e,0,4,'M','Q','T','T',4,2,0,0,0,2,0xc0,0x80}}) {
+        openTcp(test);
+        test.meanwhile(never(on("publisher.app[0]").signal("packetReceivedFromLower").within(0.1)))
+            .act(action().run<MqttScriptedPeer>("publisher.app[0]",[bytes](auto& app) { app.sendBytes(app.socket(),bytes); }));
+        finishConnection(test);
+    }
+    // A truncated CONNECT followed by EOF must not contaminate the next stream.
+    openTcp(test);
+    test.meanwhile(never(on("publisher.app[0]").signal("packetReceivedFromLower").within(0.1)))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.sendBytes(app.socket(),{0x10,0x0d,0,4}); app.socket().close(); }))
+        .once(on("publisher.app[0]").signal("socketClosed").within(1))
+        .act(action().after(0.15).run<MqttScriptedPeer>("publisher.app[0]",[](auto&) {}));
+    // These violations occur after an accepted connection.
+    for (auto bytes : std::vector<std::vector<uint8_t>>{{0xc1,0},{0x36,0},{0x40,2,0,0},{0x82,2,0,1},
+            {0x10,0x0d,0,4,'M','Q','T','T',4,2,0,0,0,1,'x'},
+            {0x30,3,0,1,'+'},{0x82,8,0,1,0,3,'a','#','b',0}}) {
+        openMqtt(test);
+        test.meanwhile(never(on("publisher.app[0]").signal("packetReceivedFromLower").within(0.1)))
+            .act(action().run<MqttScriptedPeer>("publisher.app[0]",[bytes](auto& app) { app.sendBytes(app.socket(),bytes); }));
+        finishConnection(test);
+    }
+    openMqtt(test);
+    struct TopicCase { std::string filter; std::string topic; bool matches; };
+    int identifier=0;
+    for (auto scenario : std::vector<TopicCase>{{"factory/+/temperature","factory//temperature",true},
+            {"factory/#","factory",true},{"factory/+","factory",false},
+            {"factory/+","factory/",true},{"factory/+","Factory/a",false},
+            {"#","$SYS/status",false},{"+/status","$SYS/status",false},
+            {"$SYS/#","$SYS/status",true},{"factory/\xe2\x82\xac","factory/\xe2\x82\xac",true}}) {
+        int id=++identifier;
+        test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[scenario,id](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(SUBSCRIBE); p->setPacketIdentifier(id);
+            p->setFiltersArraySize(1); p->setFilters(0,scenario.filter.c_str()); p->setResultsArraySize(1); p->setResults(0,2);
+            app.sendMqtt(app.socket(),p);
+        })).once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(SUBACK)).within(1))
+            .act(action().run<MqttScriptedPeer>("publisher.app[0]",[scenario](auto& app) {
+                auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic(scenario.topic.c_str());
+                p->setPayloadArraySize(3); p->setPayload(0,0); p->setPayload(1,255); p->setPayload(2,65); app.sendMqtt(app.socket(),p);
+            }));
+        if (scenario.matches)
+            test.once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH))
+                .assertEvent([](const MatchContext& c) {
+                    auto p=c.event.packet->peekAtFront<MqttPacket>();
+                    return p->getPayloadArraySize()==3 && p->getPayload(0)==0 && p->getPayload(1)==255 && p->getPayload(2)==65 && p->getQos()==0;
+                }).within(1));
+        else test.never(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH)).within(0.1));
+        test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[scenario,id](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(UNSUBSCRIBE); p->setPacketIdentifier(id);
+            p->setFiltersArraySize(1); p->setFilters(0,scenario.filter.c_str()); app.sendMqtt(app.socket(),p);
+        })).once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(UNSUBACK)).within(1));
+    }
+    // One multi-filter subscription, one live delivery for overlapping matches.
+    test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) {
+        auto p=makeShared<MqttPacket>(); p->setType(SUBSCRIBE); p->setPacketIdentifier(100);
+        p->setFiltersArraySize(2); p->setResultsArraySize(2); p->setFilters(0,"factory/#"); p->setFilters(1,"factory/+");
+        p->setResults(0,0); p->setResults(1,2); app.sendMqtt(app.socket(),p);
+    })).once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(SUBACK))
+        .assertEvent([](const MatchContext& c) { auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getResultsArraySize()==2 && p->getResults(0)==0 && p->getResults(1)==2; }).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic("factory/value"); app.sendMqtt(app.socket(),p);
+        })).exactlyTimes(1,on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH)).within(0.2));
+    // QoS 1 does not retain a receiver tombstone after PUBACK, even if DUP is set.
+    test.meanwhile(exactlyTimes(2,on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBLISH)).within(2)));
+    for (bool duplicate : {false,true})
+        test.act(action().run<MqttScriptedPeer>("publisher.app[0]",[duplicate](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic("factory/value");
+            p->setQos(1); p->setPacketIdentifier(501); p->setDuplicate(duplicate); app.sendMqtt(app.socket(),p);
+        })).once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(typeIs(PUBACK))
+            .assertEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getPacketIdentifier()==501; }).within(1));
+    return test;
+}
+
+%activity:
+EV << "MQTT boundary matrix compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 30s
+*.broker.numApps = 2
+*.broker.app[*].typename = "MqttBroker"
+*.broker.app[1].localPort = 1884
+*.broker.app[1].userName = "u"
+*.broker.app[1].password = "p"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttScriptedPeer"
+
+%contains: stdout
+PROTOCOLTEST mqtt_boundaries: PASS

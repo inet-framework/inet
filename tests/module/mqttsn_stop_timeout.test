@@ -1,0 +1,51 @@
+%description:
+A production client's graceful shutdown reaches the lifecycle timeout fallback.
+No further old DISCONNECT can be sent while down, and startup binds a new socket.
+
+%file: peer.cc
+#include "../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%file: check.cc
+#include "inet/common/INETDefs.h"
+namespace inet::mqttsntest {
+class StopCheck : public cSimpleModule, public cListener {
+    bool complete = false;
+    void initialize() override { getSimulation()->getSystemModule()->subscribe("scenarioComplete",this); }
+    void receiveSignal(cComponent *, simsignal_t, long value, cObject *) override { complete = value == 1; }
+    void finish() override {
+        ASSERT(complete); getSimulation()->getSystemModule()->unsubscribe("scenarioComplete",this);
+        EV << "MQTTSN STOP PASS\n";
+    }
+};
+Define_Module(StopCheck);
+}
+
+%file: test.ned
+import inet.tests.mqttsn.MqttSnTestNetwork;
+import inet.common.scenario.ScenarioManager;
+simple StopCheck { parameters: @class(::inet::mqttsntest::StopCheck); }
+network StopNetwork extends MqttSnTestNetwork { submodules: scenarioManager: ScenarioManager; check: StopCheck; }
+
+%activity:
+EV << "MQTTSN STOP FIXTURE COMPILED\n";
+
+%inifile: omnetpp.ini
+[General]
+network = StopNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.scenarioManager.script = xml("<scenario><at t='0.5'><shutdown module='sensor.app[0]'/></at><at t='2'><startup module='sensor.app[0]'/></at></scenario>")
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].script = xml("<script><expect type='4'/><send type='5'/><expect type='24'/><wait timeout='1300ms' forbidType='24'/><expect type='4'/><send type='5'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].stopOperationTimeout = 50ms
+*.sensor.app[0].keepAlive = 0s
+
+%contains: stdout
+MQTTSN STOP PASS

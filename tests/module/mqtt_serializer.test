@@ -1,0 +1,36 @@
+%description:
+Run the existing generic chunk round-trip engine and production MQTT fillers in
+isolation. This avoids the unrelated full serializer library's feature assumptions.
+Only MQTT is selected; the remaining registered types and serializers are skipped.
+
+%includes:
+#include "../../../serializer/lib/ChunkFillers.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+
+%file: engine.cc
+#include "../../../serializer/lib/ChunkRoundTripTest.cc"
+
+%file: filler.cc
+#include "../../../serializer/lib/fillers/ChunkFillers_mqtt.cc"
+
+%activity:
+using namespace inet;
+auto& registry=ChunkSerializerRegistry::getInstance();
+ChunkRoundTripConfig config;
+for (auto& name:registry.getRegisteredTypeNames())
+    if (name!="inet::mqtt::MqttPacket") config.skipTypes.insert(name);
+for (auto& name:registry.getRegisteredSerializerClassNames())
+    if (name!="inet::mqtt::MqttPacketSerializer") config.skipSerializerClasses.insert(name);
+addFillers_mqtt(config.fillers);
+ASSERT(config.fillers.size()==15);
+config.knownUnfilled="inet::mqtt::MqttPacket::protocolName";
+testChunkRoundTrips(config);
+
+%contains: stdout
+Cases:  15 run  OK: 15  FAILED: 0  CRASHED: 0
+
+%contains: stdout
+Coverage gate: 0 unexpected, 0 stale
+
+%contains: stdout
+Serializer-class gate: 0 unexpected, 0 stale

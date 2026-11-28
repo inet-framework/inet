@@ -1,0 +1,38 @@
+%description:
+SUBSCRIBE retry retains identifier/filter/QoS with DUP, UNSUBSCRIBE retry keeps its unused bit zero.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnSubscriptionRetries")
+        .once(on("gateway.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN bounded fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].script = xml("<script><expect type='4'/><send type='5'/><expect type='18' messageId='1' flags='32' topic='x/#'/><expect type='18' messageId='1' flags='160' topic='x/#'/><send type='19' flags='32' messageId='1'/><expect type='20' messageId='2' flags='0' topic='x/#'/><expect type='20' messageId='2' flags='0' topic='x/#'/><send type='21' messageId='2'/><wait timeout='300ms' forbidType='20'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='x/#' qos='1'/><unsubscribe at='0s' filter='x/#'/></mqttsn>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnSubscriptionRetries: PASS

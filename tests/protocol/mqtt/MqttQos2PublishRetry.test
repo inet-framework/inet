@@ -1,0 +1,110 @@
+%description:
+Interrupt both production sender roles before PUBREC. Persistent reconnect must
+retry PUBLISH with DUP and its old identifier, then complete the QoS 2 exchange.
+The scripted receiver supplies no routing or sender implementation.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+struct RetryState { int connection=0; int identifier=0; };
+static void answer(MqttScriptedPeer& peer,TcpSocket& socket,int type,int id=0) {
+    auto p=makeShared<MqttPacket>(); p->setType(type); p->setPacketIdentifier(id); peer.sendMqtt(socket,p);
+}
+static void installReceiver(MqttScriptedPeer& app,bool server) {
+    auto state=std::make_shared<RetryState>();
+    app.responder=[state,server](auto& peer,auto& socket,const auto& p) {
+        if (p->getType()==CONNECT || p->getType()==CONNACK) {
+            state->connection++;
+            if (server) {
+                ASSERT(p->getType()==CONNECT && !p->getCleanSession());
+                auto response=makeShared<MqttPacket>(); response->setType(CONNACK); response->setSessionPresent(state->connection==2); peer.sendMqtt(socket,response);
+            }
+            else {
+                ASSERT(p->getType()==CONNACK && p->getSessionPresent()==(state->connection==2));
+                if (state->connection==1) {
+                    auto subscription=makeShared<MqttPacket>(); subscription->setType(SUBSCRIBE); subscription->setPacketIdentifier(1);
+                    subscription->setFiltersArraySize(1); subscription->setFilters(0,"factory/#"); subscription->setResultsArraySize(1); subscription->setResults(0,2); peer.sendMqtt(socket,subscription);
+                }
+            }
+        }
+        else if (p->getType()==SUBACK) {}
+        else if (p->getType()==PUBLISH) {
+            ASSERT(p->getQos()==2 && p->getPayloadArraySize()==1 && p->getPayload(0)==65);
+            if (state->connection==1) { ASSERT(!p->getDuplicate()); state->identifier=p->getPacketIdentifier(); socket.close(); }
+            else {
+                ASSERT(state->connection==2 && p->getDuplicate() && p->getPacketIdentifier()==state->identifier);
+                answer(peer,socket,PUBREC,state->identifier);
+            }
+        }
+        else if (p->getType()==PUBREL) {
+            ASSERT(state->connection==2 && p->getPacketIdentifier()==state->identifier);
+            answer(peer,socket,PUBCOMP,state->identifier); peer.emit(peer.registerSignal("scenarioComplete"),1L);
+        }
+        else throw cRuntimeError("Unexpected control in QoS 2 retry fixture");
+    };
+}
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("mqtt_qos2_publish_retry");
+    test.meanwhile(exactlyTimes(1,on("broker.app[1]").signal("scenarioComplete").filterValue(1).within(5)))
+        .meanwhile(exactlyTimes(1,on("subscriber.app[0]").signal("scenarioComplete").filterValue(1).within(5)))
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[1]",[](auto& app) {
+            installReceiver(app,true); app.socket().bind(1884); app.socket().listen();
+        }))
+        .act(action().at(0.1).run<MqttScriptedPeer>("subscriber.app[0]",[](auto& app) {
+            installReceiver(app,false); app.socket().connect(app.addressOf("broker"),1883);
+        }));
+    for (int i=0;i<2;i++) {
+        test.once(on("subscriber.app[0]").signal("socketEstablished").within(2))
+            .act(action().run<MqttScriptedPeer>("subscriber.app[0]",[](auto& app) {
+                auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier("receiver"); p->setCleanSession(false); app.sendMqtt(app.socket(),p);
+            }));
+        if (!i) test.once(on("subscriber.app[0]").signal("socketClosed").within(2))
+            .act(action().after(0.1).run<MqttScriptedPeer>("subscriber.app[0]",[](auto& app) { app.renew(); app.socket().connect(app.addressOf("broker"),1883); }));
+    }
+    return test;
+}
+
+%activity:
+EV << "MQTT pre-PUBREC recovery compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.broker.numApps = 2
+*.broker.app[0].typename = "MqttBroker"
+*.broker.app[1].typename = "MqttScriptedPeer"
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='2' payload='41'/></mqtt>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "sender"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].connectPort = 1884
+*.observer.app[0].startTime = 0.1s
+*.observer.app[0].cleanSession = false
+*.observer.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='2' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_qos2_publish_retry: PASS

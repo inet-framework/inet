@@ -1,0 +1,39 @@
+%description:
+Production gateway retries each Will setup prompt independently before accepting CONNECT.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnWillRetry")
+        .once(on("sensor.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN bounded fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnScriptedPeer"
+*.sensor.app[0].script = xml("<script><send after='100ms' type='4' flags='12' duration='30' clientId='script'/><expect type='6'/><expect type='6'/><send type='7' flags='32' topic='will'/><expect type='8'/><expect type='8'/><send type='9' payload='41'/><expect type='5'/><send type='24'/><expect type='24'/></script>")
+*.sensor.app[0].remoteAddress = "gateway"
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+
+%contains: stdout
+PROTOCOLTEST MqttSnWillRetry: PASS

@@ -1,0 +1,63 @@
+%description:
+The production client's oldest unanswered PINGREQ expires after the configured
+two-second timeout, even if more pings are sent. An unacknowledged QoS 1 PUBLISH
+is not periodically resent while this same TCP connection remains open.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    auto pingAt=std::make_shared<double>(0);
+    return ProtocolTest("mqtt_missing_ping_response")
+        .meanwhile(exactlyTimes(1,on("broker.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PUBLISH; }).within(3.5)))
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[0]",[](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder=[](auto& peer,auto& socket,const auto& p) {
+                if (p->getType()==CONNECT) { auto reply=makeShared<MqttPacket>(); reply->setType(CONNACK); peer.sendMqtt(socket,reply); }
+            };
+        }))
+        .once(on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==PINGREQ; }).within(2))
+        .act(action().run<MqttScriptedPeer>("broker.app[0]",[pingAt](auto&) { *pingAt=simTime().dbl(); }))
+        .never(on("publisher.app[0]").signal("connectionChanged").filterValue(0).within(1.9))
+        .once(on("publisher.app[0]").signal("connectionChanged").filterValue(0)
+            .assertEvent([pingAt](const MatchContext& c) { return std::abs(c.event.time.dbl()-*pingAt-2)<1e-6; }).within(0.2));
+}
+
+%activity:
+EV << "MQTT missing ping response fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 5s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].cleanSession = false
+*.publisher.app[0].keepAlive = 1s
+*.publisher.app[0].pingResponseTimeout = 2s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.1s' topic='factory/value' qos='1' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_missing_ping_response: PASS

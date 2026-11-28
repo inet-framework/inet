@@ -86,6 +86,8 @@ std::vector<ChunkFiller> getAllChunkFillers()
     addFillers_routing(fillers);
     addFillers_mrp(fillers);
     addFillers_gptp(fillers);
+    addFillers_mqtt(fillers);
+    addFillers_mqttsn(fillers);
     return fillers;
 }
 

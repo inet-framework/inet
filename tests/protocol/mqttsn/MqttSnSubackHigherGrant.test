@@ -1,0 +1,68 @@
+%description:
+The production gateway handles the scripted MQTT HigherGrant subscription result
+and never emits an accepted MQTT-SN SUBACK for an invalid upstream result.
+
+%includes:
+#include "ProtocolTest.h"
+#include "../../../mqtt/MqttScriptedPeer.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%file: peer.cc
+#include "../../../mqtt/MqttScriptedPeer.cc"
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnSubackHigherGrant")
+        .act(action().at(0).run<mqtttest::MqttScriptedPeer>("broker.app[0]", [](auto& app) {
+            app.socket().bind(1883); app.socket().listen(); app.closeOnPeerClose = true;
+            app.responder = [](auto& peer, auto& socket, const auto& p) {
+                if (p->getType() == mqtt::CONNECT) {
+                    auto reply = makeShared<mqtt::MqttPacket>(); reply->setType(mqtt::CONNACK); peer.sendMqtt(socket,reply);
+                }
+                else if (p->getType() == mqtt::SUBSCRIBE) {
+                    int id = p->getPacketIdentifier() + 0;
+                    peer.sendBytes(socket, {0x90,3,uint8_t(id >> 8),uint8_t(id),2});
+                }
+            };
+        }))
+        .meanwhile(never(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::SUBACK && p->getReturnCode() == 0;
+        }).within(.5)))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::DISCONNECT;
+        }).within(1));
+}
+
+%activity:
+EV << "MQTT-SN subscription result fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 2s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='data/#' qos='1'/></mqttsn>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnSubackHigherGrant: PASS

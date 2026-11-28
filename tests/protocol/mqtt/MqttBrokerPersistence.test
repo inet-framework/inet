@@ -1,0 +1,94 @@
+%description:
+Graceful broker shutdown publishes a retained Will, deletes the clean publisher's
+session and preserves retained records. Late subscription and resubscription
+replay both records at granted QoS 0. Broker crash then loses both records without
+publishing another Will. A later publication proves recovery after restart.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+static MatchPredicate control(int type) {
+    return [type](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==type; };
+}
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_broker_persistence")
+        .meanwhile(exactlyTimes(1,on("subscriber.app[0]").signal("packetReceivedFromLower").filterEvent(control(PUBLISH))
+            .assertEvent([](const MatchContext& c) { auto p=c.event.packet->peekAtFront<MqttPacket>(); return !p->getRetain() && p->getQos()==1 && p->getPayload(0)==255; }).within(1.5)))
+        .act(action().at(0.2).run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) { app.closeOnPeerClose=true; app.socket().connect(app.addressOf("broker"),1883); }))
+        .once(on("publisher.app[0]").signal("socketEstablished").within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(CONNECT); p->setClientIdentifier("source");
+            p->setWill(true); p->setWillQos(2); p->setWillRetain(true); p->setWillTopic("state/will");
+            p->setWillPayloadArraySize(1); p->setWillPayload(0,255); app.sendMqtt(app.socket(),p);
+        }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(control(CONNACK)).within(1))
+        .act(action().run<MqttScriptedPeer>("publisher.app[0]",[](auto& app) {
+            auto p=makeShared<MqttPacket>(); p->setType(PUBLISH); p->setTopic("state/value"); p->setQos(1); p->setPacketIdentifier(7);
+            p->setRetain(true); p->setPayloadArraySize(1); p->setPayload(0,65); app.sendMqtt(app.socket(),p);
+        }))
+        .once(on("publisher.app[0]").signal("packetReceivedFromLower").filterEvent(control(PUBACK)).within(1))
+        .meanwhile(exactlyTimes(2,on("observer.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getType()==PUBLISH && std::string(p->getTopic())=="state/value" && p->getRetain() && p->getQos()==0 && p->getPayloadArraySize()==1 && p->getPayload(0)==65;
+            }).within(3)))
+        .meanwhile(exactlyTimes(2,on("observer.app[0]").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto p=c.event.packet->peekAtFront<MqttPacket>(); return p->getType()==PUBLISH && std::string(p->getTopic())=="state/will" && p->getRetain() && p->getQos()==0 && p->getPayloadArraySize()==1 && p->getPayload(0)==255;
+            }).within(3)))
+        .exactlyTimes(4,on("observer.app[0]").signal("packetReceivedFromLower").filterEvent(control(PUBLISH)).within(3))
+        .never(on("publisher.app[1]").signal("packetSentToUpper").within(3.2))
+        .once(on("observer.app[0]").signal("packetSentToUpper").within(1));
+}
+
+%activity:
+EV << "MQTT broker persistence fixture compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+import inet.tests.mqtt.MqttTestNetwork;
+import inet.common.scenario.ScenarioManager;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+network PersistenceNetwork extends MqttTestNetwork { submodules: scenarioManager: ScenarioManager; }
+
+%inifile: omnetpp.ini
+[General]
+network = PersistenceNetwork
+seed-set = 0
+sim-time-limit = 8s
+*.scenarioManager.script = xml("<scenario><at t='1'><shutdown module='broker.app[0]'/></at><at t='2'><startup module='broker.app[0]'/></at><at t='3.5'><crash module='broker.app[0]'/></at><at t='4.5'><startup module='broker.app[0]'/></at></scenario>")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 2
+*.publisher.app[0].typename = "MqttScriptedPeer"
+*.publisher.app[1].typename = "MqttClient"
+*.publisher.app[1].clientIdentifier = "late"
+*.publisher.app[1].connectAddress = "broker"
+*.publisher.app[1].startTime = 5.3s
+*.publisher.app[1].workload = xml("<mqtt><subscribe at='0s' filter='state/#'/><publish at='1.2s' topic='state/value' payload='55'/></mqtt>")
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='state/will' qos='1'/></mqtt>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].startTime = 2.3s
+*.observer.app[0].keepAlive = 1s
+*.observer.app[0].pingResponseTimeout = 0.2s
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='state/#'/><subscribe at='0.1s' filter='state/#'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_broker_persistence: PASS

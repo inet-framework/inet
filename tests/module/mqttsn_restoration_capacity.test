@@ -1,0 +1,63 @@
+%description:
+Exercise the production gateway's MQTT restoration handlers with all packet ids
+occupied. ACKs must unblock restoration, and only the final restoration SUBACK
+may release new queued publications. This isolates handler state, not TCP delivery.
+
+%file: capacity.cc
+#include "inet/applications/mqttsn/MqttSnGateway.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+namespace inet::mqttsntest {
+class RestorationGateway : public mqttsn::MqttSnGateway {
+    void initialize(int stage) override {
+        MqttSnGateway::initialize(stage);
+        if (stage != INITSTAGE_LAST) return;
+        Peer probe; probe.cleanSession = false; probe.address = L3AddressResolver().resolve("sensor"); probe.port = 1884;
+        probe.subscriptions["a/#"] = 1; probe.subscriptions["b/#"] = 2;
+        for (int id = 1; id <= 65535; id++) {
+            auto p = makeShared<mqtt::MqttPacket>(); p->setType(mqtt::PUBLISH); p->setQos(1); p->setTopic("old"); p->setPacketIdentifier(id);
+            probe.mqttSession.allocatedIdentifiers.insert(id); probe.mqttSession.outgoing[id] = p; probe.mqttSession.outgoingOrder.push_back(id);
+        }
+        auto queued = makeShared<mqtt::MqttPacket>(); queued->setType(mqtt::PUBLISH); queued->setQos(1); queued->setTopic("new");
+        probe.mqttSession.enqueue(queued);
+        auto connack = makeShared<mqtt::MqttPacket>(); connack->setType(mqtt::CONNACK); brokerReceive(probe,connack);
+        ASSERT(probe.restoreQueue.size() == 2 && probe.restoring.empty());
+        for (int id : {1,2}) {
+            auto ack = makeShared<mqtt::MqttPacket>(); ack->setType(mqtt::PUBACK); ack->setPacketIdentifier(id); brokerReceive(probe,ack);
+            ASSERT(probe.restoring.size() == size_t(id));
+            ASSERT(probe.mqttSession.pendingPublications.size() == 1);
+        }
+        ASSERT(probe.restoreQueue.empty());
+        auto ack = makeShared<mqtt::MqttPacket>(); ack->setType(mqtt::SUBACK); ack->setPacketIdentifier(1);
+        ack->setResultsArraySize(1); ack->setResults(0,1); brokerReceive(probe,ack);
+        ASSERT(probe.mqttSession.pendingPublications.size() == 1);
+        ack = makeShared<mqtt::MqttPacket>(); ack->setType(mqtt::SUBACK); ack->setPacketIdentifier(2);
+        ack->setResultsArraySize(1); ack->setResults(0,2); brokerReceive(probe,ack);
+        ASSERT(probe.restoring.empty() && probe.mqttSession.pendingPublications.empty());
+        ASSERT(probe.mqttSession.outgoing.size() == 65534);
+        EV << "MQTTSN RESTORATION CAPACITY PASS\n";
+    }
+};
+Define_Module(RestorationGateway);
+}
+
+%file: test.ned
+import inet.applications.mqttsn.MqttSnGateway;
+module RestorationGateway extends MqttSnGateway { parameters: @class(::inet::mqttsntest::RestorationGateway); }
+
+%activity:
+EV << "Restoration capacity fixture compiled\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 100ms
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "RestorationGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+
+%contains: stdout
+MQTTSN RESTORATION CAPACITY PASS

@@ -1,0 +1,55 @@
+%description:
+Production MQTT-SN/MQTT bidirectional binary payload routing at QoS 1.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnRoutingQos1");
+    test.meanwhile(exactlyTimes(1,on("observer.app[0]").signal("packetSentToUpper")
+        .filterEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0,255,65}); }).within(2.5)));
+    test.meanwhile(exactlyTimes(1,on("sensor.app[0]").signal("packetSentToUpper")
+        .filterEvent([](const MatchContext& c) { return c.event.packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({66,0,255}); }).within(2.5)));
+    test.once(on("sensor.app[0]").signal("sessionStateChanged").filterValue(2).within(1));
+    return test;
+}
+
+%activity:
+EV << "Production MQTT-SN routing fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.gateway.app[0].retryInterval = 100ms
+*.gateway.app[0].retryCount = 2
+*.gateway.app[0].predefinedTopics = xml("<topics><topic id='5' name='to/broker'/></topics>")
+*.observer.numApps = 1
+*.observer.app[0].typename = "MqttClient"
+*.observer.app[0].clientIdentifier = "observer"
+*.observer.app[0].connectAddress = "broker"
+*.observer.app[0].workload = xml("<mqtt><subscribe at='0s' filter='to/#' qos='2'/><publish at='1s' topic='from/broker' qos='1' payload='4200ff'/></mqtt>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].connectionless = false
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].searchDelay = 50ms
+*.sensor.app[0].predefinedTopics = xml("<topics><topic id='5' name='to/broker'/></topics>")
+*.sensor.app[0].workload = xml("<mqttsn><subscribe at='0s' filter='from/+' qos='1'/><publish at='500ms' topic='to/broker' qos='1' payload='00ff41'/></mqttsn>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnRoutingQos1: PASS

@@ -1,0 +1,50 @@
+%description:
+The production sensor and gateway establish an MQTT-SN session only after the
+gateway's per-sensor MQTT connection has been accepted by the production broker.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+#include "inet/applications/mqtt/MqttPacket_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("mqttsn_connect")
+        .once(on("sensor.app[0]").signal("packetSentToLower").filterEvent([](const MatchContext& c) {
+            return c.event.packet->peekAtFront<mqttsn::MqttSnPacket>()->getType() == mqttsn::CONNECT;
+        }).within(1))
+        .once(on("broker.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqtt::MqttPacket>();
+            return p->getType() == mqtt::CONNECT && std::string(p->getClientIdentifier()) == "sensor";
+        }).within(1))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>();
+            return p->getType() == mqttsn::CONNACK && p->getReturnCode() == mqttsn::ACCEPTED;
+        }).within(1))
+        .once(on("sensor.app[0]").signal("sessionStateChanged").filterValue(2).within(0.1));
+}
+
+%activity:
+EV << "MQTT-SN production connection fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+
+%contains: stdout
+PROTOCOLTEST mqttsn_connect: PASS

@@ -1,0 +1,65 @@
+%description:
+The first sensor broker connection closes after a partial MQTT CONNACK. A new
+sensor CONNECT authorizes the replacement; its complete CONNACK must not consume
+the old prefix. Refusal followed by one acceptance bounds the observable outcome.
+
+%includes:
+#include "ProtocolTest.h"
+#include "../../../mqtt/MqttScriptedPeer.h"
+#include "inet/applications/mqttsn/MqttSnProtocol.h"
+
+%file: peer.cc
+#include "../../../mqtt/MqttScriptedPeer.cc"
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    auto count = std::make_shared<int>(0);
+    return ProtocolTest("MqttSnPartialConnack")
+        .act(action().at(0).run<mqtttest::MqttScriptedPeer>("broker.app[0]", [count](auto& app) {
+            app.socket().bind(1883); app.socket().listen(); app.closeOnPeerClose = true;
+            app.responder = [count](auto& peer, auto& socket, const auto& p) {
+                if (p->getType() != mqtt::CONNECT) return;
+                if (std::string(p->getClientIdentifier()) == "sensor" && ++*count == 1) {
+                    peer.sendBytes(socket,{0x20,0x02,0x00}); socket.close(); return;
+                }
+                auto reply = makeShared<mqtt::MqttPacket>(); reply->setType(mqtt::CONNACK); peer.sendMqtt(socket,reply);
+            };
+        }))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>(); return p->getType() == mqttsn::CONNACK && p->getReturnCode() == 1;
+        }).within(1))
+        .once(on("sensor.app[0]").signal("packetReceivedFromLower").filterEvent([](const MatchContext& c) {
+            auto p = c.event.packet->peekAtFront<mqttsn::MqttSnPacket>(); return p->getType() == mqttsn::CONNACK && p->getReturnCode() == 0;
+        }).assertEvent([count](const MatchContext&) { return *count == 2; }).within(1));
+}
+
+%activity:
+EV << "MQTT-SN partial CONNACK fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnGateway"
+*.gateway.app[0].brokerAddress = "broker"
+*.gateway.app[0].advertise = false
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].clientIdentifier = "sensor"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].keepAlive = 0s
+
+%contains: stdout
+PROTOCOLTEST MqttSnPartialConnack: PASS

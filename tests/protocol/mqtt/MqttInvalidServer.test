@@ -1,0 +1,85 @@
+%description:
+Production client rejects missing/invalid CONNACK and malformed SUBACK, then
+accepts a valid subscription failure without retrying it immediately. The next
+workload publication proves that subscription failure does not stall the client.
+
+%includes:
+#include "ProtocolTest.h"
+#include "MqttScriptedPeer.h"
+
+%file: peer.cc
+#include "../../MqttScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::mqtt;
+using namespace inet::mqtttest;
+using namespace inet::protocoltest;
+struct InvalidServerState { int connection=-2; int subscriptions=0; };
+Define_ProtocolTestProgram()
+{
+    auto state=std::make_shared<InvalidServerState>();
+    return ProtocolTest("mqtt_invalid_server")
+        .act(action().at(0).run<MqttScriptedPeer>("broker.app[0]",[state](auto& app) {
+            app.socket().bind(1883); app.socket().listen();
+            app.responder=[state](auto& peer,auto& socket,const auto& p) {
+                if (p->getType()==CONNECT) {
+                    int scenario=++state->connection;
+                    if (scenario==-1) { peer.sendBytes(socket,{0x20,2,0}); socket.close(); return; }
+                    if (scenario==0) return; // Bound by the production connectTimeout.
+                    if (scenario==1) { peer.sendBytes(socket,{0x20,2,2,0}); return; }
+                    if (scenario==2) { peer.sendBytes(socket,{0x20,2,0,6}); return; }
+                    if (scenario==4) {
+                        auto publication=makeShared<MqttPacket>(); publication->setType(PUBLISH); publication->setTopic("factory/value"); peer.sendMqtt(socket,publication); return;
+                    }
+                    auto answer=makeShared<MqttPacket>(); answer->setType(CONNACK);
+                    answer->setSessionPresent(scenario==3); answer->setReturnCode(scenario==5 ? 1:0); peer.sendMqtt(socket,answer);
+                }
+                else if (p->getType()==SUBSCRIBE) {
+                    state->subscriptions++;
+                    ASSERT(state->connection>=6 && state->connection<=9);
+                    auto answer=makeShared<MqttPacket>(); answer->setType(SUBACK); answer->setPacketIdentifier(p->getPacketIdentifier());
+                    answer->setResultsArraySize(state->connection==6 ? 2:1);
+                    answer->setResults(0,state->connection==8 ? 2 : state->connection==9 ? 128:0);
+                    if (state->connection==7) {
+                        peer.sendBytes(socket,{0x90,3,static_cast<uint8_t>(p->getPacketIdentifier()>>8),static_cast<uint8_t>(p->getPacketIdentifier()),3});
+                    }
+                    else peer.sendMqtt(socket,answer);
+                }
+                else if (p->getType()==PUBLISH) {
+                    ASSERT(state->connection==9 && state->subscriptions==4 && p->getPayloadArraySize()==1 && p->getPayload(0)==65);
+                    peer.emit(peer.registerSignal("scenarioComplete"),1L);
+                }
+                else throw cRuntimeError("Unexpected control packet in invalid-server fixture");
+            };
+        }))
+        .once(on("broker.app[0]").signal("scenarioComplete").filterValue(1).within(5))
+        .never(on("publisher.app[0]").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return c.event.packet->peekAtFront<MqttPacket>()->getType()==SUBSCRIBE; }).within(0.5));
+}
+
+%activity:
+EV << "MQTT invalid server matrix compiled\n";
+
+%file: test.ned
+import inet.protocoltest.TcpTestApp;
+simple MqttScriptedPeer extends TcpTestApp { parameters: @class(::inet::mqtttest::MqttScriptedPeer); }
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqtt.MqttTestNetwork
+seed-set = 0
+sim-time-limit = 6s
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttScriptedPeer"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].connectTimeout = 0.2s
+*.publisher.app[0].reconnectInterval = 0.1s
+*.publisher.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#'/><publish at='0.1s' topic='factory/value' payload='41'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_invalid_server: PASS

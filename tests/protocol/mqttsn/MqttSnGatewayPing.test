@@ -1,0 +1,42 @@
+%description:
+A production client answers a gateway-originated ping, with autonomous keepalive disabled.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    ProtocolTest test("MqttSnGatewayPing");
+    test.once(on("gateway.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+    return test;
+}
+
+%activity:
+EV << "MQTT-SN deterministic fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].script = xml("<script><expect type='4'/><send type='5'/><send type='22'/><expect type='23'/><wait timeout='1200ms' forbidType='22'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].workload = xml("<mqttsn/>")
+*.sensor.app[0].congestionWait = 500ms
+
+
+%contains: stdout
+PROTOCOLTEST MqttSnGatewayPing: PASS

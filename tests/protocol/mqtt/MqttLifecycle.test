@@ -1,0 +1,72 @@
+%description:
+Production subscriber stop/start retains its persistent session, while a broker
+crash/start loses broker state and clients must establish fresh connections.
+Pending work does not fire in the down interval.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("mqtt_lifecycle")
+        .once(on("subscriber.app[0]").signal("packetSentToUpper").within(1))
+        .once(on("subscriber.app[0]").signal("connectionChanged").filterValue(0).within(1))
+        .never(on("subscriber.app[0]").signal("packetSentToUpper").within(0.7))
+        .once(on("subscriber.app[0]").signal("packetSentToUpper").within(1.5))
+        .once(on("subscriber.app[0]").signal("packetSentToUpper").within(1))
+        .once(on("subscriber.app[0]").signal("connectionChanged").filterValue(0).within(2.5))
+        .once(on("subscriber.app[0]").signal("connectionChanged").filterValue(1).within(3))
+        .once(on("subscriber.app[0]").signal("packetSentToUpper").within(4));
+}
+
+%activity:
+EV << "MQTT lifecycle fixture compiled\n";
+
+%file: test.ned
+import inet.tests.mqtt.MqttTestNetwork;
+import inet.common.scenario.ScenarioManager;
+network MqttLifecycleNetwork extends MqttTestNetwork {
+    submodules:
+        scenarioManager: ScenarioManager;
+}
+
+%file: scenario.xml
+<scenario>
+  <at t="1"><shutdown module="subscriber.app[0]"/></at>
+  <at t="2"><startup module="subscriber.app[0]"/></at>
+  <at t="3"><crash module="broker.app[0]"/></at>
+  <at t="4"><startup module="broker.app[0]"/></at>
+</scenario>
+
+%inifile: omnetpp.ini
+[General]
+network = MqttLifecycleNetwork
+seed-set = 0
+sim-time-limit = 8s
+*.scenarioManager.script = xmldoc("scenario.xml")
+*.broker.numApps = 1
+*.broker.app[0].typename = "MqttBroker"
+*.publisher.numApps = 1
+*.publisher.app[0].typename = "MqttClient"
+*.publisher.app[0].clientIdentifier = "publisher"
+*.publisher.app[0].connectAddress = "broker"
+*.publisher.app[0].startTime = 0.1s
+*.publisher.app[0].cleanSession = false
+*.publisher.app[0].keepAlive = 1s
+*.publisher.app[0].pingResponseTimeout = 0.2s
+*.publisher.app[0].workload = xml("<mqtt><publish at='0.5s' topic='factory/value' qos='1' payload='41'/><publish at='1.5s' topic='factory/value' qos='1' payload='42'/><publish at='2.5s' topic='factory/value' qos='1' payload='43'/><publish at='6.5s' topic='factory/value' qos='1' payload='44'/></mqtt>")
+*.subscriber.numApps = 1
+*.subscriber.app[0].typename = "MqttClient"
+*.subscriber.app[0].clientIdentifier = "subscriber"
+*.subscriber.app[0].connectAddress = "broker"
+*.subscriber.app[0].startTime = 0.1s
+*.subscriber.app[0].cleanSession = false
+*.subscriber.app[0].keepAlive = 1s
+*.subscriber.app[0].pingResponseTimeout = 0.2s
+*.subscriber.app[0].workload = xml("<mqtt><subscribe at='0s' filter='factory/#' qos='1'/></mqtt>")
+
+%contains: stdout
+PROTOCOLTEST mqtt_lifecycle: PASS

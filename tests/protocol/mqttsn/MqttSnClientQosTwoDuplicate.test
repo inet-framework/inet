@@ -1,0 +1,38 @@
+%description:
+Duplicate QoS 2 PUBLISH hands off once, duplicate PUBREL is answered, and completed identifier reuse succeeds.
+
+%includes:
+#include "ProtocolTest.h"
+
+%file: peer.cc
+#include "../../../../networks/mqttsn/MqttSnScriptedPeer.cc"
+
+%global:
+using namespace inet::protocoltest;
+Define_ProtocolTestProgram() {
+    return ProtocolTest("MqttSnClientQosTwoDuplicate").meanwhile(exactlyTimes(2, on("sensor.app[0]").signal("packetSentToUpper").within(2.5)))
+        .once(on("gateway.app[0]").signal("scenarioComplete").filterValue(1).within(2.9));
+}
+
+%activity:
+EV << "MQTT-SN bounded fault fixture\n";
+
+%inifile: omnetpp.ini
+[General]
+network = inet.tests.mqttsn.MqttSnTestNetwork
+seed-set = 0
+sim-time-limit = 3s
+*.gateway.numApps = 1
+*.gateway.app[0].typename = "MqttSnScriptedPeer"
+*.gateway.app[0].script = xml("<script><expect type='4'/><send type='5'/><send type='12' flags='66' topicId='29812' messageId='42' payload='41'/><expect type='15' messageId='42'/><send type='12' flags='194' topicId='29812' messageId='42' payload='41'/><expect type='15' messageId='42'/><send type='16' messageId='42'/><expect type='14' messageId='42'/><send type='16' messageId='42'/><expect type='14' messageId='42'/><send type='12' flags='66' topicId='29812' messageId='42' payload='42'/><expect type='15' messageId='42'/><send type='16' messageId='42'/><expect type='14' messageId='42'/></script>")
+*.sensor.numApps = 1
+*.sensor.app[0].typename = "MqttSnClient"
+*.sensor.app[0].gatewayAddress = "gateway"
+*.sensor.app[0].startTime = 0.1s
+*.sensor.app[0].keepAlive = 0s
+*.sensor.app[0].retryInterval = 100ms
+*.sensor.app[0].retryCount = 2
+*.sensor.app[0].workload = xml("<mqttsn/>")
+
+%contains: stdout
+PROTOCOLTEST MqttSnClientQosTwoDuplicate: PASS
