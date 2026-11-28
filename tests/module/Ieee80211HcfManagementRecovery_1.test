@@ -33,7 +33,7 @@ class TestRecoveryMgmtAp : public Ieee80211MgmtAp
     {
         auto& sta = staList[address];
         sta.address = address;
-        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+        mib->setPeerAssociationStatus(address, Ieee80211Mib::AUTHENTICATED);
     }
 
     short submitAssociationRequest(const MacAddress& address)

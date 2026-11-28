@@ -1,7 +1,7 @@
 %description:
 Verify that combined BSS and peer cleanup completes before notification.
 Check individual and bulk cleanup, empty state, local-state retention,
-unrelated peers, and replacement state installed by a callback.
+unrelated peers, and rejected mutation from a callback.
 
 %includes:
 // Author: Miguel González-López
@@ -56,9 +56,14 @@ record-scalar-results = false
 using namespace Ieee80211MibBssTeardown_1;
 
 auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
-mib->setPrimaryChannel(1);
-mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
-const auto capabilities = mib->localHtCapabilities;
+Ieee80211HtCapabilities localProfile;
+localProfile.supportedChannelWidths.insert(MHz(20));
+localProfile.rxMcsSupported[0] = true;
+mib->installLocalHtCapabilities(localProfile, true);
+Ieee80211HtOperation acceptedOperation;
+acceptedOperation.primaryChannel = 1;
+mib->commitBss("test", MacAddress::UNSPECIFIED_ADDRESS, nullptr, 1, &acceptedOperation);
+const auto capabilities = mib->getLocalHtCapabilities();
 const auto operation = mib->getHtOperation();
 const MacAddress first("02:00:00:00:00:01");
 const MacAddress other("02:00:00:00:00:02");
@@ -69,16 +74,18 @@ rates.basic = rates.operational = rates.supported;
 mib->setLocalRateSet(rates);
 
 Observer observer;
+mib->publishStateChange();
 mib->subscribe(Ieee80211Mib::rateStateChangedSignal, &observer);
 auto clear = [&](bool bulk) {
     if (bulk)
         mib->clearBssAndAllPeerStates();
     else
         mib->clearBssAndPeerState(first);
+    mib->publishStateChange();
 };
 auto checkLocal = [&]() {
     ASSERT(mib->getLocalRateSet() == rates);
-    ASSERT(mib->localHtCapabilities == capabilities);
+    ASSERT(mib->getLocalHtCapabilities() == capabilities);
     ASSERT(mib->getHtOperation() == operation);
 };
 
@@ -90,11 +97,12 @@ for (bool bulk : {false, true}) {
                 mib->clearBssAndAllPeerStates();
                 mib->setBssRateSet(hasBss ? rates : Ieee80211RateSetState());
                 if (hasHt)
-                    mib->setPeerHtCapabilities(first, capabilities, operation);
+                    mib->setPeerHtCapabilities(first, capabilities);
                 if (hasRates)
                     mib->installBssAndPeerRateSets(mib->getBssRateSet(), first, rates);
-                mib->setPeerHtCapabilities(other, capabilities, operation);
+                mib->setPeerHtCapabilities(other, capabilities);
                 mib->installBssAndPeerRateSets(mib->getBssRateSet(), other, rates);
+                mib->publishStateChange();
                 observer.check = [&]() {
                     ASSERT(mib->findPeerHtState(first) == nullptr);
                     ASSERT(mib->findPeerRateSet(first) == nullptr);
@@ -123,36 +131,39 @@ for (bool bulk : {false, true}) {
 
 for (bool bulk : {false, true}) {
     mib->clearBssAndAllPeerStates();
-    mib->setPeerHtCapabilities(first, capabilities, operation);
+    mib->setPeerHtCapabilities(first, capabilities);
     mib->installBssAndPeerRateSets(rates, first, rates);
-    bool replaced = false;
+    bool mutationRejected = false;
+    mib->publishStateChange();
     observer.check = [&]() {
-        if (replaced)
+        if (mutationRejected)
             return;
         ASSERT(mib->findPeerHtState(first) == nullptr);
         ASSERT(mib->findPeerRateSet(first) == nullptr);
         ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
         checkLocal();
-        replaced = true;
-        mib->setPeerHtCapabilities(first, capabilities, operation);
-        mib->installBssAndPeerRateSets(rates, first, rates);
+        try {
+            mib->setPeerHtCapabilities(first, capabilities);
+        }
+        catch (const cRuntimeError&) { mutationRejected = true; }
     };
     clear(bulk);
-    ASSERT(replaced);
-    ASSERT(mib->findPeerHtState(first) != nullptr);
-    ASSERT(*mib->findPeerRateSet(first) == rates);
-    ASSERT(mib->getBssRateSet() == rates);
+    ASSERT(mutationRejected);
+    ASSERT(mib->findPeerHtState(first) == nullptr);
+    ASSERT(mib->findPeerRateSet(first) == nullptr);
+    ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
     observer.check = nullptr;
 }
 
 observer.check = nullptr;
-mib->bssAccessPointData.stations[first] = Ieee80211Mib::ASSOCIATED;
+mib->setPeerAssociationStatus(first, Ieee80211Mib::ASSOCIATED);
 mib->allocateAssociationId(first);
 mib->reserveAssociationId(other);
-mib->installBssAndPeerState(rates, first, rates, &capabilities, operation);
+mib->installBssAndPeerState(rates, first, rates, &capabilities);
+mib->publishStateChange();
 observer.check = [&]() {
-    ASSERT(mib->bssAccessPointData.stations.empty());
-    ASSERT(mib->bssAccessPointData.associationIds.empty());
+    ASSERT(mib->getBssAccessPointData().stations.empty());
+    ASSERT(mib->getBssAccessPointData().associationIds.empty());
     ASSERT(mib->findPeerHtState(first) == nullptr);
     ASSERT(mib->findPeerRateSet(first) == nullptr);
     ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
@@ -160,8 +171,10 @@ observer.check = [&]() {
 };
 int before = observer.notifications;
 mib->clearAccessPointState();
+mib->publishStateChange();
 ASSERT(observer.notifications == before + 1);
 mib->clearAccessPointState();
+mib->publishStateChange();
 ASSERT(observer.notifications == before + 1);
 ASSERT(mib->reserveAssociationId(first) == 1); // Reservations also clear.
 observer.check = nullptr;

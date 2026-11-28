@@ -19,6 +19,7 @@ import inet.common.SimpleModule;
 simple OriginatorProtectionMechanism extends SimpleModule
 {
     parameters:
+        string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(OriginatorProtectionMechanism);
         string rateSelectionModule;
         @display("i=block/encrypt");

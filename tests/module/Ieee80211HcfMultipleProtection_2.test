@@ -142,12 +142,17 @@ class RateProtectionHcf : public Hcf {
     }
     void seedHtPeer(MacAddress peer) {
         Enter_Method("seedHtPeer");
-        ASSERT(mib->isHtOperationSupported() && mib->localHtCapabilitiesValid);
+        ASSERT(mib->isLocalHtCapable());
         auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getParentModule()->getParentModule()->getSubmodule("radio"));
         auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
         auto channel = transmitter->getChannel();
-        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
-        mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        {
+            Ieee80211HtOperation acceptedOperation;
+            acceptedOperation.primaryChannel = channel->getChannelNumber();
+            mib->commitBss(mib->getBssData().ssid, mib->getBssData().bssid, channel->getBand(),
+                    acceptedOperation.primaryChannel, &acceptedOperation);
+        }
+        mib->setPeerHtCapabilities(peer, mib->getLocalHtCapabilities());
         ASSERT(mib->findPeerHtState(peer) && mib->findPeerHtState(peer)->valid);
     }
     void seedRecipient(bool compressed = false) {
@@ -386,6 +391,7 @@ simple TraceAarf extends AarfRateControl {
 }
 simple DecreaseRateControl extends SimpleModule like IRateControl {
     parameters:
+        string modeSetModule;
         double initialRate @unit(bps) = default(6Mbps);
         @class(::inet::ieee80211::DecreaseRateControl);
 }

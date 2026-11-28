@@ -10,6 +10,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/linklayer/ieee80211/mgmt/contract/IIeee80211BssProvider.h"
 
 namespace inet {
 
@@ -49,14 +50,12 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mib->mode = Ieee80211Mib::INFRASTRUCTURE;
-        mib->bssStationData.stationType = Ieee80211Mib::STATION;
-        mib->bssStationData.isAssociated = true;
+        mib->configureBssRole(Ieee80211Mib::STATION);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        configureAssociation();
+        if (isUp())
+            configureAssociation();
     }
-    else if (stage == INITSTAGE_LAST)
-        configureAssociation();
 }
 
 void Ieee80211MgmtStaSimplified::handleStartOperation(LifecycleOperation *operation)
@@ -70,34 +69,77 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
 {
     L3AddressResolver addressResolver;
     auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
-    mib->bssData.bssid = accessPointAddress;
     auto apMib = findAccessPointMib(accessPointAddress);
-    apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
-    mib->bssData.ssid = apMib->bssData.ssid;
-    mib->bssStationData.isAssociated = true;
-    auto peerRates = mib->getLocalRateSet();
-    // IEEE Std 802.11-2024, 9.4.2.3: request basic-rate bits have no BSS meaning.
-    peerRates.basic = Ieee80211RateSet();
+    auto *apModule = apMib->getParentModule()->getSubmodule("mgmt");
+    auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apModule);
+    if (accessPointManagementId != apModule->getId()) {
+        unsubscribeFromAccessPoint();
+        apModule->subscribe(IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal, this);
+        accessPointManagementId = apModule->getId();
+    }
+    if (!apManagement->isAcceptingSimplifiedPeers()) {
+        // The configurator uses the SSID to group the wireless interfaces even if the AP starts down.
+        mib->configureBssRole(Ieee80211Mib::STATION, apMib->getBssData().ssid);
+        return;
+    }
+    apManagement->prepareBss();
+    mib->commitBss(apMib->getBssData().ssid, accessPointAddress, apMib->getOperationBand(),
+            apMib->hasPrimaryChannel() ? apMib->requirePrimaryChannel() : -1,
+            mib->isLocalHtCapable() && apMib->hasHtOperation() ? &apMib->getHtOperation() : nullptr);
+    mib->setAssociated(true);
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
-    bool validHt = mib->isHtOperationSupported() && apMib->isHtOperationSupported();
-    auto operation = validHt ? apMib->getHtOperation() : Ieee80211HtOperation();
-    mib->installBssAndPeerState(apMib->getBssRateSet(), apMib->address, apMib->getLocalRateSet(),
-            validHt ? &apMib->localHtCapabilities : nullptr, operation);
-    apMib->installBssAndPeerState(apMib->getBssRateSet(), mib->address, peerRates,
-            validHt ? &mib->localHtCapabilities : nullptr, operation);
+    if (mib->isLocalHtCapable() && apMib->isLocalHtCapable()) {
+        mib->setPeerHtCapabilities(apMib->address, apMib->getLocalHtCapabilities());
+    }
+    mib->installBssAndPeerRateSets(apMib->getBssRateSet(), apMib->address, apMib->getLocalRateSet());
+    auto peerRates = mib->getLocalRateSet();
+    // Request basic-rate bits do not define BSS basic rates.
+    peerRates.basic = Ieee80211RateSet();
+    apManagement->installSimplifiedPeer(mib->address, mib->isLocalHtCapable() ? &mib->getLocalHtCapabilities() : nullptr, peerRates);
+    mib->publishStateChange();
+}
+
+void Ieee80211MgmtStaSimplified::receiveSignal(cComponent *source, simsignal_t signal, bool available, cObject *details)
+{
+    if (signal != IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal ||
+        source->getId() != accessPointManagementId)
+        return;
+
+    Enter_Method("simplifiedAssociationAvailabilityChanged");
+    if (available)
+        configureAssociation();
+    else {
+        if (mib->getBssStationData().isAssociated)
+            resetPeerAssociationContext(mib->getBssData().bssid);
+        mib->clearBss();
+        mib->publishStateChange();
+    }
+}
+
+void Ieee80211MgmtStaSimplified::unsubscribeFromAccessPoint()
+{
+    if (accessPointManagementId != -1) {
+        if (auto *apModule = getSimulation()->getModule(accessPointManagementId))
+            apModule->unsubscribe(IIeee80211BssProvider::simplifiedAssociationAvailabilityChangedSignal, this);
+        accessPointManagementId = -1;
+    }
 }
 
 void Ieee80211MgmtStaSimplified::stop()
 {
-    auto accessPointAddress = mib->bssData.bssid;
-    mib->bssStationData.isAssociated = false;
-    Ieee80211MgmtBase::stop();
-    auto apMib = findAccessPointMib(accessPointAddress, false);
+    bool wasAssociated = mib->getBssStationData().isAssociated;
+    const auto accessPointAddress = mib->getBssData().bssid;
+    unsubscribeFromAccessPoint();
+    if (wasAssociated)
+        resetPeerAssociationContext(accessPointAddress);
+    mib->clearBss();
+    auto apMib = wasAssociated ? findAccessPointMib(accessPointAddress, false) : nullptr;
     if (apMib != nullptr) {
-        apMib->bssAccessPointData.stations.erase(mib->address);
-        apMib->releaseAssociationId(mib->address);
+        auto *apManagement = check_and_cast<IIeee80211BssProvider *>(apMib->getParentModule()->getSubmodule("mgmt"));
+        apManagement->removeSimplifiedPeer(mib->address);
     }
+    mib->publishStateChange();
 }
 
 void Ieee80211MgmtStaSimplified::handleTimer(cMessage *msg)

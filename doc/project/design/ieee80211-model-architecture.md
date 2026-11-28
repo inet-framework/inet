@@ -52,4 +52,27 @@ The state-notification contracts are below. These names describe notification ki
 
 An operational-state notification is emitted for a meaningful committed change, not simply because another identical advertisement arrived. Protocol outcomes may still occur without such a change. Immutable catalogs and prepared capabilities need no routine change signal. Algorithm-private state needs a notification only when a defined independent consumer requires it.
 
-Concrete signals declare their source/scope, change condition, payload, and lifetime under [AR-COM-NOTIFY](../rule/architecture.md#ar-com-notify). An immutable borrowed snapshot is allowed; it creates no second writable authority. Commands, queries, and required coordination use typed calls or protocol messages, rather than notifications.
+Concrete signals declare their source/scope, change condition, payload, and lifetime under
+[AR-COM-NOTIFY](../rule/architecture.md#ar-com-notify). An immutable borrowed snapshot is allowed;
+it creates no second writable authority. Commands, queries, and required coordination use typed
+calls or protocol messages, rather than notifications.
+
+**Implemented HT contracts.** `IIeee80211ModeSetProvider` supplies the configured catalog after `LOCAL`. `IIeee80211MacConfiguration` extends that contract with `prepareLocalCapabilities()`. This method prepares capabilities after the PHY is ready. MAC consumers resolve `modeSetModule` through `ModeSetModuleBase` at `LINK_LAYER`. The MAC NED supplies the default path for its descendants. Management uses `macModule`.
+
+`LINK_LAYER` depends on `PHYSICAL_LAYER` and `NETWORK_INTERFACE_CONFIGURATION`. These dependencies make addresses and capability inputs available before simplified association. The simplified STA calls the AP through `IIeee80211BssProvider`. The AP owns its BSS preparation and peer changes. The STA supplies its rate state with its peer capabilities.
+
+`Ieee80211Mib` supplies const queries for BSS state and capabilities. Management changes BSS and peer state through MIB methods. Management completes its timers and transactions before it calls `publishStateChange()`. The MIB retains both `rateStateChanged` and `bssStateChanged`. Both signals describe complete state.
+
+The Boolean value of `rateStateChanged` is true. Changes to rates, HT capabilities, channel operation, or BSS availability trigger this signal. Association status alone triggers only `bssStateChanged`. Its Boolean value identifies an active BSS. BSS and peer changes trigger this signal. Equal updates emit no signal.
+
+Observers query the MIB during synchronous delivery. A MIB mutation during delivery causes an error.
+
+References into the MIB remain valid until the next corresponding mutation. A retained `shared_ptr<const Ieee80211NegotiatedHtCapabilities>` preserves an immutable capability result. It does not preserve permission to use HT. The MIB supplies that permission through `relationshipAllowsHt(peer)`.
+
+`hasPreparedLocalCapabilities()` identifies a prepared profile. `isLocalHtCapable()` identifies local HT support. `hasActiveBss()` identifies an active BSS. `hasHtOperation()` identifies an accepted HT operation. A legacy BSS can be active without an HT operation. The current ad hoc model has no learned channel operation or accepted peer advertisements.
+
+Stop and crash clear operational relationships. Prepared configuration remains available. AP management retains physical channel context for restart. STA management learns operation from accepted management information, independently of scan channel changes.
+
+An up simplified STA observes the configured AP management module's Boolean `simplifiedAssociationAvailabilityChanged` signal. The AP emits it after runtime startup prepares the BSS and after shutdown or crash clears the BSS. The STA uses the provider's availability query for its initial decision, clears its local association when the AP goes down, and calls the provider to associate when the AP becomes available. A down station does not participate. The configured AP's SSID is available for network configuration even when association must wait.
+
+When a simplified association ends, each management module resets its MAC peer context before clearing the association it owns. The reset retires Block Ack agreements, invalidates pending agreement actions, and discards frames tied to the old agreements. The next association starts with fresh Block Ack state.

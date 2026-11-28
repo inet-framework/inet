@@ -24,6 +24,7 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
+    void prepareLocalOperation() override;
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;

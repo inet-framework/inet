@@ -1,0 +1,323 @@
+%description:
+
+A wired sender delivers one UDP datagram to a simplified wireless station through a simplified AP.
+The AP either restarts or starts late, or the station restarts while the AP stays up.
+In all cases the station must receive the datagram after association.
+
+The restart cases seed Basic Block Ack agreements while the peers are associated. During the outage
+both endpoints must clear the interrupted association and its agreements. Rejoining must leave the
+old agreements absent before traffic resumes. In the station-only restart cases, another station
+retains its association and agreements and receives a datagram during the outage. The station
+shuts down at 1 s in one case and at 1.55 s in the other.
+
+%extraargs: -r 0..3
+
+%file: SimplifiedApLifecycleProbe.cc
+
+#include <initializer_list>
+#include <iostream>
+
+#include "inet/common/SimpleModule.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+namespace inet::ieee80211 {
+
+// The delivery probes use best-effort traffic. Keep seeded agreements on a separate TID.
+static constexpr int testTid = 5;
+
+class SimplifiedLifecycleOriginator : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    void seed(MacAddress peer) {
+        auto *agreement = new OriginatorBlockAckAgreement(peer, testTid, SequenceNumberCyclic(0), 64, false, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, testTid}] = agreement;
+    }
+};
+
+class SimplifiedLifecycleRecipient : public RecipientBlockAckAgreementHandler
+{
+  public:
+    void seed(MacAddress peer) {
+        auto *agreement = new RecipientBlockAckAgreement(peer, testTid, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+        agreement->addbaResposneSent();
+        agreement->setVariant(BlockAckVariant::BASIC);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, testTid}] = agreement;
+    }
+};
+
+class SimplifiedLifecycleHcf : public Hcf
+{
+  public:
+    void seedAgreements(std::initializer_list<MacAddress> peers) {
+        delete originatorBlockAckAgreementHandler;
+        delete recipientBlockAckAgreementHandler;
+        auto *originator = new SimplifiedLifecycleOriginator();
+        auto *recipient = new SimplifiedLifecycleRecipient();
+        originatorBlockAckAgreementHandler = originator;
+        recipientBlockAckAgreementHandler = recipient;
+        for (auto peer : peers) {
+            originator->seed(peer);
+            recipient->seed(peer);
+        }
+    }
+
+    void checkAgreements(MacAddress peer, bool present) const {
+        if ((originatorBlockAckAgreementHandler->getAgreement(peer, testTid) != nullptr) != present)
+            throw cRuntimeError("%s: expected originator agreement with %s to be %s",
+                    getFullPath().c_str(), peer.str().c_str(), present ? "present" : "absent");
+        if ((recipientBlockAckAgreementHandler->getAgreement(testTid, peer) != nullptr) != present)
+            throw cRuntimeError("%s: expected recipient agreement with %s to be %s",
+                    getFullPath().c_str(), peer.str().c_str(), present ? "present" : "absent");
+    }
+};
+Define_Module(SimplifiedLifecycleHcf);
+
+class SimplifiedApLifecycleProbe : public SimpleModule, public cListener
+{
+    simtime_t shutdownTime;
+    simtime_t startupTime;
+
+    static void checkAssociation(const Ieee80211Mib& apMib, const Ieee80211Mib& staMib, bool associated) {
+        if (staMib.getBssStationData().isAssociated != associated || staMib.hasActiveBss() != associated)
+            throw cRuntimeError("%s: expected association and active BSS to be %s",
+                    staMib.getFullPath().c_str(), associated ? "present" : "absent");
+        if ((apMib.getPeerAssociationStatus(staMib.address) == Ieee80211Mib::ASSOCIATED) != associated)
+            throw cRuntimeError("%s: expected association with %s to be %s",
+                    apMib.getFullPath().c_str(), staMib.address.str().c_str(), associated ? "present" : "absent");
+    }
+
+  protected:
+    void initialize() override {
+        const auto *script = getModuleByPath("^.scenarioManager")->par("script").xmlValue();
+        const auto shutdowns = script->getElementsByTagName("shutdown");
+        const auto startups = script->getElementsByTagName("startup");
+        if (shutdowns.size() > 1 || startups.size() != 1)
+            throw cRuntimeError("The lifecycle fixture needs one startup and at most one shutdown");
+        const bool restarts = !shutdowns.empty();
+        const simtime_t startTime = simTime();
+        shutdownTime = restarts ? SimTime::parse(shutdowns.front()->getParentNode()->getAttribute("t")) : startTime;
+        startupTime = SimTime::parse(startups.front()->getParentNode()->getAttribute("t"));
+        const simtime_t firstSendTime = getModuleByPath("^.source.app[0]")->par("startTime");
+        if ((restarts && shutdownTime <= startTime) || shutdownTime >= startupTime || startupTime >= firstSendTime)
+            throw cRuntimeError("The lifecycle fixture needs time for observations before shutdown, during the outage, and after startup");
+
+        // Sample inside each phase to avoid ordering against the transition or the send event.
+        if (restarts)
+            scheduleAt(startTime + (shutdownTime - startTime) / 2, new cMessage("beforeShutdown"));
+        scheduleAt(shutdownTime + (startupTime - shutdownTime) / 2, new cMessage("whileDown"));
+        scheduleAt(startupTime + (firstSendTime - startupTime) / 2, new cMessage("afterStartup"));
+        if (getParentModule()->par("stationRestarts").boolValue())
+            getModuleByPath("^.otherSta.app[0]")->subscribe(packetReceivedSignal, this);
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t, cObject *, cObject *) override {
+        // The result scalar requires one receipt. Here we check when it happened.
+        if (simTime() < shutdownTime || simTime() >= startupTime)
+            throw cRuntimeError("%s: expected UDP delivery during the station outage [%s s, %s s), got %s s",
+                    source->getFullPath().c_str(), shutdownTime.str().c_str(),
+                    startupTime.str().c_str(), simTime().str().c_str());
+    }
+
+    void handleMessage(cMessage *message) override {
+        auto *staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        auto *apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto *staHcf = check_and_cast<SimplifiedLifecycleHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"));
+        auto *apHcf = check_and_cast<SimplifiedLifecycleHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        auto *otherStaMib = getParentModule()->par("stationRestarts").boolValue()
+                ? check_and_cast<Ieee80211Mib *>(getModuleByPath("^.otherSta.wlan[0].mib")) : nullptr;
+        bool beforeShutdown = message->isName("beforeShutdown");
+        bool whileDown = message->isName("whileDown");
+        checkAssociation(*apMib, *staMib, !whileDown);
+        if (beforeShutdown) {
+            staHcf->seedAgreements({apMib->address});
+            if (otherStaMib)
+                apHcf->seedAgreements({staMib->address, otherStaMib->address});
+            else
+                apHcf->seedAgreements({staMib->address});
+        }
+        staHcf->checkAgreements(apMib->address, beforeShutdown);
+        apHcf->checkAgreements(staMib->address, beforeShutdown);
+        if (otherStaMib) {
+            auto *otherStaHcf = check_and_cast<SimplifiedLifecycleHcf *>(getModuleByPath("^.otherSta.wlan[0].mac.hcf"));
+            checkAssociation(*apMib, *otherStaMib, true);
+            if (beforeShutdown)
+                otherStaHcf->seedAgreements({apMib->address});
+            otherStaHcf->checkAgreements(apMib->address, true);
+            apHcf->checkAgreements(otherStaMib->address, true);
+            if (whileDown)
+                std::cout << "Station-only shutdown preserved the other station's association and agreements.\n";
+        }
+        std::cout << "Simplified AP lifecycle state verified: " << message->getName() << "\n";
+        delete message;
+    }
+};
+Define_Module(SimplifiedApLifecycleProbe);
+
+} // namespace inet::ieee80211
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module SimplifiedLifecycleHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::SimplifiedLifecycleHcf);
+}
+
+simple SimplifiedApLifecycleProbe extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::SimplifiedApLifecycleProbe);
+}
+
+network Ieee80211MgmtSimplifiedApLifecycleTestNetwork
+{
+    parameters:
+        string scenario;
+        bool stationRestarts = scenario == "StaRestart" || scenario == "StaRestartLaterShutdown";
+        double stationShutdownTime @unit(s);
+        double stationStartupTime @unit(s) = default(2s);
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        scenarioManager: ScenarioManager {
+            parameters:
+                script = parent.stationRestarts ?
+                    xml("<scenario><at t='" + string(parent.stationShutdownTime) + "'><shutdown module='sta'/></at>"
+                        + "<at t='" + string(parent.stationStartupTime) + "'><startup module='sta'/></at></scenario>") :
+                    xmldoc(parent.scenario + ".xml");
+        }
+        ap: AccessPoint;
+        sta: WirelessHost;
+        otherSta: WirelessHost if stationRestarts;
+        source: StandardHost {
+            parameters:
+                numApps = parent.stationRestarts ? 2 : 1;
+        }
+        probe: SimplifiedApLifecycleProbe;
+    connections:
+        source.ethg++ <--> Eth100M <--> ap.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtSimplifiedApLifecycleTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 4s
+seed-set = 0
+record-vector-results = false
+
+*.ap.hasStatus = true
+*.sta.hasStatus = true
+*.scenario = "${scenario=ApRestart,ApStartsDown,StaRestart,StaRestartLaterShutdown}"
+*.stationShutdownTime = "${scenario}" == "StaRestartLaterShutdown" ? 1.55s : 1s
+*.ap.status.initialStatus = "${scenario}" == "ApStartsDown" ? "DOWN" : "UP"
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.otherSta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].agent.typename = ""
+*.otherSta.wlan[0].agent.typename = ""
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.otherSta.wlan[0].address = "02:00:00:00:00:03"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.otherSta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+**.wlan[0].radio.channelNumber = 6
+**.wlan[0].mac.qosStation = true
+**.wlan[0].mac.hcf.typename = "SimplifiedLifecycleHcf"
+**.wlan[0].mac.hcf.isBlockAckSupported = true
+**.wlan[0].mac.hcf.blockAckVariant = "basic"
+**.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 10m
+*.sta.mobility.initialX = 11m
+*.otherSta.mobility.initialX = 12m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+**.arp.typename = "GlobalArp"
+*.source.app[*].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "sta"
+*.source.app[0].startTime = 3s
+*.source.app[0].stopTime = 3.5s
+*.source.app[1].destAddresses = "otherSta"
+*.source.app[1].startTime = 1.6s
+*.source.app[1].stopTime = 1.9s
+*.source.app[*].destPort = 5000
+*.source.app[*].messageLength = 128B
+*.source.app[*].sendInterval = 1s
+*.sta.numApps = 1
+*.sta.app[0].typename = "UdpSink"
+*.sta.app[0].localPort = 5000
+*.otherSta.numApps = 1
+*.otherSta.app[0].typename = "UdpSink"
+*.otherSta.app[0].localPort = 5000
+
+%file: ApRestart.xml
+
+<scenario>
+    <at t="1s">
+        <shutdown module="ap"/>
+    </at>
+    <at t="2s">
+        <startup module="ap"/>
+    </at>
+</scenario>
+
+%file: ApStartsDown.xml
+
+<scenario>
+    <at t="2s">
+        <startup module="ap"/>
+    </at>
+</scenario>
+
+%contains: results/General-scenario=ApRestart-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%contains: results/General-scenario=ApStartsDown-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%contains: results/General-scenario=StaRestart-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%contains: results/General-scenario=StaRestart-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.otherSta.app[0] packetReceived:count 1
+
+%contains: results/General-scenario=StaRestartLaterShutdown-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.sta.app[0] packetReceived:count 1
+
+%contains: results/General-scenario=StaRestartLaterShutdown-#0.sca
+scalar Ieee80211MgmtSimplifiedApLifecycleTestNetwork.otherSta.app[0] packetReceived:count 1
+
+%contains: stdout
+Station-only shutdown preserved the other station's association and agreements.
+
+%contains: stdout
+Simplified AP lifecycle state verified: beforeShutdown
+
+%contains: stdout
+Simplified AP lifecycle state verified: whileDown
+
+%contains: stdout
+Simplified AP lifecycle state verified: afterStartup
+
+%exitcode: 0

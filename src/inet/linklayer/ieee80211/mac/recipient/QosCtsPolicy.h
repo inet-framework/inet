@@ -15,7 +15,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API QosCtsPolicy : public ModeSetListener, public ICtsPolicy
+class INET_API QosCtsPolicy : public ModeSetModuleBase, public ICtsPolicy
 {
   protected:
     IRx *rx = nullptr;

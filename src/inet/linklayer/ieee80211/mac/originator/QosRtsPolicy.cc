@@ -14,7 +14,7 @@ Define_Module(QosRtsPolicy);
 
 void QosRtsPolicy::initialize(int stage)
 {
-    ModeSetListener::initialize(stage);
+    ModeSetModuleBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rtsThreshold = par("rtsThreshold");
         ctsTimeout = par("ctsTimeout");

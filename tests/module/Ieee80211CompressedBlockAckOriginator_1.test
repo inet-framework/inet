@@ -41,8 +41,13 @@ class OriginatorHcf : public Hcf {
         auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
         auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
         auto channel = transmitter->getChannel();
-        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
-        mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        {
+            Ieee80211HtOperation acceptedOperation;
+            acceptedOperation.primaryChannel = channel->getChannelNumber();
+            mib->commitBss(mib->getBssData().ssid, mib->getBssData().bssid, channel->getBand(),
+                    acceptedOperation.primaryChannel, &acceptedOperation);
+        }
+        mib->setPeerHtCapabilities(peer, mib->getLocalHtCapabilities());
         int start = par("start");
         int offset = par("offset");
         delete originatorBlockAckAgreementHandler;

@@ -41,11 +41,11 @@ class RifsPermissionAudit : public cSimpleModule, public cListener {
         delete message;
         auto ap = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
         auto sta = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta1.wlan[0].mib"));
-        ASSERT(sta->bssStationData.isAssociated);
+        ASSERT(sta->getBssStationData().isAssociated);
         auto peer = sta->findPeerHtState(ap->address);
         ASSERT(peer && peer->valid);
         auto band = physicallayer::Ieee80211CompliantBands::getBand(par("band").stringValue());
-        auto element = makeHtOperationElement(band, peer->negotiatedCapabilities.operation);
+        auto element = makeHtOperationElement(band, sta->getHtOperation());
         if (element.rifsMode != par("expected").boolValue())
             throw cRuntimeError("Published RIFS permission differs from the received management operation");
         published = true;
