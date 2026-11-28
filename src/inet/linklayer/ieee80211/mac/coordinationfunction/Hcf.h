@@ -47,6 +47,7 @@ namespace ieee80211 {
 
 class Ieee80211Mac;
 class Ieee80211Mib;
+class TransmitStep;
 
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
@@ -84,6 +85,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::set<int64_t> obsoleteActions;
     bool handlingAgreementAction = false;
     bool finishingSequence = false;
+    int64_t originatorTxRequestId = -1;
+    bool submittingOriginatorFrame = false;
     bool updatingProcedures = false;
 
     // Transmission and Reception
@@ -181,6 +184,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void scheduleAddbaResponseTimer();
     void actionTerminated(Packet *packet, bool acknowledged);
     void invalidateActions(MacAddress peer, Tid tid, bool originator);
+    TransmitStep *getOriginatorTransmitStep() const;
+    bool withdrawOriginatorTransmission();
     void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);
     void beginTeardown(MacAddress peer, Tid tid, bool originator, int reasonCode);
     void discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highestTransmittedDataIndex = -1);
@@ -221,7 +226,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // ITx::ICallback
+    virtual void transmissionStarted(const Packet& packet) override;
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    virtual void transmissionStartFailed() override;
 
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;

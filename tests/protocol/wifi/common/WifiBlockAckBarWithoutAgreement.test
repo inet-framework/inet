@@ -63,6 +63,8 @@ class LifecycleBarStimulus : public cSimpleModule, public ITx::ICallback
         sender->sendTestBar(peer, tid, this);
     }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
 };
 Define_Module(LifecycleBarStimulus);
 

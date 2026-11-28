@@ -132,6 +132,8 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         ackCompletions++;
         ackEnd = simTime();
     }
+    void transmissionStarted(const Packet&) override {}
+    void transmissionStartFailed() override { throw cRuntimeError("Unexpected start failure"); }
     const IIeee80211Mode *dataMode() const {
         bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28 || scenario == 36;
         auto catalog = Ieee80211ModeSet::getModeSet(scenario < 19 || scenario >= 49 ? "a" : fiveGhz ? "ac" : "n(mixed-2.4Ghz)");

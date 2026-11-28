@@ -1,0 +1,422 @@
+%description:
+The sender's MAC defers DATA until radio readiness. It misses the first
+admitted start and schedules the next attempt from the MAC hook. Both HCF
+and DCF must release the channel and send the queued DATA exactly once.
+The radio-switch cases use a nonzero switch delay and restore receiver mode
+after a missed deadline or explicit withdrawal during the switch.
+With Basic Block Ack, inactivity expiry just before, at or just after
+the admitted start must preserve unsent DATA for the next exchange.
+Readiness arriving on time after expiry must reject the withdrawn request.
+The Compressed Block Ack case expires after the prepared DATA is committed
+and checks that the same allocation reaches the peer with Normal Ack.
+The receiver also submits and silently cancels the same Tx frame twice
+to check unique IDs and rejection of stale cancellation.
+
+%extraargs: -r 0..9
+
+%file: Readiness.cc
+// Author: Miguel González-López
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+namespace inet::ieee80211 {
+// These values are used by the scenario parameter in omnetpp.ini.
+enum TestCase {
+    READINESS = 0,
+    RADIO_SWITCH = 1,
+    RADIO_SWITCH_CANCEL = 2,
+    EXPIRY_AFTER_DEADLINE = 3,
+    EXPIRY_AT_DEADLINE = 4,
+    EXPIRY_BEFORE_READY = 5,
+    COMPRESSED_EXPIRY_BEFORE_READY = 6,
+};
+
+class ReadinessAgreementHandler : public OriginatorBlockAckAgreementHandler {
+  public:
+    using OriginatorBlockAckAgreementHandler::createAgreement;
+};
+
+class ReadinessHcf : public Hcf {
+    MacAddress peer;
+    const Packet *pendingData = nullptr;
+    int64_t committedAllocationIndex = -1;
+
+    bool usesCompressedBlockAck() const { return par("blockAckVariant").stdstringValue() == "compressed"; }
+
+  public:
+    bool expired = false;
+    bool hasPendingData() const { return pendingData != nullptr; }
+    int64_t getCommittedAllocationIndex() const { return committedAllocationIndex; }
+
+    void establishAgreement(MacAddress address) {
+        Enter_Method_Silent();
+        peer = address;
+        if (usesCompressedBlockAck()) {
+            Ieee80211RateSetState rates;
+            rates.supported.known = rates.basic.known = rates.operational.known = true;
+            rates.supported.legacyRates = rates.basic.legacyRates = rates.operational.legacyRates = {Mbps(6), Mbps(12), Mbps(24)};
+            mib->setLocalRateSet(rates);
+            mib->installBssAndPeerRateSets(rates, peer, rates);
+            auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
+            auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
+            auto channel = transmitter->getChannel();
+            mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
+            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        }
+        delete originatorBlockAckAgreementHandler;
+        auto handler = new ReadinessAgreementHandler;
+        originatorBlockAckAgreementHandler = handler;
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(mac->getAddress());
+        request->setReceiverAddress(peer);
+        request->setTid(5);
+        request->setBlockAckPolicy(true);
+        request->setBufferSize(64);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        handler->createAgreement(request);
+        auto agreement = handler->getAgreement(peer, 5);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        handler->finishProcedure(peer, 5);
+        agreement->calculateExpirationTime();
+    }
+
+    void expireAgreementAt(simtime_t deadline) {
+        Enter_Method_Silent();
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, 5);
+        ASSERT(deadline > simTime());
+        if (usesCompressedBlockAck()) {
+            auto prepared = frameSequenceHandler->getContext()->getQoSContext()->preparedData.get();
+            auto edcaf = edca->getEdcaf(AC_VI);
+            if (!prepared || prepared->frame != pendingData || prepared->preparation ||
+                !edcaf->getPendingQueue()->isEmpty() || !edcaf->getInProgressFrames()->containsFrame(pendingData) ||
+                pendingData->peekAtFront<Ieee80211DataHeader>()->getAckPolicy() != BLOCK_ACK)
+                throw cRuntimeError("Expected the committed Compressed Block Ack DATA at Tx submission");
+            committedAllocationIndex = pendingData->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+        }
+        agreement->setBlockAckTimeoutValue(deadline - simTime());
+        agreement->calculateExpirationTime();
+        scheduleInactivityTimer();
+    }
+
+  protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        bool inspect = !peer.isUnspecified() && !pendingData && !expired && packet->isName("request");
+        if (inspect) {
+            if (usesCompressedBlockAck()) {
+                auto prepared = frameSequenceHandler->getContext()->getQoSContext()->preparedData.get();
+                if (!prepared || !prepared->preparation || prepared->frame != packet ||
+                    edca->getEdcaf(AC_VI)->getInProgressFrames()->containsFrame(packet))
+                    throw cRuntimeError("Expected an uncommitted Compressed DATA preview before submission");
+            }
+            pendingData = packet;
+        }
+        return Hcf::transmitFrame(packet, ifs);
+    }
+
+    void handleMessage(cMessage *message) override {
+        if (message != inactivityTimer || !pendingData) {
+            Hcf::handleMessage(message);
+            return;
+        }
+        auto frames = edca->getEdcaf(AC_VI)->getInProgressFrames();
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, 5);
+        if (!frames->containsFrame(pendingData) || agreement->getHighestTransmittedDataIndex() >= 0)
+            throw cRuntimeError("The queued DATA was already counted as transmitted");
+        Hcf::handleMessage(message);
+        if (originatorBlockAckAgreementHandler->getAgreement(peer, 5) || !frames->containsFrame(pendingData))
+            throw cRuntimeError("Block Ack expiry must preserve the queued, unsent DATA");
+        pendingData = nullptr;
+        expired = true;
+    }
+};
+Define_Module(ReadinessHcf);
+
+class ReadinessMac : public Ieee80211Mac {
+    bool restoreReceiverAfterSwitch = false;
+
+  public:
+    int attempts = 0;
+    int handoffs = 0;
+    int receivedData = 0;
+    int64_t missedId = -1;
+    int64_t readyId = -1;
+    ITx *getTx() const { return tx; }
+    physicallayer::IRadio::RadioMode getRadioMode() const { return radio->getRadioMode(); }
+    int scenario() const { return par("scenario").intValue(); }
+    bool switchesRadio() const { return scenario() == RADIO_SWITCH || scenario() == RADIO_SWITCH_CANCEL; }
+    ReadinessHcf *getReadinessHcf() const { return check_and_cast<ReadinessHcf *>(hcf.get()); }
+
+  protected:
+    bool deferTransmissionStart(int64_t id, simtime_t admittedStart) override {
+        if (!par("deferStart").boolValue())
+            return false;
+        if (scenario() >= EXPIRY_AFTER_DEADLINE && (attempts != 0 || !getReadinessHcf()->hasPendingData()))
+            return false;
+        attempts++;
+        if (attempts == 1) {
+            missedId = id;
+            bool expiresBeforeReadiness = scenario() == EXPIRY_BEFORE_READY || scenario() == COMPRESSED_EXPIRY_BEFORE_READY;
+            if (switchesRadio())
+                configureRadioMode(physicallayer::IRadio::RADIO_MODE_TRANSMITTER);
+            if (scenario() >= EXPIRY_AFTER_DEADLINE) {
+                int expiryOffset = expiresBeforeReadiness ? -1 : scenario() == EXPIRY_AFTER_DEADLINE ? 1 : 0;
+                getReadinessHcf()->expireAgreementAt(admittedStart + SimTime(expiryOffset, SIMTIME_NS));
+            }
+            auto command = new cMessage("configure", physicallayer::RADIO_C_CONFIGURE);
+            command->setControlInfo(new physicallayer::Ieee80211ConfigureRadioCommand());
+            handleUpperCommand(command);
+            ASSERT(pendingRadioConfigMsg == command);
+            auto readinessTime = expiresBeforeReadiness ? admittedStart : admittedStart + SimTime(1, SIMTIME_NS);
+            scheduleAt(readinessTime, new cMessage("staleReadiness"));
+        }
+        else {
+            ASSERT(attempts == 2 && id != missedId);
+            if (scenario() == RADIO_SWITCH) {
+                ASSERT(radio->getRadioMode() == physicallayer::IRadio::RADIO_MODE_RECEIVER);
+                configureRadioMode(physicallayer::IRadio::RADIO_MODE_TRANSCEIVER);
+            }
+            readyId = id;
+            scheduleAt(admittedStart, new cMessage("readiness"));
+        }
+        return true;
+    }
+
+    void pendingTransmissionWithdrawn(int64_t id) override {
+        if (switchesRadio() && id == missedId) {
+            ASSERT(radio->getRadioMode() == physicallayer::IRadio::RADIO_MODE_SWITCHING);
+            restoreReceiverAfterSwitch = true;
+        }
+    }
+
+    using Ieee80211Mac::receiveSignal;
+    void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override {
+        Enter_Method_Silent();
+        Ieee80211Mac::receiveSignal(source, signal, value, details);
+        if (restoreReceiverAfterSwitch && signal == physicallayer::IRadio::radioModeChangedSignal &&
+            value == physicallayer::IRadio::RADIO_MODE_TRANSMITTER) {
+            restoreReceiverAfterSwitch = false;
+            configureRadioMode(physicallayer::IRadio::RADIO_MODE_RECEIVER);
+        }
+    }
+
+    void handleSelfMessage(cMessage *message) override {
+        if (message->isName("staleReadiness")) {
+            if (tx->startPendingTransmission(missedId))
+                throw cRuntimeError("Obsolete request reached the radio");
+            ASSERT(!tx->hasTransmission() && !pendingRadioConfigMsg);
+        }
+        else if (message->isName("readiness")) {
+            if (tx->startPendingTransmission(missedId) || !tx->startPendingTransmission(readyId) ||
+                tx->startPendingTransmission(readyId))
+                throw cRuntimeError("Invalid readiness result for pending request");
+        }
+        else {
+            Ieee80211Mac::handleSelfMessage(message);
+            return;
+        }
+        delete message;
+    }
+
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (scenario() >= EXPIRY_AFTER_DEADLINE && header->getType() != ST_DATA_WITH_QOS) {
+            Ieee80211Mac::sendDownFrame(packet);
+            return;
+        }
+        if (scenario() >= EXPIRY_AFTER_DEADLINE && par("deferStart").boolValue() &&
+            staticPtrCast<const Ieee80211DataHeader>(header)->getAckPolicy() != NORMAL_ACK)
+            throw cRuntimeError("DATA reached the radio with the retired Block Ack policy");
+        if (scenario() == COMPRESSED_EXPIRY_BEFORE_READY && par("deferStart").boolValue() &&
+            packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() != getReadinessHcf()->getCommittedAllocationIndex())
+            throw cRuntimeError("Expected the same committed DATA allocation after Block Ack expiry");
+        ASSERT(!par("deferStart").boolValue() || packet->isName("request"));
+        ASSERT(par("deferStart").boolValue() || header->getType() == ST_ACK);
+        handoffs++;
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+
+    void sendUpFrame(Packet *packet) override {
+        Enter_Method_Silent();
+        take(packet);
+        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>()))
+            receivedData++;
+        delete packet;
+    }
+};
+Define_Module(ReadinessMac);
+
+class ReadinessTest : public cSimpleModule, public ITx::ICallback {
+  public:
+    ReadinessTest() : cSimpleModule(65536) {}
+
+  protected:
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        throw cRuntimeError("Cancelled request reached the radio");
+    }
+
+    void transmissionStartFailed() override {
+        throw cRuntimeError("Explicit cancellation must be silent");
+    }
+
+    void transmissionStarted(const Packet&) override {
+        throw cRuntimeError("Cancelled request reached the radio");
+    }
+
+    void cancelDuringSwitch(ReadinessMac *sender, ReadinessMac *receiver) {
+        auto ack = makeShared<Ieee80211AckFrame>();
+        ack->setReceiverAddress(receiver->getAddress());
+        auto packet = new Packet("cancelDuringSwitch", ack);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto tx = sender->getTx();
+        int64_t id = -1;
+        tx->transmitFrame(packet, ack, SimTime(16, SIMTIME_US), false, this, &id);
+        delete packet;
+        wait(SimTime(4, SIMTIME_US));
+        if (sender->getRadioMode() != physicallayer::IRadio::RADIO_MODE_SWITCHING ||
+            !tx->cancelPendingTransmission(id))
+            throw cRuntimeError("Expected cancellation during the in-progress radio switch");
+        wait(SimTime(30, SIMTIME_US));
+        if (sender->getRadioMode() != physicallayer::IRadio::RADIO_MODE_RECEIVER ||
+            tx->hasTransmission() || sender->handoffs != 0)
+            throw cRuntimeError("Expected receiver mode and no handoff after explicit withdrawal");
+    }
+
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto sender = check_and_cast<ReadinessMac *>(getModuleByPath("^.sender.wlan[0].mac"));
+        auto receiver = check_and_cast<ReadinessMac *>(getModuleByPath("^.receiver.wlan[0].mac"));
+        if (sender->scenario() == RADIO_SWITCH_CANCEL) {
+            cancelDuringSwitch(sender, receiver);
+            std::cout << "Radio readiness and recovery passed." << std::endl;
+            return;
+        }
+        auto tx = receiver->getTx();
+        auto ack = makeShared<Ieee80211AckFrame>();
+        ack->setReceiverAddress(sender->getAddress());
+        auto packet = new Packet("cancel", ack);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        int64_t cancelledId = -1;
+        auto ifs = SimTime(16, SIMTIME_US);
+        tx->transmitFrame(packet, ack, ifs, true, this, &cancelledId);
+        if (!tx->hasTransmission() || !tx->cancelPendingTransmission(cancelledId))
+            throw cRuntimeError("Could not cancel first request");
+        int64_t replacementId = -1;
+        tx->transmitFrame(packet, ack, ifs, true, this, &replacementId);
+        if (replacementId == cancelledId || tx->cancelPendingTransmission(cancelledId))
+            throw cRuntimeError("Stale cancellation affected the replacement");
+        if (!tx->hasTransmission() || !tx->cancelPendingTransmission(replacementId))
+            throw cRuntimeError("Could not cancel replacement request");
+        ASSERT(!tx->hasTransmission());
+        delete packet;
+
+        auto header = makeShared<Ieee80211DataHeader>();
+        if (sender->par("qosStation").boolValue()) {
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setTid(5);
+        }
+        else
+            header->setType(ST_DATA);
+        header->setReceiverAddress(receiver->getAddress());
+        if (sender->scenario() >= EXPIRY_AFTER_DEADLINE)
+            sender->getReadinessHcf()->establishAgreement(receiver->getAddress());
+        header->setTransmitterAddress(sender->getAddress());
+        header->setAddress3(receiver->getAddress());
+        packet = new Packet("request", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(200)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        sender->processUpperFrame(packet, header);
+        wait(SimTime(4, SIMTIME_MS));
+        if (sender->scenario() >= EXPIRY_AFTER_DEADLINE) {
+            if (!sender->getReadinessHcf()->expired || sender->handoffs != 1 || receiver->receivedData != 1)
+                throw cRuntimeError("Expected the unsent DATA to survive inactivity expiry and reach the peer once");
+        }
+        else if (sender->attempts != 2 || sender->handoffs != 1 || receiver->handoffs != 1)
+            throw cRuntimeError("Expected one missed start, one DATA handoff and one ACK");
+        ASSERT(!sender->getTx()->hasTransmission() && !receiver->getTx()->hasTransmission());
+        std::cout << "Radio readiness and recovery passed." << std::endl;
+    }
+};
+Define_Module(ReadinessTest);
+} // namespace inet::ieee80211
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module ReadinessMac extends Ieee80211Mac
+{
+    parameters:
+        bool deferStart = default(false);
+        int scenario;
+        @class(::inet::ieee80211::ReadinessMac);
+}
+
+module ReadinessHcf extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::ReadinessHcf);
+}
+
+simple ReadinessTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::ReadinessTest);
+}
+
+network ReadinessNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sender: WirelessHost;
+        receiver: WirelessHost;
+        test: ReadinessTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ReadinessNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 6ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = ${scenario} == 6 ? "n(mixed-2.4Ghz)" : "a"
+**.wlan[*].bitrate = 24Mbps
+**.wlan[*].mac.typename = "ReadinessMac"
+**.wlan[*].mac.qosStation = ${qos=false,true}
+**.wlan[*].mac.scenario = ${scenario=0,1,2,3,4,5,6}
+constraint = $scenario < 3 || $qos
+**.wlan[*].mac.hcf.typename = "ReadinessHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} >= 3
+**.wlan[*].mac.hcf.blockAckVariant = ${scenario} == 6 ? "compressed" : "basic"
+*.sender.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} >= 4 ? 0B : 4096B
+*.sender.wlan[0].radio.switchingTimes = (${scenario} == 1 || ${scenario} == 2) ? "ns 0 0 0 0 0 0 0 0 0 0 0 0 0 8000 0 0 0 0 0 0 0 0 0 0 0" : "ns 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+*.sender.wlan[0].mac.deferStart = true
+*.sender.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+*.sender.mobility.initialX = 0m
+*.sender.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+
+%contains: stdout
+Radio readiness and recovery passed.

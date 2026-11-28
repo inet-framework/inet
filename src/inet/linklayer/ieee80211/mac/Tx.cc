@@ -23,6 +23,7 @@ Define_Module(Tx);
 Tx::~Tx()
 {
     cancelAndDelete(endIfsTimer);
+    cancelAndDelete(startDeadlineTimer);
     if (frame)
         delete frame;
 }
@@ -34,17 +35,17 @@ void Tx::initialize(int stage)
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(findModuleByPath(par("rxModule")));
         WATCH(transmitting);
-        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE");
+        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : frame ? "WAIT_RADIO" : "IDLE");
         WATCH_EXPR("txFramePrefix", frame ? std::string(frame->getName()) + "\n" : "");
     }
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback, int64_t *requestId)
 {
-    transmitFrame(packet, header, SIMTIME_ZERO, updateLocalNav, txCallback);
+    transmitFrame(packet, header, SIMTIME_ZERO, updateLocalNav, txCallback, requestId);
 }
 
-void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback, int64_t *requestId)
 {
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     ASSERT(this->txCallback == nullptr);
@@ -74,13 +75,61 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
-    if (ifs == 0) {
-        // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+    auto id = frame->getId();
+    if (requestId)
+        *requestId = id;
+    transmissionStartTime = simTime() + ifs;
+    // The MAC may withdraw or replace this request inside the start hook.
+    bool deferred = mac->shouldDeferTransmissionStart(id, transmissionStartTime);
+    if (!frame || frame->getId() != id || transmitting)
+        return;
+    if (deferred) {
+        if (!startDeadlineTimer) {
+            startDeadlineTimer = new cMessage("startDeadline");
+            // Give the MAC readiness event at the admitted start time the first chance.
+            startDeadlineTimer->setSchedulingPriority(std::numeric_limits<short>::max());
+        }
+        scheduleAt(transmissionStartTime, startDeadlineTimer);
     }
+    else if (ifs == 0)
+        startPendingTransmission(id);
     else
-        scheduleAfter(ifs, endIfsTimer);
+        scheduleAt(transmissionStartTime, endIfsTimer);
+}
+
+bool Tx::startPendingTransmission(int64_t requestId)
+{
+    Enter_Method("startPendingTransmission");
+    if (!frame || frame->getId() != requestId || transmitting || endIfsTimer->isScheduled() || simTime() != transmissionStartTime)
+        return false;
+    if (startDeadlineTimer)
+        cancelEvent(startDeadlineTimer);
+    transmitting = true;
+    txCallback->transmissionStarted(*frame);
+    mac->sendDownFrame(frame->dup());
+    return true;
+}
+
+bool Tx::cancelPendingTransmission(int64_t requestId)
+{
+    Enter_Method("cancelPendingTransmission");
+    if (!frame || frame->getId() != requestId || transmitting)
+        return false;
+    cancelEvent(endIfsTimer);
+    if (startDeadlineTimer)
+        cancelEvent(startDeadlineTimer);
+    clearPendingTransmission();
+    mac->notifyTransmissionWithdrawn(requestId);
+    mac->sendDownPendingRadioConfigMsg();
+    return true;
+}
+
+void Tx::clearPendingTransmission()
+{
+    delete frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    updateLocalNav = false;
 }
 
 void Tx::radioTransmissionFinished()
@@ -109,8 +158,15 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
+        startPendingTransmission(frame->getId());
+    }
+    else if (msg == startDeadlineTimer) {
+        auto callback = txCallback;
+        auto requestId = frame->getId();
+        clearPendingTransmission();
+        mac->notifyTransmissionWithdrawn(requestId);
+        mac->sendDownPendingRadioConfigMsg();
+        callback->transmissionStartFailed();
     }
     else
         ASSERT(false);

@@ -34,6 +34,7 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback) override;
     virtual void processResponse(Packet *frame) override;
     virtual void transmissionComplete() override;
+    virtual void transmissionWithdrawn() override;
     virtual void handleStartRxTimeout() override;
     virtual void interruptFrameSequence() override;
     virtual bool isSequenceRunning() override { return frameSequence != nullptr; }

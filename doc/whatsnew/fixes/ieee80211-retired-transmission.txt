@@ -1,0 +1,5 @@
+IEEE 802.11 withdraws a retired frame before radio handoff
+
+When a peer association resets, HCF withdraws a pending DATA or management transmission removed by the reset, including a pending RTS that protects it. A frame that has already reached the radio completes normally.
+
+When a Block Ack agreement is retired, HCF withdraws pending QoS DATA that still carries its Block Ack policy. Unsent DATA that survives retirement stays queued and uses the acknowledgment policy selected for its next exchange.

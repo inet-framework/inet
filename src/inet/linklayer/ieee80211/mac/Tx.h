@@ -28,6 +28,8 @@ class INET_API Tx : public SimpleModule, public ITx
     IRx *rx = nullptr;
     Packet *frame = nullptr;
     cMessage *endIfsTimer = nullptr;
+    cMessage *startDeadlineTimer = nullptr;
+    simtime_t transmissionStartTime;
     bool transmitting = false;
     bool updateLocalNav = false;
 
@@ -35,13 +37,16 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    void clearPendingTransmission();
 
   public:
     Tx() {}
     ~Tx();
 
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback) override;
-    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback) override;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback, int64_t *requestId = nullptr) override;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback, int64_t *requestId = nullptr) override;
+    virtual bool cancelPendingTransmission(int64_t requestId) override;
+    virtual bool startPendingTransmission(int64_t requestId) override;
     [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
     virtual void radioTransmissionFinished() override;
 };

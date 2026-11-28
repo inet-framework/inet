@@ -1,0 +1,3 @@
+IEEE 802.11 Tx identifies requests and reports missed radio starts
+
+IEEE 802.11 Tx identifies each submission before checking radio readiness. A delayed notification for a withdrawn request cannot start a replacement. Custom ITx implementations must support identified start and withdrawal and report radio handoff and missed starts. A MAC that prepares its radio for a deferred request must handle withdrawal so it can restore receiver mode. HCF records transmitted Block Ack DATA at radio handoff, so inactivity expiry preserves a queued frame whose start was missed.

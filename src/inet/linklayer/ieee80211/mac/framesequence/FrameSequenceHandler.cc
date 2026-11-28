@@ -76,6 +76,15 @@ void FrameSequenceHandler::transmissionComplete()
     }
 }
 
+void FrameSequenceHandler::transmissionWithdrawn()
+{
+    ASSERT(isSequenceRunning());
+    auto step = context->getLastStep();
+    ASSERT(step->getType() == IFrameSequenceStep::Type::TRANSMIT);
+    step->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+    finishFrameSequence();
+}
+
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
 {
     EV_INFO << "Starting frame sequence.\n";

@@ -282,6 +282,13 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     }
 }
 
+void Dcf::transmissionStartFailed()
+{
+    Enter_Method_Silent();
+    if (frameSequenceHandler->isSequenceRunning())
+        frameSequenceHandler->transmissionWithdrawn();
+}
+
 bool Dcf::hasFrameToTransmit()
 {
     return !channelAccess->getPendingQueue()->isEmpty() || channelAccess->getInProgressFrames()->hasInProgressFrames();

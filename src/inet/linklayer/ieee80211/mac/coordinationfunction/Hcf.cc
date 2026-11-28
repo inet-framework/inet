@@ -604,13 +604,6 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
             auto packet = frames->getFrames(i);
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
             bool transmitted = data && edcaf->getAckHandler()->getQoSDataAckStatus(data) != QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED;
-            if (data && frameSequenceHandler->isSequenceRunning()) {
-                auto context = frameSequenceHandler->getContext();
-                for (int j = 0; j < context->getNumSteps(); j++) {
-                    if (auto step = dynamic_cast<ITransmitStep *>(context->getStep(j)))
-                        transmitted |= step->getFrameToTransmit() == packet;
-                }
-            }
             // IEEE Std 802.11-2024, 11.5.3.4: the next MPDU must follow the highest transmitted sequence.
             // Include unsent fragments even if ACK processing already removed an earlier fragment.
             // Local allocation indices preserve order across gaps and wire sequence wraparound.
@@ -716,8 +709,28 @@ void Hcf::invalidateActions(MacAddress peer, Tid tid, bool originator)
     }
 }
 
+TransmitStep *Hcf::getOriginatorTransmitStep() const
+{
+    if (finishingSequence || originatorTxRequestId == -1 || !frameSequenceHandler->isSequenceRunning())
+        return nullptr;
+    return dynamic_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+}
+
+bool Hcf::withdrawOriginatorTransmission()
+{
+    if (!tx->cancelPendingTransmission(originatorTxRequestId))
+        return false;
+    originatorTxRequestId = -1;
+    // During submission, transmitFrame reports refusal back to the frame-sequence handler.
+    if (submittingOriginatorFrame)
+        return false;
+    frameSequenceHandler->transmissionWithdrawn();
+    return true;
+}
+
 void Hcf::retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset)
 {
+    bool retiredOriginatorAgreement = false;
     if (!originator)
         rx->invalidateInterframeHistory();
     if (originator) {
@@ -725,7 +738,8 @@ void Hcf::retireAgreement(MacAddress peer, Tid tid, bool originator, bool associ
         invalidateActions(peer, tid, originator);
         discardAgreementData(peer, tid, associationReset, agreement ? agreement->getHighestTransmittedDataIndex() : -1);
         if (agreement) {
-            if (agreement->getIsAddbaResponseReceived())
+            retiredOriginatorAgreement = agreement->getIsAddbaResponseReceived();
+            if (retiredOriginatorAgreement)
                 emit(blockAckAgreementDeletedSignal, agreement);
             delete agreement;
         }
@@ -740,6 +754,15 @@ void Hcf::retireAgreement(MacAddress peer, Tid tid, bool originator, bool associ
         }
     }
     scheduleInactivityTimer();
+    if (retiredOriginatorAgreement) {
+        if (auto step = getOriginatorTransmitStep()) {
+            auto header = dynamicPtrCast<const Ieee80211DataHeader>(step->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>());
+            // Tx retained the old ACK policy. A later exchange selects the policy again.
+            if (header && header->getType() == ST_DATA_WITH_QOS && header->getAckPolicy() == BLOCK_ACK &&
+                header->getReceiverAddress() == peer && header->getTid() == tid)
+                withdrawOriginatorTransmission();
+        }
+    }
 }
 
 void Hcf::beginTeardown(MacAddress peer, Tid tid, bool originator, int reasonCode)
@@ -827,6 +850,16 @@ void Hcf::resetPeer(MacAddress peer)
         invalidateActions(peer, tid, false);
         discardAgreementData(peer, tid, true);
     }
+    bool cancelled = false;
+    if (auto step = getOriginatorTransmitStep()) {
+        auto context = frameSequenceHandler->getContext();
+        auto rts = dynamic_cast<RtsTransmitStep *>(step);
+        auto original = rts ? rts->getProtectedFrame() : step->getFrameToTransmit();
+        auto header = original->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header) && header->getReceiverAddress() == peer &&
+            !context->getInProgressFrames()->containsFrame(original))
+            cancelled = withdrawOriginatorTransmission();
+    }
     for (auto agreement : recipients)
         sendUp(recipientDataService->retireAgreement(agreement, true));
     recipientDataService->clearPeer(peer);
@@ -842,6 +875,8 @@ void Hcf::resetPeer(MacAddress peer)
     handlingAgreementAction = previous;
     scheduleInactivityTimer();
     scheduleAddbaResponseTimer();
+    if (cancelled && !previous)
+        updateContention();
 }
 
 void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details)
@@ -1301,11 +1336,24 @@ bool Hcf::dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header)
     return false;
 }
 
+void Hcf::transmissionStarted(const Packet& packet)
+{
+    Enter_Method_Silent();
+    if (originatorBlockAckAgreementHandler) {
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(packet.peekAtFront<Ieee80211MacHeader>())) {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
+            if (agreement && agreement->getIsAddbaResponseReceived())
+                agreement->recordTransmittedData(packet.getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+        }
+    }
+}
+
 void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        originatorTxRequestId = -1;
         auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
         step->setPpduEnd(simTime());
         edcaf->getTxopProcedure()->recordTransmittedDuration(header->getDurationField());
@@ -1316,6 +1364,15 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     else {
         recipientProcessTransmittedControlResponseFrame(packet, header);
         mac->sendDownPendingRadioConfigMsg();
+    }
+}
+
+void Hcf::transmissionStartFailed()
+{
+    Enter_Method_Silent();
+    if (frameSequenceHandler->isSequenceRunning()) {
+        originatorTxRequestId = -1;
+        frameSequenceHandler->transmissionWithdrawn();
     }
 }
 
@@ -2331,14 +2388,11 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         RateSelection::emitDatarateSelected(this, header, mode);
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
-        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
-        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            if (originatorBlockAckAgreementHandler) {
-                auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
-                if (agreement && agreement->getIsAddbaResponseReceived())
-                    agreement->recordTransmittedData(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
-            }
-        }
+        submittingOriginatorFrame = true;
+        tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this, &originatorTxRequestId);
+        submittingOriginatorFrame = false;
+        if (originatorTxRequestId == -1)
+            return false;
         auto action = ownedActions.find(packet->getId());
         if (action != ownedActions.end()) {
             action->second.attempted = true;
