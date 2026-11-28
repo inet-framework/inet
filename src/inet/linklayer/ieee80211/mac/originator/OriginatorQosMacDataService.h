@@ -53,6 +53,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
 
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
+    std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation, const std::function<bool(b)>& fitsMpdu) override;
     virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
@@ -65,6 +66,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const override;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const override;
     virtual bool hasAMsduAggregation() const override { return aMsduAggregationPolicy != nullptr; }
+    virtual std::unique_ptr<Packet> previewBasicFirstMpdu(Packet *packet) override;
+    virtual std::unique_ptr<std::vector<Packet *>> commitBasicFrames(PreparedQosData& preparation) override;
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) override;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const override;
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) override;

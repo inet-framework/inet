@@ -60,6 +60,11 @@ void OriginatorQosMacDataService::initialize()
 
 std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation)
 {
+    return prepareFrame(queue, allowAggregation, {});
+}
+
+std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation, const std::function<bool(b)>& fitsMpdu)
+{
     Enter_Method("prepareFrame");
     if (expireFrames)
         expireFrames();
@@ -75,14 +80,14 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     auto module = dynamic_cast<cModule *>(queue);
     auto head = queue->canPullPacket(module ? module->gate("out") : nullptr);
     if (allowAggregation && selected == head && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(selected))) {
-        std::unique_ptr<std::vector<Packet *>> proposed(aMsduAggregationPolicy->computeAggregateFrames(queue));
+        std::unique_ptr<std::vector<Packet *>> proposed(aMsduAggregationPolicy->computeAggregateFrames(queue, fitsMpdu));
         bool valid = proposed && !proposed->empty() && proposed->front() == selected;
         std::set<Packet *> unique;
         if (proposed) {
             for (auto frame : *proposed) {
                 bool present = false;
-                for (int i = 0; i < queue->getNumPackets(); i++)
-                    present |= queue->getPacket(i) == frame;
+                for (int i = 0; !present && i < queue->getNumPackets(); i++)
+                    present = queue->getPacket(i) == frame;
                 valid &= present && unique.insert(frame).second &&
                     (!extractionEligible || extractionEligible(frame)) && (!aMsduPermitted || aMsduPermitted(frame));
             }
@@ -107,6 +112,35 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     header->setSequenceNumber(getNextSequenceNumber(header->getReceiverAddress(), header->getTid()));
     result->packet->insertAtFront(header);
     return result;
+}
+
+std::unique_ptr<Packet> OriginatorQosMacDataService::previewBasicFirstMpdu(Packet *packet)
+{
+    Enter_Method("previewBasicFirstMpdu");
+    if (fragmentationPolicy && (!fragmentationPermitted || fragmentationPermitted(packet))) {
+        auto sizes = fragmentationPolicy->computeFragmentSizes(packet);
+        if (!sizes.empty()) {
+            std::unique_ptr<std::vector<Packet *>> fragments(fragmentation->fragmentFrame(packet->dup(), sizes));
+            auto first = std::unique_ptr<Packet>(fragments->front());
+            for (size_t i = 1; i < fragments->size(); ++i)
+                delete (*fragments)[i];
+            return first;
+        }
+    }
+    return nullptr;
+}
+
+std::unique_ptr<std::vector<Packet *>> OriginatorQosMacDataService::commitBasicFrames(PreparedQosData& preparation)
+{
+    Enter_Method("commitBasicFrames");
+    auto packet = commitPreparedFrame(preparation);
+    if (!packet)
+        return nullptr;
+    if (fragmentationPolicy && (!fragmentationPermitted || fragmentationPermitted(packet))) {
+        if (auto fragments = fragmentIfNeeded(packet))
+            return std::unique_ptr<std::vector<Packet *>>(fragments);
+    }
+    return std::make_unique<std::vector<Packet *>>(1, packet);
 }
 
 bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& preparation, simtime_t start) const

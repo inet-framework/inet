@@ -3,6 +3,9 @@ Check reversible DATA preparation and Compressed TXOP admission through HCF, EDC
 The fixture supplies accepted agreements and peer capabilities. It injects timed CTS, ACK, and Block Ack responses at HCF.
 Service cases check queue ownership, deadlines, sequence assignment, and allocation before refusal and after commitment.
 Runtime cases check ordinary fallback, one mode decision, RTS recovery, expiry, capability loss, and mode-set changes.
+The Basic fallback control alternates 24 and 6 Mbps so an opening aggregate loses admission before RTS.
+At the first fallback RTS, only the first MSDU is numbered and the second remains queued.
+The first DATA preserves that first payload. The next actual rate decision selects its ACK policy.
 Ordinary commitment preserves elapsed queueing time and one queue pull; retransmission retains that measurement without another pull.
 This fixture does not establish association behavior. The infrastructure exchange fixture supplies that evidence.
 
@@ -50,16 +53,16 @@ Define_Module(AdmissionService);
 
 class AdmissionRecovery : public QosRecoveryProcedure {
   public:
-    int controls = 0;
+    int edcaFailures = 0;
     int dataFailures = 0;
     int numberedRtsFailures = 0;
     std::vector<int> qsrcHistory;
-    int qsrc() const { return stationShortRetryCounter; }
+    int qsrc() const { return cwCalculator->getEdcaRetryCount(); }
     size_t numberedCounters() const { return shortRetryCounter.size() + longRetryCounter.size(); }
-    void controlFrameTransmissionFailed() override {
-        controls++;
-        QosRecoveryProcedure::controlFrameTransmissionFailed();
-        qsrcHistory.push_back(stationShortRetryCounter);
+    void edcaTransmissionFailed() override {
+        edcaFailures++;
+        QosRecoveryProcedure::edcaTransmissionFailed();
+        qsrcHistory.push_back(qsrc());
     }
     void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override {
         dataFailures++;
@@ -128,6 +131,7 @@ class AdmissionHcf : public Hcf {
     std::vector<Packet *> sourcePackets;
     std::vector<cObject *> sourceOwners;
     std::vector<simtime_t> deadlines;
+    Ptr<const ByteCountChunk> firstPayload;
     int data = 0;
     int scopedData = 0;
     int rts = 0;
@@ -200,6 +204,8 @@ class AdmissionHcf : public Hcf {
         packet->setArrivalTime(simTime());
         processUpperFrame(packet, header);
         if (record) {
+            if (sourcePackets.empty())
+                firstPayload = packet->peekDataAt<ByteCountChunk>(header->getChunkLength(), B(bytes));
             sourcePackets.push_back(packet);
             sourceIds.push_back(packet->getId());
             deadlines.push_back(lifetime()->getDeadline(packet));
@@ -334,6 +340,13 @@ class AdmissionHcf : public Hcf {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto context = frameSequenceHandler->getContext();
         if (auto protectedRts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+            if (scenario() == 15) {
+                auto protectedFrame = check_and_cast<RtsTransmitStep *>(context->getLastStep())->getProtectedFrame();
+                if (!frames()->containsFrame(protectedFrame) || protectedFrame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent())
+                    throw cRuntimeError("The Basic fallback RTS must protect a numbered single MSDU");
+                if (rts == 0 && (service()->allocations() != 1 || queue()->getNumPackets() != 1 || queue()->getPacket(0) != sourcePackets[1]))
+                    throw cRuntimeError("The first fallback RTS must leave the second source queued");
+            }
             auto state = context->getQoSContext()->preparedData.get();
             if (state) {
                 if (state->preparation) {
@@ -380,6 +393,11 @@ class AdmissionHcf : public Hcf {
             scopedData += ordinary->getTid() == 5 && !ordinary->getReceiverAddress().isMulticast();
             aggregates += ordinary->getAMsduPresent();
             queriesAtData.push_back(control()->queries);
+            if (scenario() == 15 && ordinary->getAMsduPresent())
+                throw cRuntimeError("The alternating-rate Basic fallback must send one MSDU");
+            if (scenario() == 15 && data == 1 &&
+                packet->peekDataAt<ByteCountChunk>(ordinary->getChunkLength(), firstPayload->getChunkLength())->getChunkId() != firstPayload->getChunkId())
+                throw cRuntimeError("The first Basic fallback DATA must carry the original first MSDU payload");
             if (scenario() != 15 && scenario() != 16 && ordinary->getTid() == 5 && !ordinary->getReceiverAddress().isMulticast()) {
                 auto state = context->getQoSContext()->preparedData.get();
                 ASSERT(state && frames()->containsFrame(packet) && state->dataMode == mode);
@@ -552,14 +570,14 @@ class AdmissionTest : public cSimpleModule {
                     ASSERT(hcf->lifetime()->getDeadline(hcf->queue()->getPacket(0)) == hcf->deadlines[1]);
                 }
                 if (scenario == 7 || scenario == 8) {
-                    ASSERT(recovery->controls == (scenario == 7 ? 1 : 2));
+                    ASSERT(recovery->edcaFailures == (scenario == 7 ? 1 : 2));
                     ASSERT(recovery->numberedRtsFailures == 0);
                     ASSERT(hcf->queriesAtData.front() == (scenario == 7 ? 2 : 3));
                     ASSERT(recovery->qsrcHistory[0] == 1);
                     if (scenario == 8) ASSERT(recovery->qsrcHistory[1] == 0);
                 }
                 else
-                    ASSERT(recovery->controls == 0);
+                    ASSERT(recovery->edcaFailures == recovery->dataFailures + recovery->numberedRtsFailures);
                 if (scenario == 11)
                     ASSERT(hcf->queriesAtData.front() == 1 && hcf->mutation == 1);
                 if (scenario == 13) {
@@ -570,7 +588,11 @@ class AdmissionTest : public cSimpleModule {
                 }
                 if (scenario == 14)
                     ASSERT(hcf->data == 1 && hcf->aggregates == 1 && hcf->queriesAtData.front() == 1);
-                if (scenario == 15 || scenario == 16)
+                if (scenario == 15) {
+                    if (hcf->data == 0 || hcf->aggregates != 0)
+                        throw cRuntimeError("The Basic fallback must transmit a single MSDU");
+                }
+                if (scenario == 16)
                     ASSERT(hcf->service()->preparations == 0);
                 if (scenario == 17) {
                     ASSERT(hcf->data == 2 && hcf->aggregates == 0);

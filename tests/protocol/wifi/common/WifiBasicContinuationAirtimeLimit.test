@@ -1,0 +1,63 @@
+%description:
+When a queued aggregate exceeds the remaining TXOP airtime, a 1,066-byte single-MSDU MPDU continues one SIFS after the Basic Block Ack.
+
+%file: BasicContinuationAirtimeLimit.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(wifi_basic_continuation_airtime_limit)
+{
+    auto basicData = [] {
+        return on("sta1.wlan[0].mac").signal("packetSentToLower").filterEvent([](const MatchContext& context) {
+            auto header = dynamicPtrCast<const Ieee80211DataHeader>(context.event.packet->peekAtFront<Ieee80211MacHeader>());
+            return header && header->getAckPolicy() == BLOCK_ACK;
+        });
+    };
+    return ProtocolTest("wifi_basic_continuation_airtime_limit")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211AddbaResponse)").describe("the station obtains a Basic agreement").within(1.019))
+        .once(basicData()
+            .describe("the station sends the first Basic DATA").within(0.03))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("has(Ieee80211BasicBlockAckReq)").describe("the station requests feedback").within(0.002))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211BasicBlockAck)").capture("continuationTime", [](const PacketEvent& event) {
+                auto mode = event.packet->getTag<physicallayer::Ieee80211ModeInd>()->getMode();
+                return cValue((event.time + mode->getSifsTime()).dbl());
+            }).describe("the station receives Block Ack").within(0.001))
+        .once(basicData().assertEvent([](const MatchContext& context) {
+            auto packet = context.event.packet;
+            auto header = packet->peekAtFront<Ieee80211DataHeader>();
+            auto delta = context.event.time - SimTime(context.get("continuationTime").doubleValue());
+            return !header->getAMsduPresent() && packet->getByteLength() == 1066 &&
+                delta >= SimTime(-2, SIMTIME_NS) && delta <= SimTime(2, SIMTIME_NS);
+        }).describe("the single MSDU fits and continues after SIFS").within(0.00003));
+}
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_continuation_airtime_limit"
+*.sta1.numApps = 2
+*.sta1.app[0].stopTime = 1.008s
+*.sta1.app[1].typename = "UdpBasicApp"
+*.sta1.app[1].destAddresses = "sta2"
+*.sta1.app[1].destPort = 5000
+*.sta1.app[1].messageLength = 1000B
+*.sta1.app[1].sendInterval = 0.05ms
+# Queue several successors while the first Basic DATA is on the air.
+*.sta1.app[1].startTime = 1.004s
+*.sta1.app[1].stopTime = 1.0046s
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 4ms
+**.hcf.originatorAckPolicy.blockAckReqThreshold = 1
+**.hcf.rtsPolicy.rtsThreshold = 100B
+**.wlan[*].bitrate = 6Mbps
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = -1
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_continuation_airtime_limit: PASS

@@ -35,6 +35,7 @@ void Edcaf::initialize(int stage)
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         recoveryProcedure = check_and_cast<QosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
+        edcaRetryLimit = recoveryProcedure->par("shortRetryLimit");
         mgmtAndNonQoSRecoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("mgmtAndNonQoSRecoveryProcedure"));
         ackHandler = check_and_cast<QosAckHandler *>(getSubmodule("ackHandler"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
@@ -49,6 +50,7 @@ void Edcaf::initialize(int stage)
         WATCH(cw);
         WATCH(cwMin);
         WATCH(cwMax);
+        WATCH(edcaRetryCount);
         WATCH_EXPR("accessCategory", printAccessCategory(ac));
         WATCH_EXPR("contentionState", owning ? "Owning" : contention->isContentionInProgress() ? "Contending" : "Idle");
     }
@@ -56,6 +58,10 @@ void Edcaf::initialize(int stage)
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
+    }
+    else if (stage == INITSTAGE_LAST) {
+        contentionWindowSignalReady = true;
+        emit(IRecoveryProcedure::contentionWindowChangedSignal, cw);
     }
 }
 
@@ -75,26 +81,42 @@ void Edcaf::calculateTimingParameters()
         cwMin = getCwMin(ac, modeSet->getCwMin());
     if (cwMax == -1)
         cwMax = getCwMax(ac, modeSet->getCwMax(), modeSet->getCwMin());
-    cw = cwMin;
+    updateContentionWindow();
     EV_DEBUG << "Contention window parameters are initialized: cw = " << cw << ", cwMin = " << cwMin << ", cwMax = " << cwMax << std::endl;
 }
 
 void Edcaf::incrementCw()
 {
     Enter_Method("incrementCw");
-    int newCw = 2 * cw + 1;
-    if (newCw > cwMax)
-        cw = cwMax;
-    else
-        cw = newCw;
-    EV_DEBUG << "Contention window is incremented: cw = " << cw << std::endl;
+    // IEEE Std 802.11-2024, 10.23.2.2: one QSRC for this access category.
+    edcaRetryCount = edcaRetryCount < edcaRetryLimit ? edcaRetryCount + 1 : 0;
+    updateContentionWindow();
 }
 
 void Edcaf::resetCw()
 {
     Enter_Method("resetCw");
-    cw = cwMin;
+    edcaRetryCount = 0;
+    setContentionWindow(cwMin);
     EV_DEBUG << "Contention window is reset: cw = " << cw << std::endl;
+}
+
+void Edcaf::setContentionWindow(int window)
+{
+    if (cw != window) {
+        cw = window;
+        if (contentionWindowSignalReady)
+            emit(IRecoveryProcedure::contentionWindowChangedSignal, cw);
+    }
+}
+
+void Edcaf::updateContentionWindow()
+{
+    // IEEE Std 802.11-2024, 10.23.2.2: derive CW from CWmin and QSRC.
+    int64_t window = cwMin;
+    for (int i = 0; i < edcaRetryCount && window < cwMax; ++i)
+        window = 2 * window + 1;
+    setContentionWindow(std::min<int64_t>(window, cwMax));
 }
 
 int Edcaf::getAifsNumber(AccessCategory ac)

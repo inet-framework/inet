@@ -25,11 +25,15 @@ class INET_API IOriginatorQoSAckPolicy
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;
     virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
+    virtual simtime_t getNextBlockAckReqDeadline(InProgressFrames *frames, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const = 0;
+    virtual bool isBlockAckPolicyEligibleFrame(b length, const Ptr<const Ieee80211DataHeader>& header) const = 0;
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
     // Predict the request at DATA completion in the active TXOP, without changing state.
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParametersAfterData(InProgressFrames *inProgressFrames,
             const TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements, Packet *data, simtime_t dataEnd) const = 0;
+    virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParametersForPreview(InProgressFrames *frames,
+            IOriginatorBlockAckAgreementHandler *agreements, Packet *candidate, Packet *precedingData, simtime_t completion) const = 0;
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const = 0;
     virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const = 0;

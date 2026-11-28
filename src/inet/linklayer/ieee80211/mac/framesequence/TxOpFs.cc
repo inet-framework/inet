@@ -45,7 +45,8 @@ int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceCont
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
+    if (context->hasOpeningBasicBarRetry() ||
+        qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 2;
     auto frameToTransmit = context->getDataFrameToTransmit();
     const auto& macHeader = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
@@ -56,7 +57,13 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
         OriginatorBlockAckAgreement *agreement = nullptr;
         if (context->getQoSContext()->blockAckAgreementHandler)
             agreement = context->getQoSContext()->blockAckAgreementHandler->getAgreement(dataHeaderToTransmit->getReceiverAddress(), dataHeaderToTransmit->getTid());
-        auto ackPolicy = context->getQoSContext()->ackPolicy->computeAckPolicy(frameToTransmit, dataHeaderToTransmit, agreement);
+        auto ackPolicy = BLOCK_ACK;
+        // HCF has already checked the ACK policy and airtime of the reversible opening.
+        if (!qos->openingBasicData || qos->openingBasicData->packet.get() != frameToTransmit) {
+            ackPolicy = qos->ackPolicy->computeAckPolicy(frameToTransmit, dataHeaderToTransmit, agreement);
+            if (ackPolicy == BLOCK_ACK && context->getNumSteps() == 0 && qos->basicOpeningFits && !qos->basicOpeningFits(frameToTransmit))
+                ackPolicy = NORMAL_ACK;
+        }
         auto updatedHeader = frameToTransmit->removeAtFront<Ieee80211DataHeader>();
         updatedHeader->setAckPolicy(ackPolicy);
         frameToTransmit->insertAtFront(updatedHeader);
@@ -72,11 +79,17 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
 bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
     auto protectedFrame = context->getDataFrameToTransmit();
+    if (protectedFrame->getId() == context->getQoSContext()->plannedBasicDataId)
+        return false; // The previous exchange reserved a direct DATA transmission.
+    auto header = protectedFrame->peekAtFront<Ieee80211MacHeader>();
+    auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+    if (context->getNumSteps() == 0 && context->getQoSContext()->basicOpeningFits && data && data->getAckPolicy() == BLOCK_ACK)
+        return true;
     // IEEE Std 802.11-2024, 10.23.2.9(a)(1) and (c)(1): a zero-limit fragment burst shares one protection exchange.
     if (context->getQoSContext()->txopProcedure->getLimit() == 0 &&
         context->isFragmentContinuation(protectedFrame, context->getNumSteps()))
         return false;
-    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekAtFront<Ieee80211MacHeader>());
+    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, header);
 }
 
 bool TxOpFs::isBlockAckReqRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)

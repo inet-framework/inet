@@ -72,6 +72,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *inactivityTimer = nullptr;
     cMessage *dataLifetimeTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
+    cMessage *blockAckReqTimer = nullptr;
+    cMessage *basicBlockAckIdleTimer = nullptr;
+    simtime_t basicBlockAckIdleGrace;
+    std::map<std::pair<MacAddress, Tid>, simtime_t> basicBlockAckIdleDeadlines;
+    int64_t basicBlockAckReqRetryLimit = 0;
     struct OwnedAction {
         MacAddress peer;
         Tid tid = -1;
@@ -157,6 +162,14 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);
     std::pair<simtime_t, simtime_t> estimateSingleProtectionExchange(Packet *candidate, TxopProcedure *txop,
             OriginatorBlockAckAgreement *agreement);
+    simtime_t reserveBasicDataContinuation(const FrameSequenceContext *context, Packet *candidate,
+            const MacAddress& peer, Tid tid, simtime_t budget, simtime_t start, Packet *precedingData);
+    void commitPostBarData(const FrameSequenceContext *context, const Ptr<const Ieee80211BasicBlockAck>& response);
+    simtime_t computeBasicOpeningDataBudget(const FrameSequenceContext *context, const Ptr<const Ieee80211DataHeader>& data);
+    void prepareBasicOpeningData(const FrameSequenceContext *context);
+    Packet *commitBasicOpeningData(const FrameSequenceContext *context, bool receivedCts);
+    simtime_t leaveBasicFeedbackAirtime(const FrameSequenceContext *context, Packet *candidate,
+            simtime_t budget, simtime_t minimumDataAirtime, simtime_t completion, Packet *precedingData);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
@@ -176,9 +189,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
     void updateAgreementProcedures();
     void advanceOriginatorWindows();
+    void prunePendingBasicBarRetries();
     void completeTransfers();
+    void scheduleBasicBlockAckIdleTimer();
     void updateContention();
     void scheduleAddbaResponseTimer();
+    void scheduleBlockAckReqTimer();
+    bool canSendBasicFragmentBeforeFeedback(Edcaf *edcaf, Packet *candidate, simtime_t completion, simtime_t expiry);
     void actionTerminated(Packet *packet, bool acknowledged);
     void invalidateActions(MacAddress peer, Tid tid, bool originator);
     void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);

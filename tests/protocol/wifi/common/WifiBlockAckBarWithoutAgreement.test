@@ -19,15 +19,22 @@ class LifecycleBarMac : public Ieee80211Mac
     void handleLowerPacket(Packet *frame) override {
         auto ba = dynamicPtrCast<const Ieee80211BasicBlockAck>(frame->peekAtFront<Ieee80211MacHeader>());
         if (testBarOutstanding && ba && ba->getReceiverAddress() == mib->address) {
-            ASSERT(rx->lowerFrameReceived(frame));
+            if (!rx->lowerFrameReceived(frame))
+                throw cRuntimeError("The control Block Ack failed reception");
             take(frame);
             ASSERT(ba->getTidInfo() == 6);
             testBarOutstanding = false;
             emit(registerSignal("testBarResponseReceived"), 1L);
             delete frame;
         }
-        else
+        else {
+            auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(frame->peekAtFront<Ieee80211MacHeader>());
             Ieee80211Mac::handleLowerPacket(frame);
+            if (response && response->getReceiverAddress() == mib->address && response->getTid() == 6 &&
+                lifecycleHcf(getSimulation()->getSystemModule(), "sta1")->hasOriginator(response->getTransmitterAddress(), 6))
+                // Keep real queued DATA pending until the stimulus probes the established agreement.
+                rx->setContentionBlocked(true);
+        }
     }
 };
 Define_Module(LifecycleBarMac);
@@ -36,28 +43,19 @@ class LifecycleBarStimulus : public cSimpleModule, public ITx::ICallback
 {
   protected:
     void initialize() override {
-        if (par("control").boolValue())
-            scheduleAt(SimTime(1002, SIMTIME_MS), new cMessage("hold-contention"));
         scheduleAt(SimTime(1100, SIMTIME_MS), new cMessage("bar"));
     }
     void handleMessage(cMessage *message) override {
-        bool hold = message->isName("hold-contention");
         delete message;
         auto network = getParentModule();
-        if (hold) {
-            // Retained queued DATA prevents completion DELBA before the control BAR.
-            auto mac = network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac");
-            check_and_cast<IRx *>(mac->getSubmodule("rx"))->setContentionBlocked(true);
-            return;
-        }
         bool control = par("control");
         Tid tid = control ? 6 : 5;
         auto sender = lifecycleHcf(network, "sta1");
         auto recipient = lifecycleHcf(network, "ap");
         auto peer = lifecycleMib(network, "ap")->address;
         auto station = lifecycleMib(network, "sta1")->address;
-        ASSERT(sender->hasOriginator(peer, tid) == control);
-        ASSERT(recipient->hasRecipient(station, tid) == control);
+        if (sender->hasOriginator(peer, tid) != control || recipient->hasRecipient(station, tid) != control)
+            throw cRuntimeError("The BAR probe requires matching agreement state at both stations");
         if (control)
             check_and_cast<LifecycleBarMac *>(network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac"))->testBarOutstanding = true;
         sender->sendTestBar(peer, tid, this);

@@ -9,6 +9,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 
+#include <algorithm>
 #include <tuple>
 
 namespace inet {
@@ -49,18 +50,34 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
     return selectBlockAckRequest(frames, agreements, data, dataEnd);
 }
 
+simtime_t OriginatorQosAckPolicy::getNextBlockAckReqDeadline(InProgressFrames *frames, IOriginatorBlockAckAgreementHandler *agreements) const
+{
+    auto deadline = SIMTIME_MAX;
+    selectBlockAckRequest(frames, agreements, nullptr, simTime(), nullptr, &deadline);
+    return deadline;
+}
+
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::selectBlockAckRequest(InProgressFrames *frames,
-        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime) const
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *transmittingData, simtime_t selectionTime, Packet *precedingData,
+        simtime_t *nextDeadline) const
 {
     using Id = std::pair<MacAddress, Tid>;
     std::map<Id, std::vector<Packet *>> groups;
     auto outstanding = frames->getOutstandingFrames(selectionTime);
+    bool preview = transmittingData && !frames->containsFrame(transmittingData);
+    auto sequenceOf = [=](Packet *frame) {
+        return preview && frame == transmittingData ? frames->getCandidateSequenceNumber(frame) :
+            frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+    };
+    if (precedingData && !frames->isExpired(precedingData, selectionTime) &&
+        std::find(outstanding.begin(), outstanding.end(), precedingData) == outstanding.end())
+        outstanding.push_back(precedingData);
     if (transmittingData && !frames->isExpired(transmittingData, selectionTime))
         outstanding.push_back(transmittingData);
     for (auto frame : outstanding) {
         auto header = frame->peekAtFront<Ieee80211DataHeader>();
         auto agreement = agreements ? agreements->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
-        if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(header->getSequenceNumber()))
+        if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(sequenceOf(frame)))
             groups[{header->getReceiverAddress(), header->getTid()}].push_back(frame);
     }
     if (groups.empty())
@@ -72,16 +89,42 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
     for (const auto& entry : groups) {
         const auto& id = entry.first;
         auto agreement = agreements->getAgreement(id.first, id.second);
-        // INET BAR policy defers a short group only for DATA within that group's window.
-        if ((int)entry.second.size() < blockAckReqThreshold && data &&
-            data->getReceiverAddress() == id.first && data->getTid() == id.second &&
-            agreement->containsSequence(frames->getCandidateSequenceNumber(candidate)))
-            continue;
+        if ((int)entry.second.size() < blockAckReqThreshold) {
+            if (preview)
+                continue;
+            bool sameFlow = data && data->getReceiverAddress() == id.first && data->getTid() == id.second;
+            bool windowAllowsData = sameFlow && agreement->containsSequence(frames->getCandidateSequenceNumber(candidate));
+            auto maxDelay = frames->getBlockAckReqMaxDelay();
+            if (maxDelay == SIMTIME_ZERO) {
+                if (windowAllowsData)
+                    continue;
+            }
+            else if (!sameFlow || windowAllowsData) {
+                auto deadline = SIMTIME_MAX;
+                auto expiration = agreement->getExpirationTime();
+                for (auto frame : entry.second) {
+                    auto since = frame == transmittingData ? selectionTime : frames->getBlockAckOutstandingSince(frame);
+                    deadline = std::min(deadline, since == SIMTIME_MAX ? selectionTime : since + maxDelay);
+                    expiration = std::min(expiration, frames->getLifetimeDeadline(frame));
+                }
+                // Once the batch timer fires, even an uncontested grant needs AIFS and a BAR/bitmap exchange.
+                bool deadlineFits = deadline < expiration &&
+                    (expiration == SIMTIME_MAX || frames->getBasicFeedbackAccessDuration(id.first, id.second) < expiration - deadline);
+                if (deadline > selectionTime && deadlineFits) {
+                    if (nextDeadline)
+                        *nextDeadline = std::min(*nextDeadline, deadline);
+                    continue;
+                }
+                if (windowAllowsData && deadline > selectionTime && !deadlineFits &&
+                    frames->canDeferBasicFeedback(candidate, selectionTime, expiration))
+                    continue;
+            }
+        }
         auto start = agreement->getStartingSequenceNumber();
         int oldestOffset = -1;
         simtime_t arrival = SIMTIME_MAX;
         for (auto frame : entry.second) {
-            auto sequence = frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+            auto sequence = sequenceOf(frame);
             int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
             if (oldestOffset == -1 || offset < oldestOffset) {
                 oldestOffset = offset;
@@ -97,6 +140,12 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::select
         }
     }
     return result;
+}
+
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParametersForPreview(InProgressFrames *frames,
+        IOriginatorBlockAckAgreementHandler *agreements, Packet *candidate, Packet *precedingData, simtime_t completion) const
+{
+    return selectBlockAckRequest(frames, agreements, candidate, completion, precedingData);
 }
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
@@ -117,7 +166,12 @@ AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<con
 
 bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const
 {
-    return header->getType() == ST_DATA_WITH_QOS && packet->getByteLength() < maxBlockAckPolicyFrameLength;
+    return isBlockAckPolicyEligibleFrame(packet->getDataLength(), header);
+}
+
+bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(b length, const Ptr<const Ieee80211DataHeader>& header) const
+{
+    return header->getType() == ST_DATA_WITH_QOS && length < B(maxBlockAckPolicyFrameLength);
 }
 
 bool OriginatorQosAckPolicy::checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const

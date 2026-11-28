@@ -33,6 +33,10 @@ class INET_API InProgressFrames : public SimpleModule
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
     std::function<bool(Packet *)> transmissionEligible;
+    simtime_t blockAckReqMaxDelay = SIMTIME_ZERO;
+    std::function<simtime_t(const MacAddress&, Tid)> basicFeedbackAccessDuration;
+    std::function<bool(Packet *, simtime_t, simtime_t)> basicFeedbackAirtimeCheck;
+    std::map<int64_t, simtime_t> blockAckOutstandingSince;
 
   protected:
     virtual void initialize(int stage) override;
@@ -46,6 +50,21 @@ class INET_API InProgressFrames : public SimpleModule
     void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler) { lifetimeHandler = handler; }
     void setTransmissionEligibility(std::function<bool(Packet *)> predicate) { transmissionEligible = predicate; }
     bool hasEligibleInProgressFrames() { return hasEligibleFrameToTransmit(); }
+    void setBlockAckReqMaxDelay(simtime_t delay) { blockAckReqMaxDelay = delay; }
+    simtime_t getBlockAckReqMaxDelay() const { return blockAckReqMaxDelay; }
+    void setBasicFeedbackAccessDuration(std::function<simtime_t(const MacAddress&, Tid)> duration) { basicFeedbackAccessDuration = std::move(duration); }
+    simtime_t getBasicFeedbackAccessDuration(const MacAddress& peer, Tid tid) const
+    {
+        return basicFeedbackAccessDuration ? basicFeedbackAccessDuration(peer, tid) : SIMTIME_ZERO;
+    }
+    void setBasicFeedbackAirtimeCheck(std::function<bool(Packet *, simtime_t, simtime_t)> check) { basicFeedbackAirtimeCheck = std::move(check); }
+    bool canDeferBasicFeedback(Packet *candidate, simtime_t now, simtime_t expiry) const
+    {
+        return basicFeedbackAirtimeCheck && basicFeedbackAirtimeCheck(candidate, now, expiry);
+    }
+    void markBlockAckOutstanding(const Packet *packet);
+    simtime_t getBlockAckOutstandingSince(const Packet *packet) const;
+    simtime_t getLifetimeDeadline(const Packet *packet) const;
 
     virtual std::string str() const override;
     virtual void forEachChild(cVisitor *v) override;

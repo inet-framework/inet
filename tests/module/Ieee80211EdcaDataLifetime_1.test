@@ -34,6 +34,12 @@ class LifetimeHcf : public Hcf {
             Packet *last, const Ptr<const Ieee80211MacHeader>& lastHeader, AccessCategory ac) override {
         if (header->getType() == ST_ACK)
             acknowledged++;
+        if (par("checkRtsOnlyRecovery").boolValue() && header->getType() == ST_CTS) {
+            auto owner = edca->getChannelOwner();
+            owner->getRecoveryProcedure()->edcaTransmissionFailed();
+            ASSERT(owner->getEdcaRetryCount() == 1 && owner->getCw() > owner->par("cwMin").intValue());
+            successfulRts++;
+        }
         Hcf::originatorProcessReceivedControlFrame(packet, header, last, lastHeader, ac);
     }
   public:
@@ -41,6 +47,7 @@ class LifetimeHcf : public Hcf {
     int acknowledged = 0;
     int delivered = 0;
     int retriedData = 0;
+    int successfulRts = 0;
 };
 Define_Module(LifetimeHcf);
 
@@ -50,6 +57,7 @@ class EdcaDataLifetimeTest : public cSimpleModule, public cListener {
     std::map<int64_t, simtime_t> acceptedAt;
     int lifetimeDrops = 0;
     int otherDrops = 0;
+    int nextContentionWindow = -1;
 
   public:
     Packet *accept(const char *name, const char *peer = "02:00:00:00:00:02", int bytes = 100) {
@@ -70,6 +78,11 @@ class EdcaDataLifetimeTest : public cSimpleModule, public cListener {
         return packet;
     }
   protected:
+    void receiveSignal(cComponent *source, simsignal_t, intval_t, cObject *) override {
+        auto edcaf = check_and_cast<Edcaf *>(check_and_cast<cModule *>(source)->getParentModule());
+        nextContentionWindow = edcaf->getCw();
+    }
+
     void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *details) override {
         auto packet = check_and_cast<Packet *>(object);
         auto drop = check_and_cast<PacketDropDetails *>(details);
@@ -275,6 +288,18 @@ class EdcaDataLifetimeTest : public cSimpleModule, public cListener {
                 ASSERT(hcf->acceptedData == (scenario == 10 || scenario == 14 ? 0 : 1));
                 ASSERT(hcf->acknowledged == (scenario == 9 || scenario == 10 || scenario == 14 ? 0 : 1));
                 ASSERT(lifetimeDrops == (scenario == 9 || scenario == 10 || scenario == 14 ? 1 : 0));
+                if (scenario == 14) {
+                    // The accepted RTS was the final transmitted PPDU. The next
+                    // contention uses CWmin after that reservation has ended.
+                    ASSERT(hcf->successfulRts == 1);
+                    ASSERT(edcaf->getEdcaRetryCount() == 0 && edcaf->getCw() == edcaf->par("cwMin").intValue());
+                    auto contention = edcaf->getSubmodule("contention");
+                    auto backoffSignal = registerSignal("backoffPeriodGenerated");
+                    contention->subscribe(backoffSignal, this);
+                    accept("next-exchange");
+                    ASSERT(nextContentionWindow == edcaf->par("cwMin").intValue());
+                    contention->unsubscribe(backoffSignal, this);
+                }
             }
         }
         hcf->unsubscribe(packetDroppedSignal, this);
@@ -318,6 +343,7 @@ simple LifetimeArrival extends SimpleModule {
 module LifetimeHcf extends Hcf {
     parameters:
         double testIfs @unit(s) = default(0s);
+        bool checkRtsOnlyRecovery = default(false);
         @class(::inet::ieee80211::LifetimeHcf);
 }
 network EdcaDataLifetimeNetwork {
@@ -357,7 +383,9 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${scenario} == 6 ? 130B : 1500B
 **.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+*.host.wlan[*].mac.hcf.edca.edcaf[*].cwMax = ${scenario} == 14 ? 7 : 0
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+*.host.wlan[*].mac.hcf.checkRtsOnlyRecovery = ${scenario} == 14
 *.host.wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.packetCapacity = ${scenario} == 12 ? 1 : 100
 *.host.wlan[0].address = "02:00:00:00:00:01"
 *.receiver.wlan[0].address = "02:00:00:00:00:02"

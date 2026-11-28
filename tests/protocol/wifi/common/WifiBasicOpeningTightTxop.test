@@ -1,0 +1,219 @@
+%description:
+The nominal two-MSDU Basic opening fits a 2,986 us TXOP, but propagation leaves
+less live time after CTS. Fresh A-MSDU DATA must finish within the positive TXOP
+limit. A legal smaller transmission must still make progress from the queued burst.
+Repeat after losing CTS for the first fresh aggregate and reducing DATA from
+54 to 6 Mbps. The original queue head must still be transmitted.
+Two further runs use a permanently slower CTS. Check delivery of the original
+head under a new RTS when neither MSDU fits, and under the original CTS when
+one fits even though a fresh DATA rate query would choose 6 Mbps.
+
+%extraargs: -r 0..3
+
+%file: BasicOpeningTightTxop.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee8022/Ieee8022SnapHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::protocoltest {
+static int firstDatagramIdentification(const Packet *packet)
+{
+    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    auto offset = header->getChunkLength();
+    if (header->getAMsduPresent())
+        offset += packet->peekDataAt<Ieee80211MsduSubframeHeader>(offset)->getChunkLength();
+    offset += packet->peekDataAt<Ieee8022LlcSnapHeader>(offset)->getChunkLength();
+    return packet->peekDataAt<Ipv4Header>(offset)->getIdentification();
+}
+
+class TightOpeningRateSelection : public QosRateSelection
+{
+  public:
+    void lowerDataMode() { dataFrameMode = modeSet->getMode(bps(6000000)); }
+};
+Define_Module(TightOpeningRateSelection);
+
+class TightOpeningHcf : public BlockAckLifecycleHcf
+{
+  private:
+    SequenceNumberCyclic openingSequence;
+    int openingDatagram = -1;
+    bool rateLowered = false;
+    int burstRts = 0;
+    int64_t openingSourceId = -1;
+
+  protected:
+    void doBuildInside() override
+    {
+        BlockAckLifecycleHcf::doBuildInside();
+        getSubmodule("rateSelection")->deleteModule();
+        cModuleType::get("TightOpeningRateSelection")->create("rateSelection", this)->buildInside();
+    }
+
+    void originatorProcessRtsProtectionFailed(Packet *packet) override
+    {
+        if (par("dropCts").boolValue() && openingSequence.isSpecified() && !rateLowered) {
+            check_and_cast<TightOpeningRateSelection *>(getSubmodule("rateSelection"))->lowerDataMode();
+            rateLowered = true;
+        }
+        BlockAckLifecycleHcf::originatorProcessRtsProtectionFailed(packet);
+    }
+
+    bool transmitFrame(Packet *packet, simtime_t ifs) override
+    {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        bool shortCts = par("shortCts").intValue() != 0;
+        auto context = frameSequenceHandler->getContext();
+        if (auto step = dynamic_cast<RtsTransmitStep *>(context->getLastStep())) {
+            auto frames = context->getInProgressFrames();
+            auto protectedData = dynamicPtrCast<const Ieee80211DataHeader>(step->getProtectedFrame()->peekAtFront<Ieee80211MacHeader>());
+            if (!openingSequence.isSpecified() && protectedData && protectedData->getAMsduPresent() && protectedData->getAckPolicy() == BLOCK_ACK) {
+                openingSequence = frames->getCandidateSequenceNumber(const_cast<Packet *>(step->getProtectedFrame()));
+                openingDatagram = firstDatagramIdentification(step->getProtectedFrame());
+                openingSourceId = frames->peekFrameToTransmit()->getId();
+            }
+            if (shortCts && openingSequence.isSpecified() && ++burstRts == 2) {
+                auto head = frames->peekFrameToTransmit();
+                if (!head || head->getId() != openingSourceId || frames->containsFrame(head) ||
+                    !protectedData || protectedData->getAMsduPresent() || protectedData->getSequenceNumber() != openingSequence)
+                    throw cRuntimeError("The next RTS must protect a single preview of the still-queued head");
+            }
+        }
+        bool single = shortCts && openingSequence.isSpecified() && data && !data->getAMsduPresent() && data->getAckPolicy() == BLOCK_ACK &&
+            data->getSequenceNumber() == openingSequence;
+        const physicallayer::IIeee80211Mode *admittedMode = nullptr;
+        if (single) {
+            admittedMode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            if (par("shortCts").intValue() == 2)
+                check_and_cast<TightOpeningRateSelection *>(getSubmodule("rateSelection"))->lowerDataMode();
+        }
+        bool accepted = BlockAckLifecycleHcf::transmitFrame(packet, ifs);
+        if (accepted && single) {
+            auto cts = check_and_cast<IReceiveStep *>(context->getStepBeforeLast())->getReceivedFrame()->peekAtFront<Ieee80211CtsFrame>();
+            auto sentMode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            if (sentMode != admittedMode || ifs + sentMode->getDuration(packet->getDataLength()) > cts->getDurationField())
+                throw cRuntimeError("Single MSDU must use the admitted mode and fit the received CTS");
+            if (burstRts != (par("shortCts").intValue() == 1 ? 2 : 1))
+                throw cRuntimeError("Unexpected number of RTS attempts for the queue head: %d", burstRts);
+        }
+        if (accepted && data && data->getAMsduPresent() && !data->getRetry()) {
+            auto txop = edca->getChannelOwner()->getTxopProcedure();
+            auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            if (simTime() + ifs + mode->getDuration(packet->getDataLength()) > txop->getStart() + txop->getLimit())
+                throw cRuntimeError("A fresh opening A-MSDU exceeds the positive TXOP limit");
+        }
+        return accepted;
+    }
+
+  public:
+    const SequenceNumberCyclic& getOpeningSequence() const { return openingSequence; }
+    int getOpeningDatagram() const { return openingDatagram; }
+    bool hasLoweredRate() const { return rateLowered; }
+};
+Define_Module(TightOpeningHcf);
+
+static TightOpeningHcf *tightOpeningHcf()
+{
+    auto root = cSimulation::getActiveSimulation()->getSystemModule();
+    return check_and_cast<TightOpeningHcf *>(root->getModuleByPath("sta1.wlan[0].mac.hcf"));
+}
+
+Define_ProtocolTest(wifi_basic_opening_tight_txop)
+{
+    auto test = ProtocolTest("wifi_basic_opening_tight_txop");
+    if (tightOpeningHcf()->par("dropCts").boolValue())
+        test.intercept(tap("radioMedium").from("ap").to("sta1").filterPacket("has(Ieee80211CtsFrame)")
+            .nth(2).drop().describe("lose CTS for the first aggregate after the initial Normal Ack DATA"));
+    test
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211AddbaResponse)")
+            .describe("establish Basic Block Ack before the queued opening burst").within(1.019))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("has(Ieee80211RtsFrame)")
+            .assertEvent([](const MatchContext&) {
+                return tightOpeningHcf()->getOpeningSequence().isSpecified();
+            }).describe("attempt protection for a fresh aggregate").within(0.03))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("has(Ieee80211DataHeader)")
+            .assertEvent([](const MatchContext& c) {
+                auto data = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                auto hcf = tightOpeningHcf();
+                return data->getType() == ST_DATA_WITH_QOS && c.event.packet->getByteLength() <= 2132 &&
+                    data->getSequenceNumber() == hcf->getOpeningSequence() &&
+                    firstDatagramIdentification(c.event.packet) == hcf->getOpeningDatagram() &&
+                    (!hcf->par("dropCts").boolValue() || hcf->hasLoweredRate());
+            }).describe("send a legal opening DATA despite the tight aggregate budget").within(0.03));
+    if (tightOpeningHcf()->par("shortCts").intValue())
+        test.once(on("ap.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("has(Ieee80211DataHeader)")
+            .assertEvent([](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211DataHeader>();
+                return header->getAckPolicy() == BLOCK_ACK && !header->getAMsduPresent() &&
+                    header->getSequenceNumber() == tightOpeningHcf()->getOpeningSequence() &&
+                    firstDatagramIdentification(c.event.packet) == tightOpeningHcf()->getOpeningDatagram();
+            }).describe("the AP receives the original queue head as a protected single MSDU").within(0.001));
+    return test;
+}
+}
+
+%file: BasicOpeningTightTxop.ned
+import inet.protocoltest.wifi.BlockAckLifecycleHcf;
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+simple TightOpeningRateSelection extends QosRateSelection
+{
+    parameters:
+        rateControlModule = default("^.rateControl");
+        @class(::inet::protocoltest::TightOpeningRateSelection);
+}
+module TightOpeningHcf extends BlockAckLifecycleHcf
+{
+    parameters:
+        bool dropCts;
+        int shortCts;
+        @class(::inet::protocoltest::TightOpeningHcf);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_basic_opening_tight_txop"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.wlan[*].mac.hcf.typename = "TightOpeningHcf"
+*.sta1.wlan[*].mac.hcf.dropCts = ${scenario=0,1,2,3} == 1
+*.sta1.wlan[*].mac.hcf.shortCts = max(0, ${scenario} - 1)
+*.sta1.numApps = 3
+*.sta1.app[0].sendInterval = 0.05ms
+*.sta1.app[0].messageLength = ${scenario} == 2 ? 10B : (${scenario} == 3 ? 100B : 1000B)
+*.sta1.app[0].stopTime = ${scenario} >= 2 ? 1.00015s : 1.008s
+*.sta1.app[1].typename = "UdpBasicApp"
+*.sta1.app[1].destAddresses = "sta2"
+*.sta1.app[1].destPort = 5000
+*.sta1.app[1].messageLength = 1000B
+*.sta1.app[1].sendInterval = 0.05ms
+*.sta1.app[1].startTime = 1.02s
+*.sta1.app[1].stopTime = 1.0206s
+*.sta1.app[2].typename = "UdpSink"
+*.sta1.app[2].localPort = 5001
+*.sta2.numApps = 2
+*.sta2.app[1].typename = "UdpBasicApp"
+*.sta2.app[1].destAddresses = "sta1"
+*.sta2.app[1].destPort = 5001
+*.sta2.app[1].messageLength = 1500B
+*.sta2.app[1].sendInterval = 1ms
+*.sta2.app[1].startTime = 1.0195s
+*.sta2.app[1].stopTime = 1.0196s
+*.sta2.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.hcf.edca.edcaf[*].txopProcedure.txopLimit = 2986us
+**.hcf.rtsPolicy.rtsThreshold = 100B
+*.sta1.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} != 0 ? 54Mbps : 6Mbps
+*.sta1.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = ${scenario} >= 2 ? 24Mbps : -1bps
+*.ap.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = ${scenario} >= 2 ? 6Mbps : -1bps
+*.sta1.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+*.sta1.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = -1
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_basic_opening_tight_txop: PASS
+
+%not-contains: stdout
+PROTOCOLTEST wifi_basic_opening_tight_txop: FAIL

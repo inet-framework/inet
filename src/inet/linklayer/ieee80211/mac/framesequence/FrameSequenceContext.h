@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
 #include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
@@ -71,6 +72,12 @@ class INET_API QoSContext
     const BlockAckVariant blockAckVariant;
     std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
     std::unique_ptr<PreparedDataTransmission> preparedData;
+    BasicBarRetry openingBasicBarRetry;
+    std::unique_ptr<PreparedQosData> openingBasicData;
+    int64_t plannedBasicDataId = -1;
+    std::unique_ptr<PreparedQosData> plannedPostBarData;
+    simtime_t plannedPostBarDuration;
+    std::function<bool(Packet *)> basicOpeningFits;
 };
 
 class INET_API NonQoSContext
@@ -121,6 +128,7 @@ class INET_API FrameSequenceContext : public cObject
 
     virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
     virtual QoSContext *getQoSContext() const { return qosContext; }
+    bool hasOpeningBasicBarRetry() const { return steps.empty() && qosContext && qosContext->openingBasicBarRetry.request; }
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;

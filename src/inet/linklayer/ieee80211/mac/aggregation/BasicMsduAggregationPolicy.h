@@ -28,7 +28,7 @@ class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, publi
     virtual bool isEligible(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, const Ptr<const Ieee80211MacTrailer>& trailer, const Ptr<const Ieee80211DataHeader>& testHeader, b aMsduLength);
 
   public:
-    virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *queue) override;
+    virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *queue, const std::function<bool(b)>& fitsMpdu = {}) override;
 };
 
 } /* namespace ieee80211 */
