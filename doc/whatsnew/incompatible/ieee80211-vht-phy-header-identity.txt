@@ -1,0 +1,7 @@
+IEEE 802.11 HT-SIG bytes and aggregate boundaries
+
+HT transmissions now preserve the complete HT-SIG header through byte conversion. Receivers check its CRC, supported fields, and length before length-based trailer removal. Invalid headers mark packets as erroneous. Delimiter inspection supplies bounded MPDU ranges, including singleton aggregates. Ordinary valid HT duration inputs remain unchanged. VHT modes now create their own header type.
+
+Delimiter recovery now scans across typed MPDU headers. An invalid delimiter no longer causes a chunk conversion error at those headers. Bounded recovery retains later complete MPDU ranges.
+
+HT aggregate reception uses the configured PHY corruption mode. Packet mode gives the whole PSDU one DATA outcome. Select chunk mode to retain a correct MPDU beside a failed member. The HT receiver reports decoded aggregation and PSDU completeness to the MAC.

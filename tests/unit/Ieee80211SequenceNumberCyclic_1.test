@@ -1,0 +1,36 @@
+%description:
+All specified sequence numbers support cyclic addition and subtraction across zero.
+An intermediate value of minus one maps to 4095. It does not represent an unspecified source object.
+The operators retain refusal of an unspecified source object.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
+using namespace inet::ieee80211;
+
+%activity:
+int checked = 0;
+for (int value = 0; value < 4096; value++) {
+    SequenceNumberCyclic sequence(value);
+    for (int offset : {-4096, -4095, -2048, -64, -2, -1, 0, 1, 2, 63, 64, 2047, 2048, 4095, 4096}) {
+        auto normalize = [](int number) { return (number % 4096 + 4096) % 4096; };
+        ASSERT((sequence + offset).get() == normalize(value + offset));
+        ASSERT((sequence - offset).get() == normalize(value - offset));
+        checked += 2;
+    }
+}
+SequenceNumberCyclic unspecified;
+ASSERT(!unspecified.isSpecified());
+for (bool subtract : {false, true}) {
+    bool refused = false;
+    try {
+        auto result = subtract ? unspecified - 1 : unspecified + 1;
+        (void)result;
+    }
+    catch (const omnetpp::cRuntimeError&) { refused = true; }
+    ASSERT(refused);
+}
+ASSERT(checked == 4096 * 15 * 2);
+EV << "Cyclic sequence arithmetic and unspecified-source guards passed.\n";
+
+%contains: stdout
+Cyclic sequence arithmetic and unspecified-source guards passed.

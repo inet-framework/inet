@@ -7,7 +7,10 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
@@ -59,11 +62,51 @@ bool Ieee80211Receiver::computeIsReceptionPossible(const IListening *listening, 
     return ieee80211Transmission && modeSet->containsMode(ieee80211Transmission->getMode()) && getAnalogModel()->computeIsReceptionPossible(listening, reception, sensitivity);
 }
 
+std::optional<FlatReceiverBase::PartRange> Ieee80211Receiver::computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    auto packet = transmission->getPacket();
+    const auto& phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    PartRange range;
+    range.isInPacket = true;
+    if (part == IRadioSignal::SIGNAL_PART_HEADER) {
+        auto ht = dynamicPtrCast<const Ieee80211HtPhyHeader>(phyHeader);
+        if (ht && !isIeee80211HtSignalValid(*ht, check_and_cast<const Ieee80211Transmission *>(transmission)->getMode()))
+            return std::nullopt;
+        range.offset = b(0);
+        range.length = phyHeader->getChunkLength();
+    }
+    else if (part == IRadioSignal::SIGNAL_PART_DATA) {
+        // the PSDU follows the PHY header; the regions of the PSDU share the tail and pad bits after it
+        range.offset = phyHeader->getChunkLength();
+        range.length = B(phyHeader->getLengthField());
+        if (range.offset + range.length > packet->getTotalLength())
+            return std::nullopt;
+    }
+    else
+        throw cRuntimeError("Only the header part and the data part have regions, not the %s part", IRadioSignal::getSignalPartName(part));
+    return range;
+}
+
 const IReceptionResult *Ieee80211Receiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211Transmission *>(reception->getTransmission());
     auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto packet = const_cast<Packet *>(receptionResult->getPacket());
+    const auto& phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket(), b(-1),
+            Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    if (auto ht = dynamicPtrCast<const Ieee80211HtPhyHeader>(phyHeader)) {
+        bool valid = isIeee80211HtSignalValid(*ht, transmission->getMode());
+        if (ht->getAggregation() || !valid) {
+            auto radio = reception->getReceiverRadio();
+            bool decoded = valid && radio->getMedium()->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_HEADER)->isReceptionSuccessful();
+            auto indication = packet->addTag<Ieee80211AmpduInd>();
+            indication->setHeaderSuccessful(decoded);
+            indication->setAggregation(decoded && ht->getAggregation());
+            indication->setContentComplete(decoded && ht->getChunkLength() + ht->getLengthField() <= packet->getDataLength());
+            if (!indication->getContentComplete())
+                packet->setBitError(true);
+        }
+    }
     packet->addTagIfAbsent<Ieee80211ModeInd>()->setMode(transmission->getMode());
     packet->addTagIfAbsent<Ieee80211ChannelInd>()->setChannel(transmission->getChannel());
     return receptionResult;

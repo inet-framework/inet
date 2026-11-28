@@ -10,6 +10,7 @@
 
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/AmpduReception.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
@@ -54,6 +55,8 @@ class INET_API IRx
     virtual bool lowerFrameReceived(Packet *packet) = 0;
     // Discard local interval evidence when its semantic context is no longer valid.
     virtual void invalidateInterframeHistory() = 0;
+    // The caller retains the envelope. The result owns the correct, separate member Packets.
+    virtual AmpduReception lowerAggregateReceived(Packet *packet) = 0;
 };
 
 } // namespace ieee80211
