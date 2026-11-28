@@ -47,7 +47,33 @@ flowchart LR
     Send --> Receive
 ```
 
-**Observed failures.** On the sizing commit's parent (`7ad6c048d7`), both cases failed at the AP: the received DATA did not satisfy the assertion for a single Block Ack MPDU with the previewed sequence number and original IPv4 datagram. Testing the earlier sizing implementation (`aa9314b3ec`) exposed the two causes separately. With 10-byte messages the sender repeated the undersized RTS reservation and failed the queue-head delivery check. With 100-byte messages a second rate query selected a slower mode after admission, and the transmitted DATA failed the mode and CTS-airtime check. With the correction, the AP received the original head after two RTS attempts and one RTS attempt, respectively.
+**Observed failures.** On the [sizing commit's parent](https://github.com/mgonzalezlopezudc/inet/commit/63d3761c6a7341d3f04759f9e3db8d0fd301257d), runs 2 and 3 both fail the AP assertion for a single Block Ack MPDU with the previewed sequence number and the original IPv4 datagram. The same fixture passes on the [corrected PR tip](https://github.com/mgonzalezlopezudc/inet/commit/d13da89621061ceea37301bd6e52e1ea6a5b1659). The AP receives the original head after two RTS attempts in run 2 and one attempt in run 3.
+
+The two specific opening failures reproduce with the PR fixture on the [historical PR tip](https://github.com/mgonzalezlopezudc/inet/commit/aa9314b3ecf84232087076c74b3b86f6a7ed7763). Its original fixture covers runs 0 and 1. Use the [fixture pinned at the sizing commit](https://github.com/mgonzalezlopezudc/inet/blob/602f0d55a41d648e7e4d1b917c0fadb2ea7ddf2a/tests/protocol/wifi/common/WifiBasicOpeningTightTxop.test) for the asymmetric CTS cases. Run them separately because the run 2 error stops a batched execution.
+
+From the PR checkout with the OMNeT++ and opp_repl environment loaded, build and run the historical comparison in a temporary worktree.
+
+```sh
+git fetch https://github.com/mgonzalezlopezudc/inet.git aa9314b3ecf84232087076c74b3b86f6a7ed7763
+scratch="$(mktemp -d)"
+git worktree add --detach "$scratch/inet" FETCH_HEAD
+cd "$scratch/inet"
+source setenv
+make MODE=release -j4
+
+fixture=tests/protocol/wifi/common/WifiBasicOpeningTightTxop.test
+for run in 2 3; do
+    git show "602f0d55a41d648e7e4d1b917c0fadb2ea7ddf2a:$fixture" |
+        sed "s/^%extraargs: -r 0\.\.3$/%extraargs: -r $run/" >"${fixture%.test}Control${run}.test"
+done
+
+opp_run_protocol_tests --load . -p inet -m release --no-build \
+    -w '^tests/protocol/wifi$' -f 'WifiBasicOpeningTightTxopControl[23][.]test$'
+```
+
+The runner reports two failures and exits with status 1. In `tests/protocol/wifi/work/WifiBasicOpeningTightTxopControl2/test.err`, the fixture rejects the second RTS because it must protect a single preview of the still-queued head. In the corresponding `WifiBasicOpeningTightTxopControl3/test.err`, the fixture rejects DATA at the assertion that the single MSDU must use the admitted mode and fit the received CTS.
+
+For the sizing parent comparison, use `63d3761c6a7341d3f04759f9e3db8d0fd301257d` as the worktree revision and run the same commands from `cd` onward. Both cases report the AP assertion failure in their respective `test.out`. These release checks used seed set 0, OMNeT++ `6.4.0aipre2` build `260526-7b9114f72c`, and opp_repl `78dcb602f7`.
 
 **Coverage.** Runs 2 and 3 exercise a fresh Basic A-MSDU opening under single protection with a positive TXOP limit. Both use the same 24 Mbps forecast and 6 Mbps CTS response. The evidence covers these two packet sizes and the rate change injected immediately before DATA submission in run 3.
 
