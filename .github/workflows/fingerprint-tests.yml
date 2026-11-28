@@ -11,7 +11,7 @@ name: "Test: fingerprint"
 # results of the previous full run (check V4); an update checks the records of the sample against
 # the old map (check V5). Before the selection, the job `Paths that can change a result` reads the
 # paths of a pull request: when no path can change a fingerprint, the jobs run no selection, no
-# build and no test (step G2a of plan/pending/required-checks.md).
+# build and no test (TR-CI-SELECTION of doc/project/rule/testing.md).
 
 on:
   push:
@@ -204,7 +204,7 @@ jobs:
     # No `if:` for the job: GitHub gives a matrix job that its `if:` skips the name without the matrix value, and
     # the required checks `fingerprint-tests (debug|release, N)` then never report. Thus the job always runs. Its
     # steps do not run when no path of the pull request can change a fingerprint, and they skip the build and the
-    # tests when the split has no selected test (rule T8 of plan/pending/master-guards.md).
+    # tests when the split has no selected test (TR-CI-SELECTION of doc/project/rule/testing.md).
     runs-on: ubuntu-latest
     strategy:
       matrix:

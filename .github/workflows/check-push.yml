@@ -1,14 +1,14 @@
 name: "Check: push"
 
-# The push check of S1 to S6 in plan/pending/master-guards.md. A push to a branch other than master
+# The push check of PR-LAND-TRIVIAL in doc/project/rule/pull-request.md. A push to a branch other than master
 # runs this one job, and no build and no test. check-trivial-change.sh decides if the change of the
 # branch since master is trivial. If it is, the job marks each required context of master, except
 # `Master green`, as green on the head commit, and the person pushes the same commit to master with
-# no pull request (A5). Else it marks nothing: the change needs a pull request.
+# no pull request (PR-LAND-WAYS). Else it marks nothing: the change needs a pull request.
 #
-# The scripts come from master, and the pushed commits are only data (S6). GitHub runs this file from
+# The scripts come from master, and the pushed commits are only data. GitHub runs this file from
 # the pushed branch, so a branch can change it: the rules stop mistakes, not a person who wants to
-# break them (the limit in master-guards.md).
+# break them (the limit in TR-REQ-GREEN).
 
 on:
   push:
@@ -86,13 +86,13 @@ jobs:
         run: |
           run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           while IFS= read -r context; do
-            # Master green keeps its real state (S4, M8)
+            # Master green keeps its real state (PR-LAND-WAIT)
             [ -z "$context" ] || [ "$context" = "Master green" ] && continue
             gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" -f state=success -f context="$context" \
-              -f description="the push check: a trivial change (S1 to S6)" -f target_url="$run_url"
+              -f description="the push check: a trivial change (PR-LAND-TRIVIAL)" -f target_url="$run_url"
             echo "marked: $context"
           done < "$RUNNER_TEMP/required-contexts.txt"
-          # Master green gets the real state of master: a trivial change lands only when master is green (M8)
+          # Master green gets the real state of master: a trivial change lands only when master is green (PR-LAND-WAIT)
           python3 doc/project/enforcement/master_green.py post --on "$HEAD_SHA" --context="Master green"
           { echo; echo "The change is trivial: push this commit to master with no pull request. If Master green is not"
             echo "green, wait until master is green, and run this job again first:"; echo

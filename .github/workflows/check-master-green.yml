@@ -1,6 +1,6 @@
 name: "Check: master green"
 
-# M8 and M10 of plan/pending/master-guards.md: the commit status `Master green` is green only when
+# PR-LAND-WAIT of doc/project/rule/pull-request.md and TR-CI-FULL-RUN of doc/project/rule/testing.md: the commit status `Master green` is green only when
 # the full run of the head of master is finished and green. While that run is in progress or red,
 # nothing else lands. master_green.py computes the state from the newest attempt of each of the ten
 # workflows of the full run. At each push to master and at the end of each of these workflows, the
@@ -8,7 +8,7 @@ name: "Check: master green"
 # the state changed. At each event of a pull request, the other job posts it on the head of that
 # pull request. A run of a failed job again changes the state, because the newest attempt counts.
 #
-# A trivial landing starts no full run and does not change Master green (M9): at a push to master,
+# A trivial landing starts no full run and does not change Master green (TR-CI-FULL-RUN): at a push to master,
 # the job `Landing` runs check-trivial-change.sh over the commits of the push. For a trivial change it
 # marks the head with the status `Trivial landing`, which names the head before the push, and cancels
 # the opp tests, the fingerprint tests and the Linux build of the head; the statistical and chart
