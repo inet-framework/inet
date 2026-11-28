@@ -1,0 +1,9 @@
+Proxy Mobile IPv6 routes a mobile node again after a gateway or anchor restart
+
+When a Mobile Access Gateway or a Local Mobility Anchor was shut down or
+crashed and then started again, it accepted the mobile node's next
+registration but installed no route for it, and the node stayed unreachable.
+Both now forget their routes when the routing table deletes them and clear
+their bindings on a shutdown or a crash, so the next attachment of the mobile
+node sets up the session from scratch. Simulations in which no route of a
+gateway or an anchor is deleted behave as before.

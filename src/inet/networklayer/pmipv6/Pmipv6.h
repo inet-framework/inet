@@ -129,6 +129,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
     void sendMobilityMessage(Packet *packet, const Ipv6Address& destAddress, const Ipv6Address& srcAddress);
     Ipv6Address getEgressAddressFor(const Ipv6Address& destination);
     int getOrCreateTunnel(const Ipv6Address& localEndpoint, const Ipv6Address& remoteEndpoint, std::map<Ipv6Address, int>& tunnelMap);
+    void releaseMobilitySessions();
 
     // LMA
     void processProxyBindingUpdate(Packet *packet, const BindingUpdate *pbu);
