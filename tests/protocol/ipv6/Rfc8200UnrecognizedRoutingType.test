@@ -1,0 +1,162 @@
+%description:
+
+RFC 8200 / RFC 8504 — a destination that meets a Routing header of an unrecognized Routing
+Type with Segments Left non-zero discards the packet and sends Parameter Problem code 0,
+with the pointer at the Routing Type field, to the source.
+
+RFC 8200 section 4.4: "If Segments Left is non-zero, the node must discard the packet and
+send an ICMP Parameter Problem, Code 0, message to the packet's Source Address, pointing to
+the unrecognized Routing Type." RFC 8504 section 5.2 (RFC8504-NR-7 in
+doc/project/evidence/standard/rfc8504/catalog.md): Routing Header type 0 "MUST be treated as
+an unrecognized routing type". The relay inserts a Routing header of type 0 with Segments
+Left 1 between the IPv6 header and the UDP header of host A's datagram, and takes the same
+24 octets from the end of the application data, so the frame keeps its length. The Routing Type
+octet is octet 2 of the Routing header, which follows the 40-octet IPv6 header, so the
+pointer is 42. As in Rfc8200UnrecognizedNextHeader.test, the relay is two taps in series:
+tap1 inserts the header, and tap2 drops host B's report on its way back, so host B's side
+alone is judged here. Mapping of the mockup with a relay: host A = hostA, router R =
+router, relay T = tap1 and tap2, host B = hostB.
+
+The verdict line is printed only if the simulation runs past the discard, so a PASS also
+shows that the packet does not stop the run.
+
+%includes:
+#include "ProtocolTest.h"
+#include "Ipv6Fields.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// Inserts a Routing header of type 0 with Segments Left 1 and one address between the IPv6
+// header and the UDP header, and makes the IPv6 header name it. The frame keeps its length,
+// because the signal that carries it on the link keeps its own: the header's 24 octets are
+// taken from the end of the application data, so the IPv6 payload length stays and the UDP
+// length shrinks by 24.
+static void insertRoutingHeaderType0(Packet *frame)
+{
+    std::vector<Ptr<Chunk>> prefix;
+    while (dynamicPtrCast<const Ipv6Header>(frame->peekAtFront<Chunk>()) == nullptr)
+        prefix.push_back(frame->removeAtFront<Chunk>(frame->peekAtFront<Chunk>()->getChunkLength()));
+    auto ipv6Header = frame->removeAtFront<Ipv6Header>();
+    auto udpHeader = frame->removeAtFront<UdpHeader>();
+    auto routingHeader = makeShared<Ipv6RoutingHeader>();
+    routingHeader->setRoutingType(0);
+    routingHeader->setSegmentsLeft(1);
+    routingHeader->setAddressArraySize(1);
+    routingHeader->setAddress(0, Ipv6Address("2001:db8::1"));
+    routingHeader->setChunkLength(B(8 + 16));
+    routingHeader->setNextHeaderProtocol(ipv6Header->getProtocolId());
+    ipv6Header->setProtocolId(IP_PROT_IPv6EXT_ROUTING);
+    auto fcs = frame->removeAtBack<EthernetFcs>(B(4));
+    frame->removeAtBack(routingHeader->getChunkLength());
+    frame->insertAtBack(fcs);
+    udpHeader->setTotalLengthField(udpHeader->getTotalLengthField() - routingHeader->getChunkLength());
+    frame->insertAtFront(udpHeader);
+    frame->insertAtFront(routingHeader);
+    frame->insertAtFront(ipv6Header);
+    for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+        frame->insertAtFront(*it);
+}
+
+// The Routing header of an observed frame, or nullptr when it carries none.
+static Ptr<const Ipv6RoutingHeader> routingHeaderOf(const Packet *packet)
+{
+    b offset = b(0);
+    while (offset < packet->getDataLength()) {
+        const auto& chunk = packet->peekAt<Chunk>(offset);
+        if (auto header = dynamicPtrCast<const Ipv6RoutingHeader>(chunk))
+            return header;
+        offset += chunk->getChunkLength();
+    }
+    return nullptr;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc8200_unrecognized_routing_type")
+        // The relay inserts a Routing header of type 0 with Segments Left 1 ...
+        .intercept(tap("tap1").filterPacket("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { insertRoutingHeaderType0(frame); })
+                     .describe("the packet (insert a Routing header of type 0, Segments Left 1)"))
+        // ... and keeps host B's report away from host A, whose handling of it is another check.
+        .intercept(tap("tap2").filterPacket("icmpv6.type == 4").nth(1).drop()
+                     .describe("host B's Parameter Problem message (drop it before host A)"))
+        // Expected observation 1: at host B's interface the packet carries the Routing header.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterEvent([](const MatchContext& c) { auto rh = routingHeaderOf(c.event.packet); return rh != nullptr && rh->getRoutingType() == 0 && rh->getSegmentsLeft() == 1; })
+                  .describe("the packet at host B's interface with a Routing header of type 0, Segments Left 1")
+                  .within(6.0))
+        // Expected observation 2: host B originates Parameter Problem, type 4 code 0, pointer 42,
+        // at the moment of the decision (RFC 8200 section 4.4, RFC8504-NR-7).
+        .once(on("hostB.ipv6.ipv6").signal("packetReceivedFromUpper")
+                  .filterPacket("icmpv6.type == 4")
+                  .assertPacket("Icmpv6ParamProblemMsg.code == 0 && Icmpv6ParamProblemMsg.pointer == 42")
+                  .describe("host B's Parameter Problem message, code 0, pointer 42, at the moment of the discard")
+                  .within(0.5))
+        // Expected observation 3: the report leaves host B toward host A, addressed to host A.
+        .once(on("hostB.eth[0].mac").signal("packetSentToLower")
+                  .filterPacket("icmpv6.type == 4 && Icmpv6ParamProblemMsg.code == 0 && Icmpv6ParamProblemMsg.pointer == 42")
+                  .filterEvent([](const MatchContext& c) { return ipv6Address(c.event.packet, "ipv6.destAddress") == nodeIpv6Address("hostA"); })
+                  .describe("the Parameter Problem message, code 0, pointer 42, leaving host B for host A")
+                  .within(0.5))
+        // Expected observation 4: from then on, nothing of the packet reaches UDP at host B.
+        .never(on("hostB")
+                  .filterEvent([](const MatchContext& c) { return deliveredToUdp(c.event, "hostB", nullptr); })
+                  .describe("anything handed to UDP at host B")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc8200_unrecognized_routing_type compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// The mockup with a relay, where the relay is two taps in series: hostA -- router -- tap1 -- tap2 -- hostB.
+network Rfc8200TwoTapNet
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap1: PacketTap { @display("p=470,100"); }
+        tap2: PacketTap { @display("p=590,100"); }
+        hostB: StandardHost6 { @display("p=740,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> tap1.a;       // link 2 = router.eth[1], before the relay
+        tap1.b <--> Eth100M <--> tap2.a;
+        tap2.b <--> Eth100M <--> hostB.ethg++;        // link 2, after the relay
+}
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc8200TwoTapNet
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 64
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc8200_unrecognized_routing_type: PASS
