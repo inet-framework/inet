@@ -1774,6 +1774,20 @@ simtime_t Hcf::computeImmediateResponseDuration(Packet *packet, const Ptr<const 
         rateSelection->computeResponseAckFrameMode(packet, header, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
 }
 
+static simtime_t computeMultipleProtectionResponseAirtimeBound(const Ieee80211ModeSet *modeSet, b responseLength, simtime_t configuredBound)
+{
+    if (configuredBound < SIMTIME_ZERO)
+        throw cRuntimeError("multipleProtectionResponseAirtimeBound must be nonnegative");
+    if (configuredBound > SIMTIME_ZERO)
+        return configuredBound;
+    // INET modeling simplification: bound the airtime by the longest response the local PHY can decode.
+    // The sender's configured response rate controls the responses it transmits.
+    simtime_t bound;
+    for (int i = 0; i < modeSet->getNumModes(); i++)
+        bound = std::max(bound, modeSet->getMode(i)->getDuration(responseLength));
+    return bound;
+}
+
 simtime_t Hcf::computeBlockAckExchangeDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, simtime_t ppduDuration)
 {
     auto responseMode = rateSelection->computeResponseBlockAckFrameMode(packet, header, ResponseQueryRole::PREDICT);
@@ -2093,15 +2107,17 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             return false;
         auto txop = channelOwner->getTxopProcedure();
         bool singleProtection = txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION;
-        bool scopedSingle = singleProtection && !par("isBlockAckSupported").boolValue();
+        bool zeroLimit = txop->getLimit() == 0;
+        bool blockAckDisabled = !par("isBlockAckSupported").boolValue();
+        bool scopedSingle = singleProtection && blockAckDisabled;
+        bool scopedMultiple = !singleProtection && !zeroLimit && blockAckDisabled;
         bool basicDataExchange = originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC &&
             !header->getReceiverAddress().isMulticast() && (rtsStep || dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header));
         auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
-        bool zeroLimit = txop->getLimit() == 0;
         if (zeroLimit && rtsStep && !preparedStep && context->getNumSteps() > 1)
             return false;
         bool dataAfterCts = false;
-        if ((scopedSingle || basicDataExchange || zeroLimit) && context->getNumSteps() >= 3) {
+        if ((scopedSingle || scopedMultiple || basicDataExchange || zeroLimit) && context->getNumSteps() >= 3) {
             auto precedingRts = dynamic_cast<RtsTransmitStep *>(context->getStep(context->getNumSteps() - 3));
             auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStepBeforeLast());
             dataAfterCts = precedingRts && precedingRts->getProtectedFrame() == packet && receiveStep &&
@@ -2117,13 +2133,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         // DATA after the opening RTS/CTS is still part of the opening exchange.
         bool basicContinuation = basicDataExchange && context->getNumSteps() > (dataAfterCts ? 3 : 1);
         Packet *retainedPacket = packet;
-        auto retainedModeTag = scopedSingle || basicContinuation || zeroLimitFragment ?
+        auto retainedModeTag = scopedSingle || scopedMultiple || basicContinuation || zeroLimitFragment ?
             retainedPacket->findTag<Ieee80211ModeReq>() : nullptr;
         auto retainedMode = retainedModeTag ? retainedModeTag->getMode() : nullptr;
         auto compressedBar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header);
         auto mode = preparedStep ? (rtsStep ? prepared->rtsMode : prepared->dataMode) :
             compressedBar ? rateSelection->computeCompressedBlockAckReqMode(packet, compressedBar, context->getNumSteps() == 1) :
-            dataAfterCts && (scopedSingle || basicContinuation) ? packet->getTag<Ieee80211ModeReq>()->getMode() :
+            dataAfterCts && (scopedSingle || scopedMultiple || basicContinuation) ? packet->getTag<Ieee80211ModeReq>()->getMode() :
             rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
         if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
@@ -2144,9 +2160,14 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         simtime_t responseDuration = SIMTIME_ZERO;
         simtime_t nextFrameDuration = SIMTIME_ZERO;
         simtime_t cost = SIMTIME_ZERO;
-        if (scopedSingle || basicContinuation || zeroLimitFragment) {
+        if (scopedSingle || scopedMultiple || basicContinuation || zeroLimitFragment) {
             cost = mode->getDuration(packet->getDataLength());
             auto sifs = modeSet->getSifsTime();
+            simtime_t configuredResponseBound = scopedMultiple ? par("multipleProtectionResponseAirtimeBound").doubleValue() : 0;
+            // INET modeling simplification: use a configured bound on propagation to and from any peer.
+            simtime_t responseRoundTripTime = scopedMultiple ? par("multipleProtectionResponseRoundTripTimeBound").doubleValue() : 0;
+            if (responseRoundTripTime < SIMTIME_ZERO)
+                throw cRuntimeError("multipleProtectionResponseRoundTripTimeBound must be nonnegative");
             if (auto rts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
                 retainedPacket = const_cast<Packet *>(rtsStep->getProtectedFrame());
                 retainedModeTag = retainedPacket->findTag<Ieee80211ModeReq>();
@@ -2154,16 +2175,21 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 auto protectedHeader = retainedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
                 auto dataMode = rateSelection->computeMode(retainedPacket, protectedHeader, txop);
                 setFrameMode(retainedPacket, protectedHeader, dataMode);
-                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
+                responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_CTS, configuredResponseBound) :
+                    rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
                 nextFrameDuration = dataMode->getDuration(retainedPacket->getDataLength());
-                if (recipientAckPolicy->isAckNeeded(protectedHeader))
-                    nextFrameDuration += sifs + computeImmediateResponseDuration(retainedPacket, protectedHeader);
-                cost += sifs + responseDuration + sifs + nextFrameDuration;
+                if (recipientAckPolicy->isAckNeeded(protectedHeader)) {
+                    nextFrameDuration += sifs + (scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
+                        computeImmediateResponseDuration(retainedPacket, protectedHeader));
+                    cost += responseRoundTripTime;
+                }
+                cost += sifs + responseDuration + responseRoundTripTime + sifs + nextFrameDuration;
             }
             else if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
                 if (recipientAckPolicy->isAckNeeded(dataOrMgmt)) {
-                    responseDuration = computeImmediateResponseDuration(packet, dataOrMgmt);
-                    cost += sifs + responseDuration;
+                    responseDuration = scopedMultiple ? computeMultipleProtectionResponseAirtimeBound(modeSet, LENGTH_ACK, configuredResponseBound) :
+                        computeImmediateResponseDuration(packet, dataOrMgmt);
+                    cost += sifs + responseDuration + responseRoundTripTime;
                 }
             }
             else
@@ -2174,12 +2200,17 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             bool checkContinuation = basicContinuation || (!dataAfterCts && context->getNumSteps() > 1);
             bool insufficientContinuationTime = checkContinuation && (cost >= rx->getTxnavRemaining() ||
                 (zeroLimit ? !fragmentContinuation : ifs + cost > txop->getRemaining()));
+            // Recheck the remaining part of an admitted continuation after CTS. The time
+            // waiting for CTS has already elapsed, so only the DATA and its ACK are budgeted here.
+            // The opening exchange retains the existing model's initial-frame allowance.
+            bool insufficientTimeAfterCts = scopedMultiple && dataAfterCts && context->getNumSteps() > 3 &&
+                ifs + cost > txop->getRemaining();
             // IEEE Std 802.11-2024, 9.2.5.2(b)(2): subtract the leading SIFS and DATA PPDU
             // from the established reservation before checking the advertised ACK coverage.
             bool insufficientAckReservation = fragmentContinuation && !singleProtection &&
                 encodeDuration(txop->getReservationEnd() - (simTime() + ifs) - mode->getDuration(packet->getDataLength()), true) <
                     sifs + responseDuration;
-            if (insufficientContinuationTime || insufficientAckReservation) {
+            if (insufficientContinuationTime || insufficientTimeAfterCts || insufficientAckReservation) {
                 if (retainedModeTag)
                     retainedPacket->addTagIfAbsent<Ieee80211ModeReq>()->setMode(retainedMode);
                 else
