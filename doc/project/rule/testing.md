@@ -33,6 +33,7 @@ Every test rule in document order.
 | [TR-BASELINE-PIN](#tr-baseline-pin) | A commit that moves a result pins its baseline commit in a trailer |
 | [TR-BASELINE-PARENT](#tr-baseline-parent) | A baseline changes only for a test that passes on the parent commit and that the change moves |
 | [TR-BASELINE-ATTRIBUTION](#tr-baseline-attribution) | The code that moves baseline values is the smallest fragment that produces them, and a run proves it |
+| [TR-BASELINE-REPOSITORY](#tr-baseline-repository) | The baseline commits of a change are on a branch of `statistics` or `media`, and only the landing job, a maintainer and an admin move its `master` |
 
 **Determinism**
 
@@ -48,8 +49,19 @@ Every test rule in document order.
 | --- | --- |
 | [TR-CI-EVERY-COMMIT](#tr-ci-every-commit) | CI builds and tests every commit of a branch, not only its head |
 | [TR-SELECTED-PASS](#tr-selected-pass) | Before a push, the tests that the change-based selection gives for the series pass |
+| [TR-CI-SELECTION](#tr-ci-selection) | A test job of a pull request runs only the tests that the change can affect, and it reports `Selected N of M` |
+| [TR-CI-MERGE](#tr-ci-merge) | A test job of a pull request tests the merge with `master`, against the baseline that its landing will make |
+| [TR-CI-ONLY-TEST](#tr-ci-only-test) | A test job only tests: it records no baseline and uploads no candidate values |
+| [TR-CI-FULL-RUN](#tr-ci-full-run) | Each push to `master` runs the test jobs of each kind, and the full run of the head of `master` decides `Master green` |
 | [TR-CI-FEATURE-MATRIX](#tr-ci-feature-matrix) | A feature is built with its neighbours switched off |
 | [TR-FLAKY](#tr-flaky) | A flaky test is repaired or disabled with an issue, never re-run until green |
+
+**Required checks of master**
+
+| Rule | Statement |
+| --- | --- |
+| [TR-REQ-GREEN](#tr-req-green) | Each required check of `master` is green before a landing, and each comes from GitHub Actions |
+| [TR-REQ-REPORTS](#tr-req-reports) | A required job reports on each pull request, and a change of its name lands together with the change of the ruleset |
 
 ## Which test
 
@@ -272,6 +284,14 @@ Prefer `commit`. [PR-SPLIT-PREPARE](pull-request.md#pr-split-prepare) gives that
 
 *Enforced at T3 — [check-baselines.sh](../enforcement/check-baselines.sh): the form, the two size limits, a reduction that applies, files that only come or only go, and one attribution for each INET commit; T2 — [check-baseline-attribution.sh](../enforcement/check-baseline-attribution.sh) runs the moved tests that prove the form, for each pull request and by hand; T5 — whether the small change is easy to understand.*
 
+### TR-BASELINE-REPOSITORY
+
+**The baseline commits of a change are on a branch of `statistics` or `media`, and only the landing job, a maintainer and an admin move its `master`**
+
+The branch has the name of the INET branch, or the commits are on a pull request from a fork. After the landing in INET, the landing job puts each step of a pin trailer onto `master` of the baseline repository, by a fast-forward or a rebase, and adds a mark commit. At an overlap the landing job fails, and a maintainer repairs the baseline by hand and adds the mark. The baseline repositories have no workflow and no token of their own.
+
+*Enforced at T2 — a ruleset on `master` of each baseline repository lets only its bypass actors update it: the deploy key of the landing job, the roles maintain and admin, and the organization admins.*
+
 ## Determinism
 
 ### TR-DETERMINISTIC
@@ -320,6 +340,40 @@ A kind of test that the map does not hold gets no obligation from this rule. A c
 
 *Enforced at T2 — the fingerprint jobs of a pull request run the selected fingerprint tests. A push to `master` runs the selected tests and a random sample of the other tests, whose records must agree with the map (check V5); a run of `master` waits for the run before it, and a newer push cancels a run that waits, because the newer run also selects for the changes of that push, and the full run of each night runs all tests and checks the selection against the previous full run (check V4).*
 
+### TR-CI-SELECTION
+
+**A test job of a pull request runs only the tests that the change can affect, and it reports `Selected N of M`**
+
+The selection compares the change with the test map of the newest finished push run whose commit is an ancestor of the pull request, or else with the weekly map, and it uses the commits of omnetpp and opp_repl that the header of the map names. The job reports `Selected N of M`, also for N = 0. With the label `full-tests`, it runs all tests of its kind. A change in `_scripts/github/` selects all tests, a change of the workflow of a kind selects all tests of that kind, and a change of another workflow selects all tests of each kind that does not name its workflow in `inet.opp`.
+
+The job selects before the build, and with `Selected 0 of M` it skips the build. That needs a list of all tests of the kind without a build, because the selection always selects a new test that the map does not know. The fingerprint tests have this list in `tests/fingerprint/store.json`. A kind with no such list, such as the statistical and chart tests, uses a list of the paths that can change a result before the build.
+
+*Enforced at T2 — the fingerprint jobs select their tests, and the statistical and chart jobs read their list of paths. The opp tests run only on `master` until the test selection gives them jobs for pull requests.*
+
+### TR-CI-MERGE
+
+**A test job of a pull request tests the merge with `master`, against the baseline that its landing will make**
+
+That baseline is `master` of the baseline repository with the steps of the pin trailers of the pull request on it. A test of the head alone can pass on a pull request and fail after the landing, when `master` changed since the branch started.
+
+*Enforced at T2 — the statistical and chart jobs check out the merge, and `opp_checkout_test_baselines` makes the baseline of the landing.*
+
+### TR-CI-ONLY-TEST
+
+**A test job only tests: it records no baseline and uploads no candidate values**
+
+The author records a baseline on their own machine ([TR-BASELINE-COMMIT](#tr-baseline-commit)). A workflow that writes baselines lets a red test turn green with no person who looks at the change.
+
+*Enforced at T4 — review of the workflows.*
+
+### TR-CI-FULL-RUN
+
+**Each push to `master` runs the test jobs of each kind, and the full run of the head of `master` decides `Master green`**
+
+The full run is the newest attempt of each of the ten workflows of a push to `master`: the landing job `Check: baseline masters`, the six kinds of opp tests, and the fingerprint, statistical and chart tests. A scheduled run and the weekly runs do not count, and the checks V4 and V5 of the test selection, in the job `Test map`, do not count. A cancelled run is red. A red counts also when its cause is a new omnetpp or opp_repl; the status then names the commits of both, for this run and for the newest green commit of `master`. `Master green` follows a new attempt of a failed job: run a job again only for a red that the environment causes, such as a failed runner, never for a flaky test ([TR-FLAKY](#tr-flaky)). A trivial landing ([PR-LAND-TRIVIAL](pull-request.md#pr-land-trivial)) starts no full run, and `Master green` keeps the state of the commit before it.
+
+*Enforced at T2 — [master_green.py](../enforcement/master_green.py), through the workflow `Check: master green`.*
+
 ### TR-CI-FEATURE-MATRIX
 
 **A feature is built with its neighbours switched off, not only in the full build.**
@@ -335,3 +389,21 @@ The full build hides every accidental dependency, because everything a model rea
 A re-run until green teaches the whole project that a red CI means nothing, and from then on a real regression is waved through with the same reflex. A test that is flaky is either testing something non-deterministic — which is a model defect under [TR-DETERMINISTIC](#tr-deterministic) — or testing it wrongly. Both are worth finding.
 
 *Enforced at T5 — human discipline; nothing can check this one.*
+
+## Required checks of master
+
+### TR-REQ-GREEN
+
+**Each required check of `master` is green before a landing, and each comes from GitHub Actions**
+
+The ruleset `master: required checks` of GitHub is the source of the list, and the section "Required checks of master" of [the enforcement README](../enforcement/README.md#required-checks-of-master) is its copy for the reader. The checks are `Mechanical audit`, the gates of the audit; `Baseline merge`, which says if each baseline branch can land; `Attribution runs`; the test jobs; `Enforcement checker tests`; `Source seal policy`; and `Master green`. Each must come from GitHub Actions, so a status from the token of a person does not count. Limit: a workflow on any branch can post such a status, so the rules stop mistakes, not a person who wants to break them.
+
+*Enforced at T2 — the ruleset of `master`.*
+
+### TR-REQ-REPORTS
+
+**A required job reports on each pull request, and a change of its name lands together with the change of the ruleset**
+
+Its workflow has no path filter in its pull-request trigger. A job with a matrix has no job-level `if:`: GitHub gives a skipped matrix job the name without its matrix values, so its context never reports. When the job has nothing to test, its steps skip and it reports green. A job-level `if:` on another required job is true for each event of a pull request, because a skipped job counts as passed. A change that renames or removes a required job, or changes its matrix, needs the change of the ruleset by an admin at the same landing; else each pull request waits for ever. A new job becomes required only after it reports on pull requests.
+
+*Enforced at T3 — [check-required-contexts.sh](../enforcement/check-required-contexts.sh) in the pull-request audit.*

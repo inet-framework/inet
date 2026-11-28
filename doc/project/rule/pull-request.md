@@ -75,6 +75,17 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-REQ-ARCH](#pr-req-arch) | The description names the architectural surface |
 | [PR-REQ-CLEAN](#pr-req-clean) | No leftovers |
 
+**Landing on master (PR-LAND)**
+
+| Rule | Statement |
+| --- | --- |
+| [PR-LAND-WAYS](#pr-land-ways) | A change goes into `master` through a pull request with "Rebase and merge", or, when it is trivial, as a checked commit that its author pushes |
+| [PR-LAND-TRIVIAL](#pr-land-trivial) | A trivial change needs no pull request: the push check decides, and the same commit then goes to `master` |
+| [PR-LAND-WAIT](#pr-land-wait) | A landing waits until the full run of the head of `master` is finished and green |
+| [PR-LAND-BYPASS](#pr-land-bypass) | A maintainer or an admin bypasses the required checks only through a pull request, to repair a red `master` or a broken check |
+| [PR-LAND-REVIEW](#pr-land-review) | No rule asks for a review by a second person, except for a sealed source path |
+| [PR-LAND-NO-NUDGE](#pr-land-no-nudge) | Nobody adds comments to the pull request of another author to ask for checks or updates |
+
 ## Commit content (PR-SPLIT)
 
 ### PR-SPLIT-ONE-CHANGE
@@ -471,6 +482,65 @@ Name the contracts, the packet content, the configuration surface, and the featu
 
 The branch contains no debug output, no commented-out code, no `#if 0` block, no build output or IDE files, and no TODO without an issue number. A change that is not ready for this stays a draft.
 
+## Landing on master (PR-LAND)
+
+The ruleset of `master` and the workflows enforce these rules. [contribute-a-change.md](../guide/contribute-a-change.md#8-submit-a-reviewable-change) and [run-the-gates.md](../guide/run-the-gates.md#a-trivial-change) give the procedures, and [testing.md](testing.md#tr-req-green) gives the required checks.
+
+### PR-LAND-WAYS
+
+**A change goes into `master` through a pull request with "Rebase and merge", or, when it is trivial, as a checked commit that its author pushes**
+
+A pull request lands when each required check of `master` is green ([TR-REQ-GREEN](testing.md#tr-req-green)). The only merge button is "Rebase and merge": a merge commit and a squash can lose the `Change:` trailers and the pin trailers of the commits. The workflows of a pull request from a first-time contributor start only after a collaborator approves the run. A pull request does not have to be up to date with `master`: [PR-LAND-WAIT](#pr-land-wait) lets one landing at a time onto a `master` that is checked, so a red from old results names that landing, and its revert is the repair.
+
+A person with the role write or more pushes a trivial change ([PR-LAND-TRIVIAL](#pr-land-trivial)) to `master` directly. Each other change needs a pull request. No workflow pushes to `master`.
+
+### PR-LAND-TRIVIAL
+
+**A trivial change needs no pull request: the push check decides, and the same commit then goes to `master`**
+
+A change is trivial when each changed file is trivial, when no commit has a pin trailer, because a pin trailer moves a baseline at the landing, and when the gates of the pull-request audit pass, without the description. A trivial file is an `.rst` or `.md` document without a seal unit, or a `.cc`, `.h` or `.ned` file whose change touches only comments and keeps each line of code on its line: `__LINE__` reaches the outputs that the module and protocol tests compare. Never trivial:
+
+- a file under `.github/`, `_scripts/`, `doc/project/enforcement/` or `tests/`;
+- a `.txt` file, because simulations read some of them, an `.ini` file, because its comments can hold test keys such as `#expected-result`, and a `.msg` file, because it generates C++ code;
+- a sealed source path, a document with a seal unit, and the seal registry;
+- a new, removed or renamed C++ or NED file, and a change of the file mode.
+
+Push the branch to a branch other than `master`. The job `Push check` decides, and for a trivial change it marks the required checks on the head commit; `Master green` keeps the state of `master`. Then push the same commit to `master`. If `master` moved, rebase the branch and push it again. A trivial landing starts no full run, and `Master green` keeps the state of the commit before it, so it does not block the next landing.
+
+*Enforced at T2+T3 — [check-trivial-change.sh](../enforcement/check-trivial-change.sh) in the push check and in the job `Landing` of `Check: master green` (T3); GitHub refuses a push to `master` of a commit whose required checks are not green (T2).*
+
+### PR-LAND-WAIT
+
+**A landing waits until the full run of the head of `master` is finished and green**
+
+The required check `Master green` is green only then ([TR-CI-FULL-RUN](testing.md#tr-ci-full-run)). While that run is in progress or red, nothing else lands: each landing is checked before the next one, and a red names one landing. When `master` is red, only the repair or the revert lands, through the bypass ([PR-LAND-BYPASS](#pr-land-bypass)). A full run needs 25 to 40 minutes, so about two landings fit into one hour.
+
+*Enforced at T2 — the required check `Master green`, through [master_green.py](../enforcement/master_green.py).*
+
+### PR-LAND-BYPASS
+
+**A maintainer or an admin bypasses the required checks only through a pull request, to repair a red `master` or a broken check**
+
+The pull request shows each use of the bypass. Nobody pushes directly to `master`, except a trivial change. Only an admin changes the ruleset, the environments and the secrets.
+
+*Enforced at T2 — the bypass mode "pull requests only" of the ruleset of `master`. Until step G10 of [required-checks.md](../../../plan/pending/required-checks.md), the mode is still "always", and a maintainer or an admin can also push directly.*
+
+### PR-LAND-REVIEW
+
+**No rule asks for a review by a second person, except for a sealed source path**
+
+A collaborator can merge their own pull request when the checks are green. A change of a sealed source path ([sealing.md](sealing.md)) waits for a review in the environment `sealed-source-change` by a member of the team `inet-core`. The person who started the run cannot approve it, so another member approves a sealed change.
+
+*Enforced at T2 — the required check `Source seal policy`, and the environment `sealed-source-change` with "Prevent self-review" and no bypass for admins.*
+
+### PR-LAND-NO-NUDGE
+
+**Nobody adds comments to the pull request of another author to ask for checks or updates**
+
+The red checks and the guides say what to do. A pull request with no event after a new required check landed has no result for that check, and it cannot merge: its author starts the checks with a push. An edit of the description starts only `Mechanical audit` and `Baseline merge`, and no run by hand starts the checks for the author.
+
+*Enforced at T5 — human discipline.*
+
 ## Worked messages
 
 These examples use the hypothetical repair in the [compact plan](../guide/write-an-implementation-plan.md#compact-worked-example). They assume that an edit removed timer cancellation from `UdpBasicApp::handleStopOperation()`. The current source already contains that cancellation. These examples report no current defect, implemented repair, or executed tests.
@@ -577,3 +647,9 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 | PR-REQ-STORY | T3+T4 | notes from the description gate (T3) + agent review: can a reviewer restate the answers from the summary alone? (T4) |
 | PR-REQ-BASELINES | T3+T4 | the baseline gate: a section "Baseline changes" that names each commit that changes a baseline, with a summary (T3) + agent review of the summaries (T4) |
 | PR-REQ-* | T4→T5 | agent review for completeness; topic and size are human judgment |
+| PR-LAND-WAYS | T2 | the ruleset of `master`: the required checks, and "Rebase and merge" as the only merge button |
+| PR-LAND-TRIVIAL | T2+T3 | `check-trivial-change.sh` in the push check and in the job `Landing` (T3); GitHub refuses a push of a commit whose required checks are not green (T2) |
+| PR-LAND-WAIT | T2 | the required check `Master green` |
+| PR-LAND-BYPASS | T2 | the bypass mode of the ruleset of `master` |
+| PR-LAND-REVIEW | T2 | the required check `Source seal policy` and the environment `sealed-source-change` |
+| PR-LAND-NO-NUDGE | T5 | human discipline |
