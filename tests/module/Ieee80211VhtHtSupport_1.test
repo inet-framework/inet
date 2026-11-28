@@ -521,7 +521,9 @@ record-scalar-results = false
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMin = ${scenario} == 6 ? 0 : 7
 **.wlan[*].mac.hcf.edca.edcaf[*].cwMax = ${scenario} == 6 ? 0 : 15
 **.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
-*.sta.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = ${scenario} == 6 ? 304us : 0s
+# Scenario 6 leaves 152 us after the first short-GI exchange, between the
+# continuation costs with a legacy ACK (144 us) and an HT ACK (160 us).
+*.sta.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = ${scenario} == 6 ? 296us : 0s
 **.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = 0s
 *.sta.numApps = ${scenario} == 6 ? 0 : 1
 *.sta.app[0].typename = "UdpBasicApp"

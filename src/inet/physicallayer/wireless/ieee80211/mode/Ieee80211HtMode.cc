@@ -185,12 +185,8 @@ const simtime_t Ieee80211HtPreambleMode::getDuration() const
 bps Ieee80211HtSignalMode::computeGrossBitrate() const
 {
     unsigned int numberOfCodedBitsPerSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
-    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
-    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
-    else
-        throw cRuntimeError("Unknown guard interval type");
+    // IEEE Std 802.11-2024, 19.3.11.11.6: short GI applies to the DATA field.
+    return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
 }
 
 bps Ieee80211HtSignalMode::computeNetBitrate() const
@@ -275,21 +271,36 @@ unsigned int Ieee80211HtDataMode::computeNumberOfCodedBitsPerSubcarrierSum() con
            (modulationAndCodingScheme->getStreamExtension3Modulation() ? modulationAndCodingScheme->getStreamExtension3Modulation()->getSubcarrierModulation()->getCodeWordSize() : 0);
 }
 
+unsigned int Ieee80211HtDataMode::computeNumberOfDataBitsPerSymbol() const
+{
+    unsigned int codedBitsPerSymbol = computeNumberOfCodedBitsPerSubcarrierSum() * getNumberOfDataSubcarriers();
+    auto code = getCode();
+    auto forwardErrorCorrection = code ? code->getForwardErrorCorrection() : nullptr;
+    return forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(codedBitsPerSymbol) : codedBitsPerSymbol;
+}
+
 unsigned int Ieee80211HtDataMode::computeNumberOfBccEncoders() const
 {
-    // When the BCC FEC encoder is used, a single encoder is used, except that two encoders
-    // are used when the selected MCS has a PHY rate greater than 300 Mb/s (see 20.6).
-    return getGrossBitrate() > Mbps(300) ? 2 : 1;
+    // IEEE Std 802.11-2024, 19.3.11.4: evaluate the PHY data rate with 800 ns GI.
+    auto longSymbolInterval = Ieee80211HtTimingRelatedParametersBase::getSymbolInterval();
+    return bps(computeNumberOfDataBitsPerSymbol() / longSymbolInterval) > Mbps(300) ? 2 : 1;
 }
 
 const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
 {
-    unsigned int numberOfCodedBitsPerSubcarrierSum = computeNumberOfCodedBitsPerSubcarrierSum();
-    unsigned int numberOfCodedBitsPerSymbol = numberOfCodedBitsPerSubcarrierSum * getNumberOfDataSubcarriers();
-    const IForwardErrorCorrection *forwardErrorCorrection = getCode() ? getCode()->getForwardErrorCorrection() : nullptr;
-    unsigned int dataBitsPerSymbol = forwardErrorCorrection ? forwardErrorCorrection->getDecodedLength(numberOfCodedBitsPerSymbol) : numberOfCodedBitsPerSymbol;
+    unsigned int dataBitsPerSymbol = computeNumberOfDataBitsPerSymbol();
     int numberOfSymbols = lrint(ceil((double)getCompleteLength(dataLength).get<b>() / dataBitsPerSymbol)); // TODO getBitLength(dataLength) should be divisible by dataBitsPerSymbol
     return numberOfSymbols * getSymbolInterval();
+}
+
+const simtime_t Ieee80211HtMode::getDuration(b dataLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataLength);
+    // IEEE Std 802.11-2024, 19.4.3: Eq. (19-90) rounds mixed-format short-GI
+    // DATA once. Eq. (19-92) uses the raw symbol duration for greenfield.
+    if (isHtShortGuardInterval() && preambleMode->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+        dataDuration = ceil(dataDuration, preambleMode->getSymbolInterval());
+    return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataDuration + getSignalExtensionTime();
 }
 
 const simtime_t Ieee80211HtMode::getSlotTime() const

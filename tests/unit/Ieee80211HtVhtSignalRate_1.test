@@ -1,0 +1,31 @@
+%description:
+Check that HT-SIG and VHT-SIG use the long symbol interval for their modeled
+bitrates, independent of the DATA guard interval (IEEE Std 802.11-2024,
+19.3.11.11.6 and Table 21-5).
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+auto check = [this](const char *family, bool shortGi, const IIeee80211HeaderMode *header) {
+    if (header->getGrossBitrate() != Mbps(13) || header->getNetBitrate() != Mbps(6.5))
+        EV << "mismatch: " << family << " short DATA GI " << shortGi << ", gross SIGNAL rate "
+           << header->getGrossBitrate() << ", net SIGNAL rate " << header->getNetBitrate() << "\n";
+};
+for (bool shortGi : {false, true}) {
+    auto htGi = shortGi ? Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG;
+    auto vhtGi = shortGi ? Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT : Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG;
+    auto ht = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+        Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, htGi);
+    auto vht = Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs7BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, vhtGi);
+    check("HT", shortGi, ht->getHeaderMode());
+    check("VHT", shortGi, vht->getHeaderMode());
+}
+
+%not-contains: stdout
+mismatch:

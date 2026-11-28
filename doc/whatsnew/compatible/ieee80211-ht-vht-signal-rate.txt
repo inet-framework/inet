@@ -1,0 +1,3 @@
+Use long symbols for HT and VHT SIGNAL rates
+
+HT and VHT SIGNAL rates are independent of the DATA guard interval. Error models that use SIGNAL bitrate may produce different header reception outcomes for existing short-GI simulations.
