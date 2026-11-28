@@ -350,7 +350,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-7: after an ECN-Echo at a cwnd of one MSS, new data leaves at once
 
-- **State (2026-11-27):** repaired by `847f6348c0` (change R8 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on
+- **State (2026-11-27):** repaired by `bf536e41bb` (change R8 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on
   2026-11-27, with the protocol tests `Rfc3168EceAtOneSegmentWaitsForTimer.test` and
   `Rfc3168EceAtTwoSegmentsSendsAtOnce.test` and the reviewer document `tests/protocol/tcp/ece-at-one-segment.md`. The wait
   starts only when cwnd is one segment at the ECN-Echo, before the halving; the new parameter
@@ -435,8 +435,9 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   which RFC 5681 section 3.1 allows, so the sentence below that no new segment can leave holds only for new data. Gate
   A of change R9 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) decided to repair BD-14
   alone, by the guard, at a timeout only; C16 does it.
-- **State (2026-11-28):** repaired by `1a1b3e79f4` on the branch `topic/baseline-catch-up-defect-repairs` (change R9
-  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol test
+- **State (2026-11-28):** repaired by `bcf0735586` (change R9 of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-28 through the
+  pull request #1508, with the protocol test
   `Rfc6582RenoNoFastRetransmitAfterTimeout.test` and the reviewer document
   `tests/protocol/tcp/reno-no-fast-retransmit-after-timeout.md`. A timeout of `TcpReno` and `DcTcp` without SACK sets
   `recover`, and a duplicate ACK below it starts no fast retransmit. It moves the statistics of
@@ -562,8 +563,9 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-32: a data segment of 1 byte gets an ACK at once
 
-- **State (2026-11-28):** repaired by `bed9589880` on the branch `topic/baseline-catch-up-defect-repairs` (change R10
-  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests
+- **State (2026-11-28):** repaired by `2a2c1cdc28` (change R10 of
+  [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), on master on 2026-11-28 through the
+  pull request #1508, with the protocol tests
   `Rfc9293OneByteSegmentDelayedAck.test` and `Rfc9293ZeroWindowProbeAckAtOnce.test` and the reviewer document
   `tests/protocol/tcp/one-byte-segment-delayed-ack.md`. The special case is deleted, and the expected trace of
   `tcp_nagle_2.test` has the delayed ACK. Not "none known": it moves 11 fingerprint runs and 9 statistical tests of
