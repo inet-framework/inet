@@ -435,6 +435,12 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   which RFC 5681 section 3.1 allows, so the sentence below that no new segment can leave holds only for new data. Gate
   A of change R9 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) decided to repair BD-14
   alone, by the guard, at a timeout only; C16 does it.
+- **State (2026-11-28):** repaired by `5374672b81` on the branch `topic/baseline-catch-up-defect-repairs` (change R9
+  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol test
+  `Rfc6582RenoNoFastRetransmitAfterTimeout.test` and the reviewer document
+  `tests/protocol/tcp/reno-no-fast-retransmit-after-timeout.md`. A timeout of `TcpReno` and `DcTcp` without SACK sets
+  `recover`, and a duplicate ACK below it starts no fast retransmit. It moves the statistics of
+  `examples/inet/tcpwindowscale` `WS_enabled` (`statistics` `afc1807da3`) and no fingerprint.
 - **Place:** `TcpConnection::getFlightSize()` and `TcpClassicAlgorithmBase::getBytesInFlight()`. From `b2313324ef`
   (step 8); found at step 16.
 - **Fault:** after a timeout, the go-back-N slow start sends the window again. A fast retransmit of Reno or NewReno
