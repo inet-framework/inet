@@ -1,0 +1,78 @@
+%description:
+
+Checks that a gate schedule configurator reports a stream whose path crosses a
+link to an interface that is not in the interface table of its node. The PPP
+interface of the host named extra is outside the interface table, so the link
+from client to extra has no destination interface. The stream from client to
+extra cannot be scheduled over it, and the error names the two nodes.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networks.base.TsnNetworkBase;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.node.tsn.TsnDevice;
+import inet.node.tsn.TsnSwitch;
+
+network GateScheduleConfigurator_3 extends TsnNetworkBase
+{
+    parameters:
+        *.eth[*].bitrate = default(100Mbps);
+    submodules:
+        client: TsnDevice { numPppInterfaces = 1; }
+        switch: TsnSwitch;
+        server: TsnDevice;
+        extra: StandardHost { numPppInterfaces = 1; }
+    connections:
+        client.ethg++ <--> EthernetLink <--> switch.ethg++;
+        switch.ethg++ <--> EthernetLink <--> server.ethg++;
+        client.pppg++ <--> { delay = 1ms; datarate = 10Mbps; } <--> extra.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = GateScheduleConfigurator_3
+sim-time-limit = 1ms
+cmdenv-express-mode = false
+
+*.extra.ppp[0].interfaceTableModule = ""
+
+*.client.numApps = 1
+*.client.app[*].typename = "UdpSourceApp"
+*.client.app[0].display-name = "video"
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 1000
+*.client.app[0].source.packetLength = 500B
+*.client.app[0].source.productionInterval = 250us
+*.server.numApps = 1
+*.server.app[*].typename = "UdpSinkApp"
+*.server.app[0].io.localPort = 1000
+
+*.client.hasOutgoingStreams = true
+*.client.bridging.streamIdentifier.identifier.mapping = [{stream: "video", packetFilter: expr(udp.destPort == 1000)}]
+*.client.bridging.streamCoder.encoder.mapping = [{stream: "video", pcp: 4}]
+*.switch.hasIncomingStreams = true
+*.switch.hasOutgoingStreams = true
+*.switch.bridging.streamCoder.decoder.mapping = [{pcp: 4, stream: "video"}]
+*.switch.bridging.streamCoder.encoder.mapping = [{stream: "video", pcp: 4}]
+*.server.hasIncomingStreams = true
+*.switch.hasEgressTrafficShaping = true
+*.switch.eth[*].macLayer.queue.numTrafficClasses = 2
+
+*.gateScheduleConfigurator.typename = "EagerGateScheduleConfigurator"
+*.gateScheduleConfigurator.gateCycleDuration = 1ms
+*.gateScheduleConfigurator.configuration =
+   [{pcp: 4, gateIndex: 1, application: "app[0]", source: "client", destination: "extra", packetLength: 500B + 58B, packetInterval: 250us, maxLatency: 500us}]
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: test_err.out
+Cannot find an output port with a connected destination interface from node 'client' to node 'extra' on the path of a flow
+%#--------------------------------------------------------------------------------------------------------------
