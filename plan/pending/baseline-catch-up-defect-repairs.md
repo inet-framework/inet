@@ -332,7 +332,9 @@ No sealed file changes. No consumer outside INET changes.
   then three duplicate ACKs during the go-back; no fast retransmit before the ACK covers more than recover. Baselines:
   `examples/inet/tcpwindowscale` `WS_enabled`.
   - `tcp: fix: TcpReno starts no fast retransmit in the recovery of a timeout (RFC 6582 section 6)`.
-- [ ] **Step 10. R10: a data segment of 1 byte gets a delayed ACK (BD-32).** Test: with delayed ACKs, a segment of 1
+- [x] **Step 10. R10: a data segment of 1 byte gets a delayed ACK (BD-32).** Repaired as C17 `bed9589880`, with the
+  `statistics` commit `76f97c7fa4`; gate B approved on 2026-11-28 (§6.3, R10). It lands when the maintainer asks. It
+  moves 11 fingerprint runs and 9 statistical tests of Telnet examples. Test: with delayed ACKs, a segment of 1
   byte in an open window gets a delayed ACK, and a zero-window probe still gets its ACK at once.
   - `tcp: fix: a data segment of 1 byte in an open window gets a delayed ACK (RFC 9293 SHLD-18)`.
 - [ ] **Step 11. R11: the SYN is no acknowledged data (BD-15).** First check §2.4 with a run of `tcpapp`
@@ -1675,6 +1677,10 @@ sets, `runs/r10-record-a/` to `runs/r10-record-e/` of the folder of D10). The sc
 - `check-pull-request.sh --base origin/master` has two expected violations: the `statistics` commits `afc1807da3` and
   `76f97c7fa4` are not on GitHub yet. Its two notes ask whether the fingerprint moves of C17 in two ways, with and
   without `~tND`, have one cause. They have: the delayed ACK of a segment of 1 byte.
+
+**Gate B** approved by the maintainer on 2026-11-28 ("yes I do"). The repair commit of BD-32 is in
+[baseline-catch-up-defects.md](baseline-catch-up-defects.md). R10 lands when the maintainer asks, with R9: first the
+branch of `statistics` goes to GitHub, then the debug fingerprints of the landing run in the image of the CI.
 
 ## 7. Verification
 

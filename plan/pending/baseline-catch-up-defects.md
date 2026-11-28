@@ -562,6 +562,13 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
 
 #### BD-32: a data segment of 1 byte gets an ACK at once
 
+- **State (2026-11-28):** repaired by `bed9589880` on the branch `topic/baseline-catch-up-defect-repairs` (change R10
+  of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol tests
+  `Rfc9293OneByteSegmentDelayedAck.test` and `Rfc9293ZeroWindowProbeAckAtOnce.test` and the reviewer document
+  `tests/protocol/tcp/one-byte-segment-delayed-ack.md`. The special case is deleted, and the expected trace of
+  `tcp_nagle_2.test` has the delayed ACK. Not "none known": it moves 11 fingerprint runs and 9 statistical tests of
+  `examples/inet/nclients`, `examples/ipv6/nclients` and `examples/inet/shutdownrestart` `TCP` (`statistics`
+  `76f97c7fa4`).
 - **Place:** [TcpConnectionRcvSegment.cc](../../src/inet/transportlayer/tcp/TcpConnectionRcvSegment.cc), "check for
   persist probe" ("TODO how to check if it is really a persist probe?"). Older than G; active by default from
   `fce9274b35` (step 44).
