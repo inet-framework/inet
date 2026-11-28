@@ -341,6 +341,12 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
 
+          echo "::group::Checking out the inet statistical results"
+          # an update selects the changes since the old map, and rule E2 reads the statistical baseline at both
+          # commits; without the baseline repository it selects all runs, and a run without a new record leaves the map
+          opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
+          echo "::endgroup::"
+
           args=()
           for split in 0 1; do
             if [ -d $RUNNER_TEMP/records/test-map-records-$split ]; then

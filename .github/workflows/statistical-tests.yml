@@ -267,6 +267,11 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/configure-inet.sh
 
+          echo "::group::Checking out the inet statistical results"
+          # rule E2 of the selection reads the statistical baseline at the map commit and at the merge commit
+          opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
+          echo "::endgroup::"
+
           echo "::group::Selecting the tests"
           # HEAD is the merge commit: the selection takes its change and the changes from the map commit to the base
           opp_select_tests --load $INET_ROOT -p inet --kind statistical --changes HEAD --map $RUNNER_TEMP/test-map --json > $RUNNER_TEMP/selection.json
