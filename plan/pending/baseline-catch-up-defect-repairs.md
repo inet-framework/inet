@@ -326,7 +326,7 @@ No sealed file changes. No consumer outside INET changes.
   `examples/inet/dctcp` `TcpRenoIncast`.
   - `tcp: fix: at an ECN-Echo with a cwnd of one MSS, new data waits for the retransmission timer (RFC 3168 section 6.1.2)`.
 - [x] **Step 9. R9: TcpReno starts no fast retransmit in the recovery of a timeout (BD-14).** Repaired as C16
-  `5374672b81`, with the `statistics` commit `afc1807da3`; gate B approved on 2026-11-28 (§6.3, R9). It lands when the
+  `1a1b3e79f4`, with the `statistics` commit `afc1807da3`; gate B approved on 2026-11-28 (§6.3, R9). It lands when the
   maintainer asks. Gate A on 2026-11-27 revised the step (§6.3, R9): the cause of BD-14 is the missing guard of RFC 6582 section 6, not the count of the bytes
   in flight, so R9 repairs BD-14 alone, and BD-19 and BD-20 leave R9 for an analysis of their own. Test: a timeout,
   then three duplicate ACKs during the go-back; no fast retransmit before the ACK covers more than recover. Baselines:
@@ -1500,7 +1500,8 @@ B asks for the approval of these exact values.
   rebase, with the old `opp_repl`, and the record after it, with the new one, give the same values.
 - On 2026-11-28 master was at `8aa6f3148f`: 13 commits of CI files and of the test selection in `inet.opp`, and no
   source file or fingerprint store. The series is rebased on it, and C16 is `5374672b81`. No file that a simulation
-  reads changed, so the record stays valid.
+  reads changed, so the record stays valid. Later on 2026-11-28 master moved to `1a8c5fe519` in the same way (§6.3,
+  R10), and C16 is `1a1b3e79f4`.
 
 **The gates (2026-11-28)**, on the head `e12e818039`:
 
@@ -1584,6 +1585,73 @@ document `tests/protocol/tcp/one-byte-segment-delayed-ack.md` and the release no
 
 **Expected baselines.** The fingerprints and the statistics of the examples above; their re-record needs the approval of
 the exact values, after the commit.
+
+**C17 and its checks (2026-11-28).** C17 has the repair, the two tests, the new trace of `tcp_nagle_2.test`, the
+reviewer document and the release note.
+
+- In debug mode, the 24 protocol tests of RFC 9293 give 23 PASS and the 1 marked failure. 134 module tests of the
+  delayed ACK, Nagle, the persist timer, SWS, the window, the receive buffer, keep-alive, SACK, the retransmission,
+  RACK, TLP and FIN pass, except `tcp_nagle_1` and `tcp_send_1`. These two fail only on the line "Network hash" of the
+  OMNeT++ of the editor; their traces match.
+- `check-pull-request.sh` finds nothing in C17. Its one violation is the `statistics` commit of R9, which is not on
+  GitHub yet.
+- Master moved to `1a8c5fe519`: 13 commits of CI files, documents and the test selection in `inet.opp`, and no source
+  file or fingerprint store. The series is rebased on it: C16 is `1a1b3e79f4`, and C17 is `4f847d057a` (first
+  `03695d1c88`).
+
+**What C17 moves** (image of the CI; `runs/r10-c17/` of the folder of D10, `evidence/runs/4f847d057a/` of the job
+copy). All release fingerprints give 1835 PASS, 11 FAIL and 1 expected ERROR. The statistical tests give 925 PASS, 11
+expected SKIP and 9 FAIL. These are the runs and the tests of the preview, and the fingerprints have the same new
+values.
+
+| fingerprint run | `tplx` | `~tNl` | `~tND` |
+| --- | --- | --- | --- |
+| `examples/inet/nclients` (`General`, 3000 s) | `2ea6-901a` → `3425-e049` | `3ef7-8493` → `483f-bcc2` | `d4a6-6905` → `0b1d-c56b` |
+| `examples/inet/nclients` `inet__inet` (200 s) | `541c-e50f` → `e66f-0e26` | `3ef7-8493` → `483f-bcc2` | `d4a6-6905` → `0b1d-c56b` |
+| `examples/inet/nclients` `inet__lwip` (200 s) | `e51f-3d37` → `a81f-6288` | `75fb-b1ee` → `a2c1-a373` | `3f15-fa23` → `4082-9544` |
+| `examples/inet/nclients` `lwip__inet` (200 s) | `90ea-4892` → `69f8-e4c2` | `3463-5037` → `53c7-1f31` | same |
+| `examples/inet/nclients` `basicHTTP.ini` (1 d) | `625f-b47e` → `cd4d-aac3` | `8b81-d51e` → `c6cf-eeae` | `e972-57bf` → `bbc2-3fe8` |
+| `examples/inet/nclients` `omnetpp-ping.ini` `Ping` (10 s) | `ab1a-b6af` → `26f3-8312` | `3873-7716` → `3ecc-98c4` | `ed0d-e69d` → `afbd-40ca` |
+| `examples/inet/shutdownrestart` `TCP` run 0 | `c367-1f36` → `daad-a58a` | `c796-b17a` → `c50a-cf39` | `fae1-1fc0` → `cd31-308a` |
+| `examples/inet/shutdownrestart` `TCP` run 1 | `6c10-4ca4` → `61be-6b14` | `f990-c254` → `14eb-d9c9` | same |
+| `examples/inet/shutdownrestart` `TCP` run 2 | `1da9-9104` → `b571-8944` | `9253-3915` → `fd11-954a` | same |
+| `examples/ipv6/nclients` `ETH` (1000 s) | `cc2a-599d` → `994b-30a1` | `c921-2deb` → `3c12-64a4` | `ec0f-94f2` → `5a22-f37c` |
+| `examples/ipv6/nclients` `PPP` (1000 s) | `5baf-4a30` → `eb26-14c1` | `fadc-b650` → `1810-24e0` | `3237-6571` → `5097-35d3` |
+
+| statistical test | values that move | frames on the links | data that the applications receive (bytes) |
+| --- | --- | --- | --- |
+| `nclients` (`General`) | 1808 of 5957 | 4976 → 2860 | 1890, same |
+| `nclients` `inet__inet` | 1808 of 5957 | 4976 → 2860 | 1890, same |
+| `nclients` `inet__lwip` | 2440 of 5013; 338 only stored, 87 only new | 2972 → 1364 | 2226 → 1038 |
+| `nclients` `lwip__inet` | 2094 of 4690; 205 only stored, 205 only new | 2288 → 2676 | 1075 → 1471 |
+| `nclients` `basicHTTP.ini` | 669 of 53590 | 3944 → 3940 | 235560, same |
+| `nclients` `omnetpp-ping.ini` `Ping` | 1176 of 6589 | 416 → 260 | 63, same |
+| `shutdownrestart` `TCP` | 2327 of 5501; 12 only stored, 6 only new | 3570 → 2685 | 450 → 587 |
+| `ipv6/nclients` `ETH` | 2613 of 11080 | 2477 → 1469 | 582, same |
+| `ipv6/nclients` `PPP` | 1385 of 5703; 13 only stored | 2467 → 1451 | 582, same |
+
+The frames are the `txPk:count` of the PPP and Ethernet interfaces, and the data is the `packetReceived:sum(packetBytes)`
+of the applications (`runs/r10/stat-summary.py`, on the `.diff` files of the statistical tests).
+
+**Why the lwIP configurations and `shutdownrestart` move more.** In `inet__inet`, `basicHTTP.ini`, `Ping` and
+`ipv6/nclients` the applications receive the same data, and only the pure ACKs go away. In `inet__lwip`, `lwip__inet`
+and `shutdownrestart` `TCP` the data of the applications changes too. Runs of `nclients` with the debug builds before
+and after (`runs/r10-run2.sh`, `runs/r10/compare-apps.py`, the folders `before-*` and `after-*` of `runs/r10/`), with
+one random number generator for all modules and with one for each client application, show two causes. Neither is a
+fault of the repair:
+
+1. All modules draw from one generator. A shift in time changes the order of the draws, so the clients get other
+   numbers of commands, other lengths and other pauses. With a generator for each client application, `inet__inet`
+   stays equal, and so do 5 of the 8 clients of the two lwIP configurations.
+2. `TelnetApp::socketDataArrived()` takes a received segment of 1 byte for an echo, and each longer segment for the
+   output of a command. When the ACK of an echo waits, a peer with Nagle joins bytes in other ways. With a generator for
+   each client, client 0 of `lwip__inet` receives 117, 37 and 21 segments of 1 byte, 2 to 5 bytes and more before,
+   and 240, 33 and 25 after (`runs/r10/lwip__inet-own-*`). So the sessions of the other 3 clients take another course.
+
+No run has a retransmission timeout, before or after. That `TelnetApp` depends on the segmentation of a byte stream is
+older than the repair, and the defect list has no entry for it.
+
+The re-record of these values needs the approval of the maintainer.
 
 ## 7. Verification
 
