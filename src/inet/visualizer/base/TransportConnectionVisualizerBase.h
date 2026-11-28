@@ -8,6 +8,8 @@
 #ifndef __INET_TRANSPORTCONNECTIONVISUALIZERBASE_H
 #define __INET_TRANSPORTCONNECTIONVISUALIZERBASE_H
 
+#include <map>
+
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
@@ -55,6 +57,7 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     //@}
 
     std::vector<const TransportConnectionVisualization *> connectionVisualizations;
+    std::map<int, const TransportConnectionVisualization *> connectionIdToVisualization; // TcpConnection module id to its visualization
 
   protected:
     virtual void initialize(int stage) override;

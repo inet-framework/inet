@@ -1,0 +1,3 @@
+The transport connection icons disappear when TCP deletes the connection
+
+TransportConnectionVisualizer did not react to the deletion of a Transmission Control Protocol (TCP) connection, although its documentation says it does, so the two icons of a deleted connection stayed on the canvas until the end of the simulation. The visualizer now removes them when TCP deletes the connection. A connection that its node closes first is deleted when its TIME-WAIT state ends, twice the maximum segment lifetime (the msl parameter of Tcp) after the close, 240 s with the default. Simulation results do not change.

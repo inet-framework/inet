@@ -90,6 +90,9 @@ void NetworkNodeCanvasVisualizer::addNetworkNodeVisualization(NetworkNodeVisuali
 void NetworkNodeCanvasVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
     auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
+    // the visualizers that added the annotations own and delete their figures
+    while (networkNodeCanvasVisualization->getNumAnnotations() != 0)
+        networkNodeCanvasVisualization->removeAnnotation(0);
     networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeCanvasVisualization->networkNode->getId()));
     visualizationTargetModule->getCanvas()->removeFigure(networkNodeCanvasVisualization);
 }

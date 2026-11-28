@@ -72,6 +72,7 @@ void TransportConnectionVisualizerBase::subscribe()
 {
 #ifdef INET_WITH_TCP_INET
     visualizationSubjectModule->subscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
+    visualizationSubjectModule->subscribe(inet::tcp::Tcp::tcpConnectionRemovedSignal, this);
 #endif // INET_WITH_TCP_INET
 }
 
@@ -80,8 +81,10 @@ void TransportConnectionVisualizerBase::unsubscribe()
 #ifdef INET_WITH_TCP_INET
     // NOTE: lookup the module again because it may have been deleted first
     auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
-    if (visualizationSubjectModule != nullptr)
+    if (visualizationSubjectModule != nullptr) {
         visualizationSubjectModule->unsubscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
+        visualizationSubjectModule->unsubscribe(inet::tcp::Tcp::tcpConnectionRemovedSignal, this);
+    }
 #endif // INET_WITH_TCP_INET
 }
 
@@ -104,6 +107,7 @@ void TransportConnectionVisualizerBase::removeAllConnectionVisualizations()
         removeConnectionVisualization(it);
         delete it;
     }
+    connectionIdToVisualization.clear();
 }
 
 void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
@@ -121,7 +125,19 @@ void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsig
             sourcePortFilter.matches(tcpConnection->getLocalPort()) &&
             destinationPortFilter.matches(tcpConnection->getRemotePort()))
         {
-            addConnectionVisualization(createConnectionVisualization(source, destination, tcpConnection));
+            auto connectionVisualization = createConnectionVisualization(source, destination, tcpConnection);
+            connectionIdToVisualization[tcpConnection->getId()] = connectionVisualization;
+            addConnectionVisualization(connectionVisualization);
+        }
+    }
+    else if (signal == inet::tcp::Tcp::tcpConnectionRemovedSignal) {
+        // listening and passively opened connections, and filtered ones, have no visualization
+        auto it = connectionIdToVisualization.find(check_and_cast<inet::tcp::TcpConnection *>(object)->getId());
+        if (it != connectionIdToVisualization.end()) {
+            auto connectionVisualization = it->second;
+            connectionIdToVisualization.erase(it);
+            removeConnectionVisualization(connectionVisualization);
+            delete connectionVisualization;
         }
     }
     else

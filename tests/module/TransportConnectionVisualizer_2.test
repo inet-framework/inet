@@ -1,0 +1,121 @@
+%description:
+
+The transport connection visualizer removes the icons of a Transmission Control
+Protocol (TCP) connection when the connection is deleted. The client opens two
+connections to the server. The first one sends 1000 bytes and closes; it is deleted when
+its TIME-WAIT state ends, twice the maximum segment lifetime (msl = 1s) after the close.
+The second one stays open. The fake graphical user interface (GUI) of Cmdenv enables the
+visualizer. Each connection has an icon at both of its end nodes, so the checker counts
+4 icons at t=1s and 2 icons at t=3s.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
+simple IconCounter
+{
+    @class(::inet::IconCounter);
+}
+
+network Test
+{
+    submodules:
+        visualizer: IntegratedCanvasVisualizer;
+        configurator: Ipv4NetworkConfigurator;
+        counter: IconCounter;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%file: IconCounter.cc
+
+#include <omnetpp.h>
+
+using namespace omnetpp;
+
+namespace inet {
+
+class IconCounter : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(1, new cMessage("count"));
+        scheduleAt(3, new cMessage("count"));
+    }
+    virtual int countIcons(cFigure *figure)
+    {
+        int count = !strcmp(figure->getName(), "transportConnection") ? 1 : 0;
+        for (int i = 0; i < figure->getNumFigures(); i++)
+            count += countIcons(figure->getFigure(i));
+        return count;
+    }
+    virtual int countConnections(cModule *tcp)
+    {
+        int count = 0;
+        for (cModule::SubmoduleIterator it(tcp); !it.end(); ++it)
+            if (!strcmp((*it)->getModuleType()->getName(), "TcpConnection"))
+                count++;
+        return count;
+    }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        EV_INFO << "client connections at t=" << simTime() << ": " << countConnections(getModuleByPath("^.client.tcp")) << endl;
+        EV_INFO << "transport connection icons at t=" << simTime() << ": " << countIcons(getSystemModule()->getCanvas()->getRootFigure()) << endl;
+    }
+};
+
+Define_Module(IconCounter);
+
+} // namespace inet
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 4s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-fake-gui = true
+*.counter.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.visualizer.transportConnectionVisualizer.displayTransportConnections = true
+**.tcp.msl = 1s
+
+*.client.numApps = 2
+*.client.app[*].typename = "TcpSessionApp"
+*.client.app[*].connectAddress = "server"
+*.client.app[*].connectPort = 1000
+*.client.app[*].tOpen = 0s
+*.client.app[*].tSend = 0s
+*.client.app[*].sendBytes = 1000B
+*.client.app[0].tClose = 0s
+*.client.app[1].tClose = 10s
+
+*.server.numApps = 1
+*.server.app[0].typename = "TcpSinkApp"
+*.server.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+client connections at t=1: 2
+transport connection icons at t=1: 4
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+client connections at t=3: 1
+transport connection icons at t=3: 2
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
