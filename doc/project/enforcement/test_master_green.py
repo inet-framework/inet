@@ -169,6 +169,15 @@ class TrivialLandingTest(unittest.TestCase):
         runs[1] = run(FULL_RUN[1], "failure", sha=OLD)
         self.assertEqual(master_green.master_state(FakeGitHub(runs, statuses={HEAD: [MARK]}))[1].state, "failure")
 
+    def test_the_state_of_master_follows_the_mark_and_a_commit_does_not(self):
+        github = FakeGitHub(green(OLD), statuses={HEAD: [MARK]})
+        out = io.StringIO()
+        main(["state"], github=github, out=out)
+        self.assertTrue(out.getvalue().startswith(f"success: the full run of master {OLD[:10]} is green; {HEAD[:10]} is a trivial landing"))
+        out = io.StringIO()
+        main(["state", "--commit", HEAD], github=github, out=out)
+        self.assertTrue(out.getvalue().startswith("pending"))
+
     def test_a_trivial_landing_does_not_change_the_pull_requests(self):
         github = FakeGitHub(green(OLD), statuses={HEAD: [MARK], OLD: [{"context": "Master green", "state": "success"}]},
                             commits=(HEAD, OLD))

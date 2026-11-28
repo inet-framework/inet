@@ -294,7 +294,8 @@ def main(argv=None, github=None, out=sys.stdout, pause=PAUSE):
                 parser.error("is-trivial needs --commit")
             return is_trivial(github, args.commit, args.wait, out)
         if args.action == "state":
-            current = state_of(github, args.commit or github.master_head())
+            # without --commit, the state of Master green: it follows the marks of trivial landings
+            current = state_of(github, args.commit) if args.commit else master_state(github)[1]
             print(current, file=out)
             for name in FULL_RUN:
                 run = current.runs.get(name)
