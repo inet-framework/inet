@@ -1,0 +1,83 @@
+%description:
+
+RFC 9293 section 3.10.7.4 -- a zero-window probe is not acceptable and gets its ACK at once, even with
+delayed ACKs on.
+
+The rule: a segment with data that arrives while the receive window is zero is not acceptable, and
+"an empty acknowledgment segment containing the current send sequence number and an
+acknowledgment indicating the next sequence number expected to be received" is sent in reply. This
+is how the sender of the probe learns the window. The ACK of a segment of 1 byte in an open window
+is delayed (Rfc9293OneByteSegmentDelayedAck.test); this test guards the ACK of the probe, which
+must stay at once.
+
+Host A sends 5000 bytes with an MSS of 1000 bytes. The TS option takes 12 bytes of each segment, so
+a full segment holds 988 bytes. Host B advertises a window of 3952 bytes, which is four full
+segments, has delayed ACKs on, and reads nothing, so after four segments its window is zero and
+host A holds the rest. Host A sends a probe of 1 byte when its persist timer expires.
+
+Observation: host B sends the ACK of the probe in the next 0.05 s after the probe arrives, which is
+before the delay timer of 200 ms can expire.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// At the TCP of a host a segment starts with its TCP header, so the data is what follows it.
+static bool oneByteSegment(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr)
+        return false;
+    return packet->getByteLength() - (long)evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B") == 1;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("Rfc9293ZeroWindowProbeAckAtOnce")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.window == 0")
+                  .first()
+                  .describe("host B announces a zero window")
+                  .within(1.0))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterEvent(oneByteSegment)
+                  .first()
+                  .describe("the zero-window probe of 1 byte arrives at host B")
+                  .within(10.0))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .first()
+                  .describe("the ACK of the probe, at once and not after the delay timer")
+                  .within(0.05));
+}
+
+%activity:
+EV << "Rfc9293ZeroWindowProbeAckAtOnce compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+**.tcp.mss = 1000
+*.host2.tcp.advertisedWindow = 3952
+*.host2.tcp.delayedAcksEnabled = true
+*.host2.tcp.delayedAckTimeout = 200ms
+*.host1.app[0].sendBytes = 5000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST Rfc9293ZeroWindowProbeAckAtOnce: PASS

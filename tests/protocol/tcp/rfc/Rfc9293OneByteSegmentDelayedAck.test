@@ -1,0 +1,74 @@
+%description:
+
+RFC 9293 section 3.8.6.3, SHLD-18 -- a segment of 1 byte in an open window gets a delayed ACK.
+
+The rule: "A TCP endpoint SHOULD implement a delayed ACK (SHLD-18)", with a delay of less than 0.5 s
+(MUST-40). The receiver delays the ACK of a data segment that is neither out of order nor a full
+segment, and sends it when the delay timer expires. Only a segment that is not acceptable gets an
+ACK at once, such as a zero-window probe (section 3.10.7.4). The code treated each data segment of
+1 byte as a possible persist probe and sent its ACK at once (BD-32 of the defect list).
+
+Host B has delayed ACKs on, with the delay of 200 ms. Host A sends one byte into the open window of
+host B at 0.2 s, and has nothing more to send. Host B sends nothing back.
+
+Observation: host B sends no ACK of the byte for 0.19 s after the byte arrives, and sends it in the
+next 0.05 s, when the delay timer has expired. An ACK at once is the fault.
+
+Expected result: PASS.
+
+%includes:
+#include "ProtocolTest.h"
+#include "PacketField.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// At the TCP of a host a segment starts with its TCP header, so the data is what follows it.
+static bool oneByteSegment(const MatchContext& context)
+{
+    const Packet *packet = context.event.packet;
+    if (packet == nullptr)
+        return false;
+    return packet->getByteLength() - (long)evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B") == 1;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("Rfc9293OneByteSegmentDelayedAck")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host A")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterEvent(oneByteSegment)
+                  .first()
+                  .describe("the segment of 1 byte arrives at host B, in an open window")
+                  .within(1.0))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {isn} + 2")
+                   .describe("the ACK of the byte before the delay timer of 200 ms expires")
+                   .within(0.19))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {isn} + 2")
+                  .first()
+                  .describe("the delayed ACK of the byte, when the timer has expired")
+                  .within(0.05));
+}
+
+%activity:
+EV << "Rfc9293OneByteSegmentDelayedAck compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAcksEnabled = true
+*.host2.tcp.delayedAckTimeout = 200ms
+*.host1.app[0].sendBytes = 1B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST Rfc9293OneByteSegmentDelayedAck: PASS
