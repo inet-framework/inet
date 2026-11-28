@@ -435,7 +435,7 @@ and a proposed check. "Step N" is the step of the catch-up that found the entry.
   which RFC 5681 section 3.1 allows, so the sentence below that no new segment can leave holds only for new data. Gate
   A of change R9 of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md) decided to repair BD-14
   alone, by the guard, at a timeout only; C16 does it.
-- **State (2026-11-28):** repaired by `5374672b81` on the branch `topic/baseline-catch-up-defect-repairs` (change R9
+- **State (2026-11-28):** repaired by `1a1b3e79f4` on the branch `topic/baseline-catch-up-defect-repairs` (change R9
   of [baseline-catch-up-defect-repairs.md](baseline-catch-up-defect-repairs.md)), with the protocol test
   `Rfc6582RenoNoFastRetransmitAfterTimeout.test` and the reviewer document
   `tests/protocol/tcp/reno-no-fast-retransmit-after-timeout.md`. A timeout of `TcpReno` and `DcTcp` without SACK sets
